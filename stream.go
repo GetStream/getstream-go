@@ -1,12 +1,31 @@
 package getstream
 
-import (
-	"github.com/Getstream/getstream-go/chatpkg"
-)
-
 type Stream struct {
-	// chat client
-
-	chat *chatpkg.Chat
-	// video *video.Video
+	client *Client
+	chat   *Chat
+	video  *Video
 }
+
+// New
+func New(apiKey, apiSecret string) *Stream {
+	client, err := NewClient(apiKey, apiSecret)
+	if err != nil {
+		return nil
+	}
+	return &Stream{
+		client: client,
+	}
+}
+
+// Chat
+func (s *Stream) Chat() *Chat {
+	if s.chat == nil {
+		s.chat = NewChat(s.client)
+	}
+	return s.chat
+}
+
+// Video
+// func (s *Stream) Video() *video.Video {
+// 	if s.video == nil {
+// 		s.video = video.New()
