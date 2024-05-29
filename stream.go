@@ -26,6 +26,9 @@ func (s *Stream) Chat() *Chat {
 }
 
 // Video
-// func (s *Stream) Video() *video.Video {
-// 	if s.video == nil {
-// 		s.video = video.New()
+func (s *Stream) Video() *Video {
+	if s.video == nil {
+		s.video = NewVideo(s.client)
+	}
+	return s.video
+}
