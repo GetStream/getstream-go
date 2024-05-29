@@ -27,9 +27,9 @@ func (e Error) Error() string {
 }
 
 // Response is the base response returned to the client
-type Response struct {
-	RateLimitInfo *RateLimitInfo `json:"ratelimit"`
-}
+// type Response struct {
+// 	RateLimitInfo *RateLimitInfo `json:"ratelimit"`
+// }
 
 // RateLimitInfo represents rate limit information (implementation omitted for brevity)
 type RateLimitInfo struct {
@@ -133,7 +133,7 @@ func (c *Client) setHeaders(r *http.Request) {
 }
 
 // makeRequest makes a generic HTTP request
-func makeRequest[T any, U any](c *Client, ctx context.Context, method, path string, params url.Values, data T, result *U) error {
+func MakeRequest[T any, U any](c *Client, ctx context.Context, method, path string, params url.Values, data T, result *U) error {
 	r, err := newRequest(c, ctx, method, path, params, data)
 	if err != nil {
 		return err
