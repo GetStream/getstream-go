@@ -1,4 +1,4 @@
-package video
+package videopkg
 
 type Video struct {
 }

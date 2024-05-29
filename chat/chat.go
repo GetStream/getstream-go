@@ -1,4 +1,4 @@
-package chat
+package chatpkg
 
 type Chat struct {
 }
