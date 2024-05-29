@@ -1,4 +1,4 @@
-package stream_go
+package getstream
 
 import (
 	"fmt"

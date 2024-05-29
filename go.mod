@@ -1,4 +1,4 @@
-module github.com/GetStream/stream-go
+module github.com/GetStream/getstream-go
 
 go 1.22.0
 
