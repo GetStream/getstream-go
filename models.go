@@ -4066,9 +4066,9 @@ type RecordSettingsResponse struct {
 	Layout LayoutSettingsResponse `json:"layout"`
 }
 
-type Response struct {
-	Duration string `json:"duration"`
-}
+// type Response struct {
+// 	Duration string `json:"duration"`
+// }
 
 type RestoreUsersRequest struct {
 	UserIds []string `json:"user_ids"`

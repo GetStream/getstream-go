@@ -29,18 +29,8 @@ func (e Error) Error() string {
 }
 
 // Response is the base response returned to the client
-// type Response struct {
-// 	RateLimitInfo *RateLimitInfo `json:"ratelimit"`
-// }
-
-// RateLimitInfo represents rate limit information (implementation omitted for brevity)
-type RateLimitInfo struct {
-	// Fields for rate limit info
-}
-
-// NewRateLimitFromHeaders creates a RateLimitInfo from HTTP headers (implementation omitted for brevity)
-func NewRateLimitFromHeaders(headers http.Header) *RateLimitInfo {
-	return &RateLimitInfo{}
+type Response struct {
+	RateLimitInfo *RateLimitInfo `json:"ratelimit"`
 }
 
 // BuildQueryParam constructs a map of query parameters from various data types.
