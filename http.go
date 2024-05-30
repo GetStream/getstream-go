@@ -30,6 +30,7 @@ func (e Error) Error() string {
 
 // Response is the base response returned to the client
 type Response struct {
+	
 	RateLimitInfo *RateLimitInfo `json:"ratelimit"`
 }
 
