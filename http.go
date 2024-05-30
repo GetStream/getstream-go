@@ -30,7 +30,6 @@ func (e Error) Error() string {
 
 // Response is the base response returned to the client
 type Response struct {
-	
 	RateLimitInfo *RateLimitInfo `json:"ratelimit"`
 }
 
@@ -67,7 +66,7 @@ func BuildQueryParam[T any](params map[string]T) url.Values {
 }
 
 // parseResponse parses the HTTP response into the provided result
-func parseResponse[U any](c *Client, resp *http.Response, result *U) error {
+func parseResponse[U any](resp *http.Response, result *U) error {
 	if resp.Body == nil {
 		return errors.New("http body is nil")
 	}
@@ -97,7 +96,7 @@ func parseResponse[U any](c *Client, resp *http.Response, result *U) error {
 		}
 	}
 
-	return addRateLimitInfo(c, resp.Header, result)
+	return addRateLimitInfo(resp.Header, result)
 }
 
 // requestURL constructs the full request URL
@@ -196,12 +195,12 @@ func MakeRequest[GRequest any, GResponse any, GParams any](c *Client, ctx contex
 		return err
 	}
 
-	return parseResponse(c, resp, response)
+	return parseResponse(resp, response)
 }
 
 // TODO: revisit this
 // addRateLimitInfo adds rate limit information to the result
-func addRateLimitInfo[U any](c *Client, headers http.Header, result *U) error {
+func addRateLimitInfo[U any](headers http.Header, result *U) error {
 	rl := map[string]interface{}{
 		"ratelimit": NewRateLimitFromHeaders(headers),
 	}
