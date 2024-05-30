@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // Error represents an API error
@@ -76,7 +77,12 @@ func parseResponse[U any](c *Client, resp *http.Response, result *U) error {
 }
 
 // requestURL constructs the full request URL
-func (c *Client) requestURL(path string, values url.Values) (string, error) {
+func (c *Client) requestURL(path string, values url.Values, pathParams ...string) (string, error) {
+	for i, param := range pathParams {
+		placeholder := fmt.Sprintf("{param%d}", i+1)
+		path = strings.ReplaceAll(path, placeholder, url.PathEscape(param))
+	}
+
 	u, err := url.Parse(c.BaseURL + "/" + path)
 	if err != nil {
 		return "", fmt.Errorf("url.Parse: %w", err)
@@ -93,8 +99,8 @@ func (c *Client) requestURL(path string, values url.Values) (string, error) {
 }
 
 // newRequest creates a new HTTP request
-func newRequest[T any](c *Client, ctx context.Context, method, path string, params url.Values, data T) (*http.Request, error) {
-	u, err := c.requestURL(path, params)
+func newRequest[T any](c *Client, ctx context.Context, method, path string, params url.Values, data T, pathParams ...string) (*http.Request, error) {
+	u, err := c.requestURL(path, params, pathParams...)
 	if err != nil {
 		return nil, err
 	}
@@ -133,8 +139,8 @@ func (c *Client) setHeaders(r *http.Request) {
 }
 
 // makeRequest makes a generic HTTP request
-func MakeRequest[T any, U any](c *Client, ctx context.Context, method, path string, params url.Values, data T, result *U) error {
-	r, err := newRequest(c, ctx, method, path, params, data)
+func MakeRequest[T any, U any](c *Client, ctx context.Context, method, path string, params url.Values, data T, result *U, pathParams ...string) error {
+	r, err := newRequest(c, ctx, method, path, params, data, pathParams...)
 	if err != nil {
 		return err
 	}
