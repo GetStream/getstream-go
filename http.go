@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -40,6 +41,39 @@ type RateLimitInfo struct {
 // NewRateLimitFromHeaders creates a RateLimitInfo from HTTP headers (implementation omitted for brevity)
 func NewRateLimitFromHeaders(headers http.Header) *RateLimitInfo {
 	return &RateLimitInfo{}
+}
+
+// BuildQueryParam constructs a map of query parameters from various data types.
+// BuildQueryParam constructs a map of query parameters from various data types.
+func BuildQueryParam[T any](params map[string]T) url.Values {
+	values := url.Values{}
+	for key, value := range params {
+		switch v := any(value).(type) {
+		case string:
+			values.Add(key, v)
+		case int:
+			values.Add(key, strconv.Itoa(v))
+		case int32, int64:
+			if converted, ok := any(v).(int64); ok {
+				values.Add(key, strconv.FormatInt(converted, 10))
+			}
+		case uint, uint32, uint64:
+			if converted, ok := any(v).(uint64); ok {
+				values.Add(key, strconv.FormatUint(converted, 10))
+			}
+		case float32:
+			values.Add(key, strconv.FormatFloat(float64(v), 'f', -1, 32))
+		case float64:
+			values.Add(key, strconv.FormatFloat(v, 'f', -1, 64))
+		default:
+			// Attempt to marshal as JSON for any other types, including structs
+			jsonData, err := json.Marshal(v)
+			if err == nil {
+				values.Add(key, string(jsonData))
+			}
+		}
+	}
+	return values
 }
 
 // parseResponse parses the HTTP response into the provided result
@@ -139,8 +173,9 @@ func (c *Client) setHeaders(r *http.Request) {
 }
 
 // makeRequest makes a generic HTTP request
-func MakeRequest[T any, U any](c *Client, ctx context.Context, method, path string, params url.Values, data T, result *U, pathParams ...string) error {
-	r, err := newRequest(c, ctx, method, path, params, data, pathParams...)
+func MakeRequest[GRequest any, GResponse any, GParams any](c *Client, ctx context.Context, method, path string, params map[string]GParams, data *GRequest, response *GResponse, pathParams ...string) error {
+	queryParams := BuildQueryParam(params)
+	r, err := newRequest(c, ctx, method, path, queryParams, data, pathParams...)
 	if err != nil {
 		return err
 	}
@@ -155,7 +190,7 @@ func MakeRequest[T any, U any](c *Client, ctx context.Context, method, path stri
 		return err
 	}
 
-	return parseResponse(c, resp, result)
+	return parseResponse(c, resp, response)
 }
 
 // TODO: revisit this
