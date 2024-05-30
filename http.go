@@ -44,7 +44,6 @@ func NewRateLimitFromHeaders(headers http.Header) *RateLimitInfo {
 }
 
 // BuildQueryParam constructs a map of query parameters from various data types.
-// BuildQueryParam constructs a map of query parameters from various data types.
 func BuildQueryParam[T any](params map[string]T) url.Values {
 	values := url.Values{}
 	for key, value := range params {
@@ -111,11 +110,8 @@ func parseResponse[U any](c *Client, resp *http.Response, result *U) error {
 }
 
 // requestURL constructs the full request URL
-func (c *Client) requestURL(path string, values url.Values, pathParams ...string) (string, error) {
-	for i, param := range pathParams {
-		placeholder := fmt.Sprintf("{param%d}", i+1)
-		path = strings.ReplaceAll(path, placeholder, url.PathEscape(param))
-	}
+func (c *Client) requestURL(path string, values url.Values, pathParams map[string]string) (string, error) {
+	path = buildPath(path, pathParams)
 
 	u, err := url.Parse(c.BaseURL + "/" + path)
 	if err != nil {
@@ -132,9 +128,28 @@ func (c *Client) requestURL(path string, values url.Values, pathParams ...string
 	return u.String(), nil
 }
 
+// buildPath constructs a URL path with parameters, escaping them appropriately.
+func buildPath(path string, pathParams map[string]string) string {
+	if pathParams == nil {
+		return path
+	}
+	for k, v := range pathParams {
+		pathParams[k] = url.QueryEscape(v)
+	}
+	return replaceParams(path, pathParams)
+}
+
+// replaceParams replaces placeholders in the path with the corresponding values from pathParams.
+func replaceParams(path string, pathParams map[string]string) string {
+	for k, v := range pathParams {
+		path = strings.ReplaceAll(path, "{"+k+"}", v)
+	}
+	return path
+}
+
 // newRequest creates a new HTTP request
-func newRequest[T any](c *Client, ctx context.Context, method, path string, params url.Values, data T, pathParams ...string) (*http.Request, error) {
-	u, err := c.requestURL(path, params, pathParams...)
+func newRequest[T any](c *Client, ctx context.Context, method, path string, params url.Values, data T, pathParams map[string]string) (*http.Request, error) {
+	u, err := c.requestURL(path, params, pathParams)
 	if err != nil {
 		return nil, err
 	}
@@ -173,9 +188,9 @@ func (c *Client) setHeaders(r *http.Request) {
 }
 
 // makeRequest makes a generic HTTP request
-func MakeRequest[GRequest any, GResponse any, GParams any](c *Client, ctx context.Context, method, path string, params map[string]GParams, data *GRequest, response *GResponse, pathParams ...string) error {
+func MakeRequest[GRequest any, GResponse any, GParams any](c *Client, ctx context.Context, method, path string, params map[string]GParams, data *GRequest, response *GResponse, pathParams map[string]string) error {
 	queryParams := BuildQueryParam(params)
-	r, err := newRequest(c, ctx, method, path, queryParams, data, pathParams...)
+	r, err := newRequest(c, ctx, method, path, queryParams, data, pathParams)
 	if err != nil {
 		return err
 	}
