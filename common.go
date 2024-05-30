@@ -358,7 +358,7 @@ func (c *CommonClient) RestoreUsers(ctx context.Context, restoreUsersRequest Res
 func (c *CommonClient) DeactivateUser(ctx context.Context, userId string, deactivateUserRequest DeactivateUserRequest) (DeactivateUserResponse, error) {
 	var result DeactivateUserResponse
 	pathParams := map[string]string{
-		"userid": userId,
+		"user_id": userId,
 	}
 	err := MakeRequest[DeactivateUserRequest, DeactivateUserResponse, any](c.client, ctx, "POST", "/api/v2/users/{user_id}/deactivate", nil, &deactivateUserRequest, &result, pathParams)
 	return result, err
@@ -367,7 +367,7 @@ func (c *CommonClient) DeactivateUser(ctx context.Context, userId string, deacti
 func (c *CommonClient) ExportUser(ctx context.Context, userId string) (ExportUserResponse, error) {
 	var result ExportUserResponse
 	pathParams := map[string]string{
-		"userid": userId,
+		"user_id": userId,
 	}
 	err := MakeRequest[any, ExportUserResponse, any](c.client, ctx, "GET", "/api/v2/users/{user_id}/export", nil, nil, &result, pathParams)
 	return result, err
@@ -376,7 +376,7 @@ func (c *CommonClient) ExportUser(ctx context.Context, userId string) (ExportUse
 func (c *CommonClient) ReactivateUser(ctx context.Context, userId string, reactivateUserRequest ReactivateUserRequest) (ReactivateUserResponse, error) {
 	var result ReactivateUserResponse
 	pathParams := map[string]string{
-		"userid": userId,
+		"user_id": userId,
 	}
 	err := MakeRequest[ReactivateUserRequest, ReactivateUserResponse, any](c.client, ctx, "POST", "/api/v2/users/{user_id}/reactivate", nil, &reactivateUserRequest, &result, pathParams)
 	return result, err

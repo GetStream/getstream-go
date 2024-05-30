@@ -2,6 +2,7 @@ package getstream
 
 import (
 	"context"
+	"time"
 )
 
 type ChatClient struct {
@@ -447,8 +448,8 @@ func (c *ChatClient) UndeleteMessage(ctx context.Context, id string, updateMessa
 func (c *ChatClient) CastPollVote(ctx context.Context, messageId string, pollId string, castPollVoteRequest CastPollVoteRequest) (PollVoteResponse, error) {
 	var result PollVoteResponse
 	pathParams := map[string]string{
-		"messageid": messageId,
-		"pollid":    pollId,
+		"message_id": messageId,
+		"poll_id":    pollId,
 	}
 	err := MakeRequest[CastPollVoteRequest, PollVoteResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{message_id}/polls/{poll_id}/vote", nil, &castPollVoteRequest, &result, pathParams)
 	return result, err
@@ -457,9 +458,9 @@ func (c *ChatClient) CastPollVote(ctx context.Context, messageId string, pollId 
 func (c *ChatClient) RemovePollVote(ctx context.Context, messageId string, pollId string, voteId string, userId *string) (PollVoteResponse, error) {
 	var result PollVoteResponse
 	pathParams := map[string]string{
-		"messageid": messageId,
-		"pollid":    pollId,
-		"voteid":    voteId,
+		"message_id": messageId,
+		"poll_id":    pollId,
+		"vote_id":    voteId,
 	}
 	queryParams := map[string]interface{}{
 		"user_id": userId,
@@ -471,7 +472,7 @@ func (c *ChatClient) RemovePollVote(ctx context.Context, messageId string, pollI
 func (c *ChatClient) GetReplies(ctx context.Context, parentId string, limit *int, offset *int, idGte *string, idGt *string, idLte *string, idLt *string, createdAtAfterOrEqual *time.Time, createdAtAfter *time.Time, createdAtBeforeOrEqual *time.Time, createdAtBefore *time.Time, idAround *string, createdAtAround *time.Time, sort *[]*SortParam) (GetRepliesResponse, error) {
 	var result GetRepliesResponse
 	pathParams := map[string]string{
-		"parentid": parentId,
+		"parent_id": parentId,
 	}
 	queryParams := map[string]interface{}{
 		"limit":                      limit,
@@ -537,7 +538,7 @@ func (c *ChatClient) QueryPolls(ctx context.Context, userId *string, queryPollsR
 func (c *ChatClient) DeletePoll(ctx context.Context, pollId string, userId *string) (Response, error) {
 	var result Response
 	pathParams := map[string]string{
-		"pollid": pollId,
+		"poll_id": pollId,
 	}
 	queryParams := map[string]interface{}{
 		"user_id": userId,
@@ -549,7 +550,7 @@ func (c *ChatClient) DeletePoll(ctx context.Context, pollId string, userId *stri
 func (c *ChatClient) GetPoll(ctx context.Context, pollId string, userId *string) (PollResponse, error) {
 	var result PollResponse
 	pathParams := map[string]string{
-		"pollid": pollId,
+		"poll_id": pollId,
 	}
 	queryParams := map[string]interface{}{
 		"user_id": userId,
@@ -561,7 +562,7 @@ func (c *ChatClient) GetPoll(ctx context.Context, pollId string, userId *string)
 func (c *ChatClient) UpdatePollPartial(ctx context.Context, pollId string, updatePollPartialRequest UpdatePollPartialRequest) (PollResponse, error) {
 	var result PollResponse
 	pathParams := map[string]string{
-		"pollid": pollId,
+		"poll_id": pollId,
 	}
 	err := MakeRequest[UpdatePollPartialRequest, PollResponse, any](c.client, ctx, "PATCH", "/api/v2/chat/polls/{poll_id}", nil, &updatePollPartialRequest, &result, pathParams)
 	return result, err
@@ -570,7 +571,7 @@ func (c *ChatClient) UpdatePollPartial(ctx context.Context, pollId string, updat
 func (c *ChatClient) CreatePollOption(ctx context.Context, pollId string, createPollOptionRequest CreatePollOptionRequest) (PollOptionResponse, error) {
 	var result PollOptionResponse
 	pathParams := map[string]string{
-		"pollid": pollId,
+		"poll_id": pollId,
 	}
 	err := MakeRequest[CreatePollOptionRequest, PollOptionResponse, any](c.client, ctx, "POST", "/api/v2/chat/polls/{poll_id}/options", nil, &createPollOptionRequest, &result, pathParams)
 	return result, err
@@ -579,7 +580,7 @@ func (c *ChatClient) CreatePollOption(ctx context.Context, pollId string, create
 func (c *ChatClient) UpdatePollOption(ctx context.Context, pollId string, updatePollOptionRequest UpdatePollOptionRequest) (PollOptionResponse, error) {
 	var result PollOptionResponse
 	pathParams := map[string]string{
-		"pollid": pollId,
+		"poll_id": pollId,
 	}
 	err := MakeRequest[UpdatePollOptionRequest, PollOptionResponse, any](c.client, ctx, "PUT", "/api/v2/chat/polls/{poll_id}/options", nil, &updatePollOptionRequest, &result, pathParams)
 	return result, err
@@ -588,8 +589,8 @@ func (c *ChatClient) UpdatePollOption(ctx context.Context, pollId string, update
 func (c *ChatClient) DeletePollOption(ctx context.Context, pollId string, optionId string, userId *string) (Response, error) {
 	var result Response
 	pathParams := map[string]string{
-		"pollid":   pollId,
-		"optionid": optionId,
+		"poll_id":   pollId,
+		"option_id": optionId,
 	}
 	queryParams := map[string]interface{}{
 		"user_id": userId,
@@ -601,8 +602,8 @@ func (c *ChatClient) DeletePollOption(ctx context.Context, pollId string, option
 func (c *ChatClient) GetPollOption(ctx context.Context, pollId string, optionId string, userId *string) (PollOptionResponse, error) {
 	var result PollOptionResponse
 	pathParams := map[string]string{
-		"pollid":   pollId,
-		"optionid": optionId,
+		"poll_id":   pollId,
+		"option_id": optionId,
 	}
 	queryParams := map[string]interface{}{
 		"user_id": userId,
@@ -614,7 +615,7 @@ func (c *ChatClient) GetPollOption(ctx context.Context, pollId string, optionId 
 func (c *ChatClient) QueryPollVotes(ctx context.Context, pollId string, userId *string, queryPollVotesRequest QueryPollVotesRequest) (PollVotesResponse, error) {
 	var result PollVotesResponse
 	pathParams := map[string]string{
-		"pollid": pollId,
+		"poll_id": pollId,
 	}
 	queryParams := map[string]interface{}{
 		"user_id": userId,
@@ -650,7 +651,7 @@ func (c *ChatClient) QueryThreads(ctx context.Context, queryThreadsRequest Query
 func (c *ChatClient) GetThread(ctx context.Context, messageId string, connectionId *string, replyLimit *int, participantLimit *int, memberLimit *int) (GetThreadResponse, error) {
 	var result GetThreadResponse
 	pathParams := map[string]string{
-		"messageid": messageId,
+		"message_id": messageId,
 	}
 	queryParams := map[string]interface{}{
 		"connection_id":     connectionId,
@@ -665,7 +666,7 @@ func (c *ChatClient) GetThread(ctx context.Context, messageId string, connection
 func (c *ChatClient) UpdateThreadPartial(ctx context.Context, messageId string, updateThreadPartialRequest UpdateThreadPartialRequest) (UpdateThreadPartialResponse, error) {
 	var result UpdateThreadPartialResponse
 	pathParams := map[string]string{
-		"messageid": messageId,
+		"message_id": messageId,
 	}
 	err := MakeRequest[UpdateThreadPartialRequest, UpdateThreadPartialResponse, any](c.client, ctx, "PATCH", "/api/v2/chat/threads/{message_id}", nil, &updateThreadPartialRequest, &result, pathParams)
 	return result, err
@@ -686,7 +687,7 @@ func (c *ChatClient) UnreadCountsBatch(ctx context.Context, unreadCountsBatchReq
 func (c *ChatClient) SendUserCustomEvent(ctx context.Context, userId string, sendUserCustomEventRequest SendUserCustomEventRequest) (Response, error) {
 	var result Response
 	pathParams := map[string]string{
-		"userid": userId,
+		"user_id": userId,
 	}
 	err := MakeRequest[SendUserCustomEventRequest, Response, any](c.client, ctx, "POST", "/api/v2/chat/users/{user_id}/event", nil, &sendUserCustomEventRequest, &result, pathParams)
 	return result, err
