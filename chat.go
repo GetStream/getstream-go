@@ -64,7 +64,7 @@ func (c *ChatClient) DeleteChannel(ctx context.Context,
 	, HardDelete *bool
 ) (DeleteChannelResponse, error) {
 	var result DeleteChannelResponse
-	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}",url.Values{"HardDelete": []stringHardDelete }, nil, &result, Type, Id,)
+	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}",url.Values{"HardDelete": []string { HardDelete } }, nil, &result, Type, Id,)
 	return result, err
 }
 
@@ -108,7 +108,7 @@ func (c *ChatClient) DeleteFile(ctx context.Context,
 	, Url *string
 ) (FileDeleteResponse, error) {
 	var result FileDeleteResponse
-	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/file",url.Values{"Url": []stringUrl }, nil, &result, Type, Id,)
+	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/file",url.Values{"Url": []string { Url } }, nil, &result, Type, Id,)
 	return result, err
 }
 
@@ -141,7 +141,7 @@ func (c *ChatClient) DeleteImage(ctx context.Context,
 	, Url *string
 ) (FileDeleteResponse, error) {
 	var result FileDeleteResponse
-	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/image",url.Values{"Url": []stringUrl }, nil, &result, Type, Id,)
+	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/image",url.Values{"Url": []string { Url } }, nil, &result, Type, Id,)
 	return result, err
 }
 
@@ -174,7 +174,7 @@ func (c *ChatClient) GetManyMessages(ctx context.Context,
 	, Ids []string
 ) (GetManyMessagesResponse, error) {
 	var result GetManyMessagesResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/channels/{type}/{id}/messages",url.Values{"Ids": []stringIds }, nil, &result, Type, Id,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/channels/{type}/{id}/messages",url.Values{"Ids": []string { Ids } }, nil, &result, Type, Id,)
 	return result, err
 }
 
@@ -344,7 +344,7 @@ func (c *ChatClient) QueryMembers(ctx context.Context,
 	Payload *QueryMembersRequest
 ) (MembersResponse, error) {
 	var result MembersResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/members",url.Values{"Payload": []stringPayload }, nil, &result,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/members",url.Values{"Payload": []string { Payload } }, nil, &result,)
 	return result, err
 }
 
@@ -364,7 +364,7 @@ func (c *ChatClient) DeleteMessage(ctx context.Context,
 	, DeletedBy *string
 ) (DeleteMessageResponse, error) {
 	var result DeleteMessageResponse
-	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/messages/{id}",url.Values{"Hard": []stringHard, "DeletedBy": []stringDeletedBy }, nil, &result, Id,)
+	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/messages/{id}",url.Values{"Hard": []string { Hard }, "DeletedBy": []string { DeletedBy } }, nil, &result, Id,)
 	return result, err
 }
 
@@ -374,7 +374,7 @@ func (c *ChatClient) GetMessage(ctx context.Context,
 	, ShowDeletedMessage *bool
 ) (GetMessageResponse, error) {
 	var result GetMessageResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/messages/{id}",url.Values{"ShowDeletedMessage": []stringShowDeletedMessage }, nil, &result, Id,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/messages/{id}",url.Values{"ShowDeletedMessage": []string { ShowDeletedMessage } }, nil, &result, Id,)
 	return result, err
 }
 
@@ -435,7 +435,7 @@ func (c *ChatClient) DeleteReaction(ctx context.Context,
 	, UserId *string
 ) (ReactionRemovalResponse, error) {
 	var result ReactionRemovalResponse
-	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/messages/{id}/reaction/{type}",url.Values{"UserId": []stringUserId }, nil, &result, Id, Type,)
+	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/messages/{id}/reaction/{type}",url.Values{"UserId": []string { UserId } }, nil, &result, Id, Type,)
 	return result, err
 }
 
@@ -446,7 +446,7 @@ func (c *ChatClient) GetReactions(ctx context.Context,
 	, Offset *int
 ) (GetReactionsResponse, error) {
 	var result GetReactionsResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/messages/{id}/reactions",url.Values{"Limit": []stringLimit, "Offset": []stringOffset }, nil, &result, Id,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/messages/{id}/reactions",url.Values{"Limit": []string { Limit }, "Offset": []string { Offset } }, nil, &result, Id,)
 	return result, err
 }
 
@@ -499,7 +499,7 @@ func (c *ChatClient) RemovePollVote(ctx context.Context,
 	, UserId *string
 ) (PollVoteResponse, error) {
 	var result PollVoteResponse
-	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/messages/{message_id}/polls/{poll_id}/vote/{vote_id}",url.Values{"UserId": []stringUserId }, nil, &result, MessageId, PollId, VoteId,)
+	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/messages/{message_id}/polls/{poll_id}/vote/{vote_id}",url.Values{"UserId": []string { UserId } }, nil, &result, MessageId, PollId, VoteId,)
 	return result, err
 }
 
@@ -521,7 +521,7 @@ func (c *ChatClient) GetReplies(ctx context.Context,
 	, Sort *[]*SortParam
 ) (GetRepliesResponse, error) {
 	var result GetRepliesResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/messages/{parent_id}/replies",url.Values{"Limit": []stringLimit, "Offset": []stringOffset, "IdGte": []stringIdGte, "IdGt": []stringIdGt, "IdLte": []stringIdLte, "IdLt": []stringIdLt, "CreatedAtAfterOrEqual": []stringCreatedAtAfterOrEqual, "CreatedAtAfter": []stringCreatedAtAfter, "CreatedAtBeforeOrEqual": []stringCreatedAtBeforeOrEqual, "CreatedAtBefore": []stringCreatedAtBefore, "IdAround": []stringIdAround, "CreatedAtAround": []stringCreatedAtAround, "Sort": []stringSort }, nil, &result, ParentId,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/messages/{parent_id}/replies",url.Values{"Limit": []string { Limit }, "Offset": []string { Offset }, "IdGte": []string { IdGte }, "IdGt": []string { IdGt }, "IdLte": []string { IdLte }, "IdLt": []string { IdLt }, "CreatedAtAfterOrEqual": []string { CreatedAtAfterOrEqual }, "CreatedAtAfter": []string { CreatedAtAfter }, "CreatedAtBeforeOrEqual": []string { CreatedAtBeforeOrEqual }, "CreatedAtBefore": []string { CreatedAtBefore }, "IdAround": []string { IdAround }, "CreatedAtAround": []string { CreatedAtAround }, "Sort": []string { Sort } }, nil, &result, ParentId,)
 	return result, err
 }
 
@@ -530,7 +530,7 @@ func (c *ChatClient) QueryMessageFlags(ctx context.Context,
 	Payload *QueryMessageFlagsRequest
 ) (QueryMessageFlagsResponse, error) {
 	var result QueryMessageFlagsResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/moderation/flags/message",url.Values{"Payload": []stringPayload }, nil, &result,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/moderation/flags/message",url.Values{"Payload": []string { Payload } }, nil, &result,)
 	return result, err
 }
 
@@ -576,7 +576,7 @@ func (c *ChatClient) QueryPolls(ctx context.Context,
 	, QueryPollsRequest QueryPollsRequest
 ) (QueryPollsResponse, error) {
 	var result QueryPollsResponse
-	err := MakeRequest(c.client, ctx, "POST", "/api/v2/chat/polls/query",url.Values{"UserId": []stringUserId },QueryPollsRequest, &result,)
+	err := MakeRequest(c.client, ctx, "POST", "/api/v2/chat/polls/query",url.Values{"UserId": []string { UserId } },QueryPollsRequest, &result,)
 	return result, err
 }
 
@@ -586,7 +586,7 @@ func (c *ChatClient) DeletePoll(ctx context.Context,
 	, UserId *string
 ) (Response, error) {
 	var result Response
-	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/polls/{poll_id}",url.Values{"UserId": []stringUserId }, nil, &result, PollId,)
+	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/polls/{poll_id}",url.Values{"UserId": []string { UserId } }, nil, &result, PollId,)
 	return result, err
 }
 
@@ -596,7 +596,7 @@ func (c *ChatClient) GetPoll(ctx context.Context,
 	, UserId *string
 ) (PollResponse, error) {
 	var result PollResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/polls/{poll_id}",url.Values{"UserId": []stringUserId }, nil, &result, PollId,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/polls/{poll_id}",url.Values{"UserId": []string { UserId } }, nil, &result, PollId,)
 	return result, err
 }
 
@@ -637,7 +637,7 @@ func (c *ChatClient) DeletePollOption(ctx context.Context,
 	, UserId *string
 ) (Response, error) {
 	var result Response
-	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/polls/{poll_id}/options/{option_id}",url.Values{"UserId": []stringUserId }, nil, &result, PollId, OptionId,)
+	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/chat/polls/{poll_id}/options/{option_id}",url.Values{"UserId": []string { UserId } }, nil, &result, PollId, OptionId,)
 	return result, err
 }
 
@@ -648,7 +648,7 @@ func (c *ChatClient) GetPollOption(ctx context.Context,
 	, UserId *string
 ) (PollOptionResponse, error) {
 	var result PollOptionResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/polls/{poll_id}/options/{option_id}",url.Values{"UserId": []stringUserId }, nil, &result, PollId, OptionId,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/polls/{poll_id}/options/{option_id}",url.Values{"UserId": []string { UserId } }, nil, &result, PollId, OptionId,)
 	return result, err
 }
 
@@ -659,7 +659,7 @@ func (c *ChatClient) QueryPollVotes(ctx context.Context,
 	, QueryPollVotesRequest QueryPollVotesRequest
 ) (PollVotesResponse, error) {
 	var result PollVotesResponse
-	err := MakeRequest(c.client, ctx, "POST", "/api/v2/chat/polls/{poll_id}/votes",url.Values{"UserId": []stringUserId },QueryPollVotesRequest, &result, PollId,)
+	err := MakeRequest(c.client, ctx, "POST", "/api/v2/chat/polls/{poll_id}/votes",url.Values{"UserId": []string { UserId } },QueryPollVotesRequest, &result, PollId,)
 	return result, err
 }
 
@@ -668,7 +668,7 @@ func (c *ChatClient) QueryBannedUsers(ctx context.Context,
 	Payload *QueryBannedUsersRequest
 ) (QueryBannedUsersResponse, error) {
 	var result QueryBannedUsersResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/query_banned_users",url.Values{"Payload": []stringPayload }, nil, &result,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/query_banned_users",url.Values{"Payload": []string { Payload } }, nil, &result,)
 	return result, err
 }
 
@@ -677,7 +677,7 @@ func (c *ChatClient) Search(ctx context.Context,
 	Payload *SearchRequest
 ) (SearchResponse, error) {
 	var result SearchResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/search",url.Values{"Payload": []stringPayload }, nil, &result,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/search",url.Values{"Payload": []string { Payload } }, nil, &result,)
 	return result, err
 }
 
@@ -699,7 +699,7 @@ func (c *ChatClient) GetThread(ctx context.Context,
 	, MemberLimit *int
 ) (GetThreadResponse, error) {
 	var result GetThreadResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/threads/{message_id}",url.Values{"ConnectionId": []stringConnectionId, "ReplyLimit": []stringReplyLimit, "ParticipantLimit": []stringParticipantLimit, "MemberLimit": []stringMemberLimit }, nil, &result, MessageId,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/chat/threads/{message_id}",url.Values{"ConnectionId": []string { ConnectionId }, "ReplyLimit": []string { ReplyLimit }, "ParticipantLimit": []string { ParticipantLimit }, "MemberLimit": []string { MemberLimit } }, nil, &result, MessageId,)
 	return result, err
 }
 

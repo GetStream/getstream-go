@@ -47,7 +47,7 @@ func (c *VideoClient) GetCall(ctx context.Context,
 	, Notify *bool
 ) (GetCallResponse, error) {
 	var result GetCallResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}",url.Values{"MembersLimit": []stringMembersLimit, "Ring": []stringRing, "Notify": []stringNotify }, nil, &result, Type, Id,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}",url.Values{"MembersLimit": []string { MembersLimit }, "Ring": []string { Ring }, "Notify": []string { Notify } }, nil, &result, Type, Id,)
 	return result, err
 }
 

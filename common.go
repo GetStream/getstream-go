@@ -113,7 +113,7 @@ func (c *CommonClient) DeleteDevice(ctx context.Context,
 	, UserId *string
 ) (Response, error) {
 	var result Response
-	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/devices",url.Values{"Id": []stringId, "UserId": []stringUserId }, nil, &result,)
+	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/devices",url.Values{"Id": []string { Id }, "UserId": []string { UserId } }, nil, &result,)
 	return result, err
 }
 
@@ -122,7 +122,7 @@ func (c *CommonClient) ListDevices(ctx context.Context,
 	UserId *string
 ) (ListDevicesResponse, error) {
 	var result ListDevicesResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/devices",url.Values{"UserId": []stringUserId }, nil, &result,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/devices",url.Values{"UserId": []string { UserId } }, nil, &result,)
 	return result, err
 }
 
@@ -238,7 +238,7 @@ func (c *CommonClient) Unban(ctx context.Context,
 	, CreatedBy *string
 ) (Response, error) {
 	var result Response
-	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/moderation/ban",url.Values{"TargetUserId": []stringTargetUserId, "ChannelCid": []stringChannelCid, "CreatedBy": []stringCreatedBy }, nil, &result,)
+	err := MakeRequest(c.client, ctx, "DELETE", "/api/v2/moderation/ban",url.Values{"TargetUserId": []string { TargetUserId }, "ChannelCid": []string { ChannelCid }, "CreatedBy": []string { CreatedBy } }, nil, &result,)
 	return result, err
 }
 
@@ -283,7 +283,7 @@ func (c *CommonClient) GetOG(ctx context.Context,
 	Url string
 ) (GetOGResponse, error) {
 	var result GetOGResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/og",url.Values{"Url": []stringUrl }, nil, &result,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/og",url.Values{"Url": []string { Url } }, nil, &result,)
 	return result, err
 }
 
@@ -338,7 +338,7 @@ func (c *CommonClient) GetRateLimits(ctx context.Context,
 	, Endpoints *string
 ) (GetRateLimitsResponse, error) {
 	var result GetRateLimitsResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/rate_limits",url.Values{"ServerSide": []stringServerSide, "Android": []stringAndroid, "Ios": []stringIos, "Web": []stringWeb, "Endpoints": []stringEndpoints }, nil, &result,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/rate_limits",url.Values{"ServerSide": []string { ServerSide }, "Android": []string { Android }, "Ios": []string { Ios }, "Web": []string { Web }, "Endpoints": []string { Endpoints } }, nil, &result,)
 	return result, err
 }
 
@@ -381,7 +381,7 @@ func (c *CommonClient) QueryUsers(ctx context.Context,
 	Payload *QueryUsersPayload
 ) (QueryUsersResponse, error) {
 	var result QueryUsersResponse
-	err := MakeRequest(c.client, ctx, "GET", "/api/v2/users",url.Values{"Payload": []stringPayload }, nil, &result,)
+	err := MakeRequest(c.client, ctx, "GET", "/api/v2/users",url.Values{"Payload": []string { Payload } }, nil, &result,)
 	return result, err
 }
 
