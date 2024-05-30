@@ -2,11 +2,8 @@ package getstream
 
 import (
 	"context"
-	"net/http"
 	"net/url"
-
-	"github.com/getstream/go-client"
-	"github.com/getstream/go-client/models"
+	"time"
 )
 
 type VideoClient struct {
