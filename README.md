@@ -1,6 +1,6 @@
 # Official Go SDK for [Stream Chat](https://getstream.io/)
 
-[![build](https://github.com/GetStream/getstream-go/workflows/build/badge.svg)](https://github.com/GetStream/stream-go/actions)
+[![build](https://github.com/GetStream/getstream-go/workflows/build/badge.svg)](https://github.com/GetStream/getstream-go/actions)
 [![godoc](https://pkg.go.dev/badge/GetStream/getstream-go)](https://pkg.go.dev/github.com/GetStream/getstream-go?tab=doc)
 
 <p align="center">
