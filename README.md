@@ -1,4 +1,4 @@
-# Official Go SDK for [Stream Chat](https://getstream.io/chat/)
+# Official Go SDK for [Stream Chat](https://getstream.io/)
 
 [![build](https://github.com/GetStream/stream-go/workflows/build/badge.svg)](https://github.com/GetStream/stream-go/actions)
 [![godoc](https://pkg.go.dev/badge/GetStream/stream-go)](https://pkg.go.dev/github.com/GetStream/stream-go/v6?tab=doc)
@@ -7,7 +7,7 @@
     <img src="./assets/logo.svg" width="50%" height="50%">
 </p>
 <p align="center">
-    Official Go API client for Stream Chat, a service for building chat applications.
+    Official Go API client for Stream Chat and Video, a service for building chat and video applications.
     <br />
     <a href="https://getstream.io/chat/docs/"><strong>Explore the docs »</strong></a>
     <br />
