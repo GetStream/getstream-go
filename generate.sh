@@ -17,7 +17,7 @@ fi
 set -ex
 
 # cd in API repo, generate new spec and then generate code from it
-( cd $SOURCE_PATH ; go run ./cmd/chat-manager openapi generate-client --language go-serverside --spec ./releases/v2/serverside-api.yaml --output ../stream-go )
+( cd $SOURCE_PATH ; make openapi ; go run ./cmd/chat-manager openapi generate-client --language go-serverside --spec ./releases/v2/serverside-api.yaml --output ../stream-go )
 
 # lint generated code with gofumpt
 gofumpt -w ../stream-go
