@@ -17,29 +17,29 @@ type APIError struct {
 
 	Details []int `json:"details"`
 
-	ExceptionFields *map[string]string `json:"exception_fields"`
+	ExceptionFields *map[string]string `json:"exception_fields,omitempty"`
 }
 
 type APNConfig struct {
-	AuthKey *string `json:"auth_key"`
+	AuthKey *string `json:"auth_key,omitempty"`
 
-	AuthType *string `json:"auth_type"`
+	AuthType *string `json:"auth_type,omitempty"`
 
-	BundleId *string `json:"bundle_id"`
+	BundleId *string `json:"bundle_id,omitempty"`
 
-	Development *bool `json:"development"`
+	Development *bool `json:"development,omitempty"`
 
-	Disabled *bool `json:"Disabled"`
+	Disabled *bool `json:"Disabled,omitempty"`
 
-	Host *string `json:"host"`
+	Host *string `json:"host,omitempty"`
 
-	KeyId *string `json:"key_id"`
+	KeyId *string `json:"key_id,omitempty"`
 
-	NotificationTemplate *string `json:"notification_template"`
+	NotificationTemplate *string `json:"notification_template,omitempty"`
 
-	P12Cert *string `json:"p12_cert"`
+	P12Cert *string `json:"p12_cert,omitempty"`
 
-	TeamId *string `json:"team_id"`
+	TeamId *string `json:"team_id,omitempty"`
 }
 
 type APNConfigFields struct {
@@ -49,19 +49,19 @@ type APNConfigFields struct {
 
 	NotificationTemplate string `json:"notification_template"`
 
-	AuthKey *string `json:"auth_key"`
+	AuthKey *string `json:"auth_key,omitempty"`
 
-	AuthType *string `json:"auth_type"`
+	AuthType *string `json:"auth_type,omitempty"`
 
-	BundleId *string `json:"bundle_id"`
+	BundleId *string `json:"bundle_id,omitempty"`
 
-	Host *string `json:"host"`
+	Host *string `json:"host,omitempty"`
 
-	KeyId *string `json:"key_id"`
+	KeyId *string `json:"key_id,omitempty"`
 
-	P12Cert *string `json:"p12_cert"`
+	P12Cert *string `json:"p12_cert,omitempty"`
 
-	TeamId *string `json:"team_id"`
+	TeamId *string `json:"team_id,omitempty"`
 }
 
 type APNS struct {
@@ -77,9 +77,9 @@ type Action struct {
 
 	Type string `json:"type"`
 
-	Style *string `json:"style"`
+	Style *string `json:"style,omitempty"`
 
-	Value *string `json:"value"`
+	Value *string `json:"value,omitempty"`
 }
 
 type AppResponseFields struct {
@@ -151,79 +151,79 @@ type AppResponseFields struct {
 
 	PushNotifications PushNotificationFields `json:"push_notifications"`
 
-	BeforeMessageSendHookUrl *string `json:"before_message_send_hook_url"`
+	BeforeMessageSendHookUrl *string `json:"before_message_send_hook_url,omitempty"`
 
-	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before"`
+	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before,omitempty"`
 
-	AllowedFlagReasons *[]string `json:"allowed_flag_reasons"`
+	AllowedFlagReasons *[]string `json:"allowed_flag_reasons,omitempty"`
 
-	Geofences *[]*GeofenceResponse `json:"geofences"`
+	Geofences *[]*GeofenceResponse `json:"geofences,omitempty"`
 
-	ImageModerationLabels *[]string `json:"image_moderation_labels"`
+	ImageModerationLabels *[]string `json:"image_moderation_labels,omitempty"`
 
-	AgoraOptions *Config `json:"agora_options"`
+	AgoraOptions *Config `json:"agora_options,omitempty"`
 
-	DatadogInfo *DataDogInfo `json:"datadog_info"`
+	DatadogInfo *DataDogInfo `json:"datadog_info,omitempty"`
 
-	HmsOptions *Config `json:"hms_options"`
+	HmsOptions *Config `json:"hms_options,omitempty"`
 }
 
 type AsyncModerationCallbackConfig struct {
-	Mode *string `json:"mode"`
+	Mode *string `json:"mode,omitempty"`
 
-	ServerUrl *string `json:"server_url"`
+	ServerUrl *string `json:"server_url,omitempty"`
 }
 
 type AsyncModerationConfiguration struct {
-	TimeoutMs *int `json:"timeout_ms"`
+	TimeoutMs *int `json:"timeout_ms,omitempty"`
 
-	Callback *AsyncModerationCallbackConfig `json:"callback"`
+	Callback *AsyncModerationCallbackConfig `json:"callback,omitempty"`
 }
 
 type Attachment struct {
 	Custom map[string]any `json:"custom"`
 
-	AssetUrl *string `json:"asset_url"`
+	AssetUrl *string `json:"asset_url,omitempty"`
 
-	AuthorIcon *string `json:"author_icon"`
+	AuthorIcon *string `json:"author_icon,omitempty"`
 
-	AuthorLink *string `json:"author_link"`
+	AuthorLink *string `json:"author_link,omitempty"`
 
-	AuthorName *string `json:"author_name"`
+	AuthorName *string `json:"author_name,omitempty"`
 
-	Color *string `json:"color"`
+	Color *string `json:"color,omitempty"`
 
-	Fallback *string `json:"fallback"`
+	Fallback *string `json:"fallback,omitempty"`
 
-	Footer *string `json:"footer"`
+	Footer *string `json:"footer,omitempty"`
 
-	FooterIcon *string `json:"footer_icon"`
+	FooterIcon *string `json:"footer_icon,omitempty"`
 
-	ImageUrl *string `json:"image_url"`
+	ImageUrl *string `json:"image_url,omitempty"`
 
-	OgScrapeUrl *string `json:"og_scrape_url"`
+	OgScrapeUrl *string `json:"og_scrape_url,omitempty"`
 
-	OriginalHeight *int `json:"original_height"`
+	OriginalHeight *int `json:"original_height,omitempty"`
 
-	OriginalWidth *int `json:"original_width"`
+	OriginalWidth *int `json:"original_width,omitempty"`
 
-	Pretext *string `json:"pretext"`
+	Pretext *string `json:"pretext,omitempty"`
 
-	Text *string `json:"text"`
+	Text *string `json:"text,omitempty"`
 
-	ThumbUrl *string `json:"thumb_url"`
+	ThumbUrl *string `json:"thumb_url,omitempty"`
 
-	Title *string `json:"title"`
+	Title *string `json:"title,omitempty"`
 
-	TitleLink *string `json:"title_link"`
+	TitleLink *string `json:"title_link,omitempty"`
 
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 
-	Actions *[]*Action `json:"actions"`
+	Actions *[]*Action `json:"actions,omitempty"`
 
-	Fields *[]*Field `json:"fields"`
+	Fields *[]*Field `json:"fields,omitempty"`
 
-	Giphy *Images `json:"giphy"`
+	Giphy *Images `json:"giphy,omitempty"`
 }
 
 type AudioSettings struct {
@@ -239,23 +239,23 @@ type AudioSettings struct {
 
 	SpeakerDefaultOn bool `json:"speaker_default_on"`
 
-	NoiseCancellation *NoiseCancellationSettings `json:"noise_cancellation"`
+	NoiseCancellation *NoiseCancellationSettings `json:"noise_cancellation,omitempty"`
 }
 
 type AudioSettingsRequest struct {
 	DefaultDevice string `json:"default_device"`
 
-	AccessRequestEnabled *bool `json:"access_request_enabled"`
+	AccessRequestEnabled *bool `json:"access_request_enabled,omitempty"`
 
-	MicDefaultOn *bool `json:"mic_default_on"`
+	MicDefaultOn *bool `json:"mic_default_on,omitempty"`
 
-	OpusDtxEnabled *bool `json:"opus_dtx_enabled"`
+	OpusDtxEnabled *bool `json:"opus_dtx_enabled,omitempty"`
 
-	RedundantCodingEnabled *bool `json:"redundant_coding_enabled"`
+	RedundantCodingEnabled *bool `json:"redundant_coding_enabled,omitempty"`
 
-	SpeakerDefaultOn *bool `json:"speaker_default_on"`
+	SpeakerDefaultOn *bool `json:"speaker_default_on,omitempty"`
 
-	NoiseCancellation *NoiseCancellationSettings `json:"noise_cancellation"`
+	NoiseCancellation *NoiseCancellationSettings `json:"noise_cancellation,omitempty"`
 }
 
 type AudioSettingsResponse struct {
@@ -271,19 +271,19 @@ type AudioSettingsResponse struct {
 
 	SpeakerDefaultOn bool `json:"speaker_default_on"`
 
-	NoiseCancellation *NoiseCancellationSettings `json:"noise_cancellation"`
+	NoiseCancellation *NoiseCancellationSettings `json:"noise_cancellation,omitempty"`
 }
 
 type AutomodDetails struct {
-	Action *string `json:"action"`
+	Action *string `json:"action,omitempty"`
 
-	OriginalMessageType *string `json:"original_message_type"`
+	OriginalMessageType *string `json:"original_message_type,omitempty"`
 
-	ImageLabels *[]string `json:"image_labels"`
+	ImageLabels *[]string `json:"image_labels,omitempty"`
 
-	MessageDetails *FlagMessageDetails `json:"message_details"`
+	MessageDetails *FlagMessageDetails `json:"message_details,omitempty"`
 
-	Result *MessageModerationResult `json:"result"`
+	Result *MessageModerationResult `json:"result,omitempty"`
 }
 
 type AzureRequest struct {
@@ -301,7 +301,7 @@ type BackstageSettings struct {
 }
 
 type BackstageSettingsRequest struct {
-	Enabled *bool `json:"enabled"`
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 type BackstageSettingsResponse struct {
@@ -311,39 +311,39 @@ type BackstageSettingsResponse struct {
 type BanRequest struct {
 	TargetUserId string `json:"target_user_id"`
 
-	BannedById *string `json:"banned_by_id"`
+	BannedById *string `json:"banned_by_id,omitempty"`
 
-	ChannelCid *string `json:"channel_cid"`
+	ChannelCid *string `json:"channel_cid,omitempty"`
 
-	IpBan *bool `json:"ip_ban"`
+	IpBan *bool `json:"ip_ban,omitempty"`
 
-	Reason *string `json:"reason"`
+	Reason *string `json:"reason,omitempty"`
 
-	Shadow *bool `json:"shadow"`
+	Shadow *bool `json:"shadow,omitempty"`
 
-	Timeout *int `json:"timeout"`
+	Timeout *int `json:"timeout,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	BannedBy *UserRequest `json:"banned_by"`
+	BannedBy *UserRequest `json:"banned_by,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type BanResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 
-	Expires *time.Time `json:"expires"`
+	Expires *time.Time `json:"expires,omitempty"`
 
-	Reason *string `json:"reason"`
+	Reason *string `json:"reason,omitempty"`
 
-	Shadow *bool `json:"shadow"`
+	Shadow *bool `json:"shadow,omitempty"`
 
-	BannedBy *UserObject `json:"banned_by"`
+	BannedBy *UserObject `json:"banned_by,omitempty"`
 
-	Channel *ChannelResponse `json:"channel"`
+	Channel *ChannelResponse `json:"channel,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type BlockList struct {
@@ -353,9 +353,9 @@ type BlockList struct {
 
 	Words []string `json:"words"`
 
-	CreatedAt *time.Time `json:"created_at"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
 
-	UpdatedAt *time.Time `json:"updated_at"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
 type BlockListOptions struct {
@@ -379,9 +379,9 @@ type BroadcastSettings struct {
 }
 
 type BroadcastSettingsRequest struct {
-	Enabled *bool `json:"enabled"`
+	Enabled *bool `json:"enabled,omitempty"`
 
-	Hls *HLSSettingsRequest `json:"hls"`
+	Hls *HLSSettingsRequest `json:"hls,omitempty"`
 }
 
 type BroadcastSettingsResponse struct {
@@ -427,19 +427,19 @@ type CallRecording struct {
 }
 
 type CallRequest struct {
-	CreatedById *string `json:"created_by_id"`
+	CreatedById *string `json:"created_by_id,omitempty"`
 
-	StartsAt *time.Time `json:"starts_at"`
+	StartsAt *time.Time `json:"starts_at,omitempty"`
 
-	Team *string `json:"team"`
+	Team *string `json:"team,omitempty"`
 
-	Members *[]MemberRequest `json:"members"`
+	Members *[]MemberRequest `json:"members,omitempty"`
 
-	CreatedBy *UserRequest `json:"created_by"`
+	CreatedBy *UserRequest `json:"created_by,omitempty"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 
-	SettingsOverride *CallSettingsRequest `json:"settings_override"`
+	SettingsOverride *CallSettingsRequest `json:"settings_override,omitempty"`
 }
 
 type CallResponse struct {
@@ -473,15 +473,15 @@ type CallResponse struct {
 
 	Settings CallSettingsResponse `json:"settings"`
 
-	EndedAt *time.Time `json:"ended_at"`
+	EndedAt *time.Time `json:"ended_at,omitempty"`
 
-	StartsAt *time.Time `json:"starts_at"`
+	StartsAt *time.Time `json:"starts_at,omitempty"`
 
-	Team *string `json:"team"`
+	Team *string `json:"team,omitempty"`
 
-	Session *CallSessionResponse `json:"session"`
+	Session *CallSessionResponse `json:"session,omitempty"`
 
-	Thumbnails *ThumbnailResponse `json:"thumbnails"`
+	Thumbnails *ThumbnailResponse `json:"thumbnails,omitempty"`
 }
 
 type CallSessionResponse struct {
@@ -495,57 +495,57 @@ type CallSessionResponse struct {
 
 	RejectedBy map[string]time.Time `json:"rejected_by"`
 
-	EndedAt *time.Time `json:"ended_at"`
+	EndedAt *time.Time `json:"ended_at,omitempty"`
 
-	LiveEndedAt *time.Time `json:"live_ended_at"`
+	LiveEndedAt *time.Time `json:"live_ended_at,omitempty"`
 
-	LiveStartedAt *time.Time `json:"live_started_at"`
+	LiveStartedAt *time.Time `json:"live_started_at,omitempty"`
 
-	StartedAt *time.Time `json:"started_at"`
+	StartedAt *time.Time `json:"started_at,omitempty"`
 }
 
 type CallSettings struct {
-	Audio *AudioSettings `json:"audio"`
+	Audio *AudioSettings `json:"audio,omitempty"`
 
-	Backstage *BackstageSettings `json:"backstage"`
+	Backstage *BackstageSettings `json:"backstage,omitempty"`
 
-	Broadcasting *BroadcastSettings `json:"broadcasting"`
+	Broadcasting *BroadcastSettings `json:"broadcasting,omitempty"`
 
-	Geofencing *GeofenceSettings `json:"geofencing"`
+	Geofencing *GeofenceSettings `json:"geofencing,omitempty"`
 
-	Recording *RecordSettings `json:"recording"`
+	Recording *RecordSettings `json:"recording,omitempty"`
 
-	Ring *RingSettings `json:"ring"`
+	Ring *RingSettings `json:"ring,omitempty"`
 
-	Screensharing *ScreensharingSettings `json:"screensharing"`
+	Screensharing *ScreensharingSettings `json:"screensharing,omitempty"`
 
-	Thumbnails *ThumbnailsSettings `json:"thumbnails"`
+	Thumbnails *ThumbnailsSettings `json:"thumbnails,omitempty"`
 
-	Transcription *TranscriptionSettings `json:"transcription"`
+	Transcription *TranscriptionSettings `json:"transcription,omitempty"`
 
-	Video *VideoSettings `json:"video"`
+	Video *VideoSettings `json:"video,omitempty"`
 }
 
 type CallSettingsRequest struct {
-	Audio *AudioSettingsRequest `json:"audio"`
+	Audio *AudioSettingsRequest `json:"audio,omitempty"`
 
-	Backstage *BackstageSettingsRequest `json:"backstage"`
+	Backstage *BackstageSettingsRequest `json:"backstage,omitempty"`
 
-	Broadcasting *BroadcastSettingsRequest `json:"broadcasting"`
+	Broadcasting *BroadcastSettingsRequest `json:"broadcasting,omitempty"`
 
-	Geofencing *GeofenceSettingsRequest `json:"geofencing"`
+	Geofencing *GeofenceSettingsRequest `json:"geofencing,omitempty"`
 
-	Recording *RecordSettingsRequest `json:"recording"`
+	Recording *RecordSettingsRequest `json:"recording,omitempty"`
 
-	Ring *RingSettingsRequest `json:"ring"`
+	Ring *RingSettingsRequest `json:"ring,omitempty"`
 
-	Screensharing *ScreensharingSettingsRequest `json:"screensharing"`
+	Screensharing *ScreensharingSettingsRequest `json:"screensharing,omitempty"`
 
-	Thumbnails *ThumbnailsSettingsRequest `json:"thumbnails"`
+	Thumbnails *ThumbnailsSettingsRequest `json:"thumbnails,omitempty"`
 
-	Transcription *TranscriptionSettingsRequest `json:"transcription"`
+	Transcription *TranscriptionSettingsRequest `json:"transcription,omitempty"`
 
-	Video *VideoSettingsRequest `json:"video"`
+	Video *VideoSettingsRequest `json:"video,omitempty"`
 }
 
 type CallSettingsResponse struct {
@@ -589,9 +589,9 @@ type CallStatsReportSummaryResponse struct {
 
 	FirstStatsTime time.Time `json:"first_stats_time"`
 
-	CreatedAt *time.Time `json:"created_at"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
 
-	QualityScore *int `json:"quality_score"`
+	QualityScore *int `json:"quality_score,omitempty"`
 }
 
 type CallTimeline struct {
@@ -621,9 +621,9 @@ type CallType struct {
 
 	UpdatedAt time.Time `json:"UpdatedAt"`
 
-	NotificationSettings *NotificationSettings `json:"NotificationSettings"`
+	NotificationSettings *NotificationSettings `json:"NotificationSettings,omitempty"`
 
-	Settings *CallSettings `json:"Settings"`
+	Settings *CallSettings `json:"Settings,omitempty"`
 }
 
 type CallTypeResponse struct {
@@ -639,15 +639,15 @@ type CallTypeResponse struct {
 
 	Settings CallSettingsResponse `json:"settings"`
 
-	ExternalStorage *string `json:"external_storage"`
+	ExternalStorage *string `json:"external_storage,omitempty"`
 }
 
 type CastPollVoteRequest struct {
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 
-	Vote *VoteData `json:"vote"`
+	Vote *VoteData `json:"vote,omitempty"`
 }
 
 type Channel struct {
@@ -669,29 +669,29 @@ type Channel struct {
 
 	Custom map[string]any `json:"custom"`
 
-	AutoTranslationEnabled *bool `json:"auto_translation_enabled"`
+	AutoTranslationEnabled *bool `json:"auto_translation_enabled,omitempty"`
 
-	Cooldown *int `json:"cooldown"`
+	Cooldown *int `json:"cooldown,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	LastMessageAt *time.Time `json:"last_message_at"`
+	LastMessageAt *time.Time `json:"last_message_at,omitempty"`
 
-	MemberCount *int `json:"member_count"`
+	MemberCount *int `json:"member_count,omitempty"`
 
-	Team *string `json:"team"`
+	Team *string `json:"team,omitempty"`
 
-	Invites *[]*ChannelMember `json:"invites"`
+	Invites *[]*ChannelMember `json:"invites,omitempty"`
 
-	Members *[]*ChannelMember `json:"members"`
+	Members *[]*ChannelMember `json:"members,omitempty"`
 
-	Config *ChannelConfig `json:"config"`
+	Config *ChannelConfig `json:"config,omitempty"`
 
-	ConfigOverrides *ChannelConfig `json:"config_overrides"`
+	ConfigOverrides *ChannelConfig `json:"config_overrides,omitempty"`
 
-	CreatedBy *UserObject `json:"created_by"`
+	CreatedBy *UserObject `json:"created_by,omitempty"`
 
-	TruncatedBy *UserObject `json:"truncated_by"`
+	TruncatedBy *UserObject `json:"truncated_by,omitempty"`
 }
 
 type ChannelConfig struct {
@@ -739,15 +739,15 @@ type ChannelConfig struct {
 
 	Commands []string `json:"commands"`
 
-	Blocklist *string `json:"blocklist"`
+	Blocklist *string `json:"blocklist,omitempty"`
 
-	BlocklistBehavior *string `json:"blocklist_behavior"`
+	BlocklistBehavior *string `json:"blocklist_behavior,omitempty"`
 
-	AllowedFlagReasons *[]string `json:"allowed_flag_reasons"`
+	AllowedFlagReasons *[]string `json:"allowed_flag_reasons,omitempty"`
 
-	Blocklists *[]BlockListOptions `json:"blocklists"`
+	Blocklists *[]BlockListOptions `json:"blocklists,omitempty"`
 
-	AutomodThresholds *Thresholds `json:"automod_thresholds"`
+	AutomodThresholds *Thresholds `json:"automod_thresholds,omitempty"`
 }
 
 type ChannelConfigWithInfo struct {
@@ -795,71 +795,71 @@ type ChannelConfigWithInfo struct {
 
 	Commands []*Command `json:"commands"`
 
-	Blocklist *string `json:"blocklist"`
+	Blocklist *string `json:"blocklist,omitempty"`
 
-	BlocklistBehavior *string `json:"blocklist_behavior"`
+	BlocklistBehavior *string `json:"blocklist_behavior,omitempty"`
 
-	AllowedFlagReasons *[]string `json:"allowed_flag_reasons"`
+	AllowedFlagReasons *[]string `json:"allowed_flag_reasons,omitempty"`
 
-	Blocklists *[]BlockListOptions `json:"blocklists"`
+	Blocklists *[]BlockListOptions `json:"blocklists,omitempty"`
 
-	AutomodThresholds *Thresholds `json:"automod_thresholds"`
+	AutomodThresholds *Thresholds `json:"automod_thresholds,omitempty"`
 
-	Grants *map[string][]string `json:"grants"`
+	Grants *map[string][]string `json:"grants,omitempty"`
 }
 
 type ChannelExport struct {
-	Cid *string `json:"cid"`
+	Cid *string `json:"cid,omitempty"`
 
-	Id *string `json:"id"`
+	Id *string `json:"id,omitempty"`
 
-	MessagesSince *time.Time `json:"messages_since"`
+	MessagesSince *time.Time `json:"messages_since,omitempty"`
 
-	MessagesUntil *time.Time `json:"messages_until"`
+	MessagesUntil *time.Time `json:"messages_until,omitempty"`
 
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 }
 
 type ChannelGetOrCreateRequest struct {
-	HideForCreator *bool `json:"hide_for_creator"`
+	HideForCreator *bool `json:"hide_for_creator,omitempty"`
 
-	State *bool `json:"state"`
+	State *bool `json:"state,omitempty"`
 
-	ThreadUnreadCounts *bool `json:"thread_unread_counts"`
+	ThreadUnreadCounts *bool `json:"thread_unread_counts,omitempty"`
 
-	Data *ChannelInput `json:"data"`
+	Data *ChannelInput `json:"data,omitempty"`
 
-	Members *PaginationParams `json:"members"`
+	Members *PaginationParams `json:"members,omitempty"`
 
-	Messages *MessagePaginationParams `json:"messages"`
+	Messages *MessagePaginationParams `json:"messages,omitempty"`
 
-	Watchers *PaginationParams `json:"watchers"`
+	Watchers *PaginationParams `json:"watchers,omitempty"`
 }
 
 type ChannelInput struct {
-	AutoTranslationEnabled *bool `json:"auto_translation_enabled"`
+	AutoTranslationEnabled *bool `json:"auto_translation_enabled,omitempty"`
 
-	AutoTranslationLanguage *string `json:"auto_translation_language"`
+	AutoTranslationLanguage *string `json:"auto_translation_language,omitempty"`
 
-	CreatedById *string `json:"created_by_id"`
+	CreatedById *string `json:"created_by_id,omitempty"`
 
-	Disabled *bool `json:"disabled"`
+	Disabled *bool `json:"disabled,omitempty"`
 
-	Frozen *bool `json:"frozen"`
+	Frozen *bool `json:"frozen,omitempty"`
 
-	Team *string `json:"team"`
+	Team *string `json:"team,omitempty"`
 
-	TruncatedById *string `json:"truncated_by_id"`
+	TruncatedById *string `json:"truncated_by_id,omitempty"`
 
-	Invites *[]*ChannelMember `json:"invites"`
+	Invites *[]*ChannelMember `json:"invites,omitempty"`
 
-	Members *[]*ChannelMember `json:"members"`
+	Members *[]*ChannelMember `json:"members,omitempty"`
 
-	ConfigOverrides *ChannelConfig `json:"config_overrides"`
+	ConfigOverrides *ChannelConfig `json:"config_overrides,omitempty"`
 
-	CreatedBy *UserObject `json:"created_by"`
+	CreatedBy *UserObject `json:"created_by,omitempty"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 }
 
 type ChannelMember struct {
@@ -875,23 +875,23 @@ type ChannelMember struct {
 
 	UpdatedAt time.Time `json:"updated_at"`
 
-	BanExpires *time.Time `json:"ban_expires"`
+	BanExpires *time.Time `json:"ban_expires,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	InviteAcceptedAt *time.Time `json:"invite_accepted_at"`
+	InviteAcceptedAt *time.Time `json:"invite_accepted_at,omitempty"`
 
-	InviteRejectedAt *time.Time `json:"invite_rejected_at"`
+	InviteRejectedAt *time.Time `json:"invite_rejected_at,omitempty"`
 
-	Invited *bool `json:"invited"`
+	Invited *bool `json:"invited,omitempty"`
 
-	IsModerator *bool `json:"is_moderator"`
+	IsModerator *bool `json:"is_moderator,omitempty"`
 
-	Status *string `json:"status"`
+	Status *string `json:"status,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type ChannelMute struct {
@@ -899,11 +899,11 @@ type ChannelMute struct {
 
 	UpdatedAt time.Time `json:"updated_at"`
 
-	Expires *time.Time `json:"expires"`
+	Expires *time.Time `json:"expires,omitempty"`
 
-	Channel *ChannelResponse `json:"channel"`
+	Channel *ChannelResponse `json:"channel,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type ChannelResponse struct {
@@ -923,39 +923,39 @@ type ChannelResponse struct {
 
 	Custom map[string]any `json:"custom"`
 
-	AutoTranslationEnabled *bool `json:"auto_translation_enabled"`
+	AutoTranslationEnabled *bool `json:"auto_translation_enabled,omitempty"`
 
-	AutoTranslationLanguage *string `json:"auto_translation_language"`
+	AutoTranslationLanguage *string `json:"auto_translation_language,omitempty"`
 
-	Cooldown *int `json:"cooldown"`
+	Cooldown *int `json:"cooldown,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	Hidden *bool `json:"hidden"`
+	Hidden *bool `json:"hidden,omitempty"`
 
-	HideMessagesBefore *time.Time `json:"hide_messages_before"`
+	HideMessagesBefore *time.Time `json:"hide_messages_before,omitempty"`
 
-	LastMessageAt *time.Time `json:"last_message_at"`
+	LastMessageAt *time.Time `json:"last_message_at,omitempty"`
 
-	MemberCount *int `json:"member_count"`
+	MemberCount *int `json:"member_count,omitempty"`
 
-	MuteExpiresAt *time.Time `json:"mute_expires_at"`
+	MuteExpiresAt *time.Time `json:"mute_expires_at,omitempty"`
 
-	Muted *bool `json:"muted"`
+	Muted *bool `json:"muted,omitempty"`
 
-	Team *string `json:"team"`
+	Team *string `json:"team,omitempty"`
 
-	TruncatedAt *time.Time `json:"truncated_at"`
+	TruncatedAt *time.Time `json:"truncated_at,omitempty"`
 
-	Members *[]*ChannelMember `json:"members"`
+	Members *[]*ChannelMember `json:"members,omitempty"`
 
-	OwnCapabilities *[]string `json:"own_capabilities"`
+	OwnCapabilities *[]string `json:"own_capabilities,omitempty"`
 
-	Config *ChannelConfigWithInfo `json:"config"`
+	Config *ChannelConfigWithInfo `json:"config,omitempty"`
 
-	CreatedBy *UserObject `json:"created_by"`
+	CreatedBy *UserObject `json:"created_by,omitempty"`
 
-	TruncatedBy *UserObject `json:"truncated_by"`
+	TruncatedBy *UserObject `json:"truncated_by,omitempty"`
 }
 
 type ChannelStateResponse struct {
@@ -969,21 +969,21 @@ type ChannelStateResponse struct {
 
 	Threads []*ThreadState `json:"threads"`
 
-	Hidden *bool `json:"hidden"`
+	Hidden *bool `json:"hidden,omitempty"`
 
-	HideMessagesBefore *time.Time `json:"hide_messages_before"`
+	HideMessagesBefore *time.Time `json:"hide_messages_before,omitempty"`
 
-	WatcherCount *int `json:"watcher_count"`
+	WatcherCount *int `json:"watcher_count,omitempty"`
 
-	PendingMessages *[]*PendingMessage `json:"pending_messages"`
+	PendingMessages *[]*PendingMessage `json:"pending_messages,omitempty"`
 
-	Read *[]ReadStateResponse `json:"read"`
+	Read *[]ReadStateResponse `json:"read,omitempty"`
 
-	Watchers *[]UserResponse `json:"watchers"`
+	Watchers *[]UserResponse `json:"watchers,omitempty"`
 
-	Channel *ChannelResponse `json:"channel"`
+	Channel *ChannelResponse `json:"channel,omitempty"`
 
-	Membership *ChannelMember `json:"membership"`
+	Membership *ChannelMember `json:"membership,omitempty"`
 }
 
 type ChannelStateResponseFields struct {
@@ -995,21 +995,21 @@ type ChannelStateResponseFields struct {
 
 	Threads []*ThreadState `json:"threads"`
 
-	Hidden *bool `json:"hidden"`
+	Hidden *bool `json:"hidden,omitempty"`
 
-	HideMessagesBefore *time.Time `json:"hide_messages_before"`
+	HideMessagesBefore *time.Time `json:"hide_messages_before,omitempty"`
 
-	WatcherCount *int `json:"watcher_count"`
+	WatcherCount *int `json:"watcher_count,omitempty"`
 
-	PendingMessages *[]*PendingMessage `json:"pending_messages"`
+	PendingMessages *[]*PendingMessage `json:"pending_messages,omitempty"`
 
-	Read *[]ReadStateResponse `json:"read"`
+	Read *[]ReadStateResponse `json:"read,omitempty"`
 
-	Watchers *[]UserResponse `json:"watchers"`
+	Watchers *[]UserResponse `json:"watchers,omitempty"`
 
-	Channel *ChannelResponse `json:"channel"`
+	Channel *ChannelResponse `json:"channel,omitempty"`
 
-	Membership *ChannelMember `json:"membership"`
+	Membership *ChannelMember `json:"membership,omitempty"`
 }
 
 type ChannelTypeConfig struct {
@@ -1061,15 +1061,15 @@ type ChannelTypeConfig struct {
 
 	Grants map[string][]string `json:"grants"`
 
-	Blocklist *string `json:"blocklist"`
+	Blocklist *string `json:"blocklist,omitempty"`
 
-	BlocklistBehavior *string `json:"blocklist_behavior"`
+	BlocklistBehavior *string `json:"blocklist_behavior,omitempty"`
 
-	AllowedFlagReasons *[]string `json:"allowed_flag_reasons"`
+	AllowedFlagReasons *[]string `json:"allowed_flag_reasons,omitempty"`
 
-	Blocklists *[]BlockListOptions `json:"blocklists"`
+	Blocklists *[]BlockListOptions `json:"blocklists,omitempty"`
 
-	AutomodThresholds *Thresholds `json:"automod_thresholds"`
+	AutomodThresholds *Thresholds `json:"automod_thresholds,omitempty"`
 }
 
 type CheckExternalStorageResponse struct {
@@ -1077,47 +1077,47 @@ type CheckExternalStorageResponse struct {
 }
 
 type CheckPushRequest struct {
-	ApnTemplate *string `json:"apn_template"`
+	ApnTemplate *string `json:"apn_template,omitempty"`
 
-	FirebaseDataTemplate *string `json:"firebase_data_template"`
+	FirebaseDataTemplate *string `json:"firebase_data_template,omitempty"`
 
-	FirebaseTemplate *string `json:"firebase_template"`
+	FirebaseTemplate *string `json:"firebase_template,omitempty"`
 
-	MessageId *string `json:"message_id"`
+	MessageId *string `json:"message_id,omitempty"`
 
-	PushProviderName *string `json:"push_provider_name"`
+	PushProviderName *string `json:"push_provider_name,omitempty"`
 
-	PushProviderType *string `json:"push_provider_type"`
+	PushProviderType *string `json:"push_provider_type,omitempty"`
 
-	SkipDevices *bool `json:"skip_devices"`
+	SkipDevices *bool `json:"skip_devices,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type CheckPushResponse struct {
 	Duration string `json:"duration"`
 
-	RenderedApnTemplate *string `json:"rendered_apn_template"`
+	RenderedApnTemplate *string `json:"rendered_apn_template,omitempty"`
 
-	RenderedFirebaseTemplate *string `json:"rendered_firebase_template"`
+	RenderedFirebaseTemplate *string `json:"rendered_firebase_template,omitempty"`
 
-	SkipDevices *bool `json:"skip_devices"`
+	SkipDevices *bool `json:"skip_devices,omitempty"`
 
-	GeneralErrors *[]string `json:"general_errors"`
+	GeneralErrors *[]string `json:"general_errors,omitempty"`
 
-	DeviceErrors *map[string]DeviceErrorInfo `json:"device_errors"`
+	DeviceErrors *map[string]DeviceErrorInfo `json:"device_errors,omitempty"`
 
-	RenderedMessage *map[string]string `json:"rendered_message"`
+	RenderedMessage *map[string]string `json:"rendered_message,omitempty"`
 }
 
 type CheckSNSRequest struct {
-	SnsKey *string `json:"sns_key"`
+	SnsKey *string `json:"sns_key,omitempty"`
 
-	SnsSecret *string `json:"sns_secret"`
+	SnsSecret *string `json:"sns_secret,omitempty"`
 
-	SnsTopicArn *string `json:"sns_topic_arn"`
+	SnsTopicArn *string `json:"sns_topic_arn,omitempty"`
 }
 
 type CheckSNSResponse struct {
@@ -1125,17 +1125,17 @@ type CheckSNSResponse struct {
 
 	Status string `json:"status"`
 
-	Error *string `json:"error"`
+	Error *string `json:"error,omitempty"`
 
-	Data *map[string]any `json:"data"`
+	Data *map[string]any `json:"data,omitempty"`
 }
 
 type CheckSQSRequest struct {
-	SqsKey *string `json:"sqs_key"`
+	SqsKey *string `json:"sqs_key,omitempty"`
 
-	SqsSecret *string `json:"sqs_secret"`
+	SqsSecret *string `json:"sqs_secret,omitempty"`
 
-	SqsUrl *string `json:"sqs_url"`
+	SqsUrl *string `json:"sqs_url,omitempty"`
 }
 
 type CheckSQSResponse struct {
@@ -1143,9 +1143,9 @@ type CheckSQSResponse struct {
 
 	Status string `json:"status"`
 
-	Error *string `json:"error"`
+	Error *string `json:"error,omitempty"`
 
-	Data *map[string]any `json:"data"`
+	Data *map[string]any `json:"data,omitempty"`
 }
 
 type CollectUserFeedbackRequest struct {
@@ -1157,9 +1157,9 @@ type CollectUserFeedbackRequest struct {
 
 	UserSessionId string `json:"user_session_id"`
 
-	Reason *string `json:"reason"`
+	Reason *string `json:"reason,omitempty"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 }
 
 type CollectUserFeedbackResponse struct {
@@ -1175,9 +1175,9 @@ type Command struct {
 
 	Set string `json:"set"`
 
-	CreatedAt *time.Time `json:"created_at"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
 
-	UpdatedAt *time.Time `json:"updated_at"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
 type CommitMessageRequest struct{}
@@ -1187,9 +1187,9 @@ type Config struct {
 
 	AppId string `json:"app_id"`
 
-	DefaultRole *string `json:"default_role"`
+	DefaultRole *string `json:"default_role,omitempty"`
 
-	RoleMap *map[string]string `json:"role_map"`
+	RoleMap *map[string]string `json:"role_map,omitempty"`
 }
 
 type Coordinates struct {
@@ -1203,19 +1203,19 @@ type CreateBlockListRequest struct {
 
 	Words []string `json:"words"`
 
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 }
 
 type CreateCallTypeRequest struct {
 	Name string `json:"name"`
 
-	ExternalStorage *string `json:"external_storage"`
+	ExternalStorage *string `json:"external_storage,omitempty"`
 
-	Grants *map[string][]string `json:"grants"`
+	Grants *map[string][]string `json:"grants,omitempty"`
 
-	NotificationSettings *NotificationSettings `json:"notification_settings"`
+	NotificationSettings *NotificationSettings `json:"notification_settings,omitempty"`
 
-	Settings *CallSettingsRequest `json:"settings"`
+	Settings *CallSettingsRequest `json:"settings,omitempty"`
 }
 
 type CreateCallTypeResponse struct {
@@ -1233,7 +1233,7 @@ type CreateCallTypeResponse struct {
 
 	Settings CallSettingsResponse `json:"settings"`
 
-	ExternalStorage *string `json:"external_storage"`
+	ExternalStorage *string `json:"external_storage,omitempty"`
 }
 
 type CreateChannelTypeRequest struct {
@@ -1245,45 +1245,45 @@ type CreateChannelTypeRequest struct {
 
 	Name string `json:"name"`
 
-	Blocklist *string `json:"blocklist"`
+	Blocklist *string `json:"blocklist,omitempty"`
 
-	BlocklistBehavior *string `json:"blocklist_behavior"`
+	BlocklistBehavior *string `json:"blocklist_behavior,omitempty"`
 
-	ConnectEvents *bool `json:"connect_events"`
+	ConnectEvents *bool `json:"connect_events,omitempty"`
 
-	CustomEvents *bool `json:"custom_events"`
+	CustomEvents *bool `json:"custom_events,omitempty"`
 
-	MarkMessagesPending *bool `json:"mark_messages_pending"`
+	MarkMessagesPending *bool `json:"mark_messages_pending,omitempty"`
 
-	MessageRetention *string `json:"message_retention"`
+	MessageRetention *string `json:"message_retention,omitempty"`
 
-	Mutes *bool `json:"mutes"`
+	Mutes *bool `json:"mutes,omitempty"`
 
-	Polls *bool `json:"polls"`
+	Polls *bool `json:"polls,omitempty"`
 
-	PushNotifications *bool `json:"push_notifications"`
+	PushNotifications *bool `json:"push_notifications,omitempty"`
 
-	Reactions *bool `json:"reactions"`
+	Reactions *bool `json:"reactions,omitempty"`
 
-	ReadEvents *bool `json:"read_events"`
+	ReadEvents *bool `json:"read_events,omitempty"`
 
-	Replies *bool `json:"replies"`
+	Replies *bool `json:"replies,omitempty"`
 
-	Search *bool `json:"search"`
+	Search *bool `json:"search,omitempty"`
 
-	TypingEvents *bool `json:"typing_events"`
+	TypingEvents *bool `json:"typing_events,omitempty"`
 
-	Uploads *bool `json:"uploads"`
+	Uploads *bool `json:"uploads,omitempty"`
 
-	UrlEnrichment *bool `json:"url_enrichment"`
+	UrlEnrichment *bool `json:"url_enrichment,omitempty"`
 
-	Blocklists *[]BlockListOptions `json:"blocklists"`
+	Blocklists *[]BlockListOptions `json:"blocklists,omitempty"`
 
-	Commands *[]string `json:"commands"`
+	Commands *[]string `json:"commands,omitempty"`
 
-	Permissions *[]PolicyRequest `json:"permissions"`
+	Permissions *[]PolicyRequest `json:"permissions,omitempty"`
 
-	Grants *map[string][]string `json:"grants"`
+	Grants *map[string][]string `json:"grants,omitempty"`
 }
 
 type CreateChannelTypeResponse struct {
@@ -1337,15 +1337,15 @@ type CreateChannelTypeResponse struct {
 
 	Grants map[string][]string `json:"grants"`
 
-	Blocklist *string `json:"blocklist"`
+	Blocklist *string `json:"blocklist,omitempty"`
 
-	BlocklistBehavior *string `json:"blocklist_behavior"`
+	BlocklistBehavior *string `json:"blocklist_behavior,omitempty"`
 
-	AllowedFlagReasons *[]string `json:"allowed_flag_reasons"`
+	AllowedFlagReasons *[]string `json:"allowed_flag_reasons,omitempty"`
 
-	Blocklists *[]BlockListOptions `json:"blocklists"`
+	Blocklists *[]BlockListOptions `json:"blocklists,omitempty"`
 
-	AutomodThresholds *Thresholds `json:"automod_thresholds"`
+	AutomodThresholds *Thresholds `json:"automod_thresholds,omitempty"`
 }
 
 type CreateCommandRequest struct {
@@ -1353,15 +1353,15 @@ type CreateCommandRequest struct {
 
 	Name string `json:"name"`
 
-	Args *string `json:"args"`
+	Args *string `json:"args,omitempty"`
 
-	Set *string `json:"set"`
+	Set *string `json:"set,omitempty"`
 }
 
 type CreateCommandResponse struct {
 	Duration string `json:"duration"`
 
-	Command *Command `json:"command"`
+	Command *Command `json:"command,omitempty"`
 }
 
 type CreateDeviceRequest struct {
@@ -1369,13 +1369,13 @@ type CreateDeviceRequest struct {
 
 	PushProvider string `json:"push_provider"`
 
-	PushProviderName *string `json:"push_provider_name"`
+	PushProviderName *string `json:"push_provider_name,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	VoipToken *bool `json:"voip_token"`
+	VoipToken *bool `json:"voip_token,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type CreateExternalStorageRequest struct {
@@ -1385,13 +1385,13 @@ type CreateExternalStorageRequest struct {
 
 	StorageType string `json:"storage_type"`
 
-	GcsCredentials *string `json:"gcs_credentials"`
+	GcsCredentials *string `json:"gcs_credentials,omitempty"`
 
-	Path *string `json:"path"`
+	Path *string `json:"path,omitempty"`
 
-	AwsS3 *S3Request `json:"aws_s3"`
+	AwsS3 *S3Request `json:"aws_s3,omitempty"`
 
-	AzureBlob *AzureRequest `json:"azure_blob"`
+	AzureBlob *AzureRequest `json:"azure_blob,omitempty"`
 }
 
 type CreateExternalStorageResponse struct {
@@ -1419,11 +1419,11 @@ type CreateImportRequest struct {
 type CreateImportResponse struct {
 	Duration string `json:"duration"`
 
-	ImportTask *ImportTask `json:"import_task"`
+	ImportTask *ImportTask `json:"import_task,omitempty"`
 }
 
 type CreateImportURLRequest struct {
-	Filename *string `json:"filename"`
+	Filename *string `json:"filename,omitempty"`
 }
 
 type CreateImportURLResponse struct {
@@ -1437,41 +1437,41 @@ type CreateImportURLResponse struct {
 type CreatePollOptionRequest struct {
 	Text string `json:"text"`
 
-	Position *int `json:"position"`
+	Position *int `json:"position,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Custom *map[string]any `json:"Custom"`
+	Custom *map[string]any `json:"Custom,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type CreatePollRequest struct {
 	Name string `json:"name"`
 
-	AllowAnswers *bool `json:"allow_answers"`
+	AllowAnswers *bool `json:"allow_answers,omitempty"`
 
-	AllowUserSuggestedOptions *bool `json:"allow_user_suggested_options"`
+	AllowUserSuggestedOptions *bool `json:"allow_user_suggested_options,omitempty"`
 
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 
-	EnforceUniqueVote *bool `json:"enforce_unique_vote"`
+	EnforceUniqueVote *bool `json:"enforce_unique_vote,omitempty"`
 
-	Id *string `json:"id"`
+	Id *string `json:"id,omitempty"`
 
-	IsClosed *bool `json:"is_closed"`
+	IsClosed *bool `json:"is_closed,omitempty"`
 
-	MaxVotesAllowed *int `json:"max_votes_allowed"`
+	MaxVotesAllowed *int `json:"max_votes_allowed,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	VotingVisibility *string `json:"voting_visibility"`
+	VotingVisibility *string `json:"voting_visibility,omitempty"`
 
-	Options *[]*PollOptionInput `json:"options"`
+	Options *[]*PollOptionInput `json:"options,omitempty"`
 
-	Custom *map[string]any `json:"Custom"`
+	Custom *map[string]any `json:"Custom,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type CreateRoleRequest struct {
@@ -1485,33 +1485,33 @@ type CreateRoleResponse struct {
 }
 
 type DataDogInfo struct {
-	ApiKey *string `json:"api_key"`
+	ApiKey *string `json:"api_key,omitempty"`
 
-	Enabled *bool `json:"enabled"`
+	Enabled *bool `json:"enabled,omitempty"`
 
-	Site *string `json:"site"`
+	Site *string `json:"site,omitempty"`
 }
 
 type DeactivateUserRequest struct {
-	CreatedById *string `json:"created_by_id"`
+	CreatedById *string `json:"created_by_id,omitempty"`
 
-	MarkMessagesDeleted *bool `json:"mark_messages_deleted"`
+	MarkMessagesDeleted *bool `json:"mark_messages_deleted,omitempty"`
 }
 
 type DeactivateUserResponse struct {
 	Duration string `json:"duration"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type DeactivateUsersRequest struct {
 	UserIds []string `json:"user_ids"`
 
-	CreatedById *string `json:"created_by_id"`
+	CreatedById *string `json:"created_by_id,omitempty"`
 
-	MarkChannelsDeleted *bool `json:"mark_channels_deleted"`
+	MarkChannelsDeleted *bool `json:"mark_channels_deleted,omitempty"`
 
-	MarkMessagesDeleted *bool `json:"mark_messages_deleted"`
+	MarkMessagesDeleted *bool `json:"mark_messages_deleted,omitempty"`
 }
 
 type DeactivateUsersResponse struct {
@@ -1523,27 +1523,27 @@ type DeactivateUsersResponse struct {
 type DeleteChannelResponse struct {
 	Duration string `json:"duration"`
 
-	Channel *ChannelResponse `json:"channel"`
+	Channel *ChannelResponse `json:"channel,omitempty"`
 }
 
 type DeleteChannelsRequest struct {
 	Cids []string `json:"cids"`
 
-	HardDelete *bool `json:"hard_delete"`
+	HardDelete *bool `json:"hard_delete,omitempty"`
 }
 
 type DeleteChannelsResponse struct {
 	Duration string `json:"duration"`
 
-	TaskId *string `json:"task_id"`
+	TaskId *string `json:"task_id,omitempty"`
 
-	Result *map[string]*DeleteChannelsResult `json:"result"`
+	Result *map[string]*DeleteChannelsResult `json:"result,omitempty"`
 }
 
 type DeleteChannelsResult struct {
 	Status string `json:"status"`
 
-	Error *string `json:"error"`
+	Error *string `json:"error,omitempty"`
 }
 
 type DeleteCommandResponse struct {
@@ -1573,17 +1573,17 @@ type DeleteTranscriptionResponse struct {
 type DeleteUsersRequest struct {
 	UserIds []string `json:"user_ids"`
 
-	Calls *string `json:"calls"`
+	Calls *string `json:"calls,omitempty"`
 
-	Conversations *string `json:"conversations"`
+	Conversations *string `json:"conversations,omitempty"`
 
-	Messages *string `json:"messages"`
+	Messages *string `json:"messages,omitempty"`
 
-	NewCallOwnerId *string `json:"new_call_owner_id"`
+	NewCallOwnerId *string `json:"new_call_owner_id,omitempty"`
 
-	NewChannelOwnerId *string `json:"new_channel_owner_id"`
+	NewChannelOwnerId *string `json:"new_channel_owner_id,omitempty"`
 
-	User *string `json:"user"`
+	User *string `json:"user,omitempty"`
 }
 
 type DeleteUsersResponse struct {
@@ -1601,13 +1601,13 @@ type Device struct {
 
 	UserId string `json:"user_id"`
 
-	Disabled *bool `json:"disabled"`
+	Disabled *bool `json:"disabled,omitempty"`
 
-	DisabledReason *string `json:"disabled_reason"`
+	DisabledReason *string `json:"disabled_reason,omitempty"`
 
-	PushProviderName *string `json:"push_provider_name"`
+	PushProviderName *string `json:"push_provider_name,omitempty"`
 
-	Voip *bool `json:"voip"`
+	Voip *bool `json:"voip,omitempty"`
 }
 
 type DeviceErrorInfo struct {
@@ -1657,7 +1657,7 @@ type EgressResponse struct {
 
 	Rtmps []EgressRTMPResponse `json:"rtmps"`
 
-	Hls *EgressHLSResponse `json:"hls"`
+	Hls *EgressHLSResponse `json:"hls,omitempty"`
 }
 
 type EndCallRequest struct{}
@@ -1669,9 +1669,9 @@ type EndCallResponse struct {
 type ErrorResult struct {
 	Type string `json:"type"`
 
-	Stacktrace *string `json:"stacktrace"`
+	Stacktrace *string `json:"stacktrace,omitempty"`
 
-	Version *string `json:"version"`
+	Version *string `json:"version,omitempty"`
 }
 
 type EventNotificationSettings struct {
@@ -1683,13 +1683,13 @@ type EventNotificationSettings struct {
 type EventRequest struct {
 	Type string `json:"type"`
 
-	ParentId *string `json:"parent_id"`
+	ParentId *string `json:"parent_id,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type EventResponse struct {
@@ -1701,15 +1701,15 @@ type EventResponse struct {
 type ExportChannelsRequest struct {
 	Channels []ChannelExport `json:"channels"`
 
-	ClearDeletedMessageText *bool `json:"clear_deleted_message_text"`
+	ClearDeletedMessageText *bool `json:"clear_deleted_message_text,omitempty"`
 
-	ExportUsers *bool `json:"export_users"`
+	ExportUsers *bool `json:"export_users,omitempty"`
 
-	IncludeSoftDeletedChannels *bool `json:"include_soft_deleted_channels"`
+	IncludeSoftDeletedChannels *bool `json:"include_soft_deleted_channels,omitempty"`
 
-	IncludeTruncatedMessages *bool `json:"include_truncated_messages"`
+	IncludeTruncatedMessages *bool `json:"include_truncated_messages,omitempty"`
 
-	Version *string `json:"version"`
+	Version *string `json:"version,omitempty"`
 }
 
 type ExportChannelsResponse struct {
@@ -1721,19 +1721,19 @@ type ExportChannelsResponse struct {
 type ExportChannelsResult struct {
 	Url string `json:"url"`
 
-	Path *string `json:"path"`
+	Path *string `json:"path,omitempty"`
 
-	S3BucketName *string `json:"s3_bucket_name"`
+	S3BucketName *string `json:"s3_bucket_name,omitempty"`
 }
 
 type ExportUserResponse struct {
 	Duration string `json:"duration"`
 
-	Messages *[]*Message `json:"messages"`
+	Messages *[]*Message `json:"messages,omitempty"`
 
-	Reactions *[]*Reaction `json:"reactions"`
+	Reactions *[]*Reaction `json:"reactions,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type ExportUsersRequest struct {
@@ -1771,41 +1771,41 @@ type FileDeleteResponse struct {
 type FileUploadConfig struct {
 	SizeLimit int `json:"size_limit"`
 
-	AllowedFileExtensions *[]string `json:"allowed_file_extensions"`
+	AllowedFileExtensions *[]string `json:"allowed_file_extensions,omitempty"`
 
-	AllowedMimeTypes *[]string `json:"allowed_mime_types"`
+	AllowedMimeTypes *[]string `json:"allowed_mime_types,omitempty"`
 
-	BlockedFileExtensions *[]string `json:"blocked_file_extensions"`
+	BlockedFileExtensions *[]string `json:"blocked_file_extensions,omitempty"`
 
-	BlockedMimeTypes *[]string `json:"blocked_mime_types"`
+	BlockedMimeTypes *[]string `json:"blocked_mime_types,omitempty"`
 }
 
 type FileUploadRequest struct {
-	File *string `json:"file"`
+	File *string `json:"file,omitempty"`
 
-	User *OnlyUserID `json:"user"`
+	User *OnlyUserID `json:"user,omitempty"`
 }
 
 type FileUploadResponse struct {
 	Duration string `json:"duration"`
 
-	File *string `json:"file"`
+	File *string `json:"file,omitempty"`
 
-	ThumbUrl *string `json:"thumb_url"`
+	ThumbUrl *string `json:"thumb_url,omitempty"`
 }
 
 type FirebaseConfig struct {
-	ApnTemplate *string `json:"apn_template"`
+	ApnTemplate *string `json:"apn_template,omitempty"`
 
-	CredentialsJson *string `json:"credentials_json"`
+	CredentialsJson *string `json:"credentials_json,omitempty"`
 
-	DataTemplate *string `json:"data_template"`
+	DataTemplate *string `json:"data_template,omitempty"`
 
-	Disabled *bool `json:"Disabled"`
+	Disabled *bool `json:"Disabled,omitempty"`
 
-	NotificationTemplate *string `json:"notification_template"`
+	NotificationTemplate *string `json:"notification_template,omitempty"`
 
-	ServerKey *string `json:"server_key"`
+	ServerKey *string `json:"server_key,omitempty"`
 }
 
 type FirebaseConfigFields struct {
@@ -1817,9 +1817,9 @@ type FirebaseConfigFields struct {
 
 	NotificationTemplate string `json:"notification_template"`
 
-	CredentialsJson *string `json:"credentials_json"`
+	CredentialsJson *string `json:"credentials_json,omitempty"`
 
-	ServerKey *string `json:"server_key"`
+	ServerKey *string `json:"server_key,omitempty"`
 }
 
 type Flag struct {
@@ -1829,27 +1829,27 @@ type Flag struct {
 
 	UpdatedAt time.Time `json:"updated_at"`
 
-	ApprovedAt *time.Time `json:"approved_at"`
+	ApprovedAt *time.Time `json:"approved_at,omitempty"`
 
-	Reason *string `json:"reason"`
+	Reason *string `json:"reason,omitempty"`
 
-	RejectedAt *time.Time `json:"rejected_at"`
+	RejectedAt *time.Time `json:"rejected_at,omitempty"`
 
-	ReviewedAt *time.Time `json:"reviewed_at"`
+	ReviewedAt *time.Time `json:"reviewed_at,omitempty"`
 
-	ReviewedBy *string `json:"reviewed_by"`
+	ReviewedBy *string `json:"reviewed_by,omitempty"`
 
-	TargetMessageId *string `json:"target_message_id"`
+	TargetMessageId *string `json:"target_message_id,omitempty"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 
-	Details *FlagDetails `json:"details"`
+	Details *FlagDetails `json:"details,omitempty"`
 
-	TargetMessage *Message `json:"target_message"`
+	TargetMessage *Message `json:"target_message,omitempty"`
 
-	TargetUser *UserObject `json:"target_user"`
+	TargetUser *UserObject `json:"target_user,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type FlagDetails struct {
@@ -1857,7 +1857,7 @@ type FlagDetails struct {
 
 	Extra map[string]any `json:"Extra"`
 
-	Automod *AutomodDetails `json:"automod"`
+	Automod *AutomodDetails `json:"automod,omitempty"`
 }
 
 type FlagFeedback struct {
@@ -1869,33 +1869,33 @@ type FlagFeedback struct {
 }
 
 type FlagMessageDetails struct {
-	PinChanged *bool `json:"pin_changed"`
+	PinChanged *bool `json:"pin_changed,omitempty"`
 
-	ShouldEnrich *bool `json:"should_enrich"`
+	ShouldEnrich *bool `json:"should_enrich,omitempty"`
 
-	SkipPush *bool `json:"skip_push"`
+	SkipPush *bool `json:"skip_push,omitempty"`
 
-	UpdatedById *string `json:"updated_by_id"`
+	UpdatedById *string `json:"updated_by_id,omitempty"`
 }
 
 type FlagRequest struct {
-	Reason *string `json:"reason"`
+	Reason *string `json:"reason,omitempty"`
 
-	TargetMessageId *string `json:"target_message_id"`
+	TargetMessageId *string `json:"target_message_id,omitempty"`
 
-	TargetUserId *string `json:"target_user_id"`
+	TargetUserId *string `json:"target_user_id,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type FlagResponse struct {
 	Duration string `json:"duration"`
 
-	Flag *Flag `json:"flag"`
+	Flag *Flag `json:"flag,omitempty"`
 }
 
 type FullUserResponse struct {
@@ -1933,33 +1933,33 @@ type FullUserResponse struct {
 
 	Custom map[string]any `json:"custom"`
 
-	DeactivatedAt *time.Time `json:"deactivated_at"`
+	DeactivatedAt *time.Time `json:"deactivated_at,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	Image *string `json:"image"`
+	Image *string `json:"image,omitempty"`
 
-	LastActive *time.Time `json:"last_active"`
+	LastActive *time.Time `json:"last_active,omitempty"`
 
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 
-	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before"`
+	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before,omitempty"`
 
-	LatestHiddenChannels *[]string `json:"latest_hidden_channels"`
+	LatestHiddenChannels *[]string `json:"latest_hidden_channels,omitempty"`
 
-	PrivacySettings *PrivacySettings `json:"privacy_settings"`
+	PrivacySettings *PrivacySettings `json:"privacy_settings,omitempty"`
 
-	PushNotifications *PushNotificationSettings `json:"push_notifications"`
+	PushNotifications *PushNotificationSettings `json:"push_notifications,omitempty"`
 }
 
 type GeofenceResponse struct {
 	Name string `json:"name"`
 
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 
-	CountryCodes *[]string `json:"country_codes"`
+	CountryCodes *[]string `json:"country_codes,omitempty"`
 }
 
 type GeofenceSettings struct {
@@ -1967,7 +1967,7 @@ type GeofenceSettings struct {
 }
 
 type GeofenceSettingsRequest struct {
-	Names *[]string `json:"names"`
+	Names *[]string `json:"names,omitempty"`
 }
 
 type GeofenceSettingsResponse struct {
@@ -2005,7 +2005,7 @@ type GetApplicationResponse struct {
 type GetBlockListResponse struct {
 	Duration string `json:"duration"`
 
-	Blocklist *BlockList `json:"blocklist"`
+	Blocklist *BlockList `json:"blocklist,omitempty"`
 }
 
 type GetCallResponse struct {
@@ -2041,11 +2041,11 @@ type GetCallStatsResponse struct {
 
 	Sfus []SFULocationResponse `json:"sfus"`
 
-	CallTimeline *CallTimeline `json:"call_timeline"`
+	CallTimeline *CallTimeline `json:"call_timeline,omitempty"`
 
-	Jitter *Stats `json:"jitter"`
+	Jitter *Stats `json:"jitter,omitempty"`
 
-	Latency *Stats `json:"latency"`
+	Latency *Stats `json:"latency,omitempty"`
 }
 
 type GetCallTypeResponse struct {
@@ -2063,7 +2063,7 @@ type GetCallTypeResponse struct {
 
 	Settings CallSettingsResponse `json:"settings"`
 
-	ExternalStorage *string `json:"external_storage"`
+	ExternalStorage *string `json:"external_storage,omitempty"`
 }
 
 type GetCommandResponse struct {
@@ -2077,9 +2077,9 @@ type GetCommandResponse struct {
 
 	Set string `json:"set"`
 
-	CreatedAt *time.Time `json:"created_at"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
 
-	UpdatedAt *time.Time `json:"updated_at"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
 type GetCustomPermissionResponse struct {
@@ -2105,15 +2105,15 @@ type GetExportChannelsStatusResponse struct {
 
 	UpdatedAt time.Time `json:"updated_at"`
 
-	Error *ErrorResult `json:"error"`
+	Error *ErrorResult `json:"error,omitempty"`
 
-	Result *ExportChannelsResult `json:"result"`
+	Result *ExportChannelsResult `json:"result,omitempty"`
 }
 
 type GetImportResponse struct {
 	Duration string `json:"duration"`
 
-	ImportTask *ImportTask `json:"import_task"`
+	ImportTask *ImportTask `json:"import_task,omitempty"`
 }
 
 type GetManyMessagesResponse struct {
@@ -2127,7 +2127,7 @@ type GetMessageResponse struct {
 
 	Message MessageWithChannelResponse `json:"message"`
 
-	PendingMessageMetadata *map[string]string `json:"pending_message_metadata"`
+	PendingMessageMetadata *map[string]string `json:"pending_message_metadata,omitempty"`
 }
 
 type GetOGResponse struct {
@@ -2135,57 +2135,57 @@ type GetOGResponse struct {
 
 	Custom map[string]any `json:"custom"`
 
-	AssetUrl *string `json:"asset_url"`
+	AssetUrl *string `json:"asset_url,omitempty"`
 
-	AuthorIcon *string `json:"author_icon"`
+	AuthorIcon *string `json:"author_icon,omitempty"`
 
-	AuthorLink *string `json:"author_link"`
+	AuthorLink *string `json:"author_link,omitempty"`
 
-	AuthorName *string `json:"author_name"`
+	AuthorName *string `json:"author_name,omitempty"`
 
-	Color *string `json:"color"`
+	Color *string `json:"color,omitempty"`
 
-	Fallback *string `json:"fallback"`
+	Fallback *string `json:"fallback,omitempty"`
 
-	Footer *string `json:"footer"`
+	Footer *string `json:"footer,omitempty"`
 
-	FooterIcon *string `json:"footer_icon"`
+	FooterIcon *string `json:"footer_icon,omitempty"`
 
-	ImageUrl *string `json:"image_url"`
+	ImageUrl *string `json:"image_url,omitempty"`
 
-	OgScrapeUrl *string `json:"og_scrape_url"`
+	OgScrapeUrl *string `json:"og_scrape_url,omitempty"`
 
-	OriginalHeight *int `json:"original_height"`
+	OriginalHeight *int `json:"original_height,omitempty"`
 
-	OriginalWidth *int `json:"original_width"`
+	OriginalWidth *int `json:"original_width,omitempty"`
 
-	Pretext *string `json:"pretext"`
+	Pretext *string `json:"pretext,omitempty"`
 
-	Text *string `json:"text"`
+	Text *string `json:"text,omitempty"`
 
-	ThumbUrl *string `json:"thumb_url"`
+	ThumbUrl *string `json:"thumb_url,omitempty"`
 
-	Title *string `json:"title"`
+	Title *string `json:"title,omitempty"`
 
-	TitleLink *string `json:"title_link"`
+	TitleLink *string `json:"title_link,omitempty"`
 
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 
-	Actions *[]*Action `json:"actions"`
+	Actions *[]*Action `json:"actions,omitempty"`
 
-	Fields *[]*Field `json:"fields"`
+	Fields *[]*Field `json:"fields,omitempty"`
 
-	Giphy *Images `json:"giphy"`
+	Giphy *Images `json:"giphy,omitempty"`
 }
 
 type GetOrCreateCallRequest struct {
-	MembersLimit *int `json:"members_limit"`
+	MembersLimit *int `json:"members_limit,omitempty"`
 
-	Notify *bool `json:"notify"`
+	Notify *bool `json:"notify,omitempty"`
 
-	Ring *bool `json:"ring"`
+	Ring *bool `json:"ring,omitempty"`
 
-	Data *CallRequest `json:"data"`
+	Data *CallRequest `json:"data,omitempty"`
 }
 
 type GetOrCreateCallResponse struct {
@@ -2203,13 +2203,13 @@ type GetOrCreateCallResponse struct {
 type GetRateLimitsResponse struct {
 	Duration string `json:"duration"`
 
-	Android *map[string]LimitInfo `json:"android"`
+	Android *map[string]LimitInfo `json:"android,omitempty"`
 
-	Ios *map[string]LimitInfo `json:"ios"`
+	Ios *map[string]LimitInfo `json:"ios,omitempty"`
 
-	ServerSide *map[string]LimitInfo `json:"server_side"`
+	ServerSide *map[string]LimitInfo `json:"server_side,omitempty"`
 
-	Web *map[string]LimitInfo `json:"web"`
+	Web *map[string]LimitInfo `json:"web,omitempty"`
 }
 
 type GetReactionsResponse struct {
@@ -2235,9 +2235,9 @@ type GetTaskResponse struct {
 
 	UpdatedAt time.Time `json:"updated_at"`
 
-	Error *ErrorResult `json:"error"`
+	Error *ErrorResult `json:"error,omitempty"`
 
-	Result *map[string]any `json:"result"`
+	Result *map[string]any `json:"result,omitempty"`
 }
 
 type GetThreadResponse struct {
@@ -2247,15 +2247,15 @@ type GetThreadResponse struct {
 }
 
 type GoLiveRequest struct {
-	RecordingStorageName *string `json:"recording_storage_name"`
+	RecordingStorageName *string `json:"recording_storage_name,omitempty"`
 
-	StartHls *bool `json:"start_hls"`
+	StartHls *bool `json:"start_hls,omitempty"`
 
-	StartRecording *bool `json:"start_recording"`
+	StartRecording *bool `json:"start_recording,omitempty"`
 
-	StartTranscription *bool `json:"start_transcription"`
+	StartTranscription *bool `json:"start_transcription,omitempty"`
 
-	TranscriptionStorageName *string `json:"transcription_storage_name"`
+	TranscriptionStorageName *string `json:"transcription_storage_name,omitempty"`
 }
 
 type GoLiveResponse struct {
@@ -2271,17 +2271,17 @@ type HLSSettings struct {
 
 	QualityTracks []string `json:"quality_tracks"`
 
-	Layout *LayoutSettings `json:"layout"`
+	Layout *LayoutSettings `json:"layout,omitempty"`
 }
 
 type HLSSettingsRequest struct {
 	QualityTracks []string `json:"quality_tracks"`
 
-	AutoOn *bool `json:"auto_on"`
+	AutoOn *bool `json:"auto_on,omitempty"`
 
-	Enabled *bool `json:"enabled"`
+	Enabled *bool `json:"enabled,omitempty"`
 
-	Layout *LayoutSettingsRequest `json:"layout"`
+	Layout *LayoutSettingsRequest `json:"layout,omitempty"`
 }
 
 type HLSSettingsResponse struct {
@@ -2295,11 +2295,11 @@ type HLSSettingsResponse struct {
 }
 
 type HideChannelRequest struct {
-	ClearHistory *bool `json:"clear_history"`
+	ClearHistory *bool `json:"clear_history,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type HideChannelResponse struct {
@@ -2307,19 +2307,19 @@ type HideChannelResponse struct {
 }
 
 type HuaweiConfig struct {
-	Disabled *bool `json:"Disabled"`
+	Disabled *bool `json:"Disabled,omitempty"`
 
-	Id *string `json:"id"`
+	Id *string `json:"id,omitempty"`
 
-	Secret *string `json:"secret"`
+	Secret *string `json:"secret,omitempty"`
 }
 
 type HuaweiConfigFields struct {
 	Enabled bool `json:"enabled"`
 
-	Id *string `json:"id"`
+	Id *string `json:"id,omitempty"`
 
-	Secret *string `json:"secret"`
+	Secret *string `json:"secret,omitempty"`
 }
 
 type ImageData struct {
@@ -2335,31 +2335,31 @@ type ImageData struct {
 }
 
 type ImageSize struct {
-	Crop *string `json:"crop"`
+	Crop *string `json:"crop,omitempty"`
 
-	Height *int `json:"height"`
+	Height *int `json:"height,omitempty"`
 
-	Resize *string `json:"resize"`
+	Resize *string `json:"resize,omitempty"`
 
-	Width *int `json:"width"`
+	Width *int `json:"width,omitempty"`
 }
 
 type ImageUploadRequest struct {
-	File *string `json:"file"`
+	File *string `json:"file,omitempty"`
 
-	UploadSizes *[]ImageSize `json:"upload_sizes"`
+	UploadSizes *[]ImageSize `json:"upload_sizes,omitempty"`
 
-	User *OnlyUserID `json:"user"`
+	User *OnlyUserID `json:"user,omitempty"`
 }
 
 type ImageUploadResponse struct {
 	Duration string `json:"duration"`
 
-	File *string `json:"file"`
+	File *string `json:"file,omitempty"`
 
-	ThumbUrl *string `json:"thumb_url"`
+	ThumbUrl *string `json:"thumb_url,omitempty"`
 
-	UploadSizes *[]ImageSize `json:"upload_sizes"`
+	UploadSizes *[]ImageSize `json:"upload_sizes,omitempty"`
 }
 
 type Images struct {
@@ -2393,7 +2393,7 @@ type ImportTask struct {
 
 	History []*ImportTaskHistory `json:"history"`
 
-	Size *int `json:"size"`
+	Size *int `json:"size,omitempty"`
 }
 
 type ImportTaskHistory struct {
@@ -2407,15 +2407,15 @@ type ImportTaskHistory struct {
 type Label struct {
 	Name string `json:"name"`
 
-	HarmLabels *[]string `json:"harm_labels"`
+	HarmLabels *[]string `json:"harm_labels,omitempty"`
 
-	PhraseListIds *[]int `json:"phrase_list_ids"`
+	PhraseListIds *[]int `json:"phrase_list_ids,omitempty"`
 }
 
 type LabelThresholds struct {
-	Block *float64 `json:"block"`
+	Block *float64 `json:"block,omitempty"`
 
-	Flag *float64 `json:"flag"`
+	Flag *float64 `json:"flag,omitempty"`
 }
 
 type LayoutSettings struct {
@@ -2425,17 +2425,17 @@ type LayoutSettings struct {
 
 	Name string `json:"name"`
 
-	Options *map[string]any `json:"options"`
+	Options *map[string]any `json:"options,omitempty"`
 }
 
 type LayoutSettingsRequest struct {
 	Name string `json:"name"`
 
-	ExternalAppUrl *string `json:"external_app_url"`
+	ExternalAppUrl *string `json:"external_app_url,omitempty"`
 
-	ExternalCssUrl *string `json:"external_css_url"`
+	ExternalCssUrl *string `json:"external_css_url,omitempty"`
 
-	Options *map[string]any `json:"options"`
+	Options *map[string]any `json:"options,omitempty"`
 }
 
 type LayoutSettingsResponse struct {
@@ -2445,7 +2445,7 @@ type LayoutSettingsResponse struct {
 
 	Name string `json:"name"`
 
-	Options *map[string]any `json:"options"`
+	Options *map[string]any `json:"options,omitempty"`
 }
 
 type LimitInfo struct {
@@ -2547,37 +2547,37 @@ type MOSStats struct {
 }
 
 type MarkChannelsReadRequest struct {
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	ReadByChannel *map[string]string `json:"read_by_channel"`
+	ReadByChannel *map[string]string `json:"read_by_channel,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type MarkReadRequest struct {
-	MessageId *string `json:"message_id"`
+	MessageId *string `json:"message_id,omitempty"`
 
-	ThreadId *string `json:"thread_id"`
+	ThreadId *string `json:"thread_id,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type MarkReadResponse struct {
 	Duration string `json:"duration"`
 
-	Event *MessageReadEvent `json:"event"`
+	Event *MessageReadEvent `json:"event,omitempty"`
 }
 
 type MarkUnreadRequest struct {
-	MessageId *string `json:"message_id"`
+	MessageId *string `json:"message_id,omitempty"`
 
-	ThreadId *string `json:"thread_id"`
+	ThreadId *string `json:"thread_id,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type MediaPubSubHint struct {
@@ -2593,9 +2593,9 @@ type MediaPubSubHint struct {
 type MemberRequest struct {
 	UserId string `json:"user_id"`
 
-	Role *string `json:"role"`
+	Role *string `json:"role,omitempty"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 }
 
 type MemberResponse struct {
@@ -2609,9 +2609,9 @@ type MemberResponse struct {
 
 	User UserResponse `json:"user"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	Role *string `json:"role"`
+	Role *string `json:"role,omitempty"`
 }
 
 type MembersResponse struct {
@@ -2661,49 +2661,49 @@ type Message struct {
 
 	ReactionScores map[string]int `json:"reaction_scores"`
 
-	BeforeMessageSendFailed *bool `json:"before_message_send_failed"`
+	BeforeMessageSendFailed *bool `json:"before_message_send_failed,omitempty"`
 
-	Command *string `json:"command"`
+	Command *string `json:"command,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	MessageTextUpdatedAt *time.Time `json:"message_text_updated_at"`
+	MessageTextUpdatedAt *time.Time `json:"message_text_updated_at,omitempty"`
 
-	Mml *string `json:"mml"`
+	Mml *string `json:"mml,omitempty"`
 
-	ParentId *string `json:"parent_id"`
+	ParentId *string `json:"parent_id,omitempty"`
 
-	PinExpires *time.Time `json:"pin_expires"`
+	PinExpires *time.Time `json:"pin_expires,omitempty"`
 
-	PinnedAt *time.Time `json:"pinned_at"`
+	PinnedAt *time.Time `json:"pinned_at,omitempty"`
 
-	PollId *string `json:"poll_id"`
+	PollId *string `json:"poll_id,omitempty"`
 
-	QuotedMessageId *string `json:"quoted_message_id"`
+	QuotedMessageId *string `json:"quoted_message_id,omitempty"`
 
-	ShowInChannel *bool `json:"show_in_channel"`
+	ShowInChannel *bool `json:"show_in_channel,omitempty"`
 
-	ThreadParticipants *[]UserObject `json:"thread_participants"`
+	ThreadParticipants *[]UserObject `json:"thread_participants,omitempty"`
 
-	I18n *map[string]string `json:"i18n"`
+	I18n *map[string]string `json:"i18n,omitempty"`
 
-	ImageLabels *map[string][]string `json:"image_labels"`
+	ImageLabels *map[string][]string `json:"image_labels,omitempty"`
 
-	PinnedBy *UserObject `json:"pinned_by"`
+	PinnedBy *UserObject `json:"pinned_by,omitempty"`
 
-	Poll *Poll `json:"poll"`
+	Poll *Poll `json:"poll,omitempty"`
 
-	QuotedMessage *Message `json:"quoted_message"`
+	QuotedMessage *Message `json:"quoted_message,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type MessageActionRequest struct {
 	FormData map[string]string `json:"form_data"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type MessageChangeSet struct {
@@ -2733,27 +2733,27 @@ type MessageFlag struct {
 
 	UpdatedAt time.Time `json:"updated_at"`
 
-	ApprovedAt *time.Time `json:"approved_at"`
+	ApprovedAt *time.Time `json:"approved_at,omitempty"`
 
-	Reason *string `json:"reason"`
+	Reason *string `json:"reason,omitempty"`
 
-	RejectedAt *time.Time `json:"rejected_at"`
+	RejectedAt *time.Time `json:"rejected_at,omitempty"`
 
-	ReviewedAt *time.Time `json:"reviewed_at"`
+	ReviewedAt *time.Time `json:"reviewed_at,omitempty"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 
-	Details *FlagDetails `json:"details"`
+	Details *FlagDetails `json:"details,omitempty"`
 
-	Message *Message `json:"message"`
+	Message *Message `json:"message,omitempty"`
 
-	ModerationFeedback *FlagFeedback `json:"moderation_feedback"`
+	ModerationFeedback *FlagFeedback `json:"moderation_feedback,omitempty"`
 
-	ModerationResult *MessageModerationResult `json:"moderation_result"`
+	ModerationResult *MessageModerationResult `json:"moderation_result,omitempty"`
 
-	ReviewedBy *UserObject `json:"reviewed_by"`
+	ReviewedBy *UserObject `json:"reviewed_by,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type MessageHistoryEntry struct {
@@ -2783,15 +2783,15 @@ type MessageModerationResult struct {
 
 	UserKarma float64 `json:"user_karma"`
 
-	BlockedWord *string `json:"blocked_word"`
+	BlockedWord *string `json:"blocked_word,omitempty"`
 
-	BlocklistName *string `json:"blocklist_name"`
+	BlocklistName *string `json:"blocklist_name,omitempty"`
 
-	ModeratedBy *string `json:"moderated_by"`
+	ModeratedBy *string `json:"moderated_by,omitempty"`
 
-	AiModerationResponse *ModerationResponse `json:"ai_moderation_response"`
+	AiModerationResponse *ModerationResponse `json:"ai_moderation_response,omitempty"`
 
-	ModerationThresholds *Thresholds `json:"moderation_thresholds"`
+	ModerationThresholds *Thresholds `json:"moderation_thresholds,omitempty"`
 }
 
 type MessagePaginationParams struct{}
@@ -2807,51 +2807,51 @@ type MessageReadEvent struct {
 
 	Type string `json:"type"`
 
-	LastReadMessageId *string `json:"last_read_message_id"`
+	LastReadMessageId *string `json:"last_read_message_id,omitempty"`
 
-	Team *string `json:"team"`
+	Team *string `json:"team,omitempty"`
 
-	Thread *Thread `json:"thread"`
+	Thread *Thread `json:"thread,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type MessageRequest struct {
-	Html *string `json:"html"`
+	Html *string `json:"html,omitempty"`
 
-	Id *string `json:"id"`
+	Id *string `json:"id,omitempty"`
 
-	Mml *string `json:"mml"`
+	Mml *string `json:"mml,omitempty"`
 
-	ParentId *string `json:"parent_id"`
+	ParentId *string `json:"parent_id,omitempty"`
 
-	PinExpires *time.Time `json:"pin_expires"`
+	PinExpires *time.Time `json:"pin_expires,omitempty"`
 
-	Pinned *bool `json:"pinned"`
+	Pinned *bool `json:"pinned,omitempty"`
 
-	PinnedAt *time.Time `json:"pinned_at"`
+	PinnedAt *time.Time `json:"pinned_at,omitempty"`
 
-	PollId *string `json:"poll_id"`
+	PollId *string `json:"poll_id,omitempty"`
 
-	QuotedMessageId *string `json:"quoted_message_id"`
+	QuotedMessageId *string `json:"quoted_message_id,omitempty"`
 
-	ShowInChannel *bool `json:"show_in_channel"`
+	ShowInChannel *bool `json:"show_in_channel,omitempty"`
 
-	Silent *bool `json:"silent"`
+	Silent *bool `json:"silent,omitempty"`
 
-	Text *string `json:"text"`
+	Text *string `json:"text,omitempty"`
 
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Attachments *[]*Attachment `json:"attachments"`
+	Attachments *[]*Attachment `json:"attachments,omitempty"`
 
-	MentionedUsers *[]string `json:"mentioned_users"`
+	MentionedUsers *[]string `json:"mentioned_users,omitempty"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type MessageResponse struct {
@@ -2895,45 +2895,45 @@ type MessageResponse struct {
 
 	User UserResponse `json:"user"`
 
-	Command *string `json:"command"`
+	Command *string `json:"command,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	MessageTextUpdatedAt *time.Time `json:"message_text_updated_at"`
+	MessageTextUpdatedAt *time.Time `json:"message_text_updated_at,omitempty"`
 
-	Mml *string `json:"mml"`
+	Mml *string `json:"mml,omitempty"`
 
-	ParentId *string `json:"parent_id"`
+	ParentId *string `json:"parent_id,omitempty"`
 
-	PinExpires *time.Time `json:"pin_expires"`
+	PinExpires *time.Time `json:"pin_expires,omitempty"`
 
-	PinnedAt *time.Time `json:"pinned_at"`
+	PinnedAt *time.Time `json:"pinned_at,omitempty"`
 
-	PollId *string `json:"poll_id"`
+	PollId *string `json:"poll_id,omitempty"`
 
-	QuotedMessageId *string `json:"quoted_message_id"`
+	QuotedMessageId *string `json:"quoted_message_id,omitempty"`
 
-	ShowInChannel *bool `json:"show_in_channel"`
+	ShowInChannel *bool `json:"show_in_channel,omitempty"`
 
-	ThreadParticipants *[]UserResponse `json:"thread_participants"`
+	ThreadParticipants *[]UserResponse `json:"thread_participants,omitempty"`
 
-	I18n *map[string]string `json:"i18n"`
+	I18n *map[string]string `json:"i18n,omitempty"`
 
-	ImageLabels *map[string][]string `json:"image_labels"`
+	ImageLabels *map[string][]string `json:"image_labels,omitempty"`
 
-	PinnedBy *UserResponse `json:"pinned_by"`
+	PinnedBy *UserResponse `json:"pinned_by,omitempty"`
 
-	Poll *Poll `json:"poll"`
+	Poll *Poll `json:"poll,omitempty"`
 
-	QuotedMessage *Message `json:"quoted_message"`
+	QuotedMessage *Message `json:"quoted_message,omitempty"`
 
-	ReactionGroups *map[string]*ReactionGroupResponse `json:"reaction_groups"`
+	ReactionGroups *map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
 }
 
 type MessageUpdate struct {
-	OldText *string `json:"old_text"`
+	OldText *string `json:"old_text,omitempty"`
 
-	ChangeSet *MessageChangeSet `json:"change_set"`
+	ChangeSet *MessageChangeSet `json:"change_set,omitempty"`
 }
 
 type MessageWithChannelResponse struct {
@@ -2979,39 +2979,39 @@ type MessageWithChannelResponse struct {
 
 	User UserResponse `json:"user"`
 
-	Command *string `json:"command"`
+	Command *string `json:"command,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	MessageTextUpdatedAt *time.Time `json:"message_text_updated_at"`
+	MessageTextUpdatedAt *time.Time `json:"message_text_updated_at,omitempty"`
 
-	Mml *string `json:"mml"`
+	Mml *string `json:"mml,omitempty"`
 
-	ParentId *string `json:"parent_id"`
+	ParentId *string `json:"parent_id,omitempty"`
 
-	PinExpires *time.Time `json:"pin_expires"`
+	PinExpires *time.Time `json:"pin_expires,omitempty"`
 
-	PinnedAt *time.Time `json:"pinned_at"`
+	PinnedAt *time.Time `json:"pinned_at,omitempty"`
 
-	PollId *string `json:"poll_id"`
+	PollId *string `json:"poll_id,omitempty"`
 
-	QuotedMessageId *string `json:"quoted_message_id"`
+	QuotedMessageId *string `json:"quoted_message_id,omitempty"`
 
-	ShowInChannel *bool `json:"show_in_channel"`
+	ShowInChannel *bool `json:"show_in_channel,omitempty"`
 
-	ThreadParticipants *[]UserResponse `json:"thread_participants"`
+	ThreadParticipants *[]UserResponse `json:"thread_participants,omitempty"`
 
-	I18n *map[string]string `json:"i18n"`
+	I18n *map[string]string `json:"i18n,omitempty"`
 
-	ImageLabels *map[string][]string `json:"image_labels"`
+	ImageLabels *map[string][]string `json:"image_labels,omitempty"`
 
-	PinnedBy *UserResponse `json:"pinned_by"`
+	PinnedBy *UserResponse `json:"pinned_by,omitempty"`
 
-	Poll *Poll `json:"poll"`
+	Poll *Poll `json:"poll,omitempty"`
 
-	QuotedMessage *Message `json:"quoted_message"`
+	QuotedMessage *Message `json:"quoted_message,omitempty"`
 
-	ReactionGroups *map[string]*ReactionGroupResponse `json:"reaction_groups"`
+	ReactionGroups *map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
 }
 
 type ModerationResponse struct {
@@ -3025,63 +3025,63 @@ type ModerationResponse struct {
 }
 
 type MuteChannelRequest struct {
-	Expiration *int `json:"expiration"`
+	Expiration *int `json:"expiration,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	ChannelCids *[]string `json:"channel_cids"`
+	ChannelCids *[]string `json:"channel_cids,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type MuteChannelResponse struct {
 	Duration string `json:"duration"`
 
-	ChannelMutes *[]*ChannelMute `json:"channel_mutes"`
+	ChannelMutes *[]*ChannelMute `json:"channel_mutes,omitempty"`
 
-	ChannelMute *ChannelMute `json:"channel_mute"`
+	ChannelMute *ChannelMute `json:"channel_mute,omitempty"`
 
-	OwnUser *OwnUser `json:"own_user"`
+	OwnUser *OwnUser `json:"own_user,omitempty"`
 }
 
 type MuteUserRequest struct {
 	Timeout int `json:"timeout"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	TargetIds *[]string `json:"target_ids"`
+	TargetIds *[]string `json:"target_ids,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type MuteUserResponse struct {
 	Duration string `json:"duration"`
 
-	Mutes *[]*UserMute `json:"mutes"`
+	Mutes *[]*UserMute `json:"mutes,omitempty"`
 
-	NonExistingUsers *[]string `json:"non_existing_users"`
+	NonExistingUsers *[]string `json:"non_existing_users,omitempty"`
 
-	Mute *UserMute `json:"mute"`
+	Mute *UserMute `json:"mute,omitempty"`
 
-	OwnUser *OwnUser `json:"own_user"`
+	OwnUser *OwnUser `json:"own_user,omitempty"`
 }
 
 type MuteUsersRequest struct {
-	Audio *bool `json:"audio"`
+	Audio *bool `json:"audio,omitempty"`
 
-	MuteAllUsers *bool `json:"mute_all_users"`
+	MuteAllUsers *bool `json:"mute_all_users,omitempty"`
 
-	MutedById *string `json:"muted_by_id"`
+	MutedById *string `json:"muted_by_id,omitempty"`
 
-	Screenshare *bool `json:"screenshare"`
+	Screenshare *bool `json:"screenshare,omitempty"`
 
-	ScreenshareAudio *bool `json:"screenshare_audio"`
+	ScreenshareAudio *bool `json:"screenshare_audio,omitempty"`
 
-	Video *bool `json:"video"`
+	Video *bool `json:"video,omitempty"`
 
-	UserIds *[]string `json:"user_ids"`
+	UserIds *[]string `json:"user_ids,omitempty"`
 
-	MutedBy *UserRequest `json:"muted_by"`
+	MutedBy *UserRequest `json:"muted_by,omitempty"`
 }
 
 type MuteUsersResponse struct {
@@ -3105,15 +3105,15 @@ type NotificationSettings struct {
 }
 
 type NullBool struct {
-	HasValue *bool `json:"HasValue"`
+	HasValue *bool `json:"HasValue,omitempty"`
 
-	Value *bool `json:"Value"`
+	Value *bool `json:"Value,omitempty"`
 }
 
 type NullTime struct {
-	HasValue *bool `json:"HasValue"`
+	HasValue *bool `json:"HasValue,omitempty"`
 
-	Value *time.Time `json:"Value"`
+	Value *time.Time `json:"Value,omitempty"`
 }
 
 type OnlyUserID struct {
@@ -3181,37 +3181,37 @@ type OwnUser struct {
 
 	Custom map[string]any `json:"custom"`
 
-	DeactivatedAt *time.Time `json:"deactivated_at"`
+	DeactivatedAt *time.Time `json:"deactivated_at,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	Invisible *bool `json:"invisible"`
+	Invisible *bool `json:"invisible,omitempty"`
 
-	LastActive *time.Time `json:"last_active"`
+	LastActive *time.Time `json:"last_active,omitempty"`
 
-	LatestHiddenChannels *[]string `json:"latest_hidden_channels"`
+	LatestHiddenChannels *[]string `json:"latest_hidden_channels,omitempty"`
 
-	Teams *[]string `json:"teams"`
+	Teams *[]string `json:"teams,omitempty"`
 
-	PrivacySettings *PrivacySettings `json:"privacy_settings"`
+	PrivacySettings *PrivacySettings `json:"privacy_settings,omitempty"`
 
-	PushNotifications *PushNotificationSettings `json:"push_notifications"`
+	PushNotifications *PushNotificationSettings `json:"push_notifications,omitempty"`
 }
 
 type PaginationParams struct {
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	Offset *int `json:"offset"`
+	Offset *int `json:"offset,omitempty"`
 }
 
 type PendingMessage struct {
-	Channel *Channel `json:"channel"`
+	Channel *Channel `json:"channel,omitempty"`
 
-	Message *Message `json:"message"`
+	Message *Message `json:"message,omitempty"`
 
-	Metadata *map[string]string `json:"metadata"`
+	Metadata *map[string]string `json:"metadata,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type Permission struct {
@@ -3233,7 +3233,7 @@ type Permission struct {
 
 	Tags []string `json:"tags"`
 
-	Condition *map[string]any `json:"condition"`
+	Condition *map[string]any `json:"condition,omitempty"`
 }
 
 type PinRequest struct {
@@ -3313,13 +3313,13 @@ type Poll struct {
 
 	VoteCountsByOption map[string]int `json:"vote_counts_by_option"`
 
-	IsClosed *bool `json:"is_closed"`
+	IsClosed *bool `json:"is_closed,omitempty"`
 
-	MaxVotesAllowed *int `json:"max_votes_allowed"`
+	MaxVotesAllowed *int `json:"max_votes_allowed,omitempty"`
 
-	VotingVisibility *string `json:"voting_visibility"`
+	VotingVisibility *string `json:"voting_visibility,omitempty"`
 
-	CreatedBy *UserObject `json:"created_by"`
+	CreatedBy *UserObject `json:"created_by,omitempty"`
 }
 
 type PollOption struct {
@@ -3331,9 +3331,9 @@ type PollOption struct {
 }
 
 type PollOptionInput struct {
-	Text *string `json:"text"`
+	Text *string `json:"text,omitempty"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 }
 
 type PollOptionResponse struct {
@@ -3391,11 +3391,11 @@ type PollResponseData struct {
 
 	VoteCountsByOption map[string]int `json:"vote_counts_by_option"`
 
-	IsClosed *bool `json:"is_closed"`
+	IsClosed *bool `json:"is_closed,omitempty"`
 
-	MaxVotesAllowed *int `json:"max_votes_allowed"`
+	MaxVotesAllowed *int `json:"max_votes_allowed,omitempty"`
 
-	CreatedBy *UserObject `json:"created_by"`
+	CreatedBy *UserObject `json:"created_by,omitempty"`
 }
 
 type PollVote struct {
@@ -3409,19 +3409,19 @@ type PollVote struct {
 
 	UpdatedAt time.Time `json:"updated_at"`
 
-	AnswerText *string `json:"answer_text"`
+	AnswerText *string `json:"answer_text,omitempty"`
 
-	IsAnswer *bool `json:"is_answer"`
+	IsAnswer *bool `json:"is_answer,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type PollVoteResponse struct {
 	Duration string `json:"duration"`
 
-	Vote *PollVoteResponseData `json:"vote"`
+	Vote *PollVoteResponseData `json:"vote,omitempty"`
 }
 
 type PollVoteResponseData struct {
@@ -3435,13 +3435,13 @@ type PollVoteResponseData struct {
 
 	UpdatedAt time.Time `json:"updated_at"`
 
-	AnswerText *string `json:"answer_text"`
+	AnswerText *string `json:"answer_text,omitempty"`
 
-	IsAnswer *bool `json:"is_answer"`
+	IsAnswer *bool `json:"is_answer,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type PollVotesResponse struct {
@@ -3449,29 +3449,29 @@ type PollVotesResponse struct {
 
 	Votes []*PollVoteResponseData `json:"votes"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 }
 
 type PrivacySettings struct {
-	ReadReceipts *ReadReceipts `json:"read_receipts"`
+	ReadReceipts *ReadReceipts `json:"read_receipts,omitempty"`
 
-	TypingIndicators *TypingIndicators `json:"typing_indicators"`
+	TypingIndicators *TypingIndicators `json:"typing_indicators,omitempty"`
 }
 
 type PublishedTrackInfo struct {
-	CodecMimeType *string `json:"codec_mime_type"`
+	CodecMimeType *string `json:"codec_mime_type,omitempty"`
 
-	DurationSeconds *int `json:"duration_seconds"`
+	DurationSeconds *int `json:"duration_seconds,omitempty"`
 
-	TrackType *string `json:"track_type"`
+	TrackType *string `json:"track_type,omitempty"`
 }
 
 type PushConfig struct {
 	Version string `json:"version"`
 
-	OfflineOnly *bool `json:"offline_only"`
+	OfflineOnly *bool `json:"offline_only,omitempty"`
 }
 
 type PushNotificationFields struct {
@@ -3487,19 +3487,19 @@ type PushNotificationFields struct {
 
 	Xiaomi XiaomiConfigFields `json:"xiaomi"`
 
-	Providers *[]*PushProvider `json:"providers"`
+	Providers *[]*PushProvider `json:"providers,omitempty"`
 }
 
 type PushNotificationSettings struct {
-	Disabled *bool `json:"disabled"`
+	Disabled *bool `json:"disabled,omitempty"`
 
-	DisabledUntil *time.Time `json:"disabled_until"`
+	DisabledUntil *time.Time `json:"disabled_until,omitempty"`
 }
 
 type PushNotificationSettingsInput struct {
-	Disabled *NullBool `json:"disabled"`
+	Disabled *NullBool `json:"disabled,omitempty"`
 
-	DisabledUntil *NullTime `json:"disabled_until"`
+	DisabledUntil *NullTime `json:"disabled_until,omitempty"`
 }
 
 type PushProvider struct {
@@ -3511,49 +3511,49 @@ type PushProvider struct {
 
 	UpdatedAt time.Time `json:"updated_at"`
 
-	ApnAuthKey *string `json:"apn_auth_key"`
+	ApnAuthKey *string `json:"apn_auth_key,omitempty"`
 
-	ApnAuthType *string `json:"apn_auth_type"`
+	ApnAuthType *string `json:"apn_auth_type,omitempty"`
 
-	ApnDevelopment *bool `json:"apn_development"`
+	ApnDevelopment *bool `json:"apn_development,omitempty"`
 
-	ApnHost *string `json:"apn_host"`
+	ApnHost *string `json:"apn_host,omitempty"`
 
-	ApnKeyId *string `json:"apn_key_id"`
+	ApnKeyId *string `json:"apn_key_id,omitempty"`
 
-	ApnNotificationTemplate *string `json:"apn_notification_template"`
+	ApnNotificationTemplate *string `json:"apn_notification_template,omitempty"`
 
-	ApnP12Cert *string `json:"apn_p12_cert"`
+	ApnP12Cert *string `json:"apn_p12_cert,omitempty"`
 
-	ApnTeamId *string `json:"apn_team_id"`
+	ApnTeamId *string `json:"apn_team_id,omitempty"`
 
-	ApnTopic *string `json:"apn_topic"`
+	ApnTopic *string `json:"apn_topic,omitempty"`
 
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 
-	DisabledAt *time.Time `json:"disabled_at"`
+	DisabledAt *time.Time `json:"disabled_at,omitempty"`
 
-	DisabledReason *string `json:"disabled_reason"`
+	DisabledReason *string `json:"disabled_reason,omitempty"`
 
-	FirebaseApnTemplate *string `json:"firebase_apn_template"`
+	FirebaseApnTemplate *string `json:"firebase_apn_template,omitempty"`
 
-	FirebaseCredentials *string `json:"firebase_credentials"`
+	FirebaseCredentials *string `json:"firebase_credentials,omitempty"`
 
-	FirebaseDataTemplate *string `json:"firebase_data_template"`
+	FirebaseDataTemplate *string `json:"firebase_data_template,omitempty"`
 
-	FirebaseHost *string `json:"firebase_host"`
+	FirebaseHost *string `json:"firebase_host,omitempty"`
 
-	FirebaseNotificationTemplate *string `json:"firebase_notification_template"`
+	FirebaseNotificationTemplate *string `json:"firebase_notification_template,omitempty"`
 
-	FirebaseServerKey *string `json:"firebase_server_key"`
+	FirebaseServerKey *string `json:"firebase_server_key,omitempty"`
 
-	HuaweiAppId *string `json:"huawei_app_id"`
+	HuaweiAppId *string `json:"huawei_app_id,omitempty"`
 
-	HuaweiAppSecret *string `json:"huawei_app_secret"`
+	HuaweiAppSecret *string `json:"huawei_app_secret,omitempty"`
 
-	XiaomiAppSecret *string `json:"xiaomi_app_secret"`
+	XiaomiAppSecret *string `json:"xiaomi_app_secret,omitempty"`
 
-	XiaomiPackageName *string `json:"xiaomi_package_name"`
+	XiaomiPackageName *string `json:"xiaomi_package_name,omitempty"`
 }
 
 type PushProviderResponse struct {
@@ -3565,69 +3565,69 @@ type PushProviderResponse struct {
 
 	UpdatedAt time.Time `json:"updated_at"`
 
-	ApnAuthKey *string `json:"apn_auth_key"`
+	ApnAuthKey *string `json:"apn_auth_key,omitempty"`
 
-	ApnAuthType *string `json:"apn_auth_type"`
+	ApnAuthType *string `json:"apn_auth_type,omitempty"`
 
-	ApnDevelopment *bool `json:"apn_development"`
+	ApnDevelopment *bool `json:"apn_development,omitempty"`
 
-	ApnHost *string `json:"apn_host"`
+	ApnHost *string `json:"apn_host,omitempty"`
 
-	ApnKeyId *string `json:"apn_key_id"`
+	ApnKeyId *string `json:"apn_key_id,omitempty"`
 
-	ApnP12Cert *string `json:"apn_p12_cert"`
+	ApnP12Cert *string `json:"apn_p12_cert,omitempty"`
 
-	ApnSandboxCertificate *bool `json:"apn_sandbox_certificate"`
+	ApnSandboxCertificate *bool `json:"apn_sandbox_certificate,omitempty"`
 
-	ApnSupportsRemoteNotifications *bool `json:"apn_supports_remote_notifications"`
+	ApnSupportsRemoteNotifications *bool `json:"apn_supports_remote_notifications,omitempty"`
 
-	ApnSupportsVoipNotifications *bool `json:"apn_supports_voip_notifications"`
+	ApnSupportsVoipNotifications *bool `json:"apn_supports_voip_notifications,omitempty"`
 
-	ApnTeamId *string `json:"apn_team_id"`
+	ApnTeamId *string `json:"apn_team_id,omitempty"`
 
-	ApnTopic *string `json:"apn_topic"`
+	ApnTopic *string `json:"apn_topic,omitempty"`
 
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 
-	DisabledAt *time.Time `json:"disabled_at"`
+	DisabledAt *time.Time `json:"disabled_at,omitempty"`
 
-	DisabledReason *string `json:"disabled_reason"`
+	DisabledReason *string `json:"disabled_reason,omitempty"`
 
-	FirebaseApnTemplate *string `json:"firebase_apn_template"`
+	FirebaseApnTemplate *string `json:"firebase_apn_template,omitempty"`
 
-	FirebaseCredentials *string `json:"firebase_credentials"`
+	FirebaseCredentials *string `json:"firebase_credentials,omitempty"`
 
-	FirebaseDataTemplate *string `json:"firebase_data_template"`
+	FirebaseDataTemplate *string `json:"firebase_data_template,omitempty"`
 
-	FirebaseHost *string `json:"firebase_host"`
+	FirebaseHost *string `json:"firebase_host,omitempty"`
 
-	FirebaseNotificationTemplate *string `json:"firebase_notification_template"`
+	FirebaseNotificationTemplate *string `json:"firebase_notification_template,omitempty"`
 
-	FirebaseServerKey *string `json:"firebase_server_key"`
+	FirebaseServerKey *string `json:"firebase_server_key,omitempty"`
 
-	HuaweiAppId *string `json:"huawei_app_id"`
+	HuaweiAppId *string `json:"huawei_app_id,omitempty"`
 
-	HuaweiAppSecret *string `json:"huawei_app_secret"`
+	HuaweiAppSecret *string `json:"huawei_app_secret,omitempty"`
 
-	XiaomiAppSecret *string `json:"xiaomi_app_secret"`
+	XiaomiAppSecret *string `json:"xiaomi_app_secret,omitempty"`
 
-	XiaomiPackageName *string `json:"xiaomi_package_name"`
+	XiaomiPackageName *string `json:"xiaomi_package_name,omitempty"`
 }
 
 type QueryBannedUsersRequest struct {
 	FilterConditions map[string]any `json:"filter_conditions"`
 
-	ExcludeExpiredBans *bool `json:"exclude_expired_bans"`
+	ExcludeExpiredBans *bool `json:"exclude_expired_bans,omitempty"`
 
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	Offset *int `json:"offset"`
+	Offset *int `json:"offset,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Sort *[]*SortParam `json:"sort"`
+	Sort *[]*SortParam `json:"sort,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type QueryBannedUsersResponse struct {
@@ -3641,15 +3641,15 @@ type QueryCallMembersRequest struct {
 
 	Type string `json:"type"`
 
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 
-	Sort *[]*SortParam `json:"sort"`
+	Sort *[]*SortParam `json:"sort,omitempty"`
 
-	FilterConditions *map[string]any `json:"filter_conditions"`
+	FilterConditions *map[string]any `json:"filter_conditions,omitempty"`
 }
 
 type QueryCallMembersResponse struct {
@@ -3657,21 +3657,21 @@ type QueryCallMembersResponse struct {
 
 	Members []MemberResponse `json:"members"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 }
 
 type QueryCallStatsRequest struct {
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 
-	Sort *[]*SortParam `json:"sort"`
+	Sort *[]*SortParam `json:"sort,omitempty"`
 
-	FilterConditions *map[string]any `json:"filter_conditions"`
+	FilterConditions *map[string]any `json:"filter_conditions,omitempty"`
 }
 
 type QueryCallStatsResponse struct {
@@ -3679,21 +3679,21 @@ type QueryCallStatsResponse struct {
 
 	Reports []CallStatsReportSummaryResponse `json:"reports"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 }
 
 type QueryCallsRequest struct {
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 
-	Sort *[]*SortParam `json:"sort"`
+	Sort *[]*SortParam `json:"sort,omitempty"`
 
-	FilterConditions *map[string]any `json:"filter_conditions"`
+	FilterConditions *map[string]any `json:"filter_conditions,omitempty"`
 }
 
 type QueryCallsResponse struct {
@@ -3701,29 +3701,29 @@ type QueryCallsResponse struct {
 
 	Calls []CallStateResponseFields `json:"calls"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 }
 
 type QueryChannelsRequest struct {
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	MemberLimit *int `json:"member_limit"`
+	MemberLimit *int `json:"member_limit,omitempty"`
 
-	MessageLimit *int `json:"message_limit"`
+	MessageLimit *int `json:"message_limit,omitempty"`
 
-	Offset *int `json:"offset"`
+	Offset *int `json:"offset,omitempty"`
 
-	State *bool `json:"state"`
+	State *bool `json:"state,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Sort *[]*SortParam `json:"sort"`
+	Sort *[]*SortParam `json:"sort,omitempty"`
 
-	FilterConditions *map[string]any `json:"filter_conditions"`
+	FilterConditions *map[string]any `json:"filter_conditions,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type QueryChannelsResponse struct {
@@ -3737,35 +3737,35 @@ type QueryMembersRequest struct {
 
 	FilterConditions map[string]any `json:"filter_conditions"`
 
-	Id *string `json:"id"`
+	Id *string `json:"id,omitempty"`
 
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	Offset *int `json:"offset"`
+	Offset *int `json:"offset,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Members *[]*ChannelMember `json:"members"`
+	Members *[]*ChannelMember `json:"members,omitempty"`
 
-	Sort *[]*SortParam `json:"sort"`
+	Sort *[]*SortParam `json:"sort,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type QueryMessageFlagsRequest struct {
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	Offset *int `json:"offset"`
+	Offset *int `json:"offset,omitempty"`
 
-	ShowDeletedMessages *bool `json:"show_deleted_messages"`
+	ShowDeletedMessages *bool `json:"show_deleted_messages,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Sort *[]*SortParam `json:"sort"`
+	Sort *[]*SortParam `json:"sort,omitempty"`
 
-	FilterConditions *map[string]any `json:"filter_conditions"`
+	FilterConditions *map[string]any `json:"filter_conditions,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type QueryMessageFlagsResponse struct {
@@ -3777,13 +3777,13 @@ type QueryMessageFlagsResponse struct {
 type QueryMessageHistoryRequest struct {
 	Filter map[string]any `json:"filter"`
 
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 
-	Sort *[]*SortParam `json:"sort"`
+	Sort *[]*SortParam `json:"sort,omitempty"`
 }
 
 type QueryMessageHistoryResponse struct {
@@ -3791,33 +3791,33 @@ type QueryMessageHistoryResponse struct {
 
 	MessageHistory []*MessageHistoryEntry `json:"message_history"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 }
 
 type QueryPollVotesRequest struct {
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 
-	Sort *[]*SortParam `json:"sort"`
+	Sort *[]*SortParam `json:"sort,omitempty"`
 
-	Filter *map[string]any `json:"filter"`
+	Filter *map[string]any `json:"filter,omitempty"`
 }
 
 type QueryPollsRequest struct {
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 
-	Sort *[]*SortParam `json:"sort"`
+	Sort *[]*SortParam `json:"sort,omitempty"`
 
-	Filter *map[string]any `json:"filter"`
+	Filter *map[string]any `json:"filter,omitempty"`
 }
 
 type QueryPollsResponse struct {
@@ -3825,25 +3825,25 @@ type QueryPollsResponse struct {
 
 	Polls []PollResponseData `json:"polls"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 }
 
 type QueryReactionsRequest struct {
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Sort *[]*SortParam `json:"sort"`
+	Sort *[]*SortParam `json:"sort,omitempty"`
 
-	Filter *map[string]any `json:"filter"`
+	Filter *map[string]any `json:"filter,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type QueryReactionsResponse struct {
@@ -3851,27 +3851,27 @@ type QueryReactionsResponse struct {
 
 	Reactions []ReactionResponse `json:"reactions"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 }
 
 type QueryThreadsRequest struct {
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	MemberLimit *int `json:"member_limit"`
+	MemberLimit *int `json:"member_limit,omitempty"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	ParticipantLimit *int `json:"participant_limit"`
+	ParticipantLimit *int `json:"participant_limit,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 
-	ReplyLimit *int `json:"reply_limit"`
+	ReplyLimit *int `json:"reply_limit,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type QueryThreadsResponse struct {
@@ -3879,27 +3879,27 @@ type QueryThreadsResponse struct {
 
 	Threads []ThreadStateResponse `json:"threads"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Prev *string `json:"prev"`
+	Prev *string `json:"prev,omitempty"`
 }
 
 type QueryUsersPayload struct {
 	FilterConditions map[string]any `json:"filter_conditions"`
 
-	IncludeDeactivatedUsers *bool `json:"include_deactivated_users"`
+	IncludeDeactivatedUsers *bool `json:"include_deactivated_users,omitempty"`
 
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	Offset *int `json:"offset"`
+	Offset *int `json:"offset,omitempty"`
 
-	Presence *bool `json:"presence"`
+	Presence *bool `json:"presence,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Sort *[]*SortParam `json:"sort"`
+	Sort *[]*SortParam `json:"sort,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type QueryUsersResponse struct {
@@ -3925,9 +3925,9 @@ type Reaction struct {
 
 	Custom map[string]any `json:"custom"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type ReactionGroupResponse struct {
@@ -3943,25 +3943,25 @@ type ReactionGroupResponse struct {
 type ReactionRemovalResponse struct {
 	Duration string `json:"duration"`
 
-	Message *Message `json:"message"`
+	Message *Message `json:"message,omitempty"`
 
-	Reaction *Reaction `json:"reaction"`
+	Reaction *Reaction `json:"reaction,omitempty"`
 }
 
 type ReactionRequest struct {
 	Type string `json:"type"`
 
-	CreatedAt *time.Time `json:"created_at"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
 
-	Score *int `json:"score"`
+	Score *int `json:"score,omitempty"`
 
-	UpdatedAt *time.Time `json:"updated_at"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type ReactionResponse struct {
@@ -3983,27 +3983,27 @@ type ReactionResponse struct {
 }
 
 type ReactivateUserRequest struct {
-	CreatedById *string `json:"created_by_id"`
+	CreatedById *string `json:"created_by_id,omitempty"`
 
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 
-	RestoreMessages *bool `json:"restore_messages"`
+	RestoreMessages *bool `json:"restore_messages,omitempty"`
 }
 
 type ReactivateUserResponse struct {
 	Duration string `json:"duration"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type ReactivateUsersRequest struct {
 	UserIds []string `json:"user_ids"`
 
-	CreatedById *string `json:"created_by_id"`
+	CreatedById *string `json:"created_by_id,omitempty"`
 
-	RestoreChannels *bool `json:"restore_channels"`
+	RestoreChannels *bool `json:"restore_channels,omitempty"`
 
-	RestoreMessages *bool `json:"restore_messages"`
+	RestoreMessages *bool `json:"restore_messages,omitempty"`
 }
 
 type ReactivateUsersResponse struct {
@@ -4017,13 +4017,13 @@ type Read struct {
 
 	UnreadMessages int `json:"unread_messages"`
 
-	LastReadMessageId *string `json:"last_read_message_id"`
+	LastReadMessageId *string `json:"last_read_message_id,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type ReadReceipts struct {
-	Enabled *bool `json:"enabled"`
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 type ReadStateResponse struct {
@@ -4033,7 +4033,7 @@ type ReadStateResponse struct {
 
 	User UserResponse `json:"user"`
 
-	LastReadMessageId *string `json:"last_read_message_id"`
+	LastReadMessageId *string `json:"last_read_message_id,omitempty"`
 }
 
 type RecordSettings struct {
@@ -4043,17 +4043,17 @@ type RecordSettings struct {
 
 	Quality string `json:"quality"`
 
-	Layout *LayoutSettings `json:"layout"`
+	Layout *LayoutSettings `json:"layout,omitempty"`
 }
 
 type RecordSettingsRequest struct {
 	Mode string `json:"mode"`
 
-	AudioOnly *bool `json:"audio_only"`
+	AudioOnly *bool `json:"audio_only,omitempty"`
 
-	Quality *string `json:"quality"`
+	Quality *string `json:"quality,omitempty"`
 
-	Layout *LayoutSettingsRequest `json:"layout"`
+	Layout *LayoutSettingsRequest `json:"layout,omitempty"`
 }
 
 type RecordSettingsResponse struct {
@@ -4107,9 +4107,9 @@ type Role struct {
 type S3Request struct {
 	S3Region string `json:"s3_region"`
 
-	S3ApiKey *string `json:"s3_api_key"`
+	S3ApiKey *string `json:"s3_api_key,omitempty"`
 
-	S3Secret *string `json:"s3_secret"`
+	S3Secret *string `json:"s3_secret,omitempty"`
 }
 
 type SFULocationResponse struct {
@@ -4127,15 +4127,15 @@ type ScreensharingSettings struct {
 
 	Enabled bool `json:"enabled"`
 
-	TargetResolution *TargetResolution `json:"target_resolution"`
+	TargetResolution *TargetResolution `json:"target_resolution,omitempty"`
 }
 
 type ScreensharingSettingsRequest struct {
-	AccessRequestEnabled *bool `json:"access_request_enabled"`
+	AccessRequestEnabled *bool `json:"access_request_enabled,omitempty"`
 
-	Enabled *bool `json:"enabled"`
+	Enabled *bool `json:"enabled,omitempty"`
 
-	TargetResolution *TargetResolution `json:"target_resolution"`
+	TargetResolution *TargetResolution `json:"target_resolution,omitempty"`
 }
 
 type ScreensharingSettingsResponse struct {
@@ -4143,23 +4143,23 @@ type ScreensharingSettingsResponse struct {
 
 	Enabled bool `json:"enabled"`
 
-	TargetResolution *TargetResolution `json:"target_resolution"`
+	TargetResolution *TargetResolution `json:"target_resolution,omitempty"`
 }
 
 type SearchRequest struct {
 	FilterConditions map[string]any `json:"filter_conditions"`
 
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Offset *int `json:"offset"`
+	Offset *int `json:"offset,omitempty"`
 
-	Query *string `json:"query"`
+	Query *string `json:"query,omitempty"`
 
-	Sort *[]*SortParam `json:"sort"`
+	Sort *[]*SortParam `json:"sort,omitempty"`
 
-	MessageFilterConditions *map[string]any `json:"message_filter_conditions"`
+	MessageFilterConditions *map[string]any `json:"message_filter_conditions,omitempty"`
 }
 
 type SearchResponse struct {
@@ -4167,15 +4167,15 @@ type SearchResponse struct {
 
 	Results []SearchResult `json:"results"`
 
-	Next *string `json:"next"`
+	Next *string `json:"next,omitempty"`
 
-	Previous *string `json:"previous"`
+	Previous *string `json:"previous,omitempty"`
 
-	ResultsWarning *SearchWarning `json:"results_warning"`
+	ResultsWarning *SearchWarning `json:"results_warning,omitempty"`
 }
 
 type SearchResult struct {
-	Message *SearchResultMessage `json:"message"`
+	Message *SearchResultMessage `json:"message,omitempty"`
 }
 
 type SearchResultMessage struct {
@@ -4219,43 +4219,43 @@ type SearchResultMessage struct {
 
 	ReactionScores map[string]int `json:"reaction_scores"`
 
-	BeforeMessageSendFailed *bool `json:"before_message_send_failed"`
+	BeforeMessageSendFailed *bool `json:"before_message_send_failed,omitempty"`
 
-	Command *string `json:"command"`
+	Command *string `json:"command,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	MessageTextUpdatedAt *time.Time `json:"message_text_updated_at"`
+	MessageTextUpdatedAt *time.Time `json:"message_text_updated_at,omitempty"`
 
-	Mml *string `json:"mml"`
+	Mml *string `json:"mml,omitempty"`
 
-	ParentId *string `json:"parent_id"`
+	ParentId *string `json:"parent_id,omitempty"`
 
-	PinExpires *time.Time `json:"pin_expires"`
+	PinExpires *time.Time `json:"pin_expires,omitempty"`
 
-	PinnedAt *time.Time `json:"pinned_at"`
+	PinnedAt *time.Time `json:"pinned_at,omitempty"`
 
-	PollId *string `json:"poll_id"`
+	PollId *string `json:"poll_id,omitempty"`
 
-	QuotedMessageId *string `json:"quoted_message_id"`
+	QuotedMessageId *string `json:"quoted_message_id,omitempty"`
 
-	ShowInChannel *bool `json:"show_in_channel"`
+	ShowInChannel *bool `json:"show_in_channel,omitempty"`
 
-	ThreadParticipants *[]UserObject `json:"thread_participants"`
+	ThreadParticipants *[]UserObject `json:"thread_participants,omitempty"`
 
-	Channel *ChannelResponse `json:"channel"`
+	Channel *ChannelResponse `json:"channel,omitempty"`
 
-	I18n *map[string]string `json:"i18n"`
+	I18n *map[string]string `json:"i18n,omitempty"`
 
-	ImageLabels *map[string][]string `json:"image_labels"`
+	ImageLabels *map[string][]string `json:"image_labels,omitempty"`
 
-	PinnedBy *UserObject `json:"pinned_by"`
+	PinnedBy *UserObject `json:"pinned_by,omitempty"`
 
-	Poll *Poll `json:"poll"`
+	Poll *Poll `json:"poll,omitempty"`
 
-	QuotedMessage *Message `json:"quoted_message"`
+	QuotedMessage *Message `json:"quoted_message,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type SearchWarning struct {
@@ -4263,17 +4263,17 @@ type SearchWarning struct {
 
 	WarningDescription string `json:"warning_description"`
 
-	ChannelSearchCount *int `json:"channel_search_count"`
+	ChannelSearchCount *int `json:"channel_search_count,omitempty"`
 
-	ChannelSearchCids *[]string `json:"channel_search_cids"`
+	ChannelSearchCids *[]string `json:"channel_search_cids,omitempty"`
 }
 
 type SendCallEventRequest struct {
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type SendCallEventResponse struct {
@@ -4287,17 +4287,17 @@ type SendEventRequest struct {
 type SendMessageRequest struct {
 	Message MessageRequest `json:"message"`
 
-	ForceModeration *bool `json:"force_moderation"`
+	ForceModeration *bool `json:"force_moderation,omitempty"`
 
-	KeepChannelHidden *bool `json:"keep_channel_hidden"`
+	KeepChannelHidden *bool `json:"keep_channel_hidden,omitempty"`
 
-	Pending *bool `json:"pending"`
+	Pending *bool `json:"pending,omitempty"`
 
-	SkipEnrichUrl *bool `json:"skip_enrich_url"`
+	SkipEnrichUrl *bool `json:"skip_enrich_url,omitempty"`
 
-	SkipPush *bool `json:"skip_push"`
+	SkipPush *bool `json:"skip_push,omitempty"`
 
-	PendingMessageMetadata *map[string]string `json:"pending_message_metadata"`
+	PendingMessageMetadata *map[string]string `json:"pending_message_metadata,omitempty"`
 }
 
 type SendMessageResponse struct {
@@ -4305,15 +4305,15 @@ type SendMessageResponse struct {
 
 	Message MessageResponse `json:"message"`
 
-	PendingMessageMetadata *map[string]string `json:"pending_message_metadata"`
+	PendingMessageMetadata *map[string]string `json:"pending_message_metadata,omitempty"`
 }
 
 type SendReactionRequest struct {
 	Reaction ReactionRequest `json:"reaction"`
 
-	EnforceUnique *bool `json:"enforce_unique"`
+	EnforceUnique *bool `json:"enforce_unique,omitempty"`
 
-	SkipPush *bool `json:"skip_push"`
+	SkipPush *bool `json:"skip_push,omitempty"`
 }
 
 type SendReactionResponse struct {
@@ -4329,9 +4329,9 @@ type SendUserCustomEventRequest struct {
 }
 
 type ShowChannelRequest struct {
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type ShowChannelResponse struct {
@@ -4339,9 +4339,9 @@ type ShowChannelResponse struct {
 }
 
 type SortParam struct {
-	Direction *int `json:"direction"`
+	Direction *int `json:"direction,omitempty"`
 
-	Field *string `json:"field"`
+	Field *string `json:"field,omitempty"`
 }
 
 type StartHLSBroadcastingRequest struct{}
@@ -4353,7 +4353,7 @@ type StartHLSBroadcastingResponse struct {
 }
 
 type StartRecordingRequest struct {
-	RecordingExternalStorage *string `json:"recording_external_storage"`
+	RecordingExternalStorage *string `json:"recording_external_storage,omitempty"`
 }
 
 type StartRecordingResponse struct {
@@ -4361,7 +4361,7 @@ type StartRecordingResponse struct {
 }
 
 type StartTranscriptionRequest struct {
-	TranscriptionExternalStorage *string `json:"transcription_external_storage"`
+	TranscriptionExternalStorage *string `json:"transcription_external_storage,omitempty"`
 }
 
 type StartTranscriptionResponse struct {
@@ -4407,7 +4407,7 @@ type Subsession struct {
 
 	SfuId string `json:"sfu_id"`
 
-	PubSubHint *MediaPubSubHint `json:"pub_sub_hint"`
+	PubSubHint *MediaPubSubHint `json:"pub_sub_hint,omitempty"`
 }
 
 type TargetResolution struct {
@@ -4431,21 +4431,21 @@ type Thread struct {
 
 	Custom map[string]any `json:"custom"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	LastMessageAt *time.Time `json:"last_message_at"`
+	LastMessageAt *time.Time `json:"last_message_at,omitempty"`
 
-	ParticipantCount *int `json:"participant_count"`
+	ParticipantCount *int `json:"participant_count,omitempty"`
 
-	ReplyCount *int `json:"reply_count"`
+	ReplyCount *int `json:"reply_count,omitempty"`
 
-	ThreadParticipants *[]*ThreadParticipant `json:"thread_participants"`
+	ThreadParticipants *[]*ThreadParticipant `json:"thread_participants,omitempty"`
 
-	Channel *Channel `json:"channel"`
+	Channel *Channel `json:"channel,omitempty"`
 
-	CreatedBy *UserObject `json:"created_by"`
+	CreatedBy *UserObject `json:"created_by,omitempty"`
 
-	ParentMessage *Message `json:"parent_message"`
+	ParentMessage *Message `json:"parent_message,omitempty"`
 }
 
 type ThreadParticipant struct {
@@ -4459,15 +4459,15 @@ type ThreadParticipant struct {
 
 	Custom map[string]any `json:"custom"`
 
-	LastThreadMessageAt *time.Time `json:"last_thread_message_at"`
+	LastThreadMessageAt *time.Time `json:"last_thread_message_at,omitempty"`
 
-	LeftThreadAt *time.Time `json:"left_thread_at"`
+	LeftThreadAt *time.Time `json:"left_thread_at,omitempty"`
 
-	ThreadId *string `json:"thread_id"`
+	ThreadId *string `json:"thread_id,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type ThreadResponse struct {
@@ -4485,21 +4485,21 @@ type ThreadResponse struct {
 
 	Custom map[string]any `json:"custom"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	LastMessageAt *time.Time `json:"last_message_at"`
+	LastMessageAt *time.Time `json:"last_message_at,omitempty"`
 
-	ParticipantCount *int `json:"participant_count"`
+	ParticipantCount *int `json:"participant_count,omitempty"`
 
-	ReplyCount *int `json:"reply_count"`
+	ReplyCount *int `json:"reply_count,omitempty"`
 
-	ThreadParticipants *[]*ThreadParticipant `json:"thread_participants"`
+	ThreadParticipants *[]*ThreadParticipant `json:"thread_participants,omitempty"`
 
-	Channel *ChannelResponse `json:"channel"`
+	Channel *ChannelResponse `json:"channel,omitempty"`
 
-	CreatedBy *UserObject `json:"created_by"`
+	CreatedBy *UserObject `json:"created_by,omitempty"`
 
-	ParentMessage *Message `json:"parent_message"`
+	ParentMessage *Message `json:"parent_message,omitempty"`
 }
 
 type ThreadState struct {
@@ -4517,23 +4517,23 @@ type ThreadState struct {
 
 	Custom map[string]any `json:"custom"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	LastMessageAt *time.Time `json:"last_message_at"`
+	LastMessageAt *time.Time `json:"last_message_at,omitempty"`
 
-	ParticipantCount *int `json:"participant_count"`
+	ParticipantCount *int `json:"participant_count,omitempty"`
 
-	ReplyCount *int `json:"reply_count"`
+	ReplyCount *int `json:"reply_count,omitempty"`
 
-	Read *[]*Read `json:"read"`
+	Read *[]*Read `json:"read,omitempty"`
 
-	ThreadParticipants *[]*ThreadParticipant `json:"thread_participants"`
+	ThreadParticipants *[]*ThreadParticipant `json:"thread_participants,omitempty"`
 
-	Channel *Channel `json:"channel"`
+	Channel *Channel `json:"channel,omitempty"`
 
-	CreatedBy *UserObject `json:"created_by"`
+	CreatedBy *UserObject `json:"created_by,omitempty"`
 
-	ParentMessage *Message `json:"parent_message"`
+	ParentMessage *Message `json:"parent_message,omitempty"`
 }
 
 type ThreadStateResponse struct {
@@ -4553,31 +4553,31 @@ type ThreadStateResponse struct {
 
 	Custom map[string]any `json:"custom"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	LastMessageAt *time.Time `json:"last_message_at"`
+	LastMessageAt *time.Time `json:"last_message_at,omitempty"`
 
-	ParticipantCount *int `json:"participant_count"`
+	ParticipantCount *int `json:"participant_count,omitempty"`
 
-	ReplyCount *int `json:"reply_count"`
+	ReplyCount *int `json:"reply_count,omitempty"`
 
-	Read *[]*Read `json:"read"`
+	Read *[]*Read `json:"read,omitempty"`
 
-	ThreadParticipants *[]*ThreadParticipant `json:"thread_participants"`
+	ThreadParticipants *[]*ThreadParticipant `json:"thread_participants,omitempty"`
 
-	Channel *ChannelResponse `json:"channel"`
+	Channel *ChannelResponse `json:"channel,omitempty"`
 
-	CreatedBy *UserObject `json:"created_by"`
+	CreatedBy *UserObject `json:"created_by,omitempty"`
 
-	ParentMessage *Message `json:"parent_message"`
+	ParentMessage *Message `json:"parent_message,omitempty"`
 }
 
 type Thresholds struct {
-	Explicit *LabelThresholds `json:"explicit"`
+	Explicit *LabelThresholds `json:"explicit,omitempty"`
 
-	Spam *LabelThresholds `json:"spam"`
+	Spam *LabelThresholds `json:"spam,omitempty"`
 
-	Toxic *LabelThresholds `json:"toxic"`
+	Toxic *LabelThresholds `json:"toxic,omitempty"`
 }
 
 type ThumbnailResponse struct {
@@ -4589,7 +4589,7 @@ type ThumbnailsSettings struct {
 }
 
 type ThumbnailsSettingsRequest struct {
-	Enabled *bool `json:"enabled"`
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 type ThumbnailsSettingsResponse struct {
@@ -4607,9 +4607,9 @@ type TranscriptionSettings struct {
 type TranscriptionSettingsRequest struct {
 	Mode string `json:"mode"`
 
-	ClosedCaptionMode *string `json:"closed_caption_mode"`
+	ClosedCaptionMode *string `json:"closed_caption_mode,omitempty"`
 
-	Languages *[]string `json:"languages"`
+	Languages *[]string `json:"languages,omitempty"`
 }
 
 type TranscriptionSettingsResponse struct {
@@ -4625,29 +4625,29 @@ type TranslateMessageRequest struct {
 }
 
 type TruncateChannelRequest struct {
-	HardDelete *bool `json:"hard_delete"`
+	HardDelete *bool `json:"hard_delete,omitempty"`
 
-	SkipPush *bool `json:"skip_push"`
+	SkipPush *bool `json:"skip_push,omitempty"`
 
-	TruncatedAt *time.Time `json:"truncated_at"`
+	TruncatedAt *time.Time `json:"truncated_at,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Message *MessageRequest `json:"message"`
+	Message *MessageRequest `json:"message,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type TruncateChannelResponse struct {
 	Duration string `json:"duration"`
 
-	Channel *ChannelResponse `json:"channel"`
+	Channel *ChannelResponse `json:"channel,omitempty"`
 
-	Message *Message `json:"message"`
+	Message *Message `json:"message,omitempty"`
 }
 
 type TypingIndicators struct {
-	Enabled *bool `json:"enabled"`
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 type UnblockUserRequest struct {
@@ -4659,29 +4659,29 @@ type UnblockUserResponse struct {
 }
 
 type UnmuteChannelRequest struct {
-	Expiration *int `json:"expiration"`
+	Expiration *int `json:"expiration,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	ChannelCids *[]string `json:"channel_cids"`
+	ChannelCids *[]string `json:"channel_cids,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type UnmuteResponse struct {
 	Duration string `json:"duration"`
 
-	NonExistingUsers *[]string `json:"non_existing_users"`
+	NonExistingUsers *[]string `json:"non_existing_users,omitempty"`
 }
 
 type UnmuteUserRequest struct {
 	Timeout int `json:"timeout"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	TargetIds *[]string `json:"target_ids"`
+	TargetIds *[]string `json:"target_ids,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type UnpinRequest struct {
@@ -4743,95 +4743,95 @@ type UnreadCountsThread struct {
 }
 
 type UpdateAppRequest struct {
-	AsyncUrlEnrichEnabled *bool `json:"async_url_enrich_enabled"`
+	AsyncUrlEnrichEnabled *bool `json:"async_url_enrich_enabled,omitempty"`
 
-	AutoTranslationEnabled *bool `json:"auto_translation_enabled"`
+	AutoTranslationEnabled *bool `json:"auto_translation_enabled,omitempty"`
 
-	BeforeMessageSendHookUrl *string `json:"before_message_send_hook_url"`
+	BeforeMessageSendHookUrl *string `json:"before_message_send_hook_url,omitempty"`
 
-	CdnExpirationSeconds *int `json:"cdn_expiration_seconds"`
+	CdnExpirationSeconds *int `json:"cdn_expiration_seconds,omitempty"`
 
-	ChannelHideMembersOnly *bool `json:"channel_hide_members_only"`
+	ChannelHideMembersOnly *bool `json:"channel_hide_members_only,omitempty"`
 
-	CustomActionHandlerUrl *string `json:"custom_action_handler_url"`
+	CustomActionHandlerUrl *string `json:"custom_action_handler_url,omitempty"`
 
-	DisableAuthChecks *bool `json:"disable_auth_checks"`
+	DisableAuthChecks *bool `json:"disable_auth_checks,omitempty"`
 
-	DisablePermissionsChecks *bool `json:"disable_permissions_checks"`
+	DisablePermissionsChecks *bool `json:"disable_permissions_checks,omitempty"`
 
-	EnforceUniqueUsernames *string `json:"enforce_unique_usernames"`
+	EnforceUniqueUsernames *string `json:"enforce_unique_usernames,omitempty"`
 
-	ImageModerationEnabled *bool `json:"image_moderation_enabled"`
+	ImageModerationEnabled *bool `json:"image_moderation_enabled,omitempty"`
 
-	MigratePermissionsToV2 *bool `json:"migrate_permissions_to_v2"`
+	MigratePermissionsToV2 *bool `json:"migrate_permissions_to_v2,omitempty"`
 
-	MultiTenantEnabled *bool `json:"multi_tenant_enabled"`
+	MultiTenantEnabled *bool `json:"multi_tenant_enabled,omitempty"`
 
-	PermissionVersion *string `json:"permission_version"`
+	PermissionVersion *string `json:"permission_version,omitempty"`
 
-	RemindersInterval *int `json:"reminders_interval"`
+	RemindersInterval *int `json:"reminders_interval,omitempty"`
 
-	RemindersMaxMembers *int `json:"reminders_max_members"`
+	RemindersMaxMembers *int `json:"reminders_max_members,omitempty"`
 
-	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before"`
+	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before,omitempty"`
 
-	SnsKey *string `json:"sns_key"`
+	SnsKey *string `json:"sns_key,omitempty"`
 
-	SnsSecret *string `json:"sns_secret"`
+	SnsSecret *string `json:"sns_secret,omitempty"`
 
-	SnsTopicArn *string `json:"sns_topic_arn"`
+	SnsTopicArn *string `json:"sns_topic_arn,omitempty"`
 
-	SqsKey *string `json:"sqs_key"`
+	SqsKey *string `json:"sqs_key,omitempty"`
 
-	SqsSecret *string `json:"sqs_secret"`
+	SqsSecret *string `json:"sqs_secret,omitempty"`
 
-	SqsUrl *string `json:"sqs_url"`
+	SqsUrl *string `json:"sqs_url,omitempty"`
 
-	VideoProvider *string `json:"video_provider"`
+	VideoProvider *string `json:"video_provider,omitempty"`
 
-	WebhookUrl *string `json:"webhook_url"`
+	WebhookUrl *string `json:"webhook_url,omitempty"`
 
-	ImageModerationBlockLabels *[]string `json:"image_moderation_block_labels"`
+	ImageModerationBlockLabels *[]string `json:"image_moderation_block_labels,omitempty"`
 
-	ImageModerationLabels *[]string `json:"image_moderation_labels"`
+	ImageModerationLabels *[]string `json:"image_moderation_labels,omitempty"`
 
-	UserSearchDisallowedRoles *[]string `json:"user_search_disallowed_roles"`
+	UserSearchDisallowedRoles *[]string `json:"user_search_disallowed_roles,omitempty"`
 
-	WebhookEvents *[]string `json:"webhook_events"`
+	WebhookEvents *[]string `json:"webhook_events,omitempty"`
 
-	AgoraOptions *Config `json:"agora_options"`
+	AgoraOptions *Config `json:"agora_options,omitempty"`
 
-	ApnConfig *APNConfig `json:"apn_config"`
+	ApnConfig *APNConfig `json:"apn_config,omitempty"`
 
-	AsyncModerationConfig *AsyncModerationConfiguration `json:"async_moderation_config"`
+	AsyncModerationConfig *AsyncModerationConfiguration `json:"async_moderation_config,omitempty"`
 
-	DatadogInfo *DataDogInfo `json:"datadog_info"`
+	DatadogInfo *DataDogInfo `json:"datadog_info,omitempty"`
 
-	FileUploadConfig *FileUploadConfig `json:"file_upload_config"`
+	FileUploadConfig *FileUploadConfig `json:"file_upload_config,omitempty"`
 
-	FirebaseConfig *FirebaseConfig `json:"firebase_config"`
+	FirebaseConfig *FirebaseConfig `json:"firebase_config,omitempty"`
 
-	Grants *map[string][]string `json:"grants"`
+	Grants *map[string][]string `json:"grants,omitempty"`
 
-	HmsOptions *Config `json:"hms_options"`
+	HmsOptions *Config `json:"hms_options,omitempty"`
 
-	HuaweiConfig *HuaweiConfig `json:"huawei_config"`
+	HuaweiConfig *HuaweiConfig `json:"huawei_config,omitempty"`
 
-	ImageUploadConfig *FileUploadConfig `json:"image_upload_config"`
+	ImageUploadConfig *FileUploadConfig `json:"image_upload_config,omitempty"`
 
-	PushConfig *PushConfig `json:"push_config"`
+	PushConfig *PushConfig `json:"push_config,omitempty"`
 
-	XiaomiConfig *XiaomiConfig `json:"xiaomi_config"`
+	XiaomiConfig *XiaomiConfig `json:"xiaomi_config,omitempty"`
 }
 
 type UpdateBlockListRequest struct {
-	Words *[]string `json:"words"`
+	Words *[]string `json:"words,omitempty"`
 }
 
 type UpdateCallMembersRequest struct {
-	RemoveMembers *[]string `json:"remove_members"`
+	RemoveMembers *[]string `json:"remove_members,omitempty"`
 
-	UpdateMembers *[]MemberRequest `json:"update_members"`
+	UpdateMembers *[]MemberRequest `json:"update_members,omitempty"`
 }
 
 type UpdateCallMembersResponse struct {
@@ -4841,11 +4841,11 @@ type UpdateCallMembersResponse struct {
 }
 
 type UpdateCallRequest struct {
-	StartsAt *time.Time `json:"starts_at"`
+	StartsAt *time.Time `json:"starts_at,omitempty"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 
-	SettingsOverride *CallSettingsRequest `json:"settings_override"`
+	SettingsOverride *CallSettingsRequest `json:"settings_override,omitempty"`
 }
 
 type UpdateCallResponse struct {
@@ -4859,13 +4859,13 @@ type UpdateCallResponse struct {
 }
 
 type UpdateCallTypeRequest struct {
-	ExternalStorage *string `json:"external_storage"`
+	ExternalStorage *string `json:"external_storage,omitempty"`
 
-	Grants *map[string][]string `json:"grants"`
+	Grants *map[string][]string `json:"grants,omitempty"`
 
-	NotificationSettings *NotificationSettings `json:"notification_settings"`
+	NotificationSettings *NotificationSettings `json:"notification_settings,omitempty"`
 
-	Settings *CallSettingsRequest `json:"settings"`
+	Settings *CallSettingsRequest `json:"settings,omitempty"`
 }
 
 type UpdateCallTypeResponse struct {
@@ -4883,17 +4883,17 @@ type UpdateCallTypeResponse struct {
 
 	Settings CallSettingsResponse `json:"settings"`
 
-	ExternalStorage *string `json:"external_storage"`
+	ExternalStorage *string `json:"external_storage,omitempty"`
 }
 
 type UpdateChannelPartialRequest struct {
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Unset *[]string `json:"unset"`
+	Unset *[]string `json:"unset,omitempty"`
 
-	Set *map[string]any `json:"set"`
+	Set *map[string]any `json:"set,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type UpdateChannelPartialResponse struct {
@@ -4901,39 +4901,39 @@ type UpdateChannelPartialResponse struct {
 
 	Members []*ChannelMember `json:"members"`
 
-	Channel *ChannelResponse `json:"channel"`
+	Channel *ChannelResponse `json:"channel,omitempty"`
 }
 
 type UpdateChannelRequest struct {
-	AcceptInvite *bool `json:"accept_invite"`
+	AcceptInvite *bool `json:"accept_invite,omitempty"`
 
-	Cooldown *int `json:"cooldown"`
+	Cooldown *int `json:"cooldown,omitempty"`
 
-	HideHistory *bool `json:"hide_history"`
+	HideHistory *bool `json:"hide_history,omitempty"`
 
-	RejectInvite *bool `json:"reject_invite"`
+	RejectInvite *bool `json:"reject_invite,omitempty"`
 
-	SkipPush *bool `json:"skip_push"`
+	SkipPush *bool `json:"skip_push,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	AddMembers *[]*ChannelMember `json:"add_members"`
+	AddMembers *[]*ChannelMember `json:"add_members,omitempty"`
 
-	AddModerators *[]string `json:"add_moderators"`
+	AddModerators *[]string `json:"add_moderators,omitempty"`
 
-	AssignRoles *[]*ChannelMember `json:"assign_roles"`
+	AssignRoles *[]*ChannelMember `json:"assign_roles,omitempty"`
 
-	DemoteModerators *[]string `json:"demote_moderators"`
+	DemoteModerators *[]string `json:"demote_moderators,omitempty"`
 
-	Invites *[]*ChannelMember `json:"invites"`
+	Invites *[]*ChannelMember `json:"invites,omitempty"`
 
-	RemoveMembers *[]string `json:"remove_members"`
+	RemoveMembers *[]string `json:"remove_members,omitempty"`
 
-	Data *ChannelInput `json:"data"`
+	Data *ChannelInput `json:"data,omitempty"`
 
-	Message *MessageRequest `json:"message"`
+	Message *MessageRequest `json:"message,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type UpdateChannelResponse struct {
@@ -4941,9 +4941,9 @@ type UpdateChannelResponse struct {
 
 	Members []*ChannelMember `json:"members"`
 
-	Channel *ChannelResponse `json:"channel"`
+	Channel *ChannelResponse `json:"channel,omitempty"`
 
-	Message *Message `json:"message"`
+	Message *Message `json:"message,omitempty"`
 }
 
 type UpdateChannelTypeRequest struct {
@@ -4953,51 +4953,51 @@ type UpdateChannelTypeRequest struct {
 
 	MaxMessageLength int `json:"max_message_length"`
 
-	Blocklist *string `json:"blocklist"`
+	Blocklist *string `json:"blocklist,omitempty"`
 
-	BlocklistBehavior *string `json:"blocklist_behavior"`
+	BlocklistBehavior *string `json:"blocklist_behavior,omitempty"`
 
-	ConnectEvents *bool `json:"connect_events"`
+	ConnectEvents *bool `json:"connect_events,omitempty"`
 
-	CustomEvents *bool `json:"custom_events"`
+	CustomEvents *bool `json:"custom_events,omitempty"`
 
-	MarkMessagesPending *bool `json:"mark_messages_pending"`
+	MarkMessagesPending *bool `json:"mark_messages_pending,omitempty"`
 
-	Mutes *bool `json:"mutes"`
+	Mutes *bool `json:"mutes,omitempty"`
 
-	Polls *bool `json:"polls"`
+	Polls *bool `json:"polls,omitempty"`
 
-	PushNotifications *bool `json:"push_notifications"`
+	PushNotifications *bool `json:"push_notifications,omitempty"`
 
-	Quotes *bool `json:"quotes"`
+	Quotes *bool `json:"quotes,omitempty"`
 
-	Reactions *bool `json:"reactions"`
+	Reactions *bool `json:"reactions,omitempty"`
 
-	ReadEvents *bool `json:"read_events"`
+	ReadEvents *bool `json:"read_events,omitempty"`
 
-	Reminders *bool `json:"reminders"`
+	Reminders *bool `json:"reminders,omitempty"`
 
-	Replies *bool `json:"replies"`
+	Replies *bool `json:"replies,omitempty"`
 
-	Search *bool `json:"search"`
+	Search *bool `json:"search,omitempty"`
 
-	TypingEvents *bool `json:"typing_events"`
+	TypingEvents *bool `json:"typing_events,omitempty"`
 
-	Uploads *bool `json:"uploads"`
+	Uploads *bool `json:"uploads,omitempty"`
 
-	UrlEnrichment *bool `json:"url_enrichment"`
+	UrlEnrichment *bool `json:"url_enrichment,omitempty"`
 
-	AllowedFlagReasons *[]string `json:"allowed_flag_reasons"`
+	AllowedFlagReasons *[]string `json:"allowed_flag_reasons,omitempty"`
 
-	Blocklists *[]BlockListOptions `json:"blocklists"`
+	Blocklists *[]BlockListOptions `json:"blocklists,omitempty"`
 
-	Commands *[]string `json:"commands"`
+	Commands *[]string `json:"commands,omitempty"`
 
-	Permissions *[]PolicyRequest `json:"permissions"`
+	Permissions *[]PolicyRequest `json:"permissions,omitempty"`
 
-	AutomodThresholds *Thresholds `json:"automod_thresholds"`
+	AutomodThresholds *Thresholds `json:"automod_thresholds,omitempty"`
 
-	Grants *map[string][]string `json:"grants"`
+	Grants *map[string][]string `json:"grants,omitempty"`
 }
 
 type UpdateChannelTypeResponse struct {
@@ -5051,29 +5051,29 @@ type UpdateChannelTypeResponse struct {
 
 	Grants map[string][]string `json:"grants"`
 
-	Blocklist *string `json:"blocklist"`
+	Blocklist *string `json:"blocklist,omitempty"`
 
-	BlocklistBehavior *string `json:"blocklist_behavior"`
+	BlocklistBehavior *string `json:"blocklist_behavior,omitempty"`
 
-	AllowedFlagReasons *[]string `json:"allowed_flag_reasons"`
+	AllowedFlagReasons *[]string `json:"allowed_flag_reasons,omitempty"`
 
-	Blocklists *[]BlockListOptions `json:"blocklists"`
+	Blocklists *[]BlockListOptions `json:"blocklists,omitempty"`
 
-	AutomodThresholds *Thresholds `json:"automod_thresholds"`
+	AutomodThresholds *Thresholds `json:"automod_thresholds,omitempty"`
 }
 
 type UpdateCommandRequest struct {
 	Description string `json:"description"`
 
-	Args *string `json:"args"`
+	Args *string `json:"args,omitempty"`
 
-	Set *string `json:"set"`
+	Set *string `json:"set,omitempty"`
 }
 
 type UpdateCommandResponse struct {
 	Duration string `json:"duration"`
 
-	Command *Command `json:"command"`
+	Command *Command `json:"command,omitempty"`
 }
 
 type UpdateExternalStorageRequest struct {
@@ -5081,13 +5081,13 @@ type UpdateExternalStorageRequest struct {
 
 	StorageType string `json:"storage_type"`
 
-	GcsCredentials *string `json:"gcs_credentials"`
+	GcsCredentials *string `json:"gcs_credentials,omitempty"`
 
-	Path *string `json:"path"`
+	Path *string `json:"path,omitempty"`
 
-	AwsS3 *S3Request `json:"aws_s3"`
+	AwsS3 *S3Request `json:"aws_s3,omitempty"`
 
-	AzureBlob *AzureRequest `json:"azure_blob"`
+	AzureBlob *AzureRequest `json:"azure_blob,omitempty"`
 }
 
 type UpdateExternalStorageResponse struct {
@@ -5103,29 +5103,29 @@ type UpdateExternalStorageResponse struct {
 }
 
 type UpdateMessagePartialRequest struct {
-	SkipEnrichUrl *bool `json:"skip_enrich_url"`
+	SkipEnrichUrl *bool `json:"skip_enrich_url,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Unset *[]string `json:"unset"`
+	Unset *[]string `json:"unset,omitempty"`
 
-	Set *map[string]any `json:"set"`
+	Set *map[string]any `json:"set,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type UpdateMessagePartialResponse struct {
 	Duration string `json:"duration"`
 
-	Message *Message `json:"message"`
+	Message *Message `json:"message,omitempty"`
 
-	PendingMessageMetadata *map[string]string `json:"pending_message_metadata"`
+	PendingMessageMetadata *map[string]string `json:"pending_message_metadata,omitempty"`
 }
 
 type UpdateMessageRequest struct {
 	Message MessageRequest `json:"message"`
 
-	SkipEnrichUrl *bool `json:"skip_enrich_url"`
+	SkipEnrichUrl *bool `json:"skip_enrich_url,omitempty"`
 }
 
 type UpdateMessageResponse struct {
@@ -5133,7 +5133,7 @@ type UpdateMessageResponse struct {
 
 	Message Message `json:"message"`
 
-	PendingMessageMetadata *map[string]string `json:"pending_message_metadata"`
+	PendingMessageMetadata *map[string]string `json:"pending_message_metadata,omitempty"`
 }
 
 type UpdatePollOptionRequest struct {
@@ -5141,21 +5141,21 @@ type UpdatePollOptionRequest struct {
 
 	Text string `json:"text"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Custom *map[string]any `json:"Custom"`
+	Custom *map[string]any `json:"Custom,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type UpdatePollPartialRequest struct {
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Unset *[]string `json:"unset"`
+	Unset *[]string `json:"unset,omitempty"`
 
-	Set *map[string]any `json:"set"`
+	Set *map[string]any `json:"set,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type UpdatePollRequest struct {
@@ -5163,37 +5163,37 @@ type UpdatePollRequest struct {
 
 	Name string `json:"name"`
 
-	AllowAnswers *bool `json:"allow_answers"`
+	AllowAnswers *bool `json:"allow_answers,omitempty"`
 
-	AllowUserSuggestedOptions *bool `json:"allow_user_suggested_options"`
+	AllowUserSuggestedOptions *bool `json:"allow_user_suggested_options,omitempty"`
 
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 
-	EnforceUniqueVote *bool `json:"enforce_unique_vote"`
+	EnforceUniqueVote *bool `json:"enforce_unique_vote,omitempty"`
 
-	IsClosed *bool `json:"is_closed"`
+	IsClosed *bool `json:"is_closed,omitempty"`
 
-	MaxVotesAllowed *int `json:"max_votes_allowed"`
+	MaxVotesAllowed *int `json:"max_votes_allowed,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	VotingVisibility *string `json:"voting_visibility"`
+	VotingVisibility *string `json:"voting_visibility,omitempty"`
 
-	Options *[]*PollOption `json:"options"`
+	Options *[]*PollOption `json:"options,omitempty"`
 
-	Custom *map[string]any `json:"Custom"`
+	Custom *map[string]any `json:"Custom,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type UpdateThreadPartialRequest struct {
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	Unset *[]string `json:"unset"`
+	Unset *[]string `json:"unset,omitempty"`
 
-	Set *map[string]any `json:"set"`
+	Set *map[string]any `json:"set,omitempty"`
 
-	User *UserRequest `json:"user"`
+	User *UserRequest `json:"user,omitempty"`
 }
 
 type UpdateThreadPartialResponse struct {
@@ -5205,17 +5205,17 @@ type UpdateThreadPartialResponse struct {
 type UpdateUserPartialRequest struct {
 	Id string `json:"id"`
 
-	Unset *[]string `json:"unset"`
+	Unset *[]string `json:"unset,omitempty"`
 
-	Set *map[string]any `json:"set"`
+	Set *map[string]any `json:"set,omitempty"`
 }
 
 type UpdateUserPermissionsRequest struct {
 	UserId string `json:"user_id"`
 
-	GrantPermissions *[]string `json:"grant_permissions"`
+	GrantPermissions *[]string `json:"grant_permissions,omitempty"`
 
-	RevokePermissions *[]string `json:"revoke_permissions"`
+	RevokePermissions *[]string `json:"revoke_permissions,omitempty"`
 }
 
 type UpdateUserPermissionsResponse struct {
@@ -5239,7 +5239,7 @@ type UpdateUsersResponse struct {
 }
 
 type UpsertPushProviderRequest struct {
-	PushProvider *PushProvider `json:"push_provider"`
+	PushProvider *PushProvider `json:"push_provider,omitempty"`
 }
 
 type UpsertPushProviderResponse struct {
@@ -5251,7 +5251,7 @@ type UpsertPushProviderResponse struct {
 type UserCustomEventRequest struct {
 	Type string `json:"type"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 }
 
 type UserInfoResponse struct {
@@ -5269,11 +5269,11 @@ type UserMute struct {
 
 	UpdatedAt time.Time `json:"updated_at"`
 
-	Expires *time.Time `json:"expires"`
+	Expires *time.Time `json:"expires,omitempty"`
 
-	Target *UserObject `json:"target"`
+	Target *UserObject `json:"target,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type UserObject struct {
@@ -5287,51 +5287,51 @@ type UserObject struct {
 
 	Custom map[string]any `json:"custom"`
 
-	BanExpires *time.Time `json:"ban_expires"`
+	BanExpires *time.Time `json:"ban_expires,omitempty"`
 
-	CreatedAt *time.Time `json:"created_at"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
 
-	DeactivatedAt *time.Time `json:"deactivated_at"`
+	DeactivatedAt *time.Time `json:"deactivated_at,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	Invisible *bool `json:"invisible"`
+	Invisible *bool `json:"invisible,omitempty"`
 
-	Language *string `json:"language"`
+	Language *string `json:"language,omitempty"`
 
-	LastActive *time.Time `json:"last_active"`
+	LastActive *time.Time `json:"last_active,omitempty"`
 
-	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before"`
+	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before,omitempty"`
 
-	UpdatedAt *time.Time `json:"updated_at"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 
-	Teams *[]string `json:"teams"`
+	Teams *[]string `json:"teams,omitempty"`
 
-	PrivacySettings *PrivacySettings `json:"privacy_settings"`
+	PrivacySettings *PrivacySettings `json:"privacy_settings,omitempty"`
 
-	PushNotifications *PushNotificationSettings `json:"push_notifications"`
+	PushNotifications *PushNotificationSettings `json:"push_notifications,omitempty"`
 }
 
 type UserRequest struct {
 	Id string `json:"id"`
 
-	Image *string `json:"image"`
+	Image *string `json:"image,omitempty"`
 
-	Invisible *bool `json:"invisible"`
+	Invisible *bool `json:"invisible,omitempty"`
 
-	Language *string `json:"language"`
+	Language *string `json:"language,omitempty"`
 
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 
-	Role *string `json:"role"`
+	Role *string `json:"role,omitempty"`
 
-	Teams *[]string `json:"teams"`
+	Teams *[]string `json:"teams,omitempty"`
 
-	Custom *map[string]any `json:"custom"`
+	Custom *map[string]any `json:"custom,omitempty"`
 
-	PrivacySettings *PrivacySettings `json:"privacy_settings"`
+	PrivacySettings *PrivacySettings `json:"privacy_settings,omitempty"`
 
-	PushNotifications *PushNotificationSettingsInput `json:"push_notifications"`
+	PushNotifications *PushNotificationSettingsInput `json:"push_notifications,omitempty"`
 }
 
 type UserResponse struct {
@@ -5359,19 +5359,19 @@ type UserResponse struct {
 
 	Custom map[string]any `json:"custom"`
 
-	DeactivatedAt *time.Time `json:"deactivated_at"`
+	DeactivatedAt *time.Time `json:"deactivated_at,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 
-	Image *string `json:"image"`
+	Image *string `json:"image,omitempty"`
 
-	LastActive *time.Time `json:"last_active"`
+	LastActive *time.Time `json:"last_active,omitempty"`
 
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 
-	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before"`
+	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before,omitempty"`
 
-	PushNotifications *PushNotificationSettings `json:"push_notifications"`
+	PushNotifications *PushNotificationSettings `json:"push_notifications,omitempty"`
 }
 
 type UserSessionStats struct {
@@ -5397,83 +5397,83 @@ type UserSessionStats struct {
 
 	TotalPixelsOut int `json:"total_pixels_out"`
 
-	Browser *string `json:"browser"`
+	Browser *string `json:"browser,omitempty"`
 
-	BrowserVersion *string `json:"browser_version"`
+	BrowserVersion *string `json:"browser_version,omitempty"`
 
-	CurrentIp *string `json:"current_ip"`
+	CurrentIp *string `json:"current_ip,omitempty"`
 
-	CurrentSfu *string `json:"current_sfu"`
+	CurrentSfu *string `json:"current_sfu,omitempty"`
 
-	DeviceModel *string `json:"device_model"`
+	DeviceModel *string `json:"device_model,omitempty"`
 
-	DeviceVersion *string `json:"device_version"`
+	DeviceVersion *string `json:"device_version,omitempty"`
 
-	DistanceToSfuKilometers *float64 `json:"distance_to_sfu_kilometers"`
+	DistanceToSfuKilometers *float64 `json:"distance_to_sfu_kilometers,omitempty"`
 
-	MaxFirPerSecond *float64 `json:"max_fir_per_second"`
+	MaxFirPerSecond *float64 `json:"max_fir_per_second,omitempty"`
 
-	MaxFreezesPerSecond *float64 `json:"max_freezes_per_second"`
+	MaxFreezesPerSecond *float64 `json:"max_freezes_per_second,omitempty"`
 
-	MaxNackPerSecond *float64 `json:"max_nack_per_second"`
+	MaxNackPerSecond *float64 `json:"max_nack_per_second,omitempty"`
 
-	MaxPliPerSecond *float64 `json:"max_pli_per_second"`
+	MaxPliPerSecond *float64 `json:"max_pli_per_second,omitempty"`
 
-	Os *string `json:"os"`
+	Os *string `json:"os,omitempty"`
 
-	OsVersion *string `json:"os_version"`
+	OsVersion *string `json:"os_version,omitempty"`
 
-	PublisherNoiseCancellationSeconds *float64 `json:"publisher_noise_cancellation_seconds"`
+	PublisherNoiseCancellationSeconds *float64 `json:"publisher_noise_cancellation_seconds,omitempty"`
 
-	PublisherQualityLimitationFraction *float64 `json:"publisher_quality_limitation_fraction"`
+	PublisherQualityLimitationFraction *float64 `json:"publisher_quality_limitation_fraction,omitempty"`
 
-	PublishingAudioCodec *string `json:"publishing_audio_codec"`
+	PublishingAudioCodec *string `json:"publishing_audio_codec,omitempty"`
 
-	PublishingVideoCodec *string `json:"publishing_video_codec"`
+	PublishingVideoCodec *string `json:"publishing_video_codec,omitempty"`
 
-	ReceivingAudioCodec *string `json:"receiving_audio_codec"`
+	ReceivingAudioCodec *string `json:"receiving_audio_codec,omitempty"`
 
-	ReceivingVideoCodec *string `json:"receiving_video_codec"`
+	ReceivingVideoCodec *string `json:"receiving_video_codec,omitempty"`
 
-	Sdk *string `json:"sdk"`
+	Sdk *string `json:"sdk,omitempty"`
 
-	SdkVersion *string `json:"sdk_version"`
+	SdkVersion *string `json:"sdk_version,omitempty"`
 
-	SubscriberVideoQualityThrottledDurationSeconds *float64 `json:"subscriber_video_quality_throttled_duration_seconds"`
+	SubscriberVideoQualityThrottledDurationSeconds *float64 `json:"subscriber_video_quality_throttled_duration_seconds,omitempty"`
 
-	WebrtcVersion *string `json:"webrtc_version"`
+	WebrtcVersion *string `json:"webrtc_version,omitempty"`
 
-	PublishedTracks *[]PublishedTrackInfo `json:"published_tracks"`
+	PublishedTracks *[]PublishedTrackInfo `json:"published_tracks,omitempty"`
 
-	Subsessions *[]*Subsession `json:"subsessions"`
+	Subsessions *[]*Subsession `json:"subsessions,omitempty"`
 
-	Geolocation *GeolocationResult `json:"geolocation"`
+	Geolocation *GeolocationResult `json:"geolocation,omitempty"`
 
-	Jitter *Stats `json:"jitter"`
+	Jitter *Stats `json:"jitter,omitempty"`
 
-	Latency *Stats `json:"latency"`
+	Latency *Stats `json:"latency,omitempty"`
 
-	MaxPublishingVideoQuality *VideoQuality `json:"max_publishing_video_quality"`
+	MaxPublishingVideoQuality *VideoQuality `json:"max_publishing_video_quality,omitempty"`
 
-	MaxReceivingVideoQuality *VideoQuality `json:"max_receiving_video_quality"`
+	MaxReceivingVideoQuality *VideoQuality `json:"max_receiving_video_quality,omitempty"`
 
-	PubSubHints *MediaPubSubHint `json:"pub_sub_hints"`
+	PubSubHints *MediaPubSubHint `json:"pub_sub_hints,omitempty"`
 
-	PublisherAudioMos *MOSStats `json:"publisher_audio_mos"`
+	PublisherAudioMos *MOSStats `json:"publisher_audio_mos,omitempty"`
 
-	PublisherJitter *Stats `json:"publisher_jitter"`
+	PublisherJitter *Stats `json:"publisher_jitter,omitempty"`
 
-	PublisherLatency *Stats `json:"publisher_latency"`
+	PublisherLatency *Stats `json:"publisher_latency,omitempty"`
 
-	PublisherVideoQualityLimitationDurationSeconds *map[string]float64 `json:"publisher_video_quality_limitation_duration_seconds"`
+	PublisherVideoQualityLimitationDurationSeconds *map[string]float64 `json:"publisher_video_quality_limitation_duration_seconds,omitempty"`
 
-	SubscriberAudioMos *MOSStats `json:"subscriber_audio_mos"`
+	SubscriberAudioMos *MOSStats `json:"subscriber_audio_mos,omitempty"`
 
-	SubscriberJitter *Stats `json:"subscriber_jitter"`
+	SubscriberJitter *Stats `json:"subscriber_jitter,omitempty"`
 
-	SubscriberLatency *Stats `json:"subscriber_latency"`
+	SubscriberLatency *Stats `json:"subscriber_latency,omitempty"`
 
-	Timeline *CallTimeline `json:"timeline"`
+	Timeline *CallTimeline `json:"timeline,omitempty"`
 }
 
 type UserStats struct {
@@ -5483,13 +5483,13 @@ type UserStats struct {
 
 	Info UserInfoResponse `json:"info"`
 
-	Rating *int `json:"rating"`
+	Rating *int `json:"rating,omitempty"`
 }
 
 type VideoQuality struct {
-	UsageType *string `json:"usage_type"`
+	UsageType *string `json:"usage_type,omitempty"`
 
-	Resolution *VideoResolution `json:"resolution"`
+	Resolution *VideoResolution `json:"resolution,omitempty"`
 }
 
 type VideoResolution struct {
@@ -5511,15 +5511,15 @@ type VideoSettings struct {
 }
 
 type VideoSettingsRequest struct {
-	AccessRequestEnabled *bool `json:"access_request_enabled"`
+	AccessRequestEnabled *bool `json:"access_request_enabled,omitempty"`
 
-	CameraDefaultOn *bool `json:"camera_default_on"`
+	CameraDefaultOn *bool `json:"camera_default_on,omitempty"`
 
-	CameraFacing *string `json:"camera_facing"`
+	CameraFacing *string `json:"camera_facing,omitempty"`
 
-	Enabled *bool `json:"enabled"`
+	Enabled *bool `json:"enabled,omitempty"`
 
-	TargetResolution *TargetResolution `json:"target_resolution"`
+	TargetResolution *TargetResolution `json:"target_resolution,omitempty"`
 }
 
 type VideoSettingsResponse struct {
@@ -5535,11 +5535,11 @@ type VideoSettingsResponse struct {
 }
 
 type VoteData struct {
-	AnswerText *string `json:"answer_text"`
+	AnswerText *string `json:"answer_text,omitempty"`
 
-	OptionId *string `json:"option_id"`
+	OptionId *string `json:"option_id,omitempty"`
 
-	Option *PollOption `json:"Option"`
+	Option *PollOption `json:"Option,omitempty"`
 }
 
 type WSEvent struct {
@@ -5549,49 +5549,49 @@ type WSEvent struct {
 
 	Custom map[string]any `json:"custom"`
 
-	Automoderation *bool `json:"automoderation"`
+	Automoderation *bool `json:"automoderation,omitempty"`
 
-	ChannelId *string `json:"channel_id"`
+	ChannelId *string `json:"channel_id,omitempty"`
 
-	ChannelType *string `json:"channel_type"`
+	ChannelType *string `json:"channel_type,omitempty"`
 
-	Cid *string `json:"cid"`
+	Cid *string `json:"cid,omitempty"`
 
-	ConnectionId *string `json:"connection_id"`
+	ConnectionId *string `json:"connection_id,omitempty"`
 
-	ParentId *string `json:"parent_id"`
+	ParentId *string `json:"parent_id,omitempty"`
 
-	Reason *string `json:"reason"`
+	Reason *string `json:"reason,omitempty"`
 
-	Team *string `json:"team"`
+	Team *string `json:"team,omitempty"`
 
-	UserId *string `json:"user_id"`
+	UserId *string `json:"user_id,omitempty"`
 
-	WatcherCount *int `json:"watcher_count"`
+	WatcherCount *int `json:"watcher_count,omitempty"`
 
-	AutomoderationScores *ModerationResponse `json:"automoderation_scores"`
+	AutomoderationScores *ModerationResponse `json:"automoderation_scores,omitempty"`
 
-	Channel *ChannelResponse `json:"channel"`
+	Channel *ChannelResponse `json:"channel,omitempty"`
 
-	CreatedBy *UserObject `json:"created_by"`
+	CreatedBy *UserObject `json:"created_by,omitempty"`
 
-	Me *OwnUser `json:"me"`
+	Me *OwnUser `json:"me,omitempty"`
 
-	Member *ChannelMember `json:"member"`
+	Member *ChannelMember `json:"member,omitempty"`
 
-	Message *Message `json:"message"`
+	Message *Message `json:"message,omitempty"`
 
-	MessageUpdate *MessageUpdate `json:"message_update"`
+	MessageUpdate *MessageUpdate `json:"message_update,omitempty"`
 
-	Poll *Poll `json:"poll"`
+	Poll *Poll `json:"poll,omitempty"`
 
-	PollVote *PollVote `json:"poll_vote"`
+	PollVote *PollVote `json:"poll_vote,omitempty"`
 
-	Reaction *Reaction `json:"reaction"`
+	Reaction *Reaction `json:"reaction,omitempty"`
 
-	Thread *Thread `json:"thread"`
+	Thread *Thread `json:"thread,omitempty"`
 
-	User *UserObject `json:"user"`
+	User *UserObject `json:"user,omitempty"`
 }
 
 type WrappedUnreadCountsResponse struct {
@@ -5609,17 +5609,17 @@ type WrappedUnreadCountsResponse struct {
 }
 
 type XiaomiConfig struct {
-	Disabled *bool `json:"Disabled"`
+	Disabled *bool `json:"Disabled,omitempty"`
 
-	PackageName *string `json:"package_name"`
+	PackageName *string `json:"package_name,omitempty"`
 
-	Secret *string `json:"secret"`
+	Secret *string `json:"secret,omitempty"`
 }
 
 type XiaomiConfigFields struct {
 	Enabled bool `json:"enabled"`
 
-	PackageName *string `json:"package_name"`
+	PackageName *string `json:"package_name,omitempty"`
 
-	Secret *string `json:"secret"`
+	Secret *string `json:"secret,omitempty"`
 }
