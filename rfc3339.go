@@ -10,32 +10,34 @@ type Timestamp struct {
 	rfc3339 bool
 }
 
-func (t Timestamp) MarshalJSON() ([]byte, error) {
-	if t.rfc3339 {
-		return t.Time.MarshalJSON()
-	}
-	return t.formatUnix()
-}
-
 func (t *Timestamp) UnmarshalJSON(data []byte) error {
-	err := t.Time.UnmarshalJSON(data)
-	if err != nil {
-		return t.parseUnix(data)
+	strData := string(data)
+	if strData == "null" {
+		t.Time = time.Time{}
+		return nil
 	}
-	t.rfc3339 = true
-	return nil
-}
 
-func (t Timestamp) formatUnix() ([]byte, error) {
-	sec := float64(t.Time.UnixNano()) * float64(time.Nanosecond) / float64(time.Second)
-	return strconv.AppendFloat(nil, sec, 'f', -1, 64), nil
-}
+	// Try parsing as RFC3339 first
+	parsedTime, err := time.Parse(`"`+time.RFC3339Nano+`"`, strData)
+	if err == nil {
+		t.Time = parsedTime
+		t.rfc3339 = true
+		return nil
+	}
 
-func (t *Timestamp) parseUnix(data []byte) error {
-	f, err := strconv.ParseFloat(string(data), 64)
+	// Try parsing as Unix nanoseconds if RFC3339 fails
+	ns, err := strconv.ParseInt(strData, 10, 64)
+	if err == nil {
+		t.Time = time.Unix(0, ns).UTC()
+		return nil
+	}
+
+	// Handle high precision float values represented as strings
+	floatNs, err := strconv.ParseFloat(strData, 64)
 	if err != nil {
 		return err
 	}
-	t.Time = time.Unix(0, int64(f*float64(time.Second/time.Nanosecond)))
+	integerNs := int64(floatNs)
+	t.Time = time.Unix(0, integerNs).UTC()
 	return nil
 }
