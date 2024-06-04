@@ -13,7 +13,7 @@ func initVideoClient(t *testing.T) *VideoClient {
 	t.Helper()
 
 	c, err := NewClientFromEnvVars()
-	require.NoError(t, err, "new client")
+	require.NoError(t, err, "Failed to create client from env vars")
 	video := NewVideoClient(c)
 
 	return video
@@ -160,7 +160,7 @@ func TestUpdateCallType(t *testing.T) {
 	setup(t)
 	ctx := context.Background()
 	grants := map[string][]string{
-		"host": []string{JOIN_BACKSTAGE.String()},
+		"host": {JOIN_BACKSTAGE.String()},
 	}
 	response, err := client.UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
 		Audio: &AudioSettingsRequest{
