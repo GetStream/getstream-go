@@ -30,7 +30,7 @@ type Client struct {
 
 type ClientOption func(c *Client)
 
-//WithBaseUrl sets the base URL for the client.
+// WithBaseUrl sets the base URL for the client.
 func WithBaseUrl(baseURL string) ClientOption {
 	return func(c *Client) {
 		c.BaseURL = baseURL

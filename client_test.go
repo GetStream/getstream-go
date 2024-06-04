@@ -21,17 +21,18 @@ func initVideoClient(t *testing.T) *VideoClient {
 func TestCreateCall(t *testing.T) {
 	client := initVideoClient(t)
 	ctx := context.Background()
-	callRequest := GetOrCreateCallRequest{Data: &CallRequest{
-		CreatedById: PtrTo("john"),
-		SettingsOverride: &CallSettingsRequest{
-			Geofencing: &GeofenceSettingsRequest{
-				Names: PtrTo([]string{"canada"}),
-			},
-			Screensharing: &ScreensharingSettingsRequest{
-				Enabled: PtrTo(false),
+	callRequest := GetOrCreateCallRequest{
+		Data: &CallRequest{
+			CreatedById: PtrTo("john"),
+			SettingsOverride: &CallSettingsRequest{
+				Geofencing: &GeofenceSettingsRequest{
+					Names: PtrTo([]string{"canada"}),
+				},
+				Screensharing: &ScreensharingSettingsRequest{
+					Enabled: PtrTo(false),
+				},
 			},
 		},
-	},
 	}
 
 	callType := "default"

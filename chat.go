@@ -2,7 +2,6 @@ package getstream
 
 import (
 	"context"
-	"time"
 )
 
 type ChatClient struct {
@@ -469,7 +468,7 @@ func (c *ChatClient) RemovePollVote(ctx context.Context, messageId string, pollI
 	return &result, err
 }
 
-func (c *ChatClient) GetReplies(ctx context.Context, parentId string, limit *int, offset *int, idGte *string, idGt *string, idLte *string, idLt *string, createdAtAfterOrEqual *time.Time, createdAtAfter *time.Time, createdAtBeforeOrEqual *time.Time, createdAtBefore *time.Time, idAround *string, createdAtAround *time.Time, sort *[]*SortParam) (*GetRepliesResponse, error) {
+func (c *ChatClient) GetReplies(ctx context.Context, parentId string, limit *int, offset *int, idGte *string, idGt *string, idLte *string, idLt *string, createdAtAfterOrEqual *Timestamp, createdAtAfter *Timestamp, createdAtBeforeOrEqual *Timestamp, createdAtBefore *Timestamp, idAround *string, createdAtAround *Timestamp, sort *[]*SortParam) (*GetRepliesResponse, error) {
 	var result GetRepliesResponse
 	pathParams := map[string]string{
 		"parent_id": parentId,

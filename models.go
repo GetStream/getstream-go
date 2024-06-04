@@ -487,6 +487,8 @@ type CallSessionResponse struct {
 
 	AcceptedBy map[string]Timestamp `json:"accepted_by"`
 
+	MissedBy map[string]Timestamp `json:"missed_by"`
+
 	ParticipantsCountByRole map[string]int `json:"participants_count_by_role"`
 
 	RejectedBy map[string]Timestamp `json:"rejected_by"`
@@ -498,6 +500,8 @@ type CallSessionResponse struct {
 	LiveStartedAt *Timestamp `json:"live_started_at,omitempty"`
 
 	StartedAt *Timestamp `json:"started_at,omitempty"`
+
+	TimerEndsAt *Timestamp `json:"timer_ends_at,omitempty"`
 }
 
 type CallSettings struct {
@@ -508,6 +512,8 @@ type CallSettings struct {
 	Broadcasting *BroadcastSettings `json:"broadcasting,omitempty"`
 
 	Geofencing *GeofenceSettings `json:"geofencing,omitempty"`
+
+	Limits *LimitsSettings `json:"limits,omitempty"`
 
 	Recording *RecordSettings `json:"recording,omitempty"`
 
@@ -531,6 +537,8 @@ type CallSettingsRequest struct {
 
 	Geofencing *GeofenceSettingsRequest `json:"geofencing,omitempty"`
 
+	Limits *LimitsSettingsRequest `json:"limits,omitempty"`
+
 	Recording *RecordSettingsRequest `json:"recording,omitempty"`
 
 	Ring *RingSettingsRequest `json:"ring,omitempty"`
@@ -552,6 +560,8 @@ type CallSettingsResponse struct {
 	Broadcasting BroadcastSettingsResponse `json:"broadcasting"`
 
 	Geofencing GeofenceSettingsResponse `json:"geofencing"`
+
+	Limits LimitsSettingsResponse `json:"limits"`
 
 	Recording RecordSettingsResponse `json:"recording"`
 
@@ -2452,6 +2462,24 @@ type LimitInfo struct {
 	Reset int `json:"reset"`
 }
 
+type LimitsSettings struct {
+	MaxDurationSeconds *int `json:"max_duration_seconds,omitempty"`
+
+	MaxParticipants *int `json:"max_participants,omitempty"`
+}
+
+type LimitsSettingsRequest struct {
+	MaxDurationSeconds *int `json:"max_duration_seconds,omitempty"`
+
+	MaxParticipants *int `json:"max_participants,omitempty"`
+}
+
+type LimitsSettingsResponse struct {
+	MaxDurationSeconds *int `json:"max_duration_seconds,omitempty"`
+
+	MaxParticipants *int `json:"max_participants,omitempty"`
+}
+
 type ListBlockListResponse struct {
 	Duration string `json:"duration"`
 
@@ -3093,6 +3121,8 @@ type NotificationSettings struct {
 
 	CallLiveStarted EventNotificationSettings `json:"call_live_started"`
 
+	CallMissed EventNotificationSettings `json:"call_missed"`
+
 	CallNotification EventNotificationSettings `json:"call_notification"`
 
 	CallRing EventNotificationSettings `json:"call_ring"`
@@ -3120,6 +3150,7 @@ type OwnCapability string
 
 const (
 	BLOCK_USERS               OwnCapability = "block-users"
+	CHANGE_MAX_DURATION       OwnCapability = "change-max-duration"
 	CREATE_CALL               OwnCapability = "create-call"
 	CREATE_REACTION           OwnCapability = "create-reaction"
 	ENABLE_NOISE_CANCELLATION OwnCapability = "enable-noise-cancellation"
@@ -4074,18 +4105,24 @@ type RingSettings struct {
 	AutoCancelTimeoutMs int `json:"auto_cancel_timeout_ms"`
 
 	IncomingCallTimeoutMs int `json:"incoming_call_timeout_ms"`
+
+	MissedCallTimeoutMs int `json:"missed_call_timeout_ms"`
 }
 
 type RingSettingsRequest struct {
 	AutoCancelTimeoutMs int `json:"auto_cancel_timeout_ms"`
 
 	IncomingCallTimeoutMs int `json:"incoming_call_timeout_ms"`
+
+	MissedCallTimeoutMs *int `json:"missed_call_timeout_ms,omitempty"`
 }
 
 type RingSettingsResponse struct {
 	AutoCancelTimeoutMs int `json:"auto_cancel_timeout_ms"`
 
 	IncomingCallTimeoutMs int `json:"incoming_call_timeout_ms"`
+
+	MissedCallTimeoutMs int `json:"missed_call_timeout_ms"`
 }
 
 type Role struct {

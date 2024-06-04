@@ -89,7 +89,7 @@ func parseResponse[U any](resp *http.Response, result *U) error {
 		return apiErr
 	}
 
-	//unmarshal result
+	// unmarshal result
 	err = json.Unmarshal(b, result)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal HTTP response: %w", err)
