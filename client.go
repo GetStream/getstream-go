@@ -30,6 +30,20 @@ type Client struct {
 
 type ClientOption func(c *Client)
 
+//WithBaseUrl sets the base URL for the client.
+func WithBaseUrl(baseURL string) ClientOption {
+	return func(c *Client) {
+		c.BaseURL = baseURL
+	}
+}
+
+// NewClientFromEnvVars creates a new Client where the API key
+// is retrieved from STREAM_KEY and the secret from STREAM_SECRET
+// environmental variables.
+func NewClientFromEnvVars() (*Client, error) {
+	return NewClient(os.Getenv("STREAM_KEY"), os.Getenv("STREAM_SECRET"))
+}
+
 // NewClient creates new stream chat api client.
 func NewClient(apiKey, apiSecret string, options ...ClientOption) (*Client, error) {
 	switch {

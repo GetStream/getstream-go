@@ -89,21 +89,21 @@ func parseResponse[U any](resp *http.Response, result *U) error {
 		return apiErr
 	}
 
-	if _, ok := any(result).(*Response); !ok {
-		err = json.Unmarshal(b, result)
-		if err != nil {
-			return fmt.Errorf("cannot unmarshal body: %w", err)
-		}
+	//unmarshal result
+	err = json.Unmarshal(b, result)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal HTTP response: %w", err)
 	}
+	return nil
 
-	return addRateLimitInfo(resp.Header, result)
+	// return addRateLimitInfo(resp.Header, result)
 }
 
 // requestURL constructs the full request URL
 func (c *Client) requestURL(path string, values url.Values, pathParams map[string]string) (string, error) {
 	path = buildPath(path, pathParams)
 
-	u, err := url.Parse(c.BaseURL + "/" + path)
+	u, err := url.Parse(c.BaseURL + path)
 	if err != nil {
 		return "", fmt.Errorf("url.Parse: %w", err)
 	}

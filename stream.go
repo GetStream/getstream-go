@@ -7,9 +7,8 @@ type Stream struct {
 	common *CommonClient
 }
 
-// New
-func New(apiKey, apiSecret string) *Stream {
-	client, err := NewClient(apiKey, apiSecret)
+func New(apiKey, apiSecret string, options ...ClientOption) *Stream {
+	client, err := NewClient(apiKey, apiSecret, options...)
 	if err != nil {
 		return nil
 	}

@@ -1,9 +1,5 @@
 package getstream
 
-import (
-	"time"
-)
-
 type APIError struct {
 	Code int `json:"code"`
 
@@ -153,7 +149,7 @@ type AppResponseFields struct {
 
 	BeforeMessageSendHookUrl *string `json:"before_message_send_hook_url,omitempty"`
 
-	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before,omitempty"`
+	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
 
 	AllowedFlagReasons *[]string `json:"allowed_flag_reasons,omitempty"`
 
@@ -331,9 +327,9 @@ type BanRequest struct {
 }
 
 type BanResponse struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
-	Expires *time.Time `json:"expires,omitempty"`
+	Expires *Timestamp `json:"expires,omitempty"`
 
 	Reason *string `json:"reason,omitempty"`
 
@@ -353,9 +349,9 @@ type BlockList struct {
 
 	Words []string `json:"words"`
 
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
 
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 }
 
 type BlockListOptions struct {
@@ -407,7 +403,7 @@ type CallIngressResponse struct {
 }
 
 type CallParticipantResponse struct {
-	JoinedAt time.Time `json:"joined_at"`
+	JoinedAt Timestamp `json:"joined_at"`
 
 	Role string `json:"role"`
 
@@ -417,11 +413,11 @@ type CallParticipantResponse struct {
 }
 
 type CallRecording struct {
-	EndTime time.Time `json:"end_time"`
+	EndTime Timestamp `json:"end_time"`
 
 	Filename string `json:"filename"`
 
-	StartTime time.Time `json:"start_time"`
+	StartTime Timestamp `json:"start_time"`
 
 	Url string `json:"url"`
 }
@@ -429,7 +425,7 @@ type CallRecording struct {
 type CallRequest struct {
 	CreatedById *string `json:"created_by_id,omitempty"`
 
-	StartsAt *time.Time `json:"starts_at,omitempty"`
+	StartsAt *Timestamp `json:"starts_at,omitempty"`
 
 	Team *string `json:"team,omitempty"`
 
@@ -447,7 +443,7 @@ type CallResponse struct {
 
 	Cid string `json:"cid"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	CurrentSessionId string `json:"current_session_id"`
 
@@ -459,7 +455,7 @@ type CallResponse struct {
 
 	Type string `json:"type"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	BlockedUserIds []string `json:"blocked_user_ids"`
 
@@ -473,9 +469,9 @@ type CallResponse struct {
 
 	Settings CallSettingsResponse `json:"settings"`
 
-	EndedAt *time.Time `json:"ended_at,omitempty"`
+	EndedAt *Timestamp `json:"ended_at,omitempty"`
 
-	StartsAt *time.Time `json:"starts_at,omitempty"`
+	StartsAt *Timestamp `json:"starts_at,omitempty"`
 
 	Team *string `json:"team,omitempty"`
 
@@ -489,19 +485,19 @@ type CallSessionResponse struct {
 
 	Participants []CallParticipantResponse `json:"participants"`
 
-	AcceptedBy map[string]time.Time `json:"accepted_by"`
+	AcceptedBy map[string]Timestamp `json:"accepted_by"`
 
 	ParticipantsCountByRole map[string]int `json:"participants_count_by_role"`
 
-	RejectedBy map[string]time.Time `json:"rejected_by"`
+	RejectedBy map[string]Timestamp `json:"rejected_by"`
 
-	EndedAt *time.Time `json:"ended_at,omitempty"`
+	EndedAt *Timestamp `json:"ended_at,omitempty"`
 
-	LiveEndedAt *time.Time `json:"live_ended_at,omitempty"`
+	LiveEndedAt *Timestamp `json:"live_ended_at,omitempty"`
 
-	LiveStartedAt *time.Time `json:"live_started_at,omitempty"`
+	LiveStartedAt *Timestamp `json:"live_started_at,omitempty"`
 
-	StartedAt *time.Time `json:"started_at,omitempty"`
+	StartedAt *Timestamp `json:"started_at,omitempty"`
 }
 
 type CallSettings struct {
@@ -587,9 +583,9 @@ type CallStatsReportSummaryResponse struct {
 
 	CallStatus string `json:"call_status"`
 
-	FirstStatsTime time.Time `json:"first_stats_time"`
+	FirstStatsTime Timestamp `json:"first_stats_time"`
 
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
 
 	QualityScore *int `json:"quality_score,omitempty"`
 }
@@ -599,11 +595,11 @@ type CallTimeline struct {
 }
 
 type CallTranscription struct {
-	EndTime time.Time `json:"end_time"`
+	EndTime Timestamp `json:"end_time"`
 
 	Filename string `json:"filename"`
 
-	StartTime time.Time `json:"start_time"`
+	StartTime Timestamp `json:"start_time"`
 
 	Url string `json:"url"`
 }
@@ -611,7 +607,7 @@ type CallTranscription struct {
 type CallType struct {
 	AppPK int `json:"AppPK"`
 
-	CreatedAt time.Time `json:"CreatedAt"`
+	CreatedAt Timestamp `json:"CreatedAt"`
 
 	ExternalStorage string `json:"ExternalStorage"`
 
@@ -619,7 +615,7 @@ type CallType struct {
 
 	PK int `json:"PK"`
 
-	UpdatedAt time.Time `json:"UpdatedAt"`
+	UpdatedAt Timestamp `json:"UpdatedAt"`
 
 	NotificationSettings *NotificationSettings `json:"NotificationSettings,omitempty"`
 
@@ -627,11 +623,11 @@ type CallType struct {
 }
 
 type CallTypeResponse struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Name string `json:"name"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Grants map[string][]string `json:"grants"`
 
@@ -655,7 +651,7 @@ type Channel struct {
 
 	Cid string `json:"cid"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Disabled bool `json:"disabled"`
 
@@ -665,7 +661,7 @@ type Channel struct {
 
 	Type string `json:"type"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Custom map[string]any `json:"custom"`
 
@@ -673,9 +669,9 @@ type Channel struct {
 
 	Cooldown *int `json:"cooldown,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
-	LastMessageAt *time.Time `json:"last_message_at,omitempty"`
+	LastMessageAt *Timestamp `json:"last_message_at,omitempty"`
 
 	MemberCount *int `json:"member_count,omitempty"`
 
@@ -701,7 +697,7 @@ type ChannelConfig struct {
 
 	ConnectEvents bool `json:"connect_events"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	CustomEvents bool `json:"custom_events"`
 
@@ -731,7 +727,7 @@ type ChannelConfig struct {
 
 	TypingEvents bool `json:"typing_events"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Uploads bool `json:"uploads"`
 
@@ -757,7 +753,7 @@ type ChannelConfigWithInfo struct {
 
 	ConnectEvents bool `json:"connect_events"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	CustomEvents bool `json:"custom_events"`
 
@@ -787,7 +783,7 @@ type ChannelConfigWithInfo struct {
 
 	TypingEvents bool `json:"typing_events"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Uploads bool `json:"uploads"`
 
@@ -813,9 +809,9 @@ type ChannelExport struct {
 
 	Id *string `json:"id,omitempty"`
 
-	MessagesSince *time.Time `json:"messages_since,omitempty"`
+	MessagesSince *Timestamp `json:"messages_since,omitempty"`
 
-	MessagesUntil *time.Time `json:"messages_until,omitempty"`
+	MessagesUntil *Timestamp `json:"messages_until,omitempty"`
 
 	Type *string `json:"type,omitempty"`
 }
@@ -867,21 +863,21 @@ type ChannelMember struct {
 
 	ChannelRole string `json:"channel_role"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	NotificationsMuted bool `json:"notifications_muted"`
 
 	ShadowBanned bool `json:"shadow_banned"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
-	BanExpires *time.Time `json:"ban_expires,omitempty"`
+	BanExpires *Timestamp `json:"ban_expires,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
-	InviteAcceptedAt *time.Time `json:"invite_accepted_at,omitempty"`
+	InviteAcceptedAt *Timestamp `json:"invite_accepted_at,omitempty"`
 
-	InviteRejectedAt *time.Time `json:"invite_rejected_at,omitempty"`
+	InviteRejectedAt *Timestamp `json:"invite_rejected_at,omitempty"`
 
 	Invited *bool `json:"invited,omitempty"`
 
@@ -895,11 +891,11 @@ type ChannelMember struct {
 }
 
 type ChannelMute struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
-	Expires *time.Time `json:"expires,omitempty"`
+	Expires *Timestamp `json:"expires,omitempty"`
 
 	Channel *ChannelResponse `json:"channel,omitempty"`
 
@@ -909,7 +905,7 @@ type ChannelMute struct {
 type ChannelResponse struct {
 	Cid string `json:"cid"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Disabled bool `json:"disabled"`
 
@@ -919,7 +915,7 @@ type ChannelResponse struct {
 
 	Type string `json:"type"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Custom map[string]any `json:"custom"`
 
@@ -929,23 +925,23 @@ type ChannelResponse struct {
 
 	Cooldown *int `json:"cooldown,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
 	Hidden *bool `json:"hidden,omitempty"`
 
-	HideMessagesBefore *time.Time `json:"hide_messages_before,omitempty"`
+	HideMessagesBefore *Timestamp `json:"hide_messages_before,omitempty"`
 
-	LastMessageAt *time.Time `json:"last_message_at,omitempty"`
+	LastMessageAt *Timestamp `json:"last_message_at,omitempty"`
 
 	MemberCount *int `json:"member_count,omitempty"`
 
-	MuteExpiresAt *time.Time `json:"mute_expires_at,omitempty"`
+	MuteExpiresAt *Timestamp `json:"mute_expires_at,omitempty"`
 
 	Muted *bool `json:"muted,omitempty"`
 
 	Team *string `json:"team,omitempty"`
 
-	TruncatedAt *time.Time `json:"truncated_at,omitempty"`
+	TruncatedAt *Timestamp `json:"truncated_at,omitempty"`
 
 	Members *[]*ChannelMember `json:"members,omitempty"`
 
@@ -971,7 +967,7 @@ type ChannelStateResponse struct {
 
 	Hidden *bool `json:"hidden,omitempty"`
 
-	HideMessagesBefore *time.Time `json:"hide_messages_before,omitempty"`
+	HideMessagesBefore *Timestamp `json:"hide_messages_before,omitempty"`
 
 	WatcherCount *int `json:"watcher_count,omitempty"`
 
@@ -997,7 +993,7 @@ type ChannelStateResponseFields struct {
 
 	Hidden *bool `json:"hidden,omitempty"`
 
-	HideMessagesBefore *time.Time `json:"hide_messages_before,omitempty"`
+	HideMessagesBefore *Timestamp `json:"hide_messages_before,omitempty"`
 
 	WatcherCount *int `json:"watcher_count,omitempty"`
 
@@ -1019,7 +1015,7 @@ type ChannelTypeConfig struct {
 
 	ConnectEvents bool `json:"connect_events"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	CustomEvents bool `json:"custom_events"`
 
@@ -1049,7 +1045,7 @@ type ChannelTypeConfig struct {
 
 	TypingEvents bool `json:"typing_events"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Uploads bool `json:"uploads"`
 
@@ -1175,9 +1171,9 @@ type Command struct {
 
 	Set string `json:"set"`
 
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
 
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 }
 
 type CommitMessageRequest struct{}
@@ -1219,13 +1215,13 @@ type CreateCallTypeRequest struct {
 }
 
 type CreateCallTypeResponse struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Duration string `json:"duration"`
 
 	Name string `json:"name"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Grants map[string][]string `json:"grants"`
 
@@ -1293,7 +1289,7 @@ type CreateChannelTypeResponse struct {
 
 	ConnectEvents bool `json:"connect_events"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	CustomEvents bool `json:"custom_events"`
 
@@ -1325,7 +1321,7 @@ type CreateChannelTypeResponse struct {
 
 	TypingEvents bool `json:"typing_events"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Uploads bool `json:"uploads"`
 
@@ -1593,7 +1589,7 @@ type DeleteUsersResponse struct {
 }
 
 type Device struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Id string `json:"id"`
 
@@ -1823,19 +1819,19 @@ type FirebaseConfigFields struct {
 }
 
 type Flag struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	CreatedByAutomod bool `json:"created_by_automod"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
-	ApprovedAt *time.Time `json:"approved_at,omitempty"`
+	ApprovedAt *Timestamp `json:"approved_at,omitempty"`
 
 	Reason *string `json:"reason,omitempty"`
 
-	RejectedAt *time.Time `json:"rejected_at,omitempty"`
+	RejectedAt *Timestamp `json:"rejected_at,omitempty"`
 
-	ReviewedAt *time.Time `json:"reviewed_at,omitempty"`
+	ReviewedAt *Timestamp `json:"reviewed_at,omitempty"`
 
 	ReviewedBy *string `json:"reviewed_by,omitempty"`
 
@@ -1861,7 +1857,7 @@ type FlagDetails struct {
 }
 
 type FlagFeedback struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	MessageId string `json:"message_id"`
 
@@ -1901,7 +1897,7 @@ type FlagResponse struct {
 type FullUserResponse struct {
 	Banned bool `json:"banned"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Id string `json:"id"`
 
@@ -1921,7 +1917,7 @@ type FullUserResponse struct {
 
 	UnreadThreads int `json:"unread_threads"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	ChannelMutes []*ChannelMute `json:"channel_mutes"`
 
@@ -1933,17 +1929,17 @@ type FullUserResponse struct {
 
 	Custom map[string]any `json:"custom"`
 
-	DeactivatedAt *time.Time `json:"deactivated_at,omitempty"`
+	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
 	Image *string `json:"image,omitempty"`
 
-	LastActive *time.Time `json:"last_active,omitempty"`
+	LastActive *Timestamp `json:"last_active,omitempty"`
 
 	Name *string `json:"name,omitempty"`
 
-	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before,omitempty"`
+	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
 
 	LatestHiddenChannels *[]string `json:"latest_hidden_channels,omitempty"`
 
@@ -2049,13 +2045,13 @@ type GetCallStatsResponse struct {
 }
 
 type GetCallTypeResponse struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Duration string `json:"duration"`
 
 	Name string `json:"name"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Grants map[string][]string `json:"grants"`
 
@@ -2077,9 +2073,9 @@ type GetCommandResponse struct {
 
 	Set string `json:"set"`
 
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
 
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 }
 
 type GetCustomPermissionResponse struct {
@@ -2095,7 +2091,7 @@ type GetEdgesResponse struct {
 }
 
 type GetExportChannelsStatusResponse struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Duration string `json:"duration"`
 
@@ -2103,7 +2099,7 @@ type GetExportChannelsStatusResponse struct {
 
 	TaskId string `json:"task_id"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Error *ErrorResult `json:"error,omitempty"`
 
@@ -2225,7 +2221,7 @@ type GetRepliesResponse struct {
 }
 
 type GetTaskResponse struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Duration string `json:"duration"`
 
@@ -2233,7 +2229,7 @@ type GetTaskResponse struct {
 
 	TaskId string `json:"task_id"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Error *ErrorResult `json:"error,omitempty"`
 
@@ -2379,7 +2375,7 @@ type Images struct {
 }
 
 type ImportTask struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Id string `json:"id"`
 
@@ -2389,7 +2385,7 @@ type ImportTask struct {
 
 	State string `json:"state"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	History []*ImportTaskHistory `json:"history"`
 
@@ -2397,7 +2393,7 @@ type ImportTask struct {
 }
 
 type ImportTaskHistory struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	NextState string `json:"next_state"`
 
@@ -2599,9 +2595,9 @@ type MemberRequest struct {
 }
 
 type MemberResponse struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	UserId string `json:"user_id"`
 
@@ -2609,7 +2605,7 @@ type MemberResponse struct {
 
 	User UserResponse `json:"user"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
 	Role *string `json:"role,omitempty"`
 }
@@ -2623,7 +2619,7 @@ type MembersResponse struct {
 type Message struct {
 	Cid string `json:"cid"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	DeletedReplyCount int `json:"deleted_reply_count"`
 
@@ -2643,7 +2639,7 @@ type Message struct {
 
 	Type string `json:"type"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Attachments []*Attachment `json:"attachments"`
 
@@ -2665,17 +2661,17 @@ type Message struct {
 
 	Command *string `json:"command,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
-	MessageTextUpdatedAt *time.Time `json:"message_text_updated_at,omitempty"`
+	MessageTextUpdatedAt *Timestamp `json:"message_text_updated_at,omitempty"`
 
 	Mml *string `json:"mml,omitempty"`
 
 	ParentId *string `json:"parent_id,omitempty"`
 
-	PinExpires *time.Time `json:"pin_expires,omitempty"`
+	PinExpires *Timestamp `json:"pin_expires,omitempty"`
 
-	PinnedAt *time.Time `json:"pinned_at,omitempty"`
+	PinnedAt *Timestamp `json:"pinned_at,omitempty"`
 
 	PollId *string `json:"poll_id,omitempty"`
 
@@ -2727,19 +2723,19 @@ type MessageChangeSet struct {
 }
 
 type MessageFlag struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	CreatedByAutomod bool `json:"created_by_automod"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
-	ApprovedAt *time.Time `json:"approved_at,omitempty"`
+	ApprovedAt *Timestamp `json:"approved_at,omitempty"`
 
 	Reason *string `json:"reason,omitempty"`
 
-	RejectedAt *time.Time `json:"rejected_at,omitempty"`
+	RejectedAt *Timestamp `json:"rejected_at,omitempty"`
 
-	ReviewedAt *time.Time `json:"reviewed_at,omitempty"`
+	ReviewedAt *Timestamp `json:"reviewed_at,omitempty"`
 
 	Custom *map[string]any `json:"custom,omitempty"`
 
@@ -2759,7 +2755,7 @@ type MessageFlag struct {
 type MessageHistoryEntry struct {
 	MessageId string `json:"message_id"`
 
-	MessageUpdatedAt time.Time `json:"message_updated_at"`
+	MessageUpdatedAt Timestamp `json:"message_updated_at"`
 
 	MessageUpdatedById string `json:"message_updated_by_id"`
 
@@ -2773,11 +2769,11 @@ type MessageHistoryEntry struct {
 type MessageModerationResult struct {
 	Action string `json:"action"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	MessageId string `json:"message_id"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	UserBadKarma bool `json:"user_bad_karma"`
 
@@ -2803,7 +2799,7 @@ type MessageReadEvent struct {
 
 	Cid string `json:"cid"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Type string `json:"type"`
 
@@ -2825,11 +2821,11 @@ type MessageRequest struct {
 
 	ParentId *string `json:"parent_id,omitempty"`
 
-	PinExpires *time.Time `json:"pin_expires,omitempty"`
+	PinExpires *Timestamp `json:"pin_expires,omitempty"`
 
 	Pinned *bool `json:"pinned,omitempty"`
 
-	PinnedAt *time.Time `json:"pinned_at,omitempty"`
+	PinnedAt *Timestamp `json:"pinned_at,omitempty"`
 
 	PollId *string `json:"poll_id,omitempty"`
 
@@ -2857,7 +2853,7 @@ type MessageRequest struct {
 type MessageResponse struct {
 	Cid string `json:"cid"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	DeletedReplyCount int `json:"deleted_reply_count"`
 
@@ -2877,7 +2873,7 @@ type MessageResponse struct {
 
 	Type string `json:"type"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Attachments []*Attachment `json:"attachments"`
 
@@ -2897,17 +2893,17 @@ type MessageResponse struct {
 
 	Command *string `json:"command,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
-	MessageTextUpdatedAt *time.Time `json:"message_text_updated_at,omitempty"`
+	MessageTextUpdatedAt *Timestamp `json:"message_text_updated_at,omitempty"`
 
 	Mml *string `json:"mml,omitempty"`
 
 	ParentId *string `json:"parent_id,omitempty"`
 
-	PinExpires *time.Time `json:"pin_expires,omitempty"`
+	PinExpires *Timestamp `json:"pin_expires,omitempty"`
 
-	PinnedAt *time.Time `json:"pinned_at,omitempty"`
+	PinnedAt *Timestamp `json:"pinned_at,omitempty"`
 
 	PollId *string `json:"poll_id,omitempty"`
 
@@ -2939,7 +2935,7 @@ type MessageUpdate struct {
 type MessageWithChannelResponse struct {
 	Cid string `json:"cid"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	DeletedReplyCount int `json:"deleted_reply_count"`
 
@@ -2959,7 +2955,7 @@ type MessageWithChannelResponse struct {
 
 	Type string `json:"type"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Attachments []*Attachment `json:"attachments"`
 
@@ -2981,17 +2977,17 @@ type MessageWithChannelResponse struct {
 
 	Command *string `json:"command,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
-	MessageTextUpdatedAt *time.Time `json:"message_text_updated_at,omitempty"`
+	MessageTextUpdatedAt *Timestamp `json:"message_text_updated_at,omitempty"`
 
 	Mml *string `json:"mml,omitempty"`
 
 	ParentId *string `json:"parent_id,omitempty"`
 
-	PinExpires *time.Time `json:"pin_expires,omitempty"`
+	PinExpires *Timestamp `json:"pin_expires,omitempty"`
 
-	PinnedAt *time.Time `json:"pinned_at,omitempty"`
+	PinnedAt *Timestamp `json:"pinned_at,omitempty"`
 
 	PollId *string `json:"poll_id,omitempty"`
 
@@ -3113,7 +3109,7 @@ type NullBool struct {
 type NullTime struct {
 	HasValue *bool `json:"HasValue,omitempty"`
 
-	Value *time.Time `json:"Value,omitempty"`
+	Value *Timestamp `json:"Value,omitempty"`
 }
 
 type OnlyUserID struct {
@@ -3153,7 +3149,7 @@ const (
 type OwnUser struct {
 	Banned bool `json:"banned"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Id string `json:"id"`
 
@@ -3171,7 +3167,7 @@ type OwnUser struct {
 
 	UnreadThreads int `json:"unread_threads"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	ChannelMutes []*ChannelMute `json:"channel_mutes"`
 
@@ -3181,13 +3177,13 @@ type OwnUser struct {
 
 	Custom map[string]any `json:"custom"`
 
-	DeactivatedAt *time.Time `json:"deactivated_at,omitempty"`
+	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
 	Invisible *bool `json:"invisible,omitempty"`
 
-	LastActive *time.Time `json:"last_active,omitempty"`
+	LastActive *Timestamp `json:"last_active,omitempty"`
 
 	LatestHiddenChannels *[]string `json:"latest_hidden_channels,omitempty"`
 
@@ -3249,7 +3245,7 @@ type PinResponse struct {
 type Policy struct {
 	Action int `json:"action"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Name string `json:"name"`
 
@@ -3257,7 +3253,7 @@ type Policy struct {
 
 	Priority int `json:"priority"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Resources []string `json:"resources"`
 
@@ -3285,7 +3281,7 @@ type Poll struct {
 
 	AnswersCount int `json:"answers_count"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	CreatedById string `json:"created_by_id"`
 
@@ -3297,7 +3293,7 @@ type Poll struct {
 
 	Name string `json:"name"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	VoteCount int `json:"vote_count"`
 
@@ -3363,7 +3359,7 @@ type PollResponseData struct {
 
 	AnswersCount int `json:"answers_count"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	CreatedById string `json:"created_by_id"`
 
@@ -3375,7 +3371,7 @@ type PollResponseData struct {
 
 	Name string `json:"name"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	VoteCount int `json:"vote_count"`
 
@@ -3399,7 +3395,7 @@ type PollResponseData struct {
 }
 
 type PollVote struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Id string `json:"id"`
 
@@ -3407,7 +3403,7 @@ type PollVote struct {
 
 	PollId string `json:"poll_id"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	AnswerText *string `json:"answer_text,omitempty"`
 
@@ -3425,7 +3421,7 @@ type PollVoteResponse struct {
 }
 
 type PollVoteResponseData struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Id string `json:"id"`
 
@@ -3433,7 +3429,7 @@ type PollVoteResponseData struct {
 
 	PollId string `json:"poll_id"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	AnswerText *string `json:"answer_text,omitempty"`
 
@@ -3493,7 +3489,7 @@ type PushNotificationFields struct {
 type PushNotificationSettings struct {
 	Disabled *bool `json:"disabled,omitempty"`
 
-	DisabledUntil *time.Time `json:"disabled_until,omitempty"`
+	DisabledUntil *Timestamp `json:"disabled_until,omitempty"`
 }
 
 type PushNotificationSettingsInput struct {
@@ -3503,13 +3499,13 @@ type PushNotificationSettingsInput struct {
 }
 
 type PushProvider struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Name string `json:"name"`
 
 	Type string `json:"type"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	ApnAuthKey *string `json:"apn_auth_key,omitempty"`
 
@@ -3531,7 +3527,7 @@ type PushProvider struct {
 
 	Description *string `json:"description,omitempty"`
 
-	DisabledAt *time.Time `json:"disabled_at,omitempty"`
+	DisabledAt *Timestamp `json:"disabled_at,omitempty"`
 
 	DisabledReason *string `json:"disabled_reason,omitempty"`
 
@@ -3557,13 +3553,13 @@ type PushProvider struct {
 }
 
 type PushProviderResponse struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Name string `json:"name"`
 
 	Type string `json:"type"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	ApnAuthKey *string `json:"apn_auth_key,omitempty"`
 
@@ -3589,7 +3585,7 @@ type PushProviderResponse struct {
 
 	Description *string `json:"description,omitempty"`
 
-	DisabledAt *time.Time `json:"disabled_at,omitempty"`
+	DisabledAt *Timestamp `json:"disabled_at,omitempty"`
 
 	DisabledReason *string `json:"disabled_reason,omitempty"`
 
@@ -3913,7 +3909,7 @@ type RTMPIngress struct {
 }
 
 type Reaction struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	MessageId string `json:"message_id"`
 
@@ -3921,7 +3917,7 @@ type Reaction struct {
 
 	Type string `json:"type"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Custom map[string]any `json:"custom"`
 
@@ -3933,9 +3929,9 @@ type Reaction struct {
 type ReactionGroupResponse struct {
 	Count int `json:"count"`
 
-	FirstReactionAt time.Time `json:"first_reaction_at"`
+	FirstReactionAt Timestamp `json:"first_reaction_at"`
 
-	LastReactionAt time.Time `json:"last_reaction_at"`
+	LastReactionAt Timestamp `json:"last_reaction_at"`
 
 	SumScores int `json:"sum_scores"`
 }
@@ -3951,11 +3947,11 @@ type ReactionRemovalResponse struct {
 type ReactionRequest struct {
 	Type string `json:"type"`
 
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
 
 	Score *int `json:"score,omitempty"`
 
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 
 	UserId *string `json:"user_id,omitempty"`
 
@@ -3965,7 +3961,7 @@ type ReactionRequest struct {
 }
 
 type ReactionResponse struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	MessageId string `json:"message_id"`
 
@@ -3973,7 +3969,7 @@ type ReactionResponse struct {
 
 	Type string `json:"type"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	UserId string `json:"user_id"`
 
@@ -4013,7 +4009,7 @@ type ReactivateUsersResponse struct {
 }
 
 type Read struct {
-	LastRead time.Time `json:"last_read"`
+	LastRead Timestamp `json:"last_read"`
 
 	UnreadMessages int `json:"unread_messages"`
 
@@ -4027,7 +4023,7 @@ type ReadReceipts struct {
 }
 
 type ReadStateResponse struct {
-	LastRead time.Time `json:"last_read"`
+	LastRead Timestamp `json:"last_read"`
 
 	UnreadMessages int `json:"unread_messages"`
 
@@ -4093,13 +4089,13 @@ type RingSettingsResponse struct {
 }
 
 type Role struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Custom bool `json:"custom"`
 
 	Name string `json:"name"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Scopes []string `json:"scopes"`
 }
@@ -4181,7 +4177,7 @@ type SearchResult struct {
 type SearchResultMessage struct {
 	Cid string `json:"cid"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	DeletedReplyCount int `json:"deleted_reply_count"`
 
@@ -4201,7 +4197,7 @@ type SearchResultMessage struct {
 
 	Type string `json:"type"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Attachments []*Attachment `json:"attachments"`
 
@@ -4223,17 +4219,17 @@ type SearchResultMessage struct {
 
 	Command *string `json:"command,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
-	MessageTextUpdatedAt *time.Time `json:"message_text_updated_at,omitempty"`
+	MessageTextUpdatedAt *Timestamp `json:"message_text_updated_at,omitempty"`
 
 	Mml *string `json:"mml,omitempty"`
 
 	ParentId *string `json:"parent_id,omitempty"`
 
-	PinExpires *time.Time `json:"pin_expires,omitempty"`
+	PinExpires *Timestamp `json:"pin_expires,omitempty"`
 
-	PinnedAt *time.Time `json:"pinned_at,omitempty"`
+	PinnedAt *Timestamp `json:"pinned_at,omitempty"`
 
 	PollId *string `json:"poll_id,omitempty"`
 
@@ -4421,19 +4417,19 @@ type TargetResolution struct {
 type Thread struct {
 	ChannelCid string `json:"channel_cid"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	ParentMessageId string `json:"parent_message_id"`
 
 	Title string `json:"title"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Custom map[string]any `json:"custom"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
-	LastMessageAt *time.Time `json:"last_message_at,omitempty"`
+	LastMessageAt *Timestamp `json:"last_message_at,omitempty"`
 
 	ParticipantCount *int `json:"participant_count,omitempty"`
 
@@ -4453,15 +4449,15 @@ type ThreadParticipant struct {
 
 	ChannelCid string `json:"channel_cid"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
-	LastReadAt time.Time `json:"last_read_at"`
+	LastReadAt Timestamp `json:"last_read_at"`
 
 	Custom map[string]any `json:"custom"`
 
-	LastThreadMessageAt *time.Time `json:"last_thread_message_at,omitempty"`
+	LastThreadMessageAt *Timestamp `json:"last_thread_message_at,omitempty"`
 
-	LeftThreadAt *time.Time `json:"left_thread_at,omitempty"`
+	LeftThreadAt *Timestamp `json:"left_thread_at,omitempty"`
 
 	ThreadId *string `json:"thread_id,omitempty"`
 
@@ -4473,7 +4469,7 @@ type ThreadParticipant struct {
 type ThreadResponse struct {
 	ChannelCid string `json:"channel_cid"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	CreatedByUserId string `json:"created_by_user_id"`
 
@@ -4481,13 +4477,13 @@ type ThreadResponse struct {
 
 	Title string `json:"title"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Custom map[string]any `json:"custom"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
-	LastMessageAt *time.Time `json:"last_message_at,omitempty"`
+	LastMessageAt *Timestamp `json:"last_message_at,omitempty"`
 
 	ParticipantCount *int `json:"participant_count,omitempty"`
 
@@ -4505,21 +4501,21 @@ type ThreadResponse struct {
 type ThreadState struct {
 	ChannelCid string `json:"channel_cid"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	ParentMessageId string `json:"parent_message_id"`
 
 	Title string `json:"title"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	LatestReplies []*Message `json:"latest_replies"`
 
 	Custom map[string]any `json:"custom"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
-	LastMessageAt *time.Time `json:"last_message_at,omitempty"`
+	LastMessageAt *Timestamp `json:"last_message_at,omitempty"`
 
 	ParticipantCount *int `json:"participant_count,omitempty"`
 
@@ -4539,7 +4535,7 @@ type ThreadState struct {
 type ThreadStateResponse struct {
 	ChannelCid string `json:"channel_cid"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	CreatedByUserId string `json:"created_by_user_id"`
 
@@ -4547,15 +4543,15 @@ type ThreadStateResponse struct {
 
 	Title string `json:"title"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	LatestReplies []*Message `json:"latest_replies"`
 
 	Custom map[string]any `json:"custom"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
-	LastMessageAt *time.Time `json:"last_message_at,omitempty"`
+	LastMessageAt *Timestamp `json:"last_message_at,omitempty"`
 
 	ParticipantCount *int `json:"participant_count,omitempty"`
 
@@ -4629,7 +4625,7 @@ type TruncateChannelRequest struct {
 
 	SkipPush *bool `json:"skip_push,omitempty"`
 
-	TruncatedAt *time.Time `json:"truncated_at,omitempty"`
+	TruncatedAt *Timestamp `json:"truncated_at,omitempty"`
 
 	UserId *string `json:"user_id,omitempty"`
 
@@ -4707,7 +4703,7 @@ type UnreadCountsBatchResponse struct {
 type UnreadCountsChannel struct {
 	ChannelId string `json:"channel_id"`
 
-	LastRead time.Time `json:"last_read"`
+	LastRead Timestamp `json:"last_read"`
 
 	UnreadCount int `json:"unread_count"`
 }
@@ -4733,7 +4729,7 @@ type UnreadCountsResponse struct {
 }
 
 type UnreadCountsThread struct {
-	LastRead time.Time `json:"last_read"`
+	LastRead Timestamp `json:"last_read"`
 
 	LastReadMessageId string `json:"last_read_message_id"`
 
@@ -4773,7 +4769,7 @@ type UpdateAppRequest struct {
 
 	RemindersMaxMembers *int `json:"reminders_max_members,omitempty"`
 
-	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before,omitempty"`
+	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
 
 	SnsKey *string `json:"sns_key,omitempty"`
 
@@ -4841,7 +4837,7 @@ type UpdateCallMembersResponse struct {
 }
 
 type UpdateCallRequest struct {
-	StartsAt *time.Time `json:"starts_at,omitempty"`
+	StartsAt *Timestamp `json:"starts_at,omitempty"`
 
 	Custom *map[string]any `json:"custom,omitempty"`
 
@@ -4869,13 +4865,13 @@ type UpdateCallTypeRequest struct {
 }
 
 type UpdateCallTypeResponse struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Duration string `json:"duration"`
 
 	Name string `json:"name"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Grants map[string][]string `json:"grants"`
 
@@ -5007,7 +5003,7 @@ type UpdateChannelTypeResponse struct {
 
 	ConnectEvents bool `json:"connect_events"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	CustomEvents bool `json:"custom_events"`
 
@@ -5039,7 +5035,7 @@ type UpdateChannelTypeResponse struct {
 
 	TypingEvents bool `json:"typing_events"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Uploads bool `json:"uploads"`
 
@@ -5265,11 +5261,11 @@ type UserInfoResponse struct {
 }
 
 type UserMute struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
-	Expires *time.Time `json:"expires,omitempty"`
+	Expires *Timestamp `json:"expires,omitempty"`
 
 	Target *UserObject `json:"target,omitempty"`
 
@@ -5287,23 +5283,23 @@ type UserObject struct {
 
 	Custom map[string]any `json:"custom"`
 
-	BanExpires *time.Time `json:"ban_expires,omitempty"`
+	BanExpires *Timestamp `json:"ban_expires,omitempty"`
 
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
 
-	DeactivatedAt *time.Time `json:"deactivated_at,omitempty"`
+	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
 	Invisible *bool `json:"invisible,omitempty"`
 
 	Language *string `json:"language,omitempty"`
 
-	LastActive *time.Time `json:"last_active,omitempty"`
+	LastActive *Timestamp `json:"last_active,omitempty"`
 
-	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before,omitempty"`
+	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
 
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 
 	Teams *[]string `json:"teams,omitempty"`
 
@@ -5337,7 +5333,7 @@ type UserRequest struct {
 type UserResponse struct {
 	Banned bool `json:"banned"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Id string `json:"id"`
 
@@ -5351,7 +5347,7 @@ type UserResponse struct {
 
 	ShadowBanned bool `json:"shadow_banned"`
 
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt Timestamp `json:"updated_at"`
 
 	Devices []*Device `json:"devices"`
 
@@ -5359,17 +5355,17 @@ type UserResponse struct {
 
 	Custom map[string]any `json:"custom"`
 
-	DeactivatedAt *time.Time `json:"deactivated_at,omitempty"`
+	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
 
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
 	Image *string `json:"image,omitempty"`
 
-	LastActive *time.Time `json:"last_active,omitempty"`
+	LastActive *Timestamp `json:"last_active,omitempty"`
 
 	Name *string `json:"name,omitempty"`
 
-	RevokeTokensIssuedBefore *time.Time `json:"revoke_tokens_issued_before,omitempty"`
+	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
 
 	PushNotifications *PushNotificationSettings `json:"push_notifications,omitempty"`
 }
@@ -5543,7 +5539,7 @@ type VoteData struct {
 }
 
 type WSEvent struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt Timestamp `json:"created_at"`
 
 	Type string `json:"type"`
 
