@@ -2441,7 +2441,7 @@ type LayoutSettingsRequest struct {
 
 	ExternalCssUrl *string `json:"external_css_url,omitempty"`
 
-	Options *map[string]any `json:"options,omitempty"`
+	Options *map[string]string `json:"options,omitempty"`
 }
 
 type LayoutSettingsResponse struct {
@@ -3176,6 +3176,10 @@ const (
 	UPDATE_CALL_PERMISSIONS   OwnCapability = "update-call-permissions"
 	UPDATE_CALL_SETTINGS      OwnCapability = "update-call-settings"
 )
+
+func (c OwnCapability) String() string {
+	return string(c)
+}
 
 type OwnUser struct {
 	Banned bool `json:"banned"`

@@ -120,6 +120,6 @@ func (c *Call) DeleteTranscription(ctx context.Context, session string, filename
 	return c.client.DeleteTranscription(ctx, c.callType, c.callID, session, filename)
 }
 
-func (c *VideoClient) Call(ctx context.Context, callType, callID string) Call {
+func (c *VideoClient) Call(callType, callID string) Call {
 	return NewCall(callType, callID, c)
 }
