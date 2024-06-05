@@ -193,13 +193,6 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 		assert.True(t, response.Settings.Backstage.Enabled)
 		assert.Equal(t, []string{JOIN_BACKSTAGE.String()}, response.Grants["host"])
 	})
-	t.Run("Read", func(t *testing.T) {
-		ctx := context.Background()
-
-		response, err := client.GetCallType(ctx, callTypeName)
-		assert.NoError(t, err)
-		assert.Equal(t, callTypeName, response.Name)
-	})
 
 	t.Run("Update", func(t *testing.T) {
 		ctx := context.Background()
@@ -251,7 +244,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	})
 
 	t.Run("Update Custom Recording Website", func(t *testing.T) {
-		
+
 		ctx := context.Background()
 
 		_, err := client.UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
@@ -266,6 +259,14 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 			},
 		}})
 		assert.NoError(t, err)
+	})
+
+	t.Run("Read", func(t *testing.T) {
+		ctx := context.Background()
+
+		response, err := client.GetCallType(ctx, callTypeName)
+		assert.NoError(t, err)
+		assert.Equal(t, callTypeName, response.Name)
 	})
 }
 
