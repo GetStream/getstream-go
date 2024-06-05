@@ -251,7 +251,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	})
 
 	t.Run("Update Custom Recording Website", func(t *testing.T) {
-		setup(t)
+		
 		ctx := context.Background()
 
 		_, err := client.UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
