@@ -7,6 +7,16 @@ type Stream struct {
 	common *CommonClient
 }
 
+func NewStreamFromEnvVars() (*Stream, error) {
+	client, err := NewClientFromEnvVars()
+	if err != nil {
+		return nil, err
+	}
+	return &Stream{
+		client: client,
+	}, nil
+}
+
 func New(apiKey, apiSecret string, options ...ClientOption) *Stream {
 	client, err := NewClient(apiKey, apiSecret, options...)
 	if err != nil {
@@ -15,6 +25,10 @@ func New(apiKey, apiSecret string, options ...ClientOption) *Stream {
 	return &Stream{
 		client: client,
 	}
+}
+
+func (s *Stream) CreateToken(userID string, claims *StreamJWTClaims) (string, error) {
+	return s.client.CreateToken(userID, claims)
 }
 
 // Chat

@@ -96,22 +96,54 @@ func NewClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 	return client, nil
 }
 
-func (c *Client) CreateToken(userID string, expire time.Time, issuedAt ...time.Time) (string, error) {
+type StreamJWTClaims struct {
+	Expire      *time.Time
+	IssuedAt    *time.Time
+	ChannelCIDs []string
+	CallCIDs    []string
+	Role        string
+}
+
+func (c *Client) CreateToken(userID string, claims *StreamJWTClaims) (string, error) {
 	if userID == "" {
 		return "", errors.New("user ID is empty")
 	}
 
-	claims := jwt.MapClaims{
+	jwtClaims := jwt.MapClaims{
 		"user_id": userID,
 	}
-	if !expire.IsZero() {
-		claims["exp"] = expire.Unix()
-	}
-	if len(issuedAt) > 0 && !issuedAt[0].IsZero() {
-		claims["iat"] = issuedAt[0].Unix()
+
+	// Set issued at time; use the provided time or the current time if not provided.
+	if claims != nil {
+		if claims.IssuedAt != nil && !claims.IssuedAt.IsZero() {
+			jwtClaims["iat"] = claims.IssuedAt.Unix()
+		} else {
+			now := time.Now()
+			jwtClaims["iat"] = now.Unix()
+		}
+
+		// Set expiration time if provided.
+		if claims.Expire != nil && !claims.Expire.IsZero() {
+			jwtClaims["exp"] = claims.Expire.Unix()
+		}
+
+		// Add channel IDs if provided.
+		if len(claims.ChannelCIDs) > 0 {
+			jwtClaims["channel_cids"] = claims.ChannelCIDs
+		}
+
+		// Add call IDs if provided.
+		if len(claims.CallCIDs) > 0 {
+			jwtClaims["call_cids"] = claims.CallCIDs
+		}
+
+		// Add role if provided.
+		if claims.Role != "" {
+			jwtClaims["role"] = claims.Role
+		}
 	}
 
-	return c.createToken(claims)
+	return c.createToken(jwtClaims)
 }
 
 func (c *Client) createToken(claims jwt.Claims) (string, error) {

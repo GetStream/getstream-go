@@ -9,21 +9,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func initVideoClient(t *testing.T) *VideoClient {
+func initClient(t *testing.T) *Stream {
 	t.Helper()
 
-	c, err := NewClientFromEnvVars()
+	stream, err := NewStreamFromEnvVars()
 	require.NoError(t, err, "Failed to create client from env vars")
-	video := NewVideoClient(c)
 
-	return video
+	return stream
 }
 
 var (
 	once         sync.Once
 	call         *Call
 	callTypeName string
-	client       *VideoClient
+	client       *Stream
 	setupErr     error
 )
 
@@ -35,8 +34,8 @@ func setup(t *testing.T) {
 		callTypeName = "calltype" + randomString(10)
 		var err error
 
-		client = initVideoClient(t)
-		call = client.Call(callType, callID)
+		client = initClient(t)
+		call = client.Video().Call(callType, callID)
 		setupErr = err
 	})
 	if setupErr != nil {
@@ -155,7 +154,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 			},
 		}
 
-		response, err := client.CreateCallType(ctx, CreateCallTypeRequest{Grants: &grants, Name: callTypeName, Settings: callSettings, NotificationSettings: notificationSettings})
+		response, err := client.Video().CreateCallType(ctx, CreateCallTypeRequest{Grants: &grants, Name: callTypeName, Settings: callSettings, NotificationSettings: notificationSettings})
 		assert.NoError(t, err)
 		assert.Equal(t, callTypeName, response.Name)
 		assert.True(t, response.Settings.Audio.MicDefaultOn)
@@ -173,7 +172,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 		grants := map[string][]string{
 			"host": {JOIN_BACKSTAGE.String()},
 		}
-		response, err := client.UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
+		response, err := client.Video().UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
 			Audio: &AudioSettingsRequest{
 				DefaultDevice: "earpiece",
 				MicDefaultOn:  PtrTo(false),
@@ -212,7 +211,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 			"participant_label.background_color":         "transparent",
 		}
 
-		_, err := client.UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
+		_, err := client.Video().UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
 			Recording: &RecordSettingsRequest{
 				Mode:      "available",
 				AudioOnly: PtrTo(false),
@@ -229,7 +228,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	t.Run("Update Custom Recording Style css", func(t *testing.T) {
 		ctx := context.Background()
 
-		_, err := client.UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
+		_, err := client.Video().UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
 			Recording: &RecordSettingsRequest{
 				Mode:      "available",
 				AudioOnly: PtrTo(false),
@@ -247,7 +246,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 
 		ctx := context.Background()
 
-		_, err := client.UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
+		_, err := client.Video().UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
 			Recording: &RecordSettingsRequest{
 				Mode:      "available",
 				AudioOnly: PtrTo(false),
@@ -264,10 +263,95 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	t.Run("Read", func(t *testing.T) {
 		ctx := context.Background()
 
-		response, err := client.GetCallType(ctx, callTypeName)
+		response, err := client.Video().GetCallType(ctx, callTypeName)
 		assert.NoError(t, err)
 		assert.Equal(t, callTypeName, response.Name)
 	})
+}
+
+func TestVideoExamples(t *testing.T) {
+	setup(t)
+	t.Run("Create User", func(t *testing.T) {
+		ctx := context.Background()
+		countryNL := map[string]any{"country": "NL"}
+		countryUS := map[string]any{"country": "US"}
+		users := []UserRequest{
+			{Id: "tommaso-id", Name: PtrTo("tommaso"), Role: PtrTo("admin"), Custom: &countryNL},
+			{Id: "thierry-id", Name: PtrTo("thierry"), Role: PtrTo("admin"), Custom: &countryUS},
+		}
+		// create a map of users with key being user id
+		usersMap := make(map[string]UserRequest)
+		for _, user := range users {
+			usersMap[user.Id] = user
+		}
+		_, err := client.Common().UpdateUsers(ctx, UpdateUsersRequest{Users: usersMap})
+		assert.NoError(t, err)
+
+		token, err := client.CreateToken("tommaso-id", nil)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, token)
+	})
+
+	t.Run("Create Call With Members", func(t *testing.T) {
+		ctx := context.Background()
+		call := newCall(t)
+		members := []MemberRequest{
+			{UserId: "thierry-id"},
+			{UserId: "tommaso-id"},
+		}
+		callRequest := GetOrCreateCallRequest{Data: &CallRequest{
+			CreatedById: PtrTo("tommaso-id"),
+			Members:     &members,
+		},
+		}
+		_, err := call.GetOrCreate(ctx, callRequest)
+		assert.NoError(t, err)
+	})
+
+	t.Run("Ban Unban User", func(t *testing.T) {
+		ctx := context.Background()
+		badUser, err := getUser(t, nil, nil, nil)
+		assert.NoError(t, err)
+		moderator, err := getUser(t, nil, nil, nil)
+		assert.NoError(t, err)
+		banRequest := BanRequest{
+			TargetUserId: badUser.Id,
+			BannedById:   &moderator.Id,
+			Reason:       PtrTo("Banned user and all users sharing the same IP for half hour"),
+			IpBan:        PtrTo(true),
+			Timeout:      PtrTo(30),
+		}
+
+		_, err = client.Common().Ban(ctx, banRequest)
+		assert.NoError(t, err)
+
+		_, err = client.Common().Unban(ctx, badUser.Id, nil, nil)
+		assert.NoError(t, err)
+	})
+
+	// t.Run("Block Unblock User From Calls", func(t *testing.T) {
+	// 	ctx := context.Background()
+
+	// 	call := newCall(t)
+
+	// 	badUser, err := getUser(t, nil, nil, nil)
+	// 	require.NoError(t, err)
+
+	// 	_, err = call.BlockUser(ctx, BlockUserRequest{UserId: badUser.Id})
+	// 	assert.NoError(t, err)
+
+	// 	response, err := call.Get(ctx, nil, nil, nil)
+	// 	assert.NoError(t, err)
+	// 	assert.Contains(t, response.Call.BlockedUserIds, badUser.Id)
+
+	// 	_, err = call.UnblockUser(ctx, UnblockUserRequest{UserId: badUser.Id})
+	// 	assert.NoError(t, err)
+
+	// 	response, err = call.Get(ctx, nil, nil, nil)
+	// 	assert.NoError(t, err)
+	// 	assert.NotContains(t, response.Call.BlockedUserIds, badUser.Id)
+
+	// })
 }
 
 // func TestDeleteCallType(t *testing.T) {

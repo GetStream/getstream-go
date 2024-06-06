@@ -190,8 +190,10 @@ func (c *CommonClient) Unban(ctx context.Context, targetUserId string, channelCi
 	var result Response
 	queryParams := map[string]interface{}{
 		"target_user_id": targetUserId,
-		"channel_cid":    channelCid,
 		"created_by":     createdBy,
+	}
+	if channelCid != nil {
+		queryParams["channel_cid"] = channelCid
 	}
 	err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/moderation/ban", queryParams, nil, &result, nil)
 	return &result, err

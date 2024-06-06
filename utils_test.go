@@ -1,8 +1,12 @@
 package getstream
 
 import (
+	"context"
 	"math/rand"
+	"testing"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func PtrTo[T any](v T) *T {
@@ -17,4 +21,37 @@ func randomString(n int) string {
 		bytes[i] = byte(65 + r.Intn(26)) // should be 26 to include 'Z'
 	}
 	return string(bytes)
+}
+
+func newCall(t *testing.T) *Call {
+	t.Helper()
+	callID := uuid.New().String()
+	call := client.Video().Call("default", callID)
+
+	return call
+}
+
+func getUser(t *testing.T, name *string, image *string, custom *map[string]any) (*FullUserResponse, error) {
+	t.Helper()
+	ctx := context.Background()
+	userID := uuid.New().String()
+	users := []UserRequest{
+		{
+			Id:     userID,
+			Name:   name,
+			Image:  image,
+			Custom: custom,
+		},
+	}
+	usersMap := make(map[string]UserRequest)
+	for _, user := range users {
+		usersMap[user.Id] = user
+	}
+
+	res, err := client.Common().UpdateUsers(ctx, UpdateUsersRequest{Users: usersMap})
+	if err != nil {
+		return nil, err
+	}
+	user := res.Users[userID]
+	return &user, nil
 }
