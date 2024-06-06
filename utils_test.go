@@ -14,7 +14,6 @@ func PtrTo[T any](v T) *T {
 }
 
 func randomString(n int) string {
-
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	bytes := make([]byte, n)
 	for i := 0; i < n; i++ {
@@ -48,7 +47,7 @@ func getUser(t *testing.T, name *string, image *string, custom *map[string]any) 
 		usersMap[user.Id] = user
 	}
 
-	res, err := client.Common().UpdateUsers(ctx, UpdateUsersRequest{Users: usersMap})
+	res, err := client.Common().UpdateUsers(ctx, &UpdateUsersRequest{Users: usersMap})
 	if err != nil {
 		return nil, err
 	}

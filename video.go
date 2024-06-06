@@ -14,15 +14,15 @@ func NewVideoClient(client *Client) *VideoClient {
 	}
 }
 
-func (c *VideoClient) QueryCallMembers(ctx context.Context, queryCallMembersRequest QueryCallMembersRequest) (*QueryCallMembersResponse, error) {
+func (c *VideoClient) QueryCallMembers(ctx context.Context, request *QueryCallMembersRequest) (*QueryCallMembersResponse, error) {
 	var result QueryCallMembersResponse
-	err := MakeRequest[QueryCallMembersRequest, QueryCallMembersResponse, any](c.client, ctx, "POST", "/api/v2/video/call/members", nil, &queryCallMembersRequest, &result, nil)
+	err := MakeRequest[QueryCallMembersRequest, QueryCallMembersResponse, any](c.client, ctx, "POST", "/api/v2/video/call/members", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *VideoClient) QueryCallStats(ctx context.Context, queryCallStatsRequest QueryCallStatsRequest) (*QueryCallStatsResponse, error) {
+func (c *VideoClient) QueryCallStats(ctx context.Context, request *QueryCallStatsRequest) (*QueryCallStatsResponse, error) {
 	var result QueryCallStatsResponse
-	err := MakeRequest[QueryCallStatsRequest, QueryCallStatsResponse, any](c.client, ctx, "POST", "/api/v2/video/call/stats", nil, &queryCallStatsRequest, &result, nil)
+	err := MakeRequest[QueryCallStatsRequest, QueryCallStatsResponse, any](c.client, ctx, "POST", "/api/v2/video/call/stats", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -41,64 +41,64 @@ func (c *VideoClient) GetCall(ctx context.Context, _type string, id string, memb
 	return &result, err
 }
 
-func (c *VideoClient) UpdateCall(ctx context.Context, _type string, id string, updateCallRequest UpdateCallRequest) (*UpdateCallResponse, error) {
+func (c *VideoClient) UpdateCall(ctx context.Context, _type string, id string, request *UpdateCallRequest) (*UpdateCallResponse, error) {
 	var result UpdateCallResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[UpdateCallRequest, UpdateCallResponse, any](c.client, ctx, "PATCH", "/api/v2/video/call/{type}/{id}", nil, &updateCallRequest, &result, pathParams)
+	err := MakeRequest[UpdateCallRequest, UpdateCallResponse, any](c.client, ctx, "PATCH", "/api/v2/video/call/{type}/{id}", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *VideoClient) GetOrCreateCall(ctx context.Context, _type string, id string, getOrCreateCallRequest GetOrCreateCallRequest) (*GetOrCreateCallResponse, error) {
+func (c *VideoClient) GetOrCreateCall(ctx context.Context, _type string, id string, request *GetOrCreateCallRequest) (*GetOrCreateCallResponse, error) {
 	var result GetOrCreateCallResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[GetOrCreateCallRequest, GetOrCreateCallResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}", nil, &getOrCreateCallRequest, &result, pathParams)
+	err := MakeRequest[GetOrCreateCallRequest, GetOrCreateCallResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *VideoClient) BlockUser(ctx context.Context, _type string, id string, blockUserRequest BlockUserRequest) (*BlockUserResponse, error) {
+func (c *VideoClient) BlockUser(ctx context.Context, _type string, id string, request *BlockUserRequest) (*BlockUserResponse, error) {
 	var result BlockUserResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[BlockUserRequest, BlockUserResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/block", nil, &blockUserRequest, &result, pathParams)
+	err := MakeRequest[BlockUserRequest, BlockUserResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/block", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *VideoClient) SendCallEvent(ctx context.Context, _type string, id string, sendCallEventRequest SendCallEventRequest) (*SendCallEventResponse, error) {
+func (c *VideoClient) SendCallEvent(ctx context.Context, _type string, id string, request *SendCallEventRequest) (*SendCallEventResponse, error) {
 	var result SendCallEventResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[SendCallEventRequest, SendCallEventResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/event", nil, &sendCallEventRequest, &result, pathParams)
+	err := MakeRequest[SendCallEventRequest, SendCallEventResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/event", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *VideoClient) CollectUserFeedback(ctx context.Context, _type string, id string, session string, collectUserFeedbackRequest CollectUserFeedbackRequest) (*CollectUserFeedbackResponse, error) {
+func (c *VideoClient) CollectUserFeedback(ctx context.Context, _type string, id string, session string, request *CollectUserFeedbackRequest) (*CollectUserFeedbackResponse, error) {
 	var result CollectUserFeedbackResponse
 	pathParams := map[string]string{
 		"type":    _type,
 		"id":      id,
 		"session": session,
 	}
-	err := MakeRequest[CollectUserFeedbackRequest, CollectUserFeedbackResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/feedback/{session}", nil, &collectUserFeedbackRequest, &result, pathParams)
+	err := MakeRequest[CollectUserFeedbackRequest, CollectUserFeedbackResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/feedback/{session}", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *VideoClient) GoLive(ctx context.Context, _type string, id string, goLiveRequest GoLiveRequest) (*GoLiveResponse, error) {
+func (c *VideoClient) GoLive(ctx context.Context, _type string, id string, request *GoLiveRequest) (*GoLiveResponse, error) {
 	var result GoLiveResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[GoLiveRequest, GoLiveResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/go_live", nil, &goLiveRequest, &result, pathParams)
+	err := MakeRequest[GoLiveRequest, GoLiveResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/go_live", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -112,33 +112,33 @@ func (c *VideoClient) EndCall(ctx context.Context, _type string, id string) (*En
 	return &result, err
 }
 
-func (c *VideoClient) UpdateCallMembers(ctx context.Context, _type string, id string, updateCallMembersRequest UpdateCallMembersRequest) (*UpdateCallMembersResponse, error) {
+func (c *VideoClient) UpdateCallMembers(ctx context.Context, _type string, id string, request *UpdateCallMembersRequest) (*UpdateCallMembersResponse, error) {
 	var result UpdateCallMembersResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[UpdateCallMembersRequest, UpdateCallMembersResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/members", nil, &updateCallMembersRequest, &result, pathParams)
+	err := MakeRequest[UpdateCallMembersRequest, UpdateCallMembersResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/members", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *VideoClient) MuteUsers(ctx context.Context, _type string, id string, muteUsersRequest MuteUsersRequest) (*MuteUsersResponse, error) {
+func (c *VideoClient) MuteUsers(ctx context.Context, _type string, id string, request *MuteUsersRequest) (*MuteUsersResponse, error) {
 	var result MuteUsersResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[MuteUsersRequest, MuteUsersResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/mute_users", nil, &muteUsersRequest, &result, pathParams)
+	err := MakeRequest[MuteUsersRequest, MuteUsersResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/mute_users", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *VideoClient) VideoPin(ctx context.Context, _type string, id string, pinRequest PinRequest) (*PinResponse, error) {
+func (c *VideoClient) VideoPin(ctx context.Context, _type string, id string, request *PinRequest) (*PinResponse, error) {
 	var result PinResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[PinRequest, PinResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/pin", nil, &pinRequest, &result, pathParams)
+	err := MakeRequest[PinRequest, PinResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/pin", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -162,23 +162,23 @@ func (c *VideoClient) StartHLSBroadcasting(ctx context.Context, _type string, id
 	return &result, err
 }
 
-func (c *VideoClient) StartRecording(ctx context.Context, _type string, id string, startRecordingRequest StartRecordingRequest) (*StartRecordingResponse, error) {
+func (c *VideoClient) StartRecording(ctx context.Context, _type string, id string, request *StartRecordingRequest) (*StartRecordingResponse, error) {
 	var result StartRecordingResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[StartRecordingRequest, StartRecordingResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_recording", nil, &startRecordingRequest, &result, pathParams)
+	err := MakeRequest[StartRecordingRequest, StartRecordingResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_recording", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *VideoClient) StartTranscription(ctx context.Context, _type string, id string, startTranscriptionRequest StartTranscriptionRequest) (*StartTranscriptionResponse, error) {
+func (c *VideoClient) StartTranscription(ctx context.Context, _type string, id string, request *StartTranscriptionRequest) (*StartTranscriptionResponse, error) {
 	var result StartTranscriptionResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[StartTranscriptionRequest, StartTranscriptionResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_transcription", nil, &startTranscriptionRequest, &result, pathParams)
+	err := MakeRequest[StartTranscriptionRequest, StartTranscriptionResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_transcription", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -243,33 +243,33 @@ func (c *VideoClient) ListTranscriptions(ctx context.Context, _type string, id s
 	return &result, err
 }
 
-func (c *VideoClient) UnblockUser(ctx context.Context, _type string, id string, unblockUserRequest UnblockUserRequest) (*UnblockUserResponse, error) {
+func (c *VideoClient) UnblockUser(ctx context.Context, _type string, id string, request *UnblockUserRequest) (*UnblockUserResponse, error) {
 	var result UnblockUserResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[UnblockUserRequest, UnblockUserResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/unblock", nil, &unblockUserRequest, &result, pathParams)
+	err := MakeRequest[UnblockUserRequest, UnblockUserResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/unblock", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *VideoClient) VideoUnpin(ctx context.Context, _type string, id string, unpinRequest UnpinRequest) (*UnpinResponse, error) {
+func (c *VideoClient) VideoUnpin(ctx context.Context, _type string, id string, request *UnpinRequest) (*UnpinResponse, error) {
 	var result UnpinResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[UnpinRequest, UnpinResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/unpin", nil, &unpinRequest, &result, pathParams)
+	err := MakeRequest[UnpinRequest, UnpinResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/unpin", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *VideoClient) UpdateUserPermissions(ctx context.Context, _type string, id string, updateUserPermissionsRequest UpdateUserPermissionsRequest) (*UpdateUserPermissionsResponse, error) {
+func (c *VideoClient) UpdateUserPermissions(ctx context.Context, _type string, id string, request *UpdateUserPermissionsRequest) (*UpdateUserPermissionsResponse, error) {
 	var result UpdateUserPermissionsResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[UpdateUserPermissionsRequest, UpdateUserPermissionsResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/user_permissions", nil, &updateUserPermissionsRequest, &result, pathParams)
+	err := MakeRequest[UpdateUserPermissionsRequest, UpdateUserPermissionsResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/user_permissions", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -297,9 +297,9 @@ func (c *VideoClient) DeleteTranscription(ctx context.Context, _type string, id 
 	return &result, err
 }
 
-func (c *VideoClient) QueryCalls(ctx context.Context, queryCallsRequest QueryCallsRequest) (*QueryCallsResponse, error) {
+func (c *VideoClient) QueryCalls(ctx context.Context, request *QueryCallsRequest) (*QueryCallsResponse, error) {
 	var result QueryCallsResponse
-	err := MakeRequest[QueryCallsRequest, QueryCallsResponse, any](c.client, ctx, "POST", "/api/v2/video/calls", nil, &queryCallsRequest, &result, nil)
+	err := MakeRequest[QueryCallsRequest, QueryCallsResponse, any](c.client, ctx, "POST", "/api/v2/video/calls", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -309,9 +309,9 @@ func (c *VideoClient) ListCallTypes(ctx context.Context) (*ListCallTypeResponse,
 	return &result, err
 }
 
-func (c *VideoClient) CreateCallType(ctx context.Context, createCallTypeRequest CreateCallTypeRequest) (*CreateCallTypeResponse, error) {
+func (c *VideoClient) CreateCallType(ctx context.Context, request *CreateCallTypeRequest) (*CreateCallTypeResponse, error) {
 	var result CreateCallTypeResponse
-	err := MakeRequest[CreateCallTypeRequest, CreateCallTypeResponse, any](c.client, ctx, "POST", "/api/v2/video/calltypes", nil, &createCallTypeRequest, &result, nil)
+	err := MakeRequest[CreateCallTypeRequest, CreateCallTypeResponse, any](c.client, ctx, "POST", "/api/v2/video/calltypes", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -333,12 +333,12 @@ func (c *VideoClient) GetCallType(ctx context.Context, name string) (*GetCallTyp
 	return &result, err
 }
 
-func (c *VideoClient) UpdateCallType(ctx context.Context, name string, updateCallTypeRequest UpdateCallTypeRequest) (*UpdateCallTypeResponse, error) {
+func (c *VideoClient) UpdateCallType(ctx context.Context, name string, request *UpdateCallTypeRequest) (*UpdateCallTypeResponse, error) {
 	var result UpdateCallTypeResponse
 	pathParams := map[string]string{
 		"name": name,
 	}
-	err := MakeRequest[UpdateCallTypeRequest, UpdateCallTypeResponse, any](c.client, ctx, "PUT", "/api/v2/video/calltypes/{name}", nil, &updateCallTypeRequest, &result, pathParams)
+	err := MakeRequest[UpdateCallTypeRequest, UpdateCallTypeResponse, any](c.client, ctx, "PUT", "/api/v2/video/calltypes/{name}", nil, request, &result, pathParams)
 	return &result, err
 }
 

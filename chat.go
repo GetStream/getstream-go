@@ -14,30 +14,30 @@ func NewChatClient(client *Client) *ChatClient {
 	}
 }
 
-func (c *ChatClient) QueryChannels(ctx context.Context, queryChannelsRequest QueryChannelsRequest) (*QueryChannelsResponse, error) {
+func (c *ChatClient) QueryChannels(ctx context.Context, request *QueryChannelsRequest) (*QueryChannelsResponse, error) {
 	var result QueryChannelsResponse
-	err := MakeRequest[QueryChannelsRequest, QueryChannelsResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels", nil, &queryChannelsRequest, &result, nil)
+	err := MakeRequest[QueryChannelsRequest, QueryChannelsResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *ChatClient) DeleteChannels(ctx context.Context, deleteChannelsRequest DeleteChannelsRequest) (*DeleteChannelsResponse, error) {
+func (c *ChatClient) DeleteChannels(ctx context.Context, request *DeleteChannelsRequest) (*DeleteChannelsResponse, error) {
 	var result DeleteChannelsResponse
-	err := MakeRequest[DeleteChannelsRequest, DeleteChannelsResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/delete", nil, &deleteChannelsRequest, &result, nil)
+	err := MakeRequest[DeleteChannelsRequest, DeleteChannelsResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/delete", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *ChatClient) MarkChannelsRead(ctx context.Context, markChannelsReadRequest MarkChannelsReadRequest) (*MarkReadResponse, error) {
+func (c *ChatClient) MarkChannelsRead(ctx context.Context, request *MarkChannelsReadRequest) (*MarkReadResponse, error) {
 	var result MarkReadResponse
-	err := MakeRequest[MarkChannelsReadRequest, MarkReadResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/read", nil, &markChannelsReadRequest, &result, nil)
+	err := MakeRequest[MarkChannelsReadRequest, MarkReadResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/read", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *ChatClient) GetOrCreateDistinctChannel(ctx context.Context, _type string, channelGetOrCreateRequest ChannelGetOrCreateRequest) (*ChannelStateResponse, error) {
+func (c *ChatClient) GetOrCreateDistinctChannel(ctx context.Context, _type string, request *ChannelGetOrCreateRequest) (*ChannelStateResponse, error) {
 	var result ChannelStateResponse
 	pathParams := map[string]string{
 		"type": _type,
 	}
-	err := MakeRequest[ChannelGetOrCreateRequest, ChannelStateResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/query", nil, &channelGetOrCreateRequest, &result, pathParams)
+	err := MakeRequest[ChannelGetOrCreateRequest, ChannelStateResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/query", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -54,33 +54,33 @@ func (c *ChatClient) DeleteChannel(ctx context.Context, _type string, id string,
 	return &result, err
 }
 
-func (c *ChatClient) UpdateChannelPartial(ctx context.Context, _type string, id string, updateChannelPartialRequest UpdateChannelPartialRequest) (*UpdateChannelPartialResponse, error) {
+func (c *ChatClient) UpdateChannelPartial(ctx context.Context, _type string, id string, request *UpdateChannelPartialRequest) (*UpdateChannelPartialResponse, error) {
 	var result UpdateChannelPartialResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[UpdateChannelPartialRequest, UpdateChannelPartialResponse, any](c.client, ctx, "PATCH", "/api/v2/chat/channels/{type}/{id}", nil, &updateChannelPartialRequest, &result, pathParams)
+	err := MakeRequest[UpdateChannelPartialRequest, UpdateChannelPartialResponse, any](c.client, ctx, "PATCH", "/api/v2/chat/channels/{type}/{id}", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) UpdateChannel(ctx context.Context, _type string, id string, updateChannelRequest UpdateChannelRequest) (*UpdateChannelResponse, error) {
+func (c *ChatClient) UpdateChannel(ctx context.Context, _type string, id string, request *UpdateChannelRequest) (*UpdateChannelResponse, error) {
 	var result UpdateChannelResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[UpdateChannelRequest, UpdateChannelResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}", nil, &updateChannelRequest, &result, pathParams)
+	err := MakeRequest[UpdateChannelRequest, UpdateChannelResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) SendEvent(ctx context.Context, _type string, id string, sendEventRequest SendEventRequest) (*EventResponse, error) {
+func (c *ChatClient) SendEvent(ctx context.Context, _type string, id string, request *SendEventRequest) (*EventResponse, error) {
 	var result EventResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[SendEventRequest, EventResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/event", nil, &sendEventRequest, &result, pathParams)
+	err := MakeRequest[SendEventRequest, EventResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/event", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -97,23 +97,23 @@ func (c *ChatClient) DeleteFile(ctx context.Context, _type string, id string, ur
 	return &result, err
 }
 
-func (c *ChatClient) UploadFile(ctx context.Context, _type string, id string, fileUploadRequest FileUploadRequest) (*FileUploadResponse, error) {
+func (c *ChatClient) UploadFile(ctx context.Context, _type string, id string, request *FileUploadRequest) (*FileUploadResponse, error) {
 	var result FileUploadResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[FileUploadRequest, FileUploadResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/file", nil, &fileUploadRequest, &result, pathParams)
+	err := MakeRequest[FileUploadRequest, FileUploadResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/file", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) HideChannel(ctx context.Context, _type string, id string, hideChannelRequest HideChannelRequest) (*HideChannelResponse, error) {
+func (c *ChatClient) HideChannel(ctx context.Context, _type string, id string, request *HideChannelRequest) (*HideChannelResponse, error) {
 	var result HideChannelResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[HideChannelRequest, HideChannelResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/hide", nil, &hideChannelRequest, &result, pathParams)
+	err := MakeRequest[HideChannelRequest, HideChannelResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/hide", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -130,23 +130,23 @@ func (c *ChatClient) DeleteImage(ctx context.Context, _type string, id string, u
 	return &result, err
 }
 
-func (c *ChatClient) UploadImage(ctx context.Context, _type string, id string, imageUploadRequest ImageUploadRequest) (*ImageUploadResponse, error) {
+func (c *ChatClient) UploadImage(ctx context.Context, _type string, id string, request *ImageUploadRequest) (*ImageUploadResponse, error) {
 	var result ImageUploadResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[ImageUploadRequest, ImageUploadResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/image", nil, &imageUploadRequest, &result, pathParams)
+	err := MakeRequest[ImageUploadRequest, ImageUploadResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/image", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) SendMessage(ctx context.Context, _type string, id string, sendMessageRequest SendMessageRequest) (*SendMessageResponse, error) {
+func (c *ChatClient) SendMessage(ctx context.Context, _type string, id string, request *SendMessageRequest) (*SendMessageResponse, error) {
 	var result SendMessageResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[SendMessageRequest, SendMessageResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/message", nil, &sendMessageRequest, &result, pathParams)
+	err := MakeRequest[SendMessageRequest, SendMessageResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/message", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -163,53 +163,53 @@ func (c *ChatClient) GetManyMessages(ctx context.Context, _type string, id strin
 	return &result, err
 }
 
-func (c *ChatClient) GetOrCreateChannel(ctx context.Context, _type string, id string, channelGetOrCreateRequest ChannelGetOrCreateRequest) (*ChannelStateResponse, error) {
+func (c *ChatClient) GetOrCreateChannel(ctx context.Context, _type string, id string, request *ChannelGetOrCreateRequest) (*ChannelStateResponse, error) {
 	var result ChannelStateResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[ChannelGetOrCreateRequest, ChannelStateResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/query", nil, &channelGetOrCreateRequest, &result, pathParams)
+	err := MakeRequest[ChannelGetOrCreateRequest, ChannelStateResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/query", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) MarkRead(ctx context.Context, _type string, id string, markReadRequest MarkReadRequest) (*MarkReadResponse, error) {
+func (c *ChatClient) MarkRead(ctx context.Context, _type string, id string, request *MarkReadRequest) (*MarkReadResponse, error) {
 	var result MarkReadResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[MarkReadRequest, MarkReadResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/read", nil, &markReadRequest, &result, pathParams)
+	err := MakeRequest[MarkReadRequest, MarkReadResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/read", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) ShowChannel(ctx context.Context, _type string, id string, showChannelRequest ShowChannelRequest) (*ShowChannelResponse, error) {
+func (c *ChatClient) ShowChannel(ctx context.Context, _type string, id string, request *ShowChannelRequest) (*ShowChannelResponse, error) {
 	var result ShowChannelResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[ShowChannelRequest, ShowChannelResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/show", nil, &showChannelRequest, &result, pathParams)
+	err := MakeRequest[ShowChannelRequest, ShowChannelResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/show", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) TruncateChannel(ctx context.Context, _type string, id string, truncateChannelRequest TruncateChannelRequest) (*TruncateChannelResponse, error) {
+func (c *ChatClient) TruncateChannel(ctx context.Context, _type string, id string, request *TruncateChannelRequest) (*TruncateChannelResponse, error) {
 	var result TruncateChannelResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[TruncateChannelRequest, TruncateChannelResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/truncate", nil, &truncateChannelRequest, &result, pathParams)
+	err := MakeRequest[TruncateChannelRequest, TruncateChannelResponse, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/truncate", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) MarkUnread(ctx context.Context, _type string, id string, markUnreadRequest MarkUnreadRequest) (*Response, error) {
+func (c *ChatClient) MarkUnread(ctx context.Context, _type string, id string, request *MarkUnreadRequest) (*Response, error) {
 	var result Response
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[MarkUnreadRequest, Response, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/unread", nil, &markUnreadRequest, &result, pathParams)
+	err := MakeRequest[MarkUnreadRequest, Response, any](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/unread", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -219,9 +219,9 @@ func (c *ChatClient) ListChannelTypes(ctx context.Context) (*ListChannelTypesRes
 	return &result, err
 }
 
-func (c *ChatClient) CreateChannelType(ctx context.Context, createChannelTypeRequest CreateChannelTypeRequest) (*CreateChannelTypeResponse, error) {
+func (c *ChatClient) CreateChannelType(ctx context.Context, request *CreateChannelTypeRequest) (*CreateChannelTypeResponse, error) {
 	var result CreateChannelTypeResponse
-	err := MakeRequest[CreateChannelTypeRequest, CreateChannelTypeResponse, any](c.client, ctx, "POST", "/api/v2/chat/channeltypes", nil, &createChannelTypeRequest, &result, nil)
+	err := MakeRequest[CreateChannelTypeRequest, CreateChannelTypeResponse, any](c.client, ctx, "POST", "/api/v2/chat/channeltypes", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -243,12 +243,12 @@ func (c *ChatClient) GetChannelType(ctx context.Context, name string) (*Response
 	return &result, err
 }
 
-func (c *ChatClient) UpdateChannelType(ctx context.Context, name string, updateChannelTypeRequest UpdateChannelTypeRequest) (*UpdateChannelTypeResponse, error) {
+func (c *ChatClient) UpdateChannelType(ctx context.Context, name string, request *UpdateChannelTypeRequest) (*UpdateChannelTypeResponse, error) {
 	var result UpdateChannelTypeResponse
 	pathParams := map[string]string{
 		"name": name,
 	}
-	err := MakeRequest[UpdateChannelTypeRequest, UpdateChannelTypeResponse, any](c.client, ctx, "PUT", "/api/v2/chat/channeltypes/{name}", nil, &updateChannelTypeRequest, &result, pathParams)
+	err := MakeRequest[UpdateChannelTypeRequest, UpdateChannelTypeResponse, any](c.client, ctx, "PUT", "/api/v2/chat/channeltypes/{name}", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -258,9 +258,9 @@ func (c *ChatClient) ListCommands(ctx context.Context) (*ListCommandsResponse, e
 	return &result, err
 }
 
-func (c *ChatClient) CreateCommand(ctx context.Context, createCommandRequest CreateCommandRequest) (*CreateCommandResponse, error) {
+func (c *ChatClient) CreateCommand(ctx context.Context, request *CreateCommandRequest) (*CreateCommandResponse, error) {
 	var result CreateCommandResponse
-	err := MakeRequest[CreateCommandRequest, CreateCommandResponse, any](c.client, ctx, "POST", "/api/v2/chat/commands", nil, &createCommandRequest, &result, nil)
+	err := MakeRequest[CreateCommandRequest, CreateCommandResponse, any](c.client, ctx, "POST", "/api/v2/chat/commands", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -282,18 +282,18 @@ func (c *ChatClient) GetCommand(ctx context.Context, name string) (*GetCommandRe
 	return &result, err
 }
 
-func (c *ChatClient) UpdateCommand(ctx context.Context, name string, updateCommandRequest UpdateCommandRequest) (*UpdateCommandResponse, error) {
+func (c *ChatClient) UpdateCommand(ctx context.Context, name string, request *UpdateCommandRequest) (*UpdateCommandResponse, error) {
 	var result UpdateCommandResponse
 	pathParams := map[string]string{
 		"name": name,
 	}
-	err := MakeRequest[UpdateCommandRequest, UpdateCommandResponse, any](c.client, ctx, "PUT", "/api/v2/chat/commands/{name}", nil, &updateCommandRequest, &result, pathParams)
+	err := MakeRequest[UpdateCommandRequest, UpdateCommandResponse, any](c.client, ctx, "PUT", "/api/v2/chat/commands/{name}", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) ExportChannels(ctx context.Context, exportChannelsRequest ExportChannelsRequest) (*ExportChannelsResponse, error) {
+func (c *ChatClient) ExportChannels(ctx context.Context, request *ExportChannelsRequest) (*ExportChannelsResponse, error) {
 	var result ExportChannelsResponse
-	err := MakeRequest[ExportChannelsRequest, ExportChannelsResponse, any](c.client, ctx, "POST", "/api/v2/chat/export_channels", nil, &exportChannelsRequest, &result, nil)
+	err := MakeRequest[ExportChannelsRequest, ExportChannelsResponse, any](c.client, ctx, "POST", "/api/v2/chat/export_channels", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -315,9 +315,9 @@ func (c *ChatClient) QueryMembers(ctx context.Context, payload *QueryMembersRequ
 	return &result, err
 }
 
-func (c *ChatClient) QueryMessageHistory(ctx context.Context, queryMessageHistoryRequest QueryMessageHistoryRequest) (*QueryMessageHistoryResponse, error) {
+func (c *ChatClient) QueryMessageHistory(ctx context.Context, request *QueryMessageHistoryRequest) (*QueryMessageHistoryResponse, error) {
 	var result QueryMessageHistoryResponse
-	err := MakeRequest[QueryMessageHistoryRequest, QueryMessageHistoryResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/history", nil, &queryMessageHistoryRequest, &result, nil)
+	err := MakeRequest[QueryMessageHistoryRequest, QueryMessageHistoryResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/history", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -346,48 +346,48 @@ func (c *ChatClient) GetMessage(ctx context.Context, id string, showDeletedMessa
 	return &result, err
 }
 
-func (c *ChatClient) UpdateMessage(ctx context.Context, id string, updateMessageRequest UpdateMessageRequest) (*UpdateMessageResponse, error) {
+func (c *ChatClient) UpdateMessage(ctx context.Context, id string, request *UpdateMessageRequest) (*UpdateMessageResponse, error) {
 	var result UpdateMessageResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	err := MakeRequest[UpdateMessageRequest, UpdateMessageResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{id}", nil, &updateMessageRequest, &result, pathParams)
+	err := MakeRequest[UpdateMessageRequest, UpdateMessageResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{id}", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) UpdateMessagePartial(ctx context.Context, id string, updateMessagePartialRequest UpdateMessagePartialRequest) (*UpdateMessagePartialResponse, error) {
+func (c *ChatClient) UpdateMessagePartial(ctx context.Context, id string, request *UpdateMessagePartialRequest) (*UpdateMessagePartialResponse, error) {
 	var result UpdateMessagePartialResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	err := MakeRequest[UpdateMessagePartialRequest, UpdateMessagePartialResponse, any](c.client, ctx, "PUT", "/api/v2/chat/messages/{id}", nil, &updateMessagePartialRequest, &result, pathParams)
+	err := MakeRequest[UpdateMessagePartialRequest, UpdateMessagePartialResponse, any](c.client, ctx, "PUT", "/api/v2/chat/messages/{id}", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) RunMessageAction(ctx context.Context, id string, messageActionRequest MessageActionRequest) (*MessageResponse, error) {
+func (c *ChatClient) RunMessageAction(ctx context.Context, id string, request *MessageActionRequest) (*MessageResponse, error) {
 	var result MessageResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	err := MakeRequest[MessageActionRequest, MessageResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/action", nil, &messageActionRequest, &result, pathParams)
+	err := MakeRequest[MessageActionRequest, MessageResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/action", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) CommitMessage(ctx context.Context, id string, commitMessageRequest CommitMessageRequest) (*MessageResponse, error) {
+func (c *ChatClient) CommitMessage(ctx context.Context, id string, request *CommitMessageRequest) (*MessageResponse, error) {
 	var result MessageResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	err := MakeRequest[CommitMessageRequest, MessageResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/commit", nil, &commitMessageRequest, &result, pathParams)
+	err := MakeRequest[CommitMessageRequest, MessageResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/commit", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) SendReaction(ctx context.Context, id string, sendReactionRequest SendReactionRequest) (*SendReactionResponse, error) {
+func (c *ChatClient) SendReaction(ctx context.Context, id string, request *SendReactionRequest) (*SendReactionResponse, error) {
 	var result SendReactionResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	err := MakeRequest[SendReactionRequest, SendReactionResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/reaction", nil, &sendReactionRequest, &result, pathParams)
+	err := MakeRequest[SendReactionRequest, SendReactionResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/reaction", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -417,40 +417,40 @@ func (c *ChatClient) GetReactions(ctx context.Context, id string, limit *int, of
 	return &result, err
 }
 
-func (c *ChatClient) QueryReactions(ctx context.Context, id string, queryReactionsRequest QueryReactionsRequest) (*QueryReactionsResponse, error) {
+func (c *ChatClient) QueryReactions(ctx context.Context, id string, request *QueryReactionsRequest) (*QueryReactionsResponse, error) {
 	var result QueryReactionsResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	err := MakeRequest[QueryReactionsRequest, QueryReactionsResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/reactions", nil, &queryReactionsRequest, &result, pathParams)
+	err := MakeRequest[QueryReactionsRequest, QueryReactionsResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/reactions", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) TranslateMessage(ctx context.Context, id string, translateMessageRequest TranslateMessageRequest) (*MessageResponse, error) {
+func (c *ChatClient) TranslateMessage(ctx context.Context, id string, request *TranslateMessageRequest) (*MessageResponse, error) {
 	var result MessageResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	err := MakeRequest[TranslateMessageRequest, MessageResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/translate", nil, &translateMessageRequest, &result, pathParams)
+	err := MakeRequest[TranslateMessageRequest, MessageResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/translate", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) UndeleteMessage(ctx context.Context, id string, updateMessageRequest UpdateMessageRequest) (*UpdateMessageResponse, error) {
+func (c *ChatClient) UndeleteMessage(ctx context.Context, id string, request *UpdateMessageRequest) (*UpdateMessageResponse, error) {
 	var result UpdateMessageResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	err := MakeRequest[UpdateMessageRequest, UpdateMessageResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/undelete", nil, &updateMessageRequest, &result, pathParams)
+	err := MakeRequest[UpdateMessageRequest, UpdateMessageResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/undelete", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) CastPollVote(ctx context.Context, messageId string, pollId string, castPollVoteRequest CastPollVoteRequest) (*PollVoteResponse, error) {
+func (c *ChatClient) CastPollVote(ctx context.Context, messageId string, pollId string, request *CastPollVoteRequest) (*PollVoteResponse, error) {
 	var result PollVoteResponse
 	pathParams := map[string]string{
 		"message_id": messageId,
 		"poll_id":    pollId,
 	}
-	err := MakeRequest[CastPollVoteRequest, PollVoteResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{message_id}/polls/{poll_id}/vote", nil, &castPollVoteRequest, &result, pathParams)
+	err := MakeRequest[CastPollVoteRequest, PollVoteResponse, any](c.client, ctx, "POST", "/api/v2/chat/messages/{message_id}/polls/{poll_id}/vote", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -501,36 +501,36 @@ func (c *ChatClient) QueryMessageFlags(ctx context.Context, payload *QueryMessag
 	return &result, err
 }
 
-func (c *ChatClient) MuteChannel(ctx context.Context, muteChannelRequest MuteChannelRequest) (*MuteChannelResponse, error) {
+func (c *ChatClient) MuteChannel(ctx context.Context, request *MuteChannelRequest) (*MuteChannelResponse, error) {
 	var result MuteChannelResponse
-	err := MakeRequest[MuteChannelRequest, MuteChannelResponse, any](c.client, ctx, "POST", "/api/v2/chat/moderation/mute/channel", nil, &muteChannelRequest, &result, nil)
+	err := MakeRequest[MuteChannelRequest, MuteChannelResponse, any](c.client, ctx, "POST", "/api/v2/chat/moderation/mute/channel", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *ChatClient) UnmuteChannel(ctx context.Context, unmuteChannelRequest UnmuteChannelRequest) (*UnmuteResponse, error) {
+func (c *ChatClient) UnmuteChannel(ctx context.Context, request *UnmuteChannelRequest) (*UnmuteResponse, error) {
 	var result UnmuteResponse
-	err := MakeRequest[UnmuteChannelRequest, UnmuteResponse, any](c.client, ctx, "POST", "/api/v2/chat/moderation/unmute/channel", nil, &unmuteChannelRequest, &result, nil)
+	err := MakeRequest[UnmuteChannelRequest, UnmuteResponse, any](c.client, ctx, "POST", "/api/v2/chat/moderation/unmute/channel", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *ChatClient) CreatePoll(ctx context.Context, createPollRequest CreatePollRequest) (*PollResponse, error) {
+func (c *ChatClient) CreatePoll(ctx context.Context, request *CreatePollRequest) (*PollResponse, error) {
 	var result PollResponse
-	err := MakeRequest[CreatePollRequest, PollResponse, any](c.client, ctx, "POST", "/api/v2/chat/polls", nil, &createPollRequest, &result, nil)
+	err := MakeRequest[CreatePollRequest, PollResponse, any](c.client, ctx, "POST", "/api/v2/chat/polls", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *ChatClient) UpdatePoll(ctx context.Context, updatePollRequest UpdatePollRequest) (*PollResponse, error) {
+func (c *ChatClient) UpdatePoll(ctx context.Context, request *UpdatePollRequest) (*PollResponse, error) {
 	var result PollResponse
-	err := MakeRequest[UpdatePollRequest, PollResponse, any](c.client, ctx, "PUT", "/api/v2/chat/polls", nil, &updatePollRequest, &result, nil)
+	err := MakeRequest[UpdatePollRequest, PollResponse, any](c.client, ctx, "PUT", "/api/v2/chat/polls", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *ChatClient) QueryPolls(ctx context.Context, userId *string, queryPollsRequest QueryPollsRequest) (*QueryPollsResponse, error) {
+func (c *ChatClient) QueryPolls(ctx context.Context, userId *string, request *QueryPollsRequest) (*QueryPollsResponse, error) {
 	var result QueryPollsResponse
 	queryParams := map[string]interface{}{
 		"user_id": userId,
 	}
-	err := MakeRequest[QueryPollsRequest, QueryPollsResponse](c.client, ctx, "POST", "/api/v2/chat/polls/query", queryParams, &queryPollsRequest, &result, nil)
+	err := MakeRequest[QueryPollsRequest, QueryPollsResponse](c.client, ctx, "POST", "/api/v2/chat/polls/query", queryParams, request, &result, nil)
 	return &result, err
 }
 
@@ -558,30 +558,30 @@ func (c *ChatClient) GetPoll(ctx context.Context, pollId string, userId *string)
 	return &result, err
 }
 
-func (c *ChatClient) UpdatePollPartial(ctx context.Context, pollId string, updatePollPartialRequest UpdatePollPartialRequest) (*PollResponse, error) {
+func (c *ChatClient) UpdatePollPartial(ctx context.Context, pollId string, request *UpdatePollPartialRequest) (*PollResponse, error) {
 	var result PollResponse
 	pathParams := map[string]string{
 		"poll_id": pollId,
 	}
-	err := MakeRequest[UpdatePollPartialRequest, PollResponse, any](c.client, ctx, "PATCH", "/api/v2/chat/polls/{poll_id}", nil, &updatePollPartialRequest, &result, pathParams)
+	err := MakeRequest[UpdatePollPartialRequest, PollResponse, any](c.client, ctx, "PATCH", "/api/v2/chat/polls/{poll_id}", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) CreatePollOption(ctx context.Context, pollId string, createPollOptionRequest CreatePollOptionRequest) (*PollOptionResponse, error) {
+func (c *ChatClient) CreatePollOption(ctx context.Context, pollId string, request *CreatePollOptionRequest) (*PollOptionResponse, error) {
 	var result PollOptionResponse
 	pathParams := map[string]string{
 		"poll_id": pollId,
 	}
-	err := MakeRequest[CreatePollOptionRequest, PollOptionResponse, any](c.client, ctx, "POST", "/api/v2/chat/polls/{poll_id}/options", nil, &createPollOptionRequest, &result, pathParams)
+	err := MakeRequest[CreatePollOptionRequest, PollOptionResponse, any](c.client, ctx, "POST", "/api/v2/chat/polls/{poll_id}/options", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *ChatClient) UpdatePollOption(ctx context.Context, pollId string, updatePollOptionRequest UpdatePollOptionRequest) (*PollOptionResponse, error) {
+func (c *ChatClient) UpdatePollOption(ctx context.Context, pollId string, request *UpdatePollOptionRequest) (*PollOptionResponse, error) {
 	var result PollOptionResponse
 	pathParams := map[string]string{
 		"poll_id": pollId,
 	}
-	err := MakeRequest[UpdatePollOptionRequest, PollOptionResponse, any](c.client, ctx, "PUT", "/api/v2/chat/polls/{poll_id}/options", nil, &updatePollOptionRequest, &result, pathParams)
+	err := MakeRequest[UpdatePollOptionRequest, PollOptionResponse, any](c.client, ctx, "PUT", "/api/v2/chat/polls/{poll_id}/options", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -611,7 +611,7 @@ func (c *ChatClient) GetPollOption(ctx context.Context, pollId string, optionId 
 	return &result, err
 }
 
-func (c *ChatClient) QueryPollVotes(ctx context.Context, pollId string, userId *string, queryPollVotesRequest QueryPollVotesRequest) (*PollVotesResponse, error) {
+func (c *ChatClient) QueryPollVotes(ctx context.Context, pollId string, userId *string, request *QueryPollVotesRequest) (*PollVotesResponse, error) {
 	var result PollVotesResponse
 	pathParams := map[string]string{
 		"poll_id": pollId,
@@ -619,7 +619,7 @@ func (c *ChatClient) QueryPollVotes(ctx context.Context, pollId string, userId *
 	queryParams := map[string]interface{}{
 		"user_id": userId,
 	}
-	err := MakeRequest[QueryPollVotesRequest, PollVotesResponse](c.client, ctx, "POST", "/api/v2/chat/polls/{poll_id}/votes", queryParams, &queryPollVotesRequest, &result, pathParams)
+	err := MakeRequest[QueryPollVotesRequest, PollVotesResponse](c.client, ctx, "POST", "/api/v2/chat/polls/{poll_id}/votes", queryParams, request, &result, pathParams)
 	return &result, err
 }
 
@@ -641,9 +641,9 @@ func (c *ChatClient) Search(ctx context.Context, payload *SearchRequest) (*Searc
 	return &result, err
 }
 
-func (c *ChatClient) QueryThreads(ctx context.Context, queryThreadsRequest QueryThreadsRequest) (*QueryThreadsResponse, error) {
+func (c *ChatClient) QueryThreads(ctx context.Context, request *QueryThreadsRequest) (*QueryThreadsResponse, error) {
 	var result QueryThreadsResponse
-	err := MakeRequest[QueryThreadsRequest, QueryThreadsResponse, any](c.client, ctx, "POST", "/api/v2/chat/threads", nil, &queryThreadsRequest, &result, nil)
+	err := MakeRequest[QueryThreadsRequest, QueryThreadsResponse, any](c.client, ctx, "POST", "/api/v2/chat/threads", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -662,12 +662,12 @@ func (c *ChatClient) GetThread(ctx context.Context, messageId string, connection
 	return &result, err
 }
 
-func (c *ChatClient) UpdateThreadPartial(ctx context.Context, messageId string, updateThreadPartialRequest UpdateThreadPartialRequest) (*UpdateThreadPartialResponse, error) {
+func (c *ChatClient) UpdateThreadPartial(ctx context.Context, messageId string, request *UpdateThreadPartialRequest) (*UpdateThreadPartialResponse, error) {
 	var result UpdateThreadPartialResponse
 	pathParams := map[string]string{
 		"message_id": messageId,
 	}
-	err := MakeRequest[UpdateThreadPartialRequest, UpdateThreadPartialResponse, any](c.client, ctx, "PATCH", "/api/v2/chat/threads/{message_id}", nil, &updateThreadPartialRequest, &result, pathParams)
+	err := MakeRequest[UpdateThreadPartialRequest, UpdateThreadPartialResponse, any](c.client, ctx, "PATCH", "/api/v2/chat/threads/{message_id}", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -677,17 +677,17 @@ func (c *ChatClient) UnreadCounts(ctx context.Context) (*WrappedUnreadCountsResp
 	return &result, err
 }
 
-func (c *ChatClient) UnreadCountsBatch(ctx context.Context, unreadCountsBatchRequest UnreadCountsBatchRequest) (*UnreadCountsBatchResponse, error) {
+func (c *ChatClient) UnreadCountsBatch(ctx context.Context, request *UnreadCountsBatchRequest) (*UnreadCountsBatchResponse, error) {
 	var result UnreadCountsBatchResponse
-	err := MakeRequest[UnreadCountsBatchRequest, UnreadCountsBatchResponse, any](c.client, ctx, "POST", "/api/v2/chat/unread_batch", nil, &unreadCountsBatchRequest, &result, nil)
+	err := MakeRequest[UnreadCountsBatchRequest, UnreadCountsBatchResponse, any](c.client, ctx, "POST", "/api/v2/chat/unread_batch", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *ChatClient) SendUserCustomEvent(ctx context.Context, userId string, sendUserCustomEventRequest SendUserCustomEventRequest) (*Response, error) {
+func (c *ChatClient) SendUserCustomEvent(ctx context.Context, userId string, request *SendUserCustomEventRequest) (*Response, error) {
 	var result Response
 	pathParams := map[string]string{
 		"user_id": userId,
 	}
-	err := MakeRequest[SendUserCustomEventRequest, Response, any](c.client, ctx, "POST", "/api/v2/chat/users/{user_id}/event", nil, &sendUserCustomEventRequest, &result, pathParams)
+	err := MakeRequest[SendUserCustomEventRequest, Response, any](c.client, ctx, "POST", "/api/v2/chat/users/{user_id}/event", nil, request, &result, pathParams)
 	return &result, err
 }

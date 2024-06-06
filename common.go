@@ -20,9 +20,9 @@ func (c *CommonClient) GetApp(ctx context.Context) (*GetApplicationResponse, err
 	return &result, err
 }
 
-func (c *CommonClient) UpdateApp(ctx context.Context, updateAppRequest UpdateAppRequest) (*Response, error) {
+func (c *CommonClient) UpdateApp(ctx context.Context, request *UpdateAppRequest) (*Response, error) {
 	var result Response
-	err := MakeRequest[UpdateAppRequest, Response, any](c.client, ctx, "PATCH", "/api/v2/app", nil, &updateAppRequest, &result, nil)
+	err := MakeRequest[UpdateAppRequest, Response, any](c.client, ctx, "PATCH", "/api/v2/app", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -32,9 +32,9 @@ func (c *CommonClient) ListBlockLists(ctx context.Context) (*ListBlockListRespon
 	return &result, err
 }
 
-func (c *CommonClient) CreateBlockList(ctx context.Context, createBlockListRequest CreateBlockListRequest) (*Response, error) {
+func (c *CommonClient) CreateBlockList(ctx context.Context, request *CreateBlockListRequest) (*Response, error) {
 	var result Response
-	err := MakeRequest[CreateBlockListRequest, Response, any](c.client, ctx, "POST", "/api/v2/blocklists", nil, &createBlockListRequest, &result, nil)
+	err := MakeRequest[CreateBlockListRequest, Response, any](c.client, ctx, "POST", "/api/v2/blocklists", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -56,30 +56,30 @@ func (c *CommonClient) GetBlockList(ctx context.Context, name string) (*GetBlock
 	return &result, err
 }
 
-func (c *CommonClient) UpdateBlockList(ctx context.Context, name string, updateBlockListRequest UpdateBlockListRequest) (*Response, error) {
+func (c *CommonClient) UpdateBlockList(ctx context.Context, name string, request *UpdateBlockListRequest) (*Response, error) {
 	var result Response
 	pathParams := map[string]string{
 		"name": name,
 	}
-	err := MakeRequest[UpdateBlockListRequest, Response, any](c.client, ctx, "PUT", "/api/v2/blocklists/{name}", nil, &updateBlockListRequest, &result, pathParams)
+	err := MakeRequest[UpdateBlockListRequest, Response, any](c.client, ctx, "PUT", "/api/v2/blocklists/{name}", nil, request, &result, pathParams)
 	return &result, err
 }
 
-func (c *CommonClient) CheckPush(ctx context.Context, checkPushRequest CheckPushRequest) (*CheckPushResponse, error) {
+func (c *CommonClient) CheckPush(ctx context.Context, request *CheckPushRequest) (*CheckPushResponse, error) {
 	var result CheckPushResponse
-	err := MakeRequest[CheckPushRequest, CheckPushResponse, any](c.client, ctx, "POST", "/api/v2/check_push", nil, &checkPushRequest, &result, nil)
+	err := MakeRequest[CheckPushRequest, CheckPushResponse, any](c.client, ctx, "POST", "/api/v2/check_push", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *CommonClient) CheckSNS(ctx context.Context, checkSNSRequest CheckSNSRequest) (*CheckSNSResponse, error) {
+func (c *CommonClient) CheckSNS(ctx context.Context, request *CheckSNSRequest) (*CheckSNSResponse, error) {
 	var result CheckSNSResponse
-	err := MakeRequest[CheckSNSRequest, CheckSNSResponse, any](c.client, ctx, "POST", "/api/v2/check_sns", nil, &checkSNSRequest, &result, nil)
+	err := MakeRequest[CheckSNSRequest, CheckSNSResponse, any](c.client, ctx, "POST", "/api/v2/check_sns", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *CommonClient) CheckSQS(ctx context.Context, checkSQSRequest CheckSQSRequest) (*CheckSQSResponse, error) {
+func (c *CommonClient) CheckSQS(ctx context.Context, request *CheckSQSRequest) (*CheckSQSResponse, error) {
 	var result CheckSQSResponse
-	err := MakeRequest[CheckSQSRequest, CheckSQSResponse, any](c.client, ctx, "POST", "/api/v2/check_sqs", nil, &checkSQSRequest, &result, nil)
+	err := MakeRequest[CheckSQSRequest, CheckSQSResponse, any](c.client, ctx, "POST", "/api/v2/check_sqs", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -102,15 +102,15 @@ func (c *CommonClient) ListDevices(ctx context.Context, userId *string) (*ListDe
 	return &result, err
 }
 
-func (c *CommonClient) CreateDevice(ctx context.Context, createDeviceRequest CreateDeviceRequest) (*Response, error) {
+func (c *CommonClient) CreateDevice(ctx context.Context, request *CreateDeviceRequest) (*Response, error) {
 	var result Response
-	err := MakeRequest[CreateDeviceRequest, Response, any](c.client, ctx, "POST", "/api/v2/devices", nil, &createDeviceRequest, &result, nil)
+	err := MakeRequest[CreateDeviceRequest, Response, any](c.client, ctx, "POST", "/api/v2/devices", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *CommonClient) ExportUsers(ctx context.Context, exportUsersRequest ExportUsersRequest) (*ExportUsersResponse, error) {
+func (c *CommonClient) ExportUsers(ctx context.Context, request *ExportUsersRequest) (*ExportUsersResponse, error) {
 	var result ExportUsersResponse
-	err := MakeRequest[ExportUsersRequest, ExportUsersResponse, any](c.client, ctx, "POST", "/api/v2/export/users", nil, &exportUsersRequest, &result, nil)
+	err := MakeRequest[ExportUsersRequest, ExportUsersResponse, any](c.client, ctx, "POST", "/api/v2/export/users", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -120,9 +120,9 @@ func (c *CommonClient) ListExternalStorage(ctx context.Context) (*ListExternalSt
 	return &result, err
 }
 
-func (c *CommonClient) CreateExternalStorage(ctx context.Context, createExternalStorageRequest CreateExternalStorageRequest) (*CreateExternalStorageResponse, error) {
+func (c *CommonClient) CreateExternalStorage(ctx context.Context, request *CreateExternalStorageRequest) (*CreateExternalStorageResponse, error) {
 	var result CreateExternalStorageResponse
-	err := MakeRequest[CreateExternalStorageRequest, CreateExternalStorageResponse, any](c.client, ctx, "POST", "/api/v2/external_storage", nil, &createExternalStorageRequest, &result, nil)
+	err := MakeRequest[CreateExternalStorageRequest, CreateExternalStorageResponse, any](c.client, ctx, "POST", "/api/v2/external_storage", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -135,12 +135,12 @@ func (c *CommonClient) DeleteExternalStorage(ctx context.Context, name string) (
 	return &result, err
 }
 
-func (c *CommonClient) UpdateExternalStorage(ctx context.Context, name string, updateExternalStorageRequest UpdateExternalStorageRequest) (*UpdateExternalStorageResponse, error) {
+func (c *CommonClient) UpdateExternalStorage(ctx context.Context, name string, request *UpdateExternalStorageRequest) (*UpdateExternalStorageResponse, error) {
 	var result UpdateExternalStorageResponse
 	pathParams := map[string]string{
 		"name": name,
 	}
-	err := MakeRequest[UpdateExternalStorageRequest, UpdateExternalStorageResponse, any](c.client, ctx, "PUT", "/api/v2/external_storage/{name}", nil, &updateExternalStorageRequest, &result, pathParams)
+	err := MakeRequest[UpdateExternalStorageRequest, UpdateExternalStorageResponse, any](c.client, ctx, "PUT", "/api/v2/external_storage/{name}", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -153,15 +153,15 @@ func (c *CommonClient) CheckExternalStorage(ctx context.Context, name string) (*
 	return &result, err
 }
 
-func (c *CommonClient) CreateGuest(ctx context.Context, createGuestRequest CreateGuestRequest) (*CreateGuestResponse, error) {
+func (c *CommonClient) CreateGuest(ctx context.Context, request *CreateGuestRequest) (*CreateGuestResponse, error) {
 	var result CreateGuestResponse
-	err := MakeRequest[CreateGuestRequest, CreateGuestResponse, any](c.client, ctx, "POST", "/api/v2/guest", nil, &createGuestRequest, &result, nil)
+	err := MakeRequest[CreateGuestRequest, CreateGuestResponse, any](c.client, ctx, "POST", "/api/v2/guest", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *CommonClient) CreateImportURL(ctx context.Context, createImportURLRequest CreateImportURLRequest) (*CreateImportURLResponse, error) {
+func (c *CommonClient) CreateImportURL(ctx context.Context, request *CreateImportURLRequest) (*CreateImportURLResponse, error) {
 	var result CreateImportURLResponse
-	err := MakeRequest[CreateImportURLRequest, CreateImportURLResponse, any](c.client, ctx, "POST", "/api/v2/import_urls", nil, &createImportURLRequest, &result, nil)
+	err := MakeRequest[CreateImportURLRequest, CreateImportURLResponse, any](c.client, ctx, "POST", "/api/v2/import_urls", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -171,9 +171,9 @@ func (c *CommonClient) ListImports(ctx context.Context) (*ListImportsResponse, e
 	return &result, err
 }
 
-func (c *CommonClient) CreateImport(ctx context.Context, createImportRequest CreateImportRequest) (*CreateImportResponse, error) {
+func (c *CommonClient) CreateImport(ctx context.Context, request *CreateImportRequest) (*CreateImportResponse, error) {
 	var result CreateImportResponse
-	err := MakeRequest[CreateImportRequest, CreateImportResponse, any](c.client, ctx, "POST", "/api/v2/imports", nil, &createImportRequest, &result, nil)
+	err := MakeRequest[CreateImportRequest, CreateImportResponse, any](c.client, ctx, "POST", "/api/v2/imports", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -199,27 +199,27 @@ func (c *CommonClient) Unban(ctx context.Context, targetUserId string, channelCi
 	return &result, err
 }
 
-func (c *CommonClient) Ban(ctx context.Context, banRequest BanRequest) (*Response, error) {
+func (c *CommonClient) Ban(ctx context.Context, request *BanRequest) (*Response, error) {
 	var result Response
-	err := MakeRequest[BanRequest, Response, any](c.client, ctx, "POST", "/api/v2/moderation/ban", nil, &banRequest, &result, nil)
+	err := MakeRequest[BanRequest, Response, any](c.client, ctx, "POST", "/api/v2/moderation/ban", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *CommonClient) Flag(ctx context.Context, flagRequest FlagRequest) (*FlagResponse, error) {
+func (c *CommonClient) Flag(ctx context.Context, request *FlagRequest) (*FlagResponse, error) {
 	var result FlagResponse
-	err := MakeRequest[FlagRequest, FlagResponse, any](c.client, ctx, "POST", "/api/v2/moderation/flag", nil, &flagRequest, &result, nil)
+	err := MakeRequest[FlagRequest, FlagResponse, any](c.client, ctx, "POST", "/api/v2/moderation/flag", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *CommonClient) MuteUser(ctx context.Context, muteUserRequest MuteUserRequest) (*MuteUserResponse, error) {
+func (c *CommonClient) MuteUser(ctx context.Context, request *MuteUserRequest) (*MuteUserResponse, error) {
 	var result MuteUserResponse
-	err := MakeRequest[MuteUserRequest, MuteUserResponse, any](c.client, ctx, "POST", "/api/v2/moderation/mute", nil, &muteUserRequest, &result, nil)
+	err := MakeRequest[MuteUserRequest, MuteUserResponse, any](c.client, ctx, "POST", "/api/v2/moderation/mute", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *CommonClient) UnmuteUser(ctx context.Context, unmuteUserRequest UnmuteUserRequest) (*UnmuteResponse, error) {
+func (c *CommonClient) UnmuteUser(ctx context.Context, request *UnmuteUserRequest) (*UnmuteResponse, error) {
 	var result UnmuteResponse
-	err := MakeRequest[UnmuteUserRequest, UnmuteResponse, any](c.client, ctx, "POST", "/api/v2/moderation/unmute", nil, &unmuteUserRequest, &result, nil)
+	err := MakeRequest[UnmuteUserRequest, UnmuteResponse, any](c.client, ctx, "POST", "/api/v2/moderation/unmute", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -253,9 +253,9 @@ func (c *CommonClient) ListPushProviders(ctx context.Context) (*ListPushProvider
 	return &result, err
 }
 
-func (c *CommonClient) UpsertPushProvider(ctx context.Context, upsertPushProviderRequest UpsertPushProviderRequest) (*UpsertPushProviderResponse, error) {
+func (c *CommonClient) UpsertPushProvider(ctx context.Context, request *UpsertPushProviderRequest) (*UpsertPushProviderResponse, error) {
 	var result UpsertPushProviderResponse
-	err := MakeRequest[UpsertPushProviderRequest, UpsertPushProviderResponse, any](c.client, ctx, "POST", "/api/v2/push_providers", nil, &upsertPushProviderRequest, &result, nil)
+	err := MakeRequest[UpsertPushProviderRequest, UpsertPushProviderResponse, any](c.client, ctx, "POST", "/api/v2/push_providers", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -288,9 +288,9 @@ func (c *CommonClient) ListRoles(ctx context.Context) (*ListRolesResponse, error
 	return &result, err
 }
 
-func (c *CommonClient) CreateRole(ctx context.Context, createRoleRequest CreateRoleRequest) (*CreateRoleResponse, error) {
+func (c *CommonClient) CreateRole(ctx context.Context, request *CreateRoleRequest) (*CreateRoleResponse, error) {
 	var result CreateRoleResponse
-	err := MakeRequest[CreateRoleRequest, CreateRoleResponse, any](c.client, ctx, "POST", "/api/v2/roles", nil, &createRoleRequest, &result, nil)
+	err := MakeRequest[CreateRoleRequest, CreateRoleResponse, any](c.client, ctx, "POST", "/api/v2/roles", nil, request, &result, nil)
 	return &result, err
 }
 
@@ -321,48 +321,48 @@ func (c *CommonClient) QueryUsers(ctx context.Context, payload *QueryUsersPayloa
 	return &result, err
 }
 
-func (c *CommonClient) UpdateUsersPartial(ctx context.Context, updateUsersPartialRequest UpdateUsersPartialRequest) (*UpdateUsersResponse, error) {
+func (c *CommonClient) UpdateUsersPartial(ctx context.Context, request *UpdateUsersPartialRequest) (*UpdateUsersResponse, error) {
 	var result UpdateUsersResponse
-	err := MakeRequest[UpdateUsersPartialRequest, UpdateUsersResponse, any](c.client, ctx, "PATCH", "/api/v2/users", nil, &updateUsersPartialRequest, &result, nil)
+	err := MakeRequest[UpdateUsersPartialRequest, UpdateUsersResponse, any](c.client, ctx, "PATCH", "/api/v2/users", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *CommonClient) UpdateUsers(ctx context.Context, updateUsersRequest UpdateUsersRequest) (*UpdateUsersResponse, error) {
+func (c *CommonClient) UpdateUsers(ctx context.Context, request *UpdateUsersRequest) (*UpdateUsersResponse, error) {
 	var result UpdateUsersResponse
-	err := MakeRequest[UpdateUsersRequest, UpdateUsersResponse, any](c.client, ctx, "POST", "/api/v2/users", nil, &updateUsersRequest, &result, nil)
+	err := MakeRequest[UpdateUsersRequest, UpdateUsersResponse, any](c.client, ctx, "POST", "/api/v2/users", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *CommonClient) DeactivateUsers(ctx context.Context, deactivateUsersRequest DeactivateUsersRequest) (*DeactivateUsersResponse, error) {
+func (c *CommonClient) DeactivateUsers(ctx context.Context, request *DeactivateUsersRequest) (*DeactivateUsersResponse, error) {
 	var result DeactivateUsersResponse
-	err := MakeRequest[DeactivateUsersRequest, DeactivateUsersResponse, any](c.client, ctx, "POST", "/api/v2/users/deactivate", nil, &deactivateUsersRequest, &result, nil)
+	err := MakeRequest[DeactivateUsersRequest, DeactivateUsersResponse, any](c.client, ctx, "POST", "/api/v2/users/deactivate", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *CommonClient) DeleteUsers(ctx context.Context, deleteUsersRequest DeleteUsersRequest) (*DeleteUsersResponse, error) {
+func (c *CommonClient) DeleteUsers(ctx context.Context, request *DeleteUsersRequest) (*DeleteUsersResponse, error) {
 	var result DeleteUsersResponse
-	err := MakeRequest[DeleteUsersRequest, DeleteUsersResponse, any](c.client, ctx, "POST", "/api/v2/users/delete", nil, &deleteUsersRequest, &result, nil)
+	err := MakeRequest[DeleteUsersRequest, DeleteUsersResponse, any](c.client, ctx, "POST", "/api/v2/users/delete", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *CommonClient) ReactivateUsers(ctx context.Context, reactivateUsersRequest ReactivateUsersRequest) (*ReactivateUsersResponse, error) {
+func (c *CommonClient) ReactivateUsers(ctx context.Context, request *ReactivateUsersRequest) (*ReactivateUsersResponse, error) {
 	var result ReactivateUsersResponse
-	err := MakeRequest[ReactivateUsersRequest, ReactivateUsersResponse, any](c.client, ctx, "POST", "/api/v2/users/reactivate", nil, &reactivateUsersRequest, &result, nil)
+	err := MakeRequest[ReactivateUsersRequest, ReactivateUsersResponse, any](c.client, ctx, "POST", "/api/v2/users/reactivate", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *CommonClient) RestoreUsers(ctx context.Context, restoreUsersRequest RestoreUsersRequest) (*Response, error) {
+func (c *CommonClient) RestoreUsers(ctx context.Context, request *RestoreUsersRequest) (*Response, error) {
 	var result Response
-	err := MakeRequest[RestoreUsersRequest, Response, any](c.client, ctx, "POST", "/api/v2/users/restore", nil, &restoreUsersRequest, &result, nil)
+	err := MakeRequest[RestoreUsersRequest, Response, any](c.client, ctx, "POST", "/api/v2/users/restore", nil, request, &result, nil)
 	return &result, err
 }
 
-func (c *CommonClient) DeactivateUser(ctx context.Context, userId string, deactivateUserRequest DeactivateUserRequest) (*DeactivateUserResponse, error) {
+func (c *CommonClient) DeactivateUser(ctx context.Context, userId string, request *DeactivateUserRequest) (*DeactivateUserResponse, error) {
 	var result DeactivateUserResponse
 	pathParams := map[string]string{
 		"user_id": userId,
 	}
-	err := MakeRequest[DeactivateUserRequest, DeactivateUserResponse, any](c.client, ctx, "POST", "/api/v2/users/{user_id}/deactivate", nil, &deactivateUserRequest, &result, pathParams)
+	err := MakeRequest[DeactivateUserRequest, DeactivateUserResponse, any](c.client, ctx, "POST", "/api/v2/users/{user_id}/deactivate", nil, request, &result, pathParams)
 	return &result, err
 }
 
@@ -375,11 +375,11 @@ func (c *CommonClient) ExportUser(ctx context.Context, userId string) (*ExportUs
 	return &result, err
 }
 
-func (c *CommonClient) ReactivateUser(ctx context.Context, userId string, reactivateUserRequest ReactivateUserRequest) (*ReactivateUserResponse, error) {
+func (c *CommonClient) ReactivateUser(ctx context.Context, userId string, request *ReactivateUserRequest) (*ReactivateUserResponse, error) {
 	var result ReactivateUserResponse
 	pathParams := map[string]string{
 		"user_id": userId,
 	}
-	err := MakeRequest[ReactivateUserRequest, ReactivateUserResponse, any](c.client, ctx, "POST", "/api/v2/users/{user_id}/reactivate", nil, &reactivateUserRequest, &result, pathParams)
+	err := MakeRequest[ReactivateUserRequest, ReactivateUserResponse, any](c.client, ctx, "POST", "/api/v2/users/{user_id}/reactivate", nil, request, &result, pathParams)
 	return &result, err
 }

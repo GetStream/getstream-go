@@ -43,6 +43,7 @@ func setup(t *testing.T) {
 	}
 	t.Cleanup(resetSharedResource)
 }
+
 func resetSharedResource() {
 	once = sync.Once{}
 	client = nil
@@ -70,14 +71,13 @@ func TestCRUDCallOperations(t *testing.T) {
 			},
 		}
 
-		c, err := call.GetOrCreate(ctx, callRequest)
+		c, err := call.GetOrCreate(ctx, &callRequest)
 		assert.NoError(t, err)
 		assert.Equal(t, "john", c.Call.CreatedBy.Id)
 		assert.False(t, c.Call.Settings.Screensharing.Enabled)
 	})
 
 	t.Run("Update", func(t *testing.T) {
-
 		ctx := context.Background()
 		callRequest := UpdateCallRequest{
 			SettingsOverride: &CallSettingsRequest{
@@ -87,7 +87,7 @@ func TestCRUDCallOperations(t *testing.T) {
 				},
 			},
 		}
-		c, err := call.Update(ctx, callRequest)
+		c, err := call.Update(ctx, &callRequest)
 		assert.NoError(t, err)
 		assert.True(t, c.Call.Settings.Audio.MicDefaultOn)
 	})
@@ -154,7 +154,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 			},
 		}
 
-		response, err := client.Video().CreateCallType(ctx, CreateCallTypeRequest{Grants: &grants, Name: callTypeName, Settings: callSettings, NotificationSettings: notificationSettings})
+		response, err := client.Video().CreateCallType(ctx, &CreateCallTypeRequest{Grants: &grants, Name: callTypeName, Settings: callSettings, NotificationSettings: notificationSettings})
 		assert.NoError(t, err)
 		assert.Equal(t, callTypeName, response.Name)
 		assert.True(t, response.Settings.Audio.MicDefaultOn)
@@ -172,7 +172,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 		grants := map[string][]string{
 			"host": {JOIN_BACKSTAGE.String()},
 		}
-		response, err := client.Video().UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
+		response, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{Settings: &CallSettingsRequest{
 			Audio: &AudioSettingsRequest{
 				DefaultDevice: "earpiece",
 				MicDefaultOn:  PtrTo(false),
@@ -196,7 +196,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	t.Run("Update", func(t *testing.T) {
 		ctx := context.Background()
 
-		layoutOptions := map[string]string{
+		layoutOptions := map[string]any{
 			"logo.image_url":                             "https://theme.zdassets.com/theme_assets/9442057/efc3820e436f9150bc8cf34267fff4df052a1f9c.png",
 			"logo.horizontal_position":                   "center",
 			"title.text":                                 "Building Stream Video Q&A",
@@ -211,7 +211,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 			"participant_label.background_color":         "transparent",
 		}
 
-		_, err := client.Video().UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
+		_, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{Settings: &CallSettingsRequest{
 			Recording: &RecordSettingsRequest{
 				Mode:      "available",
 				AudioOnly: PtrTo(false),
@@ -228,7 +228,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	t.Run("Update Custom Recording Style css", func(t *testing.T) {
 		ctx := context.Background()
 
-		_, err := client.Video().UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
+		_, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{Settings: &CallSettingsRequest{
 			Recording: &RecordSettingsRequest{
 				Mode:      "available",
 				AudioOnly: PtrTo(false),
@@ -243,10 +243,9 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	})
 
 	t.Run("Update Custom Recording Website", func(t *testing.T) {
-
 		ctx := context.Background()
 
-		_, err := client.Video().UpdateCallType(ctx, callTypeName, UpdateCallTypeRequest{Settings: &CallSettingsRequest{
+		_, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{Settings: &CallSettingsRequest{
 			Recording: &RecordSettingsRequest{
 				Mode:      "available",
 				AudioOnly: PtrTo(false),
@@ -284,7 +283,7 @@ func TestVideoExamples(t *testing.T) {
 		for _, user := range users {
 			usersMap[user.Id] = user
 		}
-		_, err := client.Common().UpdateUsers(ctx, UpdateUsersRequest{Users: usersMap})
+		_, err := client.Common().UpdateUsers(ctx, &UpdateUsersRequest{Users: usersMap})
 		assert.NoError(t, err)
 
 		token, err := client.CreateToken("tommaso-id", nil)
@@ -299,12 +298,13 @@ func TestVideoExamples(t *testing.T) {
 			{UserId: "thierry-id"},
 			{UserId: "tommaso-id"},
 		}
-		callRequest := GetOrCreateCallRequest{Data: &CallRequest{
-			CreatedById: PtrTo("tommaso-id"),
-			Members:     &members,
-		},
+		callRequest := GetOrCreateCallRequest{
+			Data: &CallRequest{
+				CreatedById: PtrTo("tommaso-id"),
+				Members:     &members,
+			},
 		}
-		_, err := call.GetOrCreate(ctx, callRequest)
+		_, err := call.GetOrCreate(ctx, &callRequest)
 		assert.NoError(t, err)
 	})
 
@@ -322,7 +322,7 @@ func TestVideoExamples(t *testing.T) {
 			Timeout:      PtrTo(30),
 		}
 
-		_, err = client.Common().Ban(ctx, banRequest)
+		_, err = client.Common().Ban(ctx, &banRequest)
 		assert.NoError(t, err)
 
 		_, err = client.Common().Unban(ctx, badUser.Id, nil, nil)

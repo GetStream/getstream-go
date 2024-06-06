@@ -2441,7 +2441,7 @@ type LayoutSettingsRequest struct {
 
 	ExternalCssUrl *string `json:"external_css_url,omitempty"`
 
-	Options *map[string]string `json:"options,omitempty"`
+	Options *map[string]any `json:"options,omitempty"`
 }
 
 type LayoutSettingsResponse struct {

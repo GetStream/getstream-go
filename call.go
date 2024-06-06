@@ -20,44 +20,44 @@ func (c *Call) Get(ctx context.Context, membersLimit *int, ring *bool, notify *b
 	return c.client.GetCall(ctx, c.callType, c.callID, membersLimit, ring, notify)
 }
 
-func (c *Call) Update(ctx context.Context, updateCallRequest UpdateCallRequest) (*UpdateCallResponse, error) {
-	return c.client.UpdateCall(ctx, c.callType, c.callID, updateCallRequest)
+func (c *Call) Update(ctx context.Context, request *UpdateCallRequest) (*UpdateCallResponse, error) {
+	return c.client.UpdateCall(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) GetOrCreate(ctx context.Context, getOrCreateCallRequest GetOrCreateCallRequest) (*GetOrCreateCallResponse, error) {
-	return c.client.GetOrCreateCall(ctx, c.callType, c.callID, getOrCreateCallRequest)
+func (c *Call) GetOrCreate(ctx context.Context, request *GetOrCreateCallRequest) (*GetOrCreateCallResponse, error) {
+	return c.client.GetOrCreateCall(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) BlockUser(ctx context.Context, blockUserRequest BlockUserRequest) (*BlockUserResponse, error) {
-	return c.client.BlockUser(ctx, c.callType, c.callID, blockUserRequest)
+func (c *Call) BlockUser(ctx context.Context, request *BlockUserRequest) (*BlockUserResponse, error) {
+	return c.client.BlockUser(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) SendCallEvent(ctx context.Context, sendCallEventRequest SendCallEventRequest) (*SendCallEventResponse, error) {
-	return c.client.SendCallEvent(ctx, c.callType, c.callID, sendCallEventRequest)
+func (c *Call) SendCallEvent(ctx context.Context, request *SendCallEventRequest) (*SendCallEventResponse, error) {
+	return c.client.SendCallEvent(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) CollectUserFeedback(ctx context.Context, session string, collectUserFeedbackRequest CollectUserFeedbackRequest) (*CollectUserFeedbackResponse, error) {
-	return c.client.CollectUserFeedback(ctx, c.callType, c.callID, session, collectUserFeedbackRequest)
+func (c *Call) CollectUserFeedback(ctx context.Context, session string, request *CollectUserFeedbackRequest) (*CollectUserFeedbackResponse, error) {
+	return c.client.CollectUserFeedback(ctx, c.callType, c.callID, session, request)
 }
 
-func (c *Call) GoLive(ctx context.Context, goLiveRequest GoLiveRequest) (*GoLiveResponse, error) {
-	return c.client.GoLive(ctx, c.callType, c.callID, goLiveRequest)
+func (c *Call) GoLive(ctx context.Context, request *GoLiveRequest) (*GoLiveResponse, error) {
+	return c.client.GoLive(ctx, c.callType, c.callID, request)
 }
 
 func (c *Call) End(ctx context.Context) (*EndCallResponse, error) {
 	return c.client.EndCall(ctx, c.callType, c.callID)
 }
 
-func (c *Call) UpdateCallMembers(ctx context.Context, updateCallMembersRequest UpdateCallMembersRequest) (*UpdateCallMembersResponse, error) {
-	return c.client.UpdateCallMembers(ctx, c.callType, c.callID, updateCallMembersRequest)
+func (c *Call) UpdateCallMembers(ctx context.Context, request *UpdateCallMembersRequest) (*UpdateCallMembersResponse, error) {
+	return c.client.UpdateCallMembers(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) MuteUsers(ctx context.Context, muteUsersRequest MuteUsersRequest) (*MuteUsersResponse, error) {
-	return c.client.MuteUsers(ctx, c.callType, c.callID, muteUsersRequest)
+func (c *Call) MuteUsers(ctx context.Context, request *MuteUsersRequest) (*MuteUsersResponse, error) {
+	return c.client.MuteUsers(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) VideoPin(ctx context.Context, pinRequest PinRequest) (*PinResponse, error) {
-	return c.client.VideoPin(ctx, c.callType, c.callID, pinRequest)
+func (c *Call) VideoPin(ctx context.Context, request *PinRequest) (*PinResponse, error) {
+	return c.client.VideoPin(ctx, c.callType, c.callID, request)
 }
 
 func (c *Call) ListRecordings(ctx context.Context) (*ListRecordingsResponse, error) {
@@ -68,12 +68,12 @@ func (c *Call) StartHLSBroadcasting(ctx context.Context) (*StartHLSBroadcastingR
 	return c.client.StartHLSBroadcasting(ctx, c.callType, c.callID)
 }
 
-func (c *Call) StartRecording(ctx context.Context, startRecordingRequest StartRecordingRequest) (*StartRecordingResponse, error) {
-	return c.client.StartRecording(ctx, c.callType, c.callID, startRecordingRequest)
+func (c *Call) StartRecording(ctx context.Context, request *StartRecordingRequest) (*StartRecordingResponse, error) {
+	return c.client.StartRecording(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) StartTranscription(ctx context.Context, startTranscriptionRequest StartTranscriptionRequest) (*StartTranscriptionResponse, error) {
-	return c.client.StartTranscription(ctx, c.callType, c.callID, startTranscriptionRequest)
+func (c *Call) StartTranscription(ctx context.Context, request *StartTranscriptionRequest) (*StartTranscriptionResponse, error) {
+	return c.client.StartTranscription(ctx, c.callType, c.callID, request)
 }
 
 func (c *Call) GetCallStats(ctx context.Context, session string) (*GetCallStatsResponse, error) {
@@ -100,16 +100,16 @@ func (c *Call) ListTranscriptions(ctx context.Context) (*ListTranscriptionsRespo
 	return c.client.ListTranscriptions(ctx, c.callType, c.callID)
 }
 
-func (c *Call) UnblockUser(ctx context.Context, unblockUserRequest UnblockUserRequest) (*UnblockUserResponse, error) {
-	return c.client.UnblockUser(ctx, c.callType, c.callID, unblockUserRequest)
+func (c *Call) UnblockUser(ctx context.Context, request *UnblockUserRequest) (*UnblockUserResponse, error) {
+	return c.client.UnblockUser(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) VideoUnpin(ctx context.Context, unpinRequest UnpinRequest) (*UnpinResponse, error) {
-	return c.client.VideoUnpin(ctx, c.callType, c.callID, unpinRequest)
+func (c *Call) VideoUnpin(ctx context.Context, request *UnpinRequest) (*UnpinResponse, error) {
+	return c.client.VideoUnpin(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) UpdateUserPermissions(ctx context.Context, updateUserPermissionsRequest UpdateUserPermissionsRequest) (*UpdateUserPermissionsResponse, error) {
-	return c.client.UpdateUserPermissions(ctx, c.callType, c.callID, updateUserPermissionsRequest)
+func (c *Call) UpdateUserPermissions(ctx context.Context, request *UpdateUserPermissionsRequest) (*UpdateUserPermissionsResponse, error) {
+	return c.client.UpdateUserPermissions(ctx, c.callType, c.callID, request)
 }
 
 func (c *Call) DeleteRecording(ctx context.Context, session string, filename string) (*DeleteRecordingResponse, error) {
