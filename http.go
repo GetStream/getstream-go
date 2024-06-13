@@ -177,6 +177,21 @@ func (c *Client) setHeaders(r *http.Request) {
 	r.Header.Set("Stream-Auth-Type", "jwt")
 }
 
+func ToMap(item interface{}) (map[string]interface{}, error) {
+	bytes, err := json.Marshal(item)
+	if err != nil {
+		return nil, err
+	}
+
+	var result map[string]interface{}
+	err = json.Unmarshal(bytes, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 // makeRequest makes a generic HTTP request
 func MakeRequest[GRequest any, GResponse any, GParams any](c *Client, ctx context.Context, method, path string, params map[string]GParams, data *GRequest, response *GResponse, pathParams map[string]string) error {
 	queryParams := BuildQueryParam(params)
