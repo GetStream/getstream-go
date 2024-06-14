@@ -325,7 +325,7 @@ func TestVideoExamples(t *testing.T) {
 		_, err = client.Common().Ban(ctx, &banRequest)
 		assert.NoError(t, err)
 
-		_, err = client.Common().Unban(ctx, badUser.Id, nil, nil)
+		_, err = client.Common().Unban(ctx, &UnbanParams{TargetUserId: badUser.Id})
 		assert.NoError(t, err)
 	})
 

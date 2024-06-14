@@ -16,8 +16,8 @@ func NewCall(callType string, callID string, client *VideoClient) *Call {
 	}
 }
 
-func (c *Call) Get(ctx context.Context, membersLimit *int, ring *bool, notify *bool) (*GetCallResponse, error) {
-	return c.client.GetCall(ctx, c.callType, c.callID, membersLimit, ring, notify)
+func (c *Call) Get(ctx context.Context, params *GetCallParams) (*GetCallResponse, error) {
+	return c.client.GetCall(ctx, c.callType, c.callID, params)
 }
 
 func (c *Call) Update(ctx context.Context, request *UpdateCallRequest) (*UpdateCallResponse, error) {

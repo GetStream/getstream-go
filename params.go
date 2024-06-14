@@ -4,6 +4,12 @@ type DeleteChannelParams struct {
 	HardDelete *bool `json:"hard_delete,omitempty"`
 }
 
+type DeleteDeviceParams struct {
+	Id string `json:"id"`
+
+	UserId *string `json:"user_id,omitempty"`
+}
+
 type DeleteFileParams struct {
 	Url *string `json:"url,omitempty"`
 }
@@ -12,36 +18,68 @@ type DeleteImageParams struct {
 	Url *string `json:"url,omitempty"`
 }
 
-type GetManyMessagesParams struct {
-	Ids []string `json:"ids"`
-}
-
-type QueryMembersParams struct {
-	Payload *QueryMembersRequest `json:"payload,omitempty"`
-}
-
 type DeleteMessageParams struct {
 	DeletedBy *string `json:"deleted_by,omitempty"`
 
 	Hard *bool `json:"hard,omitempty"`
 }
 
-type GetMessageParams struct {
-	ShowDeletedMessage *bool `json:"show_deleted_message,omitempty"`
+type DeletePollOptionParams struct {
+	UserId *string `json:"user_id,omitempty"`
+}
+
+type DeletePollParams struct {
+	UserId *string `json:"user_id,omitempty"`
 }
 
 type DeleteReactionParams struct {
 	UserId *string `json:"user_id,omitempty"`
 }
 
+type GetCallParams struct {
+	MembersLimit *int `json:"members_limit,omitempty"`
+
+	Notify *bool `json:"notify,omitempty"`
+
+	Ring *bool `json:"ring,omitempty"`
+}
+
+type GetManyMessagesParams struct {
+	Ids []string `json:"ids"`
+}
+
+type GetMessageParams struct {
+	ShowDeletedMessage *bool `json:"show_deleted_message,omitempty"`
+}
+
+type GetOGParams struct {
+	Url string `json:"url"`
+}
+
+type GetPollOptionParams struct {
+	UserId *string `json:"user_id,omitempty"`
+}
+
+type GetPollParams struct {
+	UserId *string `json:"user_id,omitempty"`
+}
+
+type GetRateLimitsParams struct {
+	Android *bool `json:"android,omitempty"`
+
+	Endpoints *string `json:"endpoints,omitempty"`
+
+	Ios *bool `json:"ios,omitempty"`
+
+	ServerSide *bool `json:"server_side,omitempty"`
+
+	Web *bool `json:"web,omitempty"`
+}
+
 type GetReactionsParams struct {
 	Limit *int `json:"limit,omitempty"`
 
 	Offset *int `json:"offset,omitempty"`
-}
-
-type RemovePollVoteParams struct {
-	UserId *string `json:"user_id,omitempty"`
 }
 
 type GetRepliesParams struct {
@@ -72,42 +110,6 @@ type GetRepliesParams struct {
 	Sort *[]*SortParam `json:"sort,omitempty"`
 }
 
-type QueryMessageFlagsParams struct {
-	Payload *QueryMessageFlagsRequest `json:"payload,omitempty"`
-}
-
-type QueryPollsParams struct {
-	UserId *string `json:"user_id,omitempty"`
-}
-
-type DeletePollParams struct {
-	UserId *string `json:"user_id,omitempty"`
-}
-
-type GetPollParams struct {
-	UserId *string `json:"user_id,omitempty"`
-}
-
-type DeletePollOptionParams struct {
-	UserId *string `json:"user_id,omitempty"`
-}
-
-type GetPollOptionParams struct {
-	UserId *string `json:"user_id,omitempty"`
-}
-
-type QueryPollVotesParams struct {
-	UserId *string `json:"user_id,omitempty"`
-}
-
-type QueryBannedUsersParams struct {
-	Payload *QueryBannedUsersRequest `json:"payload,omitempty"`
-}
-
-type SearchParams struct {
-	Payload *SearchRequest `json:"payload,omitempty"`
-}
-
 type GetThreadParams struct {
 	ConnectionId *string `json:"connection_id,omitempty"`
 
@@ -118,14 +120,40 @@ type GetThreadParams struct {
 	ReplyLimit *int `json:"reply_limit,omitempty"`
 }
 
-type DeleteDeviceParams struct {
-	Id string `json:"id"`
-
+type ListDevicesParams struct {
 	UserId *string `json:"user_id,omitempty"`
 }
 
-type ListDevicesParams struct {
+type QueryBannedUsersParams struct {
+	Payload *QueryBannedUsersRequest `json:"payload,omitempty"`
+}
+
+type QueryMembersParams struct {
+	Payload *QueryMembersRequest `json:"payload,omitempty"`
+}
+
+type QueryMessageFlagsParams struct {
+	Payload *QueryMessageFlagsRequest `json:"payload,omitempty"`
+}
+
+type QueryPollVotesParams struct {
 	UserId *string `json:"user_id,omitempty"`
+}
+
+type QueryPollsParams struct {
+	UserId *string `json:"user_id,omitempty"`
+}
+
+type QueryUsersParams struct {
+	Payload *QueryUsersPayload `json:"payload,omitempty"`
+}
+
+type RemovePollVoteParams struct {
+	UserId *string `json:"user_id,omitempty"`
+}
+
+type SearchParams struct {
+	Payload *SearchRequest `json:"payload,omitempty"`
 }
 
 type UnbanParams struct {
@@ -134,32 +162,4 @@ type UnbanParams struct {
 	ChannelCid *string `json:"channel_cid,omitempty"`
 
 	CreatedBy *string `json:"created_by,omitempty"`
-}
-
-type GetOGParams struct {
-	Url string `json:"url"`
-}
-
-type GetRateLimitsParams struct {
-	Android *bool `json:"android,omitempty"`
-
-	Endpoints *string `json:"endpoints,omitempty"`
-
-	Ios *bool `json:"ios,omitempty"`
-
-	ServerSide *bool `json:"server_side,omitempty"`
-
-	Web *bool `json:"web,omitempty"`
-}
-
-type QueryUsersParams struct {
-	Payload *QueryUsersPayload `json:"payload,omitempty"`
-}
-
-type GetCallParams struct {
-	MembersLimit *int `json:"members_limit,omitempty"`
-
-	Notify *bool `json:"notify,omitempty"`
-
-	Ring *bool `json:"ring,omitempty"`
 }

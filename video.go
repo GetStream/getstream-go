@@ -34,18 +34,17 @@ func (c *VideoClient) QueryCallStats(ctx context.Context, request *QueryCallStat
 
 // Required permissions:
 // - ReadCall
-func (c *VideoClient) GetCall(ctx context.Context, _type string, id string, membersLimit *int, ring *bool, notify *bool) (*GetCallResponse, error) {
+func (c *VideoClient) GetCall(ctx context.Context, _type string, id string, queryParams *GetCallParams) (*GetCallResponse, error) {
 	var result GetCallResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	queryParams := map[string]interface{}{
-		"members_limit": membersLimit,
-		"ring":          ring,
-		"notify":        notify,
+	params, err := ToMap(queryParams)
+	if err != nil {
+		return nil, err
 	}
-	err := MakeRequest[any, GetCallResponse](c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}", queryParams, nil, &result, pathParams)
+	err = MakeRequest[any, GetCallResponse](c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}", params, nil, &result, pathParams)
 	return &result, err
 }
 

@@ -94,23 +94,24 @@ func (c *CommonClient) CheckSQS(ctx context.Context, request *CheckSQSRequest) (
 }
 
 // Deletes one device
-func (c *CommonClient) DeleteDevice(ctx context.Context, id string, userId *string) (*Response, error) {
+func (c *CommonClient) DeleteDevice(ctx context.Context, queryParams *DeleteDeviceParams) (*Response, error) {
 	var result Response
-	queryParams := map[string]interface{}{
-		"id":      id,
-		"user_id": userId,
+	params, err := ToMap(queryParams)
+	if err != nil {
+		return nil, err
 	}
-	err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/devices", queryParams, nil, &result, nil)
+	err = MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/devices", params, nil, &result, nil)
 	return &result, err
 }
 
 // Returns all available devices
-func (c *CommonClient) ListDevices(ctx context.Context, userId *string) (*ListDevicesResponse, error) {
+func (c *CommonClient) ListDevices(ctx context.Context, queryParams *ListDevicesParams) (*ListDevicesResponse, error) {
 	var result ListDevicesResponse
-	queryParams := map[string]interface{}{
-		"user_id": userId,
+	params, err := ToMap(queryParams)
+	if err != nil {
+		return nil, err
 	}
-	err := MakeRequest[any, ListDevicesResponse](c.client, ctx, "GET", "/api/v2/devices", queryParams, nil, &result, nil)
+	err = MakeRequest[any, ListDevicesResponse](c.client, ctx, "GET", "/api/v2/devices", params, nil, &result, nil)
 	return &result, err
 }
 
@@ -215,16 +216,13 @@ func (c *CommonClient) GetImport(ctx context.Context, id string) (*GetImportResp
 // Required permissions:
 // - BanChannelMember
 // - BanUser
-func (c *CommonClient) Unban(ctx context.Context, targetUserId string, channelCid *string, createdBy *string) (*Response, error) {
+func (c *CommonClient) Unban(ctx context.Context, queryParams *UnbanParams) (*Response, error) {
 	var result Response
-	queryParams := map[string]interface{}{
-		"target_user_id": targetUserId,
-		"created_by":     createdBy,
+	params, err := ToMap(queryParams)
+	if err != nil {
+		return nil, err
 	}
-	if channelCid != nil {
-		queryParams["channel_cid"] = channelCid
-	}
-	err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/moderation/ban", queryParams, nil, &result, nil)
+	err = MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/moderation/ban", params, nil, &result, nil)
 	return &result, err
 }
 
@@ -284,12 +282,13 @@ func (c *CommonClient) UnmuteUser(ctx context.Context, request *UnmuteUserReques
 }
 
 // Get an OpenGraph attachment for a link
-func (c *CommonClient) GetOG(ctx context.Context, url string) (*GetOGResponse, error) {
+func (c *CommonClient) GetOG(ctx context.Context, queryParams *GetOGParams) (*GetOGResponse, error) {
 	var result GetOGResponse
-	queryParams := map[string]interface{}{
-		"url": url,
+	params, err := ToMap(queryParams)
+	if err != nil {
+		return nil, err
 	}
-	err := MakeRequest[any, GetOGResponse](c.client, ctx, "GET", "/api/v2/og", queryParams, nil, &result, nil)
+	err = MakeRequest[any, GetOGResponse](c.client, ctx, "GET", "/api/v2/og", params, nil, &result, nil)
 	return &result, err
 }
 
@@ -336,16 +335,13 @@ func (c *CommonClient) DeletePushProvider(ctx context.Context, _type string, nam
 }
 
 // Get rate limits usage and quotas
-func (c *CommonClient) GetRateLimits(ctx context.Context, serverSide *bool, android *bool, ios *bool, web *bool, endpoints *string) (*GetRateLimitsResponse, error) {
+func (c *CommonClient) GetRateLimits(ctx context.Context, queryParams *GetRateLimitsParams) (*GetRateLimitsResponse, error) {
 	var result GetRateLimitsResponse
-	queryParams := map[string]interface{}{
-		"server_side": serverSide,
-		"android":     android,
-		"ios":         ios,
-		"web":         web,
-		"endpoints":   endpoints,
+	params, err := ToMap(queryParams)
+	if err != nil {
+		return nil, err
 	}
-	err := MakeRequest[any, GetRateLimitsResponse](c.client, ctx, "GET", "/api/v2/rate_limits", queryParams, nil, &result, nil)
+	err = MakeRequest[any, GetRateLimitsResponse](c.client, ctx, "GET", "/api/v2/rate_limits", params, nil, &result, nil)
 	return &result, err
 }
 
@@ -387,12 +383,13 @@ func (c *CommonClient) GetTask(ctx context.Context, id string) (*GetTaskResponse
 //
 // Required permissions:
 // - SearchUser
-func (c *CommonClient) QueryUsers(ctx context.Context, payload *QueryUsersPayload) (*QueryUsersResponse, error) {
+func (c *CommonClient) QueryUsers(ctx context.Context, queryParams *QueryUsersParams) (*QueryUsersResponse, error) {
 	var result QueryUsersResponse
-	queryParams := map[string]interface{}{
-		"payload": payload,
+	params, err := ToMap(queryParams)
+	if err != nil {
+		return nil, err
 	}
-	err := MakeRequest[any, QueryUsersResponse](c.client, ctx, "GET", "/api/v2/users", queryParams, nil, &result, nil)
+	err = MakeRequest[any, QueryUsersResponse](c.client, ctx, "GET", "/api/v2/users", params, nil, &result, nil)
 	return &result, err
 }
 
