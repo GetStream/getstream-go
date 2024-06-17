@@ -5,9 +5,9 @@ type DeleteChannelParams struct {
 }
 
 type DeleteDeviceParams struct {
-	Id string `json:"id"`
+	ID string `json:"id"`
 
-	UserId *string `json:"user_id,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
 }
 
 type DeleteFileParams struct {
@@ -25,19 +25,19 @@ type DeleteMessageParams struct {
 }
 
 type DeletePollOptionParams struct {
-	UserId *string `json:"user_id,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
 }
 
 type DeletePollParams struct {
-	UserId *string `json:"user_id,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
 }
 
 type DeleteReactionParams struct {
-	UserId *string `json:"user_id,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
 }
 
 type GetBlockedUsersParams struct {
-	UserId *string `json:"user_id,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
 }
 
 type GetCallParams struct {
@@ -49,7 +49,7 @@ type GetCallParams struct {
 }
 
 type GetManyMessagesParams struct {
-	Ids []string `json:"ids"`
+	IDs []string `json:"ids"`
 }
 
 type GetMessageParams struct {
@@ -61,11 +61,11 @@ type GetOGParams struct {
 }
 
 type GetPollOptionParams struct {
-	UserId *string `json:"user_id,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
 }
 
 type GetPollParams struct {
-	UserId *string `json:"user_id,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
 }
 
 type GetRateLimitsParams struct {
@@ -97,15 +97,15 @@ type GetRepliesParams struct {
 
 	CreatedAtBeforeOrEqual *Timestamp `json:"created_at_before_or_equal,omitempty"`
 
-	IdAround *string `json:"id_around,omitempty"`
+	IDAround *string `json:"id_around,omitempty"`
 
-	IdGt *string `json:"id_gt,omitempty"`
+	IDGt *string `json:"id_gt,omitempty"`
 
-	IdGte *string `json:"id_gte,omitempty"`
+	IDGte *string `json:"id_gte,omitempty"`
 
-	IdLt *string `json:"id_lt,omitempty"`
+	IDLt *string `json:"id_lt,omitempty"`
 
-	IdLte *string `json:"id_lte,omitempty"`
+	IDLte *string `json:"id_lte,omitempty"`
 
 	Limit *int `json:"limit,omitempty"`
 
@@ -115,7 +115,7 @@ type GetRepliesParams struct {
 }
 
 type GetThreadParams struct {
-	ConnectionId *string `json:"connection_id,omitempty"`
+	ConnectionID *string `json:"connection_id,omitempty"`
 
 	MemberLimit *int `json:"member_limit,omitempty"`
 
@@ -125,7 +125,7 @@ type GetThreadParams struct {
 }
 
 type ListDevicesParams struct {
-	UserId *string `json:"user_id,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
 }
 
 type QueryBannedUsersParams struct {
@@ -141,11 +141,11 @@ type QueryMessageFlagsParams struct {
 }
 
 type QueryPollVotesParams struct {
-	UserId *string `json:"user_id,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
 }
 
 type QueryPollsParams struct {
-	UserId *string `json:"user_id,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
 }
 
 type QueryUsersParams struct {
@@ -153,7 +153,7 @@ type QueryUsersParams struct {
 }
 
 type RemovePollVoteParams struct {
-	UserId *string `json:"user_id,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
 }
 
 type SearchParams struct {
@@ -161,7 +161,7 @@ type SearchParams struct {
 }
 
 type UnbanParams struct {
-	TargetUserId string `json:"target_user_id"`
+	TargetUserID string `json:"target_user_id"`
 
 	ChannelCid *string `json:"channel_cid,omitempty"`
 

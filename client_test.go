@@ -59,7 +59,7 @@ func TestCRUDCallOperations(t *testing.T) {
 		ctx := context.Background()
 		callRequest := GetOrCreateCallRequest{
 			Data: &CallRequest{
-				CreatedById: PtrTo("john"),
+				CreatedByID: PtrTo("john"),
 				SettingsOverride: &CallSettingsRequest{
 					Geofencing: &GeofenceSettingsRequest{
 						Names: PtrTo([]string{"canada"}),
@@ -73,7 +73,7 @@ func TestCRUDCallOperations(t *testing.T) {
 
 		c, err := call.GetOrCreate(ctx, &callRequest)
 		assert.NoError(t, err)
-		assert.Equal(t, "john", c.Data.Call.CreatedBy.Id)
+		assert.Equal(t, "john", c.Data.Call.CreatedBy.ID)
 		assert.False(t, c.Data.Call.Settings.Screensharing.Enabled)
 	})
 
@@ -275,13 +275,13 @@ func TestVideoExamples(t *testing.T) {
 		countryNL := map[string]any{"country": "NL"}
 		countryUS := map[string]any{"country": "US"}
 		users := []UserRequest{
-			{Id: "tommaso-id", Name: PtrTo("tommaso"), Role: PtrTo("admin"), Custom: &countryNL},
-			{Id: "thierry-id", Name: PtrTo("thierry"), Role: PtrTo("admin"), Custom: &countryUS},
+			{ID: "tommaso-id", Name: PtrTo("tommaso"), Role: PtrTo("admin"), Custom: &countryNL},
+			{ID: "thierry-id", Name: PtrTo("thierry"), Role: PtrTo("admin"), Custom: &countryUS},
 		}
 		// create a map of users with key being user id
 		usersMap := make(map[string]UserRequest)
 		for _, user := range users {
-			usersMap[user.Id] = user
+			usersMap[user.ID] = user
 		}
 		_, err := client.Common().UpdateUsers(ctx, &UpdateUsersRequest{Users: usersMap})
 		assert.NoError(t, err)
@@ -295,12 +295,12 @@ func TestVideoExamples(t *testing.T) {
 		ctx := context.Background()
 		call := newCall(t)
 		members := []MemberRequest{
-			{UserId: "thierry-id"},
-			{UserId: "tommaso-id"},
+			{UserID: "thierry-id"},
+			{UserID: "tommaso-id"},
 		}
 		callRequest := GetOrCreateCallRequest{
 			Data: &CallRequest{
-				CreatedById: PtrTo("tommaso-id"),
+				CreatedByID: PtrTo("tommaso-id"),
 				Members:     &members,
 			},
 		}
@@ -315,8 +315,8 @@ func TestVideoExamples(t *testing.T) {
 		moderator, err := getUser(t, nil, nil, nil)
 		assert.NoError(t, err)
 		banRequest := BanRequest{
-			TargetUserId: badUser.Id,
-			BannedById:   &moderator.Id,
+			TargetUserID: badUser.ID,
+			BannedByID:   &moderator.ID,
 			Reason:       PtrTo("Banned user and all users sharing the same IP for half hour"),
 			IpBan:        PtrTo(true),
 			Timeout:      PtrTo(30),
@@ -325,7 +325,7 @@ func TestVideoExamples(t *testing.T) {
 		_, err = client.Common().Ban(ctx, &banRequest)
 		assert.NoError(t, err)
 
-		_, err = client.Common().Unban(ctx, &UnbanParams{TargetUserId: badUser.Id})
+		_, err = client.Common().Unban(ctx, &UnbanParams{TargetUserID: badUser.ID})
 		assert.NoError(t, err)
 	})
 
@@ -337,19 +337,19 @@ func TestVideoExamples(t *testing.T) {
 	// 	badUser, err := getUser(t, nil, nil, nil)
 	// 	require.NoError(t, err)
 
-	// 	_, err = call.BlockUser(ctx, BlockUserRequest{UserId: badUser.Id})
+	// 	_, err = call.BlockUser(ctx, BlockUserRequest{UserID: badUser.ID})
 	// 	assert.NoError(t, err)
 
 	// 	response, err := call.Get(ctx, nil, nil, nil)
 	// 	assert.NoError(t, err)
-	// 	assert.Contains(t, response.Data.Call.BlockedUserIds, badUser.Id)
+	// 	assert.Contains(t, response.Data.Call.BlockedUserIDs, badUser.ID)
 
-	// 	_, err = call.UnblockUser(ctx, UnblockUserRequest{UserId: badUser.Id})
+	// 	_, err = call.UnblockUser(ctx, UnblockUserRequest{UserID: badUser.ID})
 	// 	assert.NoError(t, err)
 
 	// 	response, err = call.Get(ctx, nil, nil, nil)
 	// 	assert.NoError(t, err)
-	// 	assert.NotContains(t, response.Data.Call.BlockedUserIds, badUser.Id)
+	// 	assert.NotContains(t, response.Data.Call.BlockedUserIDs, badUser.ID)
 
 	// })
 }

@@ -36,7 +36,7 @@ func getUser(t *testing.T, name *string, image *string, custom *map[string]any) 
 	userID := uuid.New().String()
 	users := []UserRequest{
 		{
-			Id:     userID,
+			ID:     userID,
 			Name:   name,
 			Image:  image,
 			Custom: custom,
@@ -44,7 +44,7 @@ func getUser(t *testing.T, name *string, image *string, custom *map[string]any) 
 	}
 	usersMap := make(map[string]UserRequest)
 	for _, user := range users {
-		usersMap[user.Id] = user
+		usersMap[user.ID] = user
 	}
 
 	res, err := client.Common().UpdateUsers(ctx, &UpdateUsersRequest{Users: usersMap})
