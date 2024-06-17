@@ -115,8 +115,6 @@ type GetRepliesParams struct {
 }
 
 type GetThreadParams struct {
-	ConnectionID *string `json:"connection_id,omitempty"`
-
 	MemberLimit *int `json:"member_limit,omitempty"`
 
 	ParticipantLimit *int `json:"participant_limit,omitempty"`
