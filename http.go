@@ -29,8 +29,9 @@ func (e Error) Error() string {
 }
 
 // Response is the base response returned to the client
-type Response struct {
+type StreamResponse[T any] struct {
 	RateLimitInfo *RateLimitInfo `json:"ratelimit"`
+	Data          T
 }
 
 // BuildQueryParam constructs a map of query parameters from various data types.
@@ -66,15 +67,15 @@ func BuildQueryParam[T any](params map[string]T) url.Values {
 }
 
 // parseResponse parses the HTTP response into the provided result
-func parseResponse[U any](resp *http.Response, result *U) error {
+func parseResponse[GResponse any](resp *http.Response, result *GResponse) (*StreamResponse[GResponse], error) {
 	if resp.Body == nil {
-		return errors.New("http body is nil")
+		return nil, errors.New("http body is nil")
 	}
 	defer resp.Body.Close()
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("failed to read HTTP response: %w", err)
+		return nil, fmt.Errorf("failed to read HTTP response: %w", err)
 	}
 
 	if resp.StatusCode >= 399 {
@@ -83,20 +84,19 @@ func parseResponse[U any](resp *http.Response, result *U) error {
 		if err != nil {
 			apiErr.Message = string(b)
 			apiErr.StatusCode = resp.StatusCode
-			return apiErr
+			return nil, apiErr
 		}
 		apiErr.RateLimit = NewRateLimitFromHeaders(resp.Header)
-		return apiErr
+		return nil, apiErr
 	}
 
 	// unmarshal result
 	err = json.Unmarshal(b, result)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal HTTP response: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal HTTP response: %w", err)
 	}
-	return nil
 
-	// return addRateLimitInfo(resp.Header, result)
+	return addRateLimitInfo(resp.Header, result)
 }
 
 // requestURL constructs the full request URL
@@ -193,21 +193,21 @@ func ToMap(item interface{}) (map[string]interface{}, error) {
 }
 
 // makeRequest makes a generic HTTP request
-func MakeRequest[GRequest any, GResponse any, GParams any](c *Client, ctx context.Context, method, path string, params map[string]GParams, data *GRequest, response *GResponse, pathParams map[string]string) error {
+func MakeRequest[GRequest any, GResponse any, GParams any](c *Client, ctx context.Context, method, path string, params map[string]GParams, data *GRequest, response *GResponse, pathParams map[string]string) (*StreamResponse[GResponse], error) {
 	queryParams := BuildQueryParam(params)
 	r, err := newRequest(c, ctx, method, path, queryParams, data, pathParams)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resp, err := c.HTTP.Do(r)
 	if err != nil {
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
+			return nil, ctx.Err()
 		default:
 		}
-		return err
+		return nil, err
 	}
 
 	return parseResponse(resp, response)
@@ -215,21 +215,9 @@ func MakeRequest[GRequest any, GResponse any, GParams any](c *Client, ctx contex
 
 // TODO: revisit this
 // addRateLimitInfo adds rate limit information to the result
-func addRateLimitInfo[U any](headers http.Header, result *U) error {
-	rl := map[string]interface{}{
-		"ratelimit": NewRateLimitFromHeaders(headers),
-	}
-
-	b, err := json.Marshal(rl)
-	if err != nil {
-		return fmt.Errorf("cannot marshal rate limit info: %w", err)
-	}
-
-	err = json.Unmarshal(b, result)
-	if err != nil {
-		return fmt.Errorf("cannot unmarshal rate limit info: %w", err)
-	}
-	return nil
+func addRateLimitInfo[Gresponse any](headers http.Header, result *Gresponse) (*StreamResponse[Gresponse], error) {
+	rateLimit := NewRateLimitFromHeaders(headers)
+	return &StreamResponse[Gresponse]{RateLimitInfo: rateLimit, Data: *result}, nil
 }
 
 // versionHeader returns the version header (implementation omitted for brevity)

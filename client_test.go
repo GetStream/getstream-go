@@ -73,8 +73,8 @@ func TestCRUDCallOperations(t *testing.T) {
 
 		c, err := call.GetOrCreate(ctx, &callRequest)
 		assert.NoError(t, err)
-		assert.Equal(t, "john", c.Call.CreatedBy.Id)
-		assert.False(t, c.Call.Settings.Screensharing.Enabled)
+		assert.Equal(t, "john", c.Data.Call.CreatedBy.Id)
+		assert.False(t, c.Data.Call.Settings.Screensharing.Enabled)
 	})
 
 	t.Run("Update", func(t *testing.T) {
@@ -89,7 +89,7 @@ func TestCRUDCallOperations(t *testing.T) {
 		}
 		c, err := call.Update(ctx, &callRequest)
 		assert.NoError(t, err)
-		assert.True(t, c.Call.Settings.Audio.MicDefaultOn)
+		assert.True(t, c.Data.Call.Settings.Audio.MicDefaultOn)
 	})
 }
 
@@ -156,15 +156,15 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 
 		response, err := client.Video().CreateCallType(ctx, &CreateCallTypeRequest{Grants: &grants, Name: callTypeName, Settings: callSettings, NotificationSettings: notificationSettings})
 		assert.NoError(t, err)
-		assert.Equal(t, callTypeName, response.Name)
-		assert.True(t, response.Settings.Audio.MicDefaultOn)
-		assert.Equal(t, "speaker", response.Settings.Audio.DefaultDevice)
-		assert.False(t, response.Settings.Screensharing.AccessRequestEnabled)
-		assert.True(t, response.Settings.Screensharing.Enabled)
-		assert.True(t, response.NotificationSettings.Enabled)
-		assert.False(t, response.NotificationSettings.SessionStarted.Enabled)
-		assert.True(t, response.NotificationSettings.CallNotification.Enabled)
-		assert.Equal(t, "{{ user.display_name }} invites you to a call", response.NotificationSettings.CallNotification.Apns.Title)
+		assert.Equal(t, callTypeName, response.Data.Name)
+		assert.True(t, response.Data.Settings.Audio.MicDefaultOn)
+		assert.Equal(t, "speaker", response.Data.Settings.Audio.DefaultDevice)
+		assert.False(t, response.Data.Settings.Screensharing.AccessRequestEnabled)
+		assert.True(t, response.Data.Settings.Screensharing.Enabled)
+		assert.True(t, response.Data.NotificationSettings.Enabled)
+		assert.False(t, response.Data.NotificationSettings.SessionStarted.Enabled)
+		assert.True(t, response.Data.NotificationSettings.CallNotification.Enabled)
+		assert.Equal(t, "{{ user.display_name }} invites you to a call", response.Data.NotificationSettings.CallNotification.Apns.Title)
 	})
 
 	t.Run("Update", func(t *testing.T) {
@@ -186,11 +186,11 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 		}, Grants: &grants})
 
 		assert.NoError(t, err)
-		assert.False(t, response.Settings.Audio.MicDefaultOn)
-		assert.Equal(t, "earpiece", response.Settings.Audio.DefaultDevice)
-		assert.Equal(t, "disabled", response.Settings.Recording.Mode)
-		assert.True(t, response.Settings.Backstage.Enabled)
-		assert.Equal(t, []string{JOIN_BACKSTAGE.String()}, response.Grants["host"])
+		assert.False(t, response.Data.Settings.Audio.MicDefaultOn)
+		assert.Equal(t, "earpiece", response.Data.Settings.Audio.DefaultDevice)
+		assert.Equal(t, "disabled", response.Data.Settings.Recording.Mode)
+		assert.True(t, response.Data.Settings.Backstage.Enabled)
+		assert.Equal(t, []string{JOIN_BACKSTAGE.String()}, response.Data.Grants["host"])
 	})
 
 	t.Run("Update", func(t *testing.T) {
@@ -264,7 +264,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 
 		response, err := client.Video().GetCallType(ctx, callTypeName)
 		assert.NoError(t, err)
-		assert.Equal(t, callTypeName, response.Name)
+		assert.Equal(t, callTypeName, response.Data.Name)
 	})
 }
 
@@ -342,14 +342,14 @@ func TestVideoExamples(t *testing.T) {
 
 	// 	response, err := call.Get(ctx, nil, nil, nil)
 	// 	assert.NoError(t, err)
-	// 	assert.Contains(t, response.Call.BlockedUserIds, badUser.Id)
+	// 	assert.Contains(t, response.Data.Call.BlockedUserIds, badUser.Id)
 
 	// 	_, err = call.UnblockUser(ctx, UnblockUserRequest{UserId: badUser.Id})
 	// 	assert.NoError(t, err)
 
 	// 	response, err = call.Get(ctx, nil, nil, nil)
 	// 	assert.NoError(t, err)
-	// 	assert.NotContains(t, response.Call.BlockedUserIds, badUser.Id)
+	// 	assert.NotContains(t, response.Data.Call.BlockedUserIds, badUser.Id)
 
 	// })
 }

@@ -18,23 +18,23 @@ func NewVideoClient(client *Client) *VideoClient {
 //
 // Required permissions:
 // - ReadCall
-func (c *VideoClient) QueryCallMembers(ctx context.Context, request *QueryCallMembersRequest) (*QueryCallMembersResponse, error) {
+func (c *VideoClient) QueryCallMembers(ctx context.Context, request *QueryCallMembersRequest) (*StreamResponse[QueryCallMembersResponse], error) {
 	var result QueryCallMembersResponse
-	err := MakeRequest[QueryCallMembersRequest, QueryCallMembersResponse, any](c.client, ctx, "POST", "/api/v2/video/call/members", nil, request, &result, nil)
-	return &result, err
+	res, err := MakeRequest[QueryCallMembersRequest, QueryCallMembersResponse, any](c.client, ctx, "POST", "/api/v2/video/call/members", nil, request, &result, nil)
+	return res, err
 }
 
 // Required permissions:
 // - ReadCallStats
-func (c *VideoClient) QueryCallStats(ctx context.Context, request *QueryCallStatsRequest) (*QueryCallStatsResponse, error) {
+func (c *VideoClient) QueryCallStats(ctx context.Context, request *QueryCallStatsRequest) (*StreamResponse[QueryCallStatsResponse], error) {
 	var result QueryCallStatsResponse
-	err := MakeRequest[QueryCallStatsRequest, QueryCallStatsResponse, any](c.client, ctx, "POST", "/api/v2/video/call/stats", nil, request, &result, nil)
-	return &result, err
+	res, err := MakeRequest[QueryCallStatsRequest, QueryCallStatsResponse, any](c.client, ctx, "POST", "/api/v2/video/call/stats", nil, request, &result, nil)
+	return res, err
 }
 
 // Required permissions:
 // - ReadCall
-func (c *VideoClient) GetCall(ctx context.Context, _type string, id string, queryParams *GetCallParams) (*GetCallResponse, error) {
+func (c *VideoClient) GetCall(ctx context.Context, _type string, id string, queryParams *GetCallParams) (*StreamResponse[GetCallResponse], error) {
 	var result GetCallResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -44,8 +44,8 @@ func (c *VideoClient) GetCall(ctx context.Context, _type string, id string, quer
 	if err != nil {
 		return nil, err
 	}
-	err = MakeRequest[any, GetCallResponse](c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}", params, nil, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[any, GetCallResponse](c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}", params, nil, &result, pathParams)
+	return res, err
 }
 
 // Sends events:
@@ -53,14 +53,14 @@ func (c *VideoClient) GetCall(ctx context.Context, _type string, id string, quer
 //
 // Required permissions:
 // - UpdateCall
-func (c *VideoClient) UpdateCall(ctx context.Context, _type string, id string, request *UpdateCallRequest) (*UpdateCallResponse, error) {
+func (c *VideoClient) UpdateCall(ctx context.Context, _type string, id string, request *UpdateCallRequest) (*StreamResponse[UpdateCallResponse], error) {
 	var result UpdateCallResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[UpdateCallRequest, UpdateCallResponse, any](c.client, ctx, "PATCH", "/api/v2/video/call/{type}/{id}", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[UpdateCallRequest, UpdateCallResponse, any](c.client, ctx, "PATCH", "/api/v2/video/call/{type}/{id}", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Gets or creates a new call
@@ -74,14 +74,14 @@ func (c *VideoClient) UpdateCall(ctx context.Context, _type string, id string, r
 // - CreateCall
 // - ReadCall
 // - UpdateCallSettings
-func (c *VideoClient) GetOrCreateCall(ctx context.Context, _type string, id string, request *GetOrCreateCallRequest) (*GetOrCreateCallResponse, error) {
+func (c *VideoClient) GetOrCreateCall(ctx context.Context, _type string, id string, request *GetOrCreateCallRequest) (*StreamResponse[GetOrCreateCallResponse], error) {
 	var result GetOrCreateCallResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[GetOrCreateCallRequest, GetOrCreateCallResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[GetOrCreateCallRequest, GetOrCreateCallResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Block a user, preventing them from joining the call until they are unblocked.
@@ -91,14 +91,14 @@ func (c *VideoClient) GetOrCreateCall(ctx context.Context, _type string, id stri
 //
 // Required permissions:
 // - BlockUser
-func (c *VideoClient) BlockUser(ctx context.Context, _type string, id string, request *BlockUserRequest) (*BlockUserResponse, error) {
+func (c *VideoClient) BlockUser(ctx context.Context, _type string, id string, request *BlockUserRequest) (*StreamResponse[BlockUserResponse], error) {
 	var result BlockUserResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[BlockUserRequest, BlockUserResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/block", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[BlockUserRequest, BlockUserResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/block", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Sends custom event to the call
@@ -108,27 +108,27 @@ func (c *VideoClient) BlockUser(ctx context.Context, _type string, id string, re
 //
 // Required permissions:
 // - SendEvent
-func (c *VideoClient) SendCallEvent(ctx context.Context, _type string, id string, request *SendCallEventRequest) (*SendCallEventResponse, error) {
+func (c *VideoClient) SendCallEvent(ctx context.Context, _type string, id string, request *SendCallEventRequest) (*StreamResponse[SendCallEventResponse], error) {
 	var result SendCallEventResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[SendCallEventRequest, SendCallEventResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/event", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[SendCallEventRequest, SendCallEventResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/event", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Required permissions:
 // - JoinCall
-func (c *VideoClient) CollectUserFeedback(ctx context.Context, _type string, id string, session string, request *CollectUserFeedbackRequest) (*CollectUserFeedbackResponse, error) {
+func (c *VideoClient) CollectUserFeedback(ctx context.Context, _type string, id string, session string, request *CollectUserFeedbackRequest) (*StreamResponse[CollectUserFeedbackResponse], error) {
 	var result CollectUserFeedbackResponse
 	pathParams := map[string]string{
 		"type":    _type,
 		"id":      id,
 		"session": session,
 	}
-	err := MakeRequest[CollectUserFeedbackRequest, CollectUserFeedbackResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/feedback/{session}", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[CollectUserFeedbackRequest, CollectUserFeedbackResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/feedback/{session}", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Sends events:
@@ -136,14 +136,14 @@ func (c *VideoClient) CollectUserFeedback(ctx context.Context, _type string, id 
 //
 // Required permissions:
 // - UpdateCall
-func (c *VideoClient) GoLive(ctx context.Context, _type string, id string, request *GoLiveRequest) (*GoLiveResponse, error) {
+func (c *VideoClient) GoLive(ctx context.Context, _type string, id string, request *GoLiveRequest) (*StreamResponse[GoLiveResponse], error) {
 	var result GoLiveResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[GoLiveRequest, GoLiveResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/go_live", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[GoLiveRequest, GoLiveResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/go_live", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Sends events:
@@ -151,14 +151,14 @@ func (c *VideoClient) GoLive(ctx context.Context, _type string, id string, reque
 //
 // Required permissions:
 // - EndCall
-func (c *VideoClient) EndCall(ctx context.Context, _type string, id string) (*EndCallResponse, error) {
+func (c *VideoClient) EndCall(ctx context.Context, _type string, id string) (*StreamResponse[EndCallResponse], error) {
 	var result EndCallResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[any, EndCallResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/mark_ended", nil, nil, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[any, EndCallResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/mark_ended", nil, nil, &result, pathParams)
+	return res, err
 }
 
 // Sends events:
@@ -170,70 +170,70 @@ func (c *VideoClient) EndCall(ctx context.Context, _type string, id string) (*En
 // - RemoveCallMember
 // - UpdateCallMember
 // - UpdateCallMemberRole
-func (c *VideoClient) UpdateCallMembers(ctx context.Context, _type string, id string, request *UpdateCallMembersRequest) (*UpdateCallMembersResponse, error) {
+func (c *VideoClient) UpdateCallMembers(ctx context.Context, _type string, id string, request *UpdateCallMembersRequest) (*StreamResponse[UpdateCallMembersResponse], error) {
 	var result UpdateCallMembersResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[UpdateCallMembersRequest, UpdateCallMembersResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/members", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[UpdateCallMembersRequest, UpdateCallMembersResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/members", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Mutes users in a call
 //
 // Required permissions:
 // - MuteUsers
-func (c *VideoClient) MuteUsers(ctx context.Context, _type string, id string, request *MuteUsersRequest) (*MuteUsersResponse, error) {
+func (c *VideoClient) MuteUsers(ctx context.Context, _type string, id string, request *MuteUsersRequest) (*StreamResponse[MuteUsersResponse], error) {
 	var result MuteUsersResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[MuteUsersRequest, MuteUsersResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/mute_users", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[MuteUsersRequest, MuteUsersResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/mute_users", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Pins a track for all users in the call.
 //
 // Required permissions:
 // - PinCallTrack
-func (c *VideoClient) VideoPin(ctx context.Context, _type string, id string, request *PinRequest) (*PinResponse, error) {
+func (c *VideoClient) VideoPin(ctx context.Context, _type string, id string, request *PinRequest) (*StreamResponse[PinResponse], error) {
 	var result PinResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[PinRequest, PinResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/pin", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[PinRequest, PinResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/pin", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Lists recordings
 //
 // Required permissions:
 // - ListRecordings
-func (c *VideoClient) ListRecordings(ctx context.Context, _type string, id string) (*ListRecordingsResponse, error) {
+func (c *VideoClient) ListRecordings(ctx context.Context, _type string, id string) (*StreamResponse[ListRecordingsResponse], error) {
 	var result ListRecordingsResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[any, ListRecordingsResponse, any](c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}/recordings", nil, nil, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[any, ListRecordingsResponse, any](c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}/recordings", nil, nil, &result, pathParams)
+	return res, err
 }
 
 // Starts HLS broadcasting
 //
 // Required permissions:
 // - StartBroadcasting
-func (c *VideoClient) StartHLSBroadcasting(ctx context.Context, _type string, id string) (*StartHLSBroadcastingResponse, error) {
+func (c *VideoClient) StartHLSBroadcasting(ctx context.Context, _type string, id string) (*StreamResponse[StartHLSBroadcastingResponse], error) {
 	var result StartHLSBroadcastingResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[any, StartHLSBroadcastingResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_broadcasting", nil, nil, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[any, StartHLSBroadcastingResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_broadcasting", nil, nil, &result, pathParams)
+	return res, err
 }
 
 // Starts recording
@@ -243,55 +243,55 @@ func (c *VideoClient) StartHLSBroadcasting(ctx context.Context, _type string, id
 //
 // Required permissions:
 // - StartRecording
-func (c *VideoClient) StartRecording(ctx context.Context, _type string, id string, request *StartRecordingRequest) (*StartRecordingResponse, error) {
+func (c *VideoClient) StartRecording(ctx context.Context, _type string, id string, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
 	var result StartRecordingResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[StartRecordingRequest, StartRecordingResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_recording", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[StartRecordingRequest, StartRecordingResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_recording", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Starts transcription
 //
 // Required permissions:
 // - StartTranscription
-func (c *VideoClient) StartTranscription(ctx context.Context, _type string, id string, request *StartTranscriptionRequest) (*StartTranscriptionResponse, error) {
+func (c *VideoClient) StartTranscription(ctx context.Context, _type string, id string, request *StartTranscriptionRequest) (*StreamResponse[StartTranscriptionResponse], error) {
 	var result StartTranscriptionResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[StartTranscriptionRequest, StartTranscriptionResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_transcription", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[StartTranscriptionRequest, StartTranscriptionResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_transcription", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Required permissions:
 // - ReadCallStats
-func (c *VideoClient) GetCallStats(ctx context.Context, _type string, id string, session string) (*GetCallStatsResponse, error) {
+func (c *VideoClient) GetCallStats(ctx context.Context, _type string, id string, session string) (*StreamResponse[GetCallStatsResponse], error) {
 	var result GetCallStatsResponse
 	pathParams := map[string]string{
 		"type":    _type,
 		"id":      id,
 		"session": session,
 	}
-	err := MakeRequest[any, GetCallStatsResponse, any](c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}/stats/{session}", nil, nil, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[any, GetCallStatsResponse, any](c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}/stats/{session}", nil, nil, &result, pathParams)
+	return res, err
 }
 
 // Stops HLS broadcasting
 //
 // Required permissions:
 // - StopBroadcasting
-func (c *VideoClient) StopHLSBroadcasting(ctx context.Context, _type string, id string) (*StopHLSBroadcastingResponse, error) {
+func (c *VideoClient) StopHLSBroadcasting(ctx context.Context, _type string, id string) (*StreamResponse[StopHLSBroadcastingResponse], error) {
 	var result StopHLSBroadcastingResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[any, StopHLSBroadcastingResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_broadcasting", nil, nil, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[any, StopHLSBroadcastingResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_broadcasting", nil, nil, &result, pathParams)
+	return res, err
 }
 
 // Sends events:
@@ -299,14 +299,14 @@ func (c *VideoClient) StopHLSBroadcasting(ctx context.Context, _type string, id 
 //
 // Required permissions:
 // - UpdateCall
-func (c *VideoClient) StopLive(ctx context.Context, _type string, id string) (*StopLiveResponse, error) {
+func (c *VideoClient) StopLive(ctx context.Context, _type string, id string) (*StreamResponse[StopLiveResponse], error) {
 	var result StopLiveResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[any, StopLiveResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_live", nil, nil, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[any, StopLiveResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_live", nil, nil, &result, pathParams)
+	return res, err
 }
 
 // Stops recording
@@ -316,14 +316,14 @@ func (c *VideoClient) StopLive(ctx context.Context, _type string, id string) (*S
 //
 // Required permissions:
 // - StopRecording
-func (c *VideoClient) StopRecording(ctx context.Context, _type string, id string) (*StopRecordingResponse, error) {
+func (c *VideoClient) StopRecording(ctx context.Context, _type string, id string) (*StreamResponse[StopRecordingResponse], error) {
 	var result StopRecordingResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[any, StopRecordingResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_recording", nil, nil, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[any, StopRecordingResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_recording", nil, nil, &result, pathParams)
+	return res, err
 }
 
 // Stops transcription
@@ -333,28 +333,28 @@ func (c *VideoClient) StopRecording(ctx context.Context, _type string, id string
 //
 // Required permissions:
 // - StopTranscription
-func (c *VideoClient) StopTranscription(ctx context.Context, _type string, id string) (*StopTranscriptionResponse, error) {
+func (c *VideoClient) StopTranscription(ctx context.Context, _type string, id string) (*StreamResponse[StopTranscriptionResponse], error) {
 	var result StopTranscriptionResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[any, StopTranscriptionResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_transcription", nil, nil, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[any, StopTranscriptionResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_transcription", nil, nil, &result, pathParams)
+	return res, err
 }
 
 // Lists transcriptions
 //
 // Required permissions:
 // - ListTranscriptions
-func (c *VideoClient) ListTranscriptions(ctx context.Context, _type string, id string) (*ListTranscriptionsResponse, error) {
+func (c *VideoClient) ListTranscriptions(ctx context.Context, _type string, id string) (*StreamResponse[ListTranscriptionsResponse], error) {
 	var result ListTranscriptionsResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[any, ListTranscriptionsResponse, any](c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}/transcriptions", nil, nil, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[any, ListTranscriptionsResponse, any](c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}/transcriptions", nil, nil, &result, pathParams)
+	return res, err
 }
 
 // Removes the block for a user on a call. The user will be able to join the call again.
@@ -364,28 +364,28 @@ func (c *VideoClient) ListTranscriptions(ctx context.Context, _type string, id s
 //
 // Required permissions:
 // - BlockUser
-func (c *VideoClient) UnblockUser(ctx context.Context, _type string, id string, request *UnblockUserRequest) (*UnblockUserResponse, error) {
+func (c *VideoClient) UnblockUser(ctx context.Context, _type string, id string, request *UnblockUserRequest) (*StreamResponse[UnblockUserResponse], error) {
 	var result UnblockUserResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[UnblockUserRequest, UnblockUserResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/unblock", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[UnblockUserRequest, UnblockUserResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/unblock", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Unpins a track for all users in the call.
 //
 // Required permissions:
 // - PinCallTrack
-func (c *VideoClient) VideoUnpin(ctx context.Context, _type string, id string, request *UnpinRequest) (*UnpinResponse, error) {
+func (c *VideoClient) VideoUnpin(ctx context.Context, _type string, id string, request *UnpinRequest) (*StreamResponse[UnpinResponse], error) {
 	var result UnpinResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[UnpinRequest, UnpinResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/unpin", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[UnpinRequest, UnpinResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/unpin", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Updates user permissions
@@ -395,21 +395,21 @@ func (c *VideoClient) VideoUnpin(ctx context.Context, _type string, id string, r
 //
 // Required permissions:
 // - UpdateCallPermissions
-func (c *VideoClient) UpdateUserPermissions(ctx context.Context, _type string, id string, request *UpdateUserPermissionsRequest) (*UpdateUserPermissionsResponse, error) {
+func (c *VideoClient) UpdateUserPermissions(ctx context.Context, _type string, id string, request *UpdateUserPermissionsRequest) (*StreamResponse[UpdateUserPermissionsResponse], error) {
 	var result UpdateUserPermissionsResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	err := MakeRequest[UpdateUserPermissionsRequest, UpdateUserPermissionsResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/user_permissions", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[UpdateUserPermissionsRequest, UpdateUserPermissionsResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/user_permissions", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Deletes recording
 //
 // Required permissions:
 // - DeleteRecording
-func (c *VideoClient) DeleteRecording(ctx context.Context, _type string, id string, session string, filename string) (*DeleteRecordingResponse, error) {
+func (c *VideoClient) DeleteRecording(ctx context.Context, _type string, id string, session string, filename string) (*StreamResponse[DeleteRecordingResponse], error) {
 	var result DeleteRecordingResponse
 	pathParams := map[string]string{
 		"type":     _type,
@@ -417,15 +417,15 @@ func (c *VideoClient) DeleteRecording(ctx context.Context, _type string, id stri
 		"session":  session,
 		"filename": filename,
 	}
-	err := MakeRequest[any, DeleteRecordingResponse, any](c.client, ctx, "DELETE", "/api/v2/video/call/{type}/{id}/{session}/recordings/{filename}", nil, nil, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[any, DeleteRecordingResponse, any](c.client, ctx, "DELETE", "/api/v2/video/call/{type}/{id}/{session}/recordings/{filename}", nil, nil, &result, pathParams)
+	return res, err
 }
 
 // Deletes transcription
 //
 // Required permissions:
 // - DeleteTranscription
-func (c *VideoClient) DeleteTranscription(ctx context.Context, _type string, id string, session string, filename string) (*DeleteTranscriptionResponse, error) {
+func (c *VideoClient) DeleteTranscription(ctx context.Context, _type string, id string, session string, filename string) (*StreamResponse[DeleteTranscriptionResponse], error) {
 	var result DeleteTranscriptionResponse
 	pathParams := map[string]string{
 		"type":     _type,
@@ -433,62 +433,62 @@ func (c *VideoClient) DeleteTranscription(ctx context.Context, _type string, id 
 		"session":  session,
 		"filename": filename,
 	}
-	err := MakeRequest[any, DeleteTranscriptionResponse, any](c.client, ctx, "DELETE", "/api/v2/video/call/{type}/{id}/{session}/transcriptions/{filename}", nil, nil, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[any, DeleteTranscriptionResponse, any](c.client, ctx, "DELETE", "/api/v2/video/call/{type}/{id}/{session}/transcriptions/{filename}", nil, nil, &result, pathParams)
+	return res, err
 }
 
 // Query calls with filter query
 //
 // Required permissions:
 // - ReadCall
-func (c *VideoClient) QueryCalls(ctx context.Context, request *QueryCallsRequest) (*QueryCallsResponse, error) {
+func (c *VideoClient) QueryCalls(ctx context.Context, request *QueryCallsRequest) (*StreamResponse[QueryCallsResponse], error) {
 	var result QueryCallsResponse
-	err := MakeRequest[QueryCallsRequest, QueryCallsResponse, any](c.client, ctx, "POST", "/api/v2/video/calls", nil, request, &result, nil)
-	return &result, err
+	res, err := MakeRequest[QueryCallsRequest, QueryCallsResponse, any](c.client, ctx, "POST", "/api/v2/video/calls", nil, request, &result, nil)
+	return res, err
 }
 
-func (c *VideoClient) ListCallTypes(ctx context.Context) (*ListCallTypeResponse, error) {
+func (c *VideoClient) ListCallTypes(ctx context.Context) (*StreamResponse[ListCallTypeResponse], error) {
 	var result ListCallTypeResponse
-	err := MakeRequest[any, ListCallTypeResponse, any](c.client, ctx, "GET", "/api/v2/video/calltypes", nil, nil, &result, nil)
-	return &result, err
+	res, err := MakeRequest[any, ListCallTypeResponse, any](c.client, ctx, "GET", "/api/v2/video/calltypes", nil, nil, &result, nil)
+	return res, err
 }
 
-func (c *VideoClient) CreateCallType(ctx context.Context, request *CreateCallTypeRequest) (*CreateCallTypeResponse, error) {
+func (c *VideoClient) CreateCallType(ctx context.Context, request *CreateCallTypeRequest) (*StreamResponse[CreateCallTypeResponse], error) {
 	var result CreateCallTypeResponse
-	err := MakeRequest[CreateCallTypeRequest, CreateCallTypeResponse, any](c.client, ctx, "POST", "/api/v2/video/calltypes", nil, request, &result, nil)
-	return &result, err
+	res, err := MakeRequest[CreateCallTypeRequest, CreateCallTypeResponse, any](c.client, ctx, "POST", "/api/v2/video/calltypes", nil, request, &result, nil)
+	return res, err
 }
 
-func (c *VideoClient) DeleteCallType(ctx context.Context, name string) (*Response, error) {
+func (c *VideoClient) DeleteCallType(ctx context.Context, name string) (*StreamResponse[Response], error) {
 	var result Response
 	pathParams := map[string]string{
 		"name": name,
 	}
-	err := MakeRequest[any, Response, any](c.client, ctx, "DELETE", "/api/v2/video/calltypes/{name}", nil, nil, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[any, Response, any](c.client, ctx, "DELETE", "/api/v2/video/calltypes/{name}", nil, nil, &result, pathParams)
+	return res, err
 }
 
-func (c *VideoClient) GetCallType(ctx context.Context, name string) (*GetCallTypeResponse, error) {
+func (c *VideoClient) GetCallType(ctx context.Context, name string) (*StreamResponse[GetCallTypeResponse], error) {
 	var result GetCallTypeResponse
 	pathParams := map[string]string{
 		"name": name,
 	}
-	err := MakeRequest[any, GetCallTypeResponse, any](c.client, ctx, "GET", "/api/v2/video/calltypes/{name}", nil, nil, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[any, GetCallTypeResponse, any](c.client, ctx, "GET", "/api/v2/video/calltypes/{name}", nil, nil, &result, pathParams)
+	return res, err
 }
 
-func (c *VideoClient) UpdateCallType(ctx context.Context, name string, request *UpdateCallTypeRequest) (*UpdateCallTypeResponse, error) {
+func (c *VideoClient) UpdateCallType(ctx context.Context, name string, request *UpdateCallTypeRequest) (*StreamResponse[UpdateCallTypeResponse], error) {
 	var result UpdateCallTypeResponse
 	pathParams := map[string]string{
 		"name": name,
 	}
-	err := MakeRequest[UpdateCallTypeRequest, UpdateCallTypeResponse, any](c.client, ctx, "PUT", "/api/v2/video/calltypes/{name}", nil, request, &result, pathParams)
-	return &result, err
+	res, err := MakeRequest[UpdateCallTypeRequest, UpdateCallTypeResponse, any](c.client, ctx, "PUT", "/api/v2/video/calltypes/{name}", nil, request, &result, pathParams)
+	return res, err
 }
 
 // Returns the list of all edges available for video calls.
-func (c *VideoClient) GetEdges(ctx context.Context) (*GetEdgesResponse, error) {
+func (c *VideoClient) GetEdges(ctx context.Context) (*StreamResponse[GetEdgesResponse], error) {
 	var result GetEdgesResponse
-	err := MakeRequest[any, GetEdgesResponse, any](c.client, ctx, "GET", "/api/v2/video/edges", nil, nil, &result, nil)
-	return &result, err
+	res, err := MakeRequest[any, GetEdgesResponse, any](c.client, ctx, "GET", "/api/v2/video/edges", nil, nil, &result, nil)
+	return res, err
 }

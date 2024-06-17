@@ -368,6 +368,36 @@ type BlockUserResponse struct {
 	Duration string `json:"duration"`
 }
 
+type BlockUsersRequest struct {
+	BlockedUserId string `json:"blocked_user_id"`
+
+	UserId *string `json:"user_id,omitempty"`
+
+	User *UserRequest `json:"user,omitempty"`
+}
+
+type BlockUsersResponse struct {
+	BlockedByUserId string `json:"blocked_by_user_id"`
+
+	BlockedUserId string `json:"blocked_user_id"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	Duration string `json:"duration"`
+}
+
+type BlockedUserResponse struct {
+	BlockedUserId string `json:"blocked_user_id"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	UserId string `json:"user_id"`
+
+	BlockedUser UserResponse `json:"blocked_user"`
+
+	User UserResponse `json:"user"`
+}
+
 type BroadcastSettings struct {
 	Enabled bool `json:"enabled"`
 
@@ -933,6 +963,8 @@ type ChannelResponse struct {
 
 	AutoTranslationLanguage *string `json:"auto_translation_language,omitempty"`
 
+	Blocked *bool `json:"blocked,omitempty"`
+
 	Cooldown *int `json:"cooldown,omitempty"`
 
 	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
@@ -1080,6 +1112,8 @@ type ChannelTypeConfig struct {
 
 type CheckExternalStorageResponse struct {
 	Duration string `json:"duration"`
+
+	FileUrl string `json:"file_url"`
 }
 
 type CheckPushRequest struct {
@@ -1929,6 +1963,8 @@ type FullUserResponse struct {
 
 	UpdatedAt Timestamp `json:"updated_at"`
 
+	BlockedUserIds []string `json:"blocked_user_ids"`
+
 	ChannelMutes []*ChannelMute `json:"channel_mutes"`
 
 	Devices []*Device `json:"devices"`
@@ -2012,6 +2048,12 @@ type GetBlockListResponse struct {
 	Duration string `json:"duration"`
 
 	Blocklist *BlockList `json:"blocklist,omitempty"`
+}
+
+type GetBlockedUsersResponse struct {
+	Duration string `json:"duration"`
+
+	Blocks []*BlockedUserResponse `json:"blocks"`
 }
 
 type GetCallResponse struct {
@@ -3220,6 +3262,8 @@ type OwnUser struct {
 
 	LastActive *Timestamp `json:"last_active,omitempty"`
 
+	BlockedUserIds *[]string `json:"blocked_user_ids,omitempty"`
+
 	LatestHiddenChannels *[]string `json:"latest_hidden_channels,omitempty"`
 
 	Teams *[]string `json:"teams,omitempty"`
@@ -4097,9 +4141,9 @@ type RecordSettingsResponse struct {
 	Layout LayoutSettingsResponse `json:"layout"`
 }
 
-// type Response struct {
-// 	Duration string `json:"duration"`
-// }
+type Response struct {
+	Duration string `json:"duration"`
+}
 
 type RestoreUsersRequest struct {
 	UserIds []string `json:"user_ids"`
@@ -4692,6 +4736,18 @@ type UnblockUserRequest struct {
 }
 
 type UnblockUserResponse struct {
+	Duration string `json:"duration"`
+}
+
+type UnblockUsersRequest struct {
+	BlockedUserId string `json:"blocked_user_id"`
+
+	UserId *string `json:"user_id,omitempty"`
+
+	User *UserRequest `json:"user,omitempty"`
+}
+
+type UnblockUsersResponse struct {
 	Duration string `json:"duration"`
 }
 
@@ -5389,6 +5445,8 @@ type UserResponse struct {
 	ShadowBanned bool `json:"shadow_banned"`
 
 	UpdatedAt Timestamp `json:"updated_at"`
+
+	BlockedUserIds []string `json:"blocked_user_ids"`
 
 	Devices []*Device `json:"devices"`
 

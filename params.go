@@ -36,6 +36,10 @@ type DeleteReactionParams struct {
 	UserId *string `json:"user_id,omitempty"`
 }
 
+type GetBlockedUsersParams struct {
+	UserId *string `json:"user_id,omitempty"`
+}
+
 type GetCallParams struct {
 	MembersLimit *int `json:"members_limit,omitempty"`
 

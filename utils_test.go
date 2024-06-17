@@ -51,6 +51,6 @@ func getUser(t *testing.T, name *string, image *string, custom *map[string]any) 
 	if err != nil {
 		return nil, err
 	}
-	user := res.Users[userID]
+	user := res.Data.Users[userID]
 	return &user, nil
 }
