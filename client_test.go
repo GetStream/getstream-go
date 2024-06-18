@@ -2,7 +2,6 @@ package getstream
 
 import (
 	"context"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,90 +17,15 @@ func initClient(t *testing.T) *Stream {
 	return stream
 }
 
-var (
-	once         sync.Once
-	call         *Call
-	callTypeName string
-	client       *Stream
-	setupErr     error
-)
+// setup initializes the client, call object, and call type for each test
+func setup(t *testing.T, createCallType bool) (*Stream, *Call, string) {
+	t.Helper()
 
-// setup initializes the call object etc once for all tests
-func setup(t *testing.T) {
-	once.Do(func() {
-		callType := "default"
-		callID := randomString(10)
-		callTypeName = "calltype" + randomString(10)
-		var err error
-
-		client = initClient(t)
-		call = client.Video().Call(callType, callID)
-		setupErr = err
-	})
-	if setupErr != nil {
-		panic("Failed to setup call object for testing: " + setupErr.Error())
-	}
-	t.Cleanup(resetSharedResource)
-}
-
-func resetSharedResource() {
-	ctx := context.Background()
-	_, err := client.Video().DeleteCallType(ctx, callTypeName)
-	if err != nil {
-		panic("Failed to delete call type: " + err.Error())
-	}
-	once = sync.Once{}
-	client = nil
-	call = nil
-	callTypeName = ""
-	setupErr = nil
-}
-
-func TestCRUDCallOperations(t *testing.T) {
-	setup(t)
-
-	t.Run("Create", func(t *testing.T) {
-		ctx := context.Background()
-		callRequest := GetOrCreateCallRequest{
-			Data: &CallRequest{
-				CreatedByID: PtrTo("john"),
-				SettingsOverride: &CallSettingsRequest{
-					Geofencing: &GeofenceSettingsRequest{
-						Names: PtrTo([]string{"canada"}),
-					},
-					Screensharing: &ScreensharingSettingsRequest{
-						Enabled: PtrTo(false),
-					},
-				},
-			},
-		}
-
-		c, err := call.GetOrCreate(ctx, &callRequest)
-		assert.NoError(t, err)
-		assert.Equal(t, "john", c.Data.Call.CreatedBy.ID)
-		assert.False(t, c.Data.Call.Settings.Screensharing.Enabled)
-	})
-
-	t.Run("Update", func(t *testing.T) {
-		ctx := context.Background()
-		callRequest := UpdateCallRequest{
-			SettingsOverride: &CallSettingsRequest{
-				Audio: &AudioSettingsRequest{
-					MicDefaultOn:  PtrTo(true),
-					DefaultDevice: "speaker",
-				},
-			},
-		}
-		c, err := call.Update(ctx, &callRequest)
-		assert.NoError(t, err)
-		assert.True(t, c.Data.Call.Settings.Audio.MicDefaultOn)
-	})
-}
-
-func TestCRUDCallTypeOperations(t *testing.T) {
-	setup(t)
-
-	t.Run("Create", func(t *testing.T) {
+	client := initClient(t)
+	callType := "default"
+	callID := randomString(10)
+	callTypeName := "calltype" + randomString(10)
+	if createCallType {
 		ctx := context.Background()
 
 		callSettings := &CallSettingsRequest{
@@ -160,7 +84,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 		}
 
 		response, err := client.Video().CreateCallType(ctx, &CreateCallTypeRequest{Grants: &grants, Name: callTypeName, Settings: callSettings, NotificationSettings: notificationSettings})
-		assert.NoError(t, err)
+		require.NoError(t, err, "Failed to create call type")
 		assert.Equal(t, callTypeName, response.Data.Name)
 		assert.True(t, response.Data.Settings.Audio.MicDefaultOn)
 		assert.Equal(t, "speaker", response.Data.Settings.Audio.DefaultDevice)
@@ -170,9 +94,30 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 		assert.False(t, response.Data.NotificationSettings.SessionStarted.Enabled)
 		assert.True(t, response.Data.NotificationSettings.CallNotification.Enabled)
 		assert.Equal(t, "{{ user.display_name }} invites you to a call", response.Data.NotificationSettings.CallNotification.Apns.Title)
+
+	}
+
+	call := client.Video().Call(callType, callID)
+
+	t.Cleanup(func() {
+		if createCallType {
+			resetSharedResource(t, client, callTypeName)
+		}
 	})
 
-	t.Run("Update", func(t *testing.T) {
+	return client, call, callTypeName
+}
+
+func resetSharedResource(t *testing.T, client *Stream, callTypeName string) {
+	ctx := context.Background()
+	_, err := client.Video().DeleteCallType(ctx, callTypeName)
+	require.NoError(t, err, "Failed to delete call type")
+}
+
+func TestCRUDCallTypeOperations(t *testing.T) {
+	client, call, callTypeName := setup(t, true)
+
+	t.Run("Update Call Type Settings", func(t *testing.T) {
 		ctx := context.Background()
 		grants := map[string][]string{
 			"host": {JOIN_BACKSTAGE.String()},
@@ -198,7 +143,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 		assert.Equal(t, []string{JOIN_BACKSTAGE.String()}, response.Data.Grants["host"])
 	})
 
-	t.Run("Update", func(t *testing.T) {
+	t.Run("Update Layout Options", func(t *testing.T) {
 		ctx := context.Background()
 
 		layoutOptions := map[string]any{
@@ -264,17 +209,54 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("Read", func(t *testing.T) {
+	t.Run("Read Call Type", func(t *testing.T) {
 		ctx := context.Background()
 
 		response, err := client.Video().GetCallType(ctx, callTypeName)
 		assert.NoError(t, err)
 		assert.Equal(t, callTypeName, response.Data.Name)
 	})
+
+	t.Run("Create Call", func(t *testing.T) {
+		ctx := context.Background()
+		callRequest := GetOrCreateCallRequest{
+			Data: &CallRequest{
+				CreatedByID: PtrTo("john"),
+				SettingsOverride: &CallSettingsRequest{
+					Geofencing: &GeofenceSettingsRequest{
+						Names: PtrTo([]string{"canada"}),
+					},
+					Screensharing: &ScreensharingSettingsRequest{
+						Enabled: PtrTo(false),
+					},
+				},
+			},
+		}
+
+		c, err := call.GetOrCreate(ctx, &callRequest)
+		assert.NoError(t, err)
+		assert.Equal(t, "john", c.Data.Call.CreatedBy.ID)
+		assert.False(t, c.Data.Call.Settings.Screensharing.Enabled)
+	})
+
+	t.Run("Update Call", func(t *testing.T) {
+		ctx := context.Background()
+		callRequest := UpdateCallRequest{
+			SettingsOverride: &CallSettingsRequest{
+				Audio: &AudioSettingsRequest{
+					MicDefaultOn:  PtrTo(true),
+					DefaultDevice: "speaker",
+				},
+			},
+		}
+		c, err := call.Update(ctx, &callRequest)
+		assert.NoError(t, err)
+		assert.True(t, c.Data.Call.Settings.Audio.MicDefaultOn)
+	})
 }
 
 func TestVideoExamples(t *testing.T) {
-	setup(t)
+	client, _, _ := setup(t, false)
 	t.Run("Create User", func(t *testing.T) {
 		ctx := context.Background()
 		countryNL := map[string]any{"country": "NL"}
@@ -298,7 +280,7 @@ func TestVideoExamples(t *testing.T) {
 
 	t.Run("Create Call With Members", func(t *testing.T) {
 		ctx := context.Background()
-		call := newCall(t)
+		call := newCall(t, client)
 		members := []MemberRequest{
 			{UserID: "thierry-id"},
 			{UserID: "tommaso-id"},
@@ -315,9 +297,9 @@ func TestVideoExamples(t *testing.T) {
 
 	t.Run("Ban Unban User", func(t *testing.T) {
 		ctx := context.Background()
-		badUser, err := getUser(t, nil, nil, nil)
+		badUser, err := getUser(t, client, nil, nil, nil)
 		assert.NoError(t, err)
-		moderator, err := getUser(t, nil, nil, nil)
+		moderator, err := getUser(t, client, nil, nil, nil)
 		assert.NoError(t, err)
 		banRequest := BanRequest{
 			TargetUserID: badUser.ID,

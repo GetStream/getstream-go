@@ -22,7 +22,7 @@ func randomString(n int) string {
 	return string(bytes)
 }
 
-func newCall(t *testing.T) *Call {
+func newCall(t *testing.T, client *Stream) *Call {
 	t.Helper()
 	callID := uuid.New().String()
 	call := client.Video().Call("default", callID)
@@ -30,7 +30,7 @@ func newCall(t *testing.T) *Call {
 	return call
 }
 
-func getUser(t *testing.T, name *string, image *string, custom *map[string]any) (*FullUserResponse, error) {
+func getUser(t *testing.T,client *Stream, name *string, image *string, custom *map[string]any) (*FullUserResponse, error) {
 	t.Helper()
 	ctx := context.Background()
 	userID := uuid.New().String()
