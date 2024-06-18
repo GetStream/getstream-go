@@ -7,8 +7,8 @@ type Stream struct {
 	common *CommonClient
 }
 
-func NewStreamFromEnvVars() (*Stream, error) {
-	client, err := NewClientFromEnvVars()
+func NewStreamFromEnvVars(options ...ClientOption) (*Stream, error) {
+	client, err := NewClientFromEnvVars(options...)
 	if err != nil {
 		return nil, err
 	}
