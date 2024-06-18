@@ -101,6 +101,21 @@ func (c *VideoClient) BlockUser(ctx context.Context, _type string, id string, re
 	return res, err
 }
 
+// Sends events:
+// - call.deleted
+//
+// Required permissions:
+// - DeleteCall
+func (c *VideoClient) DeleteCall(ctx context.Context, _type string, id string, request *DeleteCallRequest) (*StreamResponse[DeleteCallResponse], error) {
+	var result DeleteCallResponse
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	res, err := MakeRequest[DeleteCallRequest, DeleteCallResponse, any](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/delete", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Sends custom event to the call
 //
 // Sends events:

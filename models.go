@@ -342,6 +342,7 @@ type BanResponse struct {
 	User *UserObject `json:"user,omitempty"`
 }
 
+// Block list contains restricted words
 type BlockList struct {
 	Name string `json:"name"`
 
@@ -442,6 +443,7 @@ type CallParticipantResponse struct {
 	User UserResponse `json:"user"`
 }
 
+// CallRecording represents a recording of a call.
 type CallRecording struct {
 	EndTime Timestamp `json:"end_time"`
 
@@ -468,6 +470,7 @@ type CallRequest struct {
 	SettingsOverride *CallSettingsRequest `json:"settings_override,omitempty"`
 }
 
+// Represents a call
 type CallResponse struct {
 	Backstage bool `json:"backstage"`
 
@@ -634,6 +637,7 @@ type CallTimeline struct {
 	Events []*CallEvent `json:"events"`
 }
 
+// CallTranscription represents a transcription of a call.
 type CallTranscription struct {
 	EndTime Timestamp `json:"end_time"`
 
@@ -942,6 +946,7 @@ type ChannelMute struct {
 	User *UserObject `json:"user,omitempty"`
 }
 
+// Represents channel in chat
 type ChannelResponse struct {
 	Cid string `json:"cid"`
 
@@ -1206,6 +1211,7 @@ type CollectUserFeedbackResponse struct {
 	Duration string `json:"duration"`
 }
 
+// Represents custom chat command
 type Command struct {
 	Args string `json:"args"`
 
@@ -1238,6 +1244,7 @@ type Coordinates struct {
 	Longitude float64 `json:"longitude"`
 }
 
+// Block list contains restricted words
 type CreateBlockListRequest struct {
 	Name string `json:"name"`
 
@@ -1388,6 +1395,7 @@ type CreateChannelTypeResponse struct {
 	AutomodThresholds *Thresholds `json:"automod_thresholds,omitempty"`
 }
 
+// Represents custom chat command
 type CreateCommandRequest struct {
 	Description string `json:"description"`
 
@@ -1486,6 +1494,7 @@ type CreatePollOptionRequest struct {
 	User *UserRequest `json:"user,omitempty"`
 }
 
+// Contains all information needed to create a new poll
 type CreatePollRequest struct {
 	Name string `json:"name"`
 
@@ -1558,6 +1567,18 @@ type DeactivateUsersResponse struct {
 	Duration string `json:"duration"`
 
 	TaskID string `json:"task_id"`
+}
+
+type DeleteCallRequest struct {
+	Hard *bool `json:"hard,omitempty"`
+}
+
+type DeleteCallResponse struct {
+	Duration string `json:"duration"`
+
+	Call CallResponse `json:"call"`
+
+	TaskID *string `json:"task_id,omitempty"`
 }
 
 type DeleteChannelResponse struct {
@@ -1862,6 +1883,7 @@ type FirebaseConfigFields struct {
 	ServerKey *string `json:"server_key,omitempty"`
 }
 
+// Contains information about flagged user or message
 type Flag struct {
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -2686,6 +2708,7 @@ type MembersResponse struct {
 	Members []*ChannelMember `json:"members"`
 }
 
+// Represents any chat message
 type Message struct {
 	Cid string `json:"cid"`
 
@@ -3983,10 +4006,12 @@ type QueryUsersResponse struct {
 	Users []FullUserResponse `json:"users"`
 }
 
+// RTMP input settings
 type RTMPIngress struct {
 	Address string `json:"address"`
 }
 
+// Represents user reaction to a message
 type Reaction struct {
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -4499,6 +4524,7 @@ type TargetResolution struct {
 	Width int `json:"width"`
 }
 
+// Represents a conversation thread linked to a specific message in a channel.
 type Thread struct {
 	ChannelCid string `json:"channel_cid"`
 
@@ -4529,6 +4555,7 @@ type Thread struct {
 	ParentMessage *Message `json:"parent_message,omitempty"`
 }
 
+// Represents a user that is participating in a thread.
 type ThreadParticipant struct {
 	AppPk int `json:"app_pk"`
 
@@ -4583,6 +4610,7 @@ type ThreadResponse struct {
 	ParentMessage *Message `json:"parent_message,omitempty"`
 }
 
+// Represents a conversation thread linked to a specific message in a channel.
 type ThreadState struct {
 	ChannelCid string `json:"channel_cid"`
 
@@ -4653,6 +4681,7 @@ type ThreadStateResponse struct {
 	ParentMessage *Message `json:"parent_message,omitempty"`
 }
 
+// Sets thresholds for AI moderation
 type Thresholds struct {
 	Explicit *LabelThresholds `json:"explicit,omitempty"`
 
@@ -4941,6 +4970,7 @@ type UpdateCallRequest struct {
 	SettingsOverride *CallSettingsRequest `json:"settings_override,omitempty"`
 }
 
+// Represents a call
 type UpdateCallResponse struct {
 	Duration string `json:"duration"`
 
@@ -5155,6 +5185,7 @@ type UpdateChannelTypeResponse struct {
 	AutomodThresholds *Thresholds `json:"automod_thresholds,omitempty"`
 }
 
+// Represents custom chat command
 type UpdateCommandRequest struct {
 	Description string `json:"description"`
 
@@ -5369,6 +5400,7 @@ type UserMute struct {
 	User *UserObject `json:"user,omitempty"`
 }
 
+// Represents chat user
 type UserObject struct {
 	Banned bool `json:"banned"`
 
@@ -5637,6 +5669,7 @@ type VoteData struct {
 	Option *PollOption `json:"Option,omitempty"`
 }
 
+// Represents an BaseEvent that happened in Stream Chat
 type WSEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 

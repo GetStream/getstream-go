@@ -30,7 +30,7 @@ func newCall(t *testing.T, client *Stream) *Call {
 	return call
 }
 
-func getUser(t *testing.T,client *Stream, name *string, image *string, custom *map[string]any) (*FullUserResponse, error) {
+func getUser(t *testing.T, client *Stream, name *string, image *string, custom *map[string]any) (*FullUserResponse, error) {
 	t.Helper()
 	ctx := context.Background()
 	userID := uuid.New().String()

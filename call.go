@@ -32,6 +32,10 @@ func (c *Call) BlockUser(ctx context.Context, request *BlockUserRequest) (*Strea
 	return c.client.BlockUser(ctx, c.callType, c.callID, request)
 }
 
+func (c *Call) Delete(ctx context.Context, request *DeleteCallRequest) (*StreamResponse[DeleteCallResponse], error) {
+	return c.client.DeleteCall(ctx, c.callType, c.callID, request)
+}
+
 func (c *Call) SendCallEvent(ctx context.Context, request *SendCallEventRequest) (*StreamResponse[SendCallEventResponse], error) {
 	return c.client.SendCallEvent(ctx, c.callType, c.callID, request)
 }
