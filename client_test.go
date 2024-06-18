@@ -45,6 +45,11 @@ func setup(t *testing.T) {
 }
 
 func resetSharedResource() {
+	ctx := context.Background()
+	_, err := client.Video().DeleteCallType(ctx, callTypeName)
+	if err != nil {
+		panic("Failed to delete call type: " + err.Error())
+	}
 	once = sync.Once{}
 	client = nil
 	call = nil
