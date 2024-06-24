@@ -270,7 +270,7 @@ func TestVideoExamples(t *testing.T) {
 		for _, user := range users {
 			usersMap[user.ID] = user
 		}
-		_, err := client.Common().UpdateUsers(ctx, &UpdateUsersRequest{Users: usersMap})
+		_, err := client.UpdateUsers(ctx, &UpdateUsersRequest{Users: usersMap})
 		assert.NoError(t, err)
 
 		token, err := client.CreateToken("tommaso-id", nil)
@@ -309,10 +309,10 @@ func TestVideoExamples(t *testing.T) {
 			Timeout:      PtrTo(30),
 		}
 
-		_, err = client.Common().Ban(ctx, &banRequest)
+		_, err = client.Ban(ctx, &banRequest)
 		assert.NoError(t, err)
 
-		_, err = client.Common().Unban(ctx, &UnbanParams{TargetUserID: badUser.ID})
+		_, err = client.Unban(ctx, &UnbanParams{TargetUserID: badUser.ID})
 		assert.NoError(t, err)
 	})
 
@@ -337,9 +337,7 @@ func TestVideoExamples(t *testing.T) {
 		response, err = call.Get(ctx, nil)
 		assert.NoError(t, err)
 		assert.NotContains(t, response.Data.Call.BlockedUserIDs, badUser.ID)
-
 	})
-
 }
 
 func TestSendCustomEvent(t *testing.T) {

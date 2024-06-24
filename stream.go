@@ -1,10 +1,9 @@
 package getstream
 
 type Stream struct {
-	client *Client
-	chat   *ChatClient
-	video  *VideoClient
-	common *CommonClient
+	*Client
+	chat  *ChatClient
+	video *VideoClient
 }
 
 func NewStreamFromEnvVars(options ...ClientOption) (*Stream, error) {
@@ -13,7 +12,7 @@ func NewStreamFromEnvVars(options ...ClientOption) (*Stream, error) {
 		return nil, err
 	}
 	return &Stream{
-		client: client,
+		Client: client,
 	}, nil
 }
 
@@ -23,18 +22,18 @@ func New(apiKey, apiSecret string, options ...ClientOption) *Stream {
 		return nil
 	}
 	return &Stream{
-		client: client,
+		Client: client,
 	}
 }
 
 func (s *Stream) CreateToken(userID string, claims *StreamJWTClaims) (string, error) {
-	return s.client.CreateToken(userID, claims)
+	return s.CreateToken(userID, claims)
 }
 
 // Chat
 func (s *Stream) Chat() *ChatClient {
 	if s.chat == nil {
-		s.chat = NewChatClient(s.client)
+		s.chat = NewChatClient(s.Client)
 	}
 	return s.chat
 }
@@ -42,15 +41,7 @@ func (s *Stream) Chat() *ChatClient {
 // Video
 func (s *Stream) Video() *VideoClient {
 	if s.video == nil {
-		s.video = NewVideoClient(s.client)
+		s.video = NewVideoClient(s.Client)
 	}
 	return s.video
-}
-
-// common
-func (s *Stream) Common() *CommonClient {
-	if s.common == nil {
-		s.common = NewCommonClient(s.client)
-	}
-	return s.common
 }

@@ -302,14 +302,20 @@ type AzureRequest struct {
 
 type BackstageSettings struct {
 	Enabled bool `json:"enabled"`
+
+	JoinAheadTimeSeconds *int `json:"join_ahead_time_seconds,omitempty"`
 }
 
 type BackstageSettingsRequest struct {
 	Enabled *bool `json:"enabled,omitempty"`
+
+	JoinAheadTimeSeconds *int `json:"join_ahead_time_seconds,omitempty"`
 }
 
 type BackstageSettingsResponse struct {
 	Enabled bool `json:"enabled"`
+
+	JoinAheadTimeSeconds *int `json:"join_ahead_time_seconds,omitempty"`
 }
 
 type BanRequest struct {
@@ -536,6 +542,8 @@ type CallResponse struct {
 
 	// Date/time when the call ended
 	EndedAt *Timestamp `json:"ended_at,omitempty"`
+
+	JoinAheadTimeSeconds *int `json:"join_ahead_time_seconds,omitempty"`
 
 	// Date/time when the call will start
 	StartsAt *Timestamp `json:"starts_at,omitempty"`

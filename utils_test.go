@@ -56,7 +56,7 @@ func getUser(t *testing.T, client *Stream, name *string, image *string, custom *
 		usersMap[user.ID] = user
 	}
 
-	res, err := client.Common().UpdateUsers(ctx, &UpdateUsersRequest{Users: usersMap})
+	res, err := client.UpdateUsers(ctx, &UpdateUsersRequest{Users: usersMap})
 	if err != nil {
 		return nil, err
 	}
