@@ -316,30 +316,80 @@ func TestVideoExamples(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	// t.Run("Block Unblock User From Calls", func(t *testing.T) {
-	// 	ctx := context.Background()
+	t.Run("Block Unblock User From Calls", func(t *testing.T) {
+		ctx := context.Background()
 
-	// 	call := newCall(t)
+		call := newCall(t, client)
 
-	// 	badUser, err := getUser(t, nil, nil, nil)
-	// 	require.NoError(t, err)
+		badUser, err := getUser(t, client, nil, nil, nil)
+		require.NoError(t, err)
 
-	// 	_, err = call.BlockUser(ctx, BlockUserRequest{UserID: badUser.ID})
-	// 	assert.NoError(t, err)
+		_, err = call.BlockUser(ctx, &BlockUserRequest{UserID: badUser.ID})
+		assert.NoError(t, err)
 
-	// 	response, err := call.Get(ctx, nil, nil, nil)
-	// 	assert.NoError(t, err)
-	// 	assert.Contains(t, response.Data.Call.BlockedUserIDs, badUser.ID)
+		response, err := call.Get(ctx, nil)
+		assert.NoError(t, err)
+		assert.Contains(t, response.Data.Call.BlockedUserIDs, badUser.ID)
 
-	// 	_, err = call.UnblockUser(ctx, UnblockUserRequest{UserID: badUser.ID})
-	// 	assert.NoError(t, err)
+		_, err = call.UnblockUser(ctx, &UnblockUserRequest{UserID: badUser.ID})
+		assert.NoError(t, err)
 
-	// 	response, err = call.Get(ctx, nil, nil, nil)
-	// 	assert.NoError(t, err)
-	// 	assert.NotContains(t, response.Data.Call.BlockedUserIDs, badUser.ID)
+		response, err = call.Get(ctx, nil)
+		assert.NoError(t, err)
+		assert.NotContains(t, response.Data.Call.BlockedUserIDs, badUser.ID)
 
-	// })
+	})
+
 }
+
+func TestSendCustomEvent(t *testing.T) {
+	client, call, _ := setup(t, false)
+
+	ctx := context.Background()
+	user, err := getUser(t, client, nil, nil, nil)
+	require.NoError(t, err)
+
+	callRequest := GetOrCreateCallRequest{
+		Data: &CallRequest{
+			CreatedByID: PtrTo("tommaso-id"),
+		},
+	}
+	_, err = call.GetOrCreate(ctx, &callRequest)
+	require.NoError(t, err)
+
+	customEvent := map[string]interface{}{
+		"bananas": "good",
+	}
+	sendEventRequest := SendCallEventRequest{
+		UserID: &user.ID,
+		Custom: &customEvent,
+	}
+	_, err = call.SendCallEvent(ctx, &sendEventRequest)
+	assert.NoError(t, err)
+}
+
+// func TestMuteAll(t *testing.T) {
+//     _, call, _ := setup(t, false)
+
+//     ctx := context.Background()
+//     userID := randomString(10)
+
+//     callRequest := GetOrCreateCallRequest{
+//         Data: &CallRequest{
+//             CreatedByID: PtrTo(userID),
+//         },
+//     }
+//     _, err := call.GetOrCreate(ctx, &callRequest)
+//     require.NoError(t, err)
+
+//     muteRequest := MuteUsersRequest{
+//         MutedByID:    &userID,
+//         MuteAllUsers: PtrTo(true),
+//         Audio:        PtrTo(true),
+//     }
+//     _, err = call.MuteUsers(ctx, &muteRequest)
+//     assert.NoError(t, err)
+// }
 
 // func TestDeleteCallType(t *testing.T) {
 // 	setup(t)

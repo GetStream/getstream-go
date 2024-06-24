@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 )
 
 func PtrTo[T any](v T) *T {
@@ -24,8 +25,16 @@ func randomString(n int) string {
 
 func newCall(t *testing.T, client *Stream) *Call {
 	t.Helper()
+	ctx := context.Background()
 	callID := uuid.New().String()
 	call := client.Video().Call("default", callID)
+	callRequest := GetOrCreateCallRequest{
+		Data: &CallRequest{
+			CreatedByID: PtrTo("tommaso-id"),
+		},
+	}
+	_, err := call.GetOrCreate(ctx, &callRequest)
+	require.NoError(t, err, "Error creating call")
 
 	return call
 }
