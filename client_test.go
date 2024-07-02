@@ -579,6 +579,32 @@ func TestVideoExamplesAdditional(t *testing.T) {
 	})
 }
 
+func TestDeleteCall(t *testing.T) {
+	client := initClient(t)
+	ctx := context.Background()
+	call := client.Video().Call("default", randomString(10))
+
+	t.Run("SoftDelete", func(t *testing.T) {
+		_, err := call.GetOrCreate(ctx, &GetOrCreateCallRequest{
+			Data: &CallRequest{
+				CreatedByID: PtrTo("john"),
+			},
+		})
+		require.NoError(t, err)
+
+		response, err := call.Delete(ctx, &DeleteCallRequest{})
+		require.NoError(t, err)
+		assert.NotNil(t, response.Data.Call)
+		assert.Nil(t, response.Data.TaskID)
+
+		_, err = call.Get(ctx, nil)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Can't find call with id")
+	})
+
+	// Add test for HardDelete
+}
+
 func TestTeams(t *testing.T) {
 	client := initClient(t)
 	ctx := context.Background()
