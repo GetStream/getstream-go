@@ -218,6 +218,32 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 		assert.Equal(t, callTypeName, response.Data.Name)
 	})
 
+	t.Run("CreatingStorageWithReservedNameShouldFail", func(t *testing.T) {
+		ctx := context.Background()
+		path := "directory_name/"
+		s3apiKey := "my-access-key"
+		s3secret := "my-secret"
+		_, err := client.CreateExternalStorage(ctx, &CreateExternalStorageRequest{
+			Bucket:      "my-bucket",
+			Name:        "stream-s3",
+			StorageType: "s3",
+			Path:        &path,
+			AwsS3: &S3Request{
+				S3Region: "us-east-1",
+				S3ApiKey: &s3apiKey,
+				S3Secret: &s3secret,
+			},
+		})
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "stream-s3 name reserved for internal use")
+	})
+
+	t.Run("ShouldBeAbleToListExternalStorage", func(t *testing.T) {
+		ctx := context.Background()
+		_, err := client.ListExternalStorage(ctx)
+		require.NoError(t, err)
+	})
+
 	t.Run("Create Call", func(t *testing.T) {
 		ctx := context.Background()
 		callRequest := GetOrCreateCallRequest{
