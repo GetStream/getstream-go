@@ -366,28 +366,28 @@ func TestSendCustomEvent(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// func TestMuteAll(t *testing.T) {
-//     _, call, _ := setup(t, false)
+func TestMuteAll(t *testing.T) {
+	_, call, _ := setup(t, false)
 
-//     ctx := context.Background()
-//     userID := randomString(10)
+	ctx := context.Background()
+	userID := randomString(10)
 
-//     callRequest := GetOrCreateCallRequest{
-//         Data: &CallRequest{
-//             CreatedByID: PtrTo(userID),
-//         },
-//     }
-//     _, err := call.GetOrCreate(ctx, &callRequest)
-//     require.NoError(t, err)
+	callRequest := GetOrCreateCallRequest{
+		Data: &CallRequest{
+			CreatedByID: PtrTo(userID),
+		},
+	}
+	_, err := call.GetOrCreate(ctx, &callRequest)
+	require.NoError(t, err)
 
-//     muteRequest := MuteUsersRequest{
-//         MutedByID:    &userID,
-//         MuteAllUsers: PtrTo(true),
-//         Audio:        PtrTo(true),
-//     }
-//     _, err = call.MuteUsers(ctx, &muteRequest)
-//     assert.NoError(t, err)
-// }
+	muteRequest := MuteUsersRequest{
+		MutedByID:    &userID,
+		MuteAllUsers: PtrTo(true),
+		Audio:        PtrTo(true),
+	}
+	_, err = call.MuteUsers(ctx, &muteRequest)
+	assert.NoError(t, err)
+}
 
 // func TestDeleteCallType(t *testing.T) {
 // 	setup(t)
