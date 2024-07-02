@@ -1,6 +1,7 @@
 package getstream
 
 import (
+	"encoding/json"
 	"strconv"
 	"time"
 )
@@ -8,6 +9,24 @@ import (
 type Timestamp struct {
 	time.Time
 	rfc3339 bool
+}
+
+func (t Timestamp) MarshalJSON() ([]byte, error) {
+	if t.Time.IsZero() {
+		return []byte("null"), nil
+	}
+
+	if t.rfc3339 {
+		return json.Marshal(t.Time.Format(time.RFC3339Nano))
+	}
+
+	// Marshal as nanoseconds since Unix epoch
+	nanos := t.Time.UnixNano()
+	return json.Marshal(nanos)
+}
+
+func NewTimestamp(t time.Time, rfc3339 bool) Timestamp {
+	return Timestamp{Time: t, rfc3339: rfc3339}
 }
 
 func (t *Timestamp) UnmarshalJSON(data []byte) error {

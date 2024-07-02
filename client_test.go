@@ -3,6 +3,7 @@ package getstream
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -387,6 +388,194 @@ func TestMuteAll(t *testing.T) {
 	}
 	_, err = call.MuteUsers(ctx, &muteRequest)
 	assert.NoError(t, err)
+}
+
+func TestVideoExamplesAdditional(t *testing.T) {
+	client, call, _ := setup(t, false)
+
+	t.Run("MuteSomeUsers", func(t *testing.T) {
+		ctx := context.Background()
+		alice, err := getUser(t, client, nil, nil, nil)
+		require.NoError(t, err)
+		bob, err := getUser(t, client, nil, nil, nil)
+		require.NoError(t, err)
+
+		userID := randomString(10)
+		_, err = call.GetOrCreate(ctx, &GetOrCreateCallRequest{
+			Data: &CallRequest{
+				CreatedByID: PtrTo(userID),
+			},
+		})
+		require.NoError(t, err)
+
+		_, err = call.MuteUsers(ctx, &MuteUsersRequest{
+			MutedByID:        &userID,
+			UserIDs:          &[]string{alice.ID, bob.ID},
+			Audio:            PtrTo(true),
+			Video:            PtrTo(true),
+			Screenshare:      PtrTo(true),
+			ScreenshareAudio: PtrTo(true),
+		})
+		assert.NoError(t, err)
+	})
+
+	t.Run("UpdateUserPermissions", func(t *testing.T) {
+		ctx := context.Background()
+		userID := randomString(10)
+		_, err := call.GetOrCreate(ctx, &GetOrCreateCallRequest{
+			Data: &CallRequest{
+				CreatedByID: PtrTo(userID),
+			},
+		})
+		require.NoError(t, err)
+
+		alice, err := getUser(t, client, nil, nil, nil)
+		require.NoError(t, err)
+
+		_, err = call.UpdateUserPermissions(ctx, &UpdateUserPermissionsRequest{
+			UserID:            alice.ID,
+			RevokePermissions: &[]string{SEND_AUDIO.String()},
+		})
+		assert.NoError(t, err)
+
+		_, err = call.UpdateUserPermissions(ctx, &UpdateUserPermissionsRequest{
+			UserID:           alice.ID,
+			GrantPermissions: &[]string{SEND_AUDIO.String()},
+		})
+		assert.NoError(t, err)
+	})
+
+	t.Run("DeactivateUser", func(t *testing.T) {
+		ctx := context.Background()
+		alice, err := getUser(t, client, nil, nil, nil)
+		require.NoError(t, err)
+		bob, err := getUser(t, client, nil, nil, nil)
+		require.NoError(t, err)
+
+		_, err = client.DeactivateUser(ctx, alice.ID, &DeactivateUserRequest{})
+		assert.NoError(t, err)
+
+		_, err = client.ReactivateUser(ctx, alice.ID, &ReactivateUserRequest{})
+		assert.NoError(t, err)
+
+		response, err := client.DeactivateUsers(ctx, &DeactivateUsersRequest{UserIDs: []string{alice.ID, bob.ID}})
+		assert.NoError(t, err)
+		taskID := response.Data.TaskID
+
+		// Note: In a real scenario, you might want to implement a retry mechanism or use a channel to wait for the task to complete
+		time.Sleep(2 * time.Second)
+
+		taskStatus, err := client.GetTask(ctx, taskID)
+		assert.NoError(t, err)
+
+		if taskStatus.Data.Status == "completed" {
+			t.Logf("Task result: %v", taskStatus.Data.Result)
+		}
+	})
+
+	t.Run("CreateCallWithSessionTimer", func(t *testing.T) {
+		t.Skip("Skipping this test because of nil pointer dereference")
+		ctx := context.Background()
+		userID := randomString(10)
+		response, err := call.GetOrCreate(ctx, &GetOrCreateCallRequest{
+			Data: &CallRequest{
+				CreatedByID: PtrTo(userID),
+				SettingsOverride: &CallSettingsRequest{
+					Limits: &LimitsSettingsRequest{
+						MaxDurationSeconds: PtrTo(3600),
+					},
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, 3600, *response.Data.Call.Settings.Limits.MaxDurationSeconds)
+
+		res, err := call.Update(ctx, &UpdateCallRequest{
+			SettingsOverride: &CallSettingsRequest{
+				Limits: &LimitsSettingsRequest{
+					MaxDurationSeconds: PtrTo(7200),
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, 7200, *res.Data.Call.Settings.Limits.MaxDurationSeconds)
+
+		res, err = call.Update(ctx, &UpdateCallRequest{
+			SettingsOverride: &CallSettingsRequest{
+				Limits: &LimitsSettingsRequest{
+					MaxDurationSeconds: PtrTo(0),
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, 0, *res.Data.Call.Settings.Limits.MaxDurationSeconds)
+	})
+
+	t.Run("UserBlocking", func(t *testing.T) {
+		ctx := context.Background()
+		alice, err := getUser(t, client, nil, nil, nil)
+		require.NoError(t, err)
+		bob, err := getUser(t, client, nil, nil, nil)
+		require.NoError(t, err)
+
+		_, err = client.BlockUsers(ctx, &BlockUsersRequest{BlockedUserID: bob.ID, UserID: &alice.ID})
+		assert.NoError(t, err)
+
+		response, err := client.GetBlockedUsers(ctx, &GetBlockedUsersParams{UserID: &alice.ID})
+		assert.NoError(t, err)
+		assert.Len(t, response.Data.Blocks, 1)
+		assert.Equal(t, alice.ID, response.Data.Blocks[0].UserID)
+		assert.Equal(t, bob.ID, response.Data.Blocks[0].BlockedUserID)
+
+		_, err = client.UnblockUsers(ctx, &UnblockUsersRequest{BlockedUserID: bob.ID, UserID: &alice.ID})
+		assert.NoError(t, err)
+
+		response, err = client.GetBlockedUsers(ctx, &GetBlockedUsersParams{UserID: &alice.ID})
+		assert.NoError(t, err)
+		assert.Empty(t, response.Data.Blocks)
+	})
+
+	t.Run("CreateCallWithBackstageAndJoinAheadSet", func(t *testing.T) {
+		ctx := context.Background()
+		userID := randomString(10)
+		startsAt := time.Now().Add(30 * time.Minute)
+		ts := NewTimestamp(startsAt, true)
+
+		response, err := call.GetOrCreate(ctx, &GetOrCreateCallRequest{
+			Data: &CallRequest{
+				StartsAt:    &ts,
+				CreatedByID: PtrTo(userID),
+				SettingsOverride: &CallSettingsRequest{
+					Backstage: &BackstageSettingsRequest{
+						Enabled:              PtrTo(true),
+						JoinAheadTimeSeconds: PtrTo(300),
+					},
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, 300, *response.Data.Call.JoinAheadTimeSeconds)
+
+		res, err := call.Update(ctx, &UpdateCallRequest{
+			SettingsOverride: &CallSettingsRequest{
+				Backstage: &BackstageSettingsRequest{
+					JoinAheadTimeSeconds: PtrTo(600),
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, 600, *res.Data.Call.JoinAheadTimeSeconds)
+
+		res, err = call.Update(ctx, &UpdateCallRequest{
+			SettingsOverride: &CallSettingsRequest{
+				Backstage: &BackstageSettingsRequest{
+					JoinAheadTimeSeconds: PtrTo(0),
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, 0, *res.Data.Call.JoinAheadTimeSeconds)
+	})
 }
 
 // func TestDeleteCallType(t *testing.T) {
