@@ -1,4 +1,4 @@
-# Official Go SDK for [Stream Chat](https://getstream.io/)
+# Official Go SDK for [Stream](https://getstream.io/)
 
 [![build](https://github.com/GetStream/getstream-go/workflows/build/badge.svg)](https://github.com/GetStream/getstream-go/actions)
 [![godoc](https://pkg.go.dev/badge/GetStream/getstream-go)](https://pkg.go.dev/github.com/GetStream/getstream-go?tab=doc)
@@ -43,40 +43,92 @@ go get github.com/GetStream/stream-go
 package main
 
 import (
+	"context"
+	"fmt"
 	"os"
+	"time"
 
-	stream "github.com/GetStream/stream-go"
+	stream "github.com/GetStream/getstream-go"
 )
 
-var APIKey = os.Getenv("STREAM_KEY")
-var APISecret = os.Getenv("STREAM_SECRET")
-var userID = "" // your server user id
-
 func main() {
+	apiKey := os.Getenv("STREAM_API_KEY")
+	apiSecret := os.Getenv("STREAM_API_SECRET")
+	userID := "your-user-id" // Replace with your server user id
+
 	// Initialize client
-	client, err := stream.NewClient(APIKey, APISecret)
-	
-	// Or with a specific timeout
-	client, err := stream.NewClient(APIKey, APISecret, WithTimeout(3 * time.Second))
+	client, err := stream.NewStreamFromCredentials(apiKey, apiSecret)
+	if err != nil {
+		fmt.Printf("Error initializing client: %v\n", err)
+		return
+	}
 
-	// Or using only environmental variables: (required) STREAM_KEY, (required) STREAM_SECRET,
-	// (optional) STREAM_CHAT_TIMEOUT
-	client, err := stream.NewClientFromEnvVars()
-
-	// handle error
+	// Or initialize using only environmental variables:
+	// (required) STREAM_API_KEY, (required) STREAM_API_SECRET
+	client, err = stream.NewStreamFromEnvVars()
+	if err != nil {
+		fmt.Printf("Error initializing client from env vars: %v\n", err)
+		return
+	}
 
 	// Define a context
 	ctx := context.Background()
 
-	// use client methods
+	// Create a call
+	call := client.Video().Call("default", "unique-call-id")
 
-	// create channel with users
-	users := []string{"id1", "id2", "id3"}
-	userID := "id1"
-	channel, err := client.CreateChannelWithMembers(ctx, "messaging", "channel-id", userID, users...)
+	// Create or get a call
+	response, err := call.GetOrCreate(ctx, &stream.GetOrCreateCallRequest{
+		Data: &stream.CallRequest{
+			CreatedByID: stream.PtrTo(userID),
+		},
+	})
+	if err != nil {
+		fmt.Printf("Error creating/getting call: %v\n", err)
+		return
+	}
 
-	// use channel methods
-	msg, err := channel.SendMessage(ctx, &stream.Message{Text: "hello"}, userID)
+	fmt.Printf("Call created/retrieved: %s\n", response.Data.Call.ID)
+
+	// Update call settings
+	_, err = call.Update(ctx, &stream.UpdateCallRequest{
+		SettingsOverride: &stream.CallSettingsRequest{
+			Audio: &stream.AudioSettingsRequest{
+				MicDefaultOn: stream.PtrTo(true),
+			},
+		},
+	})
+	if err != nil {
+		fmt.Printf("Error updating call settings: %v\n", err)
+		return
+	}
+
+	// Create a token for client-side use
+	token, err := client.CreateToken(userID, nil)
+	if err != nil {
+		fmt.Printf("Error creating token: %v\n", err)
+		return
+	}
+
+	fmt.Printf("Token for user %s: %s\n", userID, token)
+
+	// Query calls
+	callsResponse, err := client.Video().QueryCalls(ctx, &stream.QueryCallsRequest{
+		FilterConditions: map[string]interface{}{
+			"created_by_user_id": userID,
+		},
+	})
+	if err != nil {
+		fmt.Printf("Error querying calls: %v\n", err)
+		return
+	}
+
+	fmt.Printf("Found %d calls\n", len(callsResponse.Data.Calls))
+}
+
+// Helper function to create a pointer to a value
+func PtrTo[T any](v T) *T {
+	return &v
 }
 ```
 
