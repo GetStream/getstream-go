@@ -322,27 +322,6 @@ func TestVideoExamples(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("Ban Unban User", func(t *testing.T) {
-		ctx := context.Background()
-		badUser, err := getUser(t, client, nil, nil, nil)
-		assert.NoError(t, err)
-		moderator, err := getUser(t, client, nil, nil, nil)
-		assert.NoError(t, err)
-		banRequest := BanRequest{
-			TargetUserID: badUser.ID,
-			BannedByID:   &moderator.ID,
-			Reason:       PtrTo("Banned user and all users sharing the same IP for half hour"),
-			IpBan:        PtrTo(true),
-			Timeout:      PtrTo(30),
-		}
-
-		_, err = client.Ban(ctx, &banRequest)
-		assert.NoError(t, err)
-
-		_, err = client.Unban(ctx, &UnbanParams{TargetUserID: badUser.ID})
-		assert.NoError(t, err)
-	})
-
 	t.Run("Block Unblock User From Calls", func(t *testing.T) {
 		ctx := context.Background()
 
@@ -547,7 +526,7 @@ func TestVideoExamplesAdditional(t *testing.T) {
 		_, err = client.BlockUsers(ctx, &BlockUsersRequest{BlockedUserID: bob.ID, UserID: &alice.ID})
 		assert.NoError(t, err)
 
-		response, err := client.GetBlockedUsers(ctx, &GetBlockedUsersParams{UserID: &alice.ID})
+		response, err := client.GetBlockedUsers(ctx, &GetBlockedUsersRequest{UserID: &alice.ID})
 		assert.NoError(t, err)
 		assert.Len(t, response.Data.Blocks, 1)
 		assert.Equal(t, alice.ID, response.Data.Blocks[0].UserID)
@@ -556,7 +535,7 @@ func TestVideoExamplesAdditional(t *testing.T) {
 		_, err = client.UnblockUsers(ctx, &UnblockUsersRequest{BlockedUserID: bob.ID, UserID: &alice.ID})
 		assert.NoError(t, err)
 
-		response, err = client.GetBlockedUsers(ctx, &GetBlockedUsersParams{UserID: &alice.ID})
+		response, err = client.GetBlockedUsers(ctx, &GetBlockedUsersRequest{UserID: &alice.ID})
 		assert.NoError(t, err)
 		assert.Empty(t, response.Data.Blocks)
 	})
@@ -658,7 +637,7 @@ func TestTeams(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "blue", *response.Data.Call.Team)
 
-	usersResponse, err := client.QueryUsers(ctx, &QueryUsersParams{
+	usersResponse, err := client.QueryUsers(ctx, &QueryUsersRequest{
 		Payload: &QueryUsersPayload{FilterConditions: map[string]interface{}{
 			"id":    userID,
 			"teams": map[string]interface{}{"$in": []string{"red", "blue"}},
@@ -672,10 +651,11 @@ func TestTeams(t *testing.T) {
 	}
 	assert.Contains(t, userIDs, userID)
 
-	usersResponse, err = client.QueryUsers(ctx, &QueryUsersParams{
+	usersResponse, err = client.QueryUsers(ctx, &QueryUsersRequest{
 		Payload: &QueryUsersPayload{FilterConditions: map[string]interface{}{
 			"teams": nil,
-		}}},
+		}},
+	},
 	)
 	require.NoError(t, err)
 	for _, user := range usersResponse.Data.Users {

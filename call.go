@@ -16,8 +16,8 @@ func NewCall(callType string, callID string, client *VideoClient) *Call {
 	}
 }
 
-func (c *Call) Get(ctx context.Context, params *GetCallParams) (*StreamResponse[GetCallResponse], error) {
-	return c.client.GetCall(ctx, c.callType, c.callID, params)
+func (c *Call) Get(ctx context.Context, request *GetCallRequest) (*StreamResponse[GetCallResponse], error) {
+	return c.client.GetCall(ctx, c.callType, c.callID, request)
 }
 
 func (c *Call) Update(ctx context.Context, request *UpdateCallRequest) (*StreamResponse[UpdateCallResponse], error) {
@@ -66,6 +66,18 @@ func (c *Call) VideoPin(ctx context.Context, request *PinRequest) (*StreamRespon
 
 func (c *Call) ListRecordings(ctx context.Context) (*StreamResponse[ListRecordingsResponse], error) {
 	return c.client.ListRecordings(ctx, c.callType, c.callID)
+}
+
+func (c *Call) StartRTMPBroadcast(ctx context.Context, request *StartRTMPBroadcastsRequest) (*StreamResponse[StartRTMPBroadcastsResponse], error) {
+	return c.client.StartRTMPBroadcast(ctx, c.callType, c.callID, request)
+}
+
+func (c *Call) StopAllRTMPBroadcasts(ctx context.Context) (*StreamResponse[StopAllRTMPBroadcastsResponse], error) {
+	return c.client.StopAllRTMPBroadcasts(ctx, c.callType, c.callID)
+}
+
+func (c *Call) StopRTMPBroadcast(ctx context.Context, name string, request *StopRTMPBroadcastsRequest) (*StreamResponse[StopRTMPBroadcastsResponse], error) {
+	return c.client.StopRTMPBroadcast(ctx, c.callType, c.callID, name, request)
 }
 
 func (c *Call) StartHLSBroadcasting(ctx context.Context) (*StreamResponse[StartHLSBroadcastingResponse], error) {

@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -177,25 +178,34 @@ func (c *Client) setHeaders(r *http.Request) {
 	r.Header.Set("Stream-Auth-Type", "jwt")
 }
 
-func ToMap(item interface{}) (map[string]interface{}, error) {
-	bytes, err := json.Marshal(item)
-	if err != nil {
-		return nil, err
+func extractQueryParams(req interface{}) url.Values {
+	values := url.Values{}
+	v := reflect.ValueOf(req)
+
+	// If it's a pointer, get the underlying element
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
 	}
 
-	var result map[string]interface{}
-	err = json.Unmarshal(bytes, &result)
-	if err != nil {
-		return nil, err
+	t := v.Type()
+
+	for i := 0; i < v.NumField(); i++ {
+		field := t.Field(i)
+		value := v.Field(i)
+
+		if queryTag := field.Tag.Get("query"); queryTag != "" && queryTag != "-" {
+			if str, ok := value.Interface().(string); ok && str != "" {
+				values.Set(queryTag, str)
+			}
+		}
 	}
 
-	return result, nil
+	return values
 }
 
 // makeRequest makes a generic HTTP request
-func MakeRequest[GRequest any, GResponse any, GParams any](c *Client, ctx context.Context, method, path string, params map[string]GParams, data *GRequest, response *GResponse, pathParams map[string]string) (*StreamResponse[GResponse], error) {
-	queryParams := BuildQueryParam(params)
-	r, err := newRequest(c, ctx, method, path, queryParams, data, pathParams)
+func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, method, path string, params url.Values, data *GRequest, response *GResponse, pathParams map[string]string) (*StreamResponse[GResponse], error) {
+	r, err := newRequest(c, ctx, method, path, params, data, pathParams)
 	if err != nil {
 		return nil, err
 	}

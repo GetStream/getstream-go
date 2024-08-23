@@ -16,8 +16,8 @@ func NewChannel(channelType string, channelD string, client *ChatClient) *Channe
 	}
 }
 
-func (c *Channels) Delete(ctx context.Context, params *DeleteChannelParams) (*StreamResponse[DeleteChannelResponse], error) {
-	return c.client.DeleteChannel(ctx, c.channelType, c.channelD, params)
+func (c *Channels) Delete(ctx context.Context, request *DeleteChannelRequest) (*StreamResponse[DeleteChannelResponse], error) {
+	return c.client.DeleteChannel(ctx, c.channelType, c.channelD, request)
 }
 
 func (c *Channels) UpdateChannelPartial(ctx context.Context, request *UpdateChannelPartialRequest) (*StreamResponse[UpdateChannelPartialResponse], error) {
@@ -32,8 +32,8 @@ func (c *Channels) SendEvent(ctx context.Context, request *SendEventRequest) (*S
 	return c.client.SendEvent(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) DeleteFile(ctx context.Context, params *DeleteFileParams) (*StreamResponse[FileDeleteResponse], error) {
-	return c.client.DeleteFile(ctx, c.channelType, c.channelD, params)
+func (c *Channels) DeleteFile(ctx context.Context, request *DeleteFileRequest) (*StreamResponse[Response], error) {
+	return c.client.DeleteFile(ctx, c.channelType, c.channelD, request)
 }
 
 func (c *Channels) UploadFile(ctx context.Context, request *FileUploadRequest) (*StreamResponse[FileUploadResponse], error) {
@@ -44,8 +44,8 @@ func (c *Channels) Hide(ctx context.Context, request *HideChannelRequest) (*Stre
 	return c.client.HideChannel(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) DeleteImage(ctx context.Context, params *DeleteImageParams) (*StreamResponse[FileDeleteResponse], error) {
-	return c.client.DeleteImage(ctx, c.channelType, c.channelD, params)
+func (c *Channels) DeleteImage(ctx context.Context, request *DeleteImageRequest) (*StreamResponse[Response], error) {
+	return c.client.DeleteImage(ctx, c.channelType, c.channelD, request)
 }
 
 func (c *Channels) UploadImage(ctx context.Context, request *ImageUploadRequest) (*StreamResponse[ImageUploadResponse], error) {
@@ -56,8 +56,8 @@ func (c *Channels) SendMessage(ctx context.Context, request *SendMessageRequest)
 	return c.client.SendMessage(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) GetManyMessages(ctx context.Context, params *GetManyMessagesParams) (*StreamResponse[GetManyMessagesResponse], error) {
-	return c.client.GetManyMessages(ctx, c.channelType, c.channelD, params)
+func (c *Channels) GetManyMessages(ctx context.Context, request *GetManyMessagesRequest) (*StreamResponse[GetManyMessagesResponse], error) {
+	return c.client.GetManyMessages(ctx, c.channelType, c.channelD, request)
 }
 
 func (c *Channels) GetOrCreate(ctx context.Context, request *ChannelGetOrCreateRequest) (*StreamResponse[ChannelStateResponse], error) {
