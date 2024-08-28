@@ -35,38 +35,6 @@ type StreamResponse[T any] struct {
 	Data          T
 }
 
-// BuildQueryParam constructs a map of query parameters from various data types.
-func BuildQueryParam[T any](params map[string]T) url.Values {
-	values := url.Values{}
-	for key, value := range params {
-		switch v := any(value).(type) {
-		case string:
-			values.Add(key, v)
-		case int:
-			values.Add(key, strconv.Itoa(v))
-		case int32, int64:
-			if converted, ok := any(v).(int64); ok {
-				values.Add(key, strconv.FormatInt(converted, 10))
-			}
-		case uint, uint32, uint64:
-			if converted, ok := any(v).(uint64); ok {
-				values.Add(key, strconv.FormatUint(converted, 10))
-			}
-		case float32:
-			values.Add(key, strconv.FormatFloat(float64(v), 'f', -1, 32))
-		case float64:
-			values.Add(key, strconv.FormatFloat(v, 'f', -1, 64))
-		default:
-			// Attempt to marshal as JSON for any other types, including structs
-			jsonData, err := json.Marshal(v)
-			if err == nil {
-				values.Add(key, string(jsonData))
-			}
-		}
-	}
-	return values
-}
-
 // parseResponse parses the HTTP response into the provided result
 func parseResponse[GResponse any](resp *http.Response, result *GResponse) (*StreamResponse[GResponse], error) {
 	if resp.Body == nil {
