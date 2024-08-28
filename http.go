@@ -178,29 +178,94 @@ func (c *Client) setHeaders(r *http.Request) {
 	r.Header.Set("Stream-Auth-Type", "jwt")
 }
 
-func extractQueryParams(req interface{}) url.Values {
-	values := url.Values{}
-	v := reflect.ValueOf(req)
+func StructToMapWithTags(input any, tagName string) (map[string]any, error) {
+	result := make(map[string]any)
+	err := extractFields(reflect.ValueOf(input), tagName, result)
+	return result, err
+}
 
-	// If it's a pointer, get the underlying element
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
+// Recursive function to extract fields
+func extractFields(val reflect.Value, tagName string, result map[string]any) error {
+	// Check if the input is a pointer and get the actual value
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
 	}
 
-	t := v.Type()
+	// Ensure the provided input is a struct
+	if val.Kind() != reflect.Struct {
 
-	for i := 0; i < v.NumField(); i++ {
-		field := t.Field(i)
-		value := v.Field(i)
+		return fmt.Errorf("input must be a struct or a pointer to a struct")
+	}
 
-		if queryTag := field.Tag.Get("query"); queryTag != "" && queryTag != "-" {
-			if str, ok := value.Interface().(string); ok && str != "" {
-				values.Set(queryTag, str)
+	typ := val.Type()
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+		structField := typ.Field(i)
+
+		// Check if the field is an embedded struct and extract its fields
+		if structField.Anonymous && field.Kind() == reflect.Struct {
+
+			err := extractFields(field, tagName, result)
+			if err != nil {
+				return err
 			}
+			continue
+		}
+
+		// Check for the 'path' tag
+		if tag, ok := structField.Tag.Lookup(tagName); ok {
+			result[tag] = field.Interface()
 		}
 	}
+	return nil
+}
 
+func extractQueryParams(v any) url.Values {
+	if v == nil || reflect.ValueOf(v).IsNil() {
+		return url.Values{}
+	}
+	m, err := StructToMapWithTags(v, "query")
+	if err != nil {
+
+		panic(err)
+	}
+	values := url.Values{}
+	for k, v := range m {
+		values.Set(k, EncodeValueToQueryParam(v))
+	}
 	return values
+}
+
+// EncodeValueToQueryParam returns the string representation of a value ready to be used as a query param
+func EncodeValueToQueryParam(value any) string {
+	val := reflect.ValueOf(value)
+
+	if val.Kind() == reflect.Ptr && val.IsNil() {
+		return ""
+	}
+
+	switch val.Kind() {
+	case reflect.Ptr:
+		return EncodeValueToQueryParam(val.Elem().Interface())
+	case reflect.String:
+		return val.String()
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return strconv.FormatInt(val.Int(), 10)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return strconv.FormatUint(val.Uint(), 10)
+	case reflect.Float32, reflect.Float64:
+		return strconv.FormatFloat(val.Float(), 'f', -1, 64)
+	case reflect.Bool:
+		return strconv.FormatBool(val.Bool())
+	case reflect.Map, reflect.Struct, reflect.Slice:
+		b, err := json.Marshal(value)
+		if err != nil {
+			panic(err)
+		}
+		return string(b)
+	default:
+		return fmt.Sprintf("%v", val.Interface())
+	}
 }
 
 // makeRequest makes a generic HTTP request

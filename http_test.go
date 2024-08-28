@@ -1,6 +1,8 @@
 package getstream
 
 import (
+	"net/url"
+	"reflect"
 	"testing"
 )
 
@@ -43,4 +45,37 @@ func TestBuildPath(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestExtractQueryParams(t *testing.T) {
+	t.Run("Extract query params from GetCallRequest", func(t *testing.T) {
+		request := &GetCallRequest{
+			MembersLimit: PtrTo(10),
+			Notify:       PtrTo(true),
+			Ring:         PtrTo(false),
+			Video:        PtrTo(true),
+		}
+
+		expected := url.Values{
+			"members_limit": []string{"10"},
+			"notify":        []string{"true"},
+			"ring":          []string{"false"},
+			"video":         []string{"true"},
+		}
+
+		result := extractQueryParams(request)
+
+		if !reflect.DeepEqual(result, expected) {
+			t.Errorf("extractQueryParams() = %v, want %v", result, expected)
+		}
+	})
+
+	t.Run("Extract query params from nil request", func(t *testing.T) {
+		result := extractQueryParams(nil)
+
+		if len(result) != 0 {
+			t.Errorf("extractQueryParams(nil) = %v, want empty url.Values", result)
+		}
+	})
+
 }

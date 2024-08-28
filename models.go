@@ -19,6 +19,9 @@ type APIError struct {
 	// Additional error-specific information
 	Details []int `json:"details"`
 
+	// Flag that indicates if the error is unrecoverable, requests that return unrecoverable errors should not be retried, this error only applies to the request that caused it
+	Unrecoverable *bool `json:"unrecoverable,omitempty"`
+
 	// Additional error info
 	ExceptionFields *map[string]string `json:"exception_fields,omitempty"`
 }
@@ -716,6 +719,8 @@ type CallResponse struct {
 }
 
 type CallSessionResponse struct {
+	AnonymousParticipantCount int `json:"anonymous_participant_count"`
+
 	ID string `json:"id"`
 
 	Participants []CallParticipantResponse `json:"participants"`
@@ -2194,6 +2199,11 @@ type DeleteMessageResponse struct {
 	Duration string `json:"duration"`
 
 	Message MessageResponse `json:"message"`
+}
+
+type DeleteModerationTemplateResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
 }
 
 type DeletePollOptionRequest struct {
@@ -4844,7 +4854,7 @@ type PushProviderResponse struct {
 	XiaomiPackageName *string `json:"xiaomi_package_name,omitempty"`
 }
 
-type QueryBannedUsersRequest struct {
+type QueryBannedUsersPayload struct {
 	FilterConditions map[string]any `json:"filter_conditions"`
 
 	// Whether to exclude expired bans or not
@@ -4861,9 +4871,11 @@ type QueryBannedUsersRequest struct {
 	// Array of sort parameters
 	Sort *[]*SortParamRequest `json:"sort,omitempty"`
 
-	Payload *QueryBannedUsersRequest `query:"payload"`
-
 	User *UserRequest `json:"user,omitempty"`
+}
+
+type QueryBannedUsersRequest struct {
+	Payload *QueryBannedUsersPayload `query:"payload"`
 }
 
 type QueryBannedUsersResponse struct {
@@ -4981,36 +4993,48 @@ type QueryChannelsResponse struct {
 	Channels []ChannelStateResponseFields `json:"channels"`
 }
 
-type QueryMembersRequest struct {
-	// Channel type to interact with
+type QueryFeedModerationTemplate struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	Name string `json:"name"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	Config *FeedsModerationTemplateConfig `json:"config,omitempty"`
+}
+
+type QueryFeedModerationTemplatesResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Templates []QueryFeedModerationTemplate `json:"templates"`
+}
+
+type QueryMembersPayload struct {
 	Type string `json:"type"`
 
-	// Filter to apply to members
 	FilterConditions map[string]any `json:"filter_conditions"`
 
-	// Channel ID to interact with
 	ID *string `json:"id,omitempty"`
 
-	// Number of records to return
 	Limit *int `json:"limit,omitempty"`
 
-	// Number of records to offset
 	Offset *int `json:"offset,omitempty"`
 
 	UserID *string `json:"user_id,omitempty"`
 
-	// List of members to search in distinct channels
 	Members *[]*ChannelMember `json:"members,omitempty"`
 
-	// Array of sort parameters
 	Sort *[]*SortParamRequest `json:"sort,omitempty"`
-
-	Payload *QueryMembersRequest `query:"payload"`
 
 	User *UserRequest `json:"user,omitempty"`
 }
 
-type QueryMessageFlagsRequest struct {
+type QueryMembersRequest struct {
+	Payload *QueryMembersPayload `query:"payload"`
+}
+
+type QueryMessageFlagsPayload struct {
 	Limit *int `json:"limit,omitempty"`
 
 	Offset *int `json:"offset,omitempty"`
@@ -5024,9 +5048,11 @@ type QueryMessageFlagsRequest struct {
 
 	FilterConditions *map[string]any `json:"filter_conditions,omitempty"`
 
-	Payload *QueryMessageFlagsRequest `query:"payload"`
-
 	User *UserRequest `json:"user,omitempty"`
+}
+
+type QueryMessageFlagsRequest struct {
+	Payload *QueryMessageFlagsPayload `query:"payload"`
 }
 
 type QueryMessageFlagsResponse struct {
@@ -5304,13 +5330,9 @@ type RTMPIngress struct {
 type RTMPLocation struct {
 	Name string `json:"name"`
 
-	Password string `json:"password"`
-
 	StreamKey string `json:"stream_key"`
 
 	StreamUrl string `json:"stream_url"`
-
-	Username string `json:"username"`
 }
 
 type RTMPSettings struct {
@@ -5326,8 +5348,7 @@ type RTMPSettings struct {
 type RTMPSettingsRequest struct {
 	Enabled *bool `json:"enabled,omitempty"`
 
-	MaxDurationMinutes *int `json:"max_duration_minutes,omitempty"`
-
+	// Resolution to set for the RTMP stream
 	Quality *string `json:"quality,omitempty"`
 
 	Layout *LayoutSettingsRequest `json:"layout,omitempty"`
@@ -5674,7 +5695,7 @@ type ScreensharingSettingsResponse struct {
 	TargetResolution *TargetResolution `json:"target_resolution,omitempty"`
 }
 
-type SearchRequest struct {
+type SearchPayload struct {
 	// Channel filter conditions
 	FilterConditions map[string]any `json:"filter_conditions"`
 
@@ -5695,8 +5716,10 @@ type SearchRequest struct {
 
 	// Message filter conditions
 	MessageFilterConditions *map[string]any `json:"message_filter_conditions,omitempty"`
+}
 
-	Payload *SearchRequest `query:"payload"`
+type SearchRequest struct {
+	Payload *SearchPayload `query:"payload"`
 }
 
 type SearchResponse struct {
@@ -5915,19 +5938,19 @@ type StartHLSBroadcastingResponse struct {
 }
 
 type StartRTMPBroadcastsRequest struct {
+	// Name identifier for RTMP broadcast, must be unique in call
 	Name string `json:"name"`
 
+	// URL for the RTMP server to send the call to
 	StreamUrl string `json:"stream_url"`
 
-	Password *string `json:"password,omitempty"`
-
+	// If provided, will override the call's RTMP settings quality
 	Quality *string `json:"quality,omitempty"`
 
+	// If provided, will be appended at the end of stream_url
 	StreamKey *string `json:"stream_key,omitempty"`
 
-	Username *string `json:"username,omitempty"`
-
-	Layout *LayoutSettings `json:"layout,omitempty"`
+	Layout *LayoutSettingsRequest `json:"layout,omitempty"`
 }
 
 type StartRTMPBroadcastsResponse struct {

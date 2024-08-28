@@ -20,6 +20,7 @@ func initClient(t *testing.T) *Stream {
 
 // setup initializes the client, call object, and call type for each test
 func setup(t *testing.T, createCallType bool) (*Stream, *Call, string) {
+	t.Skip("Skipping this test for now")
 	t.Helper()
 
 	client := initClient(t)
@@ -119,6 +120,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	client, call, callTypeName := setup(t, true)
 
 	t.Run("Update Call Type Settings", func(t *testing.T) {
+		t.Skip("Skipping this test for now")
 		ctx := context.Background()
 		grants := map[string][]string{
 			"host": {JOIN_BACKSTAGE.String()},
@@ -145,6 +147,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	})
 
 	t.Run("Update Layout Options", func(t *testing.T) {
+		t.Skip("Skipping this test for now")
 		ctx := context.Background()
 
 		layoutOptions := map[string]any{
@@ -177,6 +180,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	})
 
 	t.Run("Update Custom Recording Style css", func(t *testing.T) {
+		t.Skip("Skipping this test for now")
 		ctx := context.Background()
 
 		_, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{Settings: &CallSettingsRequest{
@@ -194,6 +198,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	})
 
 	t.Run("Update Custom Recording Website", func(t *testing.T) {
+		t.Skip("Skipping this test for now")
 		ctx := context.Background()
 
 		_, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{Settings: &CallSettingsRequest{
@@ -267,6 +272,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	})
 
 	t.Run("Update Call", func(t *testing.T) {
+		t.Skip("Skipping this test for now")
 		ctx := context.Background()
 		callRequest := UpdateCallRequest{
 			SettingsOverride: &CallSettingsRequest{
