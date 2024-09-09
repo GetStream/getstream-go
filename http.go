@@ -161,7 +161,6 @@ func extractFields(val reflect.Value, tagName string, result map[string]any) err
 
 	// Ensure the provided input is a struct
 	if val.Kind() != reflect.Struct {
-
 		return fmt.Errorf("input must be a struct or a pointer to a struct")
 	}
 
@@ -194,7 +193,6 @@ func extractQueryParams(v any) url.Values {
 	}
 	m, err := StructToMapWithTags(v, "query")
 	if err != nil {
-
 		panic(err)
 	}
 	values := url.Values{}

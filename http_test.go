@@ -77,5 +77,4 @@ func TestExtractQueryParams(t *testing.T) {
 			t.Errorf("extractQueryParams(nil) = %v, want empty url.Values", result)
 		}
 	})
-
 }

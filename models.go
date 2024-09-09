@@ -985,16 +985,11 @@ type ChannelConfig struct {
 
 	UrlEnrichment bool `json:"url_enrichment"`
 
-	// List of commands that channel supports
 	Commands []string `json:"commands"`
 
 	Blocklist *string `json:"blocklist,omitempty"`
 
 	BlocklistBehavior *string `json:"blocklist_behavior,omitempty"`
-
-	PartitionSize *int `json:"partition_size,omitempty"`
-
-	PartitionTtl *int `json:"partition_ttl,omitempty"`
 
 	AllowedFlagReasons *[]string `json:"allowed_flag_reasons,omitempty"`
 
@@ -1124,7 +1119,7 @@ type ChannelInput struct {
 
 	ConfigOverrides *ChannelConfig `json:"config_overrides,omitempty"`
 
-	CreatedBy *UserObject `json:"created_by,omitempty"`
+	CreatedBy *UserRequest `json:"created_by,omitempty"`
 
 	Custom *map[string]any `json:"custom,omitempty"`
 }
@@ -1641,6 +1636,8 @@ type ConfigResponse struct {
 	BodyguardConfig *BodyguardConfig `json:"bodyguard_config,omitempty"`
 
 	GoogleVisionConfig *GoogleVisionConfig `json:"google_vision_config,omitempty"`
+
+	VelocityFilterConfig *VelocityFilterConfig `json:"velocity_filter_config,omitempty"`
 }
 
 type Coordinates struct {
@@ -3456,10 +3453,8 @@ type Label struct {
 }
 
 type LabelThresholds struct {
-	// Threshold for automatic message block
 	Block *float64 `json:"block,omitempty"`
 
-	// Threshold for automatic message flag
 	Flag *float64 `json:"flag,omitempty"`
 }
 
@@ -3894,23 +3889,33 @@ type MessageHistoryEntryResponse struct {
 	Custom map[string]any `json:"Custom"`
 }
 
+// Result of the message moderation
 type MessageModerationResult struct {
+	// Action taken by automod
 	Action string `json:"action"`
 
+	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
 
+	// ID of the message
 	MessageID string `json:"message_id"`
 
+	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
 
+	// Whether user has bad karma
 	UserBadKarma bool `json:"user_bad_karma"`
 
+	// Karma of the user
 	UserKarma float64 `json:"user_karma"`
 
+	// Word that was blocked
 	BlockedWord *string `json:"blocked_word,omitempty"`
 
+	// Name of the blocklist
 	BlocklistName *string `json:"blocklist_name,omitempty"`
 
+	// User who moderated the message
 	ModeratedBy *string `json:"moderated_by,omitempty"`
 
 	AiModerationResponse *ModerationResponse `json:"ai_moderation_response,omitempty"`
@@ -4049,7 +4054,7 @@ type MessageResponse struct {
 
 	Poll *Poll `json:"poll,omitempty"`
 
-	QuotedMessage *Message `json:"quoted_message,omitempty"`
+	QuotedMessage *MessageResponse `json:"quoted_message,omitempty"`
 
 	ReactionGroups *map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
 }
@@ -4133,7 +4138,7 @@ type MessageWithChannelResponse struct {
 
 	Poll *Poll `json:"poll,omitempty"`
 
-	QuotedMessage *Message `json:"quoted_message,omitempty"`
+	QuotedMessage *MessageResponse `json:"quoted_message,omitempty"`
 
 	ReactionGroups *map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
 }
@@ -4153,8 +4158,6 @@ type ModerationActionConfig struct {
 }
 
 type ModerationPayload struct {
-	CreatedAt *Timestamp `json:"created_at,omitempty"`
-
 	Images *[]string `json:"images,omitempty"`
 
 	Texts *[]string `json:"texts,omitempty"`
@@ -5322,6 +5325,22 @@ type QueueStatsResponse struct {
 	TimeToActionBuckets map[string]int `json:"time_to_action_buckets"`
 }
 
+type RTMPBroadcastRequest struct {
+	// Name identifier for RTMP broadcast, must be unique in call
+	Name string `json:"name"`
+
+	// URL for the RTMP server to send the call to
+	StreamUrl string `json:"stream_url"`
+
+	// If provided, will override the call's RTMP settings quality
+	Quality *string `json:"quality,omitempty"`
+
+	// If provided, will be appended at the end of stream_url
+	StreamKey *string `json:"stream_key,omitempty"`
+
+	Layout *LayoutSettingsRequest `json:"layout,omitempty"`
+}
+
 // RTMP input settings
 type RTMPIngress struct {
 	Address string `json:"address"`
@@ -5938,19 +5957,8 @@ type StartHLSBroadcastingResponse struct {
 }
 
 type StartRTMPBroadcastsRequest struct {
-	// Name identifier for RTMP broadcast, must be unique in call
-	Name string `json:"name"`
-
-	// URL for the RTMP server to send the call to
-	StreamUrl string `json:"stream_url"`
-
-	// If provided, will override the call's RTMP settings quality
-	Quality *string `json:"quality,omitempty"`
-
-	// If provided, will be appended at the end of stream_url
-	StreamKey *string `json:"stream_key,omitempty"`
-
-	Layout *LayoutSettingsRequest `json:"layout,omitempty"`
+	// List of broadcasts to start
+	Broadcasts []RTMPBroadcastRequest `json:"broadcasts"`
 }
 
 type StartRTMPBroadcastsResponse struct {
@@ -6240,10 +6248,9 @@ type ThreadStateResponse struct {
 
 	CreatedBy *UserResponse `json:"created_by,omitempty"`
 
-	ParentMessage *Message `json:"parent_message,omitempty"`
+	ParentMessage *MessageResponse `json:"parent_message,omitempty"`
 }
 
-// Sets thresholds for AI moderation
 type Thresholds struct {
 	Explicit *LabelThresholds `json:"explicit,omitempty"`
 
@@ -6900,7 +6907,7 @@ type UpdateMessagePartialResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
-	Message *Message `json:"message,omitempty"`
+	Message *MessageResponse `json:"message,omitempty"`
 
 	// Pending message metadata
 	PendingMessageMetadata *map[string]string `json:"pending_message_metadata,omitempty"`
@@ -6917,7 +6924,7 @@ type UpdateMessageResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
-	Message Message `json:"message"`
+	Message MessageResponse `json:"message"`
 
 	PendingMessageMetadata *map[string]string `json:"pending_message_metadata,omitempty"`
 }
@@ -7064,6 +7071,8 @@ type UpsertConfigRequest struct {
 	BodyguardConfig *BodyguardConfig `json:"bodyguard_config,omitempty"`
 
 	GoogleVisionConfig *GoogleVisionConfig `json:"google_vision_config,omitempty"`
+
+	VelocityFilterConfig *VelocityFilterConfig `json:"velocity_filter_config,omitempty"`
 }
 
 type UpsertConfigResponse struct {
@@ -7298,6 +7307,8 @@ type UserSessionStats struct {
 
 	MaxFreezesDurationSeconds int `json:"max_freezes_duration_seconds"`
 
+	MinEventTs int `json:"min_event_ts"`
+
 	PacketLossFraction float64 `json:"packet_loss_fraction"`
 
 	PublisherPacketLossFraction float64 `json:"publisher_packet_loss_fraction"`
@@ -7403,6 +7414,22 @@ type UserStats struct {
 	Info UserInfoResponse `json:"info"`
 
 	Rating *int `json:"rating,omitempty"`
+}
+
+type VelocityFilterConfig struct {
+	Enabled *bool `json:"enabled,omitempty"`
+
+	Rule *[]VelocityFilterConfigRule `json:"rule,omitempty"`
+}
+
+type VelocityFilterConfigRule struct {
+	Action string `json:"action"`
+
+	IpBan *bool `json:"ip_ban,omitempty"`
+
+	ShadowBan *bool `json:"shadow_ban,omitempty"`
+
+	Timeout *Timestamp `json:"timeout,omitempty"`
 }
 
 type VideoQuality struct {

@@ -293,7 +293,7 @@ func (c *VideoClient) ListRecordings(ctx context.Context,
 //
 // Required permissions:
 // - StartBroadcasting
-func (c *VideoClient) StartRTMPBroadcast(ctx context.Context,
+func (c *VideoClient) StartRTMPBroadcasts(ctx context.Context,
 	_type string,
 	id string,
 	request *StartRTMPBroadcastsRequest,
