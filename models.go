@@ -4054,7 +4054,7 @@ type MessageResponse struct {
 
 	Poll *Poll `json:"poll,omitempty"`
 
-	QuotedMessage *MessageResponse `json:"quoted_message,omitempty"`
+	QuotedMessage *Message `json:"quoted_message,omitempty"`
 
 	ReactionGroups *map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
 }
@@ -4138,7 +4138,7 @@ type MessageWithChannelResponse struct {
 
 	Poll *Poll `json:"poll,omitempty"`
 
-	QuotedMessage *MessageResponse `json:"quoted_message,omitempty"`
+	QuotedMessage *Message `json:"quoted_message,omitempty"`
 
 	ReactionGroups *map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
 }
@@ -6248,7 +6248,7 @@ type ThreadStateResponse struct {
 
 	CreatedBy *UserResponse `json:"created_by,omitempty"`
 
-	ParentMessage *MessageResponse `json:"parent_message,omitempty"`
+	ParentMessage *Message `json:"parent_message,omitempty"`
 }
 
 type Thresholds struct {
@@ -6907,7 +6907,7 @@ type UpdateMessagePartialResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
-	Message *MessageResponse `json:"message,omitempty"`
+	Message *Message `json:"message,omitempty"`
 
 	// Pending message metadata
 	PendingMessageMetadata *map[string]string `json:"pending_message_metadata,omitempty"`
@@ -6924,7 +6924,7 @@ type UpdateMessageResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
-	Message MessageResponse `json:"message"`
+	Message Message `json:"message"`
 
 	PendingMessageMetadata *map[string]string `json:"pending_message_metadata,omitempty"`
 }

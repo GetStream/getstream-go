@@ -18,9 +18,7 @@ func NewVideoClient(client *Client) *VideoClient {
 //
 // Required permissions:
 // - ReadCall
-func (c *VideoClient) QueryCallMembers(ctx context.Context,
-	request *QueryCallMembersRequest,
-) (*StreamResponse[QueryCallMembersResponse], error) {
+func (c *VideoClient) QueryCallMembers(ctx context.Context, request *QueryCallMembersRequest) (*StreamResponse[QueryCallMembersResponse], error) {
 	var result QueryCallMembersResponse
 	res, err := MakeRequest[QueryCallMembersRequest, QueryCallMembersResponse](c.client, ctx, "POST", "/api/v2/video/call/members", nil, request, &result, nil)
 	return res, err
@@ -28,9 +26,7 @@ func (c *VideoClient) QueryCallMembers(ctx context.Context,
 
 // Required permissions:
 // - ReadCallStats
-func (c *VideoClient) QueryCallStats(ctx context.Context,
-	request *QueryCallStatsRequest,
-) (*StreamResponse[QueryCallStatsResponse], error) {
+func (c *VideoClient) QueryCallStats(ctx context.Context, request *QueryCallStatsRequest) (*StreamResponse[QueryCallStatsResponse], error) {
 	var result QueryCallStatsResponse
 	res, err := MakeRequest[QueryCallStatsRequest, QueryCallStatsResponse](c.client, ctx, "POST", "/api/v2/video/call/stats", nil, request, &result, nil)
 	return res, err
@@ -38,11 +34,7 @@ func (c *VideoClient) QueryCallStats(ctx context.Context,
 
 // Required permissions:
 // - ReadCall
-func (c *VideoClient) GetCall(ctx context.Context,
-	_type string,
-	id string,
-	request *GetCallRequest,
-) (*StreamResponse[GetCallResponse], error) {
+func (c *VideoClient) GetCall(ctx context.Context, _type string, id string, request *GetCallRequest) (*StreamResponse[GetCallResponse], error) {
 	var result GetCallResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -58,11 +50,7 @@ func (c *VideoClient) GetCall(ctx context.Context,
 //
 // Required permissions:
 // - UpdateCall
-func (c *VideoClient) UpdateCall(ctx context.Context,
-	_type string,
-	id string,
-	request *UpdateCallRequest,
-) (*StreamResponse[UpdateCallResponse], error) {
+func (c *VideoClient) UpdateCall(ctx context.Context, _type string, id string, request *UpdateCallRequest) (*StreamResponse[UpdateCallResponse], error) {
 	var result UpdateCallResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -83,11 +71,7 @@ func (c *VideoClient) UpdateCall(ctx context.Context,
 // - CreateCall
 // - ReadCall
 // - UpdateCallSettings
-func (c *VideoClient) GetOrCreateCall(ctx context.Context,
-	_type string,
-	id string,
-	request *GetOrCreateCallRequest,
-) (*StreamResponse[GetOrCreateCallResponse], error) {
+func (c *VideoClient) GetOrCreateCall(ctx context.Context, _type string, id string, request *GetOrCreateCallRequest) (*StreamResponse[GetOrCreateCallResponse], error) {
 	var result GetOrCreateCallResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -104,11 +88,7 @@ func (c *VideoClient) GetOrCreateCall(ctx context.Context,
 //
 // Required permissions:
 // - BlockUser
-func (c *VideoClient) BlockUser(ctx context.Context,
-	_type string,
-	id string,
-	request *BlockUserRequest,
-) (*StreamResponse[BlockUserResponse], error) {
+func (c *VideoClient) BlockUser(ctx context.Context, _type string, id string, request *BlockUserRequest) (*StreamResponse[BlockUserResponse], error) {
 	var result BlockUserResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -123,11 +103,7 @@ func (c *VideoClient) BlockUser(ctx context.Context,
 //
 // Required permissions:
 // - DeleteCall
-func (c *VideoClient) DeleteCall(ctx context.Context,
-	_type string,
-	id string,
-	request *DeleteCallRequest,
-) (*StreamResponse[DeleteCallResponse], error) {
+func (c *VideoClient) DeleteCall(ctx context.Context, _type string, id string, request *DeleteCallRequest) (*StreamResponse[DeleteCallResponse], error) {
 	var result DeleteCallResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -144,11 +120,7 @@ func (c *VideoClient) DeleteCall(ctx context.Context,
 //
 // Required permissions:
 // - SendEvent
-func (c *VideoClient) SendCallEvent(ctx context.Context,
-	_type string,
-	id string,
-	request *SendCallEventRequest,
-) (*StreamResponse[SendCallEventResponse], error) {
+func (c *VideoClient) SendCallEvent(ctx context.Context, _type string, id string, request *SendCallEventRequest) (*StreamResponse[SendCallEventResponse], error) {
 	var result SendCallEventResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -160,12 +132,7 @@ func (c *VideoClient) SendCallEvent(ctx context.Context,
 
 // Required permissions:
 // - JoinCall
-func (c *VideoClient) CollectUserFeedback(ctx context.Context,
-	_type string,
-	id string,
-	session string,
-	request *CollectUserFeedbackRequest,
-) (*StreamResponse[CollectUserFeedbackResponse], error) {
+func (c *VideoClient) CollectUserFeedback(ctx context.Context, _type string, id string, session string, request *CollectUserFeedbackRequest) (*StreamResponse[CollectUserFeedbackResponse], error) {
 	var result CollectUserFeedbackResponse
 	pathParams := map[string]string{
 		"type":    _type,
@@ -181,11 +148,7 @@ func (c *VideoClient) CollectUserFeedback(ctx context.Context,
 //
 // Required permissions:
 // - UpdateCall
-func (c *VideoClient) GoLive(ctx context.Context,
-	_type string,
-	id string,
-	request *GoLiveRequest,
-) (*StreamResponse[GoLiveResponse], error) {
+func (c *VideoClient) GoLive(ctx context.Context, _type string, id string, request *GoLiveRequest) (*StreamResponse[GoLiveResponse], error) {
 	var result GoLiveResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -200,10 +163,7 @@ func (c *VideoClient) GoLive(ctx context.Context,
 //
 // Required permissions:
 // - EndCall
-func (c *VideoClient) EndCall(ctx context.Context,
-	_type string,
-	id string,
-) (*StreamResponse[EndCallResponse], error) {
+func (c *VideoClient) EndCall(ctx context.Context, _type string, id string) (*StreamResponse[EndCallResponse], error) {
 	var result EndCallResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -222,11 +182,7 @@ func (c *VideoClient) EndCall(ctx context.Context,
 // - RemoveCallMember
 // - UpdateCallMember
 // - UpdateCallMemberRole
-func (c *VideoClient) UpdateCallMembers(ctx context.Context,
-	_type string,
-	id string,
-	request *UpdateCallMembersRequest,
-) (*StreamResponse[UpdateCallMembersResponse], error) {
+func (c *VideoClient) UpdateCallMembers(ctx context.Context, _type string, id string, request *UpdateCallMembersRequest) (*StreamResponse[UpdateCallMembersResponse], error) {
 	var result UpdateCallMembersResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -240,11 +196,7 @@ func (c *VideoClient) UpdateCallMembers(ctx context.Context,
 //
 // Required permissions:
 // - MuteUsers
-func (c *VideoClient) MuteUsers(ctx context.Context,
-	_type string,
-	id string,
-	request *MuteUsersRequest,
-) (*StreamResponse[MuteUsersResponse], error) {
+func (c *VideoClient) MuteUsers(ctx context.Context, _type string, id string, request *MuteUsersRequest) (*StreamResponse[MuteUsersResponse], error) {
 	var result MuteUsersResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -258,11 +210,7 @@ func (c *VideoClient) MuteUsers(ctx context.Context,
 //
 // Required permissions:
 // - PinCallTrack
-func (c *VideoClient) VideoPin(ctx context.Context,
-	_type string,
-	id string,
-	request *PinRequest,
-) (*StreamResponse[PinResponse], error) {
+func (c *VideoClient) VideoPin(ctx context.Context, _type string, id string, request *PinRequest) (*StreamResponse[PinResponse], error) {
 	var result PinResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -276,10 +224,7 @@ func (c *VideoClient) VideoPin(ctx context.Context,
 //
 // Required permissions:
 // - ListRecordings
-func (c *VideoClient) ListRecordings(ctx context.Context,
-	_type string,
-	id string,
-) (*StreamResponse[ListRecordingsResponse], error) {
+func (c *VideoClient) ListRecordings(ctx context.Context, _type string, id string) (*StreamResponse[ListRecordingsResponse], error) {
 	var result ListRecordingsResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -293,11 +238,7 @@ func (c *VideoClient) ListRecordings(ctx context.Context,
 //
 // Required permissions:
 // - StartBroadcasting
-func (c *VideoClient) StartRTMPBroadcasts(ctx context.Context,
-	_type string,
-	id string,
-	request *StartRTMPBroadcastsRequest,
-) (*StreamResponse[StartRTMPBroadcastsResponse], error) {
+func (c *VideoClient) StartRTMPBroadcasts(ctx context.Context, _type string, id string, request *StartRTMPBroadcastsRequest) (*StreamResponse[StartRTMPBroadcastsResponse], error) {
 	var result StartRTMPBroadcastsResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -311,10 +252,7 @@ func (c *VideoClient) StartRTMPBroadcasts(ctx context.Context,
 //
 // Required permissions:
 // - StopBroadcasting
-func (c *VideoClient) StopAllRTMPBroadcasts(ctx context.Context,
-	_type string,
-	id string,
-) (*StreamResponse[StopAllRTMPBroadcastsResponse], error) {
+func (c *VideoClient) StopAllRTMPBroadcasts(ctx context.Context, _type string, id string) (*StreamResponse[StopAllRTMPBroadcastsResponse], error) {
 	var result StopAllRTMPBroadcastsResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -328,12 +266,7 @@ func (c *VideoClient) StopAllRTMPBroadcasts(ctx context.Context,
 //
 // Required permissions:
 // - StopBroadcasting
-func (c *VideoClient) StopRTMPBroadcast(ctx context.Context,
-	_type string,
-	id string,
-	name string,
-	request *StopRTMPBroadcastsRequest,
-) (*StreamResponse[StopRTMPBroadcastsResponse], error) {
+func (c *VideoClient) StopRTMPBroadcast(ctx context.Context, _type string, id string, name string, request *StopRTMPBroadcastsRequest) (*StreamResponse[StopRTMPBroadcastsResponse], error) {
 	var result StopRTMPBroadcastsResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -348,10 +281,7 @@ func (c *VideoClient) StopRTMPBroadcast(ctx context.Context,
 //
 // Required permissions:
 // - StartBroadcasting
-func (c *VideoClient) StartHLSBroadcasting(ctx context.Context,
-	_type string,
-	id string,
-) (*StreamResponse[StartHLSBroadcastingResponse], error) {
+func (c *VideoClient) StartHLSBroadcasting(ctx context.Context, _type string, id string) (*StreamResponse[StartHLSBroadcastingResponse], error) {
 	var result StartHLSBroadcastingResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -368,11 +298,7 @@ func (c *VideoClient) StartHLSBroadcasting(ctx context.Context,
 //
 // Required permissions:
 // - StartRecording
-func (c *VideoClient) StartRecording(ctx context.Context,
-	_type string,
-	id string,
-	request *StartRecordingRequest,
-) (*StreamResponse[StartRecordingResponse], error) {
+func (c *VideoClient) StartRecording(ctx context.Context, _type string, id string, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
 	var result StartRecordingResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -386,11 +312,7 @@ func (c *VideoClient) StartRecording(ctx context.Context,
 //
 // Required permissions:
 // - StartTranscription
-func (c *VideoClient) StartTranscription(ctx context.Context,
-	_type string,
-	id string,
-	request *StartTranscriptionRequest,
-) (*StreamResponse[StartTranscriptionResponse], error) {
+func (c *VideoClient) StartTranscription(ctx context.Context, _type string, id string, request *StartTranscriptionRequest) (*StreamResponse[StartTranscriptionResponse], error) {
 	var result StartTranscriptionResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -402,11 +324,7 @@ func (c *VideoClient) StartTranscription(ctx context.Context,
 
 // Required permissions:
 // - ReadCallStats
-func (c *VideoClient) GetCallStats(ctx context.Context,
-	_type string,
-	id string,
-	session string,
-) (*StreamResponse[GetCallStatsResponse], error) {
+func (c *VideoClient) GetCallStats(ctx context.Context, _type string, id string, session string) (*StreamResponse[GetCallStatsResponse], error) {
 	var result GetCallStatsResponse
 	pathParams := map[string]string{
 		"type":    _type,
@@ -421,10 +339,7 @@ func (c *VideoClient) GetCallStats(ctx context.Context,
 //
 // Required permissions:
 // - StopBroadcasting
-func (c *VideoClient) StopHLSBroadcasting(ctx context.Context,
-	_type string,
-	id string,
-) (*StreamResponse[StopHLSBroadcastingResponse], error) {
+func (c *VideoClient) StopHLSBroadcasting(ctx context.Context, _type string, id string) (*StreamResponse[StopHLSBroadcastingResponse], error) {
 	var result StopHLSBroadcastingResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -439,10 +354,7 @@ func (c *VideoClient) StopHLSBroadcasting(ctx context.Context,
 //
 // Required permissions:
 // - UpdateCall
-func (c *VideoClient) StopLive(ctx context.Context,
-	_type string,
-	id string,
-) (*StreamResponse[StopLiveResponse], error) {
+func (c *VideoClient) StopLive(ctx context.Context, _type string, id string) (*StreamResponse[StopLiveResponse], error) {
 	var result StopLiveResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -459,10 +371,7 @@ func (c *VideoClient) StopLive(ctx context.Context,
 //
 // Required permissions:
 // - StopRecording
-func (c *VideoClient) StopRecording(ctx context.Context,
-	_type string,
-	id string,
-) (*StreamResponse[StopRecordingResponse], error) {
+func (c *VideoClient) StopRecording(ctx context.Context, _type string, id string) (*StreamResponse[StopRecordingResponse], error) {
 	var result StopRecordingResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -479,10 +388,7 @@ func (c *VideoClient) StopRecording(ctx context.Context,
 //
 // Required permissions:
 // - StopTranscription
-func (c *VideoClient) StopTranscription(ctx context.Context,
-	_type string,
-	id string,
-) (*StreamResponse[StopTranscriptionResponse], error) {
+func (c *VideoClient) StopTranscription(ctx context.Context, _type string, id string) (*StreamResponse[StopTranscriptionResponse], error) {
 	var result StopTranscriptionResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -496,10 +402,7 @@ func (c *VideoClient) StopTranscription(ctx context.Context,
 //
 // Required permissions:
 // - ListTranscriptions
-func (c *VideoClient) ListTranscriptions(ctx context.Context,
-	_type string,
-	id string,
-) (*StreamResponse[ListTranscriptionsResponse], error) {
+func (c *VideoClient) ListTranscriptions(ctx context.Context, _type string, id string) (*StreamResponse[ListTranscriptionsResponse], error) {
 	var result ListTranscriptionsResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -516,11 +419,7 @@ func (c *VideoClient) ListTranscriptions(ctx context.Context,
 //
 // Required permissions:
 // - BlockUser
-func (c *VideoClient) UnblockUser(ctx context.Context,
-	_type string,
-	id string,
-	request *UnblockUserRequest,
-) (*StreamResponse[UnblockUserResponse], error) {
+func (c *VideoClient) UnblockUser(ctx context.Context, _type string, id string, request *UnblockUserRequest) (*StreamResponse[UnblockUserResponse], error) {
 	var result UnblockUserResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -534,11 +433,7 @@ func (c *VideoClient) UnblockUser(ctx context.Context,
 //
 // Required permissions:
 // - PinCallTrack
-func (c *VideoClient) VideoUnpin(ctx context.Context,
-	_type string,
-	id string,
-	request *UnpinRequest,
-) (*StreamResponse[UnpinResponse], error) {
+func (c *VideoClient) VideoUnpin(ctx context.Context, _type string, id string, request *UnpinRequest) (*StreamResponse[UnpinResponse], error) {
 	var result UnpinResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -555,11 +450,7 @@ func (c *VideoClient) VideoUnpin(ctx context.Context,
 //
 // Required permissions:
 // - UpdateCallPermissions
-func (c *VideoClient) UpdateUserPermissions(ctx context.Context,
-	_type string,
-	id string,
-	request *UpdateUserPermissionsRequest,
-) (*StreamResponse[UpdateUserPermissionsResponse], error) {
+func (c *VideoClient) UpdateUserPermissions(ctx context.Context, _type string, id string, request *UpdateUserPermissionsRequest) (*StreamResponse[UpdateUserPermissionsResponse], error) {
 	var result UpdateUserPermissionsResponse
 	pathParams := map[string]string{
 		"type": _type,
@@ -573,12 +464,7 @@ func (c *VideoClient) UpdateUserPermissions(ctx context.Context,
 //
 // Required permissions:
 // - DeleteRecording
-func (c *VideoClient) DeleteRecording(ctx context.Context,
-	_type string,
-	id string,
-	session string,
-	filename string,
-) (*StreamResponse[DeleteRecordingResponse], error) {
+func (c *VideoClient) DeleteRecording(ctx context.Context, _type string, id string, session string, filename string) (*StreamResponse[DeleteRecordingResponse], error) {
 	var result DeleteRecordingResponse
 	pathParams := map[string]string{
 		"type":     _type,
@@ -594,12 +480,7 @@ func (c *VideoClient) DeleteRecording(ctx context.Context,
 //
 // Required permissions:
 // - DeleteTranscription
-func (c *VideoClient) DeleteTranscription(ctx context.Context,
-	_type string,
-	id string,
-	session string,
-	filename string,
-) (*StreamResponse[DeleteTranscriptionResponse], error) {
+func (c *VideoClient) DeleteTranscription(ctx context.Context, _type string, id string, session string, filename string) (*StreamResponse[DeleteTranscriptionResponse], error) {
 	var result DeleteTranscriptionResponse
 	pathParams := map[string]string{
 		"type":     _type,
@@ -615,9 +496,7 @@ func (c *VideoClient) DeleteTranscription(ctx context.Context,
 //
 // Required permissions:
 // - ReadCall
-func (c *VideoClient) QueryCalls(ctx context.Context,
-	request *QueryCallsRequest,
-) (*StreamResponse[QueryCallsResponse], error) {
+func (c *VideoClient) QueryCalls(ctx context.Context, request *QueryCallsRequest) (*StreamResponse[QueryCallsResponse], error) {
 	var result QueryCallsResponse
 	res, err := MakeRequest[QueryCallsRequest, QueryCallsResponse](c.client, ctx, "POST", "/api/v2/video/calls", nil, request, &result, nil)
 	return res, err
@@ -629,17 +508,13 @@ func (c *VideoClient) ListCallTypes(ctx context.Context) (*StreamResponse[ListCa
 	return res, err
 }
 
-func (c *VideoClient) CreateCallType(ctx context.Context,
-	request *CreateCallTypeRequest,
-) (*StreamResponse[CreateCallTypeResponse], error) {
+func (c *VideoClient) CreateCallType(ctx context.Context, request *CreateCallTypeRequest) (*StreamResponse[CreateCallTypeResponse], error) {
 	var result CreateCallTypeResponse
 	res, err := MakeRequest[CreateCallTypeRequest, CreateCallTypeResponse](c.client, ctx, "POST", "/api/v2/video/calltypes", nil, request, &result, nil)
 	return res, err
 }
 
-func (c *VideoClient) DeleteCallType(ctx context.Context,
-	name string,
-) (*StreamResponse[Response], error) {
+func (c *VideoClient) DeleteCallType(ctx context.Context, name string) (*StreamResponse[Response], error) {
 	var result Response
 	pathParams := map[string]string{
 		"name": name,
@@ -648,9 +523,7 @@ func (c *VideoClient) DeleteCallType(ctx context.Context,
 	return res, err
 }
 
-func (c *VideoClient) GetCallType(ctx context.Context,
-	name string,
-) (*StreamResponse[GetCallTypeResponse], error) {
+func (c *VideoClient) GetCallType(ctx context.Context, name string) (*StreamResponse[GetCallTypeResponse], error) {
 	var result GetCallTypeResponse
 	pathParams := map[string]string{
 		"name": name,
@@ -659,10 +532,7 @@ func (c *VideoClient) GetCallType(ctx context.Context,
 	return res, err
 }
 
-func (c *VideoClient) UpdateCallType(ctx context.Context,
-	name string,
-	request *UpdateCallTypeRequest,
-) (*StreamResponse[UpdateCallTypeResponse], error) {
+func (c *VideoClient) UpdateCallType(ctx context.Context, name string, request *UpdateCallTypeRequest) (*StreamResponse[UpdateCallTypeResponse], error) {
 	var result UpdateCallTypeResponse
 	pathParams := map[string]string{
 		"name": name,
