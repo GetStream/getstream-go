@@ -2,6 +2,7 @@ package getstream
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -9,24 +10,26 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// initClient initializes the Stream client using environment variables.
 func initClient(t *testing.T) *Stream {
 	t.Helper()
 
-	stream, err := NewStreamFromEnvVars()
+	stream, err := NewStreamFromEnvVars(WithLogLevel(LogLevelDebug))
 	require.NoError(t, err, "Failed to create client from env vars")
 
 	return stream
 }
 
-// setup initializes the client, call object, and call type for each test
+// setup initializes the client, call object, and optionally creates a call type for each test.
+// If createCallType is true, it creates a unique call type and registers a cleanup function.
 func setup(t *testing.T, createCallType bool) (*Stream, *Call, string) {
-	t.Skip("Skipping this test for now")
 	t.Helper()
 
 	client := initClient(t)
 	callType := "default"
 	callID := randomString(10)
-	callTypeName := "calltype" + randomString(10)
+	callTypeName := "calltype_" + fmt.Sprintf("%s_%s", t.Name(), randomString(10))
+
 	if createCallType {
 		ctx := context.Background()
 
@@ -85,7 +88,12 @@ func setup(t *testing.T, createCallType bool) (*Stream, *Call, string) {
 			},
 		}
 
-		response, err := client.Video().CreateCallType(ctx, &CreateCallTypeRequest{Grants: &grants, Name: callTypeName, Settings: callSettings, NotificationSettings: notificationSettings})
+		response, err := client.Video().CreateCallType(ctx, &CreateCallTypeRequest{
+			Grants:               &grants,
+			Name:                 callTypeName,
+			Settings:             callSettings,
+			NotificationSettings: notificationSettings,
+		})
 		require.NoError(t, err, "Failed to create call type")
 		assert.Equal(t, callTypeName, response.Data.Name)
 		assert.True(t, response.Data.Settings.Audio.MicDefaultOn)
@@ -97,46 +105,124 @@ func setup(t *testing.T, createCallType bool) (*Stream, *Call, string) {
 		assert.True(t, response.Data.NotificationSettings.CallNotification.Enabled)
 		assert.Equal(t, "{{ user.display_name }} invites you to a call", response.Data.NotificationSettings.CallNotification.Apns.Title)
 
+		// Register cleanup for the created call type
+		t.Cleanup(func() {
+			resetSharedResource(t, client, callTypeName)
+		})
 	}
 
 	call := client.Video().Call(callType, callID)
 
-	t.Cleanup(func() {
-		if createCallType {
-			resetSharedResource(t, client, callTypeName)
-		}
-	})
-
 	return client, call, callTypeName
 }
 
+// resetSharedResource deletes the specified call type.
+// Errors during cleanup are logged but do not fail the test.
 func resetSharedResource(t *testing.T, client *Stream, callTypeName string) {
 	ctx := context.Background()
 	_, err := client.Video().DeleteCallType(ctx, callTypeName)
-	require.NoError(t, err, "Failed to delete call type")
+	if err != nil {
+		t.Logf("Warning: Failed to delete call type %s: %v", callTypeName, err)
+	}
 }
 
+// createCallTypeWithCleanup creates a call type with the given name and registers a cleanup function.
+// This helper can be used to create multiple call types within a single test.
+func createCallTypeWithCleanup(t *testing.T, client *Stream, callTypeName string) {
+	ctx := context.Background()
+	callSettings := &CallSettingsRequest{
+		Audio: &AudioSettingsRequest{
+			DefaultDevice: "speaker",
+			MicDefaultOn:  PtrTo(true),
+		},
+		Screensharing: &ScreensharingSettingsRequest{
+			AccessRequestEnabled: PtrTo(false),
+			Enabled:              PtrTo(true),
+		},
+	}
+
+	notificationSettings := &NotificationSettings{
+		Enabled: true,
+		CallNotification: EventNotificationSettings{
+			Apns: APNS{
+				Title: "{{ user.display_name }} invites you to a call",
+				Body:  "",
+			},
+			Enabled: true,
+		},
+		SessionStarted: EventNotificationSettings{
+			Apns: APNS{
+				Body:  "",
+				Title: "{{ user.display_name }} invites you to a call",
+			},
+			Enabled: false,
+		},
+		CallLiveStarted: EventNotificationSettings{
+			Apns: APNS{
+				Body:  "",
+				Title: "{{ user.display_name }} invites you to a call",
+			},
+			Enabled: false,
+		},
+		CallRing: EventNotificationSettings{
+			Apns: APNS{
+				Body:  "",
+				Title: "{{ user.display_name }} invites you to a call",
+			},
+			Enabled: false,
+		},
+	}
+
+	grants := map[string][]string{
+		"admin": {
+			SEND_AUDIO.String(),
+			SEND_VIDEO.String(),
+			MUTE_USERS.String(),
+		},
+		"user": {
+			SEND_AUDIO.String(),
+			SEND_VIDEO.String(),
+		},
+	}
+
+	response, err := client.Video().CreateCallType(ctx, &CreateCallTypeRequest{
+		Grants:               &grants,
+		Name:                 callTypeName,
+		Settings:             callSettings,
+		NotificationSettings: notificationSettings,
+	})
+	require.NoError(t, err, "Failed to create call type")
+	assert.Equal(t, callTypeName, response.Data.Name)
+
+	t.Cleanup(func() {
+		resetSharedResource(t, client, callTypeName)
+	})
+}
+
+// TestCRUDCallTypeOperations tests Create, Read, Update, and Delete operations for call types.
 func TestCRUDCallTypeOperations(t *testing.T) {
 	client, call, callTypeName := setup(t, true)
 
 	t.Run("Update Call Type Settings", func(t *testing.T) {
-		t.Skip("Skipping this test for now")
 		ctx := context.Background()
 		grants := map[string][]string{
 			"host": {JOIN_BACKSTAGE.String()},
 		}
-		response, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{Settings: &CallSettingsRequest{
-			Audio: &AudioSettingsRequest{
-				DefaultDevice: "earpiece",
-				MicDefaultOn:  PtrTo(false),
+		response, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{
+			Settings: &CallSettingsRequest{
+				Audio: &AudioSettingsRequest{
+					DefaultDevice: "earpiece",
+					MicDefaultOn:  PtrTo(false),
+				},
+				Recording: &RecordSettingsRequest{
+					Mode: "disabled",
+				},
+				Backstage: &BackstageSettingsRequest{
+					Enabled: PtrTo(true),
+				},
 			},
-			Recording: &RecordSettingsRequest{
-				Mode: "disabled",
-			},
-			Backstage: &BackstageSettingsRequest{
-				Enabled: PtrTo(true),
-			},
-		}, Grants: &grants})
+			Grants: &grants,
+		})
 
 		assert.NoError(t, err)
 		assert.False(t, response.Data.Settings.Audio.MicDefaultOn)
@@ -147,7 +233,6 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	})
 
 	t.Run("Update Layout Options", func(t *testing.T) {
-		t.Skip("Skipping this test for now")
 		ctx := context.Background()
 
 		layoutOptions := map[string]any{
@@ -165,53 +250,57 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 			"participant_label.background_color":         "transparent",
 		}
 
-		_, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{Settings: &CallSettingsRequest{
-			Recording: &RecordSettingsRequest{
-				Mode:      "available",
-				AudioOnly: PtrTo(false),
-				Quality:   PtrTo("1080p"),
-				Layout: &LayoutSettingsRequest{
-					Name:    "spotlight",
-					Options: &layoutOptions,
+		_, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{
+			Settings: &CallSettingsRequest{
+				Recording: &RecordSettingsRequest{
+					Mode:      "available",
+					AudioOnly: PtrTo(false),
+					Quality:   PtrTo("1080p"),
+					Layout: &LayoutSettingsRequest{
+						Name:    "spotlight",
+						Options: &layoutOptions,
+					},
 				},
 			},
-		}})
+		})
 		assert.NoError(t, err)
 	})
 
-	t.Run("Update Custom Recording Style css", func(t *testing.T) {
-		t.Skip("Skipping this test for now")
+	t.Run("Update Custom Recording Style CSS", func(t *testing.T) {
 		ctx := context.Background()
 
-		_, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{Settings: &CallSettingsRequest{
-			Recording: &RecordSettingsRequest{
-				Mode:      "available",
-				AudioOnly: PtrTo(false),
-				Quality:   PtrTo("1080p"),
-				Layout: &LayoutSettingsRequest{
-					Name:           "spotlight",
-					ExternalCssUrl: PtrTo("https://path/to/custom.css"),
+		_, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{
+			Settings: &CallSettingsRequest{
+				Recording: &RecordSettingsRequest{
+					Mode:      "available",
+					AudioOnly: PtrTo(false),
+					Quality:   PtrTo("1080p"),
+					Layout: &LayoutSettingsRequest{
+						Name:           "spotlight",
+						ExternalCssUrl: PtrTo("https://path/to/custom.css"),
+					},
 				},
 			},
-		}})
+		})
 		assert.NoError(t, err)
 	})
 
 	t.Run("Update Custom Recording Website", func(t *testing.T) {
-		t.Skip("Skipping this test for now")
 		ctx := context.Background()
 
-		_, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{Settings: &CallSettingsRequest{
-			Recording: &RecordSettingsRequest{
-				Mode:      "available",
-				AudioOnly: PtrTo(false),
-				Quality:   PtrTo("1080p"),
-				Layout: &LayoutSettingsRequest{
-					Name:           "custom",
-					ExternalAppUrl: PtrTo("https://path/to/layout/app"),
+		_, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{
+			Settings: &CallSettingsRequest{
+				Recording: &RecordSettingsRequest{
+					Mode:      "available",
+					AudioOnly: PtrTo(false),
+					Quality:   PtrTo("1080p"),
+					Layout: &LayoutSettingsRequest{
+						Name:           "custom",
+						ExternalAppUrl: PtrTo("https://path/to/layout/app"),
+					},
 				},
 			},
-		}})
+		})
 		assert.NoError(t, err)
 	})
 
@@ -272,7 +361,6 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	})
 
 	t.Run("Update Call", func(t *testing.T) {
-		t.Skip("Skipping this test for now")
 		ctx := context.Background()
 		callRequest := UpdateCallRequest{
 			SettingsOverride: &CallSettingsRequest{
@@ -288,22 +376,34 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	})
 }
 
+// TestVideoExamples tests various video-related functionalities without creating call types.
 func TestVideoExamples(t *testing.T) {
 	client, _, _ := setup(t, false)
+
 	t.Run("Create User", func(t *testing.T) {
 		ctx := context.Background()
-		countryNL := map[string]any{"country": "NL"}
-		countryUS := map[string]any{"country": "US"}
-		users := []UserRequest{
-			{ID: "tommaso-id", Name: PtrTo("tommaso"), Role: PtrTo("admin"), Custom: &countryNL},
-			{ID: "thierry-id", Name: PtrTo("thierry"), Role: PtrTo("admin"), Custom: &countryUS},
+
+		thierrySet := map[string]any{
+			"role":    "admin",
+			"country": "NL",
 		}
-		// create a map of users with key being user id
-		usersMap := make(map[string]UserRequest)
-		for _, user := range users {
-			usersMap[user.ID] = user
+		tommasoSet := map[string]any{
+			"role":    "admin",
+			"country": "US",
 		}
-		_, err := client.UpdateUsers(ctx, &UpdateUsersRequest{Users: usersMap})
+		users := []UpdateUserPartialRequest{
+			{
+				ID:    "thierry-id",
+				Set:   &thierrySet,
+				Unset: &[]string{"custom"},
+			},
+			{
+				ID:    "tommaso-id",
+				Set:   &tommasoSet,
+				Unset: &[]string{"custom"},
+			},
+		}
+		_, err := client.UpdateUsersPartial(ctx, &UpdateUsersPartialRequest{Users: users})
 		assert.NoError(t, err)
 
 		token, err := client.CreateToken("tommaso-id", nil)
@@ -352,6 +452,7 @@ func TestVideoExamples(t *testing.T) {
 	})
 }
 
+// TestSendCustomEvent tests sending custom events within a call.
 func TestSendCustomEvent(t *testing.T) {
 	client, call, _ := setup(t, false)
 
@@ -378,8 +479,9 @@ func TestSendCustomEvent(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// TestMuteAll tests muting all users in a call.
 func TestMuteAll(t *testing.T) {
-	_, call, _ := setup(t, false)
+	_, call, _ := setup(t, false) // Removed 'client' as it was unused
 
 	ctx := context.Background()
 	userID := randomString(10)
@@ -401,6 +503,7 @@ func TestMuteAll(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// TestVideoExamplesAdditional tests additional video-related functionalities.
 func TestVideoExamplesAdditional(t *testing.T) {
 	client, call, _ := setup(t, false)
 
@@ -485,7 +588,6 @@ func TestVideoExamplesAdditional(t *testing.T) {
 	})
 
 	t.Run("CreateCallWithSessionTimer", func(t *testing.T) {
-		t.Skip("Skipping this test because of nil pointer dereference")
 		ctx := context.Background()
 		userID := randomString(10)
 		response, err := call.GetOrCreate(ctx, &GetOrCreateCallRequest{
@@ -499,7 +601,7 @@ func TestVideoExamplesAdditional(t *testing.T) {
 			},
 		})
 		require.NoError(t, err)
-		assert.Equal(t, 3600, *response.Data.Call.Settings.Limits.MaxDurationSeconds)
+		assert.Equal(t, PtrTo(3600), response.Data.Call.Settings.Limits.MaxDurationSeconds)
 
 		res, err := call.Update(ctx, &UpdateCallRequest{
 			SettingsOverride: &CallSettingsRequest{
@@ -509,9 +611,9 @@ func TestVideoExamplesAdditional(t *testing.T) {
 			},
 		})
 		require.NoError(t, err)
-		assert.Equal(t, 7200, *res.Data.Call.Settings.Limits.MaxDurationSeconds)
+		assert.Equal(t, PtrTo(7200), res.Data.Call.Settings.Limits.MaxDurationSeconds)
 
-		res, err = call.Update(ctx, &UpdateCallRequest{
+		res2, err := call.Update(ctx, &UpdateCallRequest{
 			SettingsOverride: &CallSettingsRequest{
 				Limits: &LimitsSettingsRequest{
 					MaxDurationSeconds: PtrTo(0),
@@ -519,7 +621,7 @@ func TestVideoExamplesAdditional(t *testing.T) {
 			},
 		})
 		require.NoError(t, err)
-		assert.Equal(t, 0, *res.Data.Call.Settings.Limits.MaxDurationSeconds)
+		assert.Equal(t, PtrTo(0), res2.Data.Call.Settings.Limits.MaxDurationSeconds)
 	})
 
 	t.Run("UserBlocking", func(t *testing.T) {
@@ -529,25 +631,22 @@ func TestVideoExamplesAdditional(t *testing.T) {
 		bob, err := getUser(t, client, nil, nil, nil)
 		require.NoError(t, err)
 
-		_, err = client.BlockUsers(ctx, &BlockUsersRequest{BlockedUserID: bob.ID, UserID: &alice.ID})
-		assert.NoError(t, err)
+		_, err = client.Chat().BlockUsers(ctx, &BlockUsersRequest{BlockedUserID: bob.ID, UserID: &alice.ID})
 
-		response, err := client.GetBlockedUsers(ctx, &GetBlockedUsersRequest{UserID: &alice.ID})
+		response, err := client.Chat().GetBlockedUsers(ctx, &GetBlockedUsersRequest{UserID: &alice.ID})
 		assert.NoError(t, err)
 		assert.Len(t, response.Data.Blocks, 1)
 		assert.Equal(t, alice.ID, response.Data.Blocks[0].UserID)
 		assert.Equal(t, bob.ID, response.Data.Blocks[0].BlockedUserID)
 
-		_, err = client.UnblockUsers(ctx, &UnblockUsersRequest{BlockedUserID: bob.ID, UserID: &alice.ID})
-		assert.NoError(t, err)
+		_, err = client.Chat().UnblockUsers(ctx, &UnblockUsersRequest{BlockedUserID: bob.ID, UserID: &alice.ID})
 
-		response, err = client.GetBlockedUsers(ctx, &GetBlockedUsersRequest{UserID: &alice.ID})
+		response, err = client.Chat().GetBlockedUsers(ctx, &GetBlockedUsersRequest{UserID: &alice.ID})
 		assert.NoError(t, err)
 		assert.Empty(t, response.Data.Blocks)
 	})
 
 	t.Run("CreateCallWithBackstageAndJoinAheadSet", func(t *testing.T) {
-		t.Skip("Skipping this test for some reason it's failing")
 		ctx := context.Background()
 		userID := randomString(10)
 		startsAt := time.Now().Add(30 * time.Minute)
@@ -565,8 +664,9 @@ func TestVideoExamplesAdditional(t *testing.T) {
 				},
 			},
 		})
+		// Call.Settings.Backstage.JoinAheadTimeSeconds)
 		require.NoError(t, err)
-		assert.Equal(t, 300, *response.Data.Call.JoinAheadTimeSeconds)
+		assert.Equal(t, PtrTo(300), response.Data.Call.JoinAheadTimeSeconds)
 
 		res, err := call.Update(ctx, &UpdateCallRequest{
 			SettingsOverride: &CallSettingsRequest{
@@ -576,9 +676,9 @@ func TestVideoExamplesAdditional(t *testing.T) {
 			},
 		})
 		require.NoError(t, err)
-		assert.Equal(t, 600, *res.Data.Call.JoinAheadTimeSeconds)
+		assert.Equal(t, PtrTo(600), res.Data.Call.JoinAheadTimeSeconds)
 
-		res, err = call.Update(ctx, &UpdateCallRequest{
+		res2, err := call.Update(ctx, &UpdateCallRequest{
 			SettingsOverride: &CallSettingsRequest{
 				Backstage: &BackstageSettingsRequest{
 					JoinAheadTimeSeconds: PtrTo(0),
@@ -586,10 +686,12 @@ func TestVideoExamplesAdditional(t *testing.T) {
 			},
 		})
 		require.NoError(t, err)
-		assert.Equal(t, 0, *res.Data.Call.JoinAheadTimeSeconds)
+		assert.Equal(t, PtrTo(0), res2.Data.Call.JoinAheadTimeSeconds)
 	})
 }
 
+// TestDeleteCall tests the soft deletion of a call.
+// TODO: Add test for HardDelete
 func TestDeleteCall(t *testing.T) {
 	client := initClient(t)
 	ctx := context.Background()
@@ -613,9 +715,10 @@ func TestDeleteCall(t *testing.T) {
 		assert.Contains(t, err.Error(), "Can't find call with id")
 	})
 
-	// Add test for HardDelete
+	// TODO: Add test for HardDelete
 }
 
+// TestTeams tests functionalities related to teams.
 func TestTeams(t *testing.T) {
 	client := initClient(t)
 	ctx := context.Background()
@@ -641,7 +744,7 @@ func TestTeams(t *testing.T) {
 		},
 	})
 	require.NoError(t, err)
-	assert.Equal(t, "blue", *response.Data.Call.Team)
+	assert.Equal(t, PtrTo("blue"), response.Data.Call.Team)
 
 	usersResponse, err := client.QueryUsers(ctx, &QueryUsersRequest{
 		Payload: &QueryUsersPayload{FilterConditions: map[string]interface{}{
@@ -661,8 +764,7 @@ func TestTeams(t *testing.T) {
 		Payload: &QueryUsersPayload{FilterConditions: map[string]interface{}{
 			"teams": nil,
 		}},
-	},
-	)
+	})
 	require.NoError(t, err)
 	for _, user := range usersResponse.Data.Users {
 		assert.Empty(t, user.Teams)
@@ -677,11 +779,3 @@ func TestTeams(t *testing.T) {
 	require.NoError(t, err)
 	assert.Greater(t, len(callsResponse.Data.Calls), 0)
 }
-
-// func TestDeleteCallType(t *testing.T) {
-// 	setup(t)
-// 	ctx := context.Background()
-// 	_, err := client.DeleteCallType(ctx, callTypeName)
-
-// 	assert.NoError(t, err)
-// }

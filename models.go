@@ -1142,6 +1142,8 @@ type ChannelMember struct {
 	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
 
+	Custom map[string]any `json:"custom"`
+
 	// Expiration date of the ban
 	BanExpires *Timestamp `json:"ban_expires,omitempty"`
 
@@ -1183,6 +1185,8 @@ type ChannelMemberResponse struct {
 
 	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
+
+	Custom map[string]any `json:"custom"`
 
 	// Expiration date of the ban
 	BanExpires *Timestamp `json:"ban_expires,omitempty"`
@@ -1319,7 +1323,7 @@ type ChannelStateResponse struct {
 
 	WatcherCount *int `json:"watcher_count,omitempty"`
 
-	PendingMessages *[]*PendingMessage `json:"pending_messages,omitempty"`
+	PendingMessages *[]*PendingMessageResponse `json:"pending_messages,omitempty"`
 
 	Read *[]ReadStateResponse `json:"read,omitempty"`
 
@@ -1352,7 +1356,7 @@ type ChannelStateResponseFields struct {
 	WatcherCount *int `json:"watcher_count,omitempty"`
 
 	// Pending messages that this user has sent
-	PendingMessages *[]*PendingMessage `json:"pending_messages,omitempty"`
+	PendingMessages *[]*PendingMessageResponse `json:"pending_messages,omitempty"`
 
 	// List of read states
 	Read *[]ReadStateResponse `json:"read,omitempty"`
@@ -2101,7 +2105,9 @@ type DeactivateUsersResponse struct {
 	TaskID string `json:"task_id"`
 }
 
-type DeleteActivityRequest struct{}
+type DeleteActivityRequest struct {
+	HardDelete *bool `json:"hard_delete,omitempty"`
+}
 
 type DeleteCallRequest struct {
 	// if true the call will be hard deleted along with all related data
@@ -4397,15 +4403,14 @@ type PaginationParams struct {
 	Offset *int `json:"offset,omitempty"`
 }
 
-type PendingMessage struct {
-	Channel *Channel `json:"channel,omitempty"`
+type PendingMessageResponse struct {
+	Channel *ChannelResponse `json:"channel,omitempty"`
 
-	Message *Message `json:"message,omitempty"`
+	Message *MessageResponse `json:"message,omitempty"`
 
-	// Additional data attached to the pending message. This data is discarded once the pending message is committed.
 	Metadata *map[string]string `json:"metadata,omitempty"`
 
-	User *UserObject `json:"user,omitempty"`
+	User *UserResponse `json:"user,omitempty"`
 }
 
 type Permission struct {
@@ -6037,6 +6042,8 @@ type SubmitActionRequest struct {
 
 	Custom *CustomActionRequest `json:"custom,omitempty"`
 
+	DeleteActivity *DeleteActivityRequest `json:"delete_activity,omitempty"`
+
 	DeleteMessage *DeleteMessageRequest `json:"delete_message,omitempty"`
 
 	DeleteReaction *DeleteReactionRequest `json:"delete_reaction,omitempty"`
@@ -6219,7 +6226,7 @@ type ThreadStateResponse struct {
 	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
 
-	LatestReplies []*Message `json:"latest_replies"`
+	LatestReplies []MessageResponse `json:"latest_replies"`
 
 	// Custom data for this object
 	Custom map[string]any `json:"custom"`
@@ -6337,7 +6344,7 @@ type TruncateChannelResponse struct {
 
 	Channel *ChannelResponse `json:"channel,omitempty"`
 
-	Message *Message `json:"message,omitempty"`
+	Message *MessageResponse `json:"message,omitempty"`
 }
 
 type TypingIndicators struct {
@@ -6658,7 +6665,7 @@ type UpdateChannelPartialResponse struct {
 	Duration string `json:"duration"`
 
 	// List of updated members
-	Members []*ChannelMemberResponse `json:"members"`
+	Members []ChannelMemberResponse `json:"members"`
 
 	Channel *ChannelResponse `json:"channel,omitempty"`
 }
@@ -6886,6 +6893,19 @@ type UpdateExternalStorageResponse struct {
 	Path string `json:"path"`
 
 	Type string `json:"type"`
+}
+
+type UpdateMemberPartialRequest struct {
+	Unset *[]string `json:"unset,omitempty"`
+
+	Set *map[string]any `json:"set,omitempty"`
+}
+
+type UpdateMemberPartialResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	ChannelMember *ChannelMemberResponse `json:"channel_member,omitempty"`
 }
 
 type UpdateMessagePartialRequest struct {

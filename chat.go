@@ -219,6 +219,17 @@ func (c *ChatClient) UploadImage(ctx context.Context, _type string, id string, r
 	return res, err
 }
 
+func (c *ChatClient) UpdateMemberPartial(ctx context.Context, userId string, _type string, id string, request *UpdateMemberPartialRequest) (*StreamResponse[UpdateMemberPartialResponse], error) {
+	var result UpdateMemberPartialResponse
+	pathParams := map[string]string{
+		"user_id": userId,
+		"type":    _type,
+		"id":      id,
+	}
+	res, err := MakeRequest[UpdateMemberPartialRequest, UpdateMemberPartialResponse](c.client, ctx, "PATCH", "/api/v2/chat/channels/{type}/{id}/member/{user_id}", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Sends new message to the specified channel
 //
 // Sends events:
@@ -888,17 +899,6 @@ func (c *ChatClient) QueryPollVotes(ctx context.Context, pollId string, request 
 	return res, err
 }
 
-// Find and filter channel scoped or global user bans
-//
-// Required permissions:
-// - ReadChannel
-func (c *ChatClient) QueryBannedUsers(ctx context.Context, request *QueryBannedUsersRequest) (*StreamResponse[QueryBannedUsersResponse], error) {
-	var result QueryBannedUsersResponse
-	params := extractQueryParams(request)
-	res, err := MakeRequest[any, QueryBannedUsersResponse](c.client, ctx, "GET", "/api/v2/chat/query_banned_users", params, nil, &result, nil)
-	return res, err
-}
-
 // Search messages across channels
 //
 // Required permissions:
@@ -962,6 +962,28 @@ func (c *ChatClient) UnreadCounts(ctx context.Context) (*StreamResponse[WrappedU
 func (c *ChatClient) UnreadCountsBatch(ctx context.Context, request *UnreadCountsBatchRequest) (*StreamResponse[UnreadCountsBatchResponse], error) {
 	var result UnreadCountsBatchResponse
 	res, err := MakeRequest[UnreadCountsBatchRequest, UnreadCountsBatchResponse](c.client, ctx, "POST", "/api/v2/chat/unread_batch", nil, request, &result, nil)
+	return res, err
+}
+
+// Get list of blocked Users
+func (c *ChatClient) GetBlockedUsers(ctx context.Context, request *GetBlockedUsersRequest) (*StreamResponse[GetBlockedUsersResponse], error) {
+	var result GetBlockedUsersResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetBlockedUsersResponse](c.client, ctx, "GET", "/api/v2/chat/users/block", params, nil, &result, nil)
+	return res, err
+}
+
+// Block users
+func (c *ChatClient) BlockUsers(ctx context.Context, request *BlockUsersRequest) (*StreamResponse[BlockUsersResponse], error) {
+	var result BlockUsersResponse
+	res, err := MakeRequest[BlockUsersRequest, BlockUsersResponse](c.client, ctx, "POST", "/api/v2/chat/users/block", nil, request, &result, nil)
+	return res, err
+}
+
+// Unblock users
+func (c *ChatClient) UnblockUsers(ctx context.Context, request *UnblockUsersRequest) (*StreamResponse[UnblockUsersResponse], error) {
+	var result UnblockUsersResponse
+	res, err := MakeRequest[UnblockUsersRequest, UnblockUsersResponse](c.client, ctx, "POST", "/api/v2/chat/users/unblock", nil, request, &result, nil)
 	return res, err
 }
 

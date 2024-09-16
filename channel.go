@@ -52,6 +52,10 @@ func (c *Channels) UploadImage(ctx context.Context, request *ImageUploadRequest)
 	return c.client.UploadImage(ctx, c.channelType, c.channelD, request)
 }
 
+func (c *Channels) UpdateMemberPartial(ctx context.Context, userId string, request *UpdateMemberPartialRequest) (*StreamResponse[UpdateMemberPartialResponse], error) {
+	return c.client.UpdateMemberPartial(ctx, c.channelType, c.channelD, userId, request)
+}
+
 func (c *Channels) SendMessage(ctx context.Context, request *SendMessageRequest) (*StreamResponse[SendMessageResponse], error) {
 	return c.client.SendMessage(ctx, c.channelType, c.channelD, request)
 }

@@ -27,7 +27,7 @@ func New(apiKey, apiSecret string, options ...ClientOption) *Stream {
 }
 
 func (s *Stream) CreateToken(userID string, claims *StreamJWTClaims) (string, error) {
-	return s.CreateToken(userID, claims)
+	return s.CreateTokenWithClaims(userID, claims)
 }
 
 // Chat
