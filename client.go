@@ -30,9 +30,27 @@ type Client struct {
 	apiKey    string
 	apiSecret []byte
 	authToken string
+	logger    *Logger
 }
 
 type ClientOption func(c *Client)
+
+// WithLogger sets a custom logger for the client
+func WithLogger(l *Logger) ClientOption {
+	return func(c *Client) {
+		c.logger = l
+	}
+}
+
+// WithLogLevel sets the log level for the default logger
+func WithLogLevel(level LogLevel) ClientOption {
+	return func(c *Client) {
+		if c.logger == nil {
+			c.logger = DefaultLogger
+		}
+		c.logger.SetLevel(level)
+	}
+}
 
 // WithBaseUrl sets the base URL for the client.
 func WithBaseUrl(baseURL string) ClientOption {
@@ -84,6 +102,7 @@ func NewClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 			Timeout:   timeout,
 			Transport: tr,
 		},
+		logger: DefaultLogger,
 	}
 
 	for _, fn := range options {
@@ -108,7 +127,7 @@ type StreamJWTClaims struct {
 	Role        string
 }
 
-func (c *Client) CreateToken(userID string, claims *StreamJWTClaims) (string, error) {
+func (c *Client) CreateTokenWithClaims(userID string, claims *StreamJWTClaims) (string, error) {
 	if userID == "" {
 		return "", errors.New("user ID is empty")
 	}

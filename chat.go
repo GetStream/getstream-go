@@ -219,6 +219,17 @@ func (c *ChatClient) UploadImage(ctx context.Context, _type string, id string, r
 	return res, err
 }
 
+func (c *ChatClient) UpdateMemberPartial(ctx context.Context, userId string, _type string, id string, request *UpdateMemberPartialRequest) (*StreamResponse[UpdateMemberPartialResponse], error) {
+	var result UpdateMemberPartialResponse
+	pathParams := map[string]string{
+		"user_id": userId,
+		"type":    _type,
+		"id":      id,
+	}
+	res, err := MakeRequest[UpdateMemberPartialRequest, UpdateMemberPartialResponse](c.client, ctx, "PATCH", "/api/v2/chat/channels/{type}/{id}/member/{user_id}", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Sends new message to the specified channel
 //
 // Sends events:

@@ -1,8 +1,12 @@
 package getstream
 
 import (
+	"context"
+	"io"
+	"net/http"
 	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -77,4 +81,250 @@ func TestExtractQueryParams(t *testing.T) {
 			t.Errorf("extractQueryParams(nil) = %v, want empty url.Values", result)
 		}
 	})
+}
+
+func TestRequestURL(t *testing.T) {
+	originalBaseURL := "https://api.example.com"
+	mockLogger := DefaultLogger
+	client := &Client{
+		BaseURL: originalBaseURL,
+		apiKey:  "testkey",
+		logger:  mockLogger,
+	}
+
+	t.Run("Valid_URL_without_path_parameters", func(t *testing.T) {
+		path := "/v1/resources"
+		values := url.Values{
+			"param1": {"value1"},
+			"param2": {"value2"},
+		}
+
+		expectedURL := "https://api.example.com/v1/resources?api_key=testkey&param1=value1&param2=value2"
+
+		got, err := client.requestURL(path, values, nil)
+		if err != nil {
+			t.Fatalf("requestURL returned error: %v", err)
+		}
+
+		if got != expectedURL {
+			t.Errorf("requestURL() = %q, want %q", got, expectedURL)
+		}
+	})
+
+	t.Run("Valid_URL_with_path_parameters", func(t *testing.T) {
+		path := "/v1/resources/{id}"
+		pathParams := map[string]string{
+			"id": "123",
+		}
+		values := url.Values{}
+
+		expectedURL := "https://api.example.com/v1/resources/123?api_key=testkey"
+
+		got, err := client.requestURL(path, values, pathParams)
+		if err != nil {
+			t.Fatalf("requestURL returned error: %v", err)
+		}
+
+		if got != expectedURL {
+			t.Errorf("requestURL() = %q, want %q", got, expectedURL)
+		}
+	})
+
+	t.Run("Invalid_BaseURL", func(t *testing.T) {
+		invalidBaseURL := "://invalid-url"
+		client.BaseURL = invalidBaseURL
+
+		_, err := client.requestURL("/path", nil, nil)
+		if err == nil {
+			t.Fatalf("Expected error due to invalid BaseURL, got nil")
+		}
+	})
+
+	t.Run("URL_encoding_in_query_parameters", func(t *testing.T) {
+		// Reset BaseURL to valid value before this subtest
+		client.BaseURL = originalBaseURL
+
+		path := "/v1/search"
+		values := url.Values{
+			"query": {"special chars &/?"},
+		}
+
+		expectedURL := "https://api.example.com/v1/search?api_key=testkey&query=special+chars+%26%2F%3F"
+
+		got, err := client.requestURL(path, values, nil)
+		if err != nil {
+			t.Fatalf("requestURL returned error: %v", err)
+		}
+
+		if got != expectedURL {
+			t.Errorf("requestURL() = %q, want %q", got, expectedURL)
+		}
+	})
+}
+
+func TestNewRequest(t *testing.T) {
+	mockLogger := DefaultLogger
+	client := &Client{
+		BaseURL:   "https://api.example.com", // Set BaseURL
+		apiKey:    "testkey",
+		authToken: "Bearer testtoken",
+		logger:    mockLogger,
+	}
+
+	ctx := context.Background()
+
+	t.Run("GET request without body", func(t *testing.T) {
+		method := http.MethodGet
+		path := "/v1/resources"
+		params := url.Values{
+			"param": {"value"},
+		}
+		var data interface{}
+		pathParams := map[string]string{}
+
+		req, err := newRequest(client, ctx, method, path, params, data, pathParams)
+		if err != nil {
+			t.Fatalf("newRequest returned error: %v", err)
+		}
+
+		expectedURL := "https://api.example.com/v1/resources?api_key=testkey&param=value"
+		if req.URL.String() != expectedURL {
+			t.Errorf("Expected URL %s, got %s", expectedURL, req.URL.String())
+		}
+
+		if req.Method != method {
+			t.Errorf("Expected method %s, got %s", method, req.Method)
+		}
+
+		if req.Body != nil {
+			t.Errorf("Expected no body for GET request, got %v", req.Body)
+		}
+
+		if req.Header.Get("Content-Type") != "application/json" {
+			t.Errorf("Expected Content-Type 'application/json', got %s", req.Header.Get("Content-Type"))
+		}
+
+		if req.Header.Get("Authorization") != "Bearer testtoken" {
+			t.Errorf("Expected Authorization 'Bearer testtoken', got %s", req.Header.Get("Authorization"))
+		}
+	})
+
+	t.Run("POST request with JSON body", func(t *testing.T) {
+		method := http.MethodPost
+		path := "/v1/resources"
+		params := url.Values{}
+		data := map[string]interface{}{
+			"field1": "value1",
+			"field2": 2,
+		}
+		pathParams := map[string]string{}
+
+		req, err := newRequest(client, ctx, method, path, params, data, pathParams)
+		if err != nil {
+			t.Fatalf("newRequest returned error: %v", err)
+		}
+
+		expectedURL := "https://api.example.com/v1/resources?api_key=testkey"
+		if req.URL.String() != expectedURL {
+			t.Errorf("Expected URL %s, got %s", expectedURL, req.URL.String())
+		}
+
+		if req.Method != method {
+			t.Errorf("Expected method %s, got %s", method, req.Method)
+		}
+
+		body, err := io.ReadAll(req.Body)
+		if err != nil {
+			t.Fatalf("Failed to read request body: %v", err)
+		}
+
+		expectedBody := `{"field1":"value1","field2":2}`
+		if string(body) != expectedBody {
+			t.Errorf("Expected body %s, got %s", expectedBody, string(body))
+		}
+
+		if req.Header.Get("Content-Type") != "application/json" {
+			t.Errorf("Expected Content-Type 'application/json', got %s", req.Header.Get("Content-Type"))
+		}
+	})
+
+	t.Run("PUT request with io.Reader body", func(t *testing.T) {
+		method := http.MethodPut
+		path := "/v1/resources/{id}"
+		params := url.Values{}
+		bodyContent := "raw body data"
+		data := strings.NewReader(bodyContent)
+		pathParams := map[string]string{
+			"id": "123",
+		}
+
+		req, err := newRequest(client, ctx, method, path, params, data, pathParams)
+		if err != nil {
+			t.Fatalf("newRequest returned error: %v", err)
+		}
+
+		expectedURL := "https://api.example.com/v1/resources/123?api_key=testkey"
+		if req.URL.String() != expectedURL {
+			t.Errorf("Expected URL %s, got %s", expectedURL, req.URL.String())
+		}
+
+		if req.Method != method {
+			t.Errorf("Expected method %s, got %s", method, req.Method)
+		}
+
+		body, err := io.ReadAll(req.Body)
+		if err != nil {
+			t.Fatalf("Failed to read request body: %v", err)
+		}
+
+		if string(body) != bodyContent {
+			t.Errorf("Expected body %s, got %s", bodyContent, string(body))
+		}
+	})
+
+	t.Run("Unsupported data type", func(t *testing.T) {
+		method := http.MethodPost
+		path := "/v1/resources"
+		params := url.Values{}
+		data := make(chan int) // Unsupported type
+		pathParams := map[string]string{}
+
+		_, err := newRequest(client, ctx, method, path, params, data, pathParams)
+		if err == nil {
+			t.Fatalf("Expected error due to unsupported data type, got nil")
+		}
+
+		// Optionally, check the error message
+		if !strings.Contains(err.Error(), "unsupported type") {
+			t.Errorf("Expected error message to contain 'unsupported type', got %v", err)
+		}
+	})
+}
+
+func TestSetHeaders(t *testing.T) {
+	client := &Client{
+		authToken: "Bearer testtoken",
+		logger:    DefaultLogger,
+	}
+
+	req, err := http.NewRequest("GET", "https://api.example.com", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	client.setHeaders(req)
+
+	expectedHeaders := map[string]string{
+		"Content-Type":     "application/json",
+		"X-Stream-Client":  versionHeader(),
+		"Authorization":    "Bearer testtoken",
+		"Stream-Auth-Type": "jwt",
+	}
+
+	for key, expected := range expectedHeaders {
+		got := req.Header.Get(key)
+		if got != expected {
+			t.Errorf("Header %s = %s, want %s", key, got, expected)
+		}
+	}
 }

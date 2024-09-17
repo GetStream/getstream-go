@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,10 +11,36 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 )
 
+// logRequest logs the details of an HTTP request
+func (c *Client) logRequest(req *http.Request) {
+	c.logger.Debug("---> %s %s", req.Method, req.URL.String())
+	c.logger.Debug("Host: %s", req.Host)
+	for key, values := range req.Header {
+		c.logger.Debug("%s: %s", key, strings.Join(values, ", "))
+	}
+	if req.Body != nil {
+		var buf bytes.Buffer
+		body, _ := io.ReadAll(req.Body)
+		buf.Write(body)
+		req.Body = io.NopCloser(&buf)
+		c.logger.Debug("\n%s", string(body))
+	}
+}
+
+// logResponse logs the details of an HTTP response
+func (c *Client) logResponse(resp *http.Response, body []byte, duration time.Duration) {
+	c.logger.Debug("<--- %d %s (%s)", resp.StatusCode, http.StatusText(resp.StatusCode), duration)
+	for key, values := range resp.Header {
+		c.logger.Debug("%s: %s", key, strings.Join(values, ", "))
+	}
+	c.logger.Debug("\n%s", string(body))
+}
+
 // Error represents an API error
-type Error struct {
+type StreamError struct {
 	Code            int               `json:"code"`
 	Message         string            `json:"message"`
 	ExceptionFields map[string]string `json:"exception_fields,omitempty"`
@@ -25,7 +50,7 @@ type Error struct {
 	RateLimit       *RateLimitInfo    `json:"-"`
 }
 
-func (e Error) Error() string {
+func (e StreamError) Error() string {
 	return e.Message
 }
 
@@ -36,22 +61,15 @@ type StreamResponse[T any] struct {
 }
 
 // parseResponse parses the HTTP response into the provided result
-func parseResponse[GResponse any](resp *http.Response, result *GResponse) (*StreamResponse[GResponse], error) {
-	if resp.Body == nil {
-		return nil, errors.New("http body is nil")
-	}
-	defer resp.Body.Close()
-
-	b, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read HTTP response: %w", err)
-	}
-
-	if resp.StatusCode >= 399 {
-		var apiErr Error
-		err := json.Unmarshal(b, &apiErr)
+func parseResponse[GResponse any](c *Client, resp *http.Response, body []byte, result *GResponse) (*StreamResponse[GResponse], error) {
+	statusCode := resp.StatusCode
+	c.logger.Debug("Status Code: %d", statusCode)
+	// If status code indicates an error
+	if statusCode >= 399 {
+		var apiErr StreamError
+		err := json.Unmarshal(body, &apiErr)
 		if err != nil {
-			apiErr.Message = string(b)
+			apiErr.Message = string(body)
 			apiErr.StatusCode = resp.StatusCode
 			return nil, apiErr
 		}
@@ -59,12 +77,13 @@ func parseResponse[GResponse any](resp *http.Response, result *GResponse) (*Stre
 		return nil, apiErr
 	}
 
-	// unmarshal result
-	err = json.Unmarshal(b, result)
+	// Attempt to unmarshal the response into the result
+	err := json.Unmarshal(body, result)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal HTTP response: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
 
+	// Add rate limit info to the result
 	return addRateLimitInfo(resp.Header, result)
 }
 
@@ -82,9 +101,11 @@ func (c *Client) requestURL(path string, values url.Values, pathParams map[strin
 	}
 
 	values.Add("api_key", c.apiKey)
+	c.logger.Debug("Query parameters: %v", values)
 	u.RawQuery = values.Encode()
-
-	return u.String(), nil
+	url := u.String()
+	c.logger.Debug("Full URL: %s", url)
+	return url, nil
 }
 
 // buildPath constructs a URL path with parameters, escaping them appropriately.
@@ -120,22 +141,42 @@ func newRequest[T any](c *Client, ctx context.Context, method, path string, para
 
 	c.setHeaders(r)
 
+	// Do not set body if the method is GET
+	if method == http.MethodGet {
+		r.Body = nil
+		c.logger.Debug("GET request: No body set")
+		return r, nil
+	}
+
+	// Handle other methods with body
+	c.logger.Debug("Method: %s, Data: %#v (Type: %T)", method, data, data)
 	switch t := any(data).(type) {
 	case nil:
+		c.logger.Debug("Data is nil")
 		r.Body = nil
 	case io.ReadCloser:
+		c.logger.Debug("Data is io.ReadCloser")
 		r.Body = t
 	case io.Reader:
+		c.logger.Debug("Data is io.Reader")
 		r.Body = io.NopCloser(t)
 	default:
+		c.logger.Debug("Data is of type %T, attempting to marshal to JSON", t)
 		b, err := json.Marshal(data)
 		if err != nil {
+			c.logger.Error("Error marshaling data: %v", err)
 			return nil, err
 		}
 		r.Body = io.NopCloser(bytes.NewReader(b))
+		c.logger.Debug("Request body set with JSON: %s", string(b))
 	}
 
 	return r, nil
+}
+
+// isNil checks if a generic value is nil using reflection
+func isNil(v interface{}) bool {
+	return v == nil || (reflect.ValueOf(v).Kind() == reflect.Ptr && reflect.ValueOf(v).IsNil())
 }
 
 // setHeaders sets necessary headers for the request
@@ -241,6 +282,9 @@ func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, me
 		return nil, err
 	}
 
+	c.logRequest(r)
+
+	start := time.Now()
 	resp, err := c.HTTP.Do(r)
 	if err != nil {
 		select {
@@ -250,8 +294,17 @@ func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, me
 		}
 		return nil, err
 	}
+	defer resp.Body.Close()
 
-	return parseResponse(resp, response)
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read HTTP response: %w", err)
+	}
+
+	duration := time.Since(start)
+	c.logResponse(resp, b, duration)
+
+	return parseResponse(c, resp, b, response)
 }
 
 // TODO: revisit this
