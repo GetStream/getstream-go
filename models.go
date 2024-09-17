@@ -2699,6 +2699,8 @@ type FullUserResponse struct {
 
 	UnreadChannels int `json:"unread_channels"`
 
+	UnreadCount int `json:"unread_count"`
+
 	UnreadThreads int `json:"unread_threads"`
 
 	UpdatedAt Timestamp `json:"updated_at"`
@@ -3882,6 +3884,8 @@ type MessageFlagResponse struct {
 }
 
 type MessageHistoryEntryResponse struct {
+	IsDeleted bool `json:"is_deleted"`
+
 	MessageID string `json:"message_id"`
 
 	MessageUpdatedAt Timestamp `json:"message_updated_at"`
