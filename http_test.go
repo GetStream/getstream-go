@@ -307,7 +307,7 @@ func TestSetHeaders(t *testing.T) {
 		logger:    DefaultLogger,
 	}
 
-	req, err := http.NewRequest("GET", "https://api.example.com", nil)
+	req, err := http.NewRequest(http.MethodGet, "https://api.example.com", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}

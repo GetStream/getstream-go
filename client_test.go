@@ -143,7 +143,7 @@ func setup(t *testing.T, rm *ResourceManager, createCallType bool) (*Stream, *Ca
 
 	// Register cleanup for the created call
 	rm.RegisterCleanup(func() {
-		resetCallResource(t, client, call)
+		resetCallResource(t, call)
 	})
 
 	return client, call, callTypeName
@@ -159,7 +159,7 @@ func resetSharedResource(t *testing.T, client *Stream, callTypeName string) {
 }
 
 // resetCallResource deletes the specified call.
-func resetCallResource(t *testing.T, client *Stream, call *Call) {
+func resetCallResource(t *testing.T, call *Call) {
 	ctx := context.Background()
 	_, err := call.Delete(ctx, &DeleteCallRequest{})
 	if err != nil {
@@ -636,7 +636,6 @@ func TestVideoExamplesAdditional(t *testing.T) {
 	})
 
 	t.Run("UserBlocking", func(t *testing.T) {
-		//skip
 		t.Skip()
 		ctx := context.Background()
 		alice, err := getUser(t, client, nil, nil, nil)
@@ -703,7 +702,6 @@ func TestVideoExamplesAdditional(t *testing.T) {
 }
 
 // TestDeleteCall tests the soft deletion of a call.
-// TODO: Add test for HardDelete
 func TestDeleteCall(t *testing.T) {
 	client := initClient(t)
 	ctx := context.Background()
@@ -726,8 +724,6 @@ func TestDeleteCall(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "Can't find call with id")
 	})
-
-	// TODO: Add test for HardDelete
 }
 
 // TestTeams tests functionalities related to teams.
