@@ -14,6 +14,21 @@ func PtrTo[T any](v T) *T {
 	return &v
 }
 
+// ResourceManager manages resource cleanup for tests.
+type ResourceManager struct {
+	t *testing.T
+}
+
+// NewResourceManager initializes a new ResourceManager.
+func NewResourceManager(t *testing.T) *ResourceManager {
+	return &ResourceManager{t: t}
+}
+
+// RegisterCleanup registers a cleanup function to be called when the test finishes.
+func (rm *ResourceManager) RegisterCleanup(cleanup func()) {
+	rm.t.Cleanup(cleanup)
+}
+
 func randomString(n int) string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	bytes := make([]byte, n)

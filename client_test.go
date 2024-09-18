@@ -3,12 +3,40 @@ package getstream
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+// func cleanupAllExternalStorages(t *testing.T, client *Stream) {
+//     t.Helper()
+//     ctx := context.Background()
+
+//     // List all external storages
+//     response, err := client.ListExternalStorage(ctx)
+//     if err != nil {
+//         t.Logf("Warning: Failed to list external storages: %v", err)
+//         return
+//     }
+
+//     // Delete each external storage
+//     for _, storage := range response.Data.ExternalStorages {
+//         _, err := client.DeleteExternalStorage(ctx, storage.Name)
+//         if err != nil {
+//             t.Logf("Warning: Failed to delete external storage %s: %v", storage.Name, err)
+//         } else {
+//             t.Logf("Successfully deleted external storage: %s", storage.Name)
+//         }
+//     }
+// }
+
+// func TestCleanupAllExternalStorages(t *testing.T) {
+//     client := initClient(t)
+//     cleanupAllExternalStorages(t, client)
+// }
 
 // initClient initializes the Stream client using environment variables.
 func initClient(t *testing.T) *Stream {
@@ -22,7 +50,7 @@ func initClient(t *testing.T) *Stream {
 
 // setup initializes the client, call object, and optionally creates a call type for each test.
 // If createCallType is true, it creates a unique call type and registers a cleanup function.
-func setup(t *testing.T, createCallType bool) (*Stream, *Call, string) {
+func setup(t *testing.T, rm *ResourceManager, createCallType bool) (*Stream, *Call, string) {
 	t.Helper()
 
 	client := initClient(t)
@@ -106,18 +134,22 @@ func setup(t *testing.T, createCallType bool) (*Stream, *Call, string) {
 		assert.Equal(t, "{{ user.display_name }} invites you to a call", response.Data.NotificationSettings.CallNotification.Apns.Title)
 
 		// Register cleanup for the created call type
-		t.Cleanup(func() {
+		rm.RegisterCleanup(func() {
 			resetSharedResource(t, client, callTypeName)
 		})
 	}
 
 	call := client.Video().Call(callType, callID)
 
+	// Register cleanup for the created call
+	rm.RegisterCleanup(func() {
+		resetCallResource(t, client, call)
+	})
+
 	return client, call, callTypeName
 }
 
 // resetSharedResource deletes the specified call type.
-// Errors during cleanup are logged but do not fail the test.
 func resetSharedResource(t *testing.T, client *Stream, callTypeName string) {
 	ctx := context.Background()
 	_, err := client.Video().DeleteCallType(ctx, callTypeName)
@@ -126,82 +158,57 @@ func resetSharedResource(t *testing.T, client *Stream, callTypeName string) {
 	}
 }
 
-// createCallTypeWithCleanup creates a call type with the given name and registers a cleanup function.
-// This helper can be used to create multiple call types within a single test.
-func createCallTypeWithCleanup(t *testing.T, client *Stream, callTypeName string) {
+// resetCallResource deletes the specified call.
+func resetCallResource(t *testing.T, client *Stream, call *Call) {
 	ctx := context.Background()
-	callSettings := &CallSettingsRequest{
-		Audio: &AudioSettingsRequest{
-			DefaultDevice: "speaker",
-			MicDefaultOn:  PtrTo(true),
-		},
-		Screensharing: &ScreensharingSettingsRequest{
-			AccessRequestEnabled: PtrTo(false),
-			Enabled:              PtrTo(true),
-		},
+	_, err := call.Delete(ctx, &DeleteCallRequest{})
+	if err != nil {
+		// Check if the error is due to the call not being found
+		if !strings.Contains(err.Error(), "Can't find call with id") {
+			t.Logf("Warning: Failed to delete call: %v", err)
+		}
 	}
+}
 
-	notificationSettings := &NotificationSettings{
-		Enabled: true,
-		CallNotification: EventNotificationSettings{
-			Apns: APNS{
-				Title: "{{ user.display_name }} invites you to a call",
-				Body:  "",
-			},
-			Enabled: true,
-		},
-		SessionStarted: EventNotificationSettings{
-			Apns: APNS{
-				Body:  "",
-				Title: "{{ user.display_name }} invites you to a call",
-			},
-			Enabled: false,
-		},
-		CallLiveStarted: EventNotificationSettings{
-			Apns: APNS{
-				Body:  "",
-				Title: "{{ user.display_name }} invites you to a call",
-			},
-			Enabled: false,
-		},
-		CallRing: EventNotificationSettings{
-			Apns: APNS{
-				Body:  "",
-				Title: "{{ user.display_name }} invites you to a call",
-			},
-			Enabled: false,
-		},
-	}
+// createExternalStorageWithCleanup creates an external storage and registers its cleanup.
+func createExternalStorageWithCleanup(t *testing.T, rm *ResourceManager, client *Stream, storageName string) {
+	ctx := context.Background()
+	path := "test-directory/"
+	s3apiKey := "test-access-key"
+	s3secret := "test-secret"
 
-	grants := map[string][]string{
-		"admin": {
-			SEND_AUDIO.String(),
-			SEND_VIDEO.String(),
-			MUTE_USERS.String(),
+	_, err := client.CreateExternalStorage(ctx, &CreateExternalStorageRequest{
+		Bucket:      "test-bucket",
+		Name:        storageName,
+		StorageType: "s3",
+		Path:        &path,
+		AwsS3: &S3Request{
+			S3Region: "us-east-1",
+			S3ApiKey: &s3apiKey,
+			S3Secret: &s3secret,
 		},
-		"user": {
-			SEND_AUDIO.String(),
-			SEND_VIDEO.String(),
-		},
-	}
-
-	response, err := client.Video().CreateCallType(ctx, &CreateCallTypeRequest{
-		Grants:               &grants,
-		Name:                 callTypeName,
-		Settings:             callSettings,
-		NotificationSettings: notificationSettings,
 	})
-	require.NoError(t, err, "Failed to create call type")
-	assert.Equal(t, callTypeName, response.Data.Name)
+	require.NoError(t, err, "Failed to create external storage")
 
-	t.Cleanup(func() {
-		resetSharedResource(t, client, callTypeName)
+	// Register cleanup for the created external storage
+	rm.RegisterCleanup(func() {
+		resetExternalStorage(t, client, storageName)
 	})
+}
+
+// resetExternalStorage deletes the specified external storage.
+func resetExternalStorage(t *testing.T, client *Stream, storageName string) {
+	ctx := context.Background()
+	_, err := client.DeleteExternalStorage(ctx, storageName)
+	if err != nil {
+		t.Logf("Warning: Failed to delete external storage %s: %v", storageName, err)
+	}
 }
 
 // TestCRUDCallTypeOperations tests Create, Read, Update, and Delete operations for call types.
 func TestCRUDCallTypeOperations(t *testing.T) {
-	client, call, callTypeName := setup(t, true)
+	rm := NewResourceManager(t)
+	client, call, callTypeName := setup(t, rm, true)
 
 	t.Run("Update Call Type Settings", func(t *testing.T) {
 		ctx := context.Background()
@@ -378,7 +385,8 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 
 // TestVideoExamples tests various video-related functionalities without creating call types.
 func TestVideoExamples(t *testing.T) {
-	client, _, _ := setup(t, false)
+	rm := NewResourceManager(t)
+	client, _, _ := setup(t, rm, false)
 
 	t.Run("Create User", func(t *testing.T) {
 		ctx := context.Background()
@@ -454,7 +462,8 @@ func TestVideoExamples(t *testing.T) {
 
 // TestSendCustomEvent tests sending custom events within a call.
 func TestSendCustomEvent(t *testing.T) {
-	client, call, _ := setup(t, false)
+	rm := NewResourceManager(t)
+	client, call, _ := setup(t, rm, false)
 
 	ctx := context.Background()
 	user, err := getUser(t, client, nil, nil, nil)
@@ -481,7 +490,8 @@ func TestSendCustomEvent(t *testing.T) {
 
 // TestMuteAll tests muting all users in a call.
 func TestMuteAll(t *testing.T) {
-	_, call, _ := setup(t, false) // Removed 'client' as it was unused
+	rm := NewResourceManager(t)
+	_, call, _ := setup(t, rm, false)
 
 	ctx := context.Background()
 	userID := randomString(10)
@@ -505,7 +515,8 @@ func TestMuteAll(t *testing.T) {
 
 // TestVideoExamplesAdditional tests additional video-related functionalities.
 func TestVideoExamplesAdditional(t *testing.T) {
-	client, call, _ := setup(t, false)
+	rm := NewResourceManager(t)
+	client, call, _ := setup(t, rm, false)
 
 	t.Run("MuteSomeUsers", func(t *testing.T) {
 		ctx := context.Background()
@@ -782,14 +793,20 @@ func TestTeams(t *testing.T) {
 }
 
 func TestExternalStorageOperations(t *testing.T) {
-	client, _, _ := setup(t, false)
+	rm := NewResourceManager(t)
+	client, _, _ := setup(t, rm, false)
 	ctx := context.Background()
+	// Create a unique name for the test storage
+	uniqueName := "test-storage-" + randomString(10)
 
+	defer func() {
+		resetExternalStorage(t, client, uniqueName)
+	}()
 	t.Run("CreateExternalStorage", func(t *testing.T) {
 		path := "test-directory/"
 		s3apiKey := "test-access-key"
 		s3secret := "test-secret"
-		uniqueName := "test-storage-" + randomString(10)
+
 		_, err := client.CreateExternalStorage(ctx, &CreateExternalStorageRequest{
 			Bucket:      "test-bucket",
 			Name:        uniqueName,
@@ -807,12 +824,23 @@ func TestExternalStorageOperations(t *testing.T) {
 	t.Run("ListExternalStorage", func(t *testing.T) {
 		response, err := client.ListExternalStorage(ctx)
 		require.NoError(t, err)
-		assert.NotEmpty(t, response.Data.ExternalStorages)
+		assert.NotEmpty(t, response.Data.ExternalStorages, "External storages list should not be empty")
+
+		// Check if our created storage is in the list
+		found := false
+		for _, storage := range response.Data.ExternalStorages {
+			if storage.Name == uniqueName {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found, "Created external storage should be in the list")
 	})
 }
 
 func TestEnableCallRecordingAndBackstageMode(t *testing.T) {
-	_, call, _ := setup(t, false)
+	rm := NewResourceManager(t)
+	_, call, _ := setup(t, rm, false)
 	ctx := context.Background()
 	// Create the call first
 	_, err := call.GetOrCreate(ctx, &GetOrCreateCallRequest{
@@ -847,7 +875,8 @@ func TestEnableCallRecordingAndBackstageMode(t *testing.T) {
 }
 
 func TestDeleteRecordingsAndTranscriptions(t *testing.T) {
-	_, call, _ := setup(t, false)
+	rm := NewResourceManager(t)
+	_, call, _ := setup(t, rm, false)
 	ctx := context.Background()
 
 	t.Run("DeleteNonExistentRecording", func(t *testing.T) {
@@ -862,7 +891,8 @@ func TestDeleteRecordingsAndTranscriptions(t *testing.T) {
 }
 
 func TestHardDeleteCall(t *testing.T) {
-	client, call, _ := setup(t, false)
+	rm := NewResourceManager(t)
+	client, call, _ := setup(t, rm, false)
 	ctx := context.Background()
 
 	t.Run("HardDelete", func(t *testing.T) {
