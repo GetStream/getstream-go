@@ -16,9 +16,9 @@
     <a href="https://getstream.io/chat/docs/"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/GetStream/stream-go/issues">Report Bug</a>
+    <a href="https://github.com/GetStream/getstream-go/issues">Report Bug</a>
     ·
-    <a href="https://github.com/GetStream/stream-go/issues">Request Feature</a>
+    <a href="https://github.com/GetStream/getstream-go/issues">Request Feature</a>
 </p>
 
 ## Features
@@ -38,7 +38,7 @@ For the client-side integrations (web and mobile) have a look at the JavaScript,
 ## ⚙️ Installation
 
 ```shell
-go get github.com/GetStream/stream-go
+go get github.com/GetStream/getstream-go
 ```
 
 ## ✨ Getting started
