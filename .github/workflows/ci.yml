@@ -33,3 +33,13 @@ jobs:
         run: |
           go test -coverprofile cover.out -v -race ./...
           go tool cover -func=cover.out
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./cover.out
+          flags: unittests
+          name: codecov-umbrella
+          # todo swap to true once codecov is properly configured
+          fail_ci_if_error: false
