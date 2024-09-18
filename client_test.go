@@ -603,25 +603,25 @@ func TestVideoExamplesAdditional(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, PtrTo(3600), response.Data.Call.Settings.Limits.MaxDurationSeconds)
 
-		// res, err := call.Update(ctx, &UpdateCallRequest{
-		// 	SettingsOverride: &CallSettingsRequest{
-		// 		Limits: &LimitsSettingsRequest{
-		// 			MaxDurationSeconds: PtrTo(7200),
-		// 		},
-		// 	},
-		// })
-		// require.NoError(t, err)
-		// assert.Equal(t, PtrTo(7200), res.Data.Call.Settings.Limits.MaxDurationSeconds)
+		res, err := call.Update(ctx, &UpdateCallRequest{
+			SettingsOverride: &CallSettingsRequest{
+				Limits: &LimitsSettingsRequest{
+					MaxDurationSeconds: PtrTo(7200),
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, PtrTo(7200), res.Data.Call.Settings.Limits.MaxDurationSeconds)
 
-		// res2, err := call.Update(ctx, &UpdateCallRequest{
-		// 	SettingsOverride: &CallSettingsRequest{
-		// 		Limits: &LimitsSettingsRequest{
-		// 			MaxDurationSeconds: PtrTo(0),
-		// 		},
-		// 	},
-		// })
-		// require.NoError(t, err)
-		// assert.Equal(t, PtrTo(0), res2.Data.Call.Settings.Limits.MaxDurationSeconds)
+		res2, err := call.Update(ctx, &UpdateCallRequest{
+			SettingsOverride: &CallSettingsRequest{
+				Limits: &LimitsSettingsRequest{
+					MaxDurationSeconds: PtrTo(0),
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, PtrTo(0), res2.Data.Call.Settings.Limits.MaxDurationSeconds)
 	})
 
 	t.Run("UserBlocking", func(t *testing.T) {
@@ -669,25 +669,25 @@ func TestVideoExamplesAdditional(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, PtrTo(300), response.Data.Call.JoinAheadTimeSeconds)
 
-		// res, err := call.Update(ctx, &UpdateCallRequest{
-		// 	SettingsOverride: &CallSettingsRequest{
-		// 		Backstage: &BackstageSettingsRequest{
-		// 			JoinAheadTimeSeconds: PtrTo(600),
-		// 		},
-		// 	},
-		// })
-		// require.NoError(t, err)
-		// assert.Equal(t, PtrTo(600), res.Data.Call.JoinAheadTimeSeconds)
+		res, err := call.Update(ctx, &UpdateCallRequest{
+			SettingsOverride: &CallSettingsRequest{
+				Backstage: &BackstageSettingsRequest{
+					JoinAheadTimeSeconds: PtrTo(600),
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, PtrTo(600), res.Data.Call.JoinAheadTimeSeconds)
 
-		// res2, err := call.Update(ctx, &UpdateCallRequest{
-		// 	SettingsOverride: &CallSettingsRequest{
-		// 		Backstage: &BackstageSettingsRequest{
-		// 			JoinAheadTimeSeconds: PtrTo(0),
-		// 		},
-		// 	},
-		// })
-		// require.NoError(t, err)
-		// assert.Equal(t, PtrTo(0), res2.Data.Call.JoinAheadTimeSeconds)
+		res2, err := call.Update(ctx, &UpdateCallRequest{
+			SettingsOverride: &CallSettingsRequest{
+				Backstage: &BackstageSettingsRequest{
+					JoinAheadTimeSeconds: PtrTo(0),
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, PtrTo(0), res2.Data.Call.JoinAheadTimeSeconds)
 	})
 }
 
@@ -779,4 +779,116 @@ func TestTeams(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.Greater(t, len(callsResponse.Data.Calls), 0)
+}
+
+func TestExternalStorageOperations(t *testing.T) {
+	client, _, _ := setup(t, false)
+	ctx := context.Background()
+
+	t.Run("CreateExternalStorage", func(t *testing.T) {
+		path := "test-directory/"
+		s3apiKey := "test-access-key"
+		s3secret := "test-secret"
+		uniqueName := "test-storage-" + randomString(10)
+		_, err := client.CreateExternalStorage(ctx, &CreateExternalStorageRequest{
+			Bucket:      "test-bucket",
+			Name:        uniqueName,
+			StorageType: "s3",
+			Path:        &path,
+			AwsS3: &S3Request{
+				S3Region: "us-east-1",
+				S3ApiKey: &s3apiKey,
+				S3Secret: &s3secret,
+			},
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("ListExternalStorage", func(t *testing.T) {
+		response, err := client.ListExternalStorage(ctx)
+		require.NoError(t, err)
+		assert.NotEmpty(t, response.Data.ExternalStorages)
+	})
+}
+
+func TestEnableCallRecordingAndBackstageMode(t *testing.T) {
+	_, call, _ := setup(t, false)
+	ctx := context.Background()
+	// Create the call first
+	_, err := call.GetOrCreate(ctx, &GetOrCreateCallRequest{
+		Data: &CallRequest{
+			CreatedByID: PtrTo("test-user"),
+		},
+	})
+	require.NoError(t, err)
+	t.Run("EnableCallRecording", func(t *testing.T) {
+		response, err := call.Update(ctx, &UpdateCallRequest{
+			SettingsOverride: &CallSettingsRequest{
+				Recording: &RecordSettingsRequest{
+					Mode: "available",
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, "available", response.Data.Call.Settings.Recording.Mode)
+	})
+
+	t.Run("EnableBackstageMode", func(t *testing.T) {
+		response, err := call.Update(ctx, &UpdateCallRequest{
+			SettingsOverride: &CallSettingsRequest{
+				Backstage: &BackstageSettingsRequest{
+					Enabled: PtrTo(true),
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.True(t, response.Data.Call.Settings.Backstage.Enabled)
+	})
+}
+
+func TestDeleteRecordingsAndTranscriptions(t *testing.T) {
+	_, call, _ := setup(t, false)
+	ctx := context.Background()
+
+	t.Run("DeleteNonExistentRecording", func(t *testing.T) {
+		_, err := call.DeleteRecording(ctx, "non-existent-session", "non-existent-filename")
+		require.Error(t, err)
+	})
+
+	t.Run("DeleteNonExistentTranscription", func(t *testing.T) {
+		_, err := call.DeleteTranscription(ctx, "non-existent-session", "non-existent-filename")
+		require.Error(t, err)
+	})
+}
+
+func TestHardDeleteCall(t *testing.T) {
+	client, call, _ := setup(t, false)
+	ctx := context.Background()
+
+	t.Run("HardDelete", func(t *testing.T) {
+		_, err := call.GetOrCreate(ctx, &GetOrCreateCallRequest{
+			Data: &CallRequest{
+				CreatedByID: PtrTo("test-user"),
+			},
+		})
+		require.NoError(t, err)
+
+		response, err := call.Delete(ctx, &DeleteCallRequest{
+			Hard: PtrTo(true),
+		})
+		require.NoError(t, err)
+		assert.NotNil(t, response.Data.Call)
+		assert.NotNil(t, response.Data.TaskID)
+		time.Sleep(2 * time.Second)
+		// Wait for the task to complete
+		taskStatus, err := client.GetTask(ctx, *response.Data.TaskID)
+		require.NoError(t, err)
+
+		assert.Equal(t, "completed", taskStatus.Data.Status)
+
+		// Verify the call is deleted
+		_, err = call.Get(ctx, nil)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Can't find call with id")
+	})
 }
