@@ -57,7 +57,7 @@ func main() {
 	userID := "your-user-id" // Replace with your server user id
 
 	// Initialize client
-	client, err := stream.NewStreamFromCredentials(apiKey, apiSecret)
+	client, err := stream.NewClient(apiKey, apiSecret)
 	if err != nil {
 		fmt.Printf("Error initializing client: %v\n", err)
 		return
@@ -65,7 +65,7 @@ func main() {
 
 	// Or initialize using only environmental variables:
 	// (required) STREAM_API_KEY, (required) STREAM_API_SECRET
-	client, err = stream.NewStreamFromEnvVars()
+	client, err = stream.NewClientFromEnvVars()
 	if err != nil {
 		fmt.Printf("Error initializing client from env vars: %v\n", err)
 		return
@@ -75,25 +75,23 @@ func main() {
 	ctx := context.Background()
 
 	// Create a call
-	call := client.Video().Call("default", "unique-call-id")
+	call := client.Video.Call("default", "unique-call-id")
 
 	// Create or get a call
-	response, err := call.GetOrCreate(ctx, &stream.GetOrCreateCallRequest{
-		Data: &stream.CallRequest{
-			CreatedByID: stream.PtrTo(userID),
-		},
+	response, err := call.GetOrCreate(ctx, &stream.CallRequest{
+		CreatedBy: stream.UserRequest{ID: userID},
 	})
 	if err != nil {
 		fmt.Printf("Error creating/getting call: %v\n", err)
 		return
 	}
 
-	fmt.Printf("Call created/retrieved: %s\n", response.Data.Call.ID)
+	fmt.Printf("Call created/retrieved: %s\n", response.Call.ID)
 
 	// Update call settings
 	_, err = call.Update(ctx, &stream.UpdateCallRequest{
 		SettingsOverride: &stream.CallSettingsRequest{
-			Audio: &stream.AudioSettingsRequest{
+			Audio: &stream.AudioSettings{
 				MicDefaultOn: stream.PtrTo(true),
 			},
 		},
@@ -113,7 +111,7 @@ func main() {
 	fmt.Printf("Token for user %s: %s\n", userID, token)
 
 	// Query calls
-	callsResponse, err := client.Video().QueryCalls(ctx, &stream.QueryCallsRequest{
+	callsResponse, err := client.Video.QueryCalls(ctx, &stream.QueryCallsRequest{
 		FilterConditions: map[string]interface{}{
 			"created_by_user_id": userID,
 		},
@@ -123,7 +121,7 @@ func main() {
 		return
 	}
 
-	fmt.Printf("Found %d calls\n", len(callsResponse.Data.Calls))
+	fmt.Printf("Found %d calls\n", len(callsResponse.Calls))
 }
 
 // Helper function to create a pointer to a value
