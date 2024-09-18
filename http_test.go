@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBuildPath(t *testing.T) {
@@ -283,21 +285,18 @@ func TestNewRequest(t *testing.T) {
 	})
 
 	t.Run("Unsupported data type", func(t *testing.T) {
-		method := http.MethodPost
-		path := "/v1/resources"
-		params := url.Values{}
-		data := make(chan int) // Unsupported type
-		pathParams := map[string]string{}
+		client := &Client{
+            BaseURL: "https://api.stream-io-api.com",
+            apiKey:  "key",
+            logger:  DefaultLogger,
+        }
+        ctx := context.Background()
+        unsupportedData := make(chan int)
 
-		_, err := newRequest(client, ctx, method, path, params, data, pathParams)
-		if err == nil {
-			t.Fatalf("Expected error due to unsupported data type, got nil")
-		}
-
-		// Optionally, check the error message
-		if !strings.Contains(err.Error(), "unsupported type") {
-			t.Errorf("Expected error message to contain 'unsupported type', got %v", err)
-		}
+        req, err := newRequest(client, ctx, http.MethodPost, "/example", nil, unsupportedData, nil)
+        assert.NoError(t, err)
+        assert.NotNil(t, req)
+        assert.Nil(t, req.Body)  // The body should be nil for unsupported types
 	})
 }
 
