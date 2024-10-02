@@ -414,7 +414,7 @@ func TestVideoExamples(t *testing.T) {
 		_, err := client.UpdateUsersPartial(ctx, &UpdateUsersPartialRequest{Users: users})
 		assert.NoError(t, err)
 
-		token, err := client.CreateToken("tommaso-id", nil)
+		token, err := client.CreateToken("tommaso-id", nil, 3600)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, token)
 	})

@@ -26,8 +26,51 @@ func New(apiKey, apiSecret string, options ...ClientOption) *Stream {
 	}
 }
 
-func (s *Stream) CreateToken(userID string, claims *StreamJWTClaims) (string, error) {
-	return s.CreateTokenWithClaims(userID, claims)
+// CreateToken generates a token for a given user ID, with optional claims.
+//
+// Parameters:
+// - userID (string): The unique identifier of the user for whom the token is being created.
+// - claims (*Claims): A pointer to a Claims struct containing optional parameters.
+//
+// Returns:
+// - (string): The generated JWT token.
+// - (error): An error object if token creation fails.
+//
+// Example:
+//
+// expiration:= 3600, // Token expires in 1 hour
+//	claims := &Claims{
+//	   
+//	    Role:       "admin",
+//	    ChannelCIDs: []string{"channel1", "channel2"},
+//	}
+//
+// token, err := client.CreateToken("userID", claims, 3600)
+func (s *Stream) CreateToken(userID string, claims *Claims, expiration int64) (string, error) {
+	return s.createToken(userID, claims, expiration)
+}
+
+// CreateCallToken generates a token for a given user ID, including optional claims specific to calls.
+//
+// Parameters:
+// - userID (string): The unique identifier of the user for whom the token is being created.
+// - claims (*Claims): A pointer to a Claims struct containing optional parameters.
+//
+// Returns:
+// - (string): The generated JWT token.
+// - (error): An error object if token creation fails.
+//
+// Example:
+//
+//	claims := &Claims{
+//	    Role:       "moderator",
+//	    CallCIDs:   []string{"call1", "call2"},
+//	}
+//
+//	expiration:= 7200, // Token expires in 2 hours
+// token, err := client.CreateCallToken("userID", claims, expiration)
+func (s *Stream) CreateCallToken(userID string, claims *Claims, expiration int64) (string, error) {
+	return s.createCallToken(userID, claims, expiration)
 }
 
 // Chat
