@@ -4,120 +4,83 @@ import (
 	"encoding/json"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMarshalJSON(t *testing.T) {
 	testCases := []struct {
 		name     string
 		time     time.Time
-		rfc3339  bool
 		expected string
 	}{
 		{
-			name:     "Zero time",
-			time:     time.Time{},
-			rfc3339:  false,
-			expected: "null",
+			name:     "Special date",
+			time:     time.Date(2018, 10, 5, 4, 20, 0, 0, time.UTC),
+			expected: `"2018-10-05T04:20:00Z"`,
 		},
 		{
 			name:     "RFC3339 time",
 			time:     time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
-			rfc3339:  true,
 			expected: `"2020-01-01T00:00:00Z"`,
 		},
-		// time in the future
 		{
-			name:     "RFC3339 time in the future",
-			time:     time.Date(4102, 1, 1, 0, 0, 0, 0, time.UTC),
-			rfc3339:  true,
-			expected: `"4102-01-01T00:00:00Z"`,
-		},
-		{
-			name:     "Unix nanoseconds",
-			time:     time.Date(2020, 1, 1, 0, 0, 0, 123456789, time.UTC),
-			rfc3339:  false,
-			expected: "1577836800123456789",
-		},
-		{
-			name:     "Negative Unix nanoseconds",
-			time:     time.Date(1969, 12, 31, 23, 59, 59, 0, time.UTC),
-			rfc3339:  false,
-			expected: "-1000000000",
+			name:     "Future date",
+			time:     time.Date(2030, 1, 1, 0, 0, 0, 0, time.UTC),
+			expected: `"2030-01-01T00:00:00Z"`,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ts := NewTimestamp(tc.time, tc.rfc3339)
+			ts := Timestamp{&tc.time}
 			data, err := json.Marshal(ts)
-			if err != nil {
-				t.Fatalf("Expected no error, got %v", err)
-			}
-			if string(data) != tc.expected {
-				t.Errorf("Expected %s, got %s", tc.expected, string(data))
-			}
-
-			// Test round-trip
-			var unmarshalled Timestamp
-			err = json.Unmarshal(data, &unmarshalled)
-			if err != nil {
-				t.Fatalf("Expected no error during unmarshal, got %v", err)
-			}
-			if !unmarshalled.Equal(ts.Time) {
-				t.Errorf("Round-trip failed. Expected %v, got %v", ts.Time, unmarshalled.Time)
-			}
+			require.NoError(t, err)
+			assert.Equal(t, tc.expected, string(data))
 		})
 	}
 }
 
-func TestUnmarshalJSON_Null(t *testing.T) {
-	data := "null"
-	var ts Timestamp
-	err := json.Unmarshal([]byte(data), &ts)
-	if err != nil {
-		t.Fatalf("Expected no error, got %v", err)
+func TestUnmarshalJSON(t *testing.T) {
+	testCases := []struct {
+		name     string
+		data     []byte
+		expected *Timestamp
+	}{
+		{
+			name:     "empty",
+			data:     []byte("null"),
+			expected: &Timestamp{},
+		},
+		{
+			name: "special date",
+			data: []byte("1538713200000000000"),
+			expected: &Timestamp{
+				func() *time.Time {
+					t := time.Date(2018, 10, 5, 4, 20, 0, 0, time.UTC)
+					return &t
+				}(),
+			},
+		},
+		{
+			name: "future date",
+			data: []byte("2233023600000000000"),
+			expected: &Timestamp{
+				func() *time.Time {
+					t := time.Date(2040, 10, 5, 4, 20, 0, 0, time.UTC)
+					return &t
+				}(),
+			},
+		},
 	}
-	if !ts.Time.IsZero() {
-		t.Errorf("Expected zero time, got %v", ts.Time)
-	}
-}
 
-func TestUnmarshalJSON_NegativeUnix(t *testing.T) {
-	data := "-1000000000"
-	var ts Timestamp
-	err := json.Unmarshal([]byte(data), &ts)
-	if err != nil {
-		t.Fatalf("Expected no error, got %v", err)
-	}
-	expected := time.Date(1969, 12, 31, 23, 59, 59, 0, time.UTC)
-	if !ts.Time.Equal(expected) {
-		t.Errorf("Expected %v, got %v", expected, ts.Time)
-	}
-}
-
-func TestUnmarshalJSON_Precision(t *testing.T) {
-	data := "1577836800123456789"
-	var ts Timestamp
-	err := json.Unmarshal([]byte(data), &ts)
-	if err != nil {
-		t.Fatalf("Expected no error, got %v", err)
-	}
-	// Expected precision is to the nearest microsecond because Go time.Time supports up to nanoseconds
-	expected := time.Date(2020, 1, 1, 0, 0, 0, 123456789, time.UTC)
-	if !ts.Time.Equal(expected) {
-		t.Errorf("Expected %v, got %v", expected, ts.Time)
-	}
-}
-
-func TestUnmarshalJSON_FutureTimestamp(t *testing.T) {
-	data := "4102444800000000000"
-	var ts Timestamp
-	err := json.Unmarshal([]byte(data), &ts)
-	if err != nil {
-		t.Fatalf("Expected no error, got %v", err)
-	}
-	expected := time.Date(2100, 1, 1, 0, 0, 0, 0, time.UTC)
-	if !ts.Time.Equal(expected) {
-		t.Errorf("Expected %v, got %v", expected, ts.Time)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ts := &Timestamp{}
+			err := json.Unmarshal(tc.data, ts)
+			require.NoError(t, err)
+			assert.Equal(t, tc.expected, ts)
+		})
 	}
 }

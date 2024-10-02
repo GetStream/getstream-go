@@ -1,4 +1,4 @@
-package getstream
+package getstream_test
 
 import (
 	"context"
@@ -6,13 +6,10 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/GetStream/getstream-go"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
-
-func PtrTo[T any](v T) *T {
-	return &v
-}
 
 // ResourceManager manages resource cleanup for tests.
 type ResourceManager struct {
@@ -54,7 +51,7 @@ func newCall(t *testing.T, client *Stream) *Call {
 	return call
 }
 
-func getUser(t *testing.T, client *Stream, name *string, image *string, custom *map[string]any) (*FullUserResponse, error) {
+func getUser(t *testing.T, client *Stream, name *string, image *string, custom map[string]any) (*FullUserResponse, error) {
 	t.Helper()
 	ctx := context.Background()
 	userID := uuid.New().String()

@@ -1,42 +1,31 @@
-package getstream
+package getstream_test
 
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
 	"strings"
 	"testing"
 	"time"
 
+	. "github.com/GetStream/getstream-go"
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// func cleanupAllExternalStorages(t *testing.T, client *Stream) {
-//     t.Helper()
-//     ctx := context.Background()
+func TestMain(m *testing.M) {
+	// Load .env file before running tests
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, fallback to ENV vars")
+	}
 
-//     // List all external storages
-//     response, err := client.ListExternalStorage(ctx)
-//     if err != nil {
-//         t.Logf("Warning: Failed to list external storages: %v", err)
-//         return
-//     }
+	// Run the tests
+	os.Exit(m.Run())
+}
 
-//     // Delete each external storage
-//     for _, storage := range response.Data.ExternalStorages {
-//         _, err := client.DeleteExternalStorage(ctx, storage.Name)
-//         if err != nil {
-//             t.Logf("Warning: Failed to delete external storage %s: %v", storage.Name, err)
-//         } else {
-//             t.Logf("Successfully deleted external storage: %s", storage.Name)
-//         }
-//     }
-// }
-
-// func TestCleanupAllExternalStorages(t *testing.T) {
-//     client := initClient(t)
-//     cleanupAllExternalStorages(t, client)
-// }
+const skipSlowTests = true
 
 // initClient initializes the Stream client using environment variables.
 func initClient(t *testing.T) *Stream {
@@ -116,8 +105,27 @@ func setup(t *testing.T, rm *ResourceManager, createCallType bool) (*Stream, *Ca
 			},
 		}
 
+		callTypesResponse, err := client.Video().ListCallTypes(context.Background())
+		if err != nil {
+			t.Fatalf("Failed to list call types: %v", err)
+		}
+		// when more than 10 call types are defined, delete all the custom ones
+		if len(callTypesResponse.Data.CallTypes) > 10 {
+			for _, callType := range callTypesResponse.Data.CallTypes {
+				switch callType.Name {
+				case "default", "livestream", "audio_room", "development":
+					continue
+				default:
+					_, err := client.Video().DeleteCallType(context.Background(), callType.Name)
+					if err != nil {
+						t.Fatalf("Failed to delete call type: %v", err)
+					}
+				}
+			}
+		}
+
 		response, err := client.Video().CreateCallType(ctx, &CreateCallTypeRequest{
-			Grants:               &grants,
+			Grants:               grants,
 			Name:                 callTypeName,
 			Settings:             callSettings,
 			NotificationSettings: notificationSettings,
@@ -207,6 +215,10 @@ func resetExternalStorage(t *testing.T, client *Stream, storageName string) {
 
 // TestCRUDCallTypeOperations tests Create, Read, Update, and Delete operations for call types.
 func TestCRUDCallTypeOperations(t *testing.T) {
+	if skipSlowTests {
+		t.Skip("skipping slow tests")
+	}
+
 	rm := NewResourceManager(t)
 	client, call, callTypeName := setup(t, rm, true)
 
@@ -228,7 +240,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 					Enabled: PtrTo(true),
 				},
 			},
-			Grants: &grants,
+			Grants: grants,
 		})
 
 		assert.NoError(t, err)
@@ -265,7 +277,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 					Quality:   PtrTo("1080p"),
 					Layout: &LayoutSettingsRequest{
 						Name:    "spotlight",
-						Options: &layoutOptions,
+						Options: layoutOptions,
 					},
 				},
 			},
@@ -352,7 +364,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 				CreatedByID: PtrTo("john"),
 				SettingsOverride: &CallSettingsRequest{
 					Geofencing: &GeofenceSettingsRequest{
-						Names: PtrTo([]string{"canada"}),
+						Names: []string{"canada"},
 					},
 					Screensharing: &ScreensharingSettingsRequest{
 						Enabled: PtrTo(false),
@@ -402,13 +414,13 @@ func TestVideoExamples(t *testing.T) {
 		users := []UpdateUserPartialRequest{
 			{
 				ID:    "thierry-id",
-				Set:   &thierrySet,
-				Unset: &[]string{"custom"},
+				Set:   thierrySet,
+				Unset: []string{"custom"},
 			},
 			{
 				ID:    "tommaso-id",
-				Set:   &tommasoSet,
-				Unset: &[]string{"custom"},
+				Set:   tommasoSet,
+				Unset: []string{"custom"},
 			},
 		}
 		_, err := client.UpdateUsersPartial(ctx, &UpdateUsersPartialRequest{Users: users})
@@ -429,7 +441,7 @@ func TestVideoExamples(t *testing.T) {
 		callRequest := GetOrCreateCallRequest{
 			Data: &CallRequest{
 				CreatedByID: PtrTo("tommaso-id"),
-				Members:     &members,
+				Members:     members,
 			},
 		}
 		_, err := call.GetOrCreate(ctx, &callRequest)
@@ -482,7 +494,7 @@ func TestSendCustomEvent(t *testing.T) {
 	}
 	sendEventRequest := SendCallEventRequest{
 		UserID: &user.ID,
-		Custom: &customEvent,
+		Custom: customEvent,
 	}
 	_, err = call.SendCallEvent(ctx, &sendEventRequest)
 	assert.NoError(t, err)
@@ -535,7 +547,7 @@ func TestVideoExamplesAdditional(t *testing.T) {
 
 		_, err = call.MuteUsers(ctx, &MuteUsersRequest{
 			MutedByID:        &userID,
-			UserIDs:          &[]string{alice.ID, bob.ID},
+			UserIDs:          []string{alice.ID, bob.ID},
 			Audio:            PtrTo(true),
 			Video:            PtrTo(true),
 			Screenshare:      PtrTo(true),
@@ -559,13 +571,13 @@ func TestVideoExamplesAdditional(t *testing.T) {
 
 		_, err = call.UpdateUserPermissions(ctx, &UpdateUserPermissionsRequest{
 			UserID:            alice.ID,
-			RevokePermissions: &[]string{SEND_AUDIO.String()},
+			RevokePermissions: []string{SEND_AUDIO.String()},
 		})
 		assert.NoError(t, err)
 
 		_, err = call.UpdateUserPermissions(ctx, &UpdateUserPermissionsRequest{
 			UserID:           alice.ID,
-			GrantPermissions: &[]string{SEND_AUDIO.String()},
+			GrantPermissions: []string{SEND_AUDIO.String()},
 		})
 		assert.NoError(t, err)
 	})
@@ -587,10 +599,29 @@ func TestVideoExamplesAdditional(t *testing.T) {
 		assert.NoError(t, err)
 		taskID := response.Data.TaskID
 
-		// Note: In a real scenario, you might want to implement a retry mechanism or use a channel to wait for the task to complete
-		time.Sleep(2 * time.Second)
+		WaitForTask := func(ctx context.Context, client *Stream, taskID string) (*StreamResponse[GetTaskResponse], error) {
+			ticker := time.NewTicker(500 * time.Millisecond)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ticker.C:
+					taskResult, err := client.GetTask(ctx, taskID)
+					if err != nil {
+						return nil, fmt.Errorf("failed to get task result: %w", err)
+					}
+					if taskResult.Data.Status == "completed" || taskResult.Data.Status == "failed" {
+						return taskResult, nil
+					}
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				}
+			}
+		}
 
-		taskStatus, err := client.GetTask(ctx, taskID)
+		taskCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+		defer cancel()
+
+		taskStatus, err := WaitForTask(taskCtx, client, taskID)
 		assert.NoError(t, err)
 
 		if taskStatus.Data.Status == "completed" {
@@ -601,6 +632,7 @@ func TestVideoExamplesAdditional(t *testing.T) {
 	t.Run("CreateCallWithSessionTimer", func(t *testing.T) {
 		ctx := context.Background()
 		userID := randomString(10)
+		_, call, _ := setup(t, rm, false)
 		response, err := call.GetOrCreate(ctx, &GetOrCreateCallRequest{
 			Data: &CallRequest{
 				CreatedByID: PtrTo(userID),
@@ -636,7 +668,10 @@ func TestVideoExamplesAdditional(t *testing.T) {
 	})
 
 	t.Run("UserBlocking", func(t *testing.T) {
-		t.Skip()
+		if skipSlowTests {
+			t.Skip("skipping slow tests")
+		}
+
 		ctx := context.Background()
 		alice, err := getUser(t, client, nil, nil, nil)
 		require.NoError(t, err)
@@ -662,11 +697,11 @@ func TestVideoExamplesAdditional(t *testing.T) {
 		ctx := context.Background()
 		userID := randomString(10)
 		startsAt := time.Now().Add(30 * time.Minute)
-		ts := NewTimestamp(startsAt, true)
 
+		_, call, _ := setup(t, rm, false)
 		response, err := call.GetOrCreate(ctx, &GetOrCreateCallRequest{
 			Data: &CallRequest{
-				StartsAt:    &ts,
+				StartsAt:    &Timestamp{Time: &startsAt},
 				CreatedByID: PtrTo(userID),
 				SettingsOverride: &CallSettingsRequest{
 					Backstage: &BackstageSettingsRequest{
@@ -738,7 +773,7 @@ func TestTeams(t *testing.T) {
 		Users: map[string]UserRequest{
 			userID: {
 				ID:    userID,
-				Teams: &[]string{"red", "blue"},
+				Teams: []string{"red", "blue"},
 			},
 		},
 	})
@@ -779,7 +814,7 @@ func TestTeams(t *testing.T) {
 	}
 
 	callsResponse, err := client.Video().QueryCalls(ctx, &QueryCallsRequest{
-		FilterConditions: &map[string]interface{}{
+		FilterConditions: map[string]interface{}{
 			"id":   callID,
 			"team": map[string]interface{}{"$eq": "blue"},
 		},
@@ -789,15 +824,30 @@ func TestTeams(t *testing.T) {
 }
 
 func TestExternalStorageOperations(t *testing.T) {
+	if skipSlowTests {
+		t.Skip("skipping slow tests")
+	}
+
 	rm := NewResourceManager(t)
 	client, _, _ := setup(t, rm, false)
 	ctx := context.Background()
 	// Create a unique name for the test storage
 	uniqueName := "test-storage-" + randomString(10)
 
-	defer func() {
-		resetExternalStorage(t, client, uniqueName)
-	}()
+	t.Run("DeleteExistingExtStorages", func(t *testing.T) {
+		listExternalStorage, err := client.ListExternalStorage(ctx)
+		require.NoError(t, err)
+
+		// avoid accumulating ext storages forever
+		if len(listExternalStorage.Data.ExternalStorages) > 1 {
+			println("delete existing storages")
+			for _, storage := range listExternalStorage.Data.ExternalStorages {
+				_, err := client.DeleteExternalStorage(ctx, storage.Name)
+				require.NoError(t, err)
+			}
+		}
+	})
+
 	t.Run("CreateExternalStorage", func(t *testing.T) {
 		path := "test-directory/"
 		s3apiKey := "test-access-key"

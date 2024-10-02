@@ -286,17 +286,17 @@ func TestNewRequest(t *testing.T) {
 
 	t.Run("Unsupported data type", func(t *testing.T) {
 		client := &Client{
-            BaseURL: "https://api.stream-io-api.com",
-            apiKey:  "key",
-            logger:  DefaultLogger,
-        }
-        ctx := context.Background()
-        unsupportedData := make(chan int)
+			BaseURL: "https://api.stream-io-api.com",
+			apiKey:  "key",
+			logger:  DefaultLogger,
+		}
+		ctx := context.Background()
+		unsupportedData := make(chan int)
 
-        req, err := newRequest(client, ctx, http.MethodPost, "/example", nil, unsupportedData, nil)
-        assert.NoError(t, err)
-        assert.NotNil(t, req)
-        assert.Nil(t, req.Body)  // The body should be nil for unsupported types
+		req, err := newRequest(client, ctx, http.MethodPost, "/example", nil, unsupportedData, nil)
+		assert.NoError(t, err)
+		assert.NotNil(t, req)
+		assert.Nil(t, req.Body) // The body should be nil for unsupported types
 	})
 }
 

@@ -23,6 +23,10 @@ const (
 	defaultTimeout = 6 * time.Second
 )
 
+func PtrTo[T any](v T) *T {
+	return &v
+}
+
 type Client struct {
 	BaseURL string
 	HTTP    *http.Client `json:"-"`
@@ -63,7 +67,7 @@ func WithBaseUrl(baseURL string) ClientOption {
 // is retrieved from STREAM_KEY and the secret from STREAM_SECRET
 // environmental variables.
 func NewClientFromEnvVars(options ...ClientOption) (*Client, error) {
-	return NewClient(os.Getenv("STREAM_KEY"), os.Getenv("STREAM_SECRET"), options...)
+	return NewClient(os.Getenv("STREAM_API_KEY"), os.Getenv("STREAM_API_SECRET"), options...)
 }
 
 // NewClient creates new stream chat api client.
@@ -76,12 +80,12 @@ func NewClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 	}
 
 	baseURL := DefaultBaseURL
-	if baseURLEnv := os.Getenv("STREAM_CHAT_URL"); strings.HasPrefix(baseURLEnv, "http") {
+	if baseURLEnv := os.Getenv("STREAM_BASE_URL"); strings.HasPrefix(baseURLEnv, "http") {
 		baseURL = baseURLEnv
 	}
 
 	timeout := defaultTimeout
-	if timeoutEnv := os.Getenv("STREAM_CHAT_TIMEOUT"); timeoutEnv != "" {
+	if timeoutEnv := os.Getenv("STREAM_HTTP_TIMEOUT"); timeoutEnv != "" {
 		i, err := strconv.Atoi(timeoutEnv)
 		if err != nil {
 			return nil, err

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+DST_PATH=`pwd`
 SOURCE_PATH=../chat
 
 if [ ! -d $SOURCE_PATH ]
@@ -8,16 +9,9 @@ then
   exit 1;
 fi
 
-if ! gofumpt -version &> /dev/null
-then
-  echo "cannot find gofumpt in path, did you setup this repo correctly?";
-  exit 1;
-fi
-
 set -ex
 
 # cd in API repo, generate new spec and then generate code from it
-( cd $SOURCE_PATH ; make openapi ; go run ./cmd/chat-manager openapi generate-client --language go-serverside --spec ./releases/v2/serverside-api.yaml --output ../stream-go )
+( cd $SOURCE_PATH ; make openapi ; go run ./cmd/chat-manager openapi generate-client --language go-serverside --spec ./releases/v2/serverside-api.yaml --output $DST_PATH )
 
-# lint generated code with gofumpt
-gofumpt -w ../stream-go
+./lint.sh

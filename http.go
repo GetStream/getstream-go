@@ -277,7 +277,7 @@ func EncodeValueToQueryParam(value any) string {
 	}
 }
 
-// makeRequest makes a generic HTTP request
+// MakeRequest makes a generic HTTP request
 func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, method, path string, params url.Values, data *GRequest, response *GResponse, pathParams map[string]string) (*StreamResponse[GResponse], error) {
 	r, err := newRequest(c, ctx, method, path, params, data, pathParams)
 	if err != nil {
