@@ -49,8 +49,8 @@ func (c *Call) GoLive(ctx context.Context, request *GoLiveRequest) (*StreamRespo
 	return c.client.GoLive(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) End(ctx context.Context) (*StreamResponse[EndCallResponse], error) {
-	return c.client.EndCall(ctx, c.callType, c.callID)
+func (c *Call) End(ctx context.Context, request *EndCallRequest) (*StreamResponse[EndCallResponse], error) {
+	return c.client.EndCall(ctx, c.callType, c.callID, request)
 }
 
 func (c *Call) UpdateCallMembers(ctx context.Context, request *UpdateCallMembersRequest) (*StreamResponse[UpdateCallMembersResponse], error) {
@@ -61,28 +61,28 @@ func (c *Call) MuteUsers(ctx context.Context, request *MuteUsersRequest) (*Strea
 	return c.client.MuteUsers(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) VideoPin(ctx context.Context, request *PinRequest) (*StreamResponse[PinResponse], error) {
+func (c *Call) VideoPin(ctx context.Context, request *VideoPinRequest) (*StreamResponse[PinResponse], error) {
 	return c.client.VideoPin(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) ListRecordings(ctx context.Context) (*StreamResponse[ListRecordingsResponse], error) {
-	return c.client.ListRecordings(ctx, c.callType, c.callID)
+func (c *Call) ListRecordings(ctx context.Context, request *ListRecordingsRequest) (*StreamResponse[ListRecordingsResponse], error) {
+	return c.client.ListRecordings(ctx, c.callType, c.callID, request)
 }
 
 func (c *Call) StartRTMPBroadcasts(ctx context.Context, request *StartRTMPBroadcastsRequest) (*StreamResponse[StartRTMPBroadcastsResponse], error) {
 	return c.client.StartRTMPBroadcasts(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) StopAllRTMPBroadcasts(ctx context.Context) (*StreamResponse[StopAllRTMPBroadcastsResponse], error) {
-	return c.client.StopAllRTMPBroadcasts(ctx, c.callType, c.callID)
+func (c *Call) StopAllRTMPBroadcasts(ctx context.Context, request *StopAllRTMPBroadcastsRequest) (*StreamResponse[StopAllRTMPBroadcastsResponse], error) {
+	return c.client.StopAllRTMPBroadcasts(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) StopRTMPBroadcast(ctx context.Context, name string, request *StopRTMPBroadcastsRequest) (*StreamResponse[StopRTMPBroadcastsResponse], error) {
+func (c *Call) StopRTMPBroadcast(ctx context.Context, name string, request *StopRTMPBroadcastRequest) (*StreamResponse[StopRTMPBroadcastsResponse], error) {
 	return c.client.StopRTMPBroadcast(ctx, c.callType, c.callID, name, request)
 }
 
-func (c *Call) StartHLSBroadcasting(ctx context.Context) (*StreamResponse[StartHLSBroadcastingResponse], error) {
-	return c.client.StartHLSBroadcasting(ctx, c.callType, c.callID)
+func (c *Call) StartHLSBroadcasting(ctx context.Context, request *StartHLSBroadcastingRequest) (*StreamResponse[StartHLSBroadcastingResponse], error) {
+	return c.client.StartHLSBroadcasting(ctx, c.callType, c.callID, request)
 }
 
 func (c *Call) StartRecording(ctx context.Context, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
@@ -93,35 +93,35 @@ func (c *Call) StartTranscription(ctx context.Context, request *StartTranscripti
 	return c.client.StartTranscription(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) GetCallStats(ctx context.Context, session string) (*StreamResponse[GetCallStatsResponse], error) {
-	return c.client.GetCallStats(ctx, c.callType, c.callID, session)
+func (c *Call) GetCallStats(ctx context.Context, session string, request *GetCallStatsRequest) (*StreamResponse[GetCallStatsResponse], error) {
+	return c.client.GetCallStats(ctx, c.callType, c.callID, session, request)
 }
 
-func (c *Call) StopHLSBroadcasting(ctx context.Context) (*StreamResponse[StopHLSBroadcastingResponse], error) {
-	return c.client.StopHLSBroadcasting(ctx, c.callType, c.callID)
+func (c *Call) StopHLSBroadcasting(ctx context.Context, request *StopHLSBroadcastingRequest) (*StreamResponse[StopHLSBroadcastingResponse], error) {
+	return c.client.StopHLSBroadcasting(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) StopLive(ctx context.Context) (*StreamResponse[StopLiveResponse], error) {
-	return c.client.StopLive(ctx, c.callType, c.callID)
+func (c *Call) StopLive(ctx context.Context, request *StopLiveRequest) (*StreamResponse[StopLiveResponse], error) {
+	return c.client.StopLive(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) StopRecording(ctx context.Context) (*StreamResponse[StopRecordingResponse], error) {
-	return c.client.StopRecording(ctx, c.callType, c.callID)
+func (c *Call) StopRecording(ctx context.Context, request *StopRecordingRequest) (*StreamResponse[StopRecordingResponse], error) {
+	return c.client.StopRecording(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) StopTranscription(ctx context.Context) (*StreamResponse[StopTranscriptionResponse], error) {
-	return c.client.StopTranscription(ctx, c.callType, c.callID)
+func (c *Call) StopTranscription(ctx context.Context, request *StopTranscriptionRequest) (*StreamResponse[StopTranscriptionResponse], error) {
+	return c.client.StopTranscription(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) ListTranscriptions(ctx context.Context) (*StreamResponse[ListTranscriptionsResponse], error) {
-	return c.client.ListTranscriptions(ctx, c.callType, c.callID)
+func (c *Call) ListTranscriptions(ctx context.Context, request *ListTranscriptionsRequest) (*StreamResponse[ListTranscriptionsResponse], error) {
+	return c.client.ListTranscriptions(ctx, c.callType, c.callID, request)
 }
 
 func (c *Call) UnblockUser(ctx context.Context, request *UnblockUserRequest) (*StreamResponse[UnblockUserResponse], error) {
 	return c.client.UnblockUser(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) VideoUnpin(ctx context.Context, request *UnpinRequest) (*StreamResponse[UnpinResponse], error) {
+func (c *Call) VideoUnpin(ctx context.Context, request *VideoUnpinRequest) (*StreamResponse[UnpinResponse], error) {
 	return c.client.VideoUnpin(ctx, c.callType, c.callID, request)
 }
 
@@ -129,12 +129,12 @@ func (c *Call) UpdateUserPermissions(ctx context.Context, request *UpdateUserPer
 	return c.client.UpdateUserPermissions(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) DeleteRecording(ctx context.Context, session string, filename string) (*StreamResponse[DeleteRecordingResponse], error) {
-	return c.client.DeleteRecording(ctx, c.callType, c.callID, session, filename)
+func (c *Call) DeleteRecording(ctx context.Context, session string, filename string, request *DeleteRecordingRequest) (*StreamResponse[DeleteRecordingResponse], error) {
+	return c.client.DeleteRecording(ctx, c.callType, c.callID, session, filename, request)
 }
 
-func (c *Call) DeleteTranscription(ctx context.Context, session string, filename string) (*StreamResponse[DeleteTranscriptionResponse], error) {
-	return c.client.DeleteTranscription(ctx, c.callType, c.callID, session, filename)
+func (c *Call) DeleteTranscription(ctx context.Context, session string, filename string, request *DeleteTranscriptionRequest) (*StreamResponse[DeleteTranscriptionResponse], error) {
+	return c.client.DeleteTranscription(ctx, c.callType, c.callID, session, filename, request)
 }
 
 func (c *VideoClient) Call(callType, callID string) *Call {

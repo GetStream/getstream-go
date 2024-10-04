@@ -2,7 +2,6 @@
 package getstream
 
 type APIError struct {
-
 	// API error code
 	Code int `json:"code"`
 
@@ -445,24 +444,6 @@ type BanActionRequest struct {
 	Timeout *int `json:"timeout,omitempty"`
 }
 
-type BanRequest struct {
-	TargetUserID string `json:"target_user_id"`
-
-	BannedByID *string `json:"banned_by_id,omitempty"`
-
-	ChannelCid *string `json:"channel_cid,omitempty"`
-
-	IpBan *bool `json:"ip_ban,omitempty"`
-
-	Reason *string `json:"reason,omitempty"`
-
-	Shadow *bool `json:"shadow,omitempty"`
-
-	Timeout *int `json:"timeout,omitempty"`
-
-	BannedBy *UserRequest `json:"banned_by,omitempty"`
-}
-
 type BanResponse struct {
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -493,7 +474,6 @@ type BlockListOptions struct {
 
 // Block list contains restricted words
 type BlockListResponse struct {
-
 	// Block list name
 	Name string `json:"name"`
 
@@ -516,30 +496,12 @@ type BlockListRule struct {
 	Name string `json:"name"`
 }
 
-type BlockUserRequest struct {
-
-	// the user to block
-	UserID string `json:"user_id"`
-}
-
 type BlockUserResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
-type BlockUsersRequest struct {
-
-	// User id to block
-	BlockedUserID string `json:"blocked_user_id"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type BlockUsersResponse struct {
-
 	// User id who blocked another user
 	BlockedByUserID string `json:"blocked_by_user_id"`
 
@@ -554,7 +516,6 @@ type BlockUsersResponse struct {
 }
 
 type BlockedUserResponse struct {
-
 	// ID of the user who got blocked
 	BlockedUserID string `json:"blocked_user_id"`
 
@@ -825,7 +786,6 @@ type CallSettingsResponse struct {
 }
 
 type CallStateResponseFields struct {
-
 	// List of call members
 	Members []MemberResponse `json:"members"`
 
@@ -897,14 +857,6 @@ type CallTypeResponse struct {
 	Settings CallSettingsResponse `json:"settings"`
 
 	ExternalStorage *string `json:"external_storage,omitempty"`
-}
-
-type CastPollVoteRequest struct {
-	UserID *string `json:"user_id,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-
-	Vote *VoteData `json:"vote,omitempty"`
 }
 
 type Channel struct {
@@ -1085,27 +1037,7 @@ type ChannelExport struct {
 	Type *string `json:"type,omitempty"`
 }
 
-type ChannelGetOrCreateRequest struct {
-
-	// Whether this channel will be hidden for the user who created the channel or not
-	HideForCreator *bool `json:"hide_for_creator,omitempty"`
-
-	// Refresh channel state
-	State *bool `json:"state,omitempty"`
-
-	ThreadUnreadCounts *bool `json:"thread_unread_counts,omitempty"`
-
-	Data *ChannelInput `json:"data,omitempty"`
-
-	Members *PaginationParams `json:"members,omitempty"`
-
-	Messages *MessagePaginationParams `json:"messages,omitempty"`
-
-	Watchers *PaginationParams `json:"watchers,omitempty"`
-}
-
 type ChannelInput struct {
-
 	// Enable or disable auto translation
 	AutoTranslationEnabled *bool `json:"auto_translation_enabled,omitempty"`
 
@@ -1136,7 +1068,6 @@ type ChannelInput struct {
 }
 
 type ChannelMember struct {
-
 	// Whether member is banned this channel or not
 	Banned bool `json:"banned"`
 
@@ -1181,7 +1112,6 @@ type ChannelMember struct {
 }
 
 type ChannelMemberResponse struct {
-
 	// Whether member is banned this channel or not
 	Banned bool `json:"banned"`
 
@@ -1229,7 +1159,6 @@ type ChannelMemberResponse struct {
 }
 
 type ChannelMute struct {
-
 	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -1246,7 +1175,6 @@ type ChannelMute struct {
 
 // Represents channel in chat
 type ChannelResponse struct {
-
 	// Channel CID (<type>:<id>)
 	Cid string `json:"cid"`
 
@@ -1350,7 +1278,6 @@ type ChannelStateResponse struct {
 }
 
 type ChannelStateResponseFields struct {
-
 	// List of channel members
 	Members []*ChannelMember `json:"members"`
 
@@ -1451,39 +1378,10 @@ type ChannelTypeConfig struct {
 }
 
 type CheckExternalStorageResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	FileUrl string `json:"file_url"`
-}
-
-type CheckPushRequest struct {
-
-	// Push message template for APN
-	ApnTemplate *string `json:"apn_template,omitempty"`
-
-	// Push message data template for Firebase
-	FirebaseDataTemplate *string `json:"firebase_data_template,omitempty"`
-
-	// Push message template for Firebase
-	FirebaseTemplate *string `json:"firebase_template,omitempty"`
-
-	// Message ID to send push notification for
-	MessageID *string `json:"message_id,omitempty"`
-
-	// Name of push provider
-	PushProviderName *string `json:"push_provider_name,omitempty"`
-
-	// Push provider type
-	PushProviderType *string `json:"push_provider_type,omitempty"`
-
-	// Don't require existing devices to render templates
-	SkipDevices *bool `json:"skip_devices,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
 }
 
 type CheckPushResponse struct {
@@ -1505,28 +1403,7 @@ type CheckPushResponse struct {
 	RenderedMessage map[string]string `json:"rendered_message,omitempty"`
 }
 
-type CheckRequest struct {
-	ConfigKey string `json:"config_key"`
-
-	EntityCreatorID string `json:"entity_creator_id"`
-
-	EntityID string `json:"entity_id"`
-
-	EntityType string `json:"entity_type"`
-
-	TestMode *bool `json:"test_mode,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
-
-	Options map[string]any `json:"options,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type CheckResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -1537,18 +1414,6 @@ type CheckResponse struct {
 	TaskID *string `json:"task_id,omitempty"`
 
 	Item *ReviewQueueItem `json:"item,omitempty"`
-}
-
-type CheckSNSRequest struct {
-
-	// AWS SNS access key
-	SnsKey *string `json:"sns_key,omitempty"`
-
-	// AWS SNS key secret
-	SnsSecret *string `json:"sns_secret,omitempty"`
-
-	// AWS SNS topic ARN
-	SnsTopicArn *string `json:"sns_topic_arn,omitempty"`
 }
 
 type CheckSNSResponse struct {
@@ -1564,18 +1429,6 @@ type CheckSNSResponse struct {
 	Data map[string]any `json:"data,omitempty"`
 }
 
-type CheckSQSRequest struct {
-
-	// AWS SQS access key
-	SqsKey *string `json:"sqs_key,omitempty"`
-
-	// AWS SQS key secret
-	SqsSecret *string `json:"sqs_secret,omitempty"`
-
-	// AWS SQS endpoint URL
-	SqsUrl *string `json:"sqs_url,omitempty"`
-}
-
 type CheckSQSResponse struct {
 	Duration string `json:"duration"`
 
@@ -1589,29 +1442,13 @@ type CheckSQSResponse struct {
 	Data map[string]any `json:"data,omitempty"`
 }
 
-type CollectUserFeedbackRequest struct {
-	Rating int `json:"rating"`
-
-	Sdk string `json:"sdk"`
-
-	SdkVersion string `json:"sdk_version"`
-
-	UserSessionID string `json:"user_session_id"`
-
-	Reason *string `json:"reason,omitempty"`
-
-	Custom map[string]any `json:"custom,omitempty"`
-}
-
 type CollectUserFeedbackResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
 // Represents custom chat command
 type Command struct {
-
 	// Arguments help text, shown in commands auto-completion
 	Args string `json:"args"`
 
@@ -1630,8 +1467,6 @@ type Command struct {
 	// Date/time of the last update
 	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 }
-
-type CommitMessageRequest struct{}
 
 type Config struct {
 	AppCertificate string `json:"app_certificate"`
@@ -1693,31 +1528,6 @@ type CountrywiseAggregateStats struct {
 	SubscriberLatency *TimeStats `json:"subscriber_latency,omitempty"`
 }
 
-// Block list contains restricted words
-type CreateBlockListRequest struct {
-
-	// Block list name
-	Name string `json:"name"`
-
-	// List of words to block
-	Words []string `json:"words"`
-
-	// Block list type.
-	Type *string `json:"type,omitempty"`
-}
-
-type CreateCallTypeRequest struct {
-	Name string `json:"name"`
-
-	ExternalStorage *string `json:"external_storage,omitempty"`
-
-	Grants map[string][]string `json:"grants,omitempty"`
-
-	NotificationSettings *NotificationSettings `json:"notification_settings,omitempty"`
-
-	Settings *CallSettingsRequest `json:"settings,omitempty"`
-}
-
 type CreateCallTypeResponse struct {
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -1734,82 +1544,6 @@ type CreateCallTypeResponse struct {
 	Settings CallSettingsResponse `json:"settings"`
 
 	ExternalStorage *string `json:"external_storage,omitempty"`
-}
-
-type CreateChannelTypeRequest struct {
-
-	// Enables automatic message moderation
-	Automod string `json:"automod"`
-
-	// Sets behavior of automatic moderation
-	AutomodBehavior string `json:"automod_behavior"`
-
-	// Number of maximum message characters
-	MaxMessageLength int `json:"max_message_length"`
-
-	// Channel type name
-	Name string `json:"name"`
-
-	// Name of the blocklist to use
-	Blocklist *string `json:"blocklist,omitempty"`
-
-	// Sets behavior of blocklist
-	BlocklistBehavior *string `json:"blocklist_behavior,omitempty"`
-
-	// Connect events support
-	ConnectEvents *bool `json:"connect_events,omitempty"`
-
-	// Enables custom events
-	CustomEvents *bool `json:"custom_events,omitempty"`
-
-	// Marks messages as pending by default
-	MarkMessagesPending *bool `json:"mark_messages_pending,omitempty"`
-
-	MessageRetention *string `json:"message_retention,omitempty"`
-
-	// Enables mutes
-	Mutes *bool `json:"mutes,omitempty"`
-
-	PartitionSize *int `json:"partition_size,omitempty"`
-
-	PartitionTtl *string `json:"partition_ttl,omitempty"`
-
-	// Enables polls
-	Polls *bool `json:"polls,omitempty"`
-
-	// Enables push notifications
-	PushNotifications *bool `json:"push_notifications,omitempty"`
-
-	// Enables message reactions
-	Reactions *bool `json:"reactions,omitempty"`
-
-	// Read events support
-	ReadEvents *bool `json:"read_events,omitempty"`
-
-	// Enables message replies (threads)
-	Replies *bool `json:"replies,omitempty"`
-
-	// Enables message search
-	Search *bool `json:"search,omitempty"`
-
-	// Typing events support
-	TypingEvents *bool `json:"typing_events,omitempty"`
-
-	// Enables file uploads
-	Uploads *bool `json:"uploads,omitempty"`
-
-	// Enables URL enrichment
-	UrlEnrichment *bool `json:"url_enrichment,omitempty"`
-
-	Blocklists []BlockListOptions `json:"blocklists,omitempty"`
-
-	// List of commands that channel supports
-	Commands []string `json:"commands,omitempty"`
-
-	// List of permissions for the channel type
-	Permissions []PolicyRequest `json:"permissions,omitempty"`
-
-	Grants map[string][]string `json:"grants,omitempty"`
 }
 
 type CreateChannelTypeResponse struct {
@@ -1878,78 +1612,19 @@ type CreateChannelTypeResponse struct {
 	AutomodThresholds *Thresholds `json:"automod_thresholds,omitempty"`
 }
 
-// Represents custom chat command
-type CreateCommandRequest struct {
-
-	// Description, shown in commands auto-completion
-	Description string `json:"description"`
-
-	// Unique command name
-	Name string `json:"name"`
-
-	// Arguments help text, shown in commands auto-completion
-	Args *string `json:"args,omitempty"`
-
-	// Set name used for grouping commands
-	Set *string `json:"set,omitempty"`
-}
-
 type CreateCommandResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Command *Command `json:"command,omitempty"`
 }
 
-type CreateDeviceRequest struct {
-
-	// Device ID
-	ID string `json:"id"`
-
-	// Push provider
-	PushProvider string `json:"push_provider"`
-
-	// Push provider name
-	PushProviderName *string `json:"push_provider_name,omitempty"`
-
-	// **Server-side only**. User ID which server acts upon
-	UserID *string `json:"user_id,omitempty"`
-
-	// When true the token is for Apple VoIP push notifications
-	VoipToken *bool `json:"voip_token,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
-type CreateExternalStorageRequest struct {
-	Bucket string `json:"bucket"`
-
-	Name string `json:"name"`
-
-	StorageType string `json:"storage_type"`
-
-	GcsCredentials *string `json:"gcs_credentials,omitempty"`
-
-	Path *string `json:"path,omitempty"`
-
-	AwsS3 *S3Request `json:"aws_s3,omitempty"`
-
-	AzureBlob *AzureRequest `json:"azure_blob,omitempty"`
-}
-
 type CreateExternalStorageResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
-type CreateGuestRequest struct {
-	User UserRequest `json:"user"`
-}
-
 type CreateGuestResponse struct {
-
 	// the access token to authenticate the user
 	AccessToken string `json:"access_token"`
 
@@ -1959,26 +1634,14 @@ type CreateGuestResponse struct {
 	User UserResponse `json:"user"`
 }
 
-type CreateImportRequest struct {
-	Mode string `json:"mode"`
-
-	Path string `json:"path"`
-}
-
 type CreateImportResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	ImportTask *ImportTask `json:"import_task,omitempty"`
 }
 
-type CreateImportURLRequest struct {
-	Filename *string `json:"filename,omitempty"`
-}
-
 type CreateImportURLResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -1987,64 +1650,7 @@ type CreateImportURLResponse struct {
 	UploadUrl string `json:"upload_url"`
 }
 
-type CreatePollOptionRequest struct {
-
-	// Option text
-	Text string `json:"text"`
-
-	Position *int `json:"position,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	Custom map[string]any `json:"Custom,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
-// Contains all information needed to create a new poll
-type CreatePollRequest struct {
-
-	// The name of the poll
-	Name string `json:"name"`
-
-	// Indicates whether users can suggest user defined answers
-	AllowAnswers *bool `json:"allow_answers,omitempty"`
-
-	AllowUserSuggestedOptions *bool `json:"allow_user_suggested_options,omitempty"`
-
-	// A description of the poll
-	Description *string `json:"description,omitempty"`
-
-	// Indicates whether users can cast multiple votes
-	EnforceUniqueVote *bool `json:"enforce_unique_vote,omitempty"`
-
-	ID *string `json:"id,omitempty"`
-
-	// Indicates whether the poll is open for voting
-	IsClosed *bool `json:"is_closed,omitempty"`
-
-	// Indicates the maximum amount of votes a user can cast
-	MaxVotesAllowed *int `json:"max_votes_allowed,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	VotingVisibility *string `json:"voting_visibility,omitempty"`
-
-	Options []*PollOptionInput `json:"options,omitempty"`
-
-	Custom map[string]any `json:"Custom,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
-type CreateRoleRequest struct {
-
-	// Role name
-	Name string `json:"name"`
-}
-
 type CreateRoleResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -2057,28 +1663,7 @@ type CustomActionRequest struct {
 	Options map[string]any `json:"options,omitempty"`
 }
 
-type CustomCheckRequest struct {
-	EntityCreatorID string `json:"entity_creator_id"`
-
-	EntityID string `json:"entity_id"`
-
-	EntityType string `json:"entity_type"`
-
-	Name *string `json:"name,omitempty"`
-
-	Reason *string `json:"reason,omitempty"`
-
-	RecommendedAction *string `json:"recommended_action,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type CustomCheckResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -2109,39 +1694,14 @@ type DataDogInfo struct {
 	Site *string `json:"site,omitempty"`
 }
 
-type DeactivateUserRequest struct {
-
-	// ID of the user who deactivated the user
-	CreatedByID *string `json:"created_by_id,omitempty"`
-
-	// Makes messages appear to be deleted
-	MarkMessagesDeleted *bool `json:"mark_messages_deleted,omitempty"`
-}
-
 type DeactivateUserResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	User *UserResponse `json:"user,omitempty"`
 }
 
-type DeactivateUsersRequest struct {
-
-	// User IDs to deactivate
-	UserIDs []string `json:"user_ids"`
-
-	// ID of the user who deactivated the users
-	CreatedByID *string `json:"created_by_id,omitempty"`
-
-	MarkChannelsDeleted *bool `json:"mark_channels_deleted,omitempty"`
-
-	// Makes messages appear to be deleted
-	MarkMessagesDeleted *bool `json:"mark_messages_deleted,omitempty"`
-}
-
 type DeactivateUsersResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -2152,14 +1712,7 @@ type DeleteActivityRequest struct {
 	HardDelete *bool `json:"hard_delete,omitempty"`
 }
 
-type DeleteCallRequest struct {
-
-	// if true the call will be hard deleted along with all related data
-	Hard *bool `json:"hard,omitempty"`
-}
-
 type DeleteCallResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -2168,29 +1721,14 @@ type DeleteCallResponse struct {
 	TaskID *string `json:"task_id,omitempty"`
 }
 
-type DeleteChannelRequest struct {
-	HardDelete *bool `json:"-" query:"hard_delete"`
-}
-
 type DeleteChannelResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Channel *ChannelResponse `json:"channel,omitempty"`
 }
 
-type DeleteChannelsRequest struct {
-
-	// All channels that should be deleted
-	Cids []string `json:"cids"`
-
-	// Specify if channels and all ressources should be hard deleted
-	HardDelete *bool `json:"hard_delete,omitempty"`
-}
-
 type DeleteChannelsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -2207,51 +1745,18 @@ type DeleteChannelsResultResponse struct {
 }
 
 type DeleteCommandResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Name string `json:"name"`
 }
 
-type DeleteDeviceRequest struct {
-
-	// Device ID to delete
-	ID string `json:"-" query:"id"`
-
-	// **Server-side only**. User ID which server acts upon
-	UserID *string `json:"-" query:"user_id"`
-}
-
 type DeleteExternalStorageResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
-type DeleteFileRequest struct {
-
-	// File URL to delete
-	Url *string `json:"-" query:"url"`
-}
-
-type DeleteImageRequest struct {
-
-	// File URL to delete
-	Url *string `json:"-" query:"url"`
-}
-
-type DeleteMessageRequest struct {
-	DeletedBy *string `json:"-" query:"deleted_by"`
-
-	// Delete all message reactions and replies as well
-	Hard *bool `json:"-" query:"hard"`
-
-	HardDelete *bool `json:"hard_delete,omitempty"`
-}
-
 type DeleteMessageResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -2259,30 +1764,13 @@ type DeleteMessageResponse struct {
 }
 
 type DeleteModerationConfigResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
 type DeleteModerationTemplateResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
-}
-
-type DeletePollOptionRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
-type DeletePollRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
-type DeleteReactionRequest struct {
-	HardDelete *bool `json:"hard_delete,omitempty"`
-
-	// **Server-side only**. User ID which server acts upon
-	UserID *string `json:"-" query:"user_id"`
 }
 
 type DeleteRecordingResponse struct {
@@ -2301,45 +1789,7 @@ type DeleteUserRequest struct {
 	MarkMessagesDeleted *bool `json:"mark_messages_deleted,omitempty"`
 }
 
-type DeleteUsersRequest struct {
-
-	// IDs of users to delete
-	UserIDs []string `json:"user_ids"`
-
-	// Calls delete mode.
-	// Affected calls are those that include exactly two members, one of whom is the user being deleted.
-	// * null or empty string - doesn't delete any calls
-	// * soft - marks user's calls and their related data as deleted (soft-delete)
-	// * hard - deletes user's calls and their data completely (hard-delete)
-	Calls *string `json:"calls,omitempty"`
-
-	// Conversation channels delete mode.
-	// Conversation channel is any channel which only has two members one of which is the user being deleted.
-	// * null or empty string - doesn't delete any conversation channels
-	// * soft - marks all conversation channels as deleted (same effect as Delete Channels with 'hard' option disabled)
-	// * hard - deletes channel and all its data completely including messages (same effect as Delete Channels with 'hard' option enabled)
-	Conversations *string `json:"conversations,omitempty"`
-
-	// Message delete mode.
-	// * null or empty string - doesn't delete user messages
-	// * soft - marks all user messages as deleted without removing any related message data
-	// * pruning - marks all user messages as deleted, nullifies message information and removes some message data such as reactions and flags
-	// * hard - deletes messages completely with all related information
-	Messages *string `json:"messages,omitempty"`
-
-	NewCallOwnerID *string `json:"new_call_owner_id,omitempty"`
-
-	NewChannelOwnerID *string `json:"new_channel_owner_id,omitempty"`
-
-	// User delete mode.
-	// * soft - marks user as deleted and retains all user data
-	// * pruning - marks user as deleted and nullifies user information
-	// * hard - deletes user completely. Requires 'hard' option for messages and conversations as well
-	User *string `json:"user,omitempty"`
-}
-
 type DeleteUsersResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -2348,7 +1798,6 @@ type DeleteUsersResponse struct {
 }
 
 type Device struct {
-
 	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -2425,8 +1874,6 @@ type EgressResponse struct {
 
 	Hls *EgressHLSResponse `json:"hls,omitempty"`
 }
-
-type EndCallRequest struct{}
 
 type EndCallResponse struct {
 	Duration string `json:"duration"`
@@ -2513,35 +1960,13 @@ type EventRequest struct {
 }
 
 type EventResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Event WSEvent `json:"event"`
 }
 
-type ExportChannelsRequest struct {
-
-	// Export options for channels
-	Channels []ChannelExport `json:"channels"`
-
-	// Set if deleted message text should be cleared
-	ClearDeletedMessageText *bool `json:"clear_deleted_message_text,omitempty"`
-
-	ExportUsers *bool `json:"export_users,omitempty"`
-
-	// Set if you want to include deleted channels
-	IncludeSoftDeletedChannels *bool `json:"include_soft_deleted_channels,omitempty"`
-
-	// Set if you want to include truncated messages
-	IncludeTruncatedMessages *bool `json:"include_truncated_messages,omitempty"`
-
-	// Export version
-	Version *string `json:"version,omitempty"`
-}
-
 type ExportChannelsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -2550,7 +1975,6 @@ type ExportChannelsResponse struct {
 }
 
 type ExportChannelsResult struct {
-
 	// URL of result
 	Url string `json:"url"`
 
@@ -2562,7 +1986,6 @@ type ExportChannelsResult struct {
 }
 
 type ExportUserResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -2573,12 +1996,7 @@ type ExportUserResponse struct {
 	User *UserResponse `json:"user,omitempty"`
 }
 
-type ExportUsersRequest struct {
-	UserIDs []string `json:"user_ids"`
-}
-
 type ExportUsersResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -2621,16 +2039,7 @@ type FileUploadConfig struct {
 	BlockedMimeTypes []string `json:"blocked_mime_types,omitempty"`
 }
 
-type FileUploadRequest struct {
-
-	// file field
-	File *string `json:"file,omitempty"`
-
-	User *OnlyUserID `json:"user,omitempty"`
-}
-
 type FileUploadResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -2725,26 +2134,7 @@ type FlagMessageDetails struct {
 	UpdatedByID *string `json:"updated_by_id,omitempty"`
 }
 
-type FlagRequest struct {
-	EntityID string `json:"entity_id"`
-
-	EntityType string `json:"entity_type"`
-
-	Reason string `json:"reason"`
-
-	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	Custom map[string]any `json:"custom,omitempty"`
-
-	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type FlagResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -2854,7 +2244,6 @@ type GeolocationResult struct {
 }
 
 type GetApplicationResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -2867,27 +2256,12 @@ type GetBlockListResponse struct {
 	Blocklist *BlockListResponse `json:"blocklist,omitempty"`
 }
 
-type GetBlockedUsersRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
 type GetBlockedUsersResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	// Array of blocked user object
 	Blocks []*BlockedUserResponse `json:"blocks"`
-}
-
-type GetCallRequest struct {
-	MembersLimit *int `json:"-" query:"members_limit"`
-
-	Notify *bool `json:"-" query:"notify"`
-
-	Ring *bool `json:"-" query:"ring"`
-
-	Video *bool `json:"-" query:"video"`
 }
 
 type GetCallResponse struct {
@@ -3034,7 +2408,6 @@ type GetCommandResponse struct {
 }
 
 type GetConfigResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3042,7 +2415,6 @@ type GetConfigResponse struct {
 }
 
 type GetCustomPermissionResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3050,7 +2422,6 @@ type GetCustomPermissionResponse struct {
 }
 
 type GetEdgesResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3058,7 +2429,6 @@ type GetEdgesResponse struct {
 }
 
 type GetExportChannelsStatusResponse struct {
-
 	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -3079,17 +2449,10 @@ type GetExportChannelsStatusResponse struct {
 }
 
 type GetImportResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	ImportTask *ImportTask `json:"import_task,omitempty"`
-}
-
-type GetManyMessagesRequest struct {
-
-	// List of comma-separated IDs
-	IDs []string `json:"-" query:"ids"`
 }
 
 type GetManyMessagesResponse struct {
@@ -3099,26 +2462,13 @@ type GetManyMessagesResponse struct {
 	Messages []*Message `json:"messages"`
 }
 
-type GetMessageRequest struct {
-
-	// Whether to show deleted message
-	ShowDeletedMessage *bool `json:"-" query:"show_deleted_message"`
-}
-
 type GetMessageResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Message MessageWithChannelResponse `json:"message"`
 
 	PendingMessageMetadata map[string]string `json:"pending_message_metadata,omitempty"`
-}
-
-type GetOGRequest struct {
-
-	// URL to be scraped
-	Url string `json:"-" query:"url"`
 }
 
 type GetOGResponse struct {
@@ -3179,20 +2529,6 @@ type GetOGResponse struct {
 	Giphy *Images `json:"giphy,omitempty"`
 }
 
-type GetOrCreateCallRequest struct {
-	MembersLimit *int `json:"members_limit,omitempty"`
-
-	// if provided it sends a notification event to the members for this call
-	Notify *bool `json:"notify,omitempty"`
-
-	// if provided it sends a ring event to the members for this call
-	Ring *bool `json:"ring,omitempty"`
-
-	Video *bool `json:"video,omitempty"`
-
-	Data *CallRequest `json:"data,omitempty"`
-}
-
 type GetOrCreateCallResponse struct {
 	Created bool `json:"created"`
 
@@ -3203,32 +2539,6 @@ type GetOrCreateCallResponse struct {
 	OwnCapabilities []OwnCapability `json:"own_capabilities"`
 
 	Call CallResponse `json:"call"`
-}
-
-type GetPollOptionRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
-type GetPollRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
-type GetRateLimitsRequest struct {
-
-	// Whether to include Android platform limits or not
-	Android *bool `json:"-" query:"android"`
-
-	// Specific endpoints to show limits for, as a comma-separated list of values
-	Endpoints *string `json:"-" query:"endpoints"`
-
-	// Whether to include iOS platform limits or not
-	Ios *bool `json:"-" query:"ios"`
-
-	// Whether to include server-side platform limits or not
-	ServerSide *bool `json:"-" query:"server_side"`
-
-	// Whether to include web platform limits or not
-	Web *bool `json:"-" query:"web"`
 }
 
 type GetRateLimitsResponse struct {
@@ -3247,15 +2557,6 @@ type GetRateLimitsResponse struct {
 	Web map[string]LimitInfo `json:"web,omitempty"`
 }
 
-type GetReactionsRequest struct {
-
-	// Number of records to return
-	Limit *int `json:"-" query:"limit"`
-
-	// Number of records to offset
-	Offset *int `json:"-" query:"offset"`
-}
-
 type GetReactionsResponse struct {
 	Duration string `json:"duration"`
 
@@ -3263,36 +2564,7 @@ type GetReactionsResponse struct {
 	Reactions []*Reaction `json:"reactions"`
 }
 
-type GetRepliesRequest struct {
-	CreatedAtAfter *Timestamp `json:"-" query:"created_at_after"`
-
-	CreatedAtAfterOrEqual *Timestamp `json:"-" query:"created_at_after_or_equal"`
-
-	CreatedAtAround *Timestamp `json:"-" query:"created_at_around"`
-
-	CreatedAtBefore *Timestamp `json:"-" query:"created_at_before"`
-
-	CreatedAtBeforeOrEqual *Timestamp `json:"-" query:"created_at_before_or_equal"`
-
-	IDAround *string `json:"-" query:"id_around"`
-
-	IDGt *string `json:"-" query:"id_gt"`
-
-	IDGte *string `json:"-" query:"id_gte"`
-
-	IDLt *string `json:"-" query:"id_lt"`
-
-	IDLte *string `json:"-" query:"id_lte"`
-
-	Limit *int `json:"-" query:"limit"`
-
-	Offset *int `json:"-" query:"offset"`
-
-	Sort []*SortParamRequest `json:"-" query:"sort"`
-}
-
 type GetRepliesResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3300,7 +2572,6 @@ type GetRepliesResponse struct {
 }
 
 type GetReviewQueueItemResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3328,18 +2599,6 @@ type GetTaskResponse struct {
 	Result map[string]any `json:"result,omitempty"`
 }
 
-type GetThreadRequest struct {
-
-	// Limit the number of members returned per thread channel
-	MemberLimit *int `json:"-" query:"member_limit"`
-
-	// Limit the number of participants returned
-	ParticipantLimit *int `json:"-" query:"participant_limit"`
-
-	// Limit the number of replies returned
-	ReplyLimit *int `json:"-" query:"reply_limit"`
-}
-
 type GetThreadResponse struct {
 	Duration string `json:"duration"`
 
@@ -3347,7 +2606,6 @@ type GetThreadResponse struct {
 }
 
 type GetUserModerationReportResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3358,32 +2616,7 @@ type GetUserModerationReportResponse struct {
 	User UserResponse `json:"user"`
 }
 
-type GetUserReportRequest struct {
-	UserID string `json:"-" query:"user_id"`
-
-	CreateUserIfNotExists *bool `json:"-" query:"create_user_if_not_exists"`
-
-	IncludeUserBlocks *bool `json:"-" query:"include_user_blocks"`
-
-	IncludeUserMutes *bool `json:"-" query:"include_user_mutes"`
-}
-
-type GoLiveRequest struct {
-	RecordingStorageName *string `json:"recording_storage_name,omitempty"`
-
-	StartHls *bool `json:"start_hls,omitempty"`
-
-	StartRecording *bool `json:"start_recording,omitempty"`
-
-	StartRtmpBroadcasts *bool `json:"start_rtmp_broadcasts,omitempty"`
-
-	StartTranscription *bool `json:"start_transcription,omitempty"`
-
-	TranscriptionStorageName *string `json:"transcription_storage_name,omitempty"`
-}
-
 type GoLiveResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3424,18 +2657,7 @@ type HLSSettingsResponse struct {
 	Layout LayoutSettingsResponse `json:"layout"`
 }
 
-type HideChannelRequest struct {
-
-	// Whether to clear message history of the channel or not
-	ClearHistory *bool `json:"clear_history,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type HideChannelResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
@@ -3469,7 +2691,6 @@ type ImageData struct {
 }
 
 type ImageSize struct {
-
 	// Crop mode
 	Crop *string `json:"crop,omitempty"`
 
@@ -3483,17 +2704,7 @@ type ImageSize struct {
 	Width *int `json:"width,omitempty"`
 }
 
-type ImageUploadRequest struct {
-	File *string `json:"file,omitempty"`
-
-	// field with JSON-encoded array of image size configurations
-	UploadSizes []ImageSize `json:"upload_sizes,omitempty"`
-
-	User *OnlyUserID `json:"user,omitempty"`
-}
-
 type ImageUploadResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3592,7 +2803,6 @@ type LayoutSettingsResponse struct {
 }
 
 type LimitInfo struct {
-
 	// The maximum number of calls allowed for the time window
 	Limit int `json:"limit"`
 
@@ -3622,7 +2832,6 @@ type LimitsSettingsResponse struct {
 }
 
 type ListBlockListResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3643,17 +2852,10 @@ type ListChannelTypesResponse struct {
 }
 
 type ListCommandsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Commands []*Command `json:"commands"`
-}
-
-type ListDevicesRequest struct {
-
-	// **Server-side only**. User ID which server acts upon
-	UserID *string `json:"-" query:"user_id"`
 }
 
 type ListDevicesResponse struct {
@@ -3664,7 +2866,6 @@ type ListDevicesResponse struct {
 }
 
 type ListExternalStorageResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3672,7 +2873,6 @@ type ListExternalStorageResponse struct {
 }
 
 type ListImportsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3680,7 +2880,6 @@ type ListImportsResponse struct {
 }
 
 type ListPermissionsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3688,7 +2887,6 @@ type ListPermissionsResponse struct {
 }
 
 type ListPushProvidersResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3702,7 +2900,6 @@ type ListRecordingsResponse struct {
 }
 
 type ListRolesResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3723,47 +2920,11 @@ type Location struct {
 	SubdivisionIsoCode string `json:"subdivision_iso_code"`
 }
 
-type MarkChannelsReadRequest struct {
-	UserID *string `json:"user_id,omitempty"`
-
-	// Map of channel ID to last read message ID
-	ReadByChannel map[string]string `json:"read_by_channel,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
-type MarkReadRequest struct {
-
-	// ID of the message that is considered last read by client
-	MessageID *string `json:"message_id,omitempty"`
-
-	// Optional Thread ID to specifically mark a given thread as read
-	ThreadID *string `json:"thread_id,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type MarkReadResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Event *MessageReadEvent `json:"event,omitempty"`
-}
-
-type MarkUnreadRequest struct {
-
-	// ID of the message from where the channel is marked unread
-	MessageID *string `json:"message_id,omitempty"`
-
-	// Mark a thread unread, specify both the thread and message id
-	ThreadID *string `json:"thread_id,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
 }
 
 type MediaPubSubHint struct {
@@ -3786,7 +2947,6 @@ type MemberRequest struct {
 }
 
 type MemberResponse struct {
-
 	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -3807,7 +2967,6 @@ type MemberResponse struct {
 }
 
 type MembersResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -3817,7 +2976,6 @@ type MembersResponse struct {
 
 // Represents any chat message
 type Message struct {
-
 	// Channel unique identifier in <type>:<id> format
 	Cid string `json:"cid"`
 
@@ -3924,16 +3082,6 @@ type Message struct {
 	User *UserObject `json:"user,omitempty"`
 }
 
-type MessageActionRequest struct {
-
-	// ReadOnlyData to execute command with
-	FormData map[string]string `json:"form_data"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type MessageChangeSet struct {
 	Attachments bool `json:"attachments"`
 
@@ -4002,7 +3150,6 @@ type MessageHistoryEntryResponse struct {
 
 // Result of the message moderation
 type MessageModerationResult struct {
-
 	// Action taken by automod
 	Action string `json:"action"`
 
@@ -4334,24 +3481,10 @@ type ModeratorStats struct {
 }
 
 type ModeratorStatsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	ModeratorStats []*ModeratorStats `json:"moderator_stats"`
-}
-
-type MuteChannelRequest struct {
-
-	// Duration of mute in milliseconds
-	Expiration *int `json:"expiration,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	// Channel CIDs to mute (if multiple channels)
-	ChannelCids []string `json:"channel_cids,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
 }
 
 type MuteChannelResponse struct {
@@ -4363,19 +3496,6 @@ type MuteChannelResponse struct {
 	ChannelMute *ChannelMute `json:"channel_mute,omitempty"`
 
 	OwnUser *OwnUser `json:"own_user,omitempty"`
-}
-
-type MuteRequest struct {
-
-	// User IDs to mute (if multiple users)
-	TargetIDs []string `json:"target_ids"`
-
-	// Duration of mute in minutes
-	Timeout *int `json:"timeout,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
 }
 
 type MuteResponse struct {
@@ -4390,26 +3510,7 @@ type MuteResponse struct {
 	OwnUser *OwnUser `json:"own_user,omitempty"`
 }
 
-type MuteUsersRequest struct {
-	Audio *bool `json:"audio,omitempty"`
-
-	MuteAllUsers *bool `json:"mute_all_users,omitempty"`
-
-	MutedByID *string `json:"muted_by_id,omitempty"`
-
-	Screenshare *bool `json:"screenshare,omitempty"`
-
-	ScreenshareAudio *bool `json:"screenshare_audio,omitempty"`
-
-	Video *bool `json:"video,omitempty"`
-
-	UserIDs []string `json:"user_ids,omitempty"`
-
-	MutedBy *UserRequest `json:"muted_by,omitempty"`
-}
-
 type MuteUsersResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
@@ -4550,7 +3651,6 @@ type PendingMessageResponse struct {
 }
 
 type Permission struct {
-
 	// Action name this permission is for (e.g. SendMessage)
 	Action string `json:"action"`
 
@@ -4582,17 +3682,7 @@ type Permission struct {
 	Condition map[string]any `json:"condition,omitempty"`
 }
 
-type PinRequest struct {
-
-	// the session ID of the user who pinned the message
-	SessionID string `json:"session_id"`
-
-	// the user ID of the user who pinned the message
-	UserID string `json:"user_id"`
-}
-
 type PinResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
@@ -4701,7 +3791,6 @@ type PollOptionRequest struct {
 }
 
 type PollOptionResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -4717,7 +3806,6 @@ type PollOptionResponseData struct {
 }
 
 type PollResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -4787,7 +3875,6 @@ type PollVote struct {
 }
 
 type PollVoteResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -4815,7 +3902,6 @@ type PollVoteResponseData struct {
 }
 
 type PollVotesResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5025,12 +4111,7 @@ type QueryBannedUsersPayload struct {
 	User *UserRequest `json:"user,omitempty"`
 }
 
-type QueryBannedUsersRequest struct {
-	Payload *QueryBannedUsersPayload `json:"-" query:"payload"`
-}
-
 type QueryBannedUsersResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5038,24 +4119,7 @@ type QueryBannedUsersResponse struct {
 	Bans []*BanResponse `json:"bans"`
 }
 
-type QueryCallMembersRequest struct {
-	ID string `json:"id"`
-
-	Type string `json:"type"`
-
-	Limit *int `json:"limit,omitempty"`
-
-	Next *string `json:"next,omitempty"`
-
-	Prev *string `json:"prev,omitempty"`
-
-	Sort []*SortParamRequest `json:"sort,omitempty"`
-
-	FilterConditions map[string]any `json:"filter_conditions,omitempty"`
-}
-
 type QueryCallMembersResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5066,20 +4130,7 @@ type QueryCallMembersResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
-type QueryCallStatsRequest struct {
-	Limit *int `json:"limit,omitempty"`
-
-	Next *string `json:"next,omitempty"`
-
-	Prev *string `json:"prev,omitempty"`
-
-	Sort []*SortParamRequest `json:"sort,omitempty"`
-
-	FilterConditions map[string]any `json:"filter_conditions,omitempty"`
-}
-
 type QueryCallStatsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5090,20 +4141,7 @@ type QueryCallStatsResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
-type QueryCallsRequest struct {
-	Limit *int `json:"limit,omitempty"`
-
-	Next *string `json:"next,omitempty"`
-
-	Prev *string `json:"prev,omitempty"`
-
-	Sort []*SortParamRequest `json:"sort,omitempty"`
-
-	FilterConditions map[string]any `json:"filter_conditions,omitempty"`
-}
-
 type QueryCallsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5114,35 +4152,7 @@ type QueryCallsResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
-type QueryChannelsRequest struct {
-
-	// Number of channels to limit
-	Limit *int `json:"limit,omitempty"`
-
-	// Number of members to limit
-	MemberLimit *int `json:"member_limit,omitempty"`
-
-	// Number of messages to limit
-	MessageLimit *int `json:"message_limit,omitempty"`
-
-	// Channel pagination offset
-	Offset *int `json:"offset,omitempty"`
-
-	// Whether to update channel state or not
-	State *bool `json:"state,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	// List of sort parameters
-	Sort []*SortParamRequest `json:"sort,omitempty"`
-
-	FilterConditions map[string]any `json:"filter_conditions,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type QueryChannelsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5161,7 +4171,6 @@ type QueryFeedModerationTemplate struct {
 }
 
 type QueryFeedModerationTemplatesResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5188,10 +4197,6 @@ type QueryMembersPayload struct {
 	User *UserRequest `json:"user,omitempty"`
 }
 
-type QueryMembersRequest struct {
-	Payload *QueryMembersPayload `json:"-" query:"payload"`
-}
-
 type QueryMessageFlagsPayload struct {
 	Limit *int `json:"limit,omitempty"`
 
@@ -5209,12 +4214,7 @@ type QueryMessageFlagsPayload struct {
 	User *UserRequest `json:"user,omitempty"`
 }
 
-type QueryMessageFlagsRequest struct {
-	Payload *QueryMessageFlagsPayload `json:"-" query:"payload"`
-}
-
 type QueryMessageFlagsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5222,23 +4222,7 @@ type QueryMessageFlagsResponse struct {
 	Flags []*MessageFlagResponse `json:"flags"`
 }
 
-type QueryMessageHistoryRequest struct {
-
-	// Filter to apply to the query
-	Filter map[string]any `json:"filter"`
-
-	Limit *int `json:"limit,omitempty"`
-
-	Next *string `json:"next,omitempty"`
-
-	Prev *string `json:"prev,omitempty"`
-
-	// Array of sort parameters
-	Sort []*SortParamRequest `json:"sort,omitempty"`
-}
-
 type QueryMessageHistoryResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5250,24 +4234,7 @@ type QueryMessageHistoryResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
-type QueryModerationConfigsRequest struct {
-	Limit *int `json:"limit,omitempty"`
-
-	Next *string `json:"next,omitempty"`
-
-	Prev *string `json:"prev,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	Sort []*SortParamRequest `json:"sort,omitempty"`
-
-	Filter map[string]any `json:"filter,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type QueryModerationConfigsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5278,24 +4245,7 @@ type QueryModerationConfigsResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
-type QueryModerationLogsRequest struct {
-	Limit *int `json:"limit,omitempty"`
-
-	Next *string `json:"next,omitempty"`
-
-	Prev *string `json:"prev,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	Sort []*SortParamRequest `json:"sort,omitempty"`
-
-	Filter map[string]any `json:"filter,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type QueryModerationLogsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5306,40 +4256,7 @@ type QueryModerationLogsResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
-type QueryPollVotesRequest struct {
-	Limit *int `json:"limit,omitempty"`
-
-	Next *string `json:"next,omitempty"`
-
-	Prev *string `json:"prev,omitempty"`
-
-	UserID *string `json:"-" query:"user_id"`
-
-	// Array of sort parameters
-	Sort []*SortParamRequest `json:"sort,omitempty"`
-
-	// Filter to apply to the query
-	Filter map[string]any `json:"filter,omitempty"`
-}
-
-type QueryPollsRequest struct {
-	Limit *int `json:"limit,omitempty"`
-
-	Next *string `json:"next,omitempty"`
-
-	Prev *string `json:"prev,omitempty"`
-
-	UserID *string `json:"-" query:"user_id"`
-
-	// Array of sort parameters
-	Sort []*SortParamRequest `json:"sort,omitempty"`
-
-	// Filter to apply to the query
-	Filter map[string]any `json:"filter,omitempty"`
-}
-
 type QueryPollsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5351,24 +4268,7 @@ type QueryPollsResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
-type QueryReactionsRequest struct {
-	Limit *int `json:"limit,omitempty"`
-
-	Next *string `json:"next,omitempty"`
-
-	Prev *string `json:"prev,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	Sort []*SortParamRequest `json:"sort,omitempty"`
-
-	Filter map[string]any `json:"filter,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type QueryReactionsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5379,30 +4279,7 @@ type QueryReactionsResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
-type QueryReviewQueueRequest struct {
-	Limit *int `json:"limit,omitempty"`
-
-	LockModeratorDuration *int `json:"lock_moderator_duration,omitempty"`
-
-	LockModeratorID *string `json:"lock_moderator_id,omitempty"`
-
-	Next *string `json:"next,omitempty"`
-
-	Prev *string `json:"prev,omitempty"`
-
-	StatsOnly *bool `json:"stats_only,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	Sort []*SortParamRequest `json:"sort,omitempty"`
-
-	Filter map[string]any `json:"filter,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type QueryReviewQueueResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5417,28 +4294,7 @@ type QueryReviewQueueResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
-type QueryThreadsRequest struct {
-	Limit *int `json:"limit,omitempty"`
-
-	MemberLimit *int `json:"member_limit,omitempty"`
-
-	Next *string `json:"next,omitempty"`
-
-	// Limit the number of participants returned per each thread
-	ParticipantLimit *int `json:"participant_limit,omitempty"`
-
-	Prev *string `json:"prev,omitempty"`
-
-	// Limit the number of replies returned per each thread
-	ReplyLimit *int `json:"reply_limit,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type QueryThreadsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5450,24 +4306,7 @@ type QueryThreadsResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
-type QueryUsageStatsRequest struct {
-	Limit *int `json:"limit,omitempty"`
-
-	Next *string `json:"next,omitempty"`
-
-	Prev *string `json:"prev,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	Sort []*SortParamRequest `json:"sort,omitempty"`
-
-	Filter map[string]any `json:"filter,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type QueryUsageStatsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5496,12 +4335,7 @@ type QueryUsersPayload struct {
 	User *UserRequest `json:"user,omitempty"`
 }
 
-type QueryUsersRequest struct {
-	Payload *QueryUsersPayload `json:"-" query:"payload"`
-}
-
 type QueryUsersResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5519,7 +4353,6 @@ type QueueStatsResponse struct {
 }
 
 type RTMPBroadcastRequest struct {
-
 	// Name identifier for RTMP broadcast, must be unique in call
 	Name string `json:"name"`
 
@@ -5577,7 +4410,6 @@ type RTMPSettingsResponse struct {
 
 // Represents user reaction to a message
 type Reaction struct {
-
 	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -5612,7 +4444,6 @@ type ReactionGroupResponse struct {
 }
 
 type ReactionRemovalResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5638,7 +4469,6 @@ type ReactionRequest struct {
 }
 
 type ReactionResponse struct {
-
 	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -5663,42 +4493,14 @@ type ReactionResponse struct {
 	User UserResponse `json:"user"`
 }
 
-type ReactivateUserRequest struct {
-
-	// ID of the user who's reactivating the user
-	CreatedByID *string `json:"created_by_id,omitempty"`
-
-	// Set this field to put new name for the user
-	Name *string `json:"name,omitempty"`
-
-	// Restore previously deleted messages
-	RestoreMessages *bool `json:"restore_messages,omitempty"`
-}
-
 type ReactivateUserResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	User *UserResponse `json:"user,omitempty"`
 }
 
-type ReactivateUsersRequest struct {
-
-	// User IDs to reactivate
-	UserIDs []string `json:"user_ids"`
-
-	// ID of the user who's reactivating the users
-	CreatedByID *string `json:"created_by_id,omitempty"`
-
-	RestoreChannels *bool `json:"restore_channels,omitempty"`
-
-	// Restore previously deleted messages
-	RestoreMessages *bool `json:"restore_messages,omitempty"`
-}
-
 type ReactivateUsersResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -5763,21 +4565,12 @@ type RecordSettingsResponse struct {
 	Layout LayoutSettingsResponse `json:"layout"`
 }
 
-type RemovePollVoteRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
 type Response struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
 type RestoreActionRequest struct{}
-
-type RestoreUsersRequest struct {
-	UserIDs []string `json:"user_ids"`
-}
 
 type ReviewQueueItem struct {
 	ContentChanged bool `json:"content_changed"`
@@ -5858,7 +4651,6 @@ type RingSettingsResponse struct {
 }
 
 type Role struct {
-
 	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -5918,7 +4710,6 @@ type ScreensharingSettingsResponse struct {
 }
 
 type SearchPayload struct {
-
 	// Channel filter conditions
 	FilterConditions map[string]any `json:"filter_conditions"`
 
@@ -5941,12 +4732,7 @@ type SearchPayload struct {
 	MessageFilterConditions map[string]any `json:"message_filter_conditions,omitempty"`
 }
 
-type SearchRequest struct {
-	Payload *SearchPayload `json:"-" query:"payload"`
-}
-
 type SearchResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -6045,7 +4831,6 @@ type SearchResultMessage struct {
 }
 
 type SearchWarning struct {
-
 	// Code corresponding to the warning
 	WarningCode int `json:"warning_code"`
 
@@ -6059,40 +4844,11 @@ type SearchWarning struct {
 	ChannelSearchCids []string `json:"channel_search_cids,omitempty"`
 }
 
-type SendCallEventRequest struct {
-	UserID *string `json:"user_id,omitempty"`
-
-	Custom map[string]any `json:"custom,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type SendCallEventResponse struct {
 	Duration string `json:"duration"`
 }
 
-type SendEventRequest struct {
-	Event EventRequest `json:"event"`
-}
-
-type SendMessageRequest struct {
-	Message MessageRequest `json:"message"`
-
-	ForceModeration *bool `json:"force_moderation,omitempty"`
-
-	KeepChannelHidden *bool `json:"keep_channel_hidden,omitempty"`
-
-	Pending *bool `json:"pending,omitempty"`
-
-	SkipEnrichUrl *bool `json:"skip_enrich_url,omitempty"`
-
-	SkipPush *bool `json:"skip_push,omitempty"`
-
-	PendingMessageMetadata map[string]string `json:"pending_message_metadata,omitempty"`
-}
-
 type SendMessageResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -6102,18 +4858,7 @@ type SendMessageResponse struct {
 	PendingMessageMetadata map[string]string `json:"pending_message_metadata,omitempty"`
 }
 
-type SendReactionRequest struct {
-	Reaction ReactionRequest `json:"reaction"`
-
-	// Whether to replace all existing user reactions
-	EnforceUnique *bool `json:"enforce_unique,omitempty"`
-
-	// Skips any mobile push notifications
-	SkipPush *bool `json:"skip_push,omitempty"`
-}
-
 type SendReactionResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -6122,24 +4867,12 @@ type SendReactionResponse struct {
 	Reaction ReactionResponse `json:"reaction"`
 }
 
-type SendUserCustomEventRequest struct {
-	Event UserCustomEventRequest `json:"event"`
-}
-
-type ShowChannelRequest struct {
-	UserID *string `json:"user_id,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type ShowChannelResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
 type SortParam struct {
-
 	// Direction of sorting, -1 for descending, 1 for ascending
 	Direction *int `json:"direction,omitempty"`
 
@@ -6148,7 +4881,6 @@ type SortParam struct {
 }
 
 type SortParamRequest struct {
-
 	// Direction of sorting, 1 for Ascending, -1 for Descending, default is 1
 	Direction *int `json:"direction,omitempty"`
 
@@ -6156,120 +4888,59 @@ type SortParamRequest struct {
 	Field *string `json:"field,omitempty"`
 }
 
-type StartHLSBroadcastingRequest struct{}
-
 type StartHLSBroadcastingResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	PlaylistUrl string `json:"playlist_url"`
 }
 
-type StartRTMPBroadcastsRequest struct {
-
-	// List of broadcasts to start
-	Broadcasts []RTMPBroadcastRequest `json:"broadcasts"`
-}
-
 type StartRTMPBroadcastsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
-}
-
-type StartRecordingRequest struct {
-	RecordingExternalStorage *string `json:"recording_external_storage,omitempty"`
 }
 
 type StartRecordingResponse struct {
 	Duration string `json:"duration"`
 }
 
-type StartTranscriptionRequest struct {
-	TranscriptionExternalStorage *string `json:"transcription_external_storage,omitempty"`
-}
-
 type StartTranscriptionResponse struct {
 	Duration string `json:"duration"`
 }
 
-type StopAllRTMPBroadcastsRequest struct{}
-
 type StopAllRTMPBroadcastsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
-
-type StopHLSBroadcastingRequest struct{}
 
 type StopHLSBroadcastingResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
-type StopLiveRequest struct{}
-
 type StopLiveResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Call CallResponse `json:"call"`
 }
 
-type StopRTMPBroadcastsRequest struct{}
-
 type StopRTMPBroadcastsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
-
-type StopRecordingRequest struct{}
 
 type StopRecordingResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
-
-type StopTranscriptionRequest struct{}
 
 type StopTranscriptionResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
-}
-
-type SubmitActionRequest struct {
-	ActionType string `json:"action_type"`
-
-	ItemID string `json:"item_id"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	Ban *BanActionRequest `json:"ban,omitempty"`
-
-	Custom *CustomActionRequest `json:"custom,omitempty"`
-
-	DeleteActivity *DeleteActivityRequest `json:"delete_activity,omitempty"`
-
-	DeleteMessage *DeleteMessageRequest `json:"delete_message,omitempty"`
-
-	DeleteReaction *DeleteReactionRequest `json:"delete_reaction,omitempty"`
-
-	DeleteUser *DeleteUserRequest `json:"delete_user,omitempty"`
-
-	Unban *UnbanActionRequest `json:"unban,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
 }
 
 type SubmitActionResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -6328,7 +4999,6 @@ type ThreadParticipant struct {
 }
 
 type ThreadResponse struct {
-
 	// Channel CID
 	ChannelCid string `json:"channel_cid"`
 
@@ -6376,7 +5046,6 @@ type ThreadResponse struct {
 }
 
 type ThreadStateResponse struct {
-
 	// Channel CID
 	ChannelCid string `json:"channel_cid"`
 
@@ -6485,32 +5154,7 @@ type TranscriptionSettingsResponse struct {
 	Languages []string `json:"languages"`
 }
 
-type TranslateMessageRequest struct {
-
-	// Language to translate message to
-	Language string `json:"language"`
-}
-
-type TruncateChannelRequest struct {
-
-	// Permanently delete channel data (messages, reactions, etc.)
-	HardDelete *bool `json:"hard_delete,omitempty"`
-
-	// When `message` is set disables all push notifications for it
-	SkipPush *bool `json:"skip_push,omitempty"`
-
-	// Truncate channel data up to `truncated_at`. The system message (if provided) creation time is always greater than `truncated_at`
-	TruncatedAt *Timestamp `json:"truncated_at,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	Message *MessageRequest `json:"message,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type TruncateChannelResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -6529,104 +5173,36 @@ type TypingIndicatorsResponse struct {
 
 type UnbanActionRequest struct{}
 
-type UnbanRequest struct {
-	TargetUserID string `json:"-" query:"target_user_id"`
-
-	ChannelCid *string `json:"-" query:"channel_cid"`
-
-	CreatedBy *string `json:"-" query:"created_by"`
-
-	UnbannedByID *string `json:"unbanned_by_id,omitempty"`
-
-	UnbannedBy *UserRequest `json:"unbanned_by,omitempty"`
-}
-
 type UnbanResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
 type UnblockActionRequest struct{}
 
-type UnblockUserRequest struct {
-
-	// the user to unblock
-	UserID string `json:"user_id"`
-}
-
 type UnblockUserResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
-}
-
-type UnblockUsersRequest struct {
-	BlockedUserID string `json:"blocked_user_id"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
 }
 
 type UnblockUsersResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
-type UnmuteChannelRequest struct {
-
-	// Duration of mute in milliseconds
-	Expiration *int `json:"expiration,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	// Channel CIDs to mute (if multiple channels)
-	ChannelCids []string `json:"channel_cids,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
-type UnmuteRequest struct {
-
-	// User IDs to unmute
-	TargetIDs []string `json:"target_ids"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type UnmuteResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	NonExistingUsers []string `json:"non_existing_users,omitempty"`
 }
 
-type UnpinRequest struct {
-
-	// the session ID of the user who pinned the message
-	SessionID string `json:"session_id"`
-
-	// the user ID of the user who pinned the message
-	UserID string `json:"user_id"`
-}
-
 type UnpinResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
-type UnreadCountsBatchRequest struct {
-	UserIDs []string `json:"user_ids"`
-}
-
 type UnreadCountsBatchResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -6671,130 +5247,11 @@ type UnreadCountsThread struct {
 	UnreadCount int `json:"unread_count"`
 }
 
-type UpdateAppRequest struct {
-	AsyncUrlEnrichEnabled *bool `json:"async_url_enrich_enabled,omitempty"`
-
-	AutoTranslationEnabled *bool `json:"auto_translation_enabled,omitempty"`
-
-	BeforeMessageSendHookUrl *string `json:"before_message_send_hook_url,omitempty"`
-
-	CdnExpirationSeconds *int `json:"cdn_expiration_seconds,omitempty"`
-
-	ChannelHideMembersOnly *bool `json:"channel_hide_members_only,omitempty"`
-
-	CustomActionHandlerUrl *string `json:"custom_action_handler_url,omitempty"`
-
-	DisableAuthChecks *bool `json:"disable_auth_checks,omitempty"`
-
-	DisablePermissionsChecks *bool `json:"disable_permissions_checks,omitempty"`
-
-	EnforceUniqueUsernames *string `json:"enforce_unique_usernames,omitempty"`
-
-	FeedsModerationEnabled *bool `json:"feeds_moderation_enabled,omitempty"`
-
-	FeedsV2Region *string `json:"feeds_v2_region,omitempty"`
-
-	ImageModerationEnabled *bool `json:"image_moderation_enabled,omitempty"`
-
-	MigratePermissionsToV2 *bool `json:"migrate_permissions_to_v2,omitempty"`
-
-	ModerationEnabled *bool `json:"moderation_enabled,omitempty"`
-
-	ModerationWebhookUrl *string `json:"moderation_webhook_url,omitempty"`
-
-	MultiTenantEnabled *bool `json:"multi_tenant_enabled,omitempty"`
-
-	PermissionVersion *string `json:"permission_version,omitempty"`
-
-	RemindersInterval *int `json:"reminders_interval,omitempty"`
-
-	RemindersMaxMembers *int `json:"reminders_max_members,omitempty"`
-
-	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
-
-	SnsKey *string `json:"sns_key,omitempty"`
-
-	SnsSecret *string `json:"sns_secret,omitempty"`
-
-	SnsTopicArn *string `json:"sns_topic_arn,omitempty"`
-
-	SqsKey *string `json:"sqs_key,omitempty"`
-
-	SqsSecret *string `json:"sqs_secret,omitempty"`
-
-	SqsUrl *string `json:"sqs_url,omitempty"`
-
-	VideoProvider *string `json:"video_provider,omitempty"`
-
-	WebhookUrl *string `json:"webhook_url,omitempty"`
-
-	AllowedFlagReasons []string `json:"allowed_flag_reasons,omitempty"`
-
-	ImageModerationBlockLabels []string `json:"image_moderation_block_labels,omitempty"`
-
-	ImageModerationLabels []string `json:"image_moderation_labels,omitempty"`
-
-	UserSearchDisallowedRoles []string `json:"user_search_disallowed_roles,omitempty"`
-
-	WebhookEvents []string `json:"webhook_events,omitempty"`
-
-	AgoraOptions *Config `json:"agora_options,omitempty"`
-
-	ApnConfig *APNConfig `json:"apn_config,omitempty"`
-
-	AsyncModerationConfig *AsyncModerationConfiguration `json:"async_moderation_config,omitempty"`
-
-	DatadogInfo *DataDogInfo `json:"datadog_info,omitempty"`
-
-	FileUploadConfig *FileUploadConfig `json:"file_upload_config,omitempty"`
-
-	FirebaseConfig *FirebaseConfig `json:"firebase_config,omitempty"`
-
-	Grants map[string][]string `json:"grants,omitempty"`
-
-	HmsOptions *Config `json:"hms_options,omitempty"`
-
-	HuaweiConfig *HuaweiConfig `json:"huawei_config,omitempty"`
-
-	ImageUploadConfig *FileUploadConfig `json:"image_upload_config,omitempty"`
-
-	PushConfig *PushConfig `json:"push_config,omitempty"`
-
-	XiaomiConfig *XiaomiConfig `json:"xiaomi_config,omitempty"`
-}
-
-type UpdateBlockListRequest struct {
-
-	// List of words to block
-	Words []string `json:"words,omitempty"`
-}
-
-type UpdateCallMembersRequest struct {
-
-	// List of userID to remove
-	RemoveMembers []string `json:"remove_members,omitempty"`
-
-	// List of members to update or insert
-	UpdateMembers []MemberRequest `json:"update_members,omitempty"`
-}
-
 type UpdateCallMembersResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Members []MemberResponse `json:"members"`
-}
-
-type UpdateCallRequest struct {
-
-	// the time the call is scheduled to start
-	StartsAt *Timestamp `json:"starts_at,omitempty"`
-
-	// Custom data for this object
-	Custom map[string]any `json:"custom,omitempty"`
-
-	SettingsOverride *CallSettingsRequest `json:"settings_override,omitempty"`
 }
 
 // Represents a call
@@ -6806,16 +5263,6 @@ type UpdateCallResponse struct {
 	OwnCapabilities []OwnCapability `json:"own_capabilities"`
 
 	Call CallResponse `json:"call"`
-}
-
-type UpdateCallTypeRequest struct {
-	ExternalStorage *string `json:"external_storage,omitempty"`
-
-	Grants map[string][]string `json:"grants,omitempty"`
-
-	NotificationSettings *NotificationSettings `json:"notification_settings,omitempty"`
-
-	Settings *CallSettingsRequest `json:"settings,omitempty"`
 }
 
 type UpdateCallTypeResponse struct {
@@ -6836,18 +5283,7 @@ type UpdateCallTypeResponse struct {
 	ExternalStorage *string `json:"external_storage,omitempty"`
 }
 
-type UpdateChannelPartialRequest struct {
-	UserID *string `json:"user_id,omitempty"`
-
-	Unset []string `json:"unset,omitempty"`
-
-	Set map[string]any `json:"set,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type UpdateChannelPartialResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -6857,52 +5293,7 @@ type UpdateChannelPartialResponse struct {
 	Channel *ChannelResponse `json:"channel,omitempty"`
 }
 
-type UpdateChannelRequest struct {
-
-	// Set to `true` to accept the invite
-	AcceptInvite *bool `json:"accept_invite,omitempty"`
-
-	// Sets cool down period for the channel in seconds
-	Cooldown *int `json:"cooldown,omitempty"`
-
-	// Set to `true` to hide channel's history when adding new members
-	HideHistory *bool `json:"hide_history,omitempty"`
-
-	// Set to `true` to reject the invite
-	RejectInvite *bool `json:"reject_invite,omitempty"`
-
-	// When `message` is set disables all push notifications for it
-	SkipPush *bool `json:"skip_push,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	// List of user IDs to add to the channel
-	AddMembers []*ChannelMember `json:"add_members,omitempty"`
-
-	// List of user IDs to make channel moderators
-	AddModerators []string `json:"add_moderators,omitempty"`
-
-	// List of channel member role assignments. If any specified user is not part of the channel, the request will fail
-	AssignRoles []*ChannelMember `json:"assign_roles,omitempty"`
-
-	// List of user IDs to take away moderators status from
-	DemoteModerators []string `json:"demote_moderators,omitempty"`
-
-	// List of user IDs to invite to the channel
-	Invites []*ChannelMember `json:"invites,omitempty"`
-
-	// List of user IDs to remove from the channel
-	RemoveMembers []string `json:"remove_members,omitempty"`
-
-	Data *ChannelInput `json:"data,omitempty"`
-
-	Message *MessageRequest `json:"message,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type UpdateChannelResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -6912,65 +5303,6 @@ type UpdateChannelResponse struct {
 	Channel *ChannelResponse `json:"channel,omitempty"`
 
 	Message *MessageResponse `json:"message,omitempty"`
-}
-
-type UpdateChannelTypeRequest struct {
-	Automod string `json:"automod"`
-
-	AutomodBehavior string `json:"automod_behavior"`
-
-	MaxMessageLength int `json:"max_message_length"`
-
-	Blocklist *string `json:"blocklist,omitempty"`
-
-	BlocklistBehavior *string `json:"blocklist_behavior,omitempty"`
-
-	ConnectEvents *bool `json:"connect_events,omitempty"`
-
-	CustomEvents *bool `json:"custom_events,omitempty"`
-
-	MarkMessagesPending *bool `json:"mark_messages_pending,omitempty"`
-
-	Mutes *bool `json:"mutes,omitempty"`
-
-	PartitionSize *int `json:"partition_size,omitempty"`
-
-	PartitionTtl *string `json:"partition_ttl,omitempty"`
-
-	Polls *bool `json:"polls,omitempty"`
-
-	PushNotifications *bool `json:"push_notifications,omitempty"`
-
-	Quotes *bool `json:"quotes,omitempty"`
-
-	Reactions *bool `json:"reactions,omitempty"`
-
-	ReadEvents *bool `json:"read_events,omitempty"`
-
-	Reminders *bool `json:"reminders,omitempty"`
-
-	Replies *bool `json:"replies,omitempty"`
-
-	Search *bool `json:"search,omitempty"`
-
-	TypingEvents *bool `json:"typing_events,omitempty"`
-
-	Uploads *bool `json:"uploads,omitempty"`
-
-	UrlEnrichment *bool `json:"url_enrichment,omitempty"`
-
-	AllowedFlagReasons []string `json:"allowed_flag_reasons,omitempty"`
-
-	Blocklists []BlockListOptions `json:"blocklists,omitempty"`
-
-	// List of commands that channel supports
-	Commands []string `json:"commands,omitempty"`
-
-	Permissions []PolicyRequest `json:"permissions,omitempty"`
-
-	AutomodThresholds *Thresholds `json:"automod_thresholds,omitempty"`
-
-	Grants map[string][]string `json:"grants,omitempty"`
 }
 
 type UpdateChannelTypeResponse struct {
@@ -7039,37 +5371,10 @@ type UpdateChannelTypeResponse struct {
 	AutomodThresholds *Thresholds `json:"automod_thresholds,omitempty"`
 }
 
-// Represents custom chat command
-type UpdateCommandRequest struct {
-
-	// Description, shown in commands auto-completion
-	Description string `json:"description"`
-
-	// Arguments help text, shown in commands auto-completion
-	Args *string `json:"args,omitempty"`
-
-	// Set name used for grouping commands
-	Set *string `json:"set,omitempty"`
-}
-
 type UpdateCommandResponse struct {
 	Duration string `json:"duration"`
 
 	Command *Command `json:"command,omitempty"`
-}
-
-type UpdateExternalStorageRequest struct {
-	Bucket string `json:"bucket"`
-
-	StorageType string `json:"storage_type"`
-
-	GcsCredentials *string `json:"gcs_credentials,omitempty"`
-
-	Path *string `json:"path,omitempty"`
-
-	AwsS3 *S3Request `json:"aws_s3,omitempty"`
-
-	AzureBlob *AzureRequest `json:"azure_blob,omitempty"`
 }
 
 type UpdateExternalStorageResponse struct {
@@ -7085,38 +5390,14 @@ type UpdateExternalStorageResponse struct {
 	Type string `json:"type"`
 }
 
-type UpdateMemberPartialRequest struct {
-	Unset []string `json:"unset,omitempty"`
-
-	Set map[string]any `json:"set,omitempty"`
-}
-
 type UpdateMemberPartialResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	ChannelMember *ChannelMemberResponse `json:"channel_member,omitempty"`
 }
 
-type UpdateMessagePartialRequest struct {
-
-	// Skip enriching the URL in the message
-	SkipEnrichUrl *bool `json:"skip_enrich_url,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	// Array of field names to unset
-	Unset []string `json:"unset,omitempty"`
-
-	// Sets new field values
-	Set map[string]any `json:"set,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type UpdateMessagePartialResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -7126,15 +5407,7 @@ type UpdateMessagePartialResponse struct {
 	PendingMessageMetadata map[string]string `json:"pending_message_metadata,omitempty"`
 }
 
-type UpdateMessageRequest struct {
-	Message MessageRequest `json:"message"`
-
-	// Skip enrich URL
-	SkipEnrichUrl *bool `json:"skip_enrich_url,omitempty"`
-}
-
 type UpdateMessageResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -7143,86 +5416,7 @@ type UpdateMessageResponse struct {
 	PendingMessageMetadata map[string]string `json:"pending_message_metadata,omitempty"`
 }
 
-type UpdatePollOptionRequest struct {
-
-	// Option ID
-	ID string `json:"id"`
-
-	// Option text
-	Text string `json:"text"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	Custom map[string]any `json:"Custom,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
-type UpdatePollPartialRequest struct {
-	UserID *string `json:"user_id,omitempty"`
-
-	// Array of field names to unset
-	Unset []string `json:"unset,omitempty"`
-
-	// Sets new field values
-	Set map[string]any `json:"set,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
-type UpdatePollRequest struct {
-
-	// Poll ID
-	ID string `json:"id"`
-
-	// Poll name
-	Name string `json:"name"`
-
-	// Allow answers
-	AllowAnswers *bool `json:"allow_answers,omitempty"`
-
-	// Allow user suggested options
-	AllowUserSuggestedOptions *bool `json:"allow_user_suggested_options,omitempty"`
-
-	// Poll description
-	Description *string `json:"description,omitempty"`
-
-	// Enforce unique vote
-	EnforceUniqueVote *bool `json:"enforce_unique_vote,omitempty"`
-
-	// Is closed
-	IsClosed *bool `json:"is_closed,omitempty"`
-
-	// Max votes allowed
-	MaxVotesAllowed *int `json:"max_votes_allowed,omitempty"`
-
-	UserID *string `json:"user_id,omitempty"`
-
-	// Voting visibility
-	VotingVisibility *string `json:"voting_visibility,omitempty"`
-
-	// Poll options
-	Options []*PollOptionRequest `json:"options,omitempty"`
-
-	Custom map[string]any `json:"Custom,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
-type UpdateThreadPartialRequest struct {
-	UserID *string `json:"user_id,omitempty"`
-
-	// Array of field names to unset
-	Unset []string `json:"unset,omitempty"`
-
-	// Sets new field values
-	Set map[string]any `json:"set,omitempty"`
-
-	User *UserRequest `json:"user,omitempty"`
-}
-
 type UpdateThreadPartialResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -7230,7 +5424,6 @@ type UpdateThreadPartialResponse struct {
 }
 
 type UpdateUserPartialRequest struct {
-
 	// User ID to update
 	ID string `json:"id"`
 
@@ -7239,32 +5432,12 @@ type UpdateUserPartialRequest struct {
 	Set map[string]any `json:"set,omitempty"`
 }
 
-type UpdateUserPermissionsRequest struct {
-	UserID string `json:"user_id"`
-
-	GrantPermissions []string `json:"grant_permissions,omitempty"`
-
-	RevokePermissions []string `json:"revoke_permissions,omitempty"`
-}
-
 type UpdateUserPermissionsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
-type UpdateUsersPartialRequest struct {
-	Users []UpdateUserPartialRequest `json:"users"`
-}
-
-type UpdateUsersRequest struct {
-
-	// Object containing users
-	Users map[string]UserRequest `json:"users"`
-}
-
 type UpdateUsersResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -7274,40 +5447,11 @@ type UpdateUsersResponse struct {
 	Users map[string]FullUserResponse `json:"users"`
 }
 
-type UpsertConfigRequest struct {
-	Key string `json:"key"`
-
-	Async *bool `json:"async,omitempty"`
-
-	AutomodPlatformCircumventionConfig *AutomodPlatformCircumventionConfig `json:"automod_platform_circumvention_config,omitempty"`
-
-	AutomodSemanticFiltersConfig *AutomodSemanticFiltersConfig `json:"automod_semantic_filters_config,omitempty"`
-
-	AutomodToxicityConfig *AutomodToxicityConfig `json:"automod_toxicity_config,omitempty"`
-
-	AwsRekognitionConfig *AWSRekognitionConfig `json:"aws_rekognition_config,omitempty"`
-
-	BlockListConfig *BlockListConfig `json:"block_list_config,omitempty"`
-
-	BodyguardConfig *BodyguardConfig `json:"bodyguard_config,omitempty"`
-
-	GoogleVisionConfig *GoogleVisionConfig `json:"google_vision_config,omitempty"`
-
-	VelocityFilterConfig *VelocityFilterConfig `json:"velocity_filter_config,omitempty"`
-}
-
 type UpsertConfigResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Config *ConfigResponse `json:"config,omitempty"`
-}
-
-type UpsertModerationTemplateRequest struct {
-	Name string `json:"name"`
-
-	Config FeedsModerationTemplateConfig `json:"config"`
 }
 
 type UpsertModerationTemplateResponse struct {
@@ -7323,12 +5467,7 @@ type UpsertModerationTemplateResponse struct {
 	Config *FeedsModerationTemplateConfig `json:"config,omitempty"`
 }
 
-type UpsertPushProviderRequest struct {
-	PushProvider *PushProvider `json:"push_provider,omitempty"`
-}
-
 type UpsertPushProviderResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
@@ -7360,7 +5499,6 @@ type UserInfoResponse struct {
 }
 
 type UserMute struct {
-
 	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -7389,7 +5527,6 @@ type UserMuteResponse struct {
 
 // Represents chat user
 type UserObject struct {
-
 	// Whether a user is banned or not
 	Banned bool `json:"banned"`
 
@@ -7439,7 +5576,6 @@ type UserObject struct {
 }
 
 type UserRequest struct {
-
 	// User ID
 	ID string `json:"id"`
 
@@ -7464,7 +5600,6 @@ type UserRequest struct {
 }
 
 type UserResponse struct {
-
 	// Whether a user is banned or not
 	Banned bool `json:"banned"`
 
@@ -7775,7 +5910,6 @@ type WSEvent struct {
 }
 
 type WrappedUnreadCountsResponse struct {
-
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 

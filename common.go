@@ -6,7 +6,7 @@ import (
 )
 
 // This Method returns the application settings
-func (c *Client) GetApp(ctx context.Context) (*StreamResponse[GetApplicationResponse], error) {
+func (c *Client) GetApp(ctx context.Context, request *GetAppRequest) (*StreamResponse[GetApplicationResponse], error) {
 	var result GetApplicationResponse
 	res, err := MakeRequest[any, GetApplicationResponse](c, ctx, "GET", "/api/v2/app", nil, nil, &result, nil)
 	return res, err
@@ -20,7 +20,7 @@ func (c *Client) UpdateApp(ctx context.Context, request *UpdateAppRequest) (*Str
 }
 
 // Returns all available block lists
-func (c *Client) ListBlockLists(ctx context.Context) (*StreamResponse[ListBlockListResponse], error) {
+func (c *Client) ListBlockLists(ctx context.Context, request *ListBlockListsRequest) (*StreamResponse[ListBlockListResponse], error) {
 	var result ListBlockListResponse
 	res, err := MakeRequest[any, ListBlockListResponse](c, ctx, "GET", "/api/v2/blocklists", nil, nil, &result, nil)
 	return res, err
@@ -34,7 +34,7 @@ func (c *Client) CreateBlockList(ctx context.Context, request *CreateBlockListRe
 }
 
 // Deletes previously created application blocklist
-func (c *Client) DeleteBlockList(ctx context.Context, name string) (*StreamResponse[Response], error) {
+func (c *Client) DeleteBlockList(ctx context.Context, name string, request *DeleteBlockListRequest) (*StreamResponse[Response], error) {
 	var result Response
 	pathParams := map[string]string{
 		"name": name,
@@ -44,7 +44,7 @@ func (c *Client) DeleteBlockList(ctx context.Context, name string) (*StreamRespo
 }
 
 // Returns block list by given name
-func (c *Client) GetBlockList(ctx context.Context, name string) (*StreamResponse[GetBlockListResponse], error) {
+func (c *Client) GetBlockList(ctx context.Context, name string, request *GetBlockListRequest) (*StreamResponse[GetBlockListResponse], error) {
 	var result GetBlockListResponse
 	pathParams := map[string]string{
 		"name": name,
@@ -115,7 +115,7 @@ func (c *Client) ExportUsers(ctx context.Context, request *ExportUsersRequest) (
 }
 
 // Lists external storage
-func (c *Client) ListExternalStorage(ctx context.Context) (*StreamResponse[ListExternalStorageResponse], error) {
+func (c *Client) ListExternalStorage(ctx context.Context, request *ListExternalStorageRequest) (*StreamResponse[ListExternalStorageResponse], error) {
 	var result ListExternalStorageResponse
 	res, err := MakeRequest[any, ListExternalStorageResponse](c, ctx, "GET", "/api/v2/external_storage", nil, nil, &result, nil)
 	return res, err
@@ -129,7 +129,7 @@ func (c *Client) CreateExternalStorage(ctx context.Context, request *CreateExter
 }
 
 // Deletes external storage
-func (c *Client) DeleteExternalStorage(ctx context.Context, name string) (*StreamResponse[DeleteExternalStorageResponse], error) {
+func (c *Client) DeleteExternalStorage(ctx context.Context, name string, request *DeleteExternalStorageRequest) (*StreamResponse[DeleteExternalStorageResponse], error) {
 	var result DeleteExternalStorageResponse
 	pathParams := map[string]string{
 		"name": name,
@@ -147,7 +147,7 @@ func (c *Client) UpdateExternalStorage(ctx context.Context, name string, request
 	return res, err
 }
 
-func (c *Client) CheckExternalStorage(ctx context.Context, name string) (*StreamResponse[CheckExternalStorageResponse], error) {
+func (c *Client) CheckExternalStorage(ctx context.Context, name string, request *CheckExternalStorageRequest) (*StreamResponse[CheckExternalStorageResponse], error) {
 	var result CheckExternalStorageResponse
 	pathParams := map[string]string{
 		"name": name,
@@ -170,7 +170,7 @@ func (c *Client) CreateImportURL(ctx context.Context, request *CreateImportURLRe
 }
 
 // Gets an import
-func (c *Client) ListImports(ctx context.Context) (*StreamResponse[ListImportsResponse], error) {
+func (c *Client) ListImports(ctx context.Context, request *ListImportsRequest) (*StreamResponse[ListImportsResponse], error) {
 	var result ListImportsResponse
 	res, err := MakeRequest[any, ListImportsResponse](c, ctx, "GET", "/api/v2/imports", nil, nil, &result, nil)
 	return res, err
@@ -184,10 +184,10 @@ func (c *Client) CreateImport(ctx context.Context, request *CreateImportRequest)
 }
 
 // Gets an import
-func (c *Client) GetImport(ctx context.Context, id string) (*StreamResponse[GetImportResponse], error) {
+func (c *Client) GetImport(ctx context.Context, iD string, request *GetImportRequest) (*StreamResponse[GetImportResponse], error) {
 	var result GetImportResponse
 	pathParams := map[string]string{
-		"id": id,
+		"id": iD,
 	}
 	res, err := MakeRequest[any, GetImportResponse](c, ctx, "GET", "/api/v2/imports/{id}", nil, nil, &result, pathParams)
 	return res, err
@@ -202,24 +202,24 @@ func (c *Client) GetOG(ctx context.Context, request *GetOGRequest) (*StreamRespo
 }
 
 // Lists all available permissions
-func (c *Client) ListPermissions(ctx context.Context) (*StreamResponse[ListPermissionsResponse], error) {
+func (c *Client) ListPermissions(ctx context.Context, request *ListPermissionsRequest) (*StreamResponse[ListPermissionsResponse], error) {
 	var result ListPermissionsResponse
 	res, err := MakeRequest[any, ListPermissionsResponse](c, ctx, "GET", "/api/v2/permissions", nil, nil, &result, nil)
 	return res, err
 }
 
 // Gets custom permission
-func (c *Client) GetPermission(ctx context.Context, id string) (*StreamResponse[GetCustomPermissionResponse], error) {
+func (c *Client) GetPermission(ctx context.Context, iD string, request *GetPermissionRequest) (*StreamResponse[GetCustomPermissionResponse], error) {
 	var result GetCustomPermissionResponse
 	pathParams := map[string]string{
-		"id": id,
+		"id": iD,
 	}
 	res, err := MakeRequest[any, GetCustomPermissionResponse](c, ctx, "GET", "/api/v2/permissions/{id}", nil, nil, &result, pathParams)
 	return res, err
 }
 
 // List details of all push providers.
-func (c *Client) ListPushProviders(ctx context.Context) (*StreamResponse[ListPushProvidersResponse], error) {
+func (c *Client) ListPushProviders(ctx context.Context, request *ListPushProvidersRequest) (*StreamResponse[ListPushProvidersResponse], error) {
 	var result ListPushProvidersResponse
 	res, err := MakeRequest[any, ListPushProvidersResponse](c, ctx, "GET", "/api/v2/push_providers", nil, nil, &result, nil)
 	return res, err
@@ -233,7 +233,7 @@ func (c *Client) UpsertPushProvider(ctx context.Context, request *UpsertPushProv
 }
 
 // Delete a push provider from v2 with multi bundle/package support. v1 isn't supported in this endpoint
-func (c *Client) DeletePushProvider(ctx context.Context, _type string, name string) (*StreamResponse[Response], error) {
+func (c *Client) DeletePushProvider(ctx context.Context, _type string, name string, request *DeletePushProviderRequest) (*StreamResponse[Response], error) {
 	var result Response
 	pathParams := map[string]string{
 		"type": _type,
@@ -252,7 +252,7 @@ func (c *Client) GetRateLimits(ctx context.Context, request *GetRateLimitsReques
 }
 
 // Lists all available roles
-func (c *Client) ListRoles(ctx context.Context) (*StreamResponse[ListRolesResponse], error) {
+func (c *Client) ListRoles(ctx context.Context, request *ListRolesRequest) (*StreamResponse[ListRolesResponse], error) {
 	var result ListRolesResponse
 	res, err := MakeRequest[any, ListRolesResponse](c, ctx, "GET", "/api/v2/roles", nil, nil, &result, nil)
 	return res, err
@@ -266,7 +266,7 @@ func (c *Client) CreateRole(ctx context.Context, request *CreateRoleRequest) (*S
 }
 
 // Deletes custom role
-func (c *Client) DeleteRole(ctx context.Context, name string) (*StreamResponse[Response], error) {
+func (c *Client) DeleteRole(ctx context.Context, name string, request *DeleteRoleRequest) (*StreamResponse[Response], error) {
 	var result Response
 	pathParams := map[string]string{
 		"name": name,
@@ -276,10 +276,10 @@ func (c *Client) DeleteRole(ctx context.Context, name string) (*StreamResponse[R
 }
 
 // Gets status of a task
-func (c *Client) GetTask(ctx context.Context, id string) (*StreamResponse[GetTaskResponse], error) {
+func (c *Client) GetTask(ctx context.Context, iD string, request *GetTaskRequest) (*StreamResponse[GetTaskResponse], error) {
 	var result GetTaskResponse
 	pathParams := map[string]string{
-		"id": id,
+		"id": iD,
 	}
 	res, err := MakeRequest[any, GetTaskResponse](c, ctx, "GET", "/api/v2/tasks/{id}", nil, nil, &result, pathParams)
 	return res, err
@@ -381,20 +381,20 @@ func (c *Client) UnblockUsers(ctx context.Context, request *UnblockUsersRequest)
 //
 // Sends events:
 // - user.deactivated
-func (c *Client) DeactivateUser(ctx context.Context, userId string, request *DeactivateUserRequest) (*StreamResponse[DeactivateUserResponse], error) {
+func (c *Client) DeactivateUser(ctx context.Context, userID string, request *DeactivateUserRequest) (*StreamResponse[DeactivateUserResponse], error) {
 	var result DeactivateUserResponse
 	pathParams := map[string]string{
-		"user_id": userId,
+		"user_id": userID,
 	}
 	res, err := MakeRequest[DeactivateUserRequest, DeactivateUserResponse](c, ctx, "POST", "/api/v2/users/{user_id}/deactivate", nil, request, &result, pathParams)
 	return res, err
 }
 
 // Exports the user's profile, reactions and messages. Raises an error if a user has more than 10k messages or reactions
-func (c *Client) ExportUser(ctx context.Context, userId string) (*StreamResponse[ExportUserResponse], error) {
+func (c *Client) ExportUser(ctx context.Context, userID string, request *ExportUserRequest) (*StreamResponse[ExportUserResponse], error) {
 	var result ExportUserResponse
 	pathParams := map[string]string{
-		"user_id": userId,
+		"user_id": userID,
 	}
 	res, err := MakeRequest[any, ExportUserResponse](c, ctx, "GET", "/api/v2/users/{user_id}/export", nil, nil, &result, pathParams)
 	return res, err
@@ -404,10 +404,10 @@ func (c *Client) ExportUser(ctx context.Context, userId string) (*StreamResponse
 //
 // Sends events:
 // - user.reactivated
-func (c *Client) ReactivateUser(ctx context.Context, userId string, request *ReactivateUserRequest) (*StreamResponse[ReactivateUserResponse], error) {
+func (c *Client) ReactivateUser(ctx context.Context, userID string, request *ReactivateUserRequest) (*StreamResponse[ReactivateUserResponse], error) {
 	var result ReactivateUserResponse
 	pathParams := map[string]string{
-		"user_id": userId,
+		"user_id": userID,
 	}
 	res, err := MakeRequest[ReactivateUserRequest, ReactivateUserResponse](c, ctx, "POST", "/api/v2/users/{user_id}/reactivate", nil, request, &result, pathParams)
 	return res, err

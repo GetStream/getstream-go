@@ -105,7 +105,7 @@ func setup(t *testing.T, rm *ResourceManager, createCallType bool) (*Stream, *Ca
 			},
 		}
 
-		callTypesResponse, err := client.Video().ListCallTypes(context.Background())
+		callTypesResponse, err := client.Video().ListCallTypes(context.Background(), &ListCallTypesRequest{})
 		if err != nil {
 			t.Fatalf("Failed to list call types: %v", err)
 		}
@@ -116,7 +116,7 @@ func setup(t *testing.T, rm *ResourceManager, createCallType bool) (*Stream, *Ca
 				case "default", "livestream", "audio_room", "development":
 					continue
 				default:
-					_, err := client.Video().DeleteCallType(context.Background(), callType.Name)
+					_, err := client.Video().DeleteCallType(context.Background(), callType.Name, &DeleteCallTypeRequest{})
 					if err != nil {
 						t.Fatalf("Failed to delete call type: %v", err)
 					}
@@ -160,7 +160,7 @@ func setup(t *testing.T, rm *ResourceManager, createCallType bool) (*Stream, *Ca
 // resetSharedResource deletes the specified call type.
 func resetSharedResource(t *testing.T, client *Stream, callTypeName string) {
 	ctx := context.Background()
-	_, err := client.Video().DeleteCallType(ctx, callTypeName)
+	_, err := client.Video().DeleteCallType(ctx, callTypeName, &DeleteCallTypeRequest{})
 	if err != nil {
 		t.Logf("Warning: Failed to delete call type %s: %v", callTypeName, err)
 	}
@@ -207,7 +207,7 @@ func createExternalStorageWithCleanup(t *testing.T, rm *ResourceManager, client 
 // resetExternalStorage deletes the specified external storage.
 func resetExternalStorage(t *testing.T, client *Stream, storageName string) {
 	ctx := context.Background()
-	_, err := client.DeleteExternalStorage(ctx, storageName)
+	_, err := client.DeleteExternalStorage(ctx, storageName, &DeleteExternalStorageRequest{})
 	if err != nil {
 		t.Logf("Warning: Failed to delete external storage %s: %v", storageName, err)
 	}
@@ -326,7 +326,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	t.Run("Read Call Type", func(t *testing.T) {
 		ctx := context.Background()
 
-		response, err := client.Video().GetCallType(ctx, callTypeName)
+		response, err := client.Video().GetCallType(ctx, callTypeName, &GetCallTypeRequest{})
 		assert.NoError(t, err)
 		assert.Equal(t, callTypeName, response.Data.Name)
 	})
@@ -353,7 +353,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 
 	t.Run("ShouldBeAbleToListExternalStorage", func(t *testing.T) {
 		ctx := context.Background()
-		_, err := client.ListExternalStorage(ctx)
+		_, err := client.ListExternalStorage(ctx, &ListExternalStorageRequest{})
 		require.NoError(t, err)
 	})
 
@@ -605,7 +605,7 @@ func TestVideoExamplesAdditional(t *testing.T) {
 			for {
 				select {
 				case <-ticker.C:
-					taskResult, err := client.GetTask(ctx, taskID)
+					taskResult, err := client.GetTask(ctx, taskID, &GetTaskRequest{})
 					if err != nil {
 						return nil, fmt.Errorf("failed to get task result: %w", err)
 					}
@@ -835,14 +835,14 @@ func TestExternalStorageOperations(t *testing.T) {
 	uniqueName := "test-storage-" + randomString(10)
 
 	t.Run("DeleteExistingExtStorages", func(t *testing.T) {
-		listExternalStorage, err := client.ListExternalStorage(ctx)
+		listExternalStorage, err := client.ListExternalStorage(ctx, &ListExternalStorageRequest{})
 		require.NoError(t, err)
 
 		// avoid accumulating ext storages forever
 		if len(listExternalStorage.Data.ExternalStorages) > 1 {
 			println("delete existing storages")
 			for _, storage := range listExternalStorage.Data.ExternalStorages {
-				_, err := client.DeleteExternalStorage(ctx, storage.Name)
+				_, err := client.DeleteExternalStorage(ctx, storage.Name, &DeleteExternalStorageRequest{})
 				require.NoError(t, err)
 			}
 		}
@@ -868,7 +868,7 @@ func TestExternalStorageOperations(t *testing.T) {
 	})
 
 	t.Run("ListExternalStorage", func(t *testing.T) {
-		response, err := client.ListExternalStorage(ctx)
+		response, err := client.ListExternalStorage(ctx, &ListExternalStorageRequest{})
 		require.NoError(t, err)
 		assert.NotEmpty(t, response.Data.ExternalStorages, "External storages list should not be empty")
 
@@ -926,12 +926,12 @@ func TestDeleteRecordingsAndTranscriptions(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("DeleteNonExistentRecording", func(t *testing.T) {
-		_, err := call.DeleteRecording(ctx, "non-existent-session", "non-existent-filename")
+		_, err := call.DeleteRecording(ctx, "non-existent-session", "non-existent-filename", &DeleteRecordingRequest{})
 		require.Error(t, err)
 	})
 
 	t.Run("DeleteNonExistentTranscription", func(t *testing.T) {
-		_, err := call.DeleteTranscription(ctx, "non-existent-session", "non-existent-filename")
+		_, err := call.DeleteTranscription(ctx, "non-existent-session", "non-existent-filename", &DeleteTranscriptionRequest{})
 		require.Error(t, err)
 	})
 }
@@ -957,7 +957,7 @@ func TestHardDeleteCall(t *testing.T) {
 		assert.NotNil(t, response.Data.TaskID)
 		time.Sleep(2 * time.Second)
 		// Wait for the task to complete
-		taskStatus, err := client.GetTask(ctx, *response.Data.TaskID)
+		taskStatus, err := client.GetTask(ctx, *response.Data.TaskID, &GetTaskRequest{})
 		require.NoError(t, err)
 
 		assert.Equal(t, "completed", taskStatus.Data.Status)

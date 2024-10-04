@@ -37,7 +37,7 @@ func (c *Channels) DeleteFile(ctx context.Context, request *DeleteFileRequest) (
 	return c.client.DeleteFile(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) UploadFile(ctx context.Context, request *FileUploadRequest) (*StreamResponse[FileUploadResponse], error) {
+func (c *Channels) UploadFile(ctx context.Context, request *UploadFileRequest) (*StreamResponse[FileUploadResponse], error) {
 	return c.client.UploadFile(ctx, c.channelType, c.channelD, request)
 }
 
@@ -49,12 +49,12 @@ func (c *Channels) DeleteImage(ctx context.Context, request *DeleteImageRequest)
 	return c.client.DeleteImage(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) UploadImage(ctx context.Context, request *ImageUploadRequest) (*StreamResponse[ImageUploadResponse], error) {
+func (c *Channels) UploadImage(ctx context.Context, request *UploadImageRequest) (*StreamResponse[ImageUploadResponse], error) {
 	return c.client.UploadImage(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) UpdateMemberPartial(ctx context.Context, userId string, request *UpdateMemberPartialRequest) (*StreamResponse[UpdateMemberPartialResponse], error) {
-	return c.client.UpdateMemberPartial(ctx, c.channelType, c.channelD, userId, request)
+func (c *Channels) UpdateMemberPartial(ctx context.Context, userID string, request *UpdateMemberPartialRequest) (*StreamResponse[UpdateMemberPartialResponse], error) {
+	return c.client.UpdateMemberPartial(ctx, c.channelType, c.channelD, userID, request)
 }
 
 func (c *Channels) SendMessage(ctx context.Context, request *SendMessageRequest) (*StreamResponse[SendMessageResponse], error) {
@@ -65,7 +65,7 @@ func (c *Channels) GetManyMessages(ctx context.Context, request *GetManyMessages
 	return c.client.GetManyMessages(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) GetOrCreate(ctx context.Context, request *ChannelGetOrCreateRequest) (*StreamResponse[ChannelStateResponse], error) {
+func (c *Channels) GetOrCreate(ctx context.Context, request *GetOrCreateChannelRequest) (*StreamResponse[ChannelStateResponse], error) {
 	return c.client.GetOrCreateChannel(ctx, c.channelType, c.channelD, request)
 }
 
