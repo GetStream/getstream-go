@@ -6,6 +6,7 @@ import (
 	"crypto/hmac"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -28,97 +29,112 @@ func PtrTo[T any](v T) *T {
 }
 
 type Client struct {
-	BaseURL string
-	HTTP    *http.Client `json:"-"`
+	apiKey         string
+	apiSecret      []byte
+	authToken      string
+	baseUrl        string
+	defaultTimeout time.Duration
+	httpClient     *http.Client
+	logger         *Logger
+}
 
-	apiKey    string
-	apiSecret []byte
-	authToken string
-	logger    *Logger
+func (c *Client) HttpClient() *http.Client {
+	return c.httpClient
+}
+
+func (c *Client) Logger() *Logger {
+	return c.logger
+}
+
+func (c *Client) ApiKey() string {
+	return c.apiKey
+}
+
+func (c *Client) BaseUrl() string {
+	return c.baseUrl
+}
+
+func (c *Client) DefaultTimeout() time.Duration {
+	return c.defaultTimeout
 }
 
 type ClientOption func(c *Client)
 
-// WithLogger sets a custom logger for the client
-func WithLogger(l *Logger) ClientOption {
+// WithTimeout sets a custom timeout for all API requests
+func WithTimeout(t time.Duration) ClientOption {
 	return func(c *Client) {
-		c.logger = l
-	}
-}
-
-// WithLogLevel sets the log level for the default logger
-func WithLogLevel(level LogLevel) ClientOption {
-	return func(c *Client) {
-		if c.logger == nil {
-			c.logger = DefaultLogger
-		}
-		c.logger.SetLevel(level)
+		c.defaultTimeout = t
 	}
 }
 
 // WithBaseUrl sets the base URL for the client.
 func WithBaseUrl(baseURL string) ClientOption {
 	return func(c *Client) {
-		c.BaseURL = baseURL
+		c.baseUrl = baseURL
 	}
 }
 
-// NewClientFromEnvVars creates a new Client where the API key
-// is retrieved from STREAM_KEY and the secret from STREAM_SECRET
-// environmental variables.
-func NewClientFromEnvVars(options ...ClientOption) (*Client, error) {
-	apiKey := os.Getenv("STREAM_API_KEY")
+const (
+	EnvStreamApiKey      = "STREAM_API_KEY"
+	EnvStreamApiSecret   = "STREAM_API_SECRET"
+	EnvStreamBaseUrl     = "STREAM_BASE_URL"
+	EnvStreamHttpTimeout = "STREAM_HTTP_TIMEOUT"
+)
+
+func newClientFromEnvVars(options ...ClientOption) (*Client, error) {
+	apiKey := os.Getenv(EnvStreamApiKey)
 	if apiKey == "" {
-		return nil, errors.New("STREAM_API_KEY is empty")
+		return nil, errors.New(EnvStreamApiKey + " is empty")
 	}
-	apiSecret := os.Getenv("STREAM_API_SECRET")
+	apiSecret := os.Getenv(EnvStreamApiSecret)
 	if apiSecret == "" {
-		return nil, errors.New("STREAM_API_SECRET is empty")
+		return nil, errors.New(EnvStreamApiSecret + " is empty")
 	}
-	return NewClient(apiKey, apiSecret, options...)
+	return newClient(apiKey, apiSecret, options...)
 }
 
-// NewClient creates new stream chat api client.
-func NewClient(apiKey, apiSecret string, options ...ClientOption) (*Client, error) {
-	switch {
-	case apiKey == "":
+func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, error) {
+	if apiKey == "" {
 		return nil, errors.New("API key is empty")
-	case apiSecret == "":
+	}
+
+	if apiSecret == "" {
 		return nil, errors.New("API secret is empty")
 	}
 
 	baseURL := DefaultBaseURL
-	if baseURLEnv := os.Getenv("STREAM_BASE_URL"); strings.HasPrefix(baseURLEnv, "http") {
+	if baseURLEnv := os.Getenv(EnvStreamBaseUrl); strings.HasPrefix(baseURLEnv, "http") {
 		baseURL = baseURLEnv
 	}
 
-	timeout := defaultTimeout
-	if timeoutEnv := os.Getenv("STREAM_HTTP_TIMEOUT"); timeoutEnv != "" {
-		i, err := strconv.Atoi(timeoutEnv)
-		if err != nil {
-			return nil, err
-		}
-		timeout = time.Duration(i) * time.Second
+	client := &Client{
+		apiKey:         apiKey,
+		apiSecret:      []byte(apiSecret),
+		baseUrl:        baseURL,
+		logger:         DefaultLogger,
+		defaultTimeout: defaultTimeout,
 	}
 
-	tr := http.DefaultTransport.(*http.Transport).Clone() //nolint:forcetypeassert
-	tr.MaxIdleConnsPerHost = 5
-	tr.IdleConnTimeout = 59 * time.Second // load balancer's idle timeout is 60 sec
-	tr.ExpectContinueTimeout = 2 * time.Second
-
-	client := &Client{
-		apiKey:    apiKey,
-		apiSecret: []byte(apiSecret),
-		BaseURL:   baseURL,
-		HTTP: &http.Client{
-			Timeout:   timeout,
-			Transport: tr,
-		},
-		logger: DefaultLogger,
+	if timeoutEnv := os.Getenv(EnvStreamHttpTimeout); timeoutEnv != "" {
+		i, err := strconv.Atoi(timeoutEnv)
+		if err != nil {
+			return nil, fmt.Errorf("cannot convert "+EnvStreamHttpTimeout+" into a valid timeout %w", err)
+		}
+		client.defaultTimeout = time.Duration(i) * time.Second
 	}
 
 	for _, fn := range options {
 		fn(client)
+	}
+
+	tr := http.DefaultTransport.(*http.Transport).Clone() //nolint:forcetypeassert
+	tr.MaxIdleConnsPerHost = 5
+	tr.IdleConnTimeout = 59 * time.Second
+	tr.ExpectContinueTimeout = 2 * time.Second
+
+	client.httpClient = &http.Client{
+		Timeout:   client.defaultTimeout,
+		Transport: tr,
 	}
 
 	token, err := client.createToken(jwt.MapClaims{"server": true})
@@ -127,7 +143,6 @@ func NewClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 	}
 
 	client.authToken = token
-
 	return client, nil
 }
 

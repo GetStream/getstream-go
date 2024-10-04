@@ -6,8 +6,8 @@ type Stream struct {
 	video *VideoClient
 }
 
-func NewStreamFromEnvVars(options ...ClientOption) (*Stream, error) {
-	client, err := NewClientFromEnvVars(options...)
+func NewClientFromEnvVars(options ...ClientOption) (*Stream, error) {
+	client, err := newClientFromEnvVars(options...)
 	if err != nil {
 		return nil, err
 	}
@@ -16,21 +16,20 @@ func NewStreamFromEnvVars(options ...ClientOption) (*Stream, error) {
 	}, nil
 }
 
-func New(apiKey, apiSecret string, options ...ClientOption) *Stream {
-	client, err := NewClient(apiKey, apiSecret, options...)
+func NewClient(apiKey, apiSecret string, options ...ClientOption) (*Stream, error) {
+	client, err := newClient(apiKey, apiSecret, options...)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	return &Stream{
 		Client: client,
-	}
+	}, nil
 }
 
 func (s *Stream) CreateToken(userID string, claims *StreamJWTClaims) (string, error) {
 	return s.CreateTokenWithClaims(userID, claims)
 }
 
-// Chat
 func (s *Stream) Chat() *ChatClient {
 	if s.chat == nil {
 		s.chat = NewChatClient(s.Client)
@@ -38,7 +37,6 @@ func (s *Stream) Chat() *ChatClient {
 	return s.chat
 }
 
-// Video
 func (s *Stream) Video() *VideoClient {
 	if s.video == nil {
 		s.video = NewVideoClient(s.Client)

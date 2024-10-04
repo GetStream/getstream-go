@@ -38,7 +38,7 @@ const skipSlowTests = true
 func initClient(t *testing.T) *Stream {
 	t.Helper()
 
-	stream, err := NewStreamFromEnvVars(WithLogLevel(LogLevelError))
+	stream, err := NewClientFromEnvVars()
 	require.NoError(t, err, "Failed to create client from env vars")
 
 	return stream
@@ -185,39 +185,14 @@ func resetCallResource(t *testing.T, call *Call) {
 	}
 }
 
-// createExternalStorageWithCleanup creates an external storage and registers its cleanup.
-func createExternalStorageWithCleanup(t *testing.T, rm *ResourceManager, client *Stream, storageName string) {
-	ctx := context.Background()
-	path := "test-directory/"
-	s3apiKey := "test-access-key"
-	s3secret := "test-secret"
+func TestClientTimeout(t *testing.T) {
+	client, err := NewClient("apiKey", "apiSecret")
+	require.NoError(t, err)
+	assert.Equal(t, 6*time.Second, client.HttpClient().Timeout)
 
-	_, err := client.CreateExternalStorage(ctx, &CreateExternalStorageRequest{
-		Bucket:      "test-bucket",
-		Name:        storageName,
-		StorageType: "s3",
-		Path:        &path,
-		AWSS3: &S3Request{
-			S3Region: "us-east-1",
-			S3APIKey: &s3apiKey,
-			S3Secret: &s3secret,
-		},
-	})
-	require.NoError(t, err, "Failed to create external storage")
-
-	// Register cleanup for the created external storage
-	rm.RegisterCleanup(func() {
-		resetExternalStorage(t, client, storageName)
-	})
-}
-
-// resetExternalStorage deletes the specified external storage.
-func resetExternalStorage(t *testing.T, client *Stream, storageName string) {
-	ctx := context.Background()
-	_, err := client.DeleteExternalStorage(ctx, storageName, &DeleteExternalStorageRequest{})
-	if err != nil {
-		t.Logf("Warning: Failed to delete external storage %s: %v", storageName, err)
-	}
+	client, err = NewClient("apiKey", "apiSecret", WithTimeout(time.Second))
+	require.NoError(t, err)
+	assert.Equal(t, time.Second, client.HttpClient().Timeout)
 }
 
 // TestCRUDCallTypeOperations tests Create, Read, Update, and Delete operations for call types.

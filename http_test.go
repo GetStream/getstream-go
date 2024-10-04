@@ -89,7 +89,7 @@ func TestRequestURL(t *testing.T) {
 	originalBaseURL := "https://api.example.com"
 	mockLogger := DefaultLogger
 	client := &Client{
-		BaseURL: originalBaseURL,
+		baseUrl: originalBaseURL,
 		apiKey:  "testkey",
 		logger:  mockLogger,
 	}
@@ -134,17 +134,17 @@ func TestRequestURL(t *testing.T) {
 
 	t.Run("Invalid_BaseURL", func(t *testing.T) {
 		invalidBaseURL := "://invalid-url"
-		client.BaseURL = invalidBaseURL
+		client.baseUrl = invalidBaseURL
 
 		_, err := client.requestURL("/path", nil, nil)
 		if err == nil {
-			t.Fatalf("Expected error due to invalid BaseURL, got nil")
+			t.Fatalf("Expected error due to invalid baseUrl, got nil")
 		}
 	})
 
 	t.Run("URL_encoding_in_query_parameters", func(t *testing.T) {
-		// Reset BaseURL to valid value before this subtest
-		client.BaseURL = originalBaseURL
+		// Reset baseUrl to valid value before this subtest
+		client.baseUrl = originalBaseURL
 
 		path := "/v1/search"
 		values := url.Values{
@@ -167,7 +167,7 @@ func TestRequestURL(t *testing.T) {
 func TestNewRequest(t *testing.T) {
 	mockLogger := DefaultLogger
 	client := &Client{
-		BaseURL:   "https://api.example.com", // Set BaseURL
+		baseUrl:   "https://api.example.com", // Set baseUrl
 		apiKey:    "testkey",
 		authToken: "Bearer testtoken",
 		logger:    mockLogger,
@@ -286,7 +286,7 @@ func TestNewRequest(t *testing.T) {
 
 	t.Run("Unsupported data type", func(t *testing.T) {
 		client := &Client{
-			BaseURL: "https://api.stream-io-api.com",
+			baseUrl: "https://api.stream-io-api.com",
 			apiKey:  "key",
 			logger:  DefaultLogger,
 		}

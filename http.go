@@ -91,7 +91,7 @@ func parseResponse[GResponse any](c *Client, resp *http.Response, body []byte, r
 func (c *Client) requestURL(path string, values url.Values, pathParams map[string]string) (string, error) {
 	path = buildPath(path, pathParams)
 
-	u, err := url.Parse(c.BaseURL + path)
+	u, err := url.Parse(c.baseUrl + path)
 	if err != nil {
 		return "", fmt.Errorf("url.Parse: %w", err)
 	}
@@ -287,7 +287,7 @@ func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, me
 	c.logRequest(r)
 
 	start := time.Now()
-	resp, err := c.HTTP.Do(r)
+	resp, err := c.httpClient.Do(r)
 	if err != nil {
 		select {
 		case <-ctx.Done():
