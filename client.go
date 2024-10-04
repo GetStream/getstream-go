@@ -121,7 +121,7 @@ func NewClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		fn(client)
 	}
 
-	token, err := client.createToken(jwt.MapClaims{"server": true})
+	token, err := client.createTokenWithClaims(jwt.MapClaims{"server": true})
 	if err != nil {
 		return nil, err
 	}
@@ -131,58 +131,84 @@ func NewClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 	return client, nil
 }
 
-type StreamJWTClaims struct {
-	Expire      *time.Time
-	IssuedAt    *time.Time
-	ChannelCIDs []string
-	CallCIDs    []string
-	Role        string
+// Claims contains optional parameters for token creation.
+type Claims struct {
+	Role         string                 // Role assigned to the user
+	ChannelCIDs  []string               // Channel IDs the user has access to
+	CallCIDs     []string               // Call IDs the user has access to
+	CustomClaims map[string]interface{} // Additional custom claims
 }
 
-func (c *Client) CreateTokenWithClaims(userID string, claims *StreamJWTClaims) (string, error) {
+func (c *Client) createToken(userID string, claims *Claims, expiration int64) (string, error) {
 	if userID == "" {
-		return "", errors.New("user ID is empty")
+		return "", errors.New("user ID is required")
 	}
 
+	now := time.Now().Unix()
 	jwtClaims := jwt.MapClaims{
 		"user_id": userID,
+		"iat":     now,
 	}
 
-	// Set issued at time; use the provided time or the current time if not provided.
 	if claims != nil {
-		if claims.IssuedAt != nil && !claims.IssuedAt.IsZero() {
-			jwtClaims["iat"] = claims.IssuedAt.Unix()
-		} else {
-			now := time.Now()
-			jwtClaims["iat"] = now.Unix()
+		// Set expiration time if provided
+		if expiration > 0 {
+			jwtClaims["exp"] = now + expiration
 		}
 
-		// Set expiration time if provided.
-		if claims.Expire != nil && !claims.Expire.IsZero() {
-			jwtClaims["exp"] = claims.Expire.Unix()
+		// Set role if provided
+		if claims.Role != "" {
+			jwtClaims["role"] = claims.Role
 		}
 
-		// Add channel IDs if provided.
+		// Set channel CIDs if provided
 		if len(claims.ChannelCIDs) > 0 {
 			jwtClaims["channel_cids"] = claims.ChannelCIDs
 		}
 
-		// Add call IDs if provided.
+		// Set call CIDs if provided
 		if len(claims.CallCIDs) > 0 {
 			jwtClaims["call_cids"] = claims.CallCIDs
 		}
 
-		// Add role if provided.
-		if claims.Role != "" {
-			jwtClaims["role"] = claims.Role
+		// Set custom claims if provided
+		if len(claims.CustomClaims) > 0 {
+			for key, value := range claims.CustomClaims {
+				jwtClaims[key] = value
+			}
 		}
 	}
 
-	return c.createToken(jwtClaims)
+	return c.createTokenWithClaims(jwtClaims)
 }
 
-func (c *Client) createToken(claims jwt.Claims) (string, error) {
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(c.apiSecret)
+func (c *Client) createCallToken(userID string, claims *Claims, expiration int64) (string, error) {
+	if userID == "" {
+		return "", errors.New("user ID is required")
+	}
+
+	// Ensure that CallCIDs are included for call tokens
+	if claims == nil {
+		claims = &Claims{}
+	}
+	if len(claims.CallCIDs) == 0 {
+		return "", errors.New("call_cids are required for call tokens")
+	}
+
+	return c.createToken(userID, claims, expiration)
+}
+
+// createToken signs the JWT with the provided claims.
+//
+// Parameters:
+// - claims (jwt.MapClaims): The claims to include in the token.
+//
+// Returns:
+// - (string): The signed JWT token.
+// - (error): An error object if signing fails.
+func (c *Client) createTokenWithClaims(claims jwt.MapClaims) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(c.apiSecret)
 }
 
 // VerifyWebhook validates if hmac signature is correct for message body.
