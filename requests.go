@@ -178,7 +178,7 @@ type SendMessageRequest struct {
 }
 
 type GetManyMessagesRequest struct {
-	IDs []string `json:"-" query:"ids"`
+	Ids []string `json:"-" query:"ids"`
 }
 
 type GetOrCreateChannelRequest struct {
@@ -568,7 +568,7 @@ type UnreadCountsRequest struct {
 }
 
 type UnreadCountsBatchRequest struct {
-	UserIDs []string `json:"user_ids"`
+	UserIds []string `json:"user_ids"`
 }
 
 type SendUserCustomEventRequest struct {
@@ -618,7 +618,7 @@ type CreateDeviceRequest struct {
 }
 
 type ExportUsersRequest struct {
-	UserIDs []string `json:"user_ids"`
+	UserIds []string `json:"user_ids"`
 }
 
 type ListExternalStorageRequest struct {
@@ -630,7 +630,7 @@ type CreateExternalStorageRequest struct {
 	StorageType    string        `json:"storage_type"`
 	GcsCredentials *string       `json:"gcs_credentials"`
 	Path           *string       `json:"path"`
-	AwsS3          *S3Request    `json:"aws_s3"`
+	AWSS3          *S3Request    `json:"aws_s3"`
 	AzureBlob      *AzureRequest `json:"azure_blob"`
 }
 
@@ -642,7 +642,7 @@ type UpdateExternalStorageRequest struct {
 	StorageType    string        `json:"storage_type"`
 	GcsCredentials *string       `json:"gcs_credentials"`
 	Path           *string       `json:"path"`
-	AwsS3          *S3Request    `json:"aws_s3"`
+	AWSS3          *S3Request    `json:"aws_s3"`
 	AzureBlob      *AzureRequest `json:"azure_blob"`
 }
 
@@ -694,10 +694,10 @@ type CheckRequest struct {
 type UpsertConfigRequest struct {
 	Key                                string                              `json:"key"`
 	Async                              *bool                               `json:"async"`
+	AWSRekognitionConfig               *AWSRekognitionConfig               `json:"aws_rekognition_config"`
 	AutomodPlatformCircumventionConfig *AutomodPlatformCircumventionConfig `json:"automod_platform_circumvention_config"`
 	AutomodSemanticFiltersConfig       *AutomodSemanticFiltersConfig       `json:"automod_semantic_filters_config"`
 	AutomodToxicityConfig              *AutomodToxicityConfig              `json:"automod_toxicity_config"`
-	AwsRekognitionConfig               *AWSRekognitionConfig               `json:"aws_rekognition_config"`
 	BlockListConfig                    *BlockListConfig                    `json:"block_list_config"`
 	BodyguardConfig                    *BodyguardConfig                    `json:"bodyguard_config"`
 	GoogleVisionConfig                 *GoogleVisionConfig                 `json:"google_vision_config"`
@@ -768,7 +768,7 @@ type GetModeratorStatsRequest struct {
 }
 
 type MuteRequest struct {
-	TargetIDs []string     `json:"target_ids"`
+	TargetIds []string     `json:"target_ids"`
 	Timeout   *int         `json:"timeout"`
 	UserID    *string      `json:"user_id"`
 	User      *UserRequest `json:"user"`
@@ -816,7 +816,7 @@ type UnbanRequest struct {
 }
 
 type UnmuteRequest struct {
-	TargetIDs []string     `json:"target_ids"`
+	TargetIds []string     `json:"target_ids"`
 	UserID    *string      `json:"user_id"`
 	User      *UserRequest `json:"user"`
 }
@@ -902,14 +902,14 @@ type BlockUsersRequest struct {
 }
 
 type DeactivateUsersRequest struct {
-	UserIDs             []string `json:"user_ids"`
+	UserIds             []string `json:"user_ids"`
 	CreatedByID         *string  `json:"created_by_id"`
 	MarkChannelsDeleted *bool    `json:"mark_channels_deleted"`
 	MarkMessagesDeleted *bool    `json:"mark_messages_deleted"`
 }
 
 type DeleteUsersRequest struct {
-	UserIDs           []string `json:"user_ids"`
+	UserIds           []string `json:"user_ids"`
 	Calls             *string  `json:"calls"`
 	Conversations     *string  `json:"conversations"`
 	Messages          *string  `json:"messages"`
@@ -919,14 +919,14 @@ type DeleteUsersRequest struct {
 }
 
 type ReactivateUsersRequest struct {
-	UserIDs         []string `json:"user_ids"`
+	UserIds         []string `json:"user_ids"`
 	CreatedByID     *string  `json:"created_by_id"`
 	RestoreChannels *bool    `json:"restore_channels"`
 	RestoreMessages *bool    `json:"restore_messages"`
 }
 
 type RestoreUsersRequest struct {
-	UserIDs []string `json:"user_ids"`
+	UserIds []string `json:"user_ids"`
 }
 
 type UnblockUsersRequest struct {
@@ -1013,9 +1013,9 @@ type CollectUserFeedbackRequest struct {
 
 type GoLiveRequest struct {
 	RecordingStorageName     *string `json:"recording_storage_name"`
-	StartHls                 *bool   `json:"start_hls"`
+	StartHLS                 *bool   `json:"start_hls"`
+	StartRTMPBroadcasts      *bool   `json:"start_rtmp_broadcasts"`
 	StartRecording           *bool   `json:"start_recording"`
-	StartRtmpBroadcasts      *bool   `json:"start_rtmp_broadcasts"`
 	StartTranscription       *bool   `json:"start_transcription"`
 	TranscriptionStorageName *string `json:"transcription_storage_name"`
 }
@@ -1035,7 +1035,7 @@ type MuteUsersRequest struct {
 	Screenshare      *bool        `json:"screenshare"`
 	ScreenshareAudio *bool        `json:"screenshare_audio"`
 	Video            *bool        `json:"video"`
-	UserIDs          []string     `json:"user_ids"`
+	UserIds          []string     `json:"user_ids"`
 	MutedBy          *UserRequest `json:"muted_by"`
 }
 

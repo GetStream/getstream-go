@@ -270,7 +270,7 @@ type Attachment struct {
 
 	ImageUrl *string `json:"image_url,omitempty"`
 
-	OgScrapeUrl *string `json:"og_scrape_url,omitempty"`
+	OGScrapeUrl *string `json:"og_scrape_url,omitempty"`
 
 	OriginalHeight *int `json:"original_height,omitempty"`
 
@@ -554,25 +554,25 @@ type BodyguardSeverityRule struct {
 type BroadcastSettings struct {
 	Enabled bool `json:"enabled"`
 
-	Hls *HLSSettings `json:"hls,omitempty"`
+	HLS *HLSSettings `json:"hls,omitempty"`
 
-	Rtmp *RTMPSettings `json:"rtmp,omitempty"`
+	RTMP *RTMPSettings `json:"rtmp,omitempty"`
 }
 
 type BroadcastSettingsRequest struct {
 	Enabled *bool `json:"enabled,omitempty"`
 
-	Hls *HLSSettingsRequest `json:"hls,omitempty"`
+	HLS *HLSSettingsRequest `json:"hls,omitempty"`
 
-	Rtmp *RTMPSettingsRequest `json:"rtmp,omitempty"`
+	RTMP *RTMPSettingsRequest `json:"rtmp,omitempty"`
 }
 
 type BroadcastSettingsResponse struct {
 	Enabled bool `json:"enabled"`
 
-	Hls HLSSettingsResponse `json:"hls"`
+	HLS HLSSettingsResponse `json:"hls"`
 
-	Rtmp RTMPSettingsResponse `json:"rtmp"`
+	RTMP RTMPSettingsResponse `json:"rtmp"`
 }
 
 type CallEvent struct {
@@ -592,7 +592,7 @@ type CallEvent struct {
 }
 
 type CallIngressResponse struct {
-	Rtmp RTMPIngress `json:"rtmp"`
+	RTMP RTMPIngress `json:"rtmp"`
 }
 
 type CallParticipantResponse struct {
@@ -653,13 +653,13 @@ type CallResponse struct {
 
 	Transcribing bool `json:"transcribing"`
 
-	// The type of call
-	Type string `json:"type"`
-
 	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
 
-	BlockedUserIDs []string `json:"blocked_user_ids"`
+	// The type of call
+	Type string `json:"type"`
+
+	BlockedUserIds []string `json:"blocked_user_ids"`
 
 	CreatedBy UserResponse `json:"created_by"`
 
@@ -872,9 +872,9 @@ type Channel struct {
 
 	ID string `json:"id"`
 
-	Type string `json:"type"`
-
 	UpdatedAt Timestamp `json:"updated_at"`
+
+	Type string `json:"type"`
 
 	Custom map[string]any `json:"custom"`
 
@@ -1037,6 +1037,24 @@ type ChannelExport struct {
 	Type *string `json:"type,omitempty"`
 }
 
+type ChannelGetOrCreateRequest struct {
+	// Whether this channel will be hidden for the user who created the channel or not
+	HideForCreator *bool `json:"hide_for_creator,omitempty"`
+
+	// Refresh channel state
+	State *bool `json:"state,omitempty"`
+
+	ThreadUnreadCounts *bool `json:"thread_unread_counts,omitempty"`
+
+	Data *ChannelInput `json:"data,omitempty"`
+
+	Members *PaginationParams `json:"members,omitempty"`
+
+	Messages *MessagePaginationParams `json:"messages,omitempty"`
+
+	Watchers *PaginationParams `json:"watchers,omitempty"`
+}
+
 type ChannelInput struct {
 	// Enable or disable auto translation
 	AutoTranslationEnabled *bool `json:"auto_translation_enabled,omitempty"`
@@ -1189,11 +1207,11 @@ type ChannelResponse struct {
 	// Channel unique ID
 	ID string `json:"id"`
 
-	// Type of the channel
-	Type string `json:"type"`
-
 	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
+
+	// Type of the channel
+	Type string `json:"type"`
 
 	Custom map[string]any `json:"custom"`
 
@@ -1487,13 +1505,13 @@ type ConfigResponse struct {
 
 	UpdatedAt Timestamp `json:"updated_at"`
 
+	AWSRekognitionConfig *AWSRekognitionConfig `json:"aws_rekognition_config,omitempty"`
+
 	AutomodPlatformCircumventionConfig *AutomodPlatformCircumventionConfig `json:"automod_platform_circumvention_config,omitempty"`
 
 	AutomodSemanticFiltersConfig *AutomodSemanticFiltersConfig `json:"automod_semantic_filters_config,omitempty"`
 
 	AutomodToxicityConfig *AutomodToxicityConfig `json:"automod_toxicity_config,omitempty"`
-
-	AwsRekognitionConfig *AWSRekognitionConfig `json:"aws_rekognition_config,omitempty"`
 
 	BlockListConfig *BlockListConfig `json:"block_list_config,omitempty"`
 
@@ -1687,7 +1705,7 @@ type Data struct {
 }
 
 type DataDogInfo struct {
-	ApiKey *string `json:"api_key,omitempty"`
+	APIKey *string `json:"api_key,omitempty"`
 
 	Enabled *bool `json:"enabled,omitempty"`
 
@@ -1872,7 +1890,7 @@ type EgressResponse struct {
 
 	Rtmps []EgressRTMPResponse `json:"rtmps"`
 
-	Hls *EgressHLSResponse `json:"hls,omitempty"`
+	HLS *EgressHLSResponse `json:"hls,omitempty"`
 }
 
 type EndCallResponse struct {
@@ -1944,7 +1962,7 @@ type ErrorResult struct {
 type EventNotificationSettings struct {
 	Enabled bool `json:"enabled"`
 
-	Apns APNS `json:"apns"`
+	APNS APNS `json:"apns"`
 }
 
 type EventRequest struct {
@@ -2037,6 +2055,13 @@ type FileUploadConfig struct {
 	BlockedFileExtensions []string `json:"blocked_file_extensions,omitempty"`
 
 	BlockedMimeTypes []string `json:"blocked_mime_types,omitempty"`
+}
+
+type FileUploadRequest struct {
+	// file field
+	File *string `json:"file,omitempty"`
+
+	User *OnlyUserID `json:"user,omitempty"`
 }
 
 type FileUploadResponse struct {
@@ -2168,7 +2193,7 @@ type FullUserResponse struct {
 
 	UpdatedAt Timestamp `json:"updated_at"`
 
-	BlockedUserIDs []string `json:"blocked_user_ids"`
+	BlockedUserIds []string `json:"blocked_user_ids"`
 
 	ChannelMutes []*ChannelMute `json:"channel_mutes"`
 
@@ -2499,7 +2524,7 @@ type GetOGResponse struct {
 	ImageUrl *string `json:"image_url,omitempty"`
 
 	// extracted url from the text
-	OgScrapeUrl *string `json:"og_scrape_url,omitempty"`
+	OGScrapeUrl *string `json:"og_scrape_url,omitempty"`
 
 	OriginalHeight *int `json:"original_height,omitempty"`
 
@@ -2704,6 +2729,15 @@ type ImageSize struct {
 	Width *int `json:"width,omitempty"`
 }
 
+type ImageUploadRequest struct {
+	File *string `json:"file,omitempty"`
+
+	// field with JSON-encoded array of image size configurations
+	UploadSizes []ImageSize `json:"upload_sizes,omitempty"`
+
+	User *OnlyUserID `json:"user,omitempty"`
+}
+
 type ImageUploadResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -2763,7 +2797,7 @@ type Label struct {
 
 	HarmLabels []string `json:"harm_labels,omitempty"`
 
-	PhraseListIDs []int `json:"phrase_list_ids,omitempty"`
+	PhraseListIds []int `json:"phrase_list_ids,omitempty"`
 }
 
 type LabelThresholds struct {
@@ -3005,11 +3039,11 @@ type Message struct {
 	// Text of the message. Should be empty if `mml` is provided
 	Text string `json:"text"`
 
-	// Contains type of the message
-	Type string `json:"type"`
-
 	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
+
+	// Contains type of the message
+	Type string `json:"type"`
 
 	// Array of message attachments
 	Attachments []*Attachment `json:"attachments"`
@@ -3082,6 +3116,15 @@ type Message struct {
 	User *UserObject `json:"user,omitempty"`
 }
 
+type MessageActionRequest struct {
+	// ReadOnlyData to execute command with
+	FormData map[string]string `json:"form_data"`
+
+	UserID *string `json:"user_id,omitempty"`
+
+	User *UserRequest `json:"user,omitempty"`
+}
+
 type MessageChangeSet struct {
 	Attachments bool `json:"attachments"`
 
@@ -3089,7 +3132,7 @@ type MessageChangeSet struct {
 
 	Html bool `json:"html"`
 
-	MentionedUserIDs bool `json:"mentioned_user_ids"`
+	MentionedUserIds bool `json:"mentioned_user_ids"`
 
 	Mml bool `json:"mml"`
 
@@ -3229,9 +3272,9 @@ type MessageRequest struct {
 
 	Text *string `json:"text,omitempty"`
 
-	Type *string `json:"type,omitempty"`
-
 	UserID *string `json:"user_id,omitempty"`
+
+	Type *string `json:"type,omitempty"`
 
 	Attachments []*Attachment `json:"attachments,omitempty"`
 
@@ -3263,9 +3306,9 @@ type MessageResponse struct {
 
 	Text string `json:"text"`
 
-	Type string `json:"type"`
-
 	UpdatedAt Timestamp `json:"updated_at"`
+
+	Type string `json:"type"`
 
 	Attachments []*Attachment `json:"attachments"`
 
@@ -3345,9 +3388,9 @@ type MessageWithChannelResponse struct {
 
 	Text string `json:"text"`
 
-	Type string `json:"type"`
-
 	UpdatedAt Timestamp `json:"updated_at"`
+
+	Type string `json:"type"`
 
 	Attachments []*Attachment `json:"attachments"`
 
@@ -3425,13 +3468,13 @@ type ModerationConfig struct {
 
 	UpdatedAt Timestamp `json:"updated_at"`
 
+	AWSRekognitionConfig *AWSRekognitionConfig `json:"aws_rekognition_config,omitempty"`
+
 	AutomodPlatformCircumventionConfig *AutomodPlatformCircumventionConfig `json:"automod_platform_circumvention_config,omitempty"`
 
 	AutomodSemanticFiltersConfig *AutomodSemanticFiltersConfig `json:"automod_semantic_filters_config,omitempty"`
 
 	AutomodToxicityConfig *AutomodToxicityConfig `json:"automod_toxicity_config,omitempty"`
-
-	AwsRekognitionConfig *AWSRekognitionConfig `json:"aws_rekognition_config,omitempty"`
 
 	BlockListConfig *BlockListConfig `json:"block_list_config,omitempty"`
 
@@ -3623,7 +3666,7 @@ type OwnUser struct {
 
 	LastActive *Timestamp `json:"last_active,omitempty"`
 
-	BlockedUserIDs []string `json:"blocked_user_ids,omitempty"`
+	BlockedUserIds []string `json:"blocked_user_ids,omitempty"`
 
 	LatestHiddenChannels []string `json:"latest_hidden_channels,omitempty"`
 
@@ -3680,6 +3723,14 @@ type Permission struct {
 
 	// MongoDB style condition which decides whether or not the permission is granted
 	Condition map[string]any `json:"condition,omitempty"`
+}
+
+type PinRequest struct {
+	// the session ID of the user who pinned the message
+	SessionID string `json:"session_id"`
+
+	// the user ID of the user who pinned the message
+	UserID string `json:"user_id"`
 }
 
 type PinResponse struct {
@@ -3984,9 +4035,9 @@ type PushProvider struct {
 
 	Name string `json:"name"`
 
-	Type string `json:"type"`
-
 	UpdatedAt Timestamp `json:"updated_at"`
+
+	Type string `json:"type"`
 
 	ApnAuthKey *string `json:"apn_auth_key,omitempty"`
 
@@ -4038,9 +4089,9 @@ type PushProviderResponse struct {
 
 	Name string `json:"name"`
 
-	Type string `json:"type"`
-
 	UpdatedAt Timestamp `json:"updated_at"`
+
+	Type string `json:"type"`
 
 	ApnAuthKey *string `json:"apn_auth_key,omitempty"`
 
@@ -4419,11 +4470,11 @@ type Reaction struct {
 	// Reaction score. If not specified reaction has score of 1
 	Score int `json:"score"`
 
-	// The type of reaction (e.g. 'like', 'laugh', 'wow')
-	Type string `json:"type"`
-
 	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
+
+	// The type of reaction (e.g. 'like', 'laugh', 'wow')
+	Type string `json:"type"`
 
 	Custom map[string]any `json:"custom"`
 
@@ -4478,14 +4529,14 @@ type ReactionResponse struct {
 	// Score of the reaction
 	Score int `json:"score"`
 
-	// Type of reaction
-	Type string `json:"type"`
-
 	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
 
 	// User ID
 	UserID string `json:"user_id"`
+
+	// Type of reaction
+	Type string `json:"type"`
 
 	// Custom data for this object
 	Custom map[string]any `json:"custom"`
@@ -4670,7 +4721,7 @@ type Role struct {
 type S3Request struct {
 	S3Region string `json:"s3_region"`
 
-	S3ApiKey *string `json:"s3_api_key,omitempty"`
+	S3APIKey *string `json:"s3_api_key,omitempty"`
 
 	S3Secret *string `json:"s3_secret,omitempty"`
 }
@@ -4773,9 +4824,9 @@ type SearchResultMessage struct {
 
 	Text string `json:"text"`
 
-	Type string `json:"type"`
-
 	UpdatedAt Timestamp `json:"updated_at"`
+
+	Type string `json:"type"`
 
 	Attachments []*Attachment `json:"attachments"`
 
@@ -4924,6 +4975,8 @@ type StopLiveResponse struct {
 
 	Call CallResponse `json:"call"`
 }
+
+type StopRTMPBroadcastsRequest struct{}
 
 type StopRTMPBroadcastsResponse struct {
 	// Duration of the request in milliseconds
@@ -5197,6 +5250,14 @@ type UnmuteResponse struct {
 	NonExistingUsers []string `json:"non_existing_users,omitempty"`
 }
 
+type UnpinRequest struct {
+	// the session ID of the user who pinned the message
+	SessionID string `json:"session_id"`
+
+	// the user ID of the user who pinned the message
+	UserID string `json:"user_id"`
+}
+
 type UnpinResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -5454,6 +5515,12 @@ type UpsertConfigResponse struct {
 	Config *ConfigResponse `json:"config,omitempty"`
 }
 
+type UpsertModerationTemplateRequest struct {
+	Name string `json:"name"`
+
+	Config FeedsModerationTemplateConfig `json:"config"`
+}
+
 type UpsertModerationTemplateResponse struct {
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -5626,7 +5693,7 @@ type UserResponse struct {
 	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
 
-	BlockedUserIDs []string `json:"blocked_user_ids"`
+	BlockedUserIds []string `json:"blocked_user_ids"`
 
 	// List of devices user is using
 	Devices []*Device `json:"devices"`

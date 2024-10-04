@@ -64,28 +64,28 @@ func setup(t *testing.T, rm *ResourceManager, createCallType bool) (*Stream, *Ca
 		notificationSettings := &NotificationSettings{
 			Enabled: true,
 			CallNotification: EventNotificationSettings{
-				Apns: APNS{
+				APNS: APNS{
 					Title: "{{ user.display_name }} invites you to a call",
 					Body:  "",
 				},
 				Enabled: true,
 			},
 			SessionStarted: EventNotificationSettings{
-				Apns: APNS{
+				APNS: APNS{
 					Body:  "",
 					Title: "{{ user.display_name }} invites you to a call",
 				},
 				Enabled: false,
 			},
 			CallLiveStarted: EventNotificationSettings{
-				Apns: APNS{
+				APNS: APNS{
 					Body:  "",
 					Title: "{{ user.display_name }} invites you to a call",
 				},
 				Enabled: false,
 			},
 			CallRing: EventNotificationSettings{
-				Apns: APNS{
+				APNS: APNS{
 					Body:  "",
 					Title: "{{ user.display_name }} invites you to a call",
 				},
@@ -139,7 +139,7 @@ func setup(t *testing.T, rm *ResourceManager, createCallType bool) (*Stream, *Ca
 		assert.True(t, response.Data.NotificationSettings.Enabled)
 		assert.False(t, response.Data.NotificationSettings.SessionStarted.Enabled)
 		assert.True(t, response.Data.NotificationSettings.CallNotification.Enabled)
-		assert.Equal(t, "{{ user.display_name }} invites you to a call", response.Data.NotificationSettings.CallNotification.Apns.Title)
+		assert.Equal(t, "{{ user.display_name }} invites you to a call", response.Data.NotificationSettings.CallNotification.APNS.Title)
 
 		// Register cleanup for the created call type
 		rm.RegisterCleanup(func() {
@@ -190,9 +190,9 @@ func createExternalStorageWithCleanup(t *testing.T, rm *ResourceManager, client 
 		Name:        storageName,
 		StorageType: "s3",
 		Path:        &path,
-		AwsS3: &S3Request{
+		AWSS3: &S3Request{
 			S3Region: "us-east-1",
-			S3ApiKey: &s3apiKey,
+			S3APIKey: &s3apiKey,
 			S3Secret: &s3secret,
 		},
 	})
@@ -341,9 +341,9 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 			Name:        "stream-s3",
 			StorageType: "s3",
 			Path:        &path,
-			AwsS3: &S3Request{
+			AWSS3: &S3Request{
 				S3Region: "us-east-1",
-				S3ApiKey: &s3apiKey,
+				S3APIKey: &s3apiKey,
 				S3Secret: &s3secret,
 			},
 		})
@@ -461,14 +461,14 @@ func TestVideoExamples(t *testing.T) {
 
 		response, err := call.Get(ctx, nil)
 		assert.NoError(t, err)
-		assert.Contains(t, response.Data.Call.BlockedUserIDs, badUser.ID)
+		assert.Contains(t, response.Data.Call.BlockedUserIds, badUser.ID)
 
 		_, err = call.UnblockUser(ctx, &UnblockUserRequest{UserID: badUser.ID})
 		assert.NoError(t, err)
 
 		response, err = call.Get(ctx, nil)
 		assert.NoError(t, err)
-		assert.NotContains(t, response.Data.Call.BlockedUserIDs, badUser.ID)
+		assert.NotContains(t, response.Data.Call.BlockedUserIds, badUser.ID)
 	})
 }
 
@@ -547,7 +547,7 @@ func TestVideoExamplesAdditional(t *testing.T) {
 
 		_, err = call.MuteUsers(ctx, &MuteUsersRequest{
 			MutedByID:        &userID,
-			UserIDs:          []string{alice.ID, bob.ID},
+			UserIds:          []string{alice.ID, bob.ID},
 			Audio:            PtrTo(true),
 			Video:            PtrTo(true),
 			Screenshare:      PtrTo(true),
@@ -595,7 +595,7 @@ func TestVideoExamplesAdditional(t *testing.T) {
 		_, err = client.ReactivateUser(ctx, alice.ID, &ReactivateUserRequest{})
 		assert.NoError(t, err)
 
-		response, err := client.DeactivateUsers(ctx, &DeactivateUsersRequest{UserIDs: []string{alice.ID, bob.ID}})
+		response, err := client.DeactivateUsers(ctx, &DeactivateUsersRequest{UserIds: []string{alice.ID, bob.ID}})
 		assert.NoError(t, err)
 		taskID := response.Data.TaskID
 
@@ -858,9 +858,9 @@ func TestExternalStorageOperations(t *testing.T) {
 			Name:        uniqueName,
 			StorageType: "s3",
 			Path:        &path,
-			AwsS3: &S3Request{
+			AWSS3: &S3Request{
 				S3Region: "us-east-1",
-				S3ApiKey: &s3apiKey,
+				S3APIKey: &s3apiKey,
 				S3Secret: &s3secret,
 			},
 		})

@@ -184,10 +184,10 @@ func (c *Client) CreateImport(ctx context.Context, request *CreateImportRequest)
 }
 
 // Gets an import
-func (c *Client) GetImport(ctx context.Context, iD string, request *GetImportRequest) (*StreamResponse[GetImportResponse], error) {
+func (c *Client) GetImport(ctx context.Context, id string, request *GetImportRequest) (*StreamResponse[GetImportResponse], error) {
 	var result GetImportResponse
 	pathParams := map[string]string{
-		"id": iD,
+		"id": id,
 	}
 	res, err := MakeRequest[any, GetImportResponse](c, ctx, "GET", "/api/v2/imports/{id}", nil, nil, &result, pathParams)
 	return res, err
@@ -209,10 +209,10 @@ func (c *Client) ListPermissions(ctx context.Context, request *ListPermissionsRe
 }
 
 // Gets custom permission
-func (c *Client) GetPermission(ctx context.Context, iD string, request *GetPermissionRequest) (*StreamResponse[GetCustomPermissionResponse], error) {
+func (c *Client) GetPermission(ctx context.Context, id string, request *GetPermissionRequest) (*StreamResponse[GetCustomPermissionResponse], error) {
 	var result GetCustomPermissionResponse
 	pathParams := map[string]string{
-		"id": iD,
+		"id": id,
 	}
 	res, err := MakeRequest[any, GetCustomPermissionResponse](c, ctx, "GET", "/api/v2/permissions/{id}", nil, nil, &result, pathParams)
 	return res, err
@@ -276,10 +276,10 @@ func (c *Client) DeleteRole(ctx context.Context, name string, request *DeleteRol
 }
 
 // Gets status of a task
-func (c *Client) GetTask(ctx context.Context, iD string, request *GetTaskRequest) (*StreamResponse[GetTaskResponse], error) {
+func (c *Client) GetTask(ctx context.Context, id string, request *GetTaskRequest) (*StreamResponse[GetTaskResponse], error) {
 	var result GetTaskResponse
 	pathParams := map[string]string{
-		"id": iD,
+		"id": id,
 	}
 	res, err := MakeRequest[any, GetTaskResponse](c, ctx, "GET", "/api/v2/tasks/{id}", nil, nil, &result, pathParams)
 	return res, err
