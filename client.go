@@ -67,7 +67,15 @@ func WithBaseUrl(baseURL string) ClientOption {
 // is retrieved from STREAM_KEY and the secret from STREAM_SECRET
 // environmental variables.
 func NewClientFromEnvVars(options ...ClientOption) (*Client, error) {
-	return NewClient(os.Getenv("STREAM_API_KEY"), os.Getenv("STREAM_API_SECRET"), options...)
+	apiKey := os.Getenv("STREAM_API_KEY")
+	if apiKey == "" {
+		return nil, errors.New("STREAM_API_KEY is empty")
+	}
+	apiSecret := os.Getenv("STREAM_API_SECRET")
+	if apiSecret == "" {
+		return nil, errors.New("STREAM_API_SECRET is empty")
+	}
+	return NewClient(apiKey, apiSecret, options...)
 }
 
 // NewClient creates new stream chat api client.

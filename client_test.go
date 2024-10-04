@@ -16,9 +16,16 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	// Load .env file before running tests
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found, fallback to ENV vars")
+	if os.Getenv("CI") != "true" {
+		// Attempt to load the .env file
+		err := godotenv.Load()
+		if err != nil {
+			log.Println("No .env file found, relying on environment variables")
+		} else {
+			log.Println(".env file loaded successfully")
+		}
+	} else {
+		log.Println("Running in CI environment, skipping .env loading")
 	}
 
 	// Run the tests
