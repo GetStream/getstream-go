@@ -74,6 +74,25 @@ func WithBaseUrl(baseURL string) ClientOption {
 	}
 }
 
+type tokenOptions struct {
+	claims     *Claims
+	expiration *time.Duration
+}
+
+type TokenOption func(*tokenOptions)
+
+func WithExpiration(d time.Duration) TokenOption {
+	return func(t *tokenOptions) {
+		t.expiration = &d
+	}
+}
+
+func WithClaims(claims Claims) TokenOption {
+	return func(t *tokenOptions) {
+		t.claims = &claims
+	}
+}
+
 const (
 	EnvStreamApiKey      = "STREAM_API_KEY"
 	EnvStreamApiSecret   = "STREAM_API_SECRET"
@@ -127,6 +146,16 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		fn(client)
 	}
 
+	tr := http.DefaultTransport.(*http.Transport).Clone() //nolint:forcetypeassert
+	tr.MaxIdleConnsPerHost = 5
+	tr.ExpectContinueTimeout = 2 * time.Second
+	tr.IdleConnTimeout = 59 * time.Second
+
+	client.httpClient = &http.Client{
+		Timeout:   client.defaultTimeout,
+		Transport: tr,
+	}
+
 	token, err := client.createTokenWithClaims(jwt.MapClaims{"server": true})
 	if err != nil {
 		return nil, err
@@ -144,7 +173,7 @@ type Claims struct {
 	CustomClaims map[string]interface{} // Additional custom claims
 }
 
-func (c *Client) createToken(userID string, claims *Claims, expiration int64) (string, error) {
+func (c *Client) createToken(userID string, claims *Claims, expiration *time.Duration) (string, error) {
 	if userID == "" {
 		return "", errors.New("user ID is required")
 	}
@@ -155,39 +184,32 @@ func (c *Client) createToken(userID string, claims *Claims, expiration int64) (s
 		"iat":     now,
 	}
 
+	if expiration != nil && *expiration > 0 {
+		jwtClaims["exp"] = now + int64(expiration.Seconds())
+	}
+
 	if claims != nil {
-		// Set expiration time if provided
-		if expiration > 0 {
-			jwtClaims["exp"] = now + expiration
+		for key, value := range claims.CustomClaims {
+			jwtClaims[key] = value
 		}
 
-		// Set role if provided
 		if claims.Role != "" {
 			jwtClaims["role"] = claims.Role
 		}
 
-		// Set channel CIDs if provided
 		if len(claims.ChannelCIDs) > 0 {
 			jwtClaims["channel_cids"] = claims.ChannelCIDs
 		}
 
-		// Set call CIDs if provided
 		if len(claims.CallCIDs) > 0 {
 			jwtClaims["call_cids"] = claims.CallCIDs
-		}
-
-		// Set custom claims if provided
-		if len(claims.CustomClaims) > 0 {
-			for key, value := range claims.CustomClaims {
-				jwtClaims[key] = value
-			}
 		}
 	}
 
 	return c.createTokenWithClaims(jwtClaims)
 }
 
-func (c *Client) createCallToken(userID string, claims *Claims, expiration int64) (string, error) {
+func (c *Client) createCallToken(userID string, claims *Claims, expiration *time.Duration) (string, error) {
 	if userID == "" {
 		return "", errors.New("user ID is required")
 	}

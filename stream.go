@@ -39,15 +39,20 @@ func NewClient(apiKey, apiSecret string, options ...ClientOption) (*Stream, erro
 // Example:
 //
 // expiration:= 3600, // Token expires in 1 hour
+//
 //	claims := &Claims{
-//	   
+//
 //	    Role:       "admin",
 //	    ChannelCIDs: []string{"channel1", "channel2"},
 //	}
 //
 // token, err := client.CreateToken("userID", claims, 3600)
-func (s *Stream) CreateToken(userID string, claims *Claims, expiration int64) (string, error) {
-	return s.createToken(userID, claims, expiration)
+func (s *Stream) CreateToken(userID string, opts ...TokenOption) (string, error) {
+	o := tokenOptions{}
+	for _, opt := range opts {
+		opt(&o)
+	}
+	return s.createToken(userID, o.claims, o.expiration)
 }
 
 // CreateCallToken generates a token for a given user ID, including optional claims specific to calls.
@@ -68,9 +73,10 @@ func (s *Stream) CreateToken(userID string, claims *Claims, expiration int64) (s
 //	}
 //
 //	expiration:= 7200, // Token expires in 2 hours
+//
 // token, err := client.CreateCallToken("userID", claims, expiration)
 func (s *Stream) CreateCallToken(userID string, claims *Claims, expiration int64) (string, error) {
-	return s.createCallToken(userID, claims, expiration)
+	return s.createCallToken(userID, claims, nil)
 }
 
 func (s *Stream) Chat() *ChatClient {
