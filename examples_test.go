@@ -52,6 +52,5 @@ func TestCreateUserAndToken(t *testing.T) {
 	require.NotNil(t, response)
 
 	// the token will be valid for 1 hour
-	oneHourTime := time.Now().Add(1 * time.Hour)
-	client.CreateToken("tommaso-id", &getstream.StreamJWTClaims{Expire: &oneHourTime})
+	client.CreateToken("tommaso-id", nil, 3600)
 }
