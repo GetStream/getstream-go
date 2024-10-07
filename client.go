@@ -146,14 +146,8 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		fn(client)
 	}
 
-	tr := http.DefaultTransport.(*http.Transport).Clone() //nolint:forcetypeassert
-	tr.MaxIdleConnsPerHost = 5
-	tr.ExpectContinueTimeout = 2 * time.Second
-	tr.IdleConnTimeout = 59 * time.Second
-
 	client.httpClient = &http.Client{
-		Timeout:   client.defaultTimeout,
-		Transport: tr,
+		Timeout: client.defaultTimeout,
 	}
 
 	token, err := client.createTokenWithClaims(jwt.MapClaims{"server": true})
