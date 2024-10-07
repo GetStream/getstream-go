@@ -127,6 +127,10 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		fn(client)
 	}
 
+	client.httpClient = &http.Client{
+		Timeout: client.defaultTimeout,
+	}
+
 	token, err := client.createTokenWithClaims(jwt.MapClaims{"server": true})
 	if err != nil {
 		return nil, err
