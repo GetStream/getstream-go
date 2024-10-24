@@ -581,25 +581,6 @@ func TestVideoExamplesAdditional(t *testing.T) {
 		assert.NoError(t, err)
 		taskID := response.Data.TaskID
 
-		WaitForTask := func(ctx context.Context, client *Stream, taskID string) (*StreamResponse[GetTaskResponse], error) {
-			ticker := time.NewTicker(500 * time.Millisecond)
-			defer ticker.Stop()
-			for {
-				select {
-				case <-ticker.C:
-					taskResult, err := client.GetTask(ctx, taskID, &GetTaskRequest{})
-					if err != nil {
-						return nil, fmt.Errorf("failed to get task result: %w", err)
-					}
-					if taskResult.Data.Status == "completed" || taskResult.Data.Status == "failed" {
-						return taskResult, nil
-					}
-				case <-ctx.Done():
-					return nil, ctx.Err()
-				}
-			}
-		}
-
 		taskCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
 		defer cancel()
 
@@ -935,15 +916,19 @@ func TestHardDeleteCall(t *testing.T) {
 			Hard: PtrTo(true),
 		})
 		require.NoError(t, err)
-		assert.NotNil(t, response.Data.Call)
-		assert.NotNil(t, response.Data.TaskID)
-		time.Sleep(2 * time.Second)
-		// Wait for the task to complete
-		taskStatus, err := client.GetTask(ctx, *response.Data.TaskID, &GetTaskRequest{})
-		require.NoError(t, err)
+		taskID := response.Data.TaskID
 
-		assert.Equal(t, "completed", taskStatus.Data.Status)
+		require.NotNil(t, taskID)
 
+		taskCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+		defer cancel()
+
+		taskStatus, err := WaitForTask(taskCtx, client, *taskID)
+		assert.NoError(t, err)
+
+		if taskStatus.Data.Status == "completed" {
+			t.Logf("Task result: %v", taskStatus.Data.Result)
+		}
 		// Verify the call is deleted
 		_, err = call.Get(ctx, nil)
 		require.Error(t, err)

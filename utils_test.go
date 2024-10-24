@@ -2,6 +2,7 @@ package getstream_test
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -10,6 +11,25 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
+
+func WaitForTask(ctx context.Context, client *Stream, taskID string) (*StreamResponse[GetTaskResponse], error) {
+	ticker := time.NewTicker(500 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			taskResult, err := client.GetTask(ctx, taskID, &GetTaskRequest{})
+			if err != nil {
+				return nil, fmt.Errorf("failed to get task result: %w", err)
+			}
+			if taskResult.Data.Status == "completed" || taskResult.Data.Status == "failed" {
+				return taskResult, nil
+			}
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
+}
 
 // ResourceManager manages resource cleanup for tests.
 type ResourceManager struct {
