@@ -13,13 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-  
+
       - uses: actions/github-script@v6
         with:
           script: |
-            const get_change_log_diff = require('./scripts/get_changelog_diff.js')
-            core.exportVariable('CHANGELOG', get_change_log_diff())
-
             // Getting the release version from the PR source branch
             // Source branch looks like this: release-1.0.0
             const version = context.payload.pull_request.head.ref.split('-')[1]
@@ -28,6 +25,6 @@ jobs:
       - name: Create release on GitHub
         uses: ncipollo/release-action@v1
         with:
-          body: ${{ env.CHANGELOG }}
           tag: ${{ env.VERSION }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          generateReleaseNotes: true
