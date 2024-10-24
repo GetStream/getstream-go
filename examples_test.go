@@ -244,6 +244,7 @@ func TestUsers(t *testing.T) {
 
 	// deleting users
 	{
+		t.Skip("this is just an example, don't run it")
 		response, err := client.DeleteUsers(ctx, &getstream.DeleteUsersRequest{UserIds: []string{"<id>"}})
 
 		// restore a soft-deleted user
