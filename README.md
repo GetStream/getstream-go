@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/GetStream/getstream-go?style=flat-square)](https://goreportcard.com/report/github.com/GetStream/getstream-go)
 [![Godoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](https://godoc.org/github.com/GetStream/getstream-go)
 [![GitHub release](https://img.shields.io/github/release/GetStream/getstream-go.svg?style=flat-square)](https://github.com/GetStream/getstream-go/releases/latest)
-[![Go Version](https://img.shields.io/badge/go%20version-%3E%3D1.18-61CFDD.svg?style=flat-square)](https://golang.org/doc/devel/release.html)
+[![Go Version](https://img.shields.io/badge/go%20version-%3E%3D1.19-61CFDD.svg?style=flat-square)](https://golang.org/doc/devel/release.html)
 [![codecov](https://img.shields.io/codecov/c/github/GetStream/getstream-go.svg?style=flat-square)](https://codecov.io/gh/GetStream/getstream-go)
 
 <p align="center">
