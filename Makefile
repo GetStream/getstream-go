@@ -4,7 +4,7 @@ install-gofumpt:
 
 .PHONY: install-golangci
 install-golangci:
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.53.3
 
 .PHONY: build
 build:
