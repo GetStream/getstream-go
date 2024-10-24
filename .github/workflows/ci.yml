@@ -15,6 +15,7 @@ concurrency:
 jobs:
   test-build:
     name: 👷 Test & Build
+    environment: ci
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 3
