@@ -35,14 +35,14 @@ type Client struct {
 	baseUrl        string
 	defaultTimeout time.Duration
 	httpClient     *http.Client
-	logger         *Logger
+	logger         Logger
 }
 
 func (c *Client) HttpClient() *http.Client {
 	return c.httpClient
 }
 
-func (c *Client) Logger() *Logger {
+func (c *Client) Logger() Logger {
 	return c.logger
 }
 
@@ -71,6 +71,20 @@ func WithTimeout(t time.Duration) ClientOption {
 func WithBaseUrl(baseURL string) ClientOption {
 	return func(c *Client) {
 		c.baseUrl = baseURL
+	}
+}
+
+// WithLogger sets a custom logger for the client.
+func WithLogger(logger Logger) ClientOption {
+	return func(c *Client) {
+		c.logger = logger
+	}
+}
+
+// With authToken sets the auth token for the client.
+func WithAuthToken(authToken string) ClientOption {
+	return func(c *Client) {
+		c.authToken = authToken
 	}
 }
 
@@ -130,7 +144,6 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		apiKey:         apiKey,
 		apiSecret:      []byte(apiSecret),
 		baseUrl:        baseURL,
-		logger:         DefaultLogger,
 		defaultTimeout: defaultTimeout,
 	}
 
@@ -146,16 +159,22 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		fn(client)
 	}
 
+	// Set default logger if not provided
+	if client.logger == nil {
+		client.logger = DefaultLoggerInstance
+	}
+
 	client.httpClient = &http.Client{
 		Timeout: client.defaultTimeout,
 	}
 
-	token, err := client.createTokenWithClaims(jwt.MapClaims{"server": true})
-	if err != nil {
-		return nil, err
+	if client.authToken == "" {
+		token, err := client.createTokenWithClaims(jwt.MapClaims{"server": true})
+		if err != nil {
+			return nil, err
+		}
+		client.authToken = token
 	}
-
-	client.authToken = token
 	return client, nil
 }
 

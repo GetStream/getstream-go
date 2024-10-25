@@ -87,13 +87,8 @@ func TestExtractQueryParams(t *testing.T) {
 
 func TestRequestURL(t *testing.T) {
 	originalBaseURL := "https://api.example.com"
-	mockLogger := DefaultLogger
-	client := &Client{
-		baseUrl: originalBaseURL,
-		apiKey:  "testkey",
-		logger:  mockLogger,
-	}
 
+	client, _ := newClient("testKey", "testSecret", WithBaseUrl(originalBaseURL))
 	t.Run("Valid_URL_without_path_parameters", func(t *testing.T) {
 		path := "/v1/resources"
 		values := url.Values{
@@ -101,7 +96,7 @@ func TestRequestURL(t *testing.T) {
 			"param2": {"value2"},
 		}
 
-		expectedURL := "https://api.example.com/v1/resources?api_key=testkey&param1=value1&param2=value2"
+		expectedURL := "https://api.example.com/v1/resources?api_key=testKey&param1=value1&param2=value2"
 
 		got, err := client.requestURL(path, values, nil)
 		if err != nil {
@@ -120,7 +115,7 @@ func TestRequestURL(t *testing.T) {
 		}
 		values := url.Values{}
 
-		expectedURL := "https://api.example.com/v1/resources/123?api_key=testkey"
+		expectedURL := "https://api.example.com/v1/resources/123?api_key=testKey"
 
 		got, err := client.requestURL(path, values, pathParams)
 		if err != nil {
@@ -151,7 +146,7 @@ func TestRequestURL(t *testing.T) {
 			"query": {"special chars &/?"},
 		}
 
-		expectedURL := "https://api.example.com/v1/search?api_key=testkey&query=special+chars+%26%2F%3F"
+		expectedURL := "https://api.example.com/v1/search?api_key=testKey&query=special+chars+%26%2F%3F"
 
 		got, err := client.requestURL(path, values, nil)
 		if err != nil {
@@ -165,13 +160,7 @@ func TestRequestURL(t *testing.T) {
 }
 
 func TestNewRequest(t *testing.T) {
-	mockLogger := DefaultLogger
-	client := &Client{
-		baseUrl:   "https://api.example.com", // Set baseUrl
-		apiKey:    "testkey",
-		authToken: "Bearer testtoken",
-		logger:    mockLogger,
-	}
+	client, _ := newClient("testkey", "testsecret", WithBaseUrl("https://api.example.com"), WithAuthToken("Bearer testtoken"))
 
 	ctx := context.Background()
 
@@ -285,11 +274,7 @@ func TestNewRequest(t *testing.T) {
 	})
 
 	t.Run("Unsupported data type", func(t *testing.T) {
-		client := &Client{
-			baseUrl: "https://api.stream-io-api.com",
-			apiKey:  "key",
-			logger:  DefaultLogger,
-		}
+		client, _ := newClient("key", "testsecret", WithBaseUrl("https://api.example.com"))
 		ctx := context.Background()
 		unsupportedData := make(chan int)
 
@@ -301,10 +286,7 @@ func TestNewRequest(t *testing.T) {
 }
 
 func TestSetHeaders(t *testing.T) {
-	client := &Client{
-		authToken: "Bearer testtoken",
-		logger:    DefaultLogger,
-	}
+	client, _ := newClient("testkey", "testsecret", WithAuthToken("Bearer testtoken"))
 
 	req, err := http.NewRequest(http.MethodGet, "https://api.example.com", nil)
 	if err != nil {
