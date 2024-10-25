@@ -274,7 +274,7 @@ func TestNewRequest(t *testing.T) {
 	})
 
 	t.Run("Unsupported data type", func(t *testing.T) {
-		client, _ := newClient("testkey", "testsecret", WithBaseUrl("https://api.example.com"))
+		client, _ := newClient("key", "testsecret", WithBaseUrl("https://api.example.com"))
 		ctx := context.Background()
 		unsupportedData := make(chan int)
 
