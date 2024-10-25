@@ -26,6 +26,8 @@
 - Video call creation and management
 - Chat session creation and management
 - Token generation for user authentication
+- **Timeout management**: Customizable timeouts for API requests.
+- **Rate Limiting**: Rate limits are automatically parsed from responses and accessible in API errors and responses.
 - **Customizable Logging with Support for Popular Logging Libraries**
 
 ## 📝 About Stream
@@ -133,6 +135,33 @@ func PtrTo[T any](v T) *T {
     return &v
 }
 ```
+
+## 🚦 Rate Limits
+
+Rate limit information is parsed from the response headers and is accessible in both API errors and successful responses. This helps you manage your API usage efficiently and avoid being throttled.
+
+Rate limits can be accessed from:
+- **Errors**: The `StreamError` struct includes `RateLimitInfo` in case of rate-limited requests.
+- **Responses**: Successful responses also contain `RateLimitInfo` under the `RateLimitInfo` field.
+
+## 🚀 Timeout Configuration
+
+You can customize the timeout for all API requests. By default, the client has a timeout of 6 seconds, but you can set a custom timeout using the `WithTimeout` option during the client initialization.
+
+```go
+client, err := stream.NewClient(apiKey, apiSecret, stream.WithTimeout(10*time.Second))
+if err != nil {
+    fmt.Printf("Error initializing client: %v\n", err)
+    return
+}
+```
+
+Alternatively, you can configure the timeout via the `STREAM_HTTP_TIMEOUT` environment variable:
+
+```bash
+export STREAM_HTTP_TIMEOUT=10
+```
+
 
 ## 📄 Custom Logging
 
