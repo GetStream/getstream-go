@@ -87,11 +87,9 @@ func TestExtractQueryParams(t *testing.T) {
 
 func TestRequestURL(t *testing.T) {
 	originalBaseURL := "https://api.example.com"
-	mockLogger := DefaultLogger
 	client := &Client{
 		baseUrl: originalBaseURL,
 		apiKey:  "testkey",
-		logger:  mockLogger,
 	}
 
 	t.Run("Valid_URL_without_path_parameters", func(t *testing.T) {
@@ -165,12 +163,10 @@ func TestRequestURL(t *testing.T) {
 }
 
 func TestNewRequest(t *testing.T) {
-	mockLogger := DefaultLogger
 	client := &Client{
 		baseUrl:   "https://api.example.com", // Set baseUrl
 		apiKey:    "testkey",
 		authToken: "Bearer testtoken",
-		logger:    mockLogger,
 	}
 
 	ctx := context.Background()
@@ -288,7 +284,6 @@ func TestNewRequest(t *testing.T) {
 		client := &Client{
 			baseUrl: "https://api.stream-io-api.com",
 			apiKey:  "key",
-			logger:  DefaultLogger,
 		}
 		ctx := context.Background()
 		unsupportedData := make(chan int)
@@ -303,7 +298,6 @@ func TestNewRequest(t *testing.T) {
 func TestSetHeaders(t *testing.T) {
 	client := &Client{
 		authToken: "Bearer testtoken",
-		logger:    DefaultLogger,
 	}
 
 	req, err := http.NewRequest(http.MethodGet, "https://api.example.com", nil)
