@@ -160,11 +160,7 @@ func TestRequestURL(t *testing.T) {
 }
 
 func TestNewRequest(t *testing.T) {
-	client := &Client{
-		baseUrl:   "https://api.example.com", // Set baseUrl
-		apiKey:    "testkey",
-		authToken: "Bearer testtoken",
-	}
+	client, _ := newClient("testkey", "testsecret", WithBaseUrl("https://api.example.com"), WithAuthToken("Bearer testtoken"))
 
 	ctx := context.Background()
 
@@ -278,10 +274,7 @@ func TestNewRequest(t *testing.T) {
 	})
 
 	t.Run("Unsupported data type", func(t *testing.T) {
-		client := &Client{
-			baseUrl: "https://api.stream-io-api.com",
-			apiKey:  "key",
-		}
+		client, _ := newClient("testkey", "testsecret", WithBaseUrl("https://api.example.com"))
 		ctx := context.Background()
 		unsupportedData := make(chan int)
 
@@ -293,9 +286,7 @@ func TestNewRequest(t *testing.T) {
 }
 
 func TestSetHeaders(t *testing.T) {
-	client := &Client{
-		authToken: "Bearer testtoken",
-	}
+	client, _ := newClient("testkey", "testsecret", WithAuthToken("Bearer testtoken"))
 
 	req, err := http.NewRequest(http.MethodGet, "https://api.example.com", nil)
 	if err != nil {

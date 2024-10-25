@@ -81,6 +81,13 @@ func WithLogger(logger Logger) ClientOption {
 	}
 }
 
+// With authToken sets the auth token for the client.
+func WithAuthToken(authToken string) ClientOption {
+	return func(c *Client) {
+		c.authToken = authToken
+	}
+}
+
 type tokenOptions struct {
 	claims     *Claims
 	expiration *time.Duration
@@ -161,12 +168,13 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		Timeout: client.defaultTimeout,
 	}
 
-	token, err := client.createTokenWithClaims(jwt.MapClaims{"server": true})
-	if err != nil {
-		return nil, err
+	if client.authToken == "" {
+		token, err := client.createTokenWithClaims(jwt.MapClaims{"server": true})
+		if err != nil {
+			return nil, err
+		}
+		client.authToken = token
 	}
-
-	client.authToken = token
 	return client, nil
 }
 
