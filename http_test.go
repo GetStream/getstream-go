@@ -96,7 +96,7 @@ func TestRequestURL(t *testing.T) {
 			"param2": {"value2"},
 		}
 
-		expectedURL := "https://api.example.com/v1/resources?api_key=testkey&param1=value1&param2=value2"
+		expectedURL := "https://api.example.com/v1/resources?api_key=testKey&param1=value1&param2=value2"
 
 		got, err := client.requestURL(path, values, nil)
 		if err != nil {
@@ -115,7 +115,7 @@ func TestRequestURL(t *testing.T) {
 		}
 		values := url.Values{}
 
-		expectedURL := "https://api.example.com/v1/resources/123?api_key=testkey"
+		expectedURL := "https://api.example.com/v1/resources/123?api_key=testKey"
 
 		got, err := client.requestURL(path, values, pathParams)
 		if err != nil {
@@ -146,7 +146,7 @@ func TestRequestURL(t *testing.T) {
 			"query": {"special chars &/?"},
 		}
 
-		expectedURL := "https://api.example.com/v1/search?api_key=testkey&query=special+chars+%26%2F%3F"
+		expectedURL := "https://api.example.com/v1/search?api_key=testKey&query=special+chars+%26%2F%3F"
 
 		got, err := client.requestURL(path, values, nil)
 		if err != nil {
