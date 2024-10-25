@@ -35,14 +35,14 @@ type Client struct {
 	baseUrl        string
 	defaultTimeout time.Duration
 	httpClient     *http.Client
-	logger         *Logger
+	logger         Logger
 }
 
 func (c *Client) HttpClient() *http.Client {
 	return c.httpClient
 }
 
-func (c *Client) Logger() *Logger {
+func (c *Client) Logger() Logger {
 	return c.logger
 }
 
@@ -71,6 +71,13 @@ func WithTimeout(t time.Duration) ClientOption {
 func WithBaseUrl(baseURL string) ClientOption {
 	return func(c *Client) {
 		c.baseUrl = baseURL
+	}
+}
+
+// WithLogger sets a custom logger for the client.
+func WithLogger(logger Logger) ClientOption {
+	return func(c *Client) {
+		c.logger = logger
 	}
 }
 
@@ -130,7 +137,6 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		apiKey:         apiKey,
 		apiSecret:      []byte(apiSecret),
 		baseUrl:        baseURL,
-		logger:         DefaultLogger,
 		defaultTimeout: defaultTimeout,
 	}
 
@@ -144,6 +150,11 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 
 	for _, fn := range options {
 		fn(client)
+	}
+
+	// Set default logger if not provided
+	if client.logger == nil {
+		client.logger = DefaultLoggerInstance
 	}
 
 	client.httpClient = &http.Client{

@@ -7,44 +7,52 @@ import (
 	"sync"
 )
 
-// LogLevel represents the severity of a log message
+// LogLevel represents the severity of a log message.
 type LogLevel int
 
 const (
-	// LogLevelDebug is the lowest severity
+	// LogLevelDebug is the lowest severity.
 	LogLevelDebug LogLevel = iota
-	// LogLevelInfo is for general information
+	// LogLevelInfo is for general information.
 	LogLevelInfo
-	// LogLevelWarn is for warning messages
+	// LogLevelWarn is for warning messages.
 	LogLevelWarn
-	// LogLevelError is for error messages
+	// LogLevelError is for error messages.
 	LogLevelError
 )
 
-// Logger is a custom logger with log levels
-type Logger struct {
+// Logger is an interface that clients can implement to provide custom logging.
+type Logger interface {
+	Debug(format string, v ...interface{})
+	Info(format string, v ...interface{})
+	Warn(format string, v ...interface{})
+	Error(format string, v ...interface{})
+}
+
+// DefaultLogger is the default implementation of the Logger interface.
+type DefaultLogger struct {
 	logger *log.Logger
 	level  LogLevel
 	mu     sync.Mutex
 }
 
-// NewLogger creates a new Logger instance
-func NewLogger(out io.Writer, prefix string, flag int, level LogLevel) *Logger {
-	return &Logger{
+// NewDefaultLogger creates a new DefaultLogger instance.
+func NewDefaultLogger(out io.Writer, prefix string, flag int, level LogLevel) *DefaultLogger {
+	return &DefaultLogger{
 		logger: log.New(out, prefix, flag),
 		level:  level,
 	}
 }
 
-// SetLevel sets the logging level
-func (l *Logger) SetLevel(level LogLevel) {
+// SetLevel sets the logging level.
+func (l *DefaultLogger) SetLevel(level LogLevel) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.level = level
 }
 
-// Debug logs a debug message
-func (l *Logger) Debug(format string, v ...interface{}) {
+// Debug logs a debug message.
+func (l *DefaultLogger) Debug(format string, v ...interface{}) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	if l.level <= LogLevelDebug {
@@ -52,8 +60,8 @@ func (l *Logger) Debug(format string, v ...interface{}) {
 	}
 }
 
-// Info logs an info message
-func (l *Logger) Info(format string, v ...interface{}) {
+// Info logs an info message.
+func (l *DefaultLogger) Info(format string, v ...interface{}) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	if l.level <= LogLevelInfo {
@@ -61,8 +69,8 @@ func (l *Logger) Info(format string, v ...interface{}) {
 	}
 }
 
-// Warn logs a warning message
-func (l *Logger) Warn(format string, v ...interface{}) {
+// Warn logs a warning message.
+func (l *DefaultLogger) Warn(format string, v ...interface{}) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	if l.level <= LogLevelWarn {
@@ -70,8 +78,8 @@ func (l *Logger) Warn(format string, v ...interface{}) {
 	}
 }
 
-// Error logs an error message
-func (l *Logger) Error(format string, v ...interface{}) {
+// Error logs an error message.
+func (l *DefaultLogger) Error(format string, v ...interface{}) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	if l.level <= LogLevelError {
@@ -79,35 +87,37 @@ func (l *Logger) Error(format string, v ...interface{}) {
 	}
 }
 
-// DefaultLogger is the default logger instance
-var DefaultLogger = NewLogger(os.Stderr, "", log.LstdFlags, LogLevelInfo)
+// DefaultLoggerInstance is the default logger instance.
+var DefaultLoggerInstance Logger = NewDefaultLogger(os.Stderr, "", log.LstdFlags, LogLevelInfo)
 
-// SetDefaultLogger sets the default logger
-func SetDefaultLogger(logger *Logger) {
-	DefaultLogger = logger
+// SetDefaultLogger sets the default logger.
+func SetDefaultLogger(logger Logger) {
+	DefaultLoggerInstance = logger
 }
 
-// SetDefaultLogLevel sets the log level for the default logger
+// SetDefaultLogLevel sets the log level for the default logger if it is a DefaultLogger.
 func SetDefaultLogLevel(level LogLevel) {
-	DefaultLogger.SetLevel(level)
+	if logger, ok := DefaultLoggerInstance.(*DefaultLogger); ok {
+		logger.SetLevel(level)
+	}
 }
 
-// Debug logs a debug message using the default logger
+// Debug logs a debug message using the default logger.
 func Debug(format string, v ...interface{}) {
-	DefaultLogger.Debug(format, v...)
+	DefaultLoggerInstance.Debug(format, v...)
 }
 
-// Info logs an info message using the default logger
+// Info logs an info message using the default logger.
 func Info(format string, v ...interface{}) {
-	DefaultLogger.Info(format, v...)
+	DefaultLoggerInstance.Info(format, v...)
 }
 
-// Warn logs a warning message using the default logger
+// Warn logs a warning message using the default logger.
 func Warn(format string, v ...interface{}) {
-	DefaultLogger.Warn(format, v...)
+	DefaultLoggerInstance.Warn(format, v...)
 }
 
-// Error logs an error message using the default logger
+// Error logs an error message using the default logger.
 func Error(format string, v ...interface{}) {
-	DefaultLogger.Error(format, v...)
+	DefaultLoggerInstance.Error(format, v...)
 }
