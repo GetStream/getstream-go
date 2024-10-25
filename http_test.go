@@ -87,11 +87,8 @@ func TestExtractQueryParams(t *testing.T) {
 
 func TestRequestURL(t *testing.T) {
 	originalBaseURL := "https://api.example.com"
-	client := &Client{
-		baseUrl: originalBaseURL,
-		apiKey:  "testkey",
-	}
 
+	client, _ := newClient("testKey", "testSecret", WithBaseUrl(originalBaseURL))
 	t.Run("Valid_URL_without_path_parameters", func(t *testing.T) {
 		path := "/v1/resources"
 		values := url.Values{
