@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "The new version number with 'v' prefix. Example: v1.40.1"
+        description: "The new version number following semantic versioning convention. Example: 1.40.1"
         required: true
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
           npx --yes standard-version@9.3.2 --release-as "$VERSION" --skip.tag --skip.commit --tag-prefix=v
 
           # Update version in version.go
-          sed -i "s/versionName = \".*\"/versionName = \"${VERSION#v}\"/" version.go
+          sed -i "s/versionName = \".*\"/versionName = \"$VERSION\"/" version.go
           
           # Stage the new or updated files
           git add CHANGELOG.md version.go
