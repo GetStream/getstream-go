@@ -27,7 +27,7 @@ jobs:
           sed -i "s/versionName = \".*\"/versionName = \"${VERSION#v}\"/" version.go
           
           # Stage the new or updated files
-          git add CHANGELOG.md getstream/version.go
+          git add CHANGELOG.md version.go
 
           # Set up Git configuration
           git config --global user.name 'github-actions'
