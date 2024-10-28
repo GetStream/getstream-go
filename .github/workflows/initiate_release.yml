@@ -24,7 +24,7 @@ jobs:
           npx --yes standard-version@9.3.2 --release-as "$VERSION" --skip.tag --skip.commit --tag-prefix=v
 
           # Update version in version.go
-          sed -i "s/versionName = \".*\"/versionName = \"$VERSION\"/" version.go
+          sed -i "s/\(versionName = \)\"[^\"]*\"/\1\"$VERSION\"/" version.go
           
           # Stage the new or updated files
           git add CHANGELOG.md version.go
