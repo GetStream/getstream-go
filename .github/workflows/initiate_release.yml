@@ -20,19 +20,20 @@ jobs:
         env:
           VERSION: ${{ github.event.inputs.version }}
         run: |
+          # Generate the changelog without creating a tag or commit
           npx --yes standard-version@9.3.2 --release-as "$VERSION" --skip.tag --skip.commit --tag-prefix=v
-          git config --global user.name 'github-actions' 
+          
+          # Stage the new or updated CHANGELOG.md file
+          git add CHANGELOG.md
+          
+          # Set up Git configuration
+          git config --global user.name 'github-actions'
           git config --global user.email 'release@getstream.io'
+          
+          # Create a release branch with the version and push it
           git checkout -q -b "release-$VERSION"
           git commit -am "chore(release): $VERSION"
           git push -q -u origin "release-$VERSION"
-
-      - name: Get changelog diff
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const get_change_log_diff = require('./scripts/get_changelog_diff.js')
-            core.exportVariable('CHANGELOG', get_change_log_diff())
 
       - name: Open pull request
         env:
@@ -44,4 +45,4 @@ jobs:
             Make sure to use squash & merge when merging!
             Once this is merged, another job will kick off automatically and publish the package.
             # :memo: Changelog
-            ${{ env.CHANGELOG }}"
+            $(cat CHANGELOG.md)"
