@@ -16,16 +16,19 @@ jobs:
         with:
           fetch-depth: 0 # gives the changelog generator access to all previous commits
 
-      - name: Update CHANGELOG.md, version.go and push release branch
+      - name: Update CHANGELOG.md and version.go, then push release branch
         env:
           VERSION: ${{ github.event.inputs.version }}
         run: |
           # Generate the changelog without creating a tag or commit
           npx --yes standard-version@9.3.2 --release-as "$VERSION" --skip.tag --skip.commit --tag-prefix=v
+
+          # Update version in version.go
+          sed -i "s/versionName = \".*\"/versionName = \"${VERSION#v}\"/" version.go
           
-          # Stage the new or updated CHANGELOG.md file
-          git add CHANGELOG.md
-          
+          # Stage the new or updated files
+          git add CHANGELOG.md getstream/version.go
+
           # Set up Git configuration
           git config --global user.name 'github-actions'
           git config --global user.email 'release@getstream.io'
@@ -46,3 +49,4 @@ jobs:
             Once this is merged, another job will kick off automatically and publish the package.
             # :memo: Changelog
             $(cat CHANGELOG.md)"
+
