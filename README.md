@@ -112,7 +112,6 @@ func main() {
 
     // Create a token for client-side use
     tokenClaims := stream.Claims{CallCIDs: []string{"default:call1", "livestream:call2"}}
-
     token, err := client.CreateToken(
         userID, stream.WithClaims(tokenClaims), stream.WithExpiration(24*time.Hour),
     )
