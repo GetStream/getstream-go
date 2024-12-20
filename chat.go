@@ -15,6 +15,87 @@ func NewChatClient(client *Client) *ChatClient {
 	}
 }
 
+// Returns all available block lists
+func (c *ChatClient) ListBlockLists(ctx context.Context, request *ListBlockListsRequest) (*StreamResponse[ListBlockListResponse], error) {
+	var result ListBlockListResponse
+	res, err := MakeRequest[any, ListBlockListResponse](c.client, ctx, "GET", "/api/v2/chat/blocklists", nil, nil, &result, nil)
+	return res, err
+}
+
+// Creates a new application blocklist, once created the blocklist can be used by any channel type
+func (c *ChatClient) CreateBlockList(ctx context.Context, request *CreateBlockListRequest) (*StreamResponse[Response], error) {
+	var result Response
+	res, err := MakeRequest[CreateBlockListRequest, Response](c.client, ctx, "POST", "/api/v2/chat/blocklists", nil, request, &result, nil)
+	return res, err
+}
+
+// Deletes previously created application blocklist
+func (c *ChatClient) DeleteBlockList(ctx context.Context, name string, request *DeleteBlockListRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"name": name,
+	}
+	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/blocklists/{name}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Returns block list by given name
+func (c *ChatClient) GetBlockList(ctx context.Context, name string, request *GetBlockListRequest) (*StreamResponse[GetBlockListResponse], error) {
+	var result GetBlockListResponse
+	pathParams := map[string]string{
+		"name": name,
+	}
+	res, err := MakeRequest[any, GetBlockListResponse](c.client, ctx, "GET", "/api/v2/chat/blocklists/{name}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Updates contents of the block list
+func (c *ChatClient) UpdateBlockList(ctx context.Context, name string, request *UpdateBlockListRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"name": name,
+	}
+	res, err := MakeRequest[UpdateBlockListRequest, Response](c.client, ctx, "PUT", "/api/v2/chat/blocklists/{name}", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Query campaigns
+func (c *ChatClient) QueryCampaigns(ctx context.Context, request *QueryCampaignsRequest) (*StreamResponse[QueryCampaignsResponse], error) {
+	var result QueryCampaignsResponse
+	res, err := MakeRequest[QueryCampaignsRequest, QueryCampaignsResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns/query", nil, request, &result, nil)
+	return res, err
+}
+
+// Get campaign by ID.
+func (c *ChatClient) GetCampaign(ctx context.Context, id string, request *GetCampaignRequest) (*StreamResponse[GetCampaignResponse], error) {
+	var result GetCampaignResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, GetCampaignResponse](c.client, ctx, "GET", "/api/v2/chat/campaigns/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Starts or schedules a campaign
+func (c *ChatClient) StartCampaign(ctx context.Context, id string, request *StartCampaignRequest) (*StreamResponse[StartCampaignResponse], error) {
+	var result StartCampaignResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[StartCampaignRequest, StartCampaignResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns/{id}/start", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Stops a campaign
+func (c *ChatClient) ScheduleCampaign(ctx context.Context, id string, request *ScheduleCampaignRequest) (*StreamResponse[CampaignResponse], error) {
+	var result CampaignResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[ScheduleCampaignRequest, CampaignResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns/{id}/stop", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Query channels with filter query
 //
 // Required permissions:
@@ -922,6 +1003,64 @@ func (c *ChatClient) Search(ctx context.Context, request *SearchRequest) (*Strea
 	return res, err
 }
 
+// Query segments
+func (c *ChatClient) QuerySegments(ctx context.Context, request *QuerySegmentsRequest) (*StreamResponse[QuerySegmentsResponse], error) {
+	var result QuerySegmentsResponse
+	res, err := MakeRequest[QuerySegmentsRequest, QuerySegmentsResponse](c.client, ctx, "POST", "/api/v2/chat/segments/query", nil, request, &result, nil)
+	return res, err
+}
+
+// Delete a segment
+func (c *ChatClient) DeleteSegment(ctx context.Context, id string, request *DeleteSegmentRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/segments/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Get segment
+func (c *ChatClient) GetSegment(ctx context.Context, id string, request *GetSegmentRequest) (*StreamResponse[GetSegmentResponse], error) {
+	var result GetSegmentResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, GetSegmentResponse](c.client, ctx, "GET", "/api/v2/chat/segments/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Delete targets from a segment
+func (c *ChatClient) DeleteSegmentTargets(ctx context.Context, id string, request *DeleteSegmentTargetsRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[DeleteSegmentTargetsRequest, Response](c.client, ctx, "POST", "/api/v2/chat/segments/{id}/deletetargets", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Check whether a target exists in a segment. Returns 200 if the target exists, 404 otherwise
+func (c *ChatClient) SegmentTargetExists(ctx context.Context, id string, targetID string, request *SegmentTargetExistsRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"id":        id,
+		"target_id": targetID,
+	}
+	res, err := MakeRequest[any, Response](c.client, ctx, "GET", "/api/v2/chat/segments/{id}/target/{target_id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Query segment targets
+func (c *ChatClient) QuerySegmentTargets(ctx context.Context, id string, request *QuerySegmentTargetsRequest) (*StreamResponse[QuerySegmentTargetsResponse], error) {
+	var result QuerySegmentTargetsResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[QuerySegmentTargetsRequest, QuerySegmentTargetsResponse](c.client, ctx, "POST", "/api/v2/chat/segments/{id}/targets/query", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Returns the list of threads for specific user
 //
 // Required permissions:
@@ -974,6 +1113,28 @@ func (c *ChatClient) UnreadCounts(ctx context.Context, request *UnreadCountsRequ
 func (c *ChatClient) UnreadCountsBatch(ctx context.Context, request *UnreadCountsBatchRequest) (*StreamResponse[UnreadCountsBatchResponse], error) {
 	var result UnreadCountsBatchResponse
 	res, err := MakeRequest[UnreadCountsBatchRequest, UnreadCountsBatchResponse](c.client, ctx, "POST", "/api/v2/chat/unread_batch", nil, request, &result, nil)
+	return res, err
+}
+
+// Get list of blocked Users
+func (c *ChatClient) GetBlockedUsers(ctx context.Context, request *GetBlockedUsersRequest) (*StreamResponse[GetBlockedUsersResponse], error) {
+	var result GetBlockedUsersResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetBlockedUsersResponse](c.client, ctx, "GET", "/api/v2/chat/users/block", params, nil, &result, nil)
+	return res, err
+}
+
+// Block users
+func (c *ChatClient) BlockUsers(ctx context.Context, request *BlockUsersRequest) (*StreamResponse[BlockUsersResponse], error) {
+	var result BlockUsersResponse
+	res, err := MakeRequest[BlockUsersRequest, BlockUsersResponse](c.client, ctx, "POST", "/api/v2/chat/users/block", nil, request, &result, nil)
+	return res, err
+}
+
+// Unblock users
+func (c *ChatClient) UnblockUsers(ctx context.Context, request *UnblockUsersRequest) (*StreamResponse[UnblockUsersResponse], error) {
+	var result UnblockUsersResponse
+	res, err := MakeRequest[UnblockUsersRequest, UnblockUsersResponse](c.client, ctx, "POST", "/api/v2/chat/users/unblock", nil, request, &result, nil)
 	return res, err
 }
 

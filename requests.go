@@ -71,16 +71,35 @@ type UpdateBlockListRequest struct {
 	Words []string `json:"words"`
 }
 
+type QueryCampaignsRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+}
+
+type GetCampaignRequest struct {
+}
+
+type StartCampaignRequest struct {
+	ScheduledFor *Timestamp `json:"scheduled_for"`
+	StopAt       *Timestamp `json:"stop_at"`
+}
+
+type ScheduleCampaignRequest struct {
+}
+
 type QueryChannelsRequest struct {
-	Limit            *int                `json:"limit"`
-	MemberLimit      *int                `json:"member_limit"`
-	MessageLimit     *int                `json:"message_limit"`
-	Offset           *int                `json:"offset"`
-	State            *bool               `json:"state"`
-	UserID           *string             `json:"user_id"`
-	Sort             []*SortParamRequest `json:"sort"`
-	FilterConditions map[string]any      `json:"filter_conditions"`
-	User             *UserRequest        `json:"user"`
+	Limit            *int               `json:"limit"`
+	MemberLimit      *int               `json:"member_limit"`
+	MessageLimit     *int               `json:"message_limit"`
+	Offset           *int               `json:"offset"`
+	State            *bool              `json:"state"`
+	UserID           *string            `json:"user_id"`
+	Sort             []SortParamRequest `json:"sort"`
+	FilterConditions map[string]any     `json:"filter_conditions"`
+	User             *UserRequest       `json:"user"`
 }
 
 type DeleteChannelsRequest struct {
@@ -116,21 +135,21 @@ type UpdateChannelPartialRequest struct {
 }
 
 type UpdateChannelRequest struct {
-	AcceptInvite     *bool            `json:"accept_invite"`
-	Cooldown         *int             `json:"cooldown"`
-	HideHistory      *bool            `json:"hide_history"`
-	RejectInvite     *bool            `json:"reject_invite"`
-	SkipPush         *bool            `json:"skip_push"`
-	UserID           *string          `json:"user_id"`
-	AddMembers       []*ChannelMember `json:"add_members"`
-	AddModerators    []string         `json:"add_moderators"`
-	AssignRoles      []*ChannelMember `json:"assign_roles"`
-	DemoteModerators []string         `json:"demote_moderators"`
-	Invites          []*ChannelMember `json:"invites"`
-	RemoveMembers    []string         `json:"remove_members"`
-	Data             *ChannelInput    `json:"data"`
-	Message          *MessageRequest  `json:"message"`
-	User             *UserRequest     `json:"user"`
+	AcceptInvite     *bool           `json:"accept_invite"`
+	Cooldown         *int            `json:"cooldown"`
+	HideHistory      *bool           `json:"hide_history"`
+	RejectInvite     *bool           `json:"reject_invite"`
+	SkipPush         *bool           `json:"skip_push"`
+	UserID           *string         `json:"user_id"`
+	AddMembers       []ChannelMember `json:"add_members"`
+	AddModerators    []string        `json:"add_moderators"`
+	AssignRoles      []ChannelMember `json:"assign_roles"`
+	DemoteModerators []string        `json:"demote_moderators"`
+	Invites          []ChannelMember `json:"invites"`
+	RemoveMembers    []string        `json:"remove_members"`
+	Data             *ChannelInput   `json:"data"`
+	Message          *MessageRequest `json:"message"`
+	User             *UserRequest    `json:"user"`
 }
 
 type SendEventRequest struct {
@@ -223,32 +242,33 @@ type ListChannelTypesRequest struct {
 }
 
 type CreateChannelTypeRequest struct {
-	Automod             string              `json:"automod"`
-	AutomodBehavior     string              `json:"automod_behavior"`
-	MaxMessageLength    int                 `json:"max_message_length"`
-	Name                string              `json:"name"`
-	Blocklist           *string             `json:"blocklist"`
-	BlocklistBehavior   *string             `json:"blocklist_behavior"`
-	ConnectEvents       *bool               `json:"connect_events"`
-	CustomEvents        *bool               `json:"custom_events"`
-	MarkMessagesPending *bool               `json:"mark_messages_pending"`
-	MessageRetention    *string             `json:"message_retention"`
-	Mutes               *bool               `json:"mutes"`
-	PartitionSize       *int                `json:"partition_size"`
-	PartitionTtl        *string             `json:"partition_ttl"`
-	Polls               *bool               `json:"polls"`
-	PushNotifications   *bool               `json:"push_notifications"`
-	Reactions           *bool               `json:"reactions"`
-	ReadEvents          *bool               `json:"read_events"`
-	Replies             *bool               `json:"replies"`
-	Search              *bool               `json:"search"`
-	TypingEvents        *bool               `json:"typing_events"`
-	Uploads             *bool               `json:"uploads"`
-	UrlEnrichment       *bool               `json:"url_enrichment"`
-	Blocklists          []BlockListOptions  `json:"blocklists"`
-	Commands            []string            `json:"commands"`
-	Permissions         []PolicyRequest     `json:"permissions"`
-	Grants              map[string][]string `json:"grants"`
+	Automod                        string              `json:"automod"`
+	AutomodBehavior                string              `json:"automod_behavior"`
+	MaxMessageLength               int                 `json:"max_message_length"`
+	Name                           string              `json:"name"`
+	Blocklist                      *string             `json:"blocklist"`
+	BlocklistBehavior              *string             `json:"blocklist_behavior"`
+	ConnectEvents                  *bool               `json:"connect_events"`
+	CustomEvents                   *bool               `json:"custom_events"`
+	MarkMessagesPending            *bool               `json:"mark_messages_pending"`
+	MessageRetention               *string             `json:"message_retention"`
+	Mutes                          *bool               `json:"mutes"`
+	PartitionSize                  *int                `json:"partition_size"`
+	PartitionTtl                   *string             `json:"partition_ttl"`
+	Polls                          *bool               `json:"polls"`
+	PushNotifications              *bool               `json:"push_notifications"`
+	Reactions                      *bool               `json:"reactions"`
+	ReadEvents                     *bool               `json:"read_events"`
+	Replies                        *bool               `json:"replies"`
+	Search                         *bool               `json:"search"`
+	SkipLastMsgUpdateForSystemMsgs *bool               `json:"skip_last_msg_update_for_system_msgs"`
+	TypingEvents                   *bool               `json:"typing_events"`
+	Uploads                        *bool               `json:"uploads"`
+	UrlEnrichment                  *bool               `json:"url_enrichment"`
+	Blocklists                     []BlockListOptions  `json:"blocklists"`
+	Commands                       []string            `json:"commands"`
+	Permissions                    []PolicyRequest     `json:"permissions"`
+	Grants                         map[string][]string `json:"grants"`
 }
 
 type DeleteChannelTypeRequest struct {
@@ -258,34 +278,35 @@ type GetChannelTypeRequest struct {
 }
 
 type UpdateChannelTypeRequest struct {
-	Automod             string              `json:"automod"`
-	AutomodBehavior     string              `json:"automod_behavior"`
-	MaxMessageLength    int                 `json:"max_message_length"`
-	Blocklist           *string             `json:"blocklist"`
-	BlocklistBehavior   *string             `json:"blocklist_behavior"`
-	ConnectEvents       *bool               `json:"connect_events"`
-	CustomEvents        *bool               `json:"custom_events"`
-	MarkMessagesPending *bool               `json:"mark_messages_pending"`
-	Mutes               *bool               `json:"mutes"`
-	PartitionSize       *int                `json:"partition_size"`
-	PartitionTtl        *string             `json:"partition_ttl"`
-	Polls               *bool               `json:"polls"`
-	PushNotifications   *bool               `json:"push_notifications"`
-	Quotes              *bool               `json:"quotes"`
-	Reactions           *bool               `json:"reactions"`
-	ReadEvents          *bool               `json:"read_events"`
-	Reminders           *bool               `json:"reminders"`
-	Replies             *bool               `json:"replies"`
-	Search              *bool               `json:"search"`
-	TypingEvents        *bool               `json:"typing_events"`
-	Uploads             *bool               `json:"uploads"`
-	UrlEnrichment       *bool               `json:"url_enrichment"`
-	AllowedFlagReasons  []string            `json:"allowed_flag_reasons"`
-	Blocklists          []BlockListOptions  `json:"blocklists"`
-	Commands            []string            `json:"commands"`
-	Permissions         []PolicyRequest     `json:"permissions"`
-	AutomodThresholds   *Thresholds         `json:"automod_thresholds"`
-	Grants              map[string][]string `json:"grants"`
+	Automod                        string              `json:"automod"`
+	AutomodBehavior                string              `json:"automod_behavior"`
+	MaxMessageLength               int                 `json:"max_message_length"`
+	Blocklist                      *string             `json:"blocklist"`
+	BlocklistBehavior              *string             `json:"blocklist_behavior"`
+	ConnectEvents                  *bool               `json:"connect_events"`
+	CustomEvents                   *bool               `json:"custom_events"`
+	MarkMessagesPending            *bool               `json:"mark_messages_pending"`
+	Mutes                          *bool               `json:"mutes"`
+	PartitionSize                  *int                `json:"partition_size"`
+	PartitionTtl                   *string             `json:"partition_ttl"`
+	Polls                          *bool               `json:"polls"`
+	PushNotifications              *bool               `json:"push_notifications"`
+	Quotes                         *bool               `json:"quotes"`
+	Reactions                      *bool               `json:"reactions"`
+	ReadEvents                     *bool               `json:"read_events"`
+	Reminders                      *bool               `json:"reminders"`
+	Replies                        *bool               `json:"replies"`
+	Search                         *bool               `json:"search"`
+	SkipLastMsgUpdateForSystemMsgs *bool               `json:"skip_last_msg_update_for_system_msgs"`
+	TypingEvents                   *bool               `json:"typing_events"`
+	Uploads                        *bool               `json:"uploads"`
+	UrlEnrichment                  *bool               `json:"url_enrichment"`
+	AllowedFlagReasons             []string            `json:"allowed_flag_reasons"`
+	Blocklists                     []BlockListOptions  `json:"blocklists"`
+	Commands                       []string            `json:"commands"`
+	Permissions                    []PolicyRequest     `json:"permissions"`
+	AutomodThresholds              *Thresholds         `json:"automod_thresholds"`
+	Grants                         map[string][]string `json:"grants"`
 }
 
 type ListCommandsRequest struct {
@@ -327,11 +348,11 @@ type QueryMembersRequest struct {
 }
 
 type QueryMessageHistoryRequest struct {
-	Filter map[string]any      `json:"filter"`
-	Limit  *int                `json:"limit"`
-	Next   *string             `json:"next"`
-	Prev   *string             `json:"prev"`
-	Sort   []*SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
 }
 
 type DeleteMessageRequest struct {
@@ -381,13 +402,13 @@ type GetReactionsRequest struct {
 }
 
 type QueryReactionsRequest struct {
-	Limit  *int                `json:"limit"`
-	Next   *string             `json:"next"`
-	Prev   *string             `json:"prev"`
-	UserID *string             `json:"user_id"`
-	Sort   []*SortParamRequest `json:"sort"`
-	Filter map[string]any      `json:"filter"`
-	User   *UserRequest        `json:"user"`
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	UserID *string            `json:"user_id"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+	User   *UserRequest       `json:"user"`
 }
 
 type TranslateMessageRequest struct {
@@ -410,19 +431,19 @@ type RemovePollVoteRequest struct {
 }
 
 type GetRepliesRequest struct {
-	Limit                  *int                `json:"-" query:"limit"`
-	Offset                 *int                `json:"-" query:"offset"`
-	IDGte                  *string             `json:"-" query:"id_gte"`
-	IDGt                   *string             `json:"-" query:"id_gt"`
-	IDLte                  *string             `json:"-" query:"id_lte"`
-	IDLt                   *string             `json:"-" query:"id_lt"`
-	CreatedAtAfterOrEqual  *Timestamp          `json:"-" query:"created_at_after_or_equal"`
-	CreatedAtAfter         *Timestamp          `json:"-" query:"created_at_after"`
-	CreatedAtBeforeOrEqual *Timestamp          `json:"-" query:"created_at_before_or_equal"`
-	CreatedAtBefore        *Timestamp          `json:"-" query:"created_at_before"`
-	IDAround               *string             `json:"-" query:"id_around"`
-	CreatedAtAround        *Timestamp          `json:"-" query:"created_at_around"`
-	Sort                   []*SortParamRequest `json:"-" query:"sort"`
+	Limit                  *int               `json:"-" query:"limit"`
+	Offset                 *int               `json:"-" query:"offset"`
+	IDGte                  *string            `json:"-" query:"id_gte"`
+	IDGt                   *string            `json:"-" query:"id_gt"`
+	IDLte                  *string            `json:"-" query:"id_lte"`
+	IDLt                   *string            `json:"-" query:"id_lt"`
+	CreatedAtAfterOrEqual  *Timestamp         `json:"-" query:"created_at_after_or_equal"`
+	CreatedAtAfter         *Timestamp         `json:"-" query:"created_at_after"`
+	CreatedAtBeforeOrEqual *Timestamp         `json:"-" query:"created_at_before_or_equal"`
+	CreatedAtBefore        *Timestamp         `json:"-" query:"created_at_before"`
+	IDAround               *string            `json:"-" query:"id_around"`
+	CreatedAtAround        *Timestamp         `json:"-" query:"created_at_around"`
+	Sort                   []SortParamRequest `json:"-" query:"sort"`
 }
 
 type QueryMessageFlagsRequest struct {
@@ -444,44 +465,44 @@ type UnmuteChannelRequest struct {
 }
 
 type CreatePollRequest struct {
-	Name                      string             `json:"name"`
-	AllowAnswers              *bool              `json:"allow_answers"`
-	AllowUserSuggestedOptions *bool              `json:"allow_user_suggested_options"`
-	Description               *string            `json:"description"`
-	EnforceUniqueVote         *bool              `json:"enforce_unique_vote"`
-	ID                        *string            `json:"id"`
-	IsClosed                  *bool              `json:"is_closed"`
-	MaxVotesAllowed           *int               `json:"max_votes_allowed"`
-	UserID                    *string            `json:"user_id"`
-	VotingVisibility          *string            `json:"voting_visibility"`
-	Options                   []*PollOptionInput `json:"options"`
-	Custom                    map[string]any     `json:"Custom"`
-	User                      *UserRequest       `json:"user"`
+	Name                      string            `json:"name"`
+	AllowAnswers              *bool             `json:"allow_answers"`
+	AllowUserSuggestedOptions *bool             `json:"allow_user_suggested_options"`
+	Description               *string           `json:"description"`
+	EnforceUniqueVote         *bool             `json:"enforce_unique_vote"`
+	ID                        *string           `json:"id"`
+	IsClosed                  *bool             `json:"is_closed"`
+	MaxVotesAllowed           *int              `json:"max_votes_allowed"`
+	UserID                    *string           `json:"user_id"`
+	VotingVisibility          *string           `json:"voting_visibility"`
+	Options                   []PollOptionInput `json:"options"`
+	Custom                    map[string]any    `json:"Custom"`
+	User                      *UserRequest      `json:"user"`
 }
 
 type UpdatePollRequest struct {
-	ID                        string               `json:"id"`
-	Name                      string               `json:"name"`
-	AllowAnswers              *bool                `json:"allow_answers"`
-	AllowUserSuggestedOptions *bool                `json:"allow_user_suggested_options"`
-	Description               *string              `json:"description"`
-	EnforceUniqueVote         *bool                `json:"enforce_unique_vote"`
-	IsClosed                  *bool                `json:"is_closed"`
-	MaxVotesAllowed           *int                 `json:"max_votes_allowed"`
-	UserID                    *string              `json:"user_id"`
-	VotingVisibility          *string              `json:"voting_visibility"`
-	Options                   []*PollOptionRequest `json:"options"`
-	Custom                    map[string]any       `json:"Custom"`
-	User                      *UserRequest         `json:"user"`
+	ID                        string              `json:"id"`
+	Name                      string              `json:"name"`
+	AllowAnswers              *bool               `json:"allow_answers"`
+	AllowUserSuggestedOptions *bool               `json:"allow_user_suggested_options"`
+	Description               *string             `json:"description"`
+	EnforceUniqueVote         *bool               `json:"enforce_unique_vote"`
+	IsClosed                  *bool               `json:"is_closed"`
+	MaxVotesAllowed           *int                `json:"max_votes_allowed"`
+	UserID                    *string             `json:"user_id"`
+	VotingVisibility          *string             `json:"voting_visibility"`
+	Options                   []PollOptionRequest `json:"options"`
+	Custom                    map[string]any      `json:"Custom"`
+	User                      *UserRequest        `json:"user"`
 }
 
 type QueryPollsRequest struct {
-	UserID *string             `json:"-" query:"user_id"`
-	Limit  *int                `json:"limit"`
-	Next   *string             `json:"next"`
-	Prev   *string             `json:"prev"`
-	Sort   []*SortParamRequest `json:"sort"`
-	Filter map[string]any      `json:"filter"`
+	UserID *string            `json:"-" query:"user_id"`
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
 }
 
 type DeletePollRequest struct {
@@ -524,12 +545,12 @@ type GetPollOptionRequest struct {
 }
 
 type QueryPollVotesRequest struct {
-	UserID *string             `json:"-" query:"user_id"`
-	Limit  *int                `json:"limit"`
-	Next   *string             `json:"next"`
-	Prev   *string             `json:"prev"`
-	Sort   []*SortParamRequest `json:"sort"`
-	Filter map[string]any      `json:"filter"`
+	UserID *string            `json:"-" query:"user_id"`
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
 }
 
 type QueryBannedUsersRequest struct {
@@ -538,6 +559,35 @@ type QueryBannedUsersRequest struct {
 
 type SearchRequest struct {
 	Payload *SearchPayload `json:"-" query:"payload"`
+}
+
+type QuerySegmentsRequest struct {
+	Filter map[string]any     `json:"filter"`
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+}
+
+type DeleteSegmentRequest struct {
+}
+
+type GetSegmentRequest struct {
+}
+
+type DeleteSegmentTargetsRequest struct {
+	TargetIds []string `json:"target_ids"`
+}
+
+type SegmentTargetExistsRequest struct {
+}
+
+type QuerySegmentTargetsRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"Sort"`
+	Filter map[string]any     `json:"Filter"`
 }
 
 type QueryThreadsRequest struct {
@@ -569,6 +619,22 @@ type UnreadCountsRequest struct {
 
 type UnreadCountsBatchRequest struct {
 	UserIds []string `json:"user_ids"`
+}
+
+type GetBlockedUsersRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type BlockUsersRequest struct {
+	BlockedUserID string       `json:"blocked_user_id"`
+	UserID        *string      `json:"user_id"`
+	User          *UserRequest `json:"user"`
+}
+
+type UnblockUsersRequest struct {
+	BlockedUserID string       `json:"blocked_user_id"`
+	UserID        *string      `json:"user_id"`
+	User          *UserRequest `json:"user"`
 }
 
 type SendUserCustomEventRequest struct {
@@ -694,12 +760,15 @@ type CheckRequest struct {
 type UpsertConfigRequest struct {
 	Key                                string                              `json:"key"`
 	Async                              *bool                               `json:"async"`
-	AWSRekognitionConfig               *AWSRekognitionConfig               `json:"aws_rekognition_config"`
+	AWSRekognitionConfig               *AIImageConfig                      `json:"aws_rekognition_config"`
+	AiImageConfig                      *AIImageConfig                      `json:"ai_image_config"`
+	AiTextConfig                       *AITextConfig                       `json:"ai_text_config"`
+	AiVideoConfig                      *AIVideoConfig                      `json:"ai_video_config"`
 	AutomodPlatformCircumventionConfig *AutomodPlatformCircumventionConfig `json:"automod_platform_circumvention_config"`
 	AutomodSemanticFiltersConfig       *AutomodSemanticFiltersConfig       `json:"automod_semantic_filters_config"`
 	AutomodToxicityConfig              *AutomodToxicityConfig              `json:"automod_toxicity_config"`
 	BlockListConfig                    *BlockListConfig                    `json:"block_list_config"`
-	BodyguardConfig                    *BodyguardConfig                    `json:"bodyguard_config"`
+	BodyguardConfig                    *AITextConfig                       `json:"bodyguard_config"`
 	GoogleVisionConfig                 *GoogleVisionConfig                 `json:"google_vision_config"`
 	VelocityFilterConfig               *VelocityFilterConfig               `json:"velocity_filter_config"`
 }
@@ -711,22 +780,20 @@ type GetConfigRequest struct {
 }
 
 type QueryModerationConfigsRequest struct {
-	Limit  *int                `json:"limit"`
-	Next   *string             `json:"next"`
-	Prev   *string             `json:"prev"`
-	UserID *string             `json:"user_id"`
-	Sort   []*SortParamRequest `json:"sort"`
-	Filter map[string]any      `json:"filter"`
-	User   *UserRequest        `json:"user"`
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	UserID *string            `json:"user_id"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+	User   *UserRequest       `json:"user"`
 }
 
 type CustomCheckRequest struct {
-	EntityCreatorID   string             `json:"entity_creator_id"`
 	EntityID          string             `json:"entity_id"`
 	EntityType        string             `json:"entity_type"`
-	Name              *string            `json:"name"`
-	Reason            *string            `json:"reason"`
-	RecommendedAction *string            `json:"recommended_action"`
+	Flags             []CustomCheckFlag  `json:"flags"`
+	EntityCreatorID   *string            `json:"entity_creator_id"`
 	UserID            *string            `json:"user_id"`
 	ModerationPayload *ModerationPayload `json:"moderation_payload"`
 	User              *UserRequest       `json:"user"`
@@ -746,8 +813,8 @@ type V2UpsertTemplateRequest struct {
 type FlagRequest struct {
 	EntityID          string             `json:"entity_id"`
 	EntityType        string             `json:"entity_type"`
-	Reason            string             `json:"reason"`
 	EntityCreatorID   *string            `json:"entity_creator_id"`
+	Reason            *string            `json:"reason"`
 	UserID            *string            `json:"user_id"`
 	Custom            map[string]any     `json:"custom"`
 	ModerationPayload *ModerationPayload `json:"moderation_payload"`
@@ -755,13 +822,13 @@ type FlagRequest struct {
 }
 
 type QueryModerationLogsRequest struct {
-	Limit  *int                `json:"limit"`
-	Next   *string             `json:"next"`
-	Prev   *string             `json:"prev"`
-	UserID *string             `json:"user_id"`
-	Sort   []*SortParamRequest `json:"sort"`
-	Filter map[string]any      `json:"filter"`
-	User   *UserRequest        `json:"user"`
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	UserID *string            `json:"user_id"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+	User   *UserRequest       `json:"user"`
 }
 
 type GetModeratorStatsRequest struct {
@@ -778,16 +845,17 @@ type GetQueueStatsRequest struct {
 }
 
 type QueryReviewQueueRequest struct {
-	Limit                 *int                `json:"limit"`
-	LockModeratorDuration *int                `json:"lock_moderator_duration"`
-	LockModeratorID       *string             `json:"lock_moderator_id"`
-	Next                  *string             `json:"next"`
-	Prev                  *string             `json:"prev"`
-	StatsOnly             *bool               `json:"stats_only"`
-	UserID                *string             `json:"user_id"`
-	Sort                  []*SortParamRequest `json:"sort"`
-	Filter                map[string]any      `json:"filter"`
-	User                  *UserRequest        `json:"user"`
+	Limit        *int               `json:"limit"`
+	LockCount    *int               `json:"lock_count"`
+	LockDuration *int               `json:"lock_duration"`
+	LockItems    *bool              `json:"lock_items"`
+	Next         *string            `json:"next"`
+	Prev         *string            `json:"prev"`
+	StatsOnly    *bool              `json:"stats_only"`
+	UserID       *string            `json:"user_id"`
+	Sort         []SortParamRequest `json:"sort"`
+	Filter       map[string]any     `json:"filter"`
+	User         *UserRequest       `json:"user"`
 }
 
 type GetReviewQueueItemRequest struct {
@@ -803,6 +871,7 @@ type SubmitActionRequest struct {
 	DeleteMessage  *DeleteMessageRequest  `json:"delete_message"`
 	DeleteReaction *DeleteReactionRequest `json:"delete_reaction"`
 	DeleteUser     *DeleteUserRequest     `json:"delete_user"`
+	MarkReviewed   *MarkReviewedRequest   `json:"mark_reviewed"`
 	Unban          *UnbanActionRequest    `json:"unban"`
 	User           *UserRequest           `json:"user"`
 }
@@ -822,13 +891,13 @@ type UnmuteRequest struct {
 }
 
 type QueryUsageStatsRequest struct {
-	Limit  *int                `json:"limit"`
-	Next   *string             `json:"next"`
-	Prev   *string             `json:"prev"`
-	UserID *string             `json:"user_id"`
-	Sort   []*SortParamRequest `json:"sort"`
-	Filter map[string]any      `json:"filter"`
-	User   *UserRequest        `json:"user"`
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	UserID *string            `json:"user_id"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+	User   *UserRequest       `json:"user"`
 }
 
 type GetUserReportRequest struct {
@@ -891,16 +960,6 @@ type UpdateUsersRequest struct {
 	Users map[string]UserRequest `json:"users"`
 }
 
-type GetBlockedUsersRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
-type BlockUsersRequest struct {
-	BlockedUserID string       `json:"blocked_user_id"`
-	UserID        *string      `json:"user_id"`
-	User          *UserRequest `json:"user"`
-}
-
 type DeactivateUsersRequest struct {
 	UserIds             []string `json:"user_ids"`
 	CreatedByID         *string  `json:"created_by_id"`
@@ -929,12 +988,6 @@ type RestoreUsersRequest struct {
 	UserIds []string `json:"user_ids"`
 }
 
-type UnblockUsersRequest struct {
-	BlockedUserID string       `json:"blocked_user_id"`
-	UserID        *string      `json:"user_id"`
-	User          *UserRequest `json:"user"`
-}
-
 type DeactivateUserRequest struct {
 	CreatedByID         *string `json:"created_by_id"`
 	MarkMessagesDeleted *bool   `json:"mark_messages_deleted"`
@@ -950,21 +1003,21 @@ type ReactivateUserRequest struct {
 }
 
 type QueryCallMembersRequest struct {
-	ID               string              `json:"id"`
-	Type             string              `json:"type"`
-	Limit            *int                `json:"limit"`
-	Next             *string             `json:"next"`
-	Prev             *string             `json:"prev"`
-	Sort             []*SortParamRequest `json:"sort"`
-	FilterConditions map[string]any      `json:"filter_conditions"`
+	ID               string             `json:"id"`
+	Type             string             `json:"type"`
+	Limit            *int               `json:"limit"`
+	Next             *string            `json:"next"`
+	Prev             *string            `json:"prev"`
+	Sort             []SortParamRequest `json:"sort"`
+	FilterConditions map[string]any     `json:"filter_conditions"`
 }
 
 type QueryCallStatsRequest struct {
-	Limit            *int                `json:"limit"`
-	Next             *string             `json:"next"`
-	Prev             *string             `json:"prev"`
-	Sort             []*SortParamRequest `json:"sort"`
-	FilterConditions map[string]any      `json:"filter_conditions"`
+	Limit            *int               `json:"limit"`
+	Next             *string            `json:"next"`
+	Prev             *string            `json:"prev"`
+	Sort             []SortParamRequest `json:"sort"`
+	FilterConditions map[string]any     `json:"filter_conditions"`
 }
 
 type GetCallRequest struct {
@@ -1013,6 +1066,7 @@ type CollectUserFeedbackRequest struct {
 
 type GoLiveRequest struct {
 	RecordingStorageName     *string `json:"recording_storage_name"`
+	StartClosedCaption       *bool   `json:"start_closed_caption"`
 	StartHLS                 *bool   `json:"start_hls"`
 	StartRTMPBroadcasts      *bool   `json:"start_rtmp_broadcasts"`
 	StartRecording           *bool   `json:"start_recording"`
@@ -1060,11 +1114,19 @@ type StopRTMPBroadcastRequest struct {
 type StartHLSBroadcastingRequest struct {
 }
 
+type StartClosedCaptionsRequest struct {
+	EnableTranscription *bool   `json:"enable_transcription"`
+	ExternalStorage     *string `json:"external_storage"`
+	Language            *string `json:"language"`
+}
+
 type StartRecordingRequest struct {
 	RecordingExternalStorage *string `json:"recording_external_storage"`
 }
 
 type StartTranscriptionRequest struct {
+	EnableClosedCaptions         *bool   `json:"enable_closed_captions"`
+	Language                     *string `json:"language"`
 	TranscriptionExternalStorage *string `json:"transcription_external_storage"`
 }
 
@@ -1074,13 +1136,23 @@ type GetCallStatsRequest struct {
 type StopHLSBroadcastingRequest struct {
 }
 
+type StopClosedCaptionsRequest struct {
+	StopTranscription *bool `json:"stop_transcription"`
+}
+
 type StopLiveRequest struct {
+	ContinueClosedCaption  *bool `json:"continue_closed_caption"`
+	ContinueHLS            *bool `json:"continue_hls"`
+	ContinueRTMPBroadcasts *bool `json:"continue_rtmp_broadcasts"`
+	ContinueRecording      *bool `json:"continue_recording"`
+	ContinueTranscription  *bool `json:"continue_transcription"`
 }
 
 type StopRecordingRequest struct {
 }
 
 type StopTranscriptionRequest struct {
+	StopClosedCaptions *bool `json:"stop_closed_captions"`
 }
 
 type ListTranscriptionsRequest struct {
@@ -1108,11 +1180,11 @@ type DeleteTranscriptionRequest struct {
 }
 
 type QueryCallsRequest struct {
-	Limit            *int                `json:"limit"`
-	Next             *string             `json:"next"`
-	Prev             *string             `json:"prev"`
-	Sort             []*SortParamRequest `json:"sort"`
-	FilterConditions map[string]any      `json:"filter_conditions"`
+	Limit            *int               `json:"limit"`
+	Next             *string            `json:"next"`
+	Prev             *string            `json:"prev"`
+	Sort             []SortParamRequest `json:"sort"`
+	FilterConditions map[string]any     `json:"filter_conditions"`
 }
 
 type ListCallTypesRequest struct {
@@ -1140,4 +1212,10 @@ type UpdateCallTypeRequest struct {
 }
 
 type GetEdgesRequest struct {
+}
+
+type QueryAggregateCallStatsRequest struct {
+	From        *string  `json:"from"`
+	To          *string  `json:"to"`
+	ReportTypes []string `json:"report_types"`
 }
