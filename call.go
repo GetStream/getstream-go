@@ -85,6 +85,10 @@ func (c *Call) StartHLSBroadcasting(ctx context.Context, request *StartHLSBroadc
 	return c.client.StartHLSBroadcasting(ctx, c.callType, c.callID, request)
 }
 
+func (c *Call) StartClosedCaptions(ctx context.Context, request *StartClosedCaptionsRequest) (*StreamResponse[StartClosedCaptionsResponse], error) {
+	return c.client.StartClosedCaptions(ctx, c.callType, c.callID, request)
+}
+
 func (c *Call) StartRecording(ctx context.Context, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
 	return c.client.StartRecording(ctx, c.callType, c.callID, request)
 }
@@ -99,6 +103,10 @@ func (c *Call) GetCallStats(ctx context.Context, session string, request *GetCal
 
 func (c *Call) StopHLSBroadcasting(ctx context.Context, request *StopHLSBroadcastingRequest) (*StreamResponse[StopHLSBroadcastingResponse], error) {
 	return c.client.StopHLSBroadcasting(ctx, c.callType, c.callID, request)
+}
+
+func (c *Call) StopClosedCaptions(ctx context.Context, request *StopClosedCaptionsRequest) (*StreamResponse[StopClosedCaptionsResponse], error) {
+	return c.client.StopClosedCaptions(ctx, c.callType, c.callID, request)
 }
 
 func (c *Call) StopLive(ctx context.Context, request *StopLiveRequest) (*StreamResponse[StopLiveResponse], error) {

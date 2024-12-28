@@ -15,6 +15,43 @@ func NewChatClient(client *Client) *ChatClient {
 	}
 }
 
+// Query campaigns
+func (c *ChatClient) QueryCampaigns(ctx context.Context, request *QueryCampaignsRequest) (*StreamResponse[QueryCampaignsResponse], error) {
+	var result QueryCampaignsResponse
+	res, err := MakeRequest[QueryCampaignsRequest, QueryCampaignsResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns/query", nil, request, &result, nil)
+	return res, err
+}
+
+// Get campaign by ID.
+func (c *ChatClient) GetCampaign(ctx context.Context, id string, request *GetCampaignRequest) (*StreamResponse[GetCampaignResponse], error) {
+	var result GetCampaignResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, GetCampaignResponse](c.client, ctx, "GET", "/api/v2/chat/campaigns/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Starts or schedules a campaign
+func (c *ChatClient) StartCampaign(ctx context.Context, id string, request *StartCampaignRequest) (*StreamResponse[StartCampaignResponse], error) {
+	var result StartCampaignResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[StartCampaignRequest, StartCampaignResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns/{id}/start", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Stops a campaign
+func (c *ChatClient) ScheduleCampaign(ctx context.Context, id string, request *ScheduleCampaignRequest) (*StreamResponse[CampaignResponse], error) {
+	var result CampaignResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[ScheduleCampaignRequest, CampaignResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns/{id}/stop", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Query channels with filter query
 //
 // Required permissions:
@@ -919,6 +956,64 @@ func (c *ChatClient) Search(ctx context.Context, request *SearchRequest) (*Strea
 	var result SearchResponse
 	params := extractQueryParams(request)
 	res, err := MakeRequest[any, SearchResponse](c.client, ctx, "GET", "/api/v2/chat/search", params, nil, &result, nil)
+	return res, err
+}
+
+// Query segments
+func (c *ChatClient) QuerySegments(ctx context.Context, request *QuerySegmentsRequest) (*StreamResponse[QuerySegmentsResponse], error) {
+	var result QuerySegmentsResponse
+	res, err := MakeRequest[QuerySegmentsRequest, QuerySegmentsResponse](c.client, ctx, "POST", "/api/v2/chat/segments/query", nil, request, &result, nil)
+	return res, err
+}
+
+// Delete a segment
+func (c *ChatClient) DeleteSegment(ctx context.Context, id string, request *DeleteSegmentRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/segments/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Get segment
+func (c *ChatClient) GetSegment(ctx context.Context, id string, request *GetSegmentRequest) (*StreamResponse[GetSegmentResponse], error) {
+	var result GetSegmentResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, GetSegmentResponse](c.client, ctx, "GET", "/api/v2/chat/segments/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Delete targets from a segment
+func (c *ChatClient) DeleteSegmentTargets(ctx context.Context, id string, request *DeleteSegmentTargetsRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[DeleteSegmentTargetsRequest, Response](c.client, ctx, "POST", "/api/v2/chat/segments/{id}/deletetargets", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Check whether a target exists in a segment. Returns 200 if the target exists, 404 otherwise
+func (c *ChatClient) SegmentTargetExists(ctx context.Context, id string, targetID string, request *SegmentTargetExistsRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"id":        id,
+		"target_id": targetID,
+	}
+	res, err := MakeRequest[any, Response](c.client, ctx, "GET", "/api/v2/chat/segments/{id}/target/{target_id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Query segment targets
+func (c *ChatClient) QuerySegmentTargets(ctx context.Context, id string, request *QuerySegmentTargetsRequest) (*StreamResponse[QuerySegmentTargetsResponse], error) {
+	var result QuerySegmentTargetsResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[QuerySegmentTargetsRequest, QuerySegmentTargetsResponse](c.client, ctx, "POST", "/api/v2/chat/segments/{id}/targets/query", nil, request, &result, pathParams)
 	return res, err
 }
 
