@@ -81,24 +81,27 @@ func main() {
     ctx := context.Background()
 
     // Create a call
-    call := client.Video.Call("default", "unique-call-id")
+    call := client.Video().Call("default", "unique-call-id")
 
     // Create or get a call
-    response, err := call.GetOrCreate(ctx, &stream.CallRequest{
-        CreatedBy: stream.UserRequest{ID: userID},
+    response, err := call.GetOrCreate(ctx, &stream.GetOrCreateCallRequest{
+        Data: &stream.CallRequest{
+            CreatedBy: &stream.UserRequest{ID: userID},
+        },
     })
     if err != nil {
         fmt.Printf("Error creating/getting call: %v\n", err)
         return
     }
 
-    fmt.Printf("Call created/retrieved: %s\n", response.Call.ID)
+    fmt.Printf("Call created/retrieved: %s\n", response.Data.Call.ID)
 
     // Update call settings
     _, err = call.Update(ctx, &stream.UpdateCallRequest{
         SettingsOverride: &stream.CallSettingsRequest{
-            Audio: &stream.AudioSettings{
-                MicDefaultOn: stream.PtrTo(true),
+            Audio: &stream.AudioSettingsRequest{
+                DefaultDevice: "speaker",
+                MicDefaultOn:  stream.PtrTo(true),
             },
         },
     })
@@ -108,7 +111,10 @@ func main() {
     }
 
     // Create a token for client-side use
-    token, err := client.CreateToken(userID, nil)
+    tokenClaims := stream.Claims{CallCIDs: []string{"default:call1", "livestream:call2"}}
+    token, err := client.CreateToken(
+        userID, stream.WithClaims(tokenClaims), stream.WithExpiration(24*time.Hour),
+    )
     if err != nil {
         fmt.Printf("Error creating token: %v\n", err)
         return
@@ -117,7 +123,7 @@ func main() {
     fmt.Printf("Token for user %s: %s\n", userID, token)
 
     // Query calls
-    callsResponse, err := client.Video.QueryCalls(ctx, &stream.QueryCallsRequest{
+    callsResponse, err := client.Video().QueryCalls(ctx, &stream.QueryCallsRequest{
         FilterConditions: map[string]interface{}{
             "created_by_user_id": userID,
         },
@@ -127,7 +133,7 @@ func main() {
         return
     }
 
-    fmt.Printf("Found %d calls\n", len(callsResponse.Calls))
+    fmt.Printf("Found %d calls\n", len(callsResponse.Data.Calls))
 }
 
 // Helper function to create a pointer to a value
