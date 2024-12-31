@@ -1,0 +1,2 @@
+ignore:
+  - "models.go"  # models, there is nothing to test there
