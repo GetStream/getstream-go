@@ -328,4 +328,13 @@ func TestCreateChatChannelBasics(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.Equal(t, "custom-event", eventResponse.Data.Event.Type)
+
+	_, err = channel.MarkRead(ctx, &getstream.MarkReadRequest{
+		UserID: getstream.PtrTo("john"),
+	})
+	require.NoError(t, err)
+
+	deleteResponse, err := channel.Delete(ctx, &getstream.DeleteChannelRequest{})
+	require.NoError(t, err)
+	assert.NotNil(t, deleteResponse.Data.Channel.DeletedAt)
 }
