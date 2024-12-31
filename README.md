@@ -38,7 +38,7 @@ Stream is free for most side and hobby projects. To qualify, your project/compan
 
 ## 😎 Repo Overview 😎
 
-This repo contains the Node server-side SDK developed by the team and Stream community. For a feature overview please visit our [roadmap](https://github.com/GetStream/protocol/discussions/177).
+This repo contains the Golang server-side SDK developed by the team and Stream community. For a feature overview please visit our [roadmap](https://github.com/GetStream/protocol/discussions/177).
 
 ## ✍️ Contributing
 
