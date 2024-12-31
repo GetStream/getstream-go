@@ -268,3 +268,40 @@ func TestCallToken(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 }
+
+func TestCreateChatChannelBasics(t *testing.T) {
+	channel := initClient(t).Chat().Channel("messaging", uuid.NewString())
+
+	response, err := channel.GetOrCreate(ctx, &getstream.GetOrCreateChannelRequest{
+		Data: &getstream.ChannelInput{CreatedByID: getstream.PtrTo("john")},
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "messaging", response.Data.Channel.Type)
+	assert.Equal(t, "john", response.Data.Channel.CreatedBy.ID)
+
+	msgResponse, err := channel.SendMessage(ctx, &getstream.SendMessageRequest{
+		Message: getstream.MessageRequest{
+			Text:   getstream.PtrTo("hello"),
+			UserID: getstream.PtrTo("john"),
+		},
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "hello", msgResponse.Data.Message.Text)
+
+	_, err = initClient(t).Chat().UpdateChannelType(ctx, "messaging", &getstream.UpdateChannelTypeRequest{
+		Automod:          "disabled",
+		AutomodBehavior:  "block",
+		MaxMessageLength: 1000,
+		CustomEvents:     getstream.PtrTo(true),
+	})
+	require.NoError(t, err)
+
+	eventResponse, err := channel.SendEvent(ctx, &getstream.SendEventRequest{
+		Event: getstream.EventRequest{
+			Type:   "custom-event",
+			UserID: getstream.PtrTo("john"),
+		},
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "custom-event", eventResponse.Data.Event.Type)
+}
