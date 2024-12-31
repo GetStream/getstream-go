@@ -54,12 +54,27 @@ func TestBuildPath(t *testing.T) {
 }
 
 func TestExtractQueryParams(t *testing.T) {
+	type GetCallRequest struct {
+		MembersLimit *int    `json:"-" query:"members_limit"`
+		Ring         *bool   `json:"-" query:"ring"`
+		Notify       *bool   `json:"-" query:"notify"`
+		Video        *bool   `json:"-" query:"video"`
+		String       string  `json:"-" query:"string"`
+		Uint         uint    `json:"-" query:"uint"`
+		Float        float64 `json:"-" query:"float"`
+		Nil          *int    `json:"-" query:"nil"`
+	}
+
 	t.Run("Extract query params from GetCallRequest", func(t *testing.T) {
 		request := &GetCallRequest{
 			MembersLimit: PtrTo(10),
-			Notify:       PtrTo(true),
 			Ring:         PtrTo(false),
+			Notify:       PtrTo(true),
 			Video:        PtrTo(true),
+			String:       "str",
+			Uint:         1,
+			Float:        1.1,
+			Nil:          nil,
 		}
 
 		expected := url.Values{
@@ -67,6 +82,9 @@ func TestExtractQueryParams(t *testing.T) {
 			"notify":        []string{"true"},
 			"ring":          []string{"false"},
 			"video":         []string{"true"},
+			"string":        []string{"str"},
+			"uint":          []string{"1"},
+			"float":         []string{"1.1"},
 		}
 
 		result := extractQueryParams(request)

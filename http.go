@@ -176,11 +176,6 @@ func newRequest[T any](c *Client, ctx context.Context, method, path string, para
 	return r, nil
 }
 
-// isNil checks if a generic value is nil using reflection
-func isNil(v interface{}) bool {
-	return v == nil || (reflect.ValueOf(v).Kind() == reflect.Ptr && reflect.ValueOf(v).IsNil())
-}
-
 // setHeaders sets necessary headers for the request
 func (c *Client) setHeaders(r *http.Request) {
 	r.Header.Set("Content-Type", "application/json")
@@ -240,6 +235,10 @@ func extractQueryParams(v any) url.Values {
 	}
 	values := url.Values{}
 	for k, v := range m {
+		value := reflect.ValueOf(v)
+		if value.Kind() == reflect.Ptr && value.IsNil() {
+			continue
+		}
 		values.Set(k, EncodeValueToQueryParam(v))
 	}
 	return values
@@ -248,10 +247,6 @@ func extractQueryParams(v any) url.Values {
 // EncodeValueToQueryParam returns the string representation of a value ready to be used as a query param
 func EncodeValueToQueryParam(value any) string {
 	val := reflect.ValueOf(value)
-
-	if val.Kind() == reflect.Ptr && val.IsNil() {
-		return ""
-	}
 
 	switch val.Kind() {
 	case reflect.Ptr:
