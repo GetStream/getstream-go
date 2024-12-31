@@ -16,10 +16,6 @@ func (t Timestamp) MarshalJSON() ([]byte, error) {
 }
 
 func (t *Timestamp) UnmarshalJSON(data []byte) error {
-	if len(data) == 0 {
-		return nil
-	}
-
 	strData := string(data)
 	if strData == "null" {
 		return nil

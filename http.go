@@ -176,11 +176,6 @@ func newRequest[T any](c *Client, ctx context.Context, method, path string, para
 	return r, nil
 }
 
-// isNil checks if a generic value is nil using reflection
-func isNil(v interface{}) bool {
-	return v == nil || (reflect.ValueOf(v).Kind() == reflect.Ptr && reflect.ValueOf(v).IsNil())
-}
-
 // setHeaders sets necessary headers for the request
 func (c *Client) setHeaders(r *http.Request) {
 	r.Header.Set("Content-Type", "application/json")
@@ -211,18 +206,6 @@ func extractFields(val reflect.Value, tagName string, result map[string]any) err
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Field(i)
 		structField := typ.Field(i)
-
-		// Check if the field is an embedded struct and extract its fields
-		if structField.Anonymous && field.Kind() == reflect.Struct {
-
-			err := extractFields(field, tagName, result)
-			if err != nil {
-				return err
-			}
-			continue
-		}
-
-		// Check for the 'path' tag
 		if tag, ok := structField.Tag.Lookup(tagName); ok {
 			result[tag] = field.Interface()
 		}
@@ -240,6 +223,10 @@ func extractQueryParams(v any) url.Values {
 	}
 	values := url.Values{}
 	for k, v := range m {
+		value := reflect.ValueOf(v)
+		if value.Kind() == reflect.Ptr && value.IsNil() {
+			continue
+		}
 		values.Set(k, EncodeValueToQueryParam(v))
 	}
 	return values
@@ -248,10 +235,6 @@ func extractQueryParams(v any) url.Values {
 // EncodeValueToQueryParam returns the string representation of a value ready to be used as a query param
 func EncodeValueToQueryParam(value any) string {
 	val := reflect.ValueOf(value)
-
-	if val.Kind() == reflect.Ptr && val.IsNil() {
-		return ""
-	}
 
 	switch val.Kind() {
 	case reflect.Ptr:
@@ -289,11 +272,6 @@ func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, me
 	start := time.Now()
 	resp, err := c.httpClient.Do(r)
 	if err != nil {
-		select {
-		case <-ctx.Done():
-			return nil, ctx.Err()
-		default:
-		}
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -309,14 +287,8 @@ func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, me
 	return parseResponse(c, resp, b, response)
 }
 
-// TODO: revisit this
 // addRateLimitInfo adds rate limit information to the result
 func addRateLimitInfo[Gresponse any](headers http.Header, result *Gresponse) (*StreamResponse[Gresponse], error) {
 	rateLimit := NewRateLimitFromHeaders(headers)
 	return &StreamResponse[Gresponse]{RateLimitInfo: rateLimit, Data: *result}, nil
-}
-
-// versionHeader returns the version header (implementation omitted for brevity)
-func (c *Client) version() string {
-	return versionHeader()
 }

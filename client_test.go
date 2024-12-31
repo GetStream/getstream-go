@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -188,11 +189,26 @@ func resetCallResource(t *testing.T, call *Call) {
 func TestClientTimeout(t *testing.T) {
 	client, err := NewClient("apiKey", "apiSecret")
 	require.NoError(t, err)
-	assert.Equal(t, 6*time.Second, client.HttpClient().Timeout)
+	assert.Equal(t, 6*time.Second, client.HttpClient().(*http.Client).Timeout)
 
 	client, err = NewClient("apiKey", "apiSecret", WithTimeout(time.Second))
 	require.NoError(t, err)
-	assert.Equal(t, time.Second, client.HttpClient().Timeout)
+	assert.Equal(t, time.Second, client.HttpClient().(*http.Client).Timeout)
+}
+
+func TestClientGetters(t *testing.T) {
+	customLogger := NewDefaultLogger(os.Stderr, "", log.LstdFlags, LogLevelInfo)
+	client, err := NewClient("apiKey", "apiSecret", WithLogger(customLogger))
+	require.NoError(t, err)
+
+	assert.Equal(t, customLogger, client.Logger())
+	customLogger.SetLevel(LogLevelError)
+	client.Logger().Warn("This should not be logged")
+	client.Logger().Error("This should be logged")
+
+	assert.Equal(t, "apiKey", client.ApiKey())
+	assert.Equal(t, "https://chat.stream-io-api.com", client.BaseUrl())
+	assert.Equal(t, 6*time.Second, client.DefaultTimeout())
 }
 
 // TestCRUDCallTypeOperations tests Create, Read, Update, and Delete operations for call types.

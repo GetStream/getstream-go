@@ -28,17 +28,21 @@ func PtrTo[T any](v T) *T {
 	return &v
 }
 
+type HttpClient interface {
+	Do(r *http.Request) (*http.Response, error)
+}
+
 type Client struct {
 	apiKey         string
 	apiSecret      []byte
 	authToken      string
 	baseUrl        string
 	defaultTimeout time.Duration
-	httpClient     *http.Client
+	httpClient     HttpClient
 	logger         Logger
 }
 
-func (c *Client) HttpClient() *http.Client {
+func (c *Client) HttpClient() HttpClient {
 	return c.httpClient
 }
 
@@ -59,6 +63,12 @@ func (c *Client) DefaultTimeout() time.Duration {
 }
 
 type ClientOption func(c *Client)
+
+func WithHTTPClient(httpClient HttpClient) ClientOption {
+	return func(c *Client) {
+		c.httpClient = httpClient
+	}
+}
 
 // WithTimeout sets a custom timeout for all API requests
 func WithTimeout(t time.Duration) ClientOption {
@@ -81,7 +91,7 @@ func WithLogger(logger Logger) ClientOption {
 	}
 }
 
-// With authToken sets the auth token for the client.
+// WithAuthToken sets the auth token for the client.
 func WithAuthToken(authToken string) ClientOption {
 	return func(c *Client) {
 		c.authToken = authToken
@@ -164,8 +174,10 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		client.logger = DefaultLoggerInstance
 	}
 
-	client.httpClient = &http.Client{
-		Timeout: client.defaultTimeout,
+	if client.httpClient == nil {
+		client.httpClient = &http.Client{
+			Timeout: client.defaultTimeout,
+		}
 	}
 
 	if client.authToken == "" {

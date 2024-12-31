@@ -63,7 +63,7 @@ func TestCreateUserAndToken(t *testing.T) {
 func TestCreateCall(t *testing.T) {
 	client := initClient(t)
 
-	call := client.Video().Call("default", uuid.NewString())
+	call := client.Video().Call("livestream", uuid.NewString())
 
 	members := []getstream.MemberRequest{
 		{UserID: "john", Role: getstream.PtrTo("admin")},
@@ -148,6 +148,30 @@ func TestCreateCall(t *testing.T) {
 		assert.True(t, response.Data.Call.Settings.Screensharing.Enabled)
 		assert.True(t, response.Data.Call.Settings.Screensharing.AccessRequestEnabled)
 	}
+
+	// go live endpoints
+	{
+		_, err = call.GoLive(ctx, &getstream.GoLiveRequest{})
+		require.NoError(t, err)
+
+		_, err = call.StopLive(ctx, &getstream.StopLiveRequest{})
+		require.NoError(t, err)
+	}
+
+	// listing recordings and transcripts
+	{
+		_, err = call.ListTranscriptions(ctx, &getstream.ListTranscriptionsRequest{})
+		require.NoError(t, err)
+
+		_, err = call.ListRecordings(ctx, &getstream.ListRecordingsRequest{})
+		require.NoError(t, err)
+	}
+
+	_, err = call.End(ctx, &getstream.EndCallRequest{})
+	require.NoError(t, err)
+
+	_, err = call.Delete(ctx, &getstream.DeleteCallRequest{})
+	require.NoError(t, err)
 }
 
 func TestUsers(t *testing.T) {
@@ -267,4 +291,50 @@ func TestCallToken(t *testing.T) {
 	)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
+}
+
+func TestCreateChatChannelBasics(t *testing.T) {
+	channel := initClient(t).Chat().Channel("messaging", uuid.NewString())
+
+	response, err := channel.GetOrCreate(ctx, &getstream.GetOrCreateChannelRequest{
+		Data: &getstream.ChannelInput{CreatedByID: getstream.PtrTo("john")},
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "messaging", response.Data.Channel.Type)
+	assert.Equal(t, "john", response.Data.Channel.CreatedBy.ID)
+
+	msgResponse, err := channel.SendMessage(ctx, &getstream.SendMessageRequest{
+		Message: getstream.MessageRequest{
+			Text:   getstream.PtrTo("hello"),
+			UserID: getstream.PtrTo("john"),
+		},
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "hello", msgResponse.Data.Message.Text)
+
+	_, err = initClient(t).Chat().UpdateChannelType(ctx, "messaging", &getstream.UpdateChannelTypeRequest{
+		Automod:          "disabled",
+		AutomodBehavior:  "block",
+		MaxMessageLength: 1000,
+		CustomEvents:     getstream.PtrTo(true),
+	})
+	require.NoError(t, err)
+
+	eventResponse, err := channel.SendEvent(ctx, &getstream.SendEventRequest{
+		Event: getstream.EventRequest{
+			Type:   "custom-event",
+			UserID: getstream.PtrTo("john"),
+		},
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "custom-event", eventResponse.Data.Event.Type)
+
+	_, err = channel.MarkRead(ctx, &getstream.MarkReadRequest{
+		UserID: getstream.PtrTo("john"),
+	})
+	require.NoError(t, err)
+
+	deleteResponse, err := channel.Delete(ctx, &getstream.DeleteChannelRequest{})
+	require.NoError(t, err)
+	assert.NotNil(t, deleteResponse.Data.Channel.DeletedAt)
 }
