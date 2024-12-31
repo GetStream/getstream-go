@@ -292,6 +292,20 @@ func (c *VideoClient) StartHLSBroadcasting(ctx context.Context, _type string, id
 	return res, err
 }
 
+// Starts closed captions
+//
+// Required permissions:
+// - StartClosedCaptions
+func (c *VideoClient) StartClosedCaptions(ctx context.Context, _type string, id string, request *StartClosedCaptionsRequest) (*StreamResponse[StartClosedCaptionsResponse], error) {
+	var result StartClosedCaptionsResponse
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	res, err := MakeRequest[StartClosedCaptionsRequest, StartClosedCaptionsResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_closed_captions", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Starts recording
 //
 // Sends events:
@@ -350,6 +364,23 @@ func (c *VideoClient) StopHLSBroadcasting(ctx context.Context, _type string, id 
 	return res, err
 }
 
+// Stops closed captions
+//
+// Sends events:
+// - call.transcription_stopped
+//
+// Required permissions:
+// - StopClosedCaptions
+func (c *VideoClient) StopClosedCaptions(ctx context.Context, _type string, id string, request *StopClosedCaptionsRequest) (*StreamResponse[StopClosedCaptionsResponse], error) {
+	var result StopClosedCaptionsResponse
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	res, err := MakeRequest[StopClosedCaptionsRequest, StopClosedCaptionsResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_closed_captions", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Sends events:
 // - call.updated
 //
@@ -361,7 +392,7 @@ func (c *VideoClient) StopLive(ctx context.Context, _type string, id string, req
 		"type": _type,
 		"id":   id,
 	}
-	res, err := MakeRequest[any, StopLiveResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_live", nil, nil, &result, pathParams)
+	res, err := MakeRequest[StopLiveRequest, StopLiveResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_live", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -395,7 +426,7 @@ func (c *VideoClient) StopTranscription(ctx context.Context, _type string, id st
 		"type": _type,
 		"id":   id,
 	}
-	res, err := MakeRequest[any, StopTranscriptionResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_transcription", nil, nil, &result, pathParams)
+	res, err := MakeRequest[StopTranscriptionRequest, StopTranscriptionResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_transcription", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -546,5 +577,11 @@ func (c *VideoClient) UpdateCallType(ctx context.Context, name string, request *
 func (c *VideoClient) GetEdges(ctx context.Context, request *GetEdgesRequest) (*StreamResponse[GetEdgesResponse], error) {
 	var result GetEdgesResponse
 	res, err := MakeRequest[any, GetEdgesResponse](c.client, ctx, "GET", "/api/v2/video/edges", nil, nil, &result, nil)
+	return res, err
+}
+
+func (c *VideoClient) QueryAggregateCallStats(ctx context.Context, request *QueryAggregateCallStatsRequest) (*StreamResponse[QueryAggregateCallStatsResponse], error) {
+	var result QueryAggregateCallStatsResponse
+	res, err := MakeRequest[QueryAggregateCallStatsRequest, QueryAggregateCallStatsResponse](c.client, ctx, "POST", "/api/v2/video/stats", nil, request, &result, nil)
 	return res, err
 }
