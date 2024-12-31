@@ -63,7 +63,7 @@ func TestCreateUserAndToken(t *testing.T) {
 func TestCreateCall(t *testing.T) {
 	client := initClient(t)
 
-	call := client.Video().Call("default", uuid.NewString())
+	call := client.Video().Call("livestream", uuid.NewString())
 
 	members := []getstream.MemberRequest{
 		{UserID: "john", Role: getstream.PtrTo("admin")},
@@ -147,6 +147,24 @@ func TestCreateCall(t *testing.T) {
 		assert.Equal(t, map[string]any{"color": "red"}, response.Data.Call.Custom)
 		assert.True(t, response.Data.Call.Settings.Screensharing.Enabled)
 		assert.True(t, response.Data.Call.Settings.Screensharing.AccessRequestEnabled)
+	}
+
+	// go live endpoints
+	{
+		_, err = call.GoLive(ctx, &getstream.GoLiveRequest{})
+		require.NoError(t, err)
+
+		_, err = call.StopLive(ctx, &getstream.StopLiveRequest{})
+		require.NoError(t, err)
+	}
+
+	// listing recordings and transcripts
+	{
+		_, err = call.ListTranscriptions(ctx, &getstream.ListTranscriptionsRequest{})
+		require.NoError(t, err)
+
+		_, err = call.ListRecordings(ctx, &getstream.ListRecordingsRequest{})
+		require.NoError(t, err)
 	}
 }
 
