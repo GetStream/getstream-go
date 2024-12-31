@@ -206,18 +206,6 @@ func extractFields(val reflect.Value, tagName string, result map[string]any) err
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Field(i)
 		structField := typ.Field(i)
-
-		// Check if the field is an embedded struct and extract its fields
-		if structField.Anonymous && field.Kind() == reflect.Struct {
-
-			err := extractFields(field, tagName, result)
-			if err != nil {
-				return err
-			}
-			continue
-		}
-
-		// Check for the 'path' tag
 		if tag, ok := structField.Tag.Lookup(tagName); ok {
 			result[tag] = field.Interface()
 		}
@@ -284,11 +272,6 @@ func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, me
 	start := time.Now()
 	resp, err := c.httpClient.Do(r)
 	if err != nil {
-		select {
-		case <-ctx.Done():
-			return nil, ctx.Err()
-		default:
-		}
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -304,14 +287,8 @@ func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, me
 	return parseResponse(c, resp, b, response)
 }
 
-// TODO: revisit this
 // addRateLimitInfo adds rate limit information to the result
 func addRateLimitInfo[Gresponse any](headers http.Header, result *Gresponse) (*StreamResponse[Gresponse], error) {
 	rateLimit := NewRateLimitFromHeaders(headers)
 	return &StreamResponse[Gresponse]{RateLimitInfo: rateLimit, Data: *result}, nil
-}
-
-// versionHeader returns the version header (implementation omitted for brevity)
-func (c *Client) version() string {
-	return versionHeader()
 }

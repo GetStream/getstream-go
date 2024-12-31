@@ -257,7 +257,31 @@ func TestNewRequest(t *testing.T) {
 		}
 	})
 
-	t.Run("PUT request with io.Reader body", func(t *testing.T) {
+	t.Run("POST request with JSON body", func(t *testing.T) {
+		method := http.MethodPost
+		path := "/v1/resources"
+		params := url.Values{}
+		var data any
+		pathParams := map[string]string{}
+
+		req, err := newRequest(client, ctx, method, path, params, data, pathParams)
+		if err != nil {
+			t.Fatalf("newRequest returned error: %v", err)
+		}
+
+		expectedURL := "https://api.example.com/v1/resources?api_key=testkey"
+		if req.URL.String() != expectedURL {
+			t.Errorf("Expected URL %s, got %s", expectedURL, req.URL.String())
+		}
+
+		if req.Method != method {
+			t.Errorf("Expected method %s, got %s", method, req.Method)
+		}
+
+		assert.Nil(t, req.Body)
+	})
+
+	t.Run("PUT request with nil body", func(t *testing.T) {
 		method := http.MethodPut
 		path := "/v1/resources/{id}"
 		params := url.Values{}
