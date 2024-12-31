@@ -1,9 +1,12 @@
 package getstream_test
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"math/rand"
+	"net/http"
 	"testing"
 	"time"
 
@@ -11,6 +14,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
+
+type StubHTTPClient struct{}
+
+func (c *StubHTTPClient) Do(req *http.Request) (*http.Response, error) {
+	return &http.Response{
+		Status: "200 OK",
+		Body:   io.NopCloser(bytes.NewBufferString("{}")),
+	}, nil
+}
 
 func WaitForTask(ctx context.Context, client *Stream, taskID string) (*StreamResponse[GetTaskResponse], error) {
 	ticker := time.NewTicker(500 * time.Millisecond)

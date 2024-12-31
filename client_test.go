@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -188,11 +189,11 @@ func resetCallResource(t *testing.T, call *Call) {
 func TestClientTimeout(t *testing.T) {
 	client, err := NewClient("apiKey", "apiSecret")
 	require.NoError(t, err)
-	assert.Equal(t, 6*time.Second, client.HttpClient().Timeout)
+	assert.Equal(t, 6*time.Second, client.HttpClient().(*http.Client).Timeout)
 
 	client, err = NewClient("apiKey", "apiSecret", WithTimeout(time.Second))
 	require.NoError(t, err)
-	assert.Equal(t, time.Second, client.HttpClient().Timeout)
+	assert.Equal(t, time.Second, client.HttpClient().(*http.Client).Timeout)
 }
 
 // TestCRUDCallTypeOperations tests Create, Read, Update, and Delete operations for call types.

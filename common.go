@@ -286,9 +286,6 @@ func (c *Client) GetTask(ctx context.Context, id string, request *GetTaskRequest
 }
 
 // Find and filter users
-//
-// Required permissions:
-// - SearchUser
 func (c *Client) QueryUsers(ctx context.Context, request *QueryUsersRequest) (*StreamResponse[QueryUsersResponse], error) {
 	var result QueryUsersResponse
 	params := extractQueryParams(request)
