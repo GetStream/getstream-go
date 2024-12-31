@@ -54,6 +54,11 @@ func TestUnmarshalJSON(t *testing.T) {
 			expected: &Timestamp{},
 		},
 		{
+			name:     "empty",
+			data:     []byte{},
+			expected: &Timestamp{},
+		},
+		{
 			name: "special date",
 			data: []byte("1538713200000000000"),
 			expected: &Timestamp{

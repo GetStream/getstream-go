@@ -196,6 +196,17 @@ func TestClientTimeout(t *testing.T) {
 	assert.Equal(t, time.Second, client.HttpClient().(*http.Client).Timeout)
 }
 
+func TestClientGetters(t *testing.T) {
+	customLogger := &DefaultLogger{}
+	client, err := NewClient("apiKey", "apiSecret", WithLogger(customLogger))
+	require.NoError(t, err)
+
+	assert.Equal(t, customLogger, client.Logger())
+	assert.Equal(t, "apiKey", client.ApiKey())
+	assert.Equal(t, "https://chat.stream-io-api.com", client.BaseUrl())
+	assert.Equal(t, 6*time.Second, client.DefaultTimeout())
+}
+
 // TestCRUDCallTypeOperations tests Create, Read, Update, and Delete operations for call types.
 func TestCRUDCallTypeOperations(t *testing.T) {
 	if skipSlowTests {
