@@ -166,6 +166,12 @@ func TestCreateCall(t *testing.T) {
 		_, err = call.ListRecordings(ctx, &getstream.ListRecordingsRequest{})
 		require.NoError(t, err)
 	}
+
+	_, err = call.End(ctx, &getstream.EndCallRequest{})
+	require.NoError(t, err)
+
+	_, err = call.Delete(ctx, &getstream.DeleteCallRequest{})
+	require.NoError(t, err)
 }
 
 func TestUsers(t *testing.T) {
