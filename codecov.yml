@@ -1,2 +1,9 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 95%
+        threshold: 1%
+        informational: true
 ignore:
-  - "models.go"  # models, there is nothing to test there
+  - "models.go"

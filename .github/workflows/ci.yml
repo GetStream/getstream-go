@@ -40,11 +40,7 @@ jobs:
           go tool cover -func=cover.out
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./cover.out
-          flags: unittests
-          name: codecov-umbrella
-          # todo swap to true once codecov is properly configured
-          fail_ci_if_error: false
+          files: ./cover.out
