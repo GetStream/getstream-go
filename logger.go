@@ -89,35 +89,3 @@ func (l *DefaultLogger) Error(format string, v ...interface{}) {
 
 // DefaultLoggerInstance is the default logger instance.
 var DefaultLoggerInstance Logger = NewDefaultLogger(os.Stderr, "", log.LstdFlags, LogLevelInfo)
-
-// SetDefaultLogger sets the default logger.
-func SetDefaultLogger(logger Logger) {
-	DefaultLoggerInstance = logger
-}
-
-// SetDefaultLogLevel sets the log level for the default logger if it is a DefaultLogger.
-func SetDefaultLogLevel(level LogLevel) {
-	if logger, ok := DefaultLoggerInstance.(*DefaultLogger); ok {
-		logger.SetLevel(level)
-	}
-}
-
-// Debug logs a debug message using the default logger.
-func Debug(format string, v ...interface{}) {
-	DefaultLoggerInstance.Debug(format, v...)
-}
-
-// Info logs an info message using the default logger.
-func Info(format string, v ...interface{}) {
-	DefaultLoggerInstance.Info(format, v...)
-}
-
-// Warn logs a warning message using the default logger.
-func Warn(format string, v ...interface{}) {
-	DefaultLoggerInstance.Warn(format, v...)
-}
-
-// Error logs an error message using the default logger.
-func Error(format string, v ...interface{}) {
-	DefaultLoggerInstance.Error(format, v...)
-}

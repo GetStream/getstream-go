@@ -91,7 +91,7 @@ func WithLogger(logger Logger) ClientOption {
 	}
 }
 
-// With authToken sets the auth token for the client.
+// WithAuthToken sets the auth token for the client.
 func WithAuthToken(authToken string) ClientOption {
 	return func(c *Client) {
 		c.authToken = authToken

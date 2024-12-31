@@ -197,11 +197,15 @@ func TestClientTimeout(t *testing.T) {
 }
 
 func TestClientGetters(t *testing.T) {
-	customLogger := &DefaultLogger{}
+	customLogger := NewDefaultLogger(os.Stderr, "", log.LstdFlags, LogLevelInfo)
 	client, err := NewClient("apiKey", "apiSecret", WithLogger(customLogger))
 	require.NoError(t, err)
 
 	assert.Equal(t, customLogger, client.Logger())
+	customLogger.SetLevel(LogLevelError)
+	client.Logger().Warn("This should not be logged")
+	client.Logger().Error("This should be logged")
+
 	assert.Equal(t, "apiKey", client.ApiKey())
 	assert.Equal(t, "https://chat.stream-io-api.com", client.BaseUrl())
 	assert.Equal(t, 6*time.Second, client.DefaultTimeout())
