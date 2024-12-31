@@ -2,8 +2,7 @@ coverage:
   status:
     project:
       default:
-        target: 95%
+        target: 90%
         threshold: 1%
-        informational: true
 ignore:
   - "models.go"
