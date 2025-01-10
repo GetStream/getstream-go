@@ -1029,6 +1029,14 @@ type CallRejectedEvent struct {
 	Reason *string `json:"reason,omitempty"`
 }
 
+type CallReportResponse struct {
+	Score float64 `json:"score"`
+
+	EndedAt *Timestamp `json:"ended_at,omitempty"`
+
+	StartedAt *Timestamp `json:"started_at,omitempty"`
+}
+
 // CallRequest is the payload for creating a call.
 type CallRequest struct {
 	CreatedByID *string `json:"created_by_id,omitempty"`
@@ -3550,6 +3558,16 @@ type GetBlockedUsersResponse struct {
 	Blocks []BlockedUserResponse `json:"blocks"`
 }
 
+// Basic response information
+type GetCallReportResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	SessionID string `json:"session_id"`
+
+	Report ReportResponse `json:"report"`
+}
+
 type GetCallResponse struct {
 	Duration string `json:"duration"`
 
@@ -5365,6 +5383,12 @@ type PaginationParams struct {
 	Offset *int `json:"offset,omitempty"`
 }
 
+type ParticipantReportResponse struct {
+	Sum int `json:"sum"`
+
+	Unique int `json:"unique"`
+}
+
 type PendingMessageResponse struct {
 	Channel *ChannelResponse `json:"channel,omitempty"`
 
@@ -6474,6 +6498,14 @@ type ReportByHistogramBucket struct {
 	LowerBound *Bound `json:"lower_bound,omitempty"`
 
 	UpperBound *Bound `json:"upper_bound,omitempty"`
+}
+
+type ReportResponse struct {
+	Call CallReportResponse `json:"call"`
+
+	Participants ParticipantReportResponse `json:"participants"`
+
+	UserRatings UserRatingReportResponse `json:"user_ratings"`
 }
 
 // Basic response information
@@ -7825,6 +7857,12 @@ type UserMutedEvent struct {
 	TargetUsers []string `json:"target_users,omitempty"`
 
 	User *User `json:"user,omitempty"`
+}
+
+type UserRatingReportResponse struct {
+	Average float64 `json:"average"`
+
+	Count int `json:"count"`
 }
 
 type UserReactivatedEvent struct {

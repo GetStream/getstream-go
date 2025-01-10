@@ -1103,6 +1103,10 @@ type VideoPinRequest struct {
 type ListRecordingsRequest struct {
 }
 
+type GetCallReportRequest struct {
+	SessionID *string `json:"-" query:"session_id"`
+}
+
 type StartRTMPBroadcastsRequest struct {
 	Broadcasts []RTMPBroadcastRequest `json:"broadcasts"`
 }

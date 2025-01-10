@@ -69,6 +69,10 @@ func (c *Call) ListRecordings(ctx context.Context, request *ListRecordingsReques
 	return c.client.ListRecordings(ctx, c.callType, c.callID, request)
 }
 
+func (c *Call) GetCallReport(ctx context.Context, request *GetCallReportRequest) (*StreamResponse[GetCallReportResponse], error) {
+	return c.client.GetCallReport(ctx, c.callType, c.callID, request)
+}
+
 func (c *Call) StartRTMPBroadcasts(ctx context.Context, request *StartRTMPBroadcastsRequest) (*StreamResponse[StartRTMPBroadcastsResponse], error) {
 	return c.client.StartRTMPBroadcasts(ctx, c.callType, c.callID, request)
 }

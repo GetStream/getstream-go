@@ -189,6 +189,17 @@ func (c *VideoClient) ListRecordings(ctx context.Context, _type string, id strin
 	return res, err
 }
 
+func (c *VideoClient) GetCallReport(ctx context.Context, _type string, id string, request *GetCallReportRequest) (*StreamResponse[GetCallReportResponse], error) {
+	var result GetCallReportResponse
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetCallReportResponse](c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}/report", params, nil, &result, pathParams)
+	return res, err
+}
+
 // Starts RTMP broadcasts for the provided RTMP destinations
 func (c *VideoClient) StartRTMPBroadcasts(ctx context.Context, _type string, id string, request *StartRTMPBroadcastsRequest) (*StreamResponse[StartRTMPBroadcastsResponse], error) {
 	var result StartRTMPBroadcastsResponse
