@@ -21,7 +21,7 @@ fmt: install-gofumpt
 
 .PHONY: test
 test:
-	@go test -v ./pkg/...
+	@go test -v ./...
 
 .PHONY: generate
 generate:
