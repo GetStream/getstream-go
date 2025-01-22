@@ -647,6 +647,12 @@ type BroadcastSettingsResponse struct {
 	RTMP RTMPSettingsResponse `json:"rtmp"`
 }
 
+type BrowserDataResponse struct {
+	Name *string `json:"name,omitempty"`
+
+	Version *string `json:"version,omitempty"`
+}
+
 // This event is sent when a user accepts a notification to join a call.
 type CallAcceptedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -2404,6 +2410,14 @@ type CheckSQSResponse struct {
 	Data map[string]any `json:"data,omitempty"`
 }
 
+type ClientOSDataResponse struct {
+	Architecture *string `json:"architecture,omitempty"`
+
+	Name *string `json:"name,omitempty"`
+
+	Version *string `json:"version,omitempty"`
+}
+
 // This event is sent when closed captions are being sent in a call, clients should use this to show the closed captions in the call screen
 type ClosedCaptionEvent struct {
 	CallCid string `json:"call_cid"`
@@ -2881,6 +2895,12 @@ type Device struct {
 	PushProviderName *string `json:"push_provider_name,omitempty"`
 
 	Voip *bool `json:"voip,omitempty"`
+}
+
+type DeviceDataResponse struct {
+	Name *string `json:"name,omitempty"`
+
+	Version *string `json:"version,omitempty"`
 }
 
 type DeviceErrorInfo struct {
@@ -5468,6 +5488,14 @@ type PinResponse struct {
 	Duration string `json:"duration"`
 }
 
+type PlatformDataResponse struct {
+	Browser BrowserDataResponse `json:"browser"`
+
+	Device DeviceDataResponse `json:"device"`
+
+	Os ClientOSDataResponse `json:"os"`
+}
+
 type Policy struct {
 	Action int `json:"action"`
 
@@ -6169,6 +6197,18 @@ type QueryUsageStatsResponse struct {
 	Duration string `json:"duration"`
 
 	Items []ModerationUsageStats `json:"items"`
+
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
+}
+
+// Basic response information
+type QueryUserFeedbackResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	UserFeedback []UserFeedbackResponse `json:"user_feedback"`
 
 	Next *string `json:"next,omitempty"`
 
@@ -7794,6 +7834,26 @@ type UserFeedbackReport struct {
 
 type UserFeedbackReportResponse struct {
 	Daily []DailyAggregateUserFeedbackReportResponse `json:"daily"`
+}
+
+type UserFeedbackResponse struct {
+	Cid string `json:"cid"`
+
+	Rating int `json:"rating"`
+
+	Reason string `json:"reason"`
+
+	Sdk string `json:"sdk"`
+
+	SdkVersion string `json:"sdk_version"`
+
+	SessionID string `json:"session_id"`
+
+	UserID string `json:"user_id"`
+
+	Platform PlatformDataResponse `json:"platform"`
+
+	Custom map[string]any `json:"custom,omitempty"`
 }
 
 type UserFlaggedEvent struct {

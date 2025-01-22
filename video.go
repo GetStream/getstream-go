@@ -15,6 +15,13 @@ func NewVideoClient(client *Client) *VideoClient {
 	}
 }
 
+func (c *VideoClient) QueryUserFeedback(ctx context.Context, request *QueryUserFeedbackRequest) (*StreamResponse[QueryUserFeedbackResponse], error) {
+	var result QueryUserFeedbackResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[QueryUserFeedbackRequest, QueryUserFeedbackResponse](c.client, ctx, "POST", "/api/v2/video/call/feedback", params, request, &result, nil)
+	return res, err
+}
+
 // Query call members with filter query
 func (c *VideoClient) QueryCallMembers(ctx context.Context, request *QueryCallMembersRequest) (*StreamResponse[QueryCallMembersResponse], error) {
 	var result QueryCallMembersResponse
