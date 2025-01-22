@@ -1004,6 +1004,15 @@ type ReactivateUserRequest struct {
 	RestoreMessages *bool   `json:"restore_messages"`
 }
 
+type QueryUserFeedbackRequest struct {
+	Full             *bool              `json:"-" query:"full"`
+	Limit            *int               `json:"limit"`
+	Next             *string            `json:"next"`
+	Prev             *string            `json:"prev"`
+	Sort             []SortParamRequest `json:"sort"`
+	FilterConditions map[string]any     `json:"filter_conditions"`
+}
+
 type QueryCallMembersRequest struct {
 	ID               string             `json:"id"`
 	Type             string             `json:"type"`
