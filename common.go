@@ -22,14 +22,15 @@ func (c *Client) UpdateApp(ctx context.Context, request *UpdateAppRequest) (*Str
 // Returns all available block lists
 func (c *Client) ListBlockLists(ctx context.Context, request *ListBlockListsRequest) (*StreamResponse[ListBlockListResponse], error) {
 	var result ListBlockListResponse
-	res, err := MakeRequest[any, ListBlockListResponse](c, ctx, "GET", "/api/v2/blocklists", nil, nil, &result, nil)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, ListBlockListResponse](c, ctx, "GET", "/api/v2/blocklists", params, nil, &result, nil)
 	return res, err
 }
 
 // Creates a new application blocklist, once created the blocklist can be used by any channel type
-func (c *Client) CreateBlockList(ctx context.Context, request *CreateBlockListRequest) (*StreamResponse[Response], error) {
-	var result Response
-	res, err := MakeRequest[CreateBlockListRequest, Response](c, ctx, "POST", "/api/v2/blocklists", nil, request, &result, nil)
+func (c *Client) CreateBlockList(ctx context.Context, request *CreateBlockListRequest) (*StreamResponse[CreateBlockListResponse], error) {
+	var result CreateBlockListResponse
+	res, err := MakeRequest[CreateBlockListRequest, CreateBlockListResponse](c, ctx, "POST", "/api/v2/blocklists", nil, request, &result, nil)
 	return res, err
 }
 
@@ -39,7 +40,8 @@ func (c *Client) DeleteBlockList(ctx context.Context, name string, request *Dele
 	pathParams := map[string]string{
 		"name": name,
 	}
-	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/blocklists/{name}", nil, nil, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/blocklists/{name}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -49,17 +51,18 @@ func (c *Client) GetBlockList(ctx context.Context, name string, request *GetBloc
 	pathParams := map[string]string{
 		"name": name,
 	}
-	res, err := MakeRequest[any, GetBlockListResponse](c, ctx, "GET", "/api/v2/blocklists/{name}", nil, nil, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetBlockListResponse](c, ctx, "GET", "/api/v2/blocklists/{name}", params, nil, &result, pathParams)
 	return res, err
 }
 
 // Updates contents of the block list
-func (c *Client) UpdateBlockList(ctx context.Context, name string, request *UpdateBlockListRequest) (*StreamResponse[Response], error) {
-	var result Response
+func (c *Client) UpdateBlockList(ctx context.Context, name string, request *UpdateBlockListRequest) (*StreamResponse[UpdateBlockListResponse], error) {
+	var result UpdateBlockListResponse
 	pathParams := map[string]string{
 		"name": name,
 	}
-	res, err := MakeRequest[UpdateBlockListRequest, Response](c, ctx, "PUT", "/api/v2/blocklists/{name}", nil, request, &result, pathParams)
+	res, err := MakeRequest[UpdateBlockListRequest, UpdateBlockListResponse](c, ctx, "PUT", "/api/v2/blocklists/{name}", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -296,6 +299,7 @@ func (c *Client) QueryUsers(ctx context.Context, request *QueryUsersRequest) (*S
 // Updates certain fields of the user
 //
 // Sends events:
+// - user.presence.changed
 // - user.updated
 // - user.presence.changed
 func (c *Client) UpdateUsersPartial(ctx context.Context, request *UpdateUsersPartialRequest) (*StreamResponse[UpdateUsersResponse], error) {
@@ -353,6 +357,7 @@ func (c *Client) DeleteUsers(ctx context.Context, request *DeleteUsersRequest) (
 // Reactivate users in batches
 //
 // Sends events:
+// - user.reactivated
 // - user.reactivated
 func (c *Client) ReactivateUsers(ctx context.Context, request *ReactivateUsersRequest) (*StreamResponse[ReactivateUsersResponse], error) {
 	var result ReactivateUsersResponse

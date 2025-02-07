@@ -338,3 +338,43 @@ func TestCreateChatChannelBasics(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, deleteResponse.Data.Channel.DeletedAt)
 }
+
+func TestCall_FrameRecording(t *testing.T) {
+	t.Skip("this is just an example, don't run it")
+
+	client := initClient(t)
+	call := client.Video().Call("default", "call-id")
+
+	_, err := call.GetOrCreate(ctx, &getstream.GetOrCreateCallRequest{
+		Ring: getstream.PtrTo(true),
+	})
+	require.NoError(t, err)
+
+	_, err = call.StartFrameRecording(ctx, &getstream.StartFrameRecordingRequest{})
+	require.NoError(t, err)
+
+	resp, err := call.GetOrCreate(ctx, &getstream.GetOrCreateCallRequest{})
+	require.NoError(t, err)
+
+	resp.Data.Call.Egress.FrameRecording.Status = "recording"
+
+	_, err = call.StopFrameRecording(ctx, &getstream.StopFrameRecordingRequest{})
+	require.NoError(t, err)
+}
+
+func TestCall_AutoFrameRecording(t *testing.T) {
+	client := initClient(t)
+	call_type_name := "default"
+
+	// Automatically record calls
+	resp, err := client.Video().UpdateCallType(ctx, call_type_name, &getstream.UpdateCallTypeRequest{
+		Settings: &getstream.CallSettingsRequest{
+			FrameRecording: &getstream.FrameRecordingSettingsRequest{
+				Mode:                     "auto-on",
+				CaptureIntervalInSeconds: 2,
+			},
+		},
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "auto-on", resp.Data.Settings.FrameRecording.Mode)
+}

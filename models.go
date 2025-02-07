@@ -172,8 +172,6 @@ type ActionLogResponse struct {
 }
 
 type AggregatedStats struct {
-	CountrywiseAggregateStats map[string]*CountrywiseAggregateStats `json:"countrywise_aggregate_stats,omitempty"`
-
 	PublisherAggregateStats *PublisherAggregateStats `json:"publisher_aggregate_stats,omitempty"`
 
 	Turn *TURNAggregatedStats `json:"turn,omitempty"`
@@ -183,6 +181,10 @@ type AnyEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 
 	Type string `json:"type"`
+}
+
+func (*AnyEvent) GetEventType() string {
+	return "*"
 }
 
 type AppResponseFields struct {
@@ -205,6 +207,8 @@ type AppResponseFields struct {
 	ImageModerationEnabled bool `json:"image_moderation_enabled"`
 
 	ModerationEnabled bool `json:"moderation_enabled"`
+
+	ModerationMultitenantBlocklistEnabled bool `json:"moderation_multitenant_blocklist_enabled"`
 
 	ModerationWebhookUrl string `json:"moderation_webhook_url"`
 
@@ -543,6 +547,10 @@ type BlockListResponse struct {
 	// Date/time of creation
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
 
+	ID *string `json:"id,omitempty"`
+
+	Team *string `json:"team,omitempty"`
+
 	// Date/time of the last update
 	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 }
@@ -551,6 +559,8 @@ type BlockListRule struct {
 	Action string `json:"action"`
 
 	Name string `json:"name"`
+
+	Team string `json:"team"`
 }
 
 // BlockUserResponse is the payload for blocking a user.
@@ -586,6 +596,10 @@ type BlockedUserEvent struct {
 	Type string `json:"type"`
 
 	BlockedByUser *UserResponse `json:"blocked_by_user,omitempty"`
+}
+
+func (*BlockedUserEvent) GetEventType() string {
+	return "call.blocked_user"
 }
 
 type BlockedUserResponse struct {
@@ -667,6 +681,10 @@ type CallAcceptedEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CallAcceptedEvent) GetEventType() string {
+	return "call.accepted"
+}
+
 // CallClosedCaption represents a closed caption of a call.
 type CallClosedCaption struct {
 	EndTime Timestamp `json:"end_time"`
@@ -690,6 +708,10 @@ type CallClosedCaptionsFailedEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CallClosedCaptionsFailedEvent) GetEventType() string {
+	return "call.closed_captions_failed"
+}
+
 // This event is sent when call closed caption has started
 type CallClosedCaptionsStartedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -700,6 +722,10 @@ type CallClosedCaptionsStartedEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CallClosedCaptionsStartedEvent) GetEventType() string {
+	return "call.closed_captions_started"
+}
+
 // This event is sent when call closed captions has stopped
 type CallClosedCaptionsStoppedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -708,6 +734,10 @@ type CallClosedCaptionsStoppedEvent struct {
 
 	// The type of event: "call.transcription_stopped" in this case
 	Type string `json:"type"`
+}
+
+func (*CallClosedCaptionsStoppedEvent) GetEventType() string {
+	return "call.closed_captions_stopped"
 }
 
 // This event is sent when a call is created. Clients receiving this event should check if the ringing
@@ -726,6 +756,10 @@ type CallCreatedEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CallCreatedEvent) GetEventType() string {
+	return "call.created"
+}
+
 // This event is sent when a call is deleted. Clients receiving this event should leave the call screen
 type CallDeletedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -736,6 +770,10 @@ type CallDeletedEvent struct {
 
 	// The type of event: "call.deleted" in this case
 	Type string `json:"type"`
+}
+
+func (*CallDeletedEvent) GetEventType() string {
+	return "call.deleted"
 }
 
 type CallDurationReport struct {
@@ -760,6 +798,10 @@ type CallEndedEvent struct {
 	User *UserResponse `json:"user,omitempty"`
 }
 
+func (*CallEndedEvent) GetEventType() string {
+	return "call.ended"
+}
+
 type CallEvent struct {
 	Description string `json:"description"`
 
@@ -782,6 +824,91 @@ type CallEvent struct {
 	IssueTags []string `json:"issue_tags,omitempty"`
 }
 
+// This event is sent when frame recording has failed
+type CallFrameRecordingFailedEvent struct {
+	CallCid string `json:"call_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	EgressID string `json:"egress_id"`
+
+	Call CallResponse `json:"call"`
+
+	// The type of event: "call.frame_recording_failed" in this case
+	Type string `json:"type"`
+}
+
+func (*CallFrameRecordingFailedEvent) GetEventType() string {
+	return "call.frame_recording_failed"
+}
+
+// This event is sent when a frame is captured from a call
+type CallFrameRecordingFrameReadyEvent struct {
+	CallCid string `json:"call_cid"`
+
+	// The time the frame was captured
+	CapturedAt Timestamp `json:"captured_at"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	EgressID string `json:"egress_id"`
+
+	// Call session ID
+	SessionID string `json:"session_id"`
+
+	// The type of the track frame was captured from (TRACK_TYPE_VIDEO|TRACK_TYPE_SCREEN_SHARE)
+	TrackType string `json:"track_type"`
+
+	// The URL of the frame
+	Url string `json:"url"`
+
+	// The users in the frame
+	Users map[string]UserResponse `json:"users"`
+
+	// The type of event: "call.frame_recording_ready" in this case
+	Type string `json:"type"`
+}
+
+func (*CallFrameRecordingFrameReadyEvent) GetEventType() string {
+	return "call.frame_recording_ready"
+}
+
+// This event is sent when frame recording has started
+type CallFrameRecordingStartedEvent struct {
+	CallCid string `json:"call_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	EgressID string `json:"egress_id"`
+
+	Call CallResponse `json:"call"`
+
+	// The type of event: "call.frame_recording_started" in this case
+	Type string `json:"type"`
+}
+
+func (*CallFrameRecordingStartedEvent) GetEventType() string {
+	return "call.frame_recording_started"
+}
+
+// This event is sent when frame recording has stopped
+type CallFrameRecordingStoppedEvent struct {
+	CallCid string `json:"call_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	EgressID string `json:"egress_id"`
+
+	Call CallResponse `json:"call"`
+
+	// The type of event: "call.frame_recording_stopped" in this case
+	Type string `json:"type"`
+}
+
+func (*CallFrameRecordingStoppedEvent) GetEventType() string {
+	return "call.frame_recording_stopped"
+}
+
 // This event is sent when HLS broadcasting has failed
 type CallHLSBroadcastingFailedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -792,6 +919,10 @@ type CallHLSBroadcastingFailedEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CallHLSBroadcastingFailedEvent) GetEventType() string {
+	return "call.hls_broadcasting_failed"
+}
+
 // This event is sent when HLS broadcasting has started
 type CallHLSBroadcastingStartedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -800,8 +931,14 @@ type CallHLSBroadcastingStartedEvent struct {
 
 	HLSPlaylistUrl string `json:"hls_playlist_url"`
 
+	Call CallResponse `json:"call"`
+
 	// The type of event: "call.hls_broadcasting_started" in this case
 	Type string `json:"type"`
+}
+
+func (*CallHLSBroadcastingStartedEvent) GetEventType() string {
+	return "call.hls_broadcasting_started"
 }
 
 // This event is sent when HLS broadcasting has stopped
@@ -812,6 +949,10 @@ type CallHLSBroadcastingStoppedEvent struct {
 
 	// The type of event: "call.hls_broadcasting_stopped" in this case
 	Type string `json:"type"`
+}
+
+func (*CallHLSBroadcastingStoppedEvent) GetEventType() string {
+	return "call.hls_broadcasting_stopped"
 }
 
 // CallIngressResponse is the payload for ingress settings
@@ -831,6 +972,10 @@ type CallLiveStartedEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CallLiveStartedEvent) GetEventType() string {
+	return "call.live_started"
+}
+
 // This event is sent when one or more members are added to a call
 type CallMemberAddedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -844,6 +989,10 @@ type CallMemberAddedEvent struct {
 
 	// The type of event: "call.member_added" in this case
 	Type string `json:"type"`
+}
+
+func (*CallMemberAddedEvent) GetEventType() string {
+	return "call.member_added"
 }
 
 // This event is sent when one or more members are removed from a call
@@ -861,6 +1010,10 @@ type CallMemberRemovedEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CallMemberRemovedEvent) GetEventType() string {
+	return "call.member_removed"
+}
+
 // This event is sent when one or more members are updated
 type CallMemberUpdatedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -874,6 +1027,10 @@ type CallMemberUpdatedEvent struct {
 
 	// The type of event: "call.member_updated" in this case
 	Type string `json:"type"`
+}
+
+func (*CallMemberUpdatedEvent) GetEventType() string {
+	return "call.member_updated"
 }
 
 // This event is sent when one or more members get its role updated
@@ -892,6 +1049,10 @@ type CallMemberUpdatedPermissionEvent struct {
 
 	// The type of event: "call.member_added" in this case
 	Type string `json:"type"`
+}
+
+func (*CallMemberUpdatedPermissionEvent) GetEventType() string {
+	return "call.member_updated_permission"
 }
 
 // This event is sent to call members who did not accept/reject/join the call to notify they missed the call
@@ -916,6 +1077,10 @@ type CallMissedEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CallMissedEvent) GetEventType() string {
+	return "call.missed"
+}
+
 // This event is sent to all call members to notify they are getting called
 type CallNotificationEvent struct {
 	CallCid string `json:"call_cid"`
@@ -934,6 +1099,10 @@ type CallNotificationEvent struct {
 
 	// The type of event: "call.notification" in this case
 	Type string `json:"type"`
+}
+
+func (*CallNotificationEvent) GetEventType() string {
+	return "call.notification"
 }
 
 type CallParticipantCountReport struct {
@@ -966,6 +1135,10 @@ type CallReactionEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CallReactionEvent) GetEventType() string {
+	return "call.reaction_new"
+}
+
 // CallRecording represents a recording of a call.
 type CallRecording struct {
 	EndTime Timestamp `json:"end_time"`
@@ -983,8 +1156,14 @@ type CallRecordingFailedEvent struct {
 
 	CreatedAt Timestamp `json:"created_at"`
 
+	EgressID string `json:"egress_id"`
+
 	// The type of event: "call.recording_failed" in this case
 	Type string `json:"type"`
+}
+
+func (*CallRecordingFailedEvent) GetEventType() string {
+	return "call.recording_failed"
 }
 
 // This event is sent when call recording is ready
@@ -993,10 +1172,16 @@ type CallRecordingReadyEvent struct {
 
 	CreatedAt Timestamp `json:"created_at"`
 
+	EgressID string `json:"egress_id"`
+
 	CallRecording CallRecording `json:"call_recording"`
 
 	// The type of event: "call.recording_ready" in this case
 	Type string `json:"type"`
+}
+
+func (*CallRecordingReadyEvent) GetEventType() string {
+	return "call.recording_ready"
 }
 
 // This event is sent when call recording has started
@@ -1005,8 +1190,14 @@ type CallRecordingStartedEvent struct {
 
 	CreatedAt Timestamp `json:"created_at"`
 
+	EgressID string `json:"egress_id"`
+
 	// The type of event: "call.recording_started" in this case
 	Type string `json:"type"`
+}
+
+func (*CallRecordingStartedEvent) GetEventType() string {
+	return "call.recording_started"
 }
 
 // This event is sent when call recording has stopped
@@ -1015,8 +1206,14 @@ type CallRecordingStoppedEvent struct {
 
 	CreatedAt Timestamp `json:"created_at"`
 
+	EgressID string `json:"egress_id"`
+
 	// The type of event: "call.recording_stopped" in this case
 	Type string `json:"type"`
+}
+
+func (*CallRecordingStoppedEvent) GetEventType() string {
+	return "call.recording_stopped"
 }
 
 // This event is sent when a user rejects a notification to join a call.
@@ -1033,6 +1230,10 @@ type CallRejectedEvent struct {
 	Type string `json:"type"`
 
 	Reason *string `json:"reason,omitempty"`
+}
+
+func (*CallRejectedEvent) GetEventType() string {
+	return "call.rejected"
 }
 
 type CallReportResponse struct {
@@ -1139,6 +1340,10 @@ type CallRingEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CallRingEvent) GetEventType() string {
+	return "call.ring"
+}
+
 // This event is sent when a call RTMP broadcast has failed
 type CallRtmpBroadcastFailedEvent struct {
 	// The unique identifier for a call (<type>:<id>)
@@ -1152,6 +1357,10 @@ type CallRtmpBroadcastFailedEvent struct {
 
 	// The type of event: "call.rtmp_broadcast_failed" in this case
 	Type string `json:"type"`
+}
+
+func (*CallRtmpBroadcastFailedEvent) GetEventType() string {
+	return "call.rtmp_broadcast_failed"
 }
 
 // This event is sent when RTMP broadcast has started
@@ -1169,6 +1378,10 @@ type CallRtmpBroadcastStartedEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CallRtmpBroadcastStartedEvent) GetEventType() string {
+	return "call.rtmp_broadcast_started"
+}
+
 // This event is sent when RTMP broadcast has stopped
 type CallRtmpBroadcastStoppedEvent struct {
 	// The unique identifier for a call (<type>:<id>)
@@ -1182,6 +1395,10 @@ type CallRtmpBroadcastStoppedEvent struct {
 
 	// The type of event: "call.rtmp_broadcast_stopped" in this case
 	Type string `json:"type"`
+}
+
+func (*CallRtmpBroadcastStoppedEvent) GetEventType() string {
+	return "call.rtmp_broadcast_stopped"
 }
 
 // This event is sent when a call session ends
@@ -1199,6 +1416,10 @@ type CallSessionEndedEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CallSessionEndedEvent) GetEventType() string {
+	return "call.session_ended"
+}
+
 // This event is sent when a participant joins a call session
 type CallSessionParticipantJoinedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -1212,6 +1433,10 @@ type CallSessionParticipantJoinedEvent struct {
 
 	// The type of event: "call.session_participant_joined" in this case
 	Type string `json:"type"`
+}
+
+func (*CallSessionParticipantJoinedEvent) GetEventType() string {
+	return "call.session_participant_joined"
 }
 
 // This event is sent when a participant leaves a call session
@@ -1230,6 +1455,10 @@ type CallSessionParticipantLeftEvent struct {
 
 	// The type of event: "call.session_participant_left" in this case
 	Type string `json:"type"`
+}
+
+func (*CallSessionParticipantLeftEvent) GetEventType() string {
+	return "call.session_participant_left"
 }
 
 type CallSessionResponse struct {
@@ -1273,12 +1502,18 @@ type CallSessionStartedEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CallSessionStartedEvent) GetEventType() string {
+	return "call.session_started"
+}
+
 type CallSettings struct {
 	Audio *AudioSettings `json:"audio,omitempty"`
 
 	Backstage *BackstageSettings `json:"backstage,omitempty"`
 
 	Broadcasting *BroadcastSettings `json:"broadcasting,omitempty"`
+
+	FrameRecording *FrameRecordSettings `json:"frame_recording,omitempty"`
 
 	Geofencing *GeofenceSettings `json:"geofencing,omitempty"`
 
@@ -1289,6 +1524,8 @@ type CallSettings struct {
 	Ring *RingSettings `json:"ring,omitempty"`
 
 	Screensharing *ScreensharingSettings `json:"screensharing,omitempty"`
+
+	Session *SessionSettings `json:"session,omitempty"`
 
 	Thumbnails *ThumbnailsSettings `json:"thumbnails,omitempty"`
 
@@ -1304,6 +1541,8 @@ type CallSettingsRequest struct {
 
 	Broadcasting *BroadcastSettingsRequest `json:"broadcasting,omitempty"`
 
+	FrameRecording *FrameRecordingSettingsRequest `json:"frame_recording,omitempty"`
+
 	Geofencing *GeofenceSettingsRequest `json:"geofencing,omitempty"`
 
 	Limits *LimitsSettingsRequest `json:"limits,omitempty"`
@@ -1313,6 +1552,8 @@ type CallSettingsRequest struct {
 	Ring *RingSettingsRequest `json:"ring,omitempty"`
 
 	Screensharing *ScreensharingSettingsRequest `json:"screensharing,omitempty"`
+
+	Session *SessionSettingsRequest `json:"session,omitempty"`
 
 	Thumbnails *ThumbnailsSettingsRequest `json:"thumbnails,omitempty"`
 
@@ -1328,6 +1569,8 @@ type CallSettingsResponse struct {
 
 	Broadcasting BroadcastSettingsResponse `json:"broadcasting"`
 
+	FrameRecording FrameRecordingSettingsResponse `json:"frame_recording"`
+
 	Geofencing GeofenceSettingsResponse `json:"geofencing"`
 
 	Limits LimitsSettingsResponse `json:"limits"`
@@ -1337,6 +1580,8 @@ type CallSettingsResponse struct {
 	Ring RingSettingsResponse `json:"ring"`
 
 	Screensharing ScreensharingSettingsResponse `json:"screensharing"`
+
+	Session SessionSettingsResponse `json:"session"`
 
 	Thumbnails ThumbnailsSettingsResponse `json:"thumbnails"`
 
@@ -1394,8 +1639,14 @@ type CallTranscriptionFailedEvent struct {
 
 	CreatedAt Timestamp `json:"created_at"`
 
+	EgressID string `json:"egress_id"`
+
 	// The type of event: "call.transcription_failed" in this case
 	Type string `json:"type"`
+}
+
+func (*CallTranscriptionFailedEvent) GetEventType() string {
+	return "call.transcription_failed"
 }
 
 // This event is sent when call transcription is ready
@@ -1404,10 +1655,16 @@ type CallTranscriptionReadyEvent struct {
 
 	CreatedAt Timestamp `json:"created_at"`
 
+	EgressID string `json:"egress_id"`
+
 	CallTranscription CallTranscription `json:"call_transcription"`
 
 	// The type of event: "call.transcription_ready" in this case
 	Type string `json:"type"`
+}
+
+func (*CallTranscriptionReadyEvent) GetEventType() string {
+	return "call.transcription_ready"
 }
 
 // This event is sent when call transcription has started
@@ -1416,8 +1673,14 @@ type CallTranscriptionStartedEvent struct {
 
 	CreatedAt Timestamp `json:"created_at"`
 
+	EgressID string `json:"egress_id"`
+
 	// The type of event: "call.transcription_started" in this case
 	Type string `json:"type"`
+}
+
+func (*CallTranscriptionStartedEvent) GetEventType() string {
+	return "call.transcription_started"
 }
 
 // This event is sent when call transcription has stopped
@@ -1426,8 +1689,14 @@ type CallTranscriptionStoppedEvent struct {
 
 	CreatedAt Timestamp `json:"created_at"`
 
+	EgressID string `json:"egress_id"`
+
 	// The type of event: "call.transcription_stopped" in this case
 	Type string `json:"type"`
+}
+
+func (*CallTranscriptionStoppedEvent) GetEventType() string {
+	return "call.transcription_stopped"
 }
 
 type CallType struct {
@@ -1486,6 +1755,10 @@ type CallUpdatedEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CallUpdatedEvent) GetEventType() string {
+	return "call.updated"
+}
+
 // This event is sent when a call member is muted
 type CallUserMutedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -1498,6 +1771,10 @@ type CallUserMutedEvent struct {
 
 	// The type of event: "call.user_muted" in this case
 	Type string `json:"type"`
+}
+
+func (*CallUserMutedEvent) GetEventType() string {
+	return "call.user_muted"
 }
 
 type CallsPerDayReport struct {
@@ -1523,11 +1800,17 @@ type CampaignChannelTemplate struct {
 type CampaignCompletedEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 
+	Custom map[string]any `json:"custom"`
+
 	Type string `json:"type"`
 
 	ReceivedAt *Timestamp `json:"received_at,omitempty"`
 
 	Campaign *CampaignResponse `json:"campaign,omitempty"`
+}
+
+func (*CampaignCompletedEvent) GetEventType() string {
+	return "campaign.completed"
 }
 
 type CampaignMessageTemplate struct {
@@ -1552,6 +1835,8 @@ type CampaignResponse struct {
 	Name string `json:"name"`
 
 	SenderID string `json:"sender_id"`
+
+	SenderMode string `json:"sender_mode"`
 
 	SkipPush bool `json:"skip_push"`
 
@@ -1585,11 +1870,17 @@ type CampaignResponse struct {
 type CampaignStartedEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 
+	Custom map[string]any `json:"custom"`
+
 	Type string `json:"type"`
 
 	ReceivedAt *Timestamp `json:"received_at,omitempty"`
 
 	Campaign *CampaignResponse `json:"campaign,omitempty"`
+}
+
+func (*CampaignStartedEvent) GetEventType() string {
+	return "campaign.started"
 }
 
 type CampaignStatsResponse struct {
@@ -1781,6 +2072,10 @@ type ChannelCreatedEvent struct {
 	Type string `json:"type"`
 }
 
+func (*ChannelCreatedEvent) GetEventType() string {
+	return "channel.created"
+}
+
 type ChannelDeletedEvent struct {
 	ChannelID string `json:"channel_id"`
 
@@ -1797,6 +2092,10 @@ type ChannelDeletedEvent struct {
 	Team *string `json:"team,omitempty"`
 
 	Channel *ChannelResponse `json:"channel,omitempty"`
+}
+
+func (*ChannelDeletedEvent) GetEventType() string {
+	return "channel.deleted"
 }
 
 type ChannelExport struct {
@@ -1825,6 +2124,10 @@ type ChannelFrozenEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 
 	Type string `json:"type"`
+}
+
+func (*ChannelFrozenEvent) GetEventType() string {
+	return "channel.frozen"
 }
 
 type ChannelGetOrCreateRequest struct {
@@ -1863,6 +2166,10 @@ type ChannelHiddenEvent struct {
 	Channel *ChannelResponse `json:"channel,omitempty"`
 
 	User *User `json:"user,omitempty"`
+}
+
+func (*ChannelHiddenEvent) GetEventType() string {
+	return "channel.hidden"
 }
 
 type ChannelInput struct {
@@ -2024,6 +2331,10 @@ type ChannelMutedEvent struct {
 	Type string `json:"type"`
 }
 
+func (*ChannelMutedEvent) GetEventType() string {
+	return "channel.muted"
+}
+
 type ChannelOwnCapability string
 
 const (
@@ -2065,6 +2376,12 @@ const (
 
 func (c ChannelOwnCapability) String() string {
 	return string(c)
+}
+
+type ChannelPushPreferences struct {
+	ChatLevel *string `json:"chat_level,omitempty"`
+
+	DisabledUntil *Timestamp `json:"disabled_until,omitempty"`
 }
 
 // Represents channel in chat
@@ -2170,6 +2487,8 @@ type ChannelStateResponse struct {
 	Channel *ChannelResponse `json:"channel,omitempty"`
 
 	Membership *ChannelMember `json:"membership,omitempty"`
+
+	PushPreferences *ChannelPushPreferences `json:"push_preferences,omitempty"`
 }
 
 type ChannelStateResponseFields struct {
@@ -2205,6 +2524,8 @@ type ChannelStateResponseFields struct {
 	Channel *ChannelResponse `json:"channel,omitempty"`
 
 	Membership *ChannelMember `json:"membership,omitempty"`
+
+	PushPreferences *ChannelPushPreferences `json:"push_preferences,omitempty"`
 }
 
 type ChannelTruncatedEvent struct {
@@ -2221,6 +2542,10 @@ type ChannelTruncatedEvent struct {
 	Type string `json:"type"`
 
 	Channel *ChannelResponse `json:"channel,omitempty"`
+}
+
+func (*ChannelTruncatedEvent) GetEventType() string {
+	return "channel.truncated"
 }
 
 type ChannelTypeConfig struct {
@@ -2301,10 +2626,18 @@ type ChannelUnFrozenEvent struct {
 	Type string `json:"type"`
 }
 
+func (*ChannelUnFrozenEvent) GetEventType() string {
+	return "channel.unfrozen"
+}
+
 type ChannelUnmutedEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 
 	Type string `json:"type"`
+}
+
+func (*ChannelUnmutedEvent) GetEventType() string {
+	return "channel.unmuted"
 }
 
 type ChannelUpdatedEvent struct {
@@ -2329,6 +2662,10 @@ type ChannelUpdatedEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*ChannelUpdatedEvent) GetEventType() string {
+	return "channel.updated"
+}
+
 type ChannelVisibleEvent struct {
 	ChannelID string `json:"channel_id"`
 
@@ -2341,6 +2678,10 @@ type ChannelVisibleEvent struct {
 	Type string `json:"type"`
 
 	User *User `json:"user,omitempty"`
+}
+
+func (*ChannelVisibleEvent) GetEventType() string {
+	return "channel.visible"
 }
 
 // Basic response information
@@ -2428,6 +2769,10 @@ type ClosedCaptionEvent struct {
 
 	// The type of event: "call.closed_caption" in this case
 	Type string `json:"type"`
+}
+
+func (*ClosedCaptionEvent) GetEventType() string {
+	return "call.closed_caption"
 }
 
 // Basic response information
@@ -2521,16 +2866,12 @@ type Count struct {
 	Value int `json:"value"`
 }
 
-type CountrywiseAggregateStats struct {
-	ParticipantCount *Count `json:"participant_count,omitempty"`
+// Basic response information
+type CreateBlockListResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
 
-	PublisherJitter *TimeStats `json:"publisher_jitter,omitempty"`
-
-	PublisherLatency *TimeStats `json:"publisher_latency,omitempty"`
-
-	SubscriberJitter *TimeStats `json:"subscriber_jitter,omitempty"`
-
-	SubscriberLatency *TimeStats `json:"subscriber_latency,omitempty"`
+	Blocklist *BlockListResponse `json:"blocklist,omitempty"`
 }
 
 // Response for creating a call type
@@ -2716,6 +3057,10 @@ type CustomVideoEvent struct {
 	Type string `json:"type"`
 }
 
+func (*CustomVideoEvent) GetEventType() string {
+	return "custom"
+}
+
 type DailyAggregateCallDurationReportResponse struct {
 	Date string `json:"date"`
 
@@ -2849,6 +3194,16 @@ type DeleteModerationTemplateResponse struct {
 	Duration string `json:"duration"`
 }
 
+// Basic response information
+type DeleteReactionResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Message MessageResponse `json:"message"`
+
+	Reaction ReactionResponse `json:"reaction"`
+}
+
 // Response for DeleteRecording
 type DeleteRecordingResponse struct {
 	// Duration of the request in milliseconds
@@ -2962,6 +3317,8 @@ type EdgeResponse struct {
 
 type EgressHLSResponse struct {
 	PlaylistUrl string `json:"playlist_url"`
+
+	Status string `json:"status"`
 }
 
 type EgressRTMPResponse struct {
@@ -2978,6 +3335,8 @@ type EgressResponse struct {
 	Broadcasting bool `json:"broadcasting"`
 
 	Rtmps []EgressRTMPResponse `json:"rtmps"`
+
+	FrameRecording *FrameRecordingResponse `json:"frame_recording,omitempty"`
 
 	HLS *EgressHLSResponse `json:"hls,omitempty"`
 }
@@ -3080,8 +3439,6 @@ type EntityCreator struct {
 	Teams []string `json:"teams,omitempty"`
 
 	PrivacySettings *PrivacySettings `json:"privacy_settings,omitempty"`
-
-	PushNotifications *PushNotificationSettings `json:"push_notifications,omitempty"`
 }
 
 // User response object
@@ -3118,9 +3475,6 @@ type EntityCreatorResponse struct {
 
 	BlockedUserIds []string `json:"blocked_user_ids"`
 
-	// List of devices user is using
-	Devices []DeviceResponse `json:"devices"`
-
 	// List of teams user is a part of
 	Teams []string `json:"teams"`
 
@@ -3146,6 +3500,9 @@ type EntityCreatorResponse struct {
 
 	// Revocation date for tokens
 	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
+
+	// List of devices user is using
+	Devices []DeviceResponse `json:"devices,omitempty"`
 
 	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
 
@@ -3442,6 +3799,8 @@ type FlagResponse struct {
 type FlagUpdatedEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 
+	Custom map[string]any `json:"custom"`
+
 	Type string `json:"type"`
 
 	ReceivedAt *Timestamp `json:"received_at,omitempty"`
@@ -3451,6 +3810,38 @@ type FlagUpdatedEvent struct {
 	Message *MessageResponse `json:"Message,omitempty"`
 
 	User *UserResponse `json:"User,omitempty"`
+}
+
+func (*FlagUpdatedEvent) GetEventType() string {
+	return "flag.updated"
+}
+
+type FrameRecordSettings struct {
+	CaptureIntervalInSeconds int `json:"capture_interval_in_seconds"`
+
+	Mode string `json:"mode"`
+
+	Quality *string `json:"quality,omitempty"`
+}
+
+type FrameRecordingResponse struct {
+	Status string `json:"status"`
+}
+
+type FrameRecordingSettingsRequest struct {
+	CaptureIntervalInSeconds int `json:"capture_interval_in_seconds"`
+
+	Mode string `json:"mode"`
+
+	Quality *string `json:"quality,omitempty"`
+}
+
+type FrameRecordingSettingsResponse struct {
+	CaptureIntervalInSeconds int `json:"capture_interval_in_seconds"`
+
+	Mode string `json:"mode"`
+
+	Quality *string `json:"quality,omitempty"`
 }
 
 type FullUserResponse struct {
@@ -3507,8 +3898,6 @@ type FullUserResponse struct {
 	LatestHiddenChannels []string `json:"latest_hidden_channels,omitempty"`
 
 	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
-
-	PushNotifications *PushNotificationSettingsResponse `json:"push_notifications,omitempty"`
 }
 
 type GeofenceResponse struct {
@@ -3813,6 +4202,14 @@ type GetMessageResponse struct {
 	Message MessageWithChannelResponse `json:"message"`
 
 	PendingMessageMetadata map[string]string `json:"pending_message_metadata,omitempty"`
+}
+
+// Basic response information
+type GetModerationAnalyticsResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Analytics *ModerationAnalytics `json:"analytics,omitempty"`
 }
 
 type GetOGResponse struct {
@@ -4351,6 +4748,10 @@ type MemberAddedEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*MemberAddedEvent) GetEventType() string {
+	return "member.added"
+}
+
 type MemberRemovedEvent struct {
 	ChannelID string `json:"channel_id"`
 
@@ -4365,6 +4766,10 @@ type MemberRemovedEvent struct {
 	Member *ChannelMember `json:"member,omitempty"`
 
 	User *User `json:"user,omitempty"`
+}
+
+func (*MemberRemovedEvent) GetEventType() string {
+	return "member.removed"
 }
 
 // MemberRequest is the payload for adding a member to a call.
@@ -4414,6 +4819,10 @@ type MemberUpdatedEvent struct {
 	Member *ChannelMember `json:"member,omitempty"`
 
 	User *User `json:"user,omitempty"`
+}
+
+func (*MemberUpdatedEvent) GetEventType() string {
+	return "member.updated"
 }
 
 type MembersResponse struct {
@@ -4555,6 +4964,10 @@ type MessageDeletedEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*MessageDeletedEvent) GetEventType() string {
+	return "message.deleted"
+}
+
 type MessageFlagResponse struct {
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -4599,6 +5012,10 @@ type MessageFlaggedEvent struct {
 	Message *Message `json:"message,omitempty"`
 
 	User *User `json:"user,omitempty"`
+}
+
+func (*MessageFlaggedEvent) GetEventType() string {
+	return "message.flagged"
 }
 
 type MessageHistoryEntryResponse struct {
@@ -4673,6 +5090,10 @@ type MessageNewEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*MessageNewEvent) GetEventType() string {
+	return "notification.thread_message_new"
+}
+
 type MessagePaginationParams struct{}
 
 type MessageReadEvent struct {
@@ -4686,13 +5107,15 @@ type MessageReadEvent struct {
 
 	Type string `json:"type"`
 
+	ChannelLastMessageAt *Timestamp `json:"channel_last_message_at,omitempty"`
+
 	LastReadMessageID *string `json:"last_read_message_id,omitempty"`
 
 	Team *string `json:"team,omitempty"`
 
 	Thread *ThreadResponse `json:"thread,omitempty"`
 
-	User *UserResponse `json:"user,omitempty"`
+	User *UserResponseCommonFields `json:"user,omitempty"`
 }
 
 type MessageRequest struct {
@@ -4854,6 +5277,10 @@ type MessageUnblockedEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*MessageUnblockedEvent) GetEventType() string {
+	return "message.unblocked"
+}
+
 type MessageUndeletedEvent struct {
 	ChannelID string `json:"channel_id"`
 
@@ -4872,6 +5299,10 @@ type MessageUndeletedEvent struct {
 	Message *Message `json:"message,omitempty"`
 
 	User *User `json:"user,omitempty"`
+}
+
+func (*MessageUndeletedEvent) GetEventType() string {
+	return "message.undeleted"
 }
 
 type MessageUpdate struct {
@@ -4898,6 +5329,10 @@ type MessageUpdatedEvent struct {
 	Message *Message `json:"message,omitempty"`
 
 	User *User `json:"user,omitempty"`
+}
+
+func (*MessageUpdatedEvent) GetEventType() string {
+	return "message.updated"
 }
 
 // Represents any chat message
@@ -5023,6 +5458,36 @@ type ModerationActionConfig struct {
 	Custom map[string]any `json:"custom"`
 }
 
+type ModerationAnalytics struct {
+	TotalItemsModerated int `json:"total_items_moderated"`
+
+	AiImageHarms []map[string]any `json:"ai_image_harms"`
+
+	AiTextHarms []map[string]any `json:"ai_text_harms"`
+
+	AiVideoHarms []map[string]any `json:"ai_video_harms"`
+
+	BlocklistByList []map[string]any `json:"blocklist_by_list"`
+
+	BlocklistMatches []map[string]any `json:"blocklist_matches"`
+
+	ModelAccuracy []map[string]any `json:"model_accuracy"`
+
+	ModeratorActions []map[string]any `json:"moderator_actions"`
+
+	ModeratorProductivity []map[string]any `json:"moderator_productivity"`
+
+	SemanticFilterTopMatches []map[string]any `json:"semantic_filter_top_matches"`
+
+	SlaMetrics []map[string]any `json:"sla_metrics"`
+
+	UsageMetrics []map[string]any `json:"usage_metrics"`
+
+	ActionDistributionOverTime map[string]map[string]any `json:"action_distribution_over_time"`
+
+	DetectionByEngineOverTime map[string]map[string]any `json:"detection_by_engine_over_time"`
+}
+
 type ModerationCustomActionEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -5035,8 +5500,14 @@ type ModerationCustomActionEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*ModerationCustomActionEvent) GetEventType() string {
+	return "moderation.custom_action"
+}
+
 type ModerationEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
+
+	Custom map[string]any `json:"custom"`
 
 	Type string `json:"type"`
 
@@ -5047,6 +5518,10 @@ type ModerationEvent struct {
 	Action *ActionLogResponse `json:"action,omitempty"`
 
 	ReviewQueueItem *ReviewQueueItemResponse `json:"review_queue_item,omitempty"`
+}
+
+func (*ModerationEvent) GetEventType() string {
+	return "review_queue_item.updated"
 }
 
 type ModerationFlaggedEvent struct {
@@ -5061,6 +5536,10 @@ type ModerationFlaggedEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*ModerationFlaggedEvent) GetEventType() string {
+	return "moderation.flagged"
+}
+
 type ModerationMarkReviewedEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -5071,6 +5550,10 @@ type ModerationMarkReviewedEvent struct {
 	Message *Message `json:"message,omitempty"`
 
 	User *User `json:"user,omitempty"`
+}
+
+func (*ModerationMarkReviewedEvent) GetEventType() string {
+	return "moderation.mark_reviewed"
 }
 
 type ModerationPayload struct {
@@ -5222,6 +5705,10 @@ type NotificationMarkUnreadEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*NotificationMarkUnreadEvent) GetEventType() string {
+	return "notification.mark_unread"
+}
+
 type NotificationSettings struct {
 	Enabled bool `json:"enabled"`
 
@@ -5236,17 +5723,7 @@ type NotificationSettings struct {
 	SessionStarted EventNotificationSettings `json:"session_started"`
 }
 
-type NullBool struct {
-	HasValue *bool `json:"HasValue,omitempty"`
-
-	Value *bool `json:"Value,omitempty"`
-}
-
-type NullTime struct {
-	HasValue *bool `json:"HasValue,omitempty"`
-
-	Value *Timestamp `json:"Value,omitempty"`
-}
+type NullTime struct{}
 
 type OnlyUserID struct {
 	ID string `json:"id"`
@@ -5273,10 +5750,12 @@ const (
 	SEND_VIDEO                 OwnCapability = "send-video"
 	START_BROADCAST_CALL       OwnCapability = "start-broadcast-call"
 	START_CLOSED_CAPTIONS_CALL OwnCapability = "start-closed-captions-call"
+	START_FRAME_RECORD_CALL    OwnCapability = "start-frame-record-call"
 	START_RECORD_CALL          OwnCapability = "start-record-call"
 	START_TRANSCRIPTION_CALL   OwnCapability = "start-transcription-call"
 	STOP_BROADCAST_CALL        OwnCapability = "stop-broadcast-call"
 	STOP_CLOSED_CAPTIONS_CALL  OwnCapability = "stop-closed-captions-call"
+	STOP_FRAME_RECORD_CALL     OwnCapability = "stop-frame-record-call"
 	STOP_RECORD_CALL           OwnCapability = "stop-record-call"
 	STOP_TRANSCRIPTION_CALL    OwnCapability = "stop-transcription-call"
 	UPDATE_CALL                OwnCapability = "update-call"
@@ -5338,7 +5817,7 @@ type OwnUser struct {
 
 	PrivacySettings *PrivacySettings `json:"privacy_settings,omitempty"`
 
-	PushNotifications *PushNotificationSettings `json:"push_notifications,omitempty"`
+	PushPreferences *PushPreferences `json:"push_preferences,omitempty"`
 }
 
 type OwnUserResponse struct {
@@ -5394,7 +5873,7 @@ type OwnUserResponse struct {
 
 	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
 
-	PushNotifications *PushNotificationSettingsResponse `json:"push_notifications,omitempty"`
+	PushPreferences *PushPreferences `json:"push_preferences,omitempty"`
 }
 
 type PaginationParams struct {
@@ -5471,6 +5950,10 @@ type PermissionRequestEvent struct {
 
 	// The type of event: "call.permission_request" in this case
 	Type string `json:"type"`
+}
+
+func (*PermissionRequestEvent) GetEventType() string {
+	return "call.permission_request"
 }
 
 // PinRequest is the payload for pinning a message.
@@ -5773,20 +6256,33 @@ type PushNotificationFields struct {
 	Providers []PushProvider `json:"providers,omitempty"`
 }
 
-type PushNotificationSettings struct {
+type PushNotificationSettingsResponse struct {
 	Disabled *bool `json:"disabled,omitempty"`
 
 	DisabledUntil *Timestamp `json:"disabled_until,omitempty"`
 }
 
-type PushNotificationSettingsInput struct {
-	Disabled *NullBool `json:"disabled,omitempty"`
+type PushPreferenceInput struct {
+	// Set the push preferences for a specific channel. If empty it sets the default for the user
+	ChannelCid *string `json:"channel_cid,omitempty"`
 
-	DisabledUntil *NullTime `json:"disabled_until,omitempty"`
+	// Set the level of push notifications for the user. One of all, mentions, none, default
+	ChatLevel *string `json:"chat_level,omitempty"`
+
+	// Disable push notifications till a certain time
+	DisabledUntil *Timestamp `json:"disabled_until,omitempty"`
+
+	// Remove the disabled until time. (IE stop snoozing notifications)
+	RemoveDisable *bool `json:"remove_disable,omitempty"`
+
+	// The user id for which to set the push preferences. Required when using server side auths, defaults to current user with client side auth.
+	UserID *string `json:"user_id,omitempty"`
 }
 
-type PushNotificationSettingsResponse struct {
-	Disabled *bool `json:"disabled,omitempty"`
+type PushPreferences struct {
+	CallLevel *string `json:"call_level,omitempty"`
+
+	ChatLevel *string `json:"chat_level,omitempty"`
 
 	DisabledUntil *Timestamp `json:"disabled_until,omitempty"`
 }
@@ -6148,7 +6644,7 @@ type QueryReviewQueueResponse struct {
 
 	ActionConfig map[string][]ModerationActionConfig `json:"action_config"`
 
-	Stats map[string]int `json:"stats"`
+	Stats map[string]any `json:"stats"`
 
 	Next *string `json:"next,omitempty"`
 
@@ -6349,6 +6845,10 @@ type ReactionDeletedEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*ReactionDeletedEvent) GetEventType() string {
+	return "reaction.deleted"
+}
+
 // ReactionGroupResponse contains all information about a reaction of the same type.
 type ReactionGroupResponse struct {
 	// Count is the number of reactions of this type.
@@ -6386,14 +6886,8 @@ type ReactionNewEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
-// Basic response information
-type ReactionRemovalResponse struct {
-	// Duration of the request in milliseconds
-	Duration string `json:"duration"`
-
-	Message *Message `json:"message,omitempty"`
-
-	Reaction *Reaction `json:"reaction,omitempty"`
+func (*ReactionNewEvent) GetEventType() string {
+	return "reaction.new"
 }
 
 // Represents user reaction to a message
@@ -6460,6 +6954,10 @@ type ReactionUpdatedEvent struct {
 	Team *string `json:"team,omitempty"`
 
 	User *User `json:"user,omitempty"`
+}
+
+func (*ReactionUpdatedEvent) GetEventType() string {
+	return "reaction.updated"
 }
 
 type ReactivateUserResponse struct {
@@ -6531,8 +7029,6 @@ type ReportByHistogramBucket struct {
 
 	Count int `json:"count"`
 
-	Mean float64 `json:"mean"`
-
 	Sum float64 `json:"sum"`
 
 	LowerBound *Bound `json:"lower_bound,omitempty"`
@@ -6557,6 +7053,8 @@ type Response struct {
 type RestoreActionRequest struct{}
 
 type ReviewQueueItem struct {
+	AiTextSeverity string `json:"ai_text_severity"`
+
 	BounceCount int `json:"bounce_count"`
 
 	ContentChanged bool `json:"content_changed"`
@@ -6597,8 +7095,6 @@ type ReviewQueueItem struct {
 
 	Teams []string `json:"teams"`
 
-	CompletedAt NullTime `json:"completed_at"`
-
 	ReviewedAt NullTime `json:"reviewed_at"`
 
 	AssignedTo *User `json:"assigned_to,omitempty"`
@@ -6615,6 +7111,8 @@ type ReviewQueueItem struct {
 }
 
 type ReviewQueueItemResponse struct {
+	AiTextSeverity string `json:"ai_text_severity"`
+
 	CreatedAt Timestamp `json:"created_at"`
 
 	EntityID string `json:"entity_id"`
@@ -6646,6 +7144,8 @@ type ReviewQueueItemResponse struct {
 	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
 
 	ReviewedAt *Timestamp `json:"reviewed_at,omitempty"`
+
+	Teams []string `json:"teams,omitempty"`
 
 	AssignedTo *UserResponse `json:"assigned_to,omitempty"`
 
@@ -6977,6 +7477,18 @@ type SendReactionResponse struct {
 	Reaction ReactionResponse `json:"reaction"`
 }
 
+type SessionSettings struct {
+	InactivityTimeoutSeconds int `json:"inactivity_timeout_seconds"`
+}
+
+type SessionSettingsRequest struct {
+	InactivityTimeoutSeconds int `json:"inactivity_timeout_seconds"`
+}
+
+type SessionSettingsResponse struct {
+	InactivityTimeoutSeconds int `json:"inactivity_timeout_seconds"`
+}
+
 // Basic response information
 type ShowChannelResponse struct {
 	// Duration of the request in milliseconds
@@ -7000,6 +7512,12 @@ type StartCampaignResponse struct {
 }
 
 type StartClosedCaptionsResponse struct {
+	Duration string `json:"duration"`
+}
+
+// StartFrameRecordingResponse is the response payload for the start frame recording endpoint.
+type StartFrameRecordingResponse struct {
+	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
@@ -7037,6 +7555,12 @@ type StopCampaignRequest struct{}
 
 // Basic response information
 type StopClosedCaptionsResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+}
+
+// Basic response information
+type StopFrameRecordingResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
@@ -7247,6 +7771,10 @@ type ThreadUpdatedEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*ThreadUpdatedEvent) GetEventType() string {
+	return "thread.updated"
+}
+
 // Sets thresholds for AI moderation
 type Thresholds struct {
 	Explicit *LabelThresholds `json:"explicit,omitempty"`
@@ -7356,6 +7884,10 @@ type UnblockedUserEvent struct {
 	Type string `json:"type"`
 }
 
+func (*UnblockedUserEvent) GetEventType() string {
+	return "call.unblocked_user"
+}
+
 // Basic response information
 type UnmuteResponse struct {
 	// Duration of the request in milliseconds
@@ -7423,6 +7955,14 @@ type UnreadCountsThread struct {
 	ParentMessageID string `json:"parent_message_id"`
 
 	UnreadCount int `json:"unread_count"`
+}
+
+// Basic response information
+type UpdateBlockListResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Blocklist *BlockListResponse `json:"blocklist,omitempty"`
 }
 
 // Basic response information
@@ -7652,6 +8192,10 @@ type UpdatedCallPermissionsEvent struct {
 	Type string `json:"type"`
 }
 
+func (*UpdatedCallPermissionsEvent) GetEventType() string {
+	return "call.permissions_updated"
+}
+
 // Basic response information
 type UpsertConfigResponse struct {
 	// Duration of the request in milliseconds
@@ -7678,6 +8222,22 @@ type UpsertModerationTemplateResponse struct {
 	UpdatedAt Timestamp `json:"updated_at"`
 
 	Config *FeedsModerationTemplateConfig `json:"config,omitempty"`
+}
+
+type UpsertPushPreferencesRequest struct {
+	// A list of push preferences for channels, calls, or the user.
+	Preferences []PushPreferenceInput `json:"preferences"`
+}
+
+type UpsertPushPreferencesResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	// The channel specific push notification preferences, only returned for channels you've edited.
+	UserChannelPreferences map[string]map[string]ChannelPushPreferences `json:"user_channel_preferences"`
+
+	// The user preferences, always returned regardless if you edited it
+	UserPreferences map[string]PushPreferences `json:"user_preferences"`
 }
 
 // Basic response information
@@ -7722,8 +8282,6 @@ type User struct {
 	Teams []string `json:"teams,omitempty"`
 
 	PrivacySettings *PrivacySettings `json:"privacy_settings,omitempty"`
-
-	PushNotifications *PushNotificationSettings `json:"push_notifications,omitempty"`
 }
 
 type UserBannedEvent struct {
@@ -7750,6 +8308,10 @@ type UserBannedEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*UserBannedEvent) GetEventType() string {
+	return "user.banned"
+}
+
 type UserBlock struct {
 	BlockedByUserID string `json:"blocked_by_user_id"`
 
@@ -7774,6 +8336,10 @@ type UserDeactivatedEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*UserDeactivatedEvent) GetEventType() string {
+	return "user.deactivated"
+}
+
 type UserDeletedEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -7788,42 +8354,8 @@ type UserDeletedEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
-type UserEventPayload struct {
-	Banned bool `json:"banned"`
-
-	CreatedAt Timestamp `json:"created_at"`
-
-	ID string `json:"id"`
-
-	Language string `json:"language"`
-
-	Online bool `json:"online"`
-
-	Role string `json:"role"`
-
-	UpdatedAt Timestamp `json:"updated_at"`
-
-	BlockedUserIds []string `json:"blocked_user_ids"`
-
-	Teams []string `json:"teams"`
-
-	Custom map[string]any `json:"custom"`
-
-	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
-
-	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
-
-	Image *string `json:"image,omitempty"`
-
-	Invisible *bool `json:"invisible,omitempty"`
-
-	LastActive *Timestamp `json:"last_active,omitempty"`
-
-	Name *string `json:"name,omitempty"`
-
-	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
-
-	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
+func (*UserDeletedEvent) GetEventType() string {
+	return "user.deleted"
 }
 
 type UserFeedbackReport struct {
@@ -7866,6 +8398,10 @@ type UserFlaggedEvent struct {
 	TargetUsers []string `json:"target_users,omitempty"`
 
 	User *User `json:"user,omitempty"`
+}
+
+func (*UserFlaggedEvent) GetEventType() string {
+	return "user.flagged"
 }
 
 type UserInfoResponse struct {
@@ -7919,6 +8455,10 @@ type UserMutedEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*UserMutedEvent) GetEventType() string {
+	return "user.muted"
+}
+
 type UserRatingReportResponse struct {
 	Average float64 `json:"average"`
 
@@ -7931,6 +8471,10 @@ type UserReactivatedEvent struct {
 	Type string `json:"type"`
 
 	User *User `json:"user,omitempty"`
+}
+
+func (*UserReactivatedEvent) GetEventType() string {
+	return "user.reactivated"
 }
 
 // User request object
@@ -7954,8 +8498,6 @@ type UserRequest struct {
 	Custom map[string]any `json:"custom,omitempty"`
 
 	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
-
-	PushNotifications *PushNotificationSettingsInput `json:"push_notifications,omitempty"`
 }
 
 // User response object
@@ -7988,9 +8530,6 @@ type UserResponse struct {
 
 	BlockedUserIds []string `json:"blocked_user_ids"`
 
-	// List of devices user is using
-	Devices []DeviceResponse `json:"devices"`
-
 	// List of teams user is a part of
 	Teams []string `json:"teams"`
 
@@ -8017,9 +8556,84 @@ type UserResponse struct {
 	// Revocation date for tokens
 	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
 
+	// List of devices user is using
+	Devices []DeviceResponse `json:"devices,omitempty"`
+
 	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
 
 	PushNotifications *PushNotificationSettingsResponse `json:"push_notifications,omitempty"`
+}
+
+type UserResponseCommonFields struct {
+	Banned bool `json:"banned"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	ID string `json:"id"`
+
+	Language string `json:"language"`
+
+	Online bool `json:"online"`
+
+	Role string `json:"role"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	BlockedUserIds []string `json:"blocked_user_ids"`
+
+	Teams []string `json:"teams"`
+
+	Custom map[string]any `json:"custom"`
+
+	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
+
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
+
+	Image *string `json:"image,omitempty"`
+
+	LastActive *Timestamp `json:"last_active,omitempty"`
+
+	Name *string `json:"name,omitempty"`
+
+	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
+}
+
+type UserResponsePrivacyFields struct {
+	Banned bool `json:"banned"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	ID string `json:"id"`
+
+	Language string `json:"language"`
+
+	Online bool `json:"online"`
+
+	Role string `json:"role"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	BlockedUserIds []string `json:"blocked_user_ids"`
+
+	Teams []string `json:"teams"`
+
+	Custom map[string]any `json:"custom"`
+
+	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
+
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
+
+	Image *string `json:"image,omitempty"`
+
+	Invisible *bool `json:"invisible,omitempty"`
+
+	LastActive *Timestamp `json:"last_active,omitempty"`
+
+	Name *string `json:"name,omitempty"`
+
+	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
+
+	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
 }
 
 type UserSessionStats struct {
@@ -8156,6 +8770,10 @@ type UserUnbannedEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*UserUnbannedEvent) GetEventType() string {
+	return "user.unbanned"
+}
+
 type UserUnmutedEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -8168,6 +8786,10 @@ type UserUnmutedEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*UserUnmutedEvent) GetEventType() string {
+	return "user.unmuted"
+}
+
 type UserUnreadReminderEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -8178,14 +8800,27 @@ type UserUnreadReminderEvent struct {
 	User *User `json:"user,omitempty"`
 }
 
+func (*UserUnreadReminderEvent) GetEventType() string {
+	return "user.unread_message_reminder"
+}
+
+// This event is sent when a user gets updated. The event contains information about the updated user.
 type UserUpdatedEvent struct {
+	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
 
-	User UserEventPayload `json:"user"`
+	Custom map[string]any `json:"custom"`
 
+	User UserResponsePrivacyFields `json:"user"`
+
+	// The type of event: "user.updated" in this case
 	Type string `json:"type"`
 
 	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*UserUpdatedEvent) GetEventType() string {
+	return "user.updated"
 }
 
 type VelocityFilterConfig struct {
@@ -8293,6 +8928,8 @@ type WSEvent struct {
 	Automoderation *bool `json:"automoderation,omitempty"`
 
 	ChannelID *string `json:"channel_id,omitempty"`
+
+	ChannelLastMessageAt *Timestamp `json:"channel_last_message_at,omitempty"`
 
 	ChannelType *string `json:"channel_type,omitempty"`
 

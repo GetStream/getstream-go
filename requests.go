@@ -50,21 +50,26 @@ type UpdateAppRequest struct {
 }
 
 type ListBlockListsRequest struct {
+	Team *string `json:"-" query:"team"`
 }
 
 type CreateBlockListRequest struct {
 	Name  string   `json:"name"`
 	Words []string `json:"words"`
+	Team  *string  `json:"team"`
 	Type  *string  `json:"type"`
 }
 
 type DeleteBlockListRequest struct {
+	Team *string `json:"-" query:"team"`
 }
 
 type GetBlockListRequest struct {
+	Team *string `json:"-" query:"team"`
 }
 
 type UpdateBlockListRequest struct {
+	Team  *string  `json:"team"`
 	Words []string `json:"words"`
 }
 
@@ -550,6 +555,10 @@ type QueryPollVotesRequest struct {
 	Filter map[string]any     `json:"filter"`
 }
 
+type UpdatePushNotificationPreferencesRequest struct {
+	Preferences []PushPreferenceInput `json:"preferences"`
+}
+
 type QueryBannedUsersRequest struct {
 	Payload *QueryBannedUsersPayload `json:"-" query:"payload"`
 }
@@ -715,6 +724,11 @@ type CreateImportRequest struct {
 type GetImportRequest struct {
 }
 
+type GetModerationAnalyticsRequest struct {
+	EndDate   *string `json:"end_date"`
+	StartDate *string `json:"start_date"`
+}
+
 type BanRequest struct {
 	TargetUserID string       `json:"target_user_id"`
 	BannedByID   *string      `json:"banned_by_id"`
@@ -731,6 +745,7 @@ type CheckRequest struct {
 	EntityCreatorID   string             `json:"entity_creator_id"`
 	EntityID          string             `json:"entity_id"`
 	EntityType        string             `json:"entity_type"`
+	ConfigTeam        *string            `json:"config_team"`
 	TestMode          *bool              `json:"test_mode"`
 	UserID            *string            `json:"user_id"`
 	ModerationPayload *ModerationPayload `json:"moderation_payload"`
@@ -1070,8 +1085,8 @@ type CollectUserFeedbackRequest struct {
 	Rating        int            `json:"rating"`
 	Sdk           string         `json:"sdk"`
 	SdkVersion    string         `json:"sdk_version"`
-	UserSessionID string         `json:"user_session_id"`
 	Reason        *string        `json:"reason"`
+	UserSessionID *string        `json:"user_session_id"`
 	Custom        map[string]any `json:"custom"`
 }
 
@@ -1135,6 +1150,10 @@ type StartClosedCaptionsRequest struct {
 	Language            *string `json:"language"`
 }
 
+type StartFrameRecordingRequest struct {
+	RecordingExternalStorage *string `json:"recording_external_storage"`
+}
+
 type StartRecordingRequest struct {
 	RecordingExternalStorage *string `json:"recording_external_storage"`
 }
@@ -1153,6 +1172,9 @@ type StopHLSBroadcastingRequest struct {
 
 type StopClosedCaptionsRequest struct {
 	StopTranscription *bool `json:"stop_transcription"`
+}
+
+type StopFrameRecordingRequest struct {
 }
 
 type StopLiveRequest struct {

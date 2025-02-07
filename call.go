@@ -41,8 +41,8 @@ func (c *Call) SendCallEvent(ctx context.Context, request *SendCallEventRequest)
 	return c.client.SendCallEvent(ctx, c.callType, c.callID, request)
 }
 
-func (c *Call) CollectUserFeedback(ctx context.Context, session string, request *CollectUserFeedbackRequest) (*StreamResponse[CollectUserFeedbackResponse], error) {
-	return c.client.CollectUserFeedback(ctx, c.callType, c.callID, session, request)
+func (c *Call) CollectUserFeedback(ctx context.Context, request *CollectUserFeedbackRequest) (*StreamResponse[CollectUserFeedbackResponse], error) {
+	return c.client.CollectUserFeedback(ctx, c.callType, c.callID, request)
 }
 
 func (c *Call) GoLive(ctx context.Context, request *GoLiveRequest) (*StreamResponse[GoLiveResponse], error) {
@@ -93,6 +93,10 @@ func (c *Call) StartClosedCaptions(ctx context.Context, request *StartClosedCapt
 	return c.client.StartClosedCaptions(ctx, c.callType, c.callID, request)
 }
 
+func (c *Call) StartFrameRecording(ctx context.Context, request *StartFrameRecordingRequest) (*StreamResponse[StartFrameRecordingResponse], error) {
+	return c.client.StartFrameRecording(ctx, c.callType, c.callID, request)
+}
+
 func (c *Call) StartRecording(ctx context.Context, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
 	return c.client.StartRecording(ctx, c.callType, c.callID, request)
 }
@@ -111,6 +115,10 @@ func (c *Call) StopHLSBroadcasting(ctx context.Context, request *StopHLSBroadcas
 
 func (c *Call) StopClosedCaptions(ctx context.Context, request *StopClosedCaptionsRequest) (*StreamResponse[StopClosedCaptionsResponse], error) {
 	return c.client.StopClosedCaptions(ctx, c.callType, c.callID, request)
+}
+
+func (c *Call) StopFrameRecording(ctx context.Context, request *StopFrameRecordingRequest) (*StreamResponse[StopFrameRecordingResponse], error) {
+	return c.client.StopFrameRecording(ctx, c.callType, c.callID, request)
 }
 
 func (c *Call) StopLive(ctx context.Context, request *StopLiveRequest) (*StreamResponse[StopLiveResponse], error) {
