@@ -1,7 +1,7 @@
 package getstream
 
 const (
-	versionName = "1.2.0"
+	versionName = "asdasd"
 )
 
 // Version returns the version of the library.
