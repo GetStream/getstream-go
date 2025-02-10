@@ -485,6 +485,13 @@ func TestChatQueryPollVotes(t *testing.T) {
 	_, err = client.Chat().QueryPollVotes(context.Background(), "", &getstream.QueryPollVotesRequest{})
 	require.NoError(t, err)
 }
+func TestChatUpdatePushNotificationPreferences(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().UpdatePushNotificationPreferences(context.Background(), &getstream.UpdatePushNotificationPreferencesRequest{})
+	require.NoError(t, err)
+}
 func TestChatQueryBannedUsers(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

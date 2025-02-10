@@ -76,7 +76,7 @@ func TestVideoCollectUserFeedback(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Video().CollectUserFeedback(context.Background(), "", "", "", &getstream.CollectUserFeedbackRequest{})
+	_, err = client.Video().CollectUserFeedback(context.Background(), "", "", &getstream.CollectUserFeedbackRequest{})
 	require.NoError(t, err)
 }
 func TestVideoGoLive(t *testing.T) {
@@ -163,6 +163,13 @@ func TestVideoStartClosedCaptions(t *testing.T) {
 	_, err = client.Video().StartClosedCaptions(context.Background(), "", "", &getstream.StartClosedCaptionsRequest{})
 	require.NoError(t, err)
 }
+func TestVideoStartFrameRecording(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().StartFrameRecording(context.Background(), "", "", &getstream.StartFrameRecordingRequest{})
+	require.NoError(t, err)
+}
 func TestVideoStartRecording(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -196,6 +203,13 @@ func TestVideoStopClosedCaptions(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Video().StopClosedCaptions(context.Background(), "", "", &getstream.StopClosedCaptionsRequest{})
+	require.NoError(t, err)
+}
+func TestVideoStopFrameRecording(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().StopFrameRecording(context.Background(), "", "", &getstream.StopFrameRecordingRequest{})
 	require.NoError(t, err)
 }
 func TestVideoStopLive(t *testing.T) {

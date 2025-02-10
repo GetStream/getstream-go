@@ -114,14 +114,13 @@ func (c *VideoClient) SendCallEvent(ctx context.Context, _type string, id string
 	return res, err
 }
 
-func (c *VideoClient) CollectUserFeedback(ctx context.Context, _type string, id string, session string, request *CollectUserFeedbackRequest) (*StreamResponse[CollectUserFeedbackResponse], error) {
+func (c *VideoClient) CollectUserFeedback(ctx context.Context, _type string, id string, request *CollectUserFeedbackRequest) (*StreamResponse[CollectUserFeedbackResponse], error) {
 	var result CollectUserFeedbackResponse
 	pathParams := map[string]string{
-		"type":    _type,
-		"id":      id,
-		"session": session,
+		"type": _type,
+		"id":   id,
 	}
-	res, err := MakeRequest[CollectUserFeedbackRequest, CollectUserFeedbackResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/feedback/{session}", nil, request, &result, pathParams)
+	res, err := MakeRequest[CollectUserFeedbackRequest, CollectUserFeedbackResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/feedback", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -263,6 +262,20 @@ func (c *VideoClient) StartClosedCaptions(ctx context.Context, _type string, id 
 	return res, err
 }
 
+// Starts frame by frame recording
+//
+// Sends events:
+// - call.frame_recording_started
+func (c *VideoClient) StartFrameRecording(ctx context.Context, _type string, id string, request *StartFrameRecordingRequest) (*StreamResponse[StartFrameRecordingResponse], error) {
+	var result StartFrameRecordingResponse
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	res, err := MakeRequest[StartFrameRecordingRequest, StartFrameRecordingResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_frame_recording", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Starts recording
 //
 // Sends events:
@@ -321,6 +334,20 @@ func (c *VideoClient) StopClosedCaptions(ctx context.Context, _type string, id s
 		"id":   id,
 	}
 	res, err := MakeRequest[StopClosedCaptionsRequest, StopClosedCaptionsResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_closed_captions", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Stops frame recording
+//
+// Sends events:
+// - call.frame_recording_stopped
+func (c *VideoClient) StopFrameRecording(ctx context.Context, _type string, id string, request *StopFrameRecordingRequest) (*StreamResponse[StopFrameRecordingResponse], error) {
+	var result StopFrameRecordingResponse
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	res, err := MakeRequest[any, StopFrameRecordingResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_frame_recording", nil, nil, &result, pathParams)
 	return res, err
 }
 
