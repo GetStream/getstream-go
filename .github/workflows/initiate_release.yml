@@ -4,8 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "The new version number following semantic versioning convention. Example: 1.40.1"
+        description: "The new version number following semantic versioning convention. Example: v1.40.1"
         required: true
+        type: string
+        pattern: "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
 
 jobs:
   init_release:
