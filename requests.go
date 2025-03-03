@@ -16,6 +16,7 @@ type UpdateAppRequest struct {
 	EnforceUniqueUsernames     *string                       `json:"enforce_unique_usernames"`
 	FeedsModerationEnabled     *bool                         `json:"feeds_moderation_enabled"`
 	FeedsV2Region              *string                       `json:"feeds_v2_region"`
+	GuestUserCreationDisabled  *bool                         `json:"guest_user_creation_disabled"`
 	ImageModerationEnabled     *bool                         `json:"image_moderation_enabled"`
 	MigratePermissionsToV2     *bool                         `json:"migrate_permissions_to_v2"`
 	ModerationEnabled          *bool                         `json:"moderation_enabled"`
@@ -340,9 +341,6 @@ type ExportChannelsRequest struct {
 	IncludeSoftDeletedChannels *bool           `json:"include_soft_deleted_channels"`
 	IncludeTruncatedMessages   *bool           `json:"include_truncated_messages"`
 	Version                    *string         `json:"version"`
-}
-
-type GetExportChannelsStatusRequest struct {
 }
 
 type QueryMembersRequest struct {
@@ -1094,7 +1092,6 @@ type GoLiveRequest struct {
 	RecordingStorageName     *string `json:"recording_storage_name"`
 	StartClosedCaption       *bool   `json:"start_closed_caption"`
 	StartHLS                 *bool   `json:"start_hls"`
-	StartRTMPBroadcasts      *bool   `json:"start_rtmp_broadcasts"`
 	StartRecording           *bool   `json:"start_recording"`
 	StartTranscription       *bool   `json:"start_transcription"`
 	TranscriptionStorageName *string `json:"transcription_storage_name"`
