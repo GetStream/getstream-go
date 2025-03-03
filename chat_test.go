@@ -261,13 +261,6 @@ func TestChatExportChannels(t *testing.T) {
 	_, err = client.Chat().ExportChannels(context.Background(), &getstream.ExportChannelsRequest{})
 	require.NoError(t, err)
 }
-func TestChatGetExportChannelsStatus(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetExportChannelsStatus(context.Background(), "", &getstream.GetExportChannelsStatusRequest{})
-	require.NoError(t, err)
-}
 func TestChatQueryMembers(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

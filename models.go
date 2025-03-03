@@ -204,6 +204,8 @@ type AppResponseFields struct {
 
 	EnforceUniqueUsernames string `json:"enforce_unique_usernames"`
 
+	GuestUserCreationDisabled bool `json:"guest_user_creation_disabled"`
+
 	ImageModerationEnabled bool `json:"image_moderation_enabled"`
 
 	ModerationEnabled bool `json:"moderation_enabled"`
@@ -269,6 +271,72 @@ type AppResponseFields struct {
 	ImageModerationLabels []string `json:"image_moderation_labels,omitempty"`
 
 	DatadogInfo *DataDogInfo `json:"datadog_info,omitempty"`
+}
+
+type AsyncExportChannelsEvent struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	FinishedAt Timestamp `json:"finished_at"`
+
+	StartedAt Timestamp `json:"started_at"`
+
+	TaskID string `json:"task_id"`
+
+	Url string `json:"url"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*AsyncExportChannelsEvent) GetEventType() string {
+	return "export.channels.success"
+}
+
+type AsyncExportErrorEvent struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	Error string `json:"error"`
+
+	FinishedAt Timestamp `json:"finished_at"`
+
+	StartedAt Timestamp `json:"started_at"`
+
+	TaskID string `json:"task_id"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*AsyncExportErrorEvent) GetEventType() string {
+	return "export.users.error"
+}
+
+type AsyncExportUsersEvent struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	FinishedAt Timestamp `json:"finished_at"`
+
+	StartedAt Timestamp `json:"started_at"`
+
+	TaskID string `json:"task_id"`
+
+	Url string `json:"url"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*AsyncExportUsersEvent) GetEventType() string {
+	return "export.users.success"
 }
 
 type AsyncModerationCallbackConfig struct {
@@ -689,11 +757,34 @@ func (*CallAcceptedEvent) GetEventType() string {
 type CallClosedCaption struct {
 	EndTime Timestamp `json:"end_time"`
 
+	ID string `json:"id"`
+
+	Language string `json:"language"`
+
 	SpeakerID string `json:"speaker_id"`
 
 	StartTime Timestamp `json:"start_time"`
 
 	Text string `json:"text"`
+
+	User UserResponse `json:"user"`
+}
+
+// CallClosedCaptionTranslated represents a closed caption translation event
+type CallClosedCaptionTranslated struct {
+	EndTime Timestamp `json:"end_time"`
+
+	ID string `json:"id"`
+
+	Language string `json:"language"`
+
+	SpeakerID string `json:"speaker_id"`
+
+	StartTime Timestamp `json:"start_time"`
+
+	Text string `json:"text"`
+
+	I18nText map[string]string `json:"i18n_text"`
 
 	User UserResponse `json:"user"`
 }
@@ -1145,6 +1236,8 @@ type CallRecording struct {
 
 	Filename string `json:"filename"`
 
+	SessionID string `json:"session_id"`
+
 	StartTime Timestamp `json:"start_time"`
 
 	Url string `json:"url"`
@@ -1283,6 +1376,8 @@ type CallResponse struct {
 	Recording bool `json:"recording"`
 
 	Transcribing bool `json:"transcribing"`
+
+	Translating bool `json:"translating"`
 
 	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
@@ -2338,40 +2433,41 @@ func (*ChannelMutedEvent) GetEventType() string {
 type ChannelOwnCapability string
 
 const (
-	BAN_CHANNEL_MEMBERS    ChannelOwnCapability = "ban-channel-members"
-	CAST_POLL_VOTE         ChannelOwnCapability = "cast-poll-vote"
-	CONNECT_EVENTS         ChannelOwnCapability = "connect-events"
-	CREATE_ATTACHMENT      ChannelOwnCapability = "create-attachment"
-	DELETE_ANY_MESSAGE     ChannelOwnCapability = "delete-any-message"
-	DELETE_CHANNEL         ChannelOwnCapability = "delete-channel"
-	DELETE_OWN_MESSAGE     ChannelOwnCapability = "delete-own-message"
-	FLAG_MESSAGE           ChannelOwnCapability = "flag-message"
-	FREEZE_CHANNEL         ChannelOwnCapability = "freeze-channel"
-	JOIN_CHANNEL           ChannelOwnCapability = "join-channel"
-	LEAVE_CHANNEL          ChannelOwnCapability = "leave-channel"
-	MUTE_CHANNEL           ChannelOwnCapability = "mute-channel"
-	PIN_MESSAGE            ChannelOwnCapability = "pin-message"
-	QUERY_POLL_VOTES       ChannelOwnCapability = "query-poll-votes"
-	QUOTE_MESSAGE          ChannelOwnCapability = "quote-message"
-	READ_EVENTS            ChannelOwnCapability = "read-events"
-	SEARCH_MESSAGES        ChannelOwnCapability = "search-messages"
-	SEND_CUSTOM_EVENTS     ChannelOwnCapability = "send-custom-events"
-	SEND_LINKS             ChannelOwnCapability = "send-links"
-	SEND_MESSAGE           ChannelOwnCapability = "send-message"
-	SEND_POLL              ChannelOwnCapability = "send-poll"
-	SEND_REACTION          ChannelOwnCapability = "send-reaction"
-	SEND_REPLY             ChannelOwnCapability = "send-reply"
-	SEND_TYPING_EVENTS     ChannelOwnCapability = "send-typing-events"
-	SET_CHANNEL_COOLDOWN   ChannelOwnCapability = "set-channel-cooldown"
-	SKIP_SLOW_MODE         ChannelOwnCapability = "skip-slow-mode"
-	SLOW_MODE              ChannelOwnCapability = "slow-mode"
-	TYPING_EVENTS          ChannelOwnCapability = "typing-events"
-	UPDATE_ANY_MESSAGE     ChannelOwnCapability = "update-any-message"
-	UPDATE_CHANNEL         ChannelOwnCapability = "update-channel"
-	UPDATE_CHANNEL_MEMBERS ChannelOwnCapability = "update-channel-members"
-	UPDATE_OWN_MESSAGE     ChannelOwnCapability = "update-own-message"
-	UPDATE_THREAD          ChannelOwnCapability = "update-thread"
-	UPLOAD_FILE            ChannelOwnCapability = "upload-file"
+	BAN_CHANNEL_MEMBERS                ChannelOwnCapability = "ban-channel-members"
+	CAST_POLL_VOTE                     ChannelOwnCapability = "cast-poll-vote"
+	CONNECT_EVENTS                     ChannelOwnCapability = "connect-events"
+	CREATE_ATTACHMENT                  ChannelOwnCapability = "create-attachment"
+	DELETE_ANY_MESSAGE                 ChannelOwnCapability = "delete-any-message"
+	DELETE_CHANNEL                     ChannelOwnCapability = "delete-channel"
+	DELETE_OWN_MESSAGE                 ChannelOwnCapability = "delete-own-message"
+	FLAG_MESSAGE                       ChannelOwnCapability = "flag-message"
+	FREEZE_CHANNEL                     ChannelOwnCapability = "freeze-channel"
+	JOIN_CHANNEL                       ChannelOwnCapability = "join-channel"
+	LEAVE_CHANNEL                      ChannelOwnCapability = "leave-channel"
+	MUTE_CHANNEL                       ChannelOwnCapability = "mute-channel"
+	PIN_MESSAGE                        ChannelOwnCapability = "pin-message"
+	QUERY_POLL_VOTES                   ChannelOwnCapability = "query-poll-votes"
+	QUOTE_MESSAGE                      ChannelOwnCapability = "quote-message"
+	READ_EVENTS                        ChannelOwnCapability = "read-events"
+	SEARCH_MESSAGES                    ChannelOwnCapability = "search-messages"
+	SEND_CUSTOM_EVENTS                 ChannelOwnCapability = "send-custom-events"
+	SEND_LINKS                         ChannelOwnCapability = "send-links"
+	SEND_MESSAGE                       ChannelOwnCapability = "send-message"
+	SEND_POLL                          ChannelOwnCapability = "send-poll"
+	SEND_REACTION                      ChannelOwnCapability = "send-reaction"
+	SEND_REPLY                         ChannelOwnCapability = "send-reply"
+	SEND_RESTRICTED_VISIBILITY_MESSAGE ChannelOwnCapability = "send-restricted-visibility-message"
+	SEND_TYPING_EVENTS                 ChannelOwnCapability = "send-typing-events"
+	SET_CHANNEL_COOLDOWN               ChannelOwnCapability = "set-channel-cooldown"
+	SKIP_SLOW_MODE                     ChannelOwnCapability = "skip-slow-mode"
+	SLOW_MODE                          ChannelOwnCapability = "slow-mode"
+	TYPING_EVENTS                      ChannelOwnCapability = "typing-events"
+	UPDATE_ANY_MESSAGE                 ChannelOwnCapability = "update-any-message"
+	UPDATE_CHANNEL                     ChannelOwnCapability = "update-channel"
+	UPDATE_CHANNEL_MEMBERS             ChannelOwnCapability = "update-channel-members"
+	UPDATE_OWN_MESSAGE                 ChannelOwnCapability = "update-own-message"
+	UPDATE_THREAD                      ChannelOwnCapability = "update-thread"
+	UPLOAD_FILE                        ChannelOwnCapability = "upload-file"
 )
 
 func (c ChannelOwnCapability) String() string {
@@ -2773,6 +2869,22 @@ type ClosedCaptionEvent struct {
 
 func (*ClosedCaptionEvent) GetEventType() string {
 	return "call.closed_caption"
+}
+
+// This event is sent when a closed caption is translated
+type ClosedCaptionTranslatedEvent struct {
+	CallCid string `json:"call_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	TranslatedClosedCaption CallClosedCaptionTranslated `json:"translated_closed_caption"`
+
+	// The type of event: "call.closed_caption.translated" in this case
+	Type string `json:"type"`
+}
+
+func (*ClosedCaptionTranslatedEvent) GetEventType() string {
+	return "call.closed_caption.translated"
 }
 
 // Basic response information
@@ -3453,6 +3565,8 @@ type EntityCreatorResponse struct {
 
 	DeletedContentCount int `json:"deleted_content_count"`
 
+	FlaggedCount int `json:"flagged_count"`
+
 	// Unique user identifier
 	ID string `json:"id"`
 
@@ -3551,17 +3665,6 @@ type ExportChannelsResponse struct {
 	TaskID string `json:"task_id"`
 }
 
-type ExportChannelsResult struct {
-	// URL of result
-	Url string `json:"url"`
-
-	// S3 path of result
-	Path *string `json:"path,omitempty"`
-
-	// S3 bucket name result
-	S3BucketName *string `json:"s3_bucket_name,omitempty"`
-}
-
 type ExportUserResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -3591,6 +3694,12 @@ type ExternalStorageResponse struct {
 	Path string `json:"path"`
 
 	Type string `json:"type"`
+}
+
+type FPSStats struct {
+	AverageFps float64 `json:"average_fps"`
+
+	Tracked int `json:"tracked"`
 }
 
 type FeedsModerationTemplateConfig struct {
@@ -3883,6 +3992,8 @@ type FullUserResponse struct {
 
 	Custom map[string]any `json:"custom"`
 
+	BanExpires *Timestamp `json:"ban_expires,omitempty"`
+
 	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
 
 	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
@@ -4157,26 +4268,6 @@ type GetEdgesResponse struct {
 	Duration string `json:"duration"`
 
 	Edges []EdgeResponse `json:"edges"`
-}
-
-type GetExportChannelsStatusResponse struct {
-	// Date/time of creation
-	CreatedAt Timestamp `json:"created_at"`
-
-	// Duration of the request in milliseconds
-	Duration string `json:"duration"`
-
-	// Task status
-	Status string `json:"status"`
-
-	TaskID string `json:"task_id"`
-
-	// Date/time of the last update
-	UpdatedAt Timestamp `json:"updated_at"`
-
-	Error *ErrorResult `json:"error,omitempty"`
-
-	Result *ExportChannelsResult `json:"result,omitempty"`
 }
 
 // Basic response information
@@ -4866,6 +4957,8 @@ type Message struct {
 
 	OwnReactions []Reaction `json:"own_reactions"`
 
+	RestrictedVisibility []string `json:"restricted_visibility"`
+
 	Custom map[string]any `json:"custom"`
 
 	ReactionCounts map[string]int `json:"reaction_counts"`
@@ -5091,7 +5184,7 @@ type MessageNewEvent struct {
 }
 
 func (*MessageNewEvent) GetEventType() string {
-	return "message.new"
+	return "notification.thread_message_new"
 }
 
 type MessagePaginationParams struct{}
@@ -5151,6 +5244,8 @@ type MessageRequest struct {
 
 	MentionedUsers []string `json:"mentioned_users,omitempty"`
 
+	RestrictedVisibility []string `json:"restricted_visibility,omitempty"`
+
 	Custom map[string]any `json:"custom,omitempty"`
 
 	User *UserRequest `json:"user,omitempty"`
@@ -5204,6 +5299,9 @@ type MessageResponse struct {
 
 	// List of 10 latest reactions of authenticated user to this message
 	OwnReactions []ReactionResponse `json:"own_reactions"`
+
+	// A list of user ids that have restricted visibility to the message, if the list is not empty, the message is only visible to the users in the list
+	RestrictedVisibility []string `json:"restricted_visibility"`
 
 	Custom map[string]any `json:"custom"`
 
@@ -5384,6 +5482,9 @@ type MessageWithChannelResponse struct {
 	// List of 10 latest reactions of authenticated user to this message
 	OwnReactions []ReactionResponse `json:"own_reactions"`
 
+	// A list of user ids that have restricted visibility to the message, if the list is not empty, the message is only visible to the users in the list
+	RestrictedVisibility []string `json:"restricted_visibility"`
+
 	Channel ChannelResponse `json:"channel"`
 
 	Custom map[string]any `json:"custom"`
@@ -5480,8 +5581,6 @@ type ModerationAnalytics struct {
 	SemanticFilterTopMatches []map[string]any `json:"semantic_filter_top_matches"`
 
 	SlaMetrics []map[string]any `json:"sla_metrics"`
-
-	UsageMetrics []map[string]any `json:"usage_metrics"`
 
 	ActionDistributionOverTime map[string]map[string]any `json:"action_distribution_over_time"`
 
@@ -7331,6 +7430,8 @@ type SearchResultMessage struct {
 
 	OwnReactions []ReactionResponse `json:"own_reactions"`
 
+	RestrictedVisibility []string `json:"restricted_visibility"`
+
 	Custom map[string]any `json:"custom"`
 
 	ReactionCounts map[string]int `json:"reaction_counts"`
@@ -7488,6 +7589,8 @@ type SessionSettingsRequest struct {
 type SessionSettingsResponse struct {
 	InactivityTimeoutSeconds int `json:"inactivity_timeout_seconds"`
 }
+
+type ShadowBlockActionRequest struct{}
 
 // Basic response information
 type ShowChannelResponse struct {
@@ -7815,6 +7918,8 @@ type TranscriptionSettings struct {
 	Language string `json:"language"`
 
 	Mode string `json:"mode"`
+
+	Translation *TranslationSettings `json:"translation,omitempty"`
 }
 
 type TranscriptionSettingsRequest struct {
@@ -7823,6 +7928,8 @@ type TranscriptionSettingsRequest struct {
 	ClosedCaptionMode *string `json:"closed_caption_mode,omitempty"`
 
 	Language *string `json:"language,omitempty"`
+
+	Translation *TranslationSettings `json:"translation,omitempty"`
 }
 
 type TranscriptionSettingsResponse struct {
@@ -7831,6 +7938,14 @@ type TranscriptionSettingsResponse struct {
 	Language string `json:"language"`
 
 	Mode string `json:"mode"`
+
+	Translation *TranslationSettings `json:"translation,omitempty"`
+}
+
+type TranslationSettings struct {
+	Enabled bool `json:"enabled"`
+
+	Languages []string `json:"languages"`
 }
 
 type TruncateChannelResponse struct {
@@ -8717,6 +8832,8 @@ type UserSessionStats struct {
 
 	Subsessions []Subsession `json:"subsessions,omitempty"`
 
+	Fps *FPSStats `json:"fps,omitempty"`
+
 	Geolocation *GeolocationResult `json:"geolocation,omitempty"`
 
 	Jitter *TimeStats `json:"jitter,omitempty"`
@@ -8825,6 +8942,8 @@ func (*UserUpdatedEvent) GetEventType() string {
 
 type VelocityFilterConfig struct {
 	CascadingActions bool `json:"cascading_actions"`
+
+	CidsPerUser int `json:"cids_per_user"`
 
 	Enabled bool `json:"enabled"`
 

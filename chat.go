@@ -433,15 +433,6 @@ func (c *ChatClient) ExportChannels(ctx context.Context, request *ExportChannels
 	return res, err
 }
 
-func (c *ChatClient) GetExportChannelsStatus(ctx context.Context, id string, request *GetExportChannelsStatusRequest) (*StreamResponse[GetExportChannelsStatusResponse], error) {
-	var result GetExportChannelsStatusResponse
-	pathParams := map[string]string{
-		"id": id,
-	}
-	res, err := MakeRequest[any, GetExportChannelsStatusResponse](c.client, ctx, "GET", "/api/v2/chat/export_channels/{id}", nil, nil, &result, pathParams)
-	return res, err
-}
-
 // Find and filter channel members
 func (c *ChatClient) QueryMembers(ctx context.Context, request *QueryMembersRequest) (*StreamResponse[MembersResponse], error) {
 	var result MembersResponse
