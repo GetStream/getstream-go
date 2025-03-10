@@ -1,18 +1,23 @@
 # Official Go SDK for [Stream](https://getstream.io/)
 
+
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/19dd203e-c84a-4015-9c90-1a54212fc2e2">
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/fb6b6686-ce5d-4c8f-87b7-9bb495b6ce66">
+    <img src="https://github.com/user-attachments/assets/19dd203e-c84a-4015-9c90-1a54212fc2e2" width="360" alt="Stream logo">
+  </picture>
+  <h3>Official Go API client for Stream Chat and Video, a service for building chat and video applications.</h3>
+  
 [![Build Status](https://img.shields.io/github/actions/workflow/status/GetStream/getstream-go/ci.yml?branch=main&style=flat-square)](https://github.com/GetStream/getstream-go/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/GetStream/getstream-go?style=flat-square)](https://goreportcard.com/report/github.com/GetStream/getstream-go)
 [![Godoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](https://godoc.org/github.com/GetStream/getstream-go)
 [![GitHub release](https://img.shields.io/github/release/GetStream/getstream-go.svg?style=flat-square)](https://github.com/GetStream/getstream-go/releases/latest)
 [![Go Version](https://img.shields.io/badge/go%20version-%3E%3D1.19-61CFDD.svg?style=flat-square)](https://golang.org/doc/devel/release.html)
 [![codecov](https://img.shields.io/codecov/c/github/GetStream/getstream-go.svg?style=flat-square)](https://codecov.io/gh/GetStream/getstream-go)
+</div>
 
 <p align="center">
-    <img src="./assets/logo.svg" width="50%" height="50%">
-</p>
-<p align="center">
-    Official Go API client for Stream Chat and Video, a service for building chat and video applications.
-    <br />
     <a href="https://getstream.io/chat/docs/"><strong>Explore the docs »</strong></a>
     <br />
     <br />
@@ -52,6 +57,17 @@ To regenerate the Go source from OpenAPI, just run the `./generate.sh` script fr
 
 > **Note**
 > Code generation currently relies on tooling that is not publicly available. Only Stream developers can regenerate SDK source code from the OpenAPI spec.
+
+## 🔍 Why Choose Stream?
+
+[Stream](https://getstream.io) powers chat and activity feeds for over 1 billion end users. Our robust, scalable platform helps you build:
+
+- **In-app Messaging** - Group chats, direct messaging, channels
+- **Team Collaboration** - Slack-like workspaces and threaded conversations
+- **Live Streaming** - Interactive live streams with chat
+- **Virtual Events** - Engaging event platforms with rich chat features
+- **Gaming Communities** - Community building with real-time chat
+- **Support Channels** - Customer support with integrated chat
 
 ## 🧑‍💻 We Are Hiring!
 
