@@ -410,39 +410,44 @@ func TestRingIndividualMembers(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, response)
+	users := response.Data.Users
+	myselfID := users[myself].ID
+	myFriendID := users[myFriend].ID
+	myOtherFriendID := users[myOtherFriend].ID
 
-	// Create call with two members: myself and myFriend
+	// Create call with only two members to match the Python test flow
 	members := []getstream.MemberRequest{
-		{UserID: myself},
-		{UserID: myFriend},
+		{UserID: myselfID},
+		{UserID: myFriendID},
 	}
 
 	callRequest := getstream.GetOrCreateCallRequest{
 		Data: &getstream.CallRequest{
-			CreatedByID: getstream.PtrTo(myself),
+			CreatedByID: getstream.PtrTo(myselfID),
 			Members:     members,
 		},
 	}
 
-	_, err = call.GetOrCreate(ctx, &callRequest)
+	callResponse, err := call.GetOrCreate(ctx, &callRequest)
 	require.NoError(t, err)
+	require.NotNil(t, callResponse)
 
 	// Ring existing member (myFriend)
-	ringResponse, err := call.Ring(ctx, []string{myFriend})
+	ringResponse, err := call.Ring(ctx, []string{myFriendID})
 	require.NoError(t, err)
 	require.NotNil(t, ringResponse)
 
-	// Add new member (myOtherFriend) to the call
+	// Add new member (myOtherFriend) to the call, matching the Python flow
 	updateResponse, err := call.UpdateCallMembers(ctx, &getstream.UpdateCallMembersRequest{
 		UpdateMembers: []getstream.MemberRequest{
-			{UserID: myOtherFriend},
+			{UserID: myOtherFriendID},
 		},
 	})
 	require.NoError(t, err)
 	require.NotNil(t, updateResponse)
 
 	// Ring the newly added member
-	ringResponse, err = call.Ring(ctx, []string{myOtherFriend})
+	ringResponse, err = call.Ring(ctx, []string{myOtherFriendID})
 	require.NoError(t, err)
 	require.NotNil(t, ringResponse)
 }

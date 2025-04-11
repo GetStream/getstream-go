@@ -103,6 +103,103 @@ func TestExtractQueryParams(t *testing.T) {
 	})
 }
 
+func TestEncodeValueToQueryParam(t *testing.T) {
+	type testStruct struct {
+		Field1 string
+		Field2 int
+	}
+
+	tests := []struct {
+		name  string
+		value interface{}
+		want  string
+	}{
+		{
+			name:  "String slice",
+			value: []string{"a", "b", "c"},
+			want:  "a,b,c",
+		},
+		{
+			name:  "Integer slice",
+			value: []int{1, 2, 3},
+			want:  "1,2,3",
+		},
+		{
+			name:  "Empty slice",
+			value: []string{},
+			want:  "[]",
+		},
+		{
+			name:  "Mixed type slice",
+			value: []interface{}{"a", 1, true},
+			want:  `["a",1,true]`,
+		},
+		{
+			name: "Struct slice",
+			value: []testStruct{
+				{Field1: "value1", Field2: 1},
+				{Field1: "value2", Field2: 2},
+			},
+			want: `[{"Field1":"value1","Field2":1},{"Field1":"value2","Field2":2}]`,
+		},
+		{
+			name:  "Slice with special characters",
+			value: []string{"a&b", "c/d", "e=f"},
+			want:  "a&b,c/d,e=f",
+		},
+		{
+			name:  "Single string",
+			value: "test",
+			want:  "test",
+		},
+		{
+			name:  "Single integer",
+			value: 123,
+			want:  "123",
+		},
+		{
+			name:  "Boolean",
+			value: true,
+			want:  "true",
+		},
+		{
+			name:  "Float",
+			value: 123.45,
+			want:  "123.45",
+		},
+		{
+			name: "Map",
+			value: map[string]interface{}{
+				"key1": "value1",
+				"key2": 2,
+			},
+			want: `{"key1":"value1","key2":2}`,
+		},
+		{
+			name: "Struct",
+			value: testStruct{
+				Field1: "value",
+				Field2: 123,
+			},
+			want: `{"Field1":"value","Field2":123}`,
+		},
+		{
+			name:  "Pointer to string",
+			value: PtrTo("test"),
+			want:  "test",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := EncodeValueToQueryParam(tt.value)
+			if got != tt.want {
+				t.Errorf("EncodeValueToQueryParam() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestRequestURL(t *testing.T) {
 	originalBaseURL := "https://api.example.com"
 
