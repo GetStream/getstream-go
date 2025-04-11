@@ -249,7 +249,33 @@ func EncodeValueToQueryParam(value any) string {
 		return strconv.FormatFloat(val.Float(), 'f', -1, 64)
 	case reflect.Bool:
 		return strconv.FormatBool(val.Bool())
-	case reflect.Map, reflect.Struct, reflect.Slice:
+	case reflect.Slice:
+		// Special handling for slices of primitive types - use comma-separated format
+		if val.Len() == 0 {
+			return "[]"
+		}
+
+		// Check if it's a slice of simple types (string, numbers, bool)
+		firstElem := val.Index(0)
+		switch firstElem.Kind() {
+		case reflect.String, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+			reflect.Float32, reflect.Float64, reflect.Bool:
+			// For simple types, create a comma-separated list
+			var values []string
+			for i := 0; i < val.Len(); i++ {
+				values = append(values, EncodeValueToQueryParam(val.Index(i).Interface()))
+			}
+			return strings.Join(values, ",")
+		default:
+			// For complex types, use JSON
+			b, err := json.Marshal(value)
+			if err != nil {
+				panic(err)
+			}
+			return string(b)
+		}
+	case reflect.Map, reflect.Struct:
 		b, err := json.Marshal(value)
 		if err != nil {
 			panic(err)

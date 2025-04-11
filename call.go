@@ -157,6 +157,15 @@ func (c *Call) DeleteTranscription(ctx context.Context, session string, filename
 	return c.client.DeleteTranscription(ctx, c.callType, c.callID, session, filename, request)
 }
 
+func (c *Call) Ring(ctx context.Context, memberIDs []string) (*StreamResponse[GetCallResponse], error) {
+	ring := true
+	request := &GetCallRequest{
+		Ring:      &ring,
+		MemberIds: memberIDs,
+	}
+	return c.Get(ctx, request)
+}
+
 func (c *VideoClient) Call(callType, callID string) *Call {
 	return NewCall(callType, callID, c)
 }

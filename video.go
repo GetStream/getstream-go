@@ -114,6 +114,8 @@ func (c *VideoClient) SendCallEvent(ctx context.Context, _type string, id string
 	return res, err
 }
 
+// Sends events:
+// - call.user_feedback_submitted
 func (c *VideoClient) CollectUserFeedback(ctx context.Context, _type string, id string, request *CollectUserFeedbackRequest) (*StreamResponse[CollectUserFeedbackResponse], error) {
 	var result CollectUserFeedbackResponse
 	pathParams := map[string]string{

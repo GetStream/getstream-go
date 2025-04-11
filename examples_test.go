@@ -378,3 +378,76 @@ func TestCall_AutoFrameRecording(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "auto-on", resp.Data.Settings.FrameRecording.Mode)
 }
+
+func TestRingIndividualMembers(t *testing.T) {
+	client := initClient(t)
+
+	// Create a new call with a random ID
+	callID := uuid.NewString()
+	call := client.Video().Call("default", callID)
+
+	// Create users for testing
+	myself := uuid.NewString()
+	myFriend := uuid.NewString()
+	myOtherFriend := uuid.NewString()
+
+	// Pre-create users
+	response, err := client.UpdateUsers(ctx, &getstream.UpdateUsersRequest{
+		Users: map[string]getstream.UserRequest{
+			myself: {
+				ID:   myself,
+				Name: getstream.PtrTo("myself"),
+			},
+			myFriend: {
+				ID:   myFriend,
+				Name: getstream.PtrTo("my-friend"),
+			},
+			myOtherFriend: {
+				ID:   myOtherFriend,
+				Name: getstream.PtrTo("my-other-friend"),
+			},
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, response)
+	users := response.Data.Users
+	myselfID := users[myself].ID
+	myFriendID := users[myFriend].ID
+	myOtherFriendID := users[myOtherFriend].ID
+
+	// Create call with only two members to match the Python test flow
+	members := []getstream.MemberRequest{
+		{UserID: myselfID},
+		{UserID: myFriendID},
+	}
+
+	callRequest := getstream.GetOrCreateCallRequest{
+		Data: &getstream.CallRequest{
+			CreatedByID: getstream.PtrTo(myselfID),
+			Members:     members,
+		},
+	}
+
+	callResponse, err := call.GetOrCreate(ctx, &callRequest)
+	require.NoError(t, err)
+	require.NotNil(t, callResponse)
+
+	// Ring existing member (myFriend)
+	ringResponse, err := call.Ring(ctx, []string{myFriendID})
+	require.NoError(t, err)
+	require.NotNil(t, ringResponse)
+
+	// Add new member (myOtherFriend) to the call, matching the Python flow
+	updateResponse, err := call.UpdateCallMembers(ctx, &getstream.UpdateCallMembersRequest{
+		UpdateMembers: []getstream.MemberRequest{
+			{UserID: myOtherFriendID},
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, updateResponse)
+
+	// Ring the newly added member
+	ringResponse, err = call.Ring(ctx, []string{myOtherFriendID})
+	require.NoError(t, err)
+	require.NotNil(t, ringResponse)
+}

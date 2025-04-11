@@ -16,6 +16,7 @@ type UpdateAppRequest struct {
 	EnforceUniqueUsernames     *string                       `json:"enforce_unique_usernames"`
 	FeedsModerationEnabled     *bool                         `json:"feeds_moderation_enabled"`
 	FeedsV2Region              *string                       `json:"feeds_v2_region"`
+	GuestUserCreationDisabled  *bool                         `json:"guest_user_creation_disabled"`
 	ImageModerationEnabled     *bool                         `json:"image_moderation_enabled"`
 	MigratePermissionsToV2     *bool                         `json:"migrate_permissions_to_v2"`
 	ModerationEnabled          *bool                         `json:"moderation_enabled"`
@@ -74,14 +75,18 @@ type UpdateBlockListRequest struct {
 }
 
 type QueryCampaignsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
+	Limit     *int               `json:"limit"`
+	Next      *string            `json:"next"`
+	Prev      *string            `json:"prev"`
+	UserLimit *int               `json:"user_limit"`
+	Sort      []SortParamRequest `json:"sort"`
+	Filter    map[string]any     `json:"filter"`
 }
 
 type GetCampaignRequest struct {
+	Prev  *string `json:"-" query:"prev"`
+	Next  *string `json:"-" query:"next"`
+	Limit *int    `json:"-" query:"limit"`
 }
 
 type StartCampaignRequest struct {
@@ -152,6 +157,16 @@ type UpdateChannelRequest struct {
 	Data             *ChannelInput   `json:"data"`
 	Message          *MessageRequest `json:"message"`
 	User             *UserRequest    `json:"user"`
+}
+
+type DeleteDraftRequest struct {
+	ParentID *string `json:"-" query:"parent_id"`
+	UserID   *string `json:"-" query:"user_id"`
+}
+
+type GetDraftRequest struct {
+	ParentID *string `json:"-" query:"parent_id"`
+	UserID   *string `json:"-" query:"user_id"`
 }
 
 type SendEventRequest struct {
@@ -333,6 +348,16 @@ type UpdateCommandRequest struct {
 	Set         *string `json:"set"`
 }
 
+type QueryDraftsRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	UserID *string            `json:"user_id"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+	User   *UserRequest       `json:"user"`
+}
+
 type ExportChannelsRequest struct {
 	Channels                   []ChannelExport `json:"channels"`
 	ClearDeletedMessageText    *bool           `json:"clear_deleted_message_text"`
@@ -340,9 +365,6 @@ type ExportChannelsRequest struct {
 	IncludeSoftDeletedChannels *bool           `json:"include_soft_deleted_channels"`
 	IncludeTruncatedMessages   *bool           `json:"include_truncated_messages"`
 	Version                    *string         `json:"version"`
-}
-
-type GetExportChannelsStatusRequest struct {
 }
 
 type QueryMembersRequest struct {
@@ -597,14 +619,16 @@ type QuerySegmentTargetsRequest struct {
 }
 
 type QueryThreadsRequest struct {
-	Limit            *int         `json:"limit"`
-	MemberLimit      *int         `json:"member_limit"`
-	Next             *string      `json:"next"`
-	ParticipantLimit *int         `json:"participant_limit"`
-	Prev             *string      `json:"prev"`
-	ReplyLimit       *int         `json:"reply_limit"`
-	UserID           *string      `json:"user_id"`
-	User             *UserRequest `json:"user"`
+	Limit            *int               `json:"limit"`
+	MemberLimit      *int               `json:"member_limit"`
+	Next             *string            `json:"next"`
+	ParticipantLimit *int               `json:"participant_limit"`
+	Prev             *string            `json:"prev"`
+	ReplyLimit       *int               `json:"reply_limit"`
+	UserID           *string            `json:"user_id"`
+	Sort             []SortParamRequest `json:"sort"`
+	Filter           map[string]any     `json:"filter"`
+	User             *UserRequest       `json:"user"`
 }
 
 type GetThreadRequest struct {
@@ -724,11 +748,6 @@ type CreateImportRequest struct {
 type GetImportRequest struct {
 }
 
-type GetModerationAnalyticsRequest struct {
-	EndDate   *string `json:"end_date"`
-	StartDate *string `json:"start_date"`
-}
-
 type BanRequest struct {
 	TargetUserID string       `json:"target_user_id"`
 	BannedByID   *string      `json:"banned_by_id"`
@@ -832,17 +851,11 @@ type QueryModerationLogsRequest struct {
 	User   *UserRequest       `json:"user"`
 }
 
-type GetModeratorStatsRequest struct {
-}
-
 type MuteRequest struct {
 	TargetIds []string     `json:"target_ids"`
 	Timeout   *int         `json:"timeout"`
 	UserID    *string      `json:"user_id"`
 	User      *UserRequest `json:"user"`
-}
-
-type GetQueueStatsRequest struct {
 }
 
 type QueryReviewQueueRequest struct {
@@ -889,23 +902,6 @@ type UnmuteRequest struct {
 	TargetIds []string     `json:"target_ids"`
 	UserID    *string      `json:"user_id"`
 	User      *UserRequest `json:"user"`
-}
-
-type QueryUsageStatsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	UserID *string            `json:"user_id"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user"`
-}
-
-type GetUserReportRequest struct {
-	UserID                string `json:"-" query:"user_id"`
-	CreateUserIfNotExists *bool  `json:"-" query:"create_user_if_not_exists"`
-	IncludeUserMutes      *bool  `json:"-" query:"include_user_mutes"`
-	IncludeUserBlocks     *bool  `json:"-" query:"include_user_blocks"`
 }
 
 type GetOGRequest struct {
@@ -1047,10 +1043,11 @@ type QueryCallStatsRequest struct {
 }
 
 type GetCallRequest struct {
-	MembersLimit *int  `json:"-" query:"members_limit"`
-	Ring         *bool `json:"-" query:"ring"`
-	Notify       *bool `json:"-" query:"notify"`
-	Video        *bool `json:"-" query:"video"`
+	MembersLimit *int     `json:"-" query:"members_limit"`
+	Ring         *bool    `json:"-" query:"ring"`
+	Notify       *bool    `json:"-" query:"notify"`
+	Video        *bool    `json:"-" query:"video"`
+	MemberIds    []string `json:"-" query:"member_ids"`
 }
 
 type UpdateCallRequest struct {
@@ -1094,7 +1091,6 @@ type GoLiveRequest struct {
 	RecordingStorageName     *string `json:"recording_storage_name"`
 	StartClosedCaption       *bool   `json:"start_closed_caption"`
 	StartHLS                 *bool   `json:"start_hls"`
-	StartRTMPBroadcasts      *bool   `json:"start_rtmp_broadcasts"`
 	StartRecording           *bool   `json:"start_recording"`
 	StartTranscription       *bool   `json:"start_transcription"`
 	TranscriptionStorageName *string `json:"transcription_storage_name"`
