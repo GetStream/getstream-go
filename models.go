@@ -1246,6 +1246,8 @@ type CallReportResponse struct {
 
 // CallRequest is the payload for creating a call.
 type CallRequest struct {
+	ChannelCid *string `json:"channel_cid,omitempty"`
+
 	CreatedByID *string `json:"created_by_id,omitempty"`
 
 	StartsAt *Timestamp `json:"starts_at,omitempty"`
@@ -1302,6 +1304,8 @@ type CallResponse struct {
 	Ingress CallIngressResponse `json:"ingress"`
 
 	Settings CallSettingsResponse `json:"settings"`
+
+	ChannelCid *string `json:"channel_cid,omitempty"`
 
 	// Date/time when the call ended
 	EndedAt *Timestamp `json:"ended_at,omitempty"`
@@ -1600,6 +1604,23 @@ type CallStateResponseFields struct {
 	Call CallResponse `json:"call"`
 }
 
+// This event is sent when the insights report is ready
+type CallStatsReportReadyEvent struct {
+	CallCid string `json:"call_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Call session ID
+	SessionID string `json:"session_id"`
+
+	// The type of event, "call.report_ready" in this case
+	Type string `json:"type"`
+}
+
+func (*CallStatsReportReadyEvent) GetEventType() string {
+	return "call.stats_report_ready"
+}
+
 type CallStatsReportSummaryResponse struct {
 	CallCid string `json:"call_cid"`
 
@@ -1704,6 +1725,8 @@ type CallType struct {
 
 	CreatedAt Timestamp `json:"CreatedAt"`
 
+	EnableLiveInsights bool `json:"EnableLiveInsights"`
+
 	ExternalStorage string `json:"ExternalStorage"`
 
 	Name string `json:"Name"`
@@ -1757,6 +1780,38 @@ type CallUpdatedEvent struct {
 
 func (*CallUpdatedEvent) GetEventType() string {
 	return "call.updated"
+}
+
+// This event is sent when a user submits feedback for a call.
+type CallUserFeedbackSubmittedEvent struct {
+	CallCid string `json:"call_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	// The rating given by the user (1-5)
+	Rating int `json:"rating"`
+
+	// Call session ID
+	SessionID string `json:"session_id"`
+
+	User UserResponse `json:"user"`
+
+	// The type of event, "call.user_feedback" in this case
+	Type string `json:"type"`
+
+	// The reason provided by the user for the rating
+	Reason *string `json:"reason,omitempty"`
+
+	Sdk *string `json:"sdk,omitempty"`
+
+	SdkVersion *string `json:"sdk_version,omitempty"`
+
+	// Custom data provided by the user
+	Custom map[string]any `json:"custom,omitempty"`
+}
+
+func (*CallUserFeedbackSubmittedEvent) GetEventType() string {
+	return "call.user_feedback_submitted"
 }
 
 // This event is sent when a call member is muted
@@ -2684,6 +2739,10 @@ func (*ChannelVisibleEvent) GetEventType() string {
 	return "channel.visible"
 }
 
+type ChatActivityStatsResponse struct {
+	Messages *MessageStatsResponse `json:"Messages,omitempty"`
+}
+
 // Basic response information
 type CheckExternalStorageResponse struct {
 	// Duration of the request in milliseconds
@@ -2864,6 +2923,12 @@ type Count struct {
 	Approximate bool `json:"approximate"`
 
 	Value int `json:"value"`
+}
+
+type CountByMinuteResponse struct {
+	Count int `json:"count"`
+
+	StartTs Timestamp `json:"start_ts"`
 }
 
 // Basic response information
@@ -3975,6 +4040,8 @@ type GetCallReportResponse struct {
 	SessionID string `json:"session_id"`
 
 	Report ReportResponse `json:"report"`
+
+	ChatActivity *ChatActivityStatsResponse `json:"chat_activity,omitempty"`
 }
 
 type GetCallResponse struct {
@@ -4383,6 +4450,12 @@ type GoLiveResponse struct {
 
 type GoogleVisionConfig struct {
 	Enabled *bool `json:"enabled,omitempty"`
+}
+
+type GroupedStatsResponse struct {
+	Name string `json:"name"`
+
+	Unique int `json:"unique"`
 }
 
 type HLSSettings struct {
@@ -5263,6 +5336,10 @@ type MessageResponse struct {
 	ReactionGroups map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
 }
 
+type MessageStatsResponse struct {
+	CountOverTime []CountByMinuteResponse `json:"count_over_time,omitempty"`
+}
+
 type MessageUnblockedEvent struct {
 	Cid string `json:"cid"`
 
@@ -5882,10 +5959,42 @@ type PaginationParams struct {
 	Offset *int `json:"offset,omitempty"`
 }
 
+type ParticipantCountByMinuteResponse struct {
+	First int `json:"first"`
+
+	Last int `json:"last"`
+
+	Max int `json:"max"`
+
+	Min int `json:"min"`
+
+	StartTs Timestamp `json:"start_ts"`
+}
+
+type ParticipantCountOverTimeResponse struct {
+	ByMinute []ParticipantCountByMinuteResponse `json:"by_minute,omitempty"`
+}
+
 type ParticipantReportResponse struct {
 	Sum int `json:"sum"`
 
 	Unique int `json:"unique"`
+
+	MaxConcurrent *int `json:"max_concurrent,omitempty"`
+
+	ByBrowser []GroupedStatsResponse `json:"by_browser,omitempty"`
+
+	ByCountry []GroupedStatsResponse `json:"by_country,omitempty"`
+
+	ByDevice []GroupedStatsResponse `json:"by_device,omitempty"`
+
+	ByOperatingSystem []GroupedStatsResponse `json:"by_operating_system,omitempty"`
+
+	CountOverTime *ParticipantCountOverTimeResponse `json:"count_over_time,omitempty"`
+
+	Publishers *PublisherStatsResponse `json:"publishers,omitempty"`
+
+	Subscribers *SubscriberStatsResponse `json:"subscribers,omitempty"`
 }
 
 type PendingMessageResponse struct {
@@ -6232,6 +6341,14 @@ type PublisherAggregateStats struct {
 	ByTrackType map[string]Count `json:"by_track_type,omitempty"`
 
 	Total *Count `json:"total,omitempty"`
+}
+
+type PublisherStatsResponse struct {
+	Total int `json:"total"`
+
+	Unique int `json:"unique"`
+
+	ByTrack []TrackStatsResponse `json:"by_track,omitempty"`
 }
 
 type PushConfig struct {
@@ -7606,6 +7723,14 @@ type SubmitActionResponse struct {
 	Item *ReviewQueueItem `json:"item,omitempty"`
 }
 
+type SubscriberStatsResponse struct {
+	Total int `json:"total"`
+
+	TotalSubscribedDurationSeconds int `json:"total_subscribed_duration_seconds"`
+
+	Unique int `json:"unique"`
+}
+
 type Subsession struct {
 	EndedAt int `json:"ended_at"`
 
@@ -7806,6 +7931,12 @@ type TimeStats struct {
 	AverageSeconds float64 `json:"average_seconds"`
 
 	MaxSeconds float64 `json:"max_seconds"`
+}
+
+type TrackStatsResponse struct {
+	DurationSeconds int `json:"duration_seconds"`
+
+	TrackType string `json:"track_type"`
 }
 
 type TranscriptionSettings struct {
