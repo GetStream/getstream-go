@@ -878,7 +878,8 @@ func TestEnableCallRecordingAndBackstageMode(t *testing.T) {
 		response, err := call.Update(ctx, &UpdateCallRequest{
 			SettingsOverride: &CallSettingsRequest{
 				Recording: &RecordSettingsRequest{
-					Mode: "available",
+					Mode:      "available",
+					AudioOnly: PtrTo(true),
 				},
 			},
 		})
