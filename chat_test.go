@@ -86,6 +86,20 @@ func TestChatUpdateChannel(t *testing.T) {
 	_, err = client.Chat().UpdateChannel(context.Background(), "", "", &getstream.UpdateChannelRequest{})
 	require.NoError(t, err)
 }
+func TestChatDeleteDraft(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().DeleteDraft(context.Background(), "", "", &getstream.DeleteDraftRequest{})
+	require.NoError(t, err)
+}
+func TestChatGetDraft(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().GetDraft(context.Background(), "", "", &getstream.GetDraftRequest{})
+	require.NoError(t, err)
+}
 func TestChatSendEvent(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -132,7 +146,7 @@ func TestChatUpdateMemberPartial(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Chat().UpdateMemberPartial(context.Background(), "", "", "", &getstream.UpdateMemberPartialRequest{})
+	_, err = client.Chat().UpdateMemberPartial(context.Background(), "", "", &getstream.UpdateMemberPartialRequest{})
 	require.NoError(t, err)
 }
 func TestChatSendMessage(t *testing.T) {
@@ -254,18 +268,18 @@ func TestChatUpdateCommand(t *testing.T) {
 	_, err = client.Chat().UpdateCommand(context.Background(), "", &getstream.UpdateCommandRequest{})
 	require.NoError(t, err)
 }
+func TestChatQueryDrafts(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().QueryDrafts(context.Background(), &getstream.QueryDraftsRequest{})
+	require.NoError(t, err)
+}
 func TestChatExportChannels(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
 	_, err = client.Chat().ExportChannels(context.Background(), &getstream.ExportChannelsRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetExportChannelsStatus(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetExportChannelsStatus(context.Background(), "", &getstream.GetExportChannelsStatusRequest{})
 	require.NoError(t, err)
 }
 func TestChatQueryMembers(t *testing.T) {

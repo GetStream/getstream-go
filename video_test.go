@@ -107,6 +107,13 @@ func TestVideoMuteUsers(t *testing.T) {
 	_, err = client.Video().MuteUsers(context.Background(), "", "", &getstream.MuteUsersRequest{})
 	require.NoError(t, err)
 }
+func TestVideoQueryCallParticipants(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().QueryCallParticipants(context.Background(), "", "", &getstream.QueryCallParticipantsRequest{})
+	require.NoError(t, err)
+}
 func TestVideoVideoPin(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -182,13 +189,6 @@ func TestVideoStartTranscription(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Video().StartTranscription(context.Background(), "", "", &getstream.StartTranscriptionRequest{})
-	require.NoError(t, err)
-}
-func TestVideoGetCallStats(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Video().GetCallStats(context.Background(), "", "", "", &getstream.GetCallStatsRequest{})
 	require.NoError(t, err)
 }
 func TestVideoStopHLSBroadcasting(t *testing.T) {

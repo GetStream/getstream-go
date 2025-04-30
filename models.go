@@ -4,6 +4,8 @@ package getstream
 type AIImageConfig struct {
 	Enabled bool `json:"enabled"`
 
+	OcrRules []OCRRule `json:"ocr_rules"`
+
 	Rules []AWSRekognitionRule `json:"rules"`
 
 	Async *bool `json:"async,omitempty"`
@@ -150,18 +152,25 @@ type ActionLog struct {
 }
 
 type ActionLogResponse struct {
+	// Timestamp when the action was taken
 	CreatedAt Timestamp `json:"created_at"`
 
+	// Unique identifier of the action log
 	ID string `json:"id"`
 
+	// Reason for the moderation action
 	Reason string `json:"reason"`
 
+	// ID of the user who was the target of the action
 	TargetUserID string `json:"target_user_id"`
 
+	// ID of the user who performed the action
 	UserID string `json:"user_id"`
 
+	// Type of moderation action
 	Type string `json:"type"`
 
+	// Additional metadata about the action
 	Custom map[string]any `json:"custom"`
 
 	ReviewQueueItem *ReviewQueueItem `json:"review_queue_item,omitempty"`
@@ -169,12 +178,6 @@ type ActionLogResponse struct {
 	TargetUser *UserResponse `json:"target_user,omitempty"`
 
 	User *UserResponse `json:"user,omitempty"`
-}
-
-type AggregatedStats struct {
-	PublisherAggregateStats *PublisherAggregateStats `json:"publisher_aggregate_stats,omitempty"`
-
-	Turn *TURNAggregatedStats `json:"turn,omitempty"`
 }
 
 type AnyEvent struct {
@@ -203,6 +206,8 @@ type AppResponseFields struct {
 	DisablePermissionsChecks bool `json:"disable_permissions_checks"`
 
 	EnforceUniqueUsernames string `json:"enforce_unique_usernames"`
+
+	GuestUserCreationDisabled bool `json:"guest_user_creation_disabled"`
 
 	ImageModerationEnabled bool `json:"image_moderation_enabled"`
 
@@ -269,6 +274,94 @@ type AppResponseFields struct {
 	ImageModerationLabels []string `json:"image_moderation_labels,omitempty"`
 
 	DatadogInfo *DataDogInfo `json:"datadog_info,omitempty"`
+}
+
+type AsyncExportChannelsEvent struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	FinishedAt Timestamp `json:"finished_at"`
+
+	StartedAt Timestamp `json:"started_at"`
+
+	TaskID string `json:"task_id"`
+
+	Url string `json:"url"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*AsyncExportChannelsEvent) GetEventType() string {
+	return "export.channels.success"
+}
+
+type AsyncExportErrorEvent struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	Error string `json:"error"`
+
+	FinishedAt Timestamp `json:"finished_at"`
+
+	StartedAt Timestamp `json:"started_at"`
+
+	TaskID string `json:"task_id"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*AsyncExportErrorEvent) GetEventType() string {
+	return "export.channels.error"
+}
+
+type AsyncExportModerationLogsEvent struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	FinishedAt Timestamp `json:"finished_at"`
+
+	StartedAt Timestamp `json:"started_at"`
+
+	TaskID string `json:"task_id"`
+
+	Url string `json:"url"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*AsyncExportModerationLogsEvent) GetEventType() string {
+	return "export.moderation_logs.success"
+}
+
+type AsyncExportUsersEvent struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	FinishedAt Timestamp `json:"finished_at"`
+
+	StartedAt Timestamp `json:"started_at"`
+
+	TaskID string `json:"task_id"`
+
+	Url string `json:"url"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*AsyncExportUsersEvent) GetEventType() string {
+	return "export.users.success"
 }
 
 type AsyncModerationCallbackConfig struct {
@@ -802,28 +895,6 @@ func (*CallEndedEvent) GetEventType() string {
 	return "call.ended"
 }
 
-type CallEvent struct {
-	Description string `json:"description"`
-
-	EndTimestamp int `json:"end_timestamp"`
-
-	Internal bool `json:"internal"`
-
-	Kind string `json:"kind"`
-
-	Severity int `json:"severity"`
-
-	Timestamp int `json:"timestamp"`
-
-	Type string `json:"type"`
-
-	Category *string `json:"category,omitempty"`
-
-	Component *string `json:"component,omitempty"`
-
-	IssueTags []string `json:"issue_tags,omitempty"`
-}
-
 // This event is sent when frame recording has failed
 type CallFrameRecordingFailedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -1145,6 +1216,8 @@ type CallRecording struct {
 
 	Filename string `json:"filename"`
 
+	SessionID string `json:"session_id"`
+
 	StartTime Timestamp `json:"start_time"`
 
 	Url string `json:"url"`
@@ -1229,6 +1302,7 @@ type CallRejectedEvent struct {
 	// The type of event: "call.rejected" in this case
 	Type string `json:"type"`
 
+	// Provides information about why the call was rejected. You can provide any value, but the Stream API and SDKs use these default values: rejected, cancel, timeout and busy
 	Reason *string `json:"reason,omitempty"`
 }
 
@@ -1246,6 +1320,8 @@ type CallReportResponse struct {
 
 // CallRequest is the payload for creating a call.
 type CallRequest struct {
+	ChannelCid *string `json:"channel_cid,omitempty"`
+
 	CreatedByID *string `json:"created_by_id,omitempty"`
 
 	StartsAt *Timestamp `json:"starts_at,omitempty"`
@@ -1302,6 +1378,8 @@ type CallResponse struct {
 	Ingress CallIngressResponse `json:"ingress"`
 
 	Settings CallSettingsResponse `json:"settings"`
+
+	ChannelCid *string `json:"channel_cid,omitempty"`
 
 	// Date/time when the call ended
 	EndedAt *Timestamp `json:"ended_at,omitempty"`
@@ -1600,6 +1678,23 @@ type CallStateResponseFields struct {
 	Call CallResponse `json:"call"`
 }
 
+// This event is sent when the insights report is ready
+type CallStatsReportReadyEvent struct {
+	CallCid string `json:"call_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Call session ID
+	SessionID string `json:"session_id"`
+
+	// The type of event, "call.report_ready" in this case
+	Type string `json:"type"`
+}
+
+func (*CallStatsReportReadyEvent) GetEventType() string {
+	return "call.stats_report_ready"
+}
+
 type CallStatsReportSummaryResponse struct {
 	CallCid string `json:"call_cid"`
 
@@ -1616,10 +1711,6 @@ type CallStatsReportSummaryResponse struct {
 	MinUserRating *int `json:"min_user_rating,omitempty"`
 
 	QualityScore *int `json:"quality_score,omitempty"`
-}
-
-type CallTimeline struct {
-	Events []CallEvent `json:"events"`
 }
 
 // CallTranscription represents a transcription of a call.
@@ -1704,6 +1795,8 @@ type CallType struct {
 
 	CreatedAt Timestamp `json:"CreatedAt"`
 
+	EnableLiveInsights bool `json:"EnableLiveInsights"`
+
 	ExternalStorage string `json:"ExternalStorage"`
 
 	Name string `json:"Name"`
@@ -1757,6 +1850,38 @@ type CallUpdatedEvent struct {
 
 func (*CallUpdatedEvent) GetEventType() string {
 	return "call.updated"
+}
+
+// This event is sent when a user submits feedback for a call.
+type CallUserFeedbackSubmittedEvent struct {
+	CallCid string `json:"call_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	// The rating given by the user (1-5)
+	Rating int `json:"rating"`
+
+	// Call session ID
+	SessionID string `json:"session_id"`
+
+	User UserResponse `json:"user"`
+
+	// The type of event, "call.user_feedback" in this case
+	Type string `json:"type"`
+
+	// The reason provided by the user for the rating
+	Reason *string `json:"reason,omitempty"`
+
+	Sdk *string `json:"sdk,omitempty"`
+
+	SdkVersion *string `json:"sdk_version,omitempty"`
+
+	// Custom data provided by the user
+	Custom map[string]any `json:"custom,omitempty"`
+}
+
+func (*CallUserFeedbackSubmittedEvent) GetEventType() string {
+	return "call.user_feedback_submitted"
 }
 
 // This event is sent when a call member is muted
@@ -1838,6 +1963,8 @@ type CampaignResponse struct {
 
 	SenderMode string `json:"sender_mode"`
 
+	ShowChannels bool `json:"show_channels"`
+
 	SkipPush bool `json:"skip_push"`
 
 	SkipWebhook bool `json:"skip_webhook"`
@@ -1893,6 +2020,10 @@ type CampaignStatsResponse struct {
 	StatsMessagesSent int `json:"stats_messages_sent"`
 
 	StatsStartedAt Timestamp `json:"stats_started_at"`
+
+	StatsUsersRead int `json:"stats_users_read"`
+
+	StatsUsersSent int `json:"stats_users_sent"`
 }
 
 type Channel struct {
@@ -1919,6 +2050,8 @@ type Channel struct {
 	Cooldown *int `json:"cooldown,omitempty"`
 
 	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
+
+	LastCampaigns *string `json:"last_campaigns,omitempty"`
 
 	LastMessageAt *Timestamp `json:"last_message_at,omitempty"`
 
@@ -2338,40 +2471,41 @@ func (*ChannelMutedEvent) GetEventType() string {
 type ChannelOwnCapability string
 
 const (
-	BAN_CHANNEL_MEMBERS    ChannelOwnCapability = "ban-channel-members"
-	CAST_POLL_VOTE         ChannelOwnCapability = "cast-poll-vote"
-	CONNECT_EVENTS         ChannelOwnCapability = "connect-events"
-	CREATE_ATTACHMENT      ChannelOwnCapability = "create-attachment"
-	DELETE_ANY_MESSAGE     ChannelOwnCapability = "delete-any-message"
-	DELETE_CHANNEL         ChannelOwnCapability = "delete-channel"
-	DELETE_OWN_MESSAGE     ChannelOwnCapability = "delete-own-message"
-	FLAG_MESSAGE           ChannelOwnCapability = "flag-message"
-	FREEZE_CHANNEL         ChannelOwnCapability = "freeze-channel"
-	JOIN_CHANNEL           ChannelOwnCapability = "join-channel"
-	LEAVE_CHANNEL          ChannelOwnCapability = "leave-channel"
-	MUTE_CHANNEL           ChannelOwnCapability = "mute-channel"
-	PIN_MESSAGE            ChannelOwnCapability = "pin-message"
-	QUERY_POLL_VOTES       ChannelOwnCapability = "query-poll-votes"
-	QUOTE_MESSAGE          ChannelOwnCapability = "quote-message"
-	READ_EVENTS            ChannelOwnCapability = "read-events"
-	SEARCH_MESSAGES        ChannelOwnCapability = "search-messages"
-	SEND_CUSTOM_EVENTS     ChannelOwnCapability = "send-custom-events"
-	SEND_LINKS             ChannelOwnCapability = "send-links"
-	SEND_MESSAGE           ChannelOwnCapability = "send-message"
-	SEND_POLL              ChannelOwnCapability = "send-poll"
-	SEND_REACTION          ChannelOwnCapability = "send-reaction"
-	SEND_REPLY             ChannelOwnCapability = "send-reply"
-	SEND_TYPING_EVENTS     ChannelOwnCapability = "send-typing-events"
-	SET_CHANNEL_COOLDOWN   ChannelOwnCapability = "set-channel-cooldown"
-	SKIP_SLOW_MODE         ChannelOwnCapability = "skip-slow-mode"
-	SLOW_MODE              ChannelOwnCapability = "slow-mode"
-	TYPING_EVENTS          ChannelOwnCapability = "typing-events"
-	UPDATE_ANY_MESSAGE     ChannelOwnCapability = "update-any-message"
-	UPDATE_CHANNEL         ChannelOwnCapability = "update-channel"
-	UPDATE_CHANNEL_MEMBERS ChannelOwnCapability = "update-channel-members"
-	UPDATE_OWN_MESSAGE     ChannelOwnCapability = "update-own-message"
-	UPDATE_THREAD          ChannelOwnCapability = "update-thread"
-	UPLOAD_FILE            ChannelOwnCapability = "upload-file"
+	BAN_CHANNEL_MEMBERS                ChannelOwnCapability = "ban-channel-members"
+	CAST_POLL_VOTE                     ChannelOwnCapability = "cast-poll-vote"
+	CONNECT_EVENTS                     ChannelOwnCapability = "connect-events"
+	CREATE_ATTACHMENT                  ChannelOwnCapability = "create-attachment"
+	DELETE_ANY_MESSAGE                 ChannelOwnCapability = "delete-any-message"
+	DELETE_CHANNEL                     ChannelOwnCapability = "delete-channel"
+	DELETE_OWN_MESSAGE                 ChannelOwnCapability = "delete-own-message"
+	FLAG_MESSAGE                       ChannelOwnCapability = "flag-message"
+	FREEZE_CHANNEL                     ChannelOwnCapability = "freeze-channel"
+	JOIN_CHANNEL                       ChannelOwnCapability = "join-channel"
+	LEAVE_CHANNEL                      ChannelOwnCapability = "leave-channel"
+	MUTE_CHANNEL                       ChannelOwnCapability = "mute-channel"
+	PIN_MESSAGE                        ChannelOwnCapability = "pin-message"
+	QUERY_POLL_VOTES                   ChannelOwnCapability = "query-poll-votes"
+	QUOTE_MESSAGE                      ChannelOwnCapability = "quote-message"
+	READ_EVENTS                        ChannelOwnCapability = "read-events"
+	SEARCH_MESSAGES                    ChannelOwnCapability = "search-messages"
+	SEND_CUSTOM_EVENTS                 ChannelOwnCapability = "send-custom-events"
+	SEND_LINKS                         ChannelOwnCapability = "send-links"
+	SEND_MESSAGE                       ChannelOwnCapability = "send-message"
+	SEND_POLL                          ChannelOwnCapability = "send-poll"
+	SEND_REACTION                      ChannelOwnCapability = "send-reaction"
+	SEND_REPLY                         ChannelOwnCapability = "send-reply"
+	SEND_RESTRICTED_VISIBILITY_MESSAGE ChannelOwnCapability = "send-restricted-visibility-message"
+	SEND_TYPING_EVENTS                 ChannelOwnCapability = "send-typing-events"
+	SET_CHANNEL_COOLDOWN               ChannelOwnCapability = "set-channel-cooldown"
+	SKIP_SLOW_MODE                     ChannelOwnCapability = "skip-slow-mode"
+	SLOW_MODE                          ChannelOwnCapability = "slow-mode"
+	TYPING_EVENTS                      ChannelOwnCapability = "typing-events"
+	UPDATE_ANY_MESSAGE                 ChannelOwnCapability = "update-any-message"
+	UPDATE_CHANNEL                     ChannelOwnCapability = "update-channel"
+	UPDATE_CHANNEL_MEMBERS             ChannelOwnCapability = "update-channel-members"
+	UPDATE_OWN_MESSAGE                 ChannelOwnCapability = "update-own-message"
+	UPDATE_THREAD                      ChannelOwnCapability = "update-thread"
+	UPLOAD_FILE                        ChannelOwnCapability = "upload-file"
 )
 
 func (c ChannelOwnCapability) String() string {
@@ -2486,6 +2620,8 @@ type ChannelStateResponse struct {
 
 	Channel *ChannelResponse `json:"channel,omitempty"`
 
+	Draft *DraftResponse `json:"draft,omitempty"`
+
 	Membership *ChannelMember `json:"membership,omitempty"`
 
 	PushPreferences *ChannelPushPreferences `json:"push_preferences,omitempty"`
@@ -2522,6 +2658,8 @@ type ChannelStateResponseFields struct {
 	Watchers []UserResponse `json:"watchers,omitempty"`
 
 	Channel *ChannelResponse `json:"channel,omitempty"`
+
+	Draft *DraftResponse `json:"draft,omitempty"`
 
 	Membership *ChannelMember `json:"membership,omitempty"`
 
@@ -2684,6 +2822,10 @@ func (*ChannelVisibleEvent) GetEventType() string {
 	return "channel.visible"
 }
 
+type ChatActivityStatsResponse struct {
+	Messages *MessageStatsResponse `json:"Messages,omitempty"`
+}
+
 // Basic response information
 type CheckExternalStorageResponse struct {
 	// Duration of the request in milliseconds
@@ -2711,15 +2853,16 @@ type CheckPushResponse struct {
 	RenderedMessage map[string]string `json:"rendered_message,omitempty"`
 }
 
-// Basic response information
 type CheckResponse struct {
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
+	// Suggested action based on moderation results
 	RecommendedAction string `json:"recommended_action"`
 
+	// Status of the moderation check (completed or pending)
 	Status string `json:"status"`
 
+	// ID of the running moderation task
 	TaskID *string `json:"task_id,omitempty"`
 
 	Item *ReviewQueueItem `json:"item,omitempty"`
@@ -2827,14 +2970,19 @@ type ConfigOverrides struct {
 }
 
 type ConfigResponse struct {
+	// Whether moderation should be performed asynchronously
 	Async bool `json:"async"`
 
+	// When the configuration was created
 	CreatedAt Timestamp `json:"created_at"`
 
+	// Unique identifier for the moderation configuration
 	Key string `json:"key"`
 
+	// Team associated with the configuration
 	Team string `json:"team"`
 
+	// When the configuration was last updated
 	UpdatedAt Timestamp `json:"updated_at"`
 
 	AiImageConfig *AIImageConfig `json:"ai_image_config,omitempty"`
@@ -2854,16 +3002,10 @@ type ConfigResponse struct {
 	VelocityFilterConfig *VelocityFilterConfig `json:"velocity_filter_config,omitempty"`
 }
 
-type Coordinates struct {
-	Latitude float64 `json:"latitude"`
+type CountByMinuteResponse struct {
+	Count int `json:"count"`
 
-	Longitude float64 `json:"longitude"`
-}
-
-type Count struct {
-	Approximate bool `json:"approximate"`
-
-	Value int `json:"value"`
+	StartTs Timestamp `json:"start_ts"`
 }
 
 // Basic response information
@@ -3021,22 +3163,26 @@ type CustomActionRequest struct {
 }
 
 type CustomCheckFlag struct {
+	// Type of check (custom_check_text, custom_check_image, custom_check_video)
 	Type string `json:"type"`
 
+	// Optional explanation for the flag
 	Reason *string `json:"reason,omitempty"`
 
+	// Labels from various moderation sources
 	Labels []string `json:"labels,omitempty"`
 
+	// Additional metadata for the flag
 	Custom map[string]any `json:"custom,omitempty"`
 }
 
-// Basic response information
 type CustomCheckResponse struct {
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
+	// Unique identifier of the custom check
 	ID string `json:"id"`
 
+	// Status of the custom check
 	Status string `json:"status"`
 
 	Item *ReviewQueueItemResponse `json:"item,omitempty"`
@@ -3182,15 +3328,11 @@ type DeleteMessageResponse struct {
 	Message MessageResponse `json:"message"`
 }
 
-// Basic response information
 type DeleteModerationConfigResponse struct {
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
-// Basic response information
 type DeleteModerationTemplateResponse struct {
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
@@ -3291,6 +3433,50 @@ type DeviceResponse struct {
 
 	// When true the token is for Apple VoIP push notifications
 	Voip *bool `json:"voip,omitempty"`
+}
+
+type DraftPayloadResponse struct {
+	ID string `json:"id"`
+
+	Text string `json:"text"`
+
+	Custom map[string]any `json:"custom"`
+
+	Html *string `json:"html,omitempty"`
+
+	Mml *string `json:"mml,omitempty"`
+
+	ParentID *string `json:"parent_id,omitempty"`
+
+	PollID *string `json:"poll_id,omitempty"`
+
+	QuotedMessageID *string `json:"quoted_message_id,omitempty"`
+
+	ShowInChannel *bool `json:"show_in_channel,omitempty"`
+
+	Silent *bool `json:"silent,omitempty"`
+
+	Type *string `json:"type,omitempty"`
+
+	Attachments []Attachment `json:"attachments,omitempty"`
+
+	MentionedUsers []UserResponse `json:"mentioned_users,omitempty"`
+}
+
+type DraftResponse struct {
+	ChannelCid string `json:"channel_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	Message DraftPayloadResponse `json:"message"`
+
+	ParentID *string `json:"parent_id,omitempty"`
+
+	Channel *ChannelResponse `json:"channel,omitempty"`
+
+	ParentMessage *MessageResponse `json:"parent_message,omitempty"`
+
+	QuotedMessage *MessageResponse `json:"quoted_message,omitempty"`
 }
 
 type EdgeResponse struct {
@@ -3416,6 +3602,8 @@ type EntityCreator struct {
 
 	Custom map[string]any `json:"custom"`
 
+	TeamsRole map[string]string `json:"teams_role"`
+
 	BanExpires *Timestamp `json:"ban_expires,omitempty"`
 
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
@@ -3441,72 +3629,61 @@ type EntityCreator struct {
 	PrivacySettings *PrivacySettings `json:"privacy_settings,omitempty"`
 }
 
-// User response object
 type EntityCreatorResponse struct {
+	// Number of minor actions performed on the user
 	BanCount int `json:"ban_count"`
 
-	// Whether a user is banned or not
 	Banned bool `json:"banned"`
 
-	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
 
+	// Number of major actions performed on the user
 	DeletedContentCount int `json:"deleted_content_count"`
 
-	// Unique user identifier
+	// Number of flag actions performed on the user
+	FlaggedCount int `json:"flagged_count"`
+
 	ID string `json:"id"`
 
 	Invisible bool `json:"invisible"`
 
-	// Preferred language of a user
 	Language string `json:"language"`
 
-	// Whether a user online or not
 	Online bool `json:"online"`
 
-	// Determines the set of user permissions
 	Role string `json:"role"`
 
-	// Whether a user is shadow banned
 	ShadowBanned bool `json:"shadow_banned"`
 
-	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
 
 	BlockedUserIds []string `json:"blocked_user_ids"`
 
-	// List of teams user is a part of
 	Teams []string `json:"teams"`
 
-	// Custom data for this object
 	Custom map[string]any `json:"custom"`
 
-	// Date when ban expires
 	BanExpires *Timestamp `json:"ban_expires,omitempty"`
 
-	// Date of deactivation
 	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
 
-	// Date/time of deletion
 	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
 	Image *string `json:"image,omitempty"`
 
-	// Date of last activity
 	LastActive *Timestamp `json:"last_active,omitempty"`
 
-	// Optional name of user
 	Name *string `json:"name,omitempty"`
 
-	// Revocation date for tokens
 	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
 
-	// List of devices user is using
 	Devices []DeviceResponse `json:"devices,omitempty"`
 
 	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
 
 	PushNotifications *PushNotificationSettingsResponse `json:"push_notifications,omitempty"`
+
+	TeamsRole map[string]string `json:"teams_role,omitempty"`
 }
 
 type ErrorResult struct {
@@ -3549,17 +3726,6 @@ type ExportChannelsResponse struct {
 
 	// ID of the task to export channels
 	TaskID string `json:"task_id"`
-}
-
-type ExportChannelsResult struct {
-	// URL of result
-	Url string `json:"url"`
-
-	// S3 path of result
-	Path *string `json:"path,omitempty"`
-
-	// S3 bucket name result
-	S3BucketName *string `json:"s3_bucket_name,omitempty"`
 }
 
 type ExportUserResponse struct {
@@ -3670,96 +3836,40 @@ type Flag struct {
 	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
 
-	CreatedByAutomod bool `json:"created_by_automod"`
+	// Unique identifier of the entity being flagged
+	EntityID string `json:"entity_id"`
+
+	// Type of entity being flagged (e.g., message, user)
+	EntityType string `json:"entity_type"`
 
 	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
 
-	// Date of the approval
-	ApprovedAt *Timestamp `json:"approved_at,omitempty"`
-
-	Reason *string `json:"reason,omitempty"`
-
-	// Date of the rejection
-	RejectedAt *Timestamp `json:"rejected_at,omitempty"`
-
-	// Date of the review
-	ReviewedAt *Timestamp `json:"reviewed_at,omitempty"`
-
-	ReviewedBy *string `json:"reviewed_by,omitempty"`
-
-	// ID of flagged message
-	TargetMessageID *string `json:"target_message_id,omitempty"`
-
-	Custom map[string]any `json:"custom,omitempty"`
-
-	Details *FlagDetails `json:"details,omitempty"`
-
-	TargetMessage *Message `json:"target_message,omitempty"`
-
-	TargetUser *User `json:"target_user,omitempty"`
-
-	User *User `json:"user,omitempty"`
-}
-
-type Flag2 struct {
-	CreatedAt Timestamp `json:"created_at"`
-
-	EntityID string `json:"entity_id"`
-
-	EntityType string `json:"entity_type"`
-
-	UpdatedAt Timestamp `json:"updated_at"`
-
+	// Result of bodyguard, API calls, our own AI etc
 	Result []map[string]any `json:"result"`
 
+	// ID of the user who created the flagged entity
 	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
 
 	ModerationPayloadHash *string `json:"moderation_payload_hash,omitempty"`
 
+	// Optional explanation for why the content is being flagged
 	Reason *string `json:"reason,omitempty"`
 
+	// ID of the review queue item
 	ReviewQueueItemID *string `json:"review_queue_item_id,omitempty"`
 
 	Type *string `json:"type,omitempty"`
 
+	// Labels from bodyguard, API calls, our own AI etc
 	Labels []string `json:"labels,omitempty"`
 
+	// Additional metadata about the flag
 	Custom map[string]any `json:"custom,omitempty"`
 
 	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
 
 	User *User `json:"user,omitempty"`
-}
-
-type Flag2Response struct {
-	CreatedAt Timestamp `json:"created_at"`
-
-	EntityID string `json:"entity_id"`
-
-	EntityType string `json:"entity_type"`
-
-	UpdatedAt Timestamp `json:"updated_at"`
-
-	UserID string `json:"user_id"`
-
-	Result []map[string]any `json:"result"`
-
-	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
-
-	Reason *string `json:"reason,omitempty"`
-
-	ReviewQueueItemID *string `json:"review_queue_item_id,omitempty"`
-
-	Type *string `json:"type,omitempty"`
-
-	Labels []string `json:"labels,omitempty"`
-
-	Custom map[string]any `json:"custom,omitempty"`
-
-	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
-
-	User *UserResponse `json:"user,omitempty"`
 }
 
 type FlagDetails struct {
@@ -3788,11 +3898,10 @@ type FlagMessageDetails struct {
 	UpdatedByID *string `json:"updated_by_id,omitempty"`
 }
 
-// Basic response information
 type FlagResponse struct {
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
+	// Unique identifier of the created moderation item
 	ItemID string `json:"item_id"`
 }
 
@@ -3883,6 +3992,8 @@ type FullUserResponse struct {
 
 	Custom map[string]any `json:"custom"`
 
+	BanExpires *Timestamp `json:"ban_expires,omitempty"`
+
 	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
 
 	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
@@ -3898,6 +4009,8 @@ type FullUserResponse struct {
 	LatestHiddenChannels []string `json:"latest_hidden_channels,omitempty"`
 
 	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
+
+	TeamsRole map[string]string `json:"teams_role,omitempty"`
 }
 
 type GeofenceResponse struct {
@@ -3920,28 +4033,6 @@ type GeofenceSettingsRequest struct {
 
 type GeofenceSettingsResponse struct {
 	Names []string `json:"names"`
-}
-
-type GeolocationResult struct {
-	AccuracyRadius int `json:"accuracy_radius"`
-
-	City string `json:"city"`
-
-	Continent string `json:"continent"`
-
-	ContinentCode string `json:"continent_code"`
-
-	Country string `json:"country"`
-
-	CountryIsoCode string `json:"country_iso_code"`
-
-	Latitude float64 `json:"latitude"`
-
-	Longitude float64 `json:"longitude"`
-
-	Subdivision string `json:"subdivision"`
-
-	SubdivisionIsoCode string `json:"subdivision_iso_code"`
 }
 
 // Basic response information
@@ -3975,6 +4066,8 @@ type GetCallReportResponse struct {
 	SessionID string `json:"session_id"`
 
 	Report ReportResponse `json:"report"`
+
+	ChatActivity *ChatActivityStatsResponse `json:"chat_activity,omitempty"`
 }
 
 type GetCallResponse struct {
@@ -3985,42 +4078,6 @@ type GetCallResponse struct {
 	OwnCapabilities []OwnCapability `json:"own_capabilities"`
 
 	Call CallResponse `json:"call"`
-}
-
-// Basic response information
-type GetCallStatsResponse struct {
-	CallDurationSeconds int `json:"call_duration_seconds"`
-
-	CallStatus string `json:"call_status"`
-
-	// Duration of the request in milliseconds
-	Duration string `json:"duration"`
-
-	MaxFreezesDurationSeconds int `json:"max_freezes_duration_seconds"`
-
-	MaxParticipants int `json:"max_participants"`
-
-	MaxTotalQualityLimitationDurationSeconds int `json:"max_total_quality_limitation_duration_seconds"`
-
-	PublishingParticipants int `json:"publishing_participants"`
-
-	QualityScore int `json:"quality_score"`
-
-	SfuCount int `json:"sfu_count"`
-
-	ParticipantReport []UserStats `json:"participant_report"`
-
-	Sfus []SFULocationResponse `json:"sfus"`
-
-	AverageConnectionTime *float64 `json:"average_connection_time,omitempty"`
-
-	Aggregated *AggregatedStats `json:"aggregated,omitempty"`
-
-	CallTimeline *CallTimeline `json:"call_timeline,omitempty"`
-
-	Jitter *TimeStats `json:"jitter,omitempty"`
-
-	Latency *TimeStats `json:"latency,omitempty"`
 }
 
 type GetCallTypeResponse struct {
@@ -4047,6 +4104,8 @@ type GetCampaignResponse struct {
 	Duration string `json:"duration"`
 
 	Campaign *CampaignResponse `json:"campaign,omitempty"`
+
+	Users *PagerResponse `json:"users,omitempty"`
 }
 
 // Basic response information
@@ -4135,9 +4194,7 @@ type GetCommandResponse struct {
 	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 }
 
-// Basic response information
 type GetConfigResponse struct {
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Config *ConfigResponse `json:"config,omitempty"`
@@ -4152,31 +4209,19 @@ type GetCustomPermissionResponse struct {
 }
 
 // Basic response information
+type GetDraftResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Draft DraftResponse `json:"draft"`
+}
+
+// Basic response information
 type GetEdgesResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Edges []EdgeResponse `json:"edges"`
-}
-
-type GetExportChannelsStatusResponse struct {
-	// Date/time of creation
-	CreatedAt Timestamp `json:"created_at"`
-
-	// Duration of the request in milliseconds
-	Duration string `json:"duration"`
-
-	// Task status
-	Status string `json:"status"`
-
-	TaskID string `json:"task_id"`
-
-	// Date/time of the last update
-	UpdatedAt Timestamp `json:"updated_at"`
-
-	Error *ErrorResult `json:"error,omitempty"`
-
-	Result *ExportChannelsResult `json:"result,omitempty"`
 }
 
 // Basic response information
@@ -4202,14 +4247,6 @@ type GetMessageResponse struct {
 	Message MessageWithChannelResponse `json:"message"`
 
 	PendingMessageMetadata map[string]string `json:"pending_message_metadata,omitempty"`
-}
-
-// Basic response information
-type GetModerationAnalyticsResponse struct {
-	// Duration of the request in milliseconds
-	Duration string `json:"duration"`
-
-	Analytics *ModerationAnalytics `json:"analytics,omitempty"`
 }
 
 type GetOGResponse struct {
@@ -4319,12 +4356,8 @@ type GetRepliesResponse struct {
 	Messages []MessageResponse `json:"messages"`
 }
 
-// Basic response information
 type GetReviewQueueItemResponse struct {
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
-
-	History []ReviewQueueItemResponse `json:"history"`
 
 	Item *ReviewQueueItemResponse `json:"item,omitempty"`
 }
@@ -4362,18 +4395,6 @@ type GetThreadResponse struct {
 }
 
 // Basic response information
-type GetUserModerationReportResponse struct {
-	// Duration of the request in milliseconds
-	Duration string `json:"duration"`
-
-	UserBlocks []UserBlock `json:"user_blocks"`
-
-	UserMutes []UserMute `json:"user_mutes"`
-
-	User UserResponse `json:"user"`
-}
-
-// Basic response information
 type GoLiveResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -4383,6 +4404,12 @@ type GoLiveResponse struct {
 
 type GoogleVisionConfig struct {
 	Enabled *bool `json:"enabled,omitempty"`
+}
+
+type GroupedStatsResponse struct {
+	Name string `json:"name"`
+
+	Unique int `json:"unique"`
 }
 
 type HLSSettings struct {
@@ -4699,14 +4726,6 @@ type ListTranscriptionsResponse struct {
 	Transcriptions []CallTranscription `json:"transcriptions"`
 }
 
-type Location struct {
-	ContinentCode string `json:"continent_code"`
-
-	CountryIsoCode string `json:"country_iso_code"`
-
-	SubdivisionIsoCode string `json:"subdivision_iso_code"`
-}
-
 type MarkReadResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -4718,16 +4737,6 @@ type MarkReviewedRequest struct {
 	ContentToMarkAsReviewedLimit *int `json:"content_to_mark_as_reviewed_limit,omitempty"`
 
 	DisableMarkingContentAsReviewed *bool `json:"disable_marking_content_as_reviewed,omitempty"`
-}
-
-type MediaPubSubHint struct {
-	AudioPublished bool `json:"audio_published"`
-
-	AudioSubscribed bool `json:"audio_subscribed"`
-
-	VideoPublished bool `json:"video_published"`
-
-	VideoSubscribed bool `json:"video_subscribed"`
 }
 
 type MemberAddedEvent struct {
@@ -4865,6 +4874,8 @@ type Message struct {
 	MentionedUsers []User `json:"mentioned_users"`
 
 	OwnReactions []Reaction `json:"own_reactions"`
+
+	RestrictedVisibility []string `json:"restricted_visibility"`
 
 	Custom map[string]any `json:"custom"`
 
@@ -5091,7 +5102,11 @@ type MessageNewEvent struct {
 }
 
 func (*MessageNewEvent) GetEventType() string {
-	return "message.new"
+	return "notification.thread_message_new"
+}
+
+type MessageOptions struct {
+	IncludeThreadParticipants *bool `json:"include_thread_participants,omitempty"`
 }
 
 type MessagePaginationParams struct{}
@@ -5151,6 +5166,8 @@ type MessageRequest struct {
 
 	MentionedUsers []string `json:"mentioned_users,omitempty"`
 
+	RestrictedVisibility []string `json:"restricted_visibility,omitempty"`
+
 	Custom map[string]any `json:"custom,omitempty"`
 
 	User *UserRequest `json:"user,omitempty"`
@@ -5205,6 +5222,9 @@ type MessageResponse struct {
 	// List of 10 latest reactions of authenticated user to this message
 	OwnReactions []ReactionResponse `json:"own_reactions"`
 
+	// A list of user ids that have restricted visibility to the message, if the list is not empty, the message is only visible to the users in the list
+	RestrictedVisibility []string `json:"restricted_visibility"`
+
 	Custom map[string]any `json:"custom"`
 
 	// An object containing number of reactions of each type. Key: reaction type (string), value: number of reactions (int)
@@ -5246,6 +5266,8 @@ type MessageResponse struct {
 	// List of users who participate in thread
 	ThreadParticipants []UserResponse `json:"thread_participants,omitempty"`
 
+	Draft *DraftResponse `json:"draft,omitempty"`
+
 	// Object with translations. Key `language` contains the original language key. Other keys contain translations
 	I18n map[string]string `json:"i18n,omitempty"`
 
@@ -5261,6 +5283,10 @@ type MessageResponse struct {
 	QuotedMessage *MessageResponse `json:"quoted_message,omitempty"`
 
 	ReactionGroups map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
+}
+
+type MessageStatsResponse struct {
+	CountOverTime []CountByMinuteResponse `json:"count_over_time,omitempty"`
 }
 
 type MessageUnblockedEvent struct {
@@ -5384,6 +5410,9 @@ type MessageWithChannelResponse struct {
 	// List of 10 latest reactions of authenticated user to this message
 	OwnReactions []ReactionResponse `json:"own_reactions"`
 
+	// A list of user ids that have restricted visibility to the message, if the list is not empty, the message is only visible to the users in the list
+	RestrictedVisibility []string `json:"restricted_visibility"`
+
 	Channel ChannelResponse `json:"channel"`
 
 	Custom map[string]any `json:"custom"`
@@ -5427,6 +5456,8 @@ type MessageWithChannelResponse struct {
 	// List of users who participate in thread
 	ThreadParticipants []UserResponse `json:"thread_participants,omitempty"`
 
+	Draft *DraftResponse `json:"draft,omitempty"`
+
 	// Object with translations. Key `language` contains the original language key. Other keys contain translations
 	I18n map[string]string `json:"i18n,omitempty"`
 
@@ -5458,34 +5489,31 @@ type ModerationActionConfig struct {
 	Custom map[string]any `json:"custom"`
 }
 
-type ModerationAnalytics struct {
-	TotalItemsModerated int `json:"total_items_moderated"`
+// This event is sent when a moderation check is completed
+type ModerationCheckCompletedEvent struct {
+	CreatedAt Timestamp `json:"created_at"`
 
-	AiImageHarms []map[string]any `json:"ai_image_harms"`
+	// The ID of entity which was moderated
+	EntityID string `json:"entity_id"`
 
-	AiTextHarms []map[string]any `json:"ai_text_harms"`
+	// The type of the entity which was moderated
+	EntityType string `json:"entity_type"`
 
-	AiVideoHarms []map[string]any `json:"ai_video_harms"`
+	// The recommended action
+	RecommendedAction string `json:"recommended_action"`
 
-	BlocklistByList []map[string]any `json:"blocklist_by_list"`
+	// The review queue item ID
+	ReviewQueueItemID string `json:"review_queue_item_id"`
 
-	BlocklistMatches []map[string]any `json:"blocklist_matches"`
+	Custom map[string]any `json:"custom"`
 
-	ModelAccuracy []map[string]any `json:"model_accuracy"`
+	Type string `json:"type"`
 
-	ModeratorActions []map[string]any `json:"moderator_actions"`
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
 
-	ModeratorProductivity []map[string]any `json:"moderator_productivity"`
-
-	SemanticFilterTopMatches []map[string]any `json:"semantic_filter_top_matches"`
-
-	SlaMetrics []map[string]any `json:"sla_metrics"`
-
-	UsageMetrics []map[string]any `json:"usage_metrics"`
-
-	ActionDistributionOverTime map[string]map[string]any `json:"action_distribution_over_time"`
-
-	DetectionByEngineOverTime map[string]map[string]any `json:"detection_by_engine_over_time"`
+func (*ModerationCheckCompletedEvent) GetEventType() string {
+	return "moderation_check.completed"
 }
 
 type ModerationCustomActionEvent struct {
@@ -5502,26 +5530,6 @@ type ModerationCustomActionEvent struct {
 
 func (*ModerationCustomActionEvent) GetEventType() string {
 	return "moderation.custom_action"
-}
-
-type ModerationEvent struct {
-	CreatedAt Timestamp `json:"created_at"`
-
-	Custom map[string]any `json:"custom"`
-
-	Type string `json:"type"`
-
-	ReceivedAt *Timestamp `json:"received_at,omitempty"`
-
-	Flags []Flag2Response `json:"flags,omitempty"`
-
-	Action *ActionLogResponse `json:"action,omitempty"`
-
-	ReviewQueueItem *ReviewQueueItemResponse `json:"review_queue_item,omitempty"`
-}
-
-func (*ModerationEvent) GetEventType() string {
-	return "review_queue_item.updated"
 }
 
 type ModerationFlaggedEvent struct {
@@ -5576,22 +5584,6 @@ type ModerationResponse struct {
 	Toxic float64 `json:"toxic"`
 }
 
-type ModerationUsageStats struct {
-	AppPk int `json:"app_pk"`
-
-	ID int `json:"id"`
-
-	OrganizationID int `json:"organization_id"`
-
-	ReferenceDate Timestamp `json:"reference_date"`
-
-	UpdatedAt Timestamp `json:"updated_at"`
-
-	UsageAmount int `json:"usage_amount"`
-
-	UsageType string `json:"usage_type"`
-}
-
 type ModerationV2Response struct {
 	Action string `json:"action"`
 
@@ -5606,22 +5598,6 @@ type ModerationV2Response struct {
 	ImageHarms []string `json:"image_harms,omitempty"`
 
 	TextHarms []string `json:"text_harms,omitempty"`
-}
-
-type ModeratorStats struct {
-	ID string `json:"id"`
-
-	ItemsReviewed int `json:"items_reviewed"`
-
-	ActionCounts map[string]int `json:"action_counts"`
-}
-
-// Basic response information
-type ModeratorStatsResponse struct {
-	// Duration of the request in milliseconds
-	Duration string `json:"duration"`
-
-	ModeratorStats []ModeratorStats `json:"moderator_stats"`
 }
 
 type MuteChannelResponse struct {
@@ -5725,6 +5701,12 @@ type NotificationSettings struct {
 
 type NullTime struct{}
 
+type OCRRule struct {
+	Action string `json:"action"`
+
+	Label string `json:"label"`
+}
+
 type OnlyUserID struct {
 	ID string `json:"id"`
 }
@@ -5818,6 +5800,8 @@ type OwnUser struct {
 	PrivacySettings *PrivacySettings `json:"privacy_settings,omitempty"`
 
 	PushPreferences *PushPreferences `json:"push_preferences,omitempty"`
+
+	TeamsRole map[string]string `json:"teams_role,omitempty"`
 }
 
 type OwnUserResponse struct {
@@ -5874,6 +5858,14 @@ type OwnUserResponse struct {
 	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
 
 	PushPreferences *PushPreferences `json:"push_preferences,omitempty"`
+
+	TeamsRole map[string]string `json:"teams_role,omitempty"`
+}
+
+type PagerResponse struct {
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
 }
 
 type PaginationParams struct {
@@ -5882,10 +5874,42 @@ type PaginationParams struct {
 	Offset *int `json:"offset,omitempty"`
 }
 
+type ParticipantCountByMinuteResponse struct {
+	First int `json:"first"`
+
+	Last int `json:"last"`
+
+	Max int `json:"max"`
+
+	Min int `json:"min"`
+
+	StartTs Timestamp `json:"start_ts"`
+}
+
+type ParticipantCountOverTimeResponse struct {
+	ByMinute []ParticipantCountByMinuteResponse `json:"by_minute,omitempty"`
+}
+
 type ParticipantReportResponse struct {
 	Sum int `json:"sum"`
 
 	Unique int `json:"unique"`
+
+	MaxConcurrent *int `json:"max_concurrent,omitempty"`
+
+	ByBrowser []GroupedStatsResponse `json:"by_browser,omitempty"`
+
+	ByCountry []GroupedStatsResponse `json:"by_country,omitempty"`
+
+	ByDevice []GroupedStatsResponse `json:"by_device,omitempty"`
+
+	ByOperatingSystem []GroupedStatsResponse `json:"by_operating_system,omitempty"`
+
+	CountOverTime *ParticipantCountOverTimeResponse `json:"count_over_time,omitempty"`
+
+	Publishers *PublisherStatsResponse `json:"publishers,omitempty"`
+
+	Subscribers *SubscriberStatsResponse `json:"subscribers,omitempty"`
 }
 
 type PendingMessageResponse struct {
@@ -6220,18 +6244,12 @@ type PrivacySettingsResponse struct {
 	TypingIndicators *TypingIndicatorsResponse `json:"typing_indicators,omitempty"`
 }
 
-type PublishedTrackInfo struct {
-	CodecMimeType *string `json:"codec_mime_type,omitempty"`
+type PublisherStatsResponse struct {
+	Total int `json:"total"`
 
-	DurationSeconds *int `json:"duration_seconds,omitempty"`
+	Unique int `json:"unique"`
 
-	TrackType *string `json:"track_type,omitempty"`
-}
-
-type PublisherAggregateStats struct {
-	ByTrackType map[string]Count `json:"by_track_type,omitempty"`
-
-	Total *Count `json:"total,omitempty"`
+	ByTrack []TrackStatsResponse `json:"by_track,omitempty"`
 }
 
 type PushConfig struct {
@@ -6467,6 +6485,21 @@ type QueryCallMembersResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
+type QueryCallParticipantsResponse struct {
+	Duration string `json:"duration"`
+
+	TotalParticipants int `json:"total_participants"`
+
+	Members []MemberResponse `json:"members"`
+
+	OwnCapabilities []OwnCapability `json:"own_capabilities"`
+
+	// List of call participants
+	Participants []CallParticipantResponse `json:"participants"`
+
+	Call CallResponse `json:"call"`
+}
+
 // Basic response information
 type QueryCallStatsResponse struct {
 	// Duration of the request in milliseconds
@@ -6510,21 +6543,35 @@ type QueryChannelsResponse struct {
 	Channels []ChannelStateResponseFields `json:"channels"`
 }
 
+type QueryDraftsResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	// Drafts
+	Drafts []DraftResponse `json:"drafts"`
+
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
+}
+
 type QueryFeedModerationTemplate struct {
+	// When the template was created
 	CreatedAt Timestamp `json:"created_at"`
 
+	// Name of the moderation template
 	Name string `json:"name"`
 
+	// When the template was last updated
 	UpdatedAt Timestamp `json:"updated_at"`
 
 	Config *FeedsModerationTemplateConfig `json:"config,omitempty"`
 }
 
-// Basic response information
 type QueryFeedModerationTemplatesResponse struct {
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
+	// List of moderation templates
 	Templates []QueryFeedModerationTemplate `json:"templates"`
 }
 
@@ -6587,11 +6634,10 @@ type QueryMessageHistoryResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
-// Basic response information
 type QueryModerationConfigsResponse struct {
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
+	// List of moderation configurations
 	Configs []ConfigResponse `json:"configs"`
 
 	Next *string `json:"next,omitempty"`
@@ -6599,11 +6645,10 @@ type QueryModerationConfigsResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
-// Basic response information
 type QueryModerationLogsResponse struct {
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
+	// List of moderation action logs
 	Logs []ActionLogResponse `json:"logs"`
 
 	Next *string `json:"next,omitempty"`
@@ -6635,15 +6680,16 @@ type QueryReactionsResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
-// Basic response information
 type QueryReviewQueueResponse struct {
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
+	// List of review queue items
 	Items []ReviewQueueItemResponse `json:"items"`
 
+	// Configuration for moderation actions
 	ActionConfig map[string][]ModerationActionConfig `json:"action_config"`
 
+	// Statistics about the review queue
 	Stats map[string]any `json:"stats"`
 
 	Next *string `json:"next,omitempty"`
@@ -6688,18 +6734,6 @@ type QueryThreadsResponse struct {
 }
 
 // Basic response information
-type QueryUsageStatsResponse struct {
-	// Duration of the request in milliseconds
-	Duration string `json:"duration"`
-
-	Items []ModerationUsageStats `json:"items"`
-
-	Next *string `json:"next,omitempty"`
-
-	Prev *string `json:"prev,omitempty"`
-}
-
-// Basic response information
 type QueryUserFeedbackResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -6735,16 +6769,6 @@ type QueryUsersResponse struct {
 
 	// Array of users as result of filters applied.
 	Users []FullUserResponse `json:"users"`
-}
-
-// Basic response information
-type QueueStatsResponse struct {
-	AvgTimeToAction int `json:"avg_time_to_action"`
-
-	// Duration of the request in milliseconds
-	Duration string `json:"duration"`
-
-	TimeToActionBuckets map[string]int `json:"time_to_action_buckets"`
 }
 
 // RTMPBroadcastRequest is the payload for starting an RTMP broadcast.
@@ -7057,6 +7081,8 @@ type ReviewQueueItem struct {
 
 	BounceCount int `json:"bounce_count"`
 
+	ConfigKey string `json:"config_key"`
+
 	ContentChanged bool `json:"content_changed"`
 
 	CreatedAt Timestamp `json:"created_at"`
@@ -7064,6 +7090,8 @@ type ReviewQueueItem struct {
 	EntityID string `json:"entity_id"`
 
 	EntityType string `json:"entity_type"`
+
+	FlagsCount int `json:"flags_count"`
 
 	HasImage bool `json:"has_image"`
 
@@ -7089,13 +7117,15 @@ type ReviewQueueItem struct {
 
 	Bans []Ban `json:"bans"`
 
-	Flags []Flag2 `json:"flags"`
+	Flags []Flag `json:"flags"`
 
 	Languages []string `json:"languages"`
 
 	Teams []string `json:"teams"`
 
 	ReviewedAt NullTime `json:"reviewed_at"`
+
+	Activity *EnrichedActivity `json:"activity,omitempty"`
 
 	AssignedTo *User `json:"assigned_to,omitempty"`
 
@@ -7108,44 +7138,92 @@ type ReviewQueueItem struct {
 	Message *Message `json:"message,omitempty"`
 
 	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
+
+	Reaction *Reaction `json:"reaction,omitempty"`
+}
+
+// This event is sent when a new moderation review queue item is created
+type ReviewQueueItemNewEvent struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	// The flags associated with this review queue item
+	Flags []FlagResponse `json:"flags,omitempty"`
+
+	Action *ActionLogResponse `json:"action,omitempty"`
+
+	ReviewQueueItem *ReviewQueueItemResponse `json:"review_queue_item,omitempty"`
+}
+
+func (*ReviewQueueItemNewEvent) GetEventType() string {
+	return "review_queue_item.new"
 }
 
 type ReviewQueueItemResponse struct {
+	// AI-determined text severity
 	AiTextSeverity string `json:"ai_text_severity"`
 
+	// When the item was created
 	CreatedAt Timestamp `json:"created_at"`
 
+	// ID of the entity being reviewed
 	EntityID string `json:"entity_id"`
 
+	// Type of entity being reviewed
 	EntityType string `json:"entity_type"`
 
+	FlagsCount int `json:"flags_count"`
+
+	// Unique identifier of the review queue item
 	ID string `json:"id"`
 
+	// Suggested moderation action
 	RecommendedAction string `json:"recommended_action"`
 
+	// ID of the moderator who reviewed the item
 	ReviewedBy string `json:"reviewed_by"`
 
+	// Severity level of the content
 	Severity int `json:"severity"`
 
+	// Current status of the review
 	Status string `json:"status"`
 
+	// When the item was last updated
 	UpdatedAt Timestamp `json:"updated_at"`
 
+	// Moderation actions taken
 	Actions []ActionLogResponse `json:"actions"`
 
+	// Associated ban records
 	Bans []Ban `json:"bans"`
 
-	Flags []Flag2Response `json:"flags"`
+	// Associated flag records
+	Flags []FlagResponse `json:"flags"`
 
+	// Detected languages in the content
 	Languages []string `json:"languages"`
 
+	// When the review was completed
 	CompletedAt *Timestamp `json:"completed_at,omitempty"`
 
+	ConfigKey *string `json:"config_key,omitempty"`
+
+	// ID of who created the entity
 	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
 
+	// When the item was reviewed
 	ReviewedAt *Timestamp `json:"reviewed_at,omitempty"`
 
+	// Teams associated with this item
 	Teams []string `json:"teams,omitempty"`
+
+	Activity *EnrichedActivity `json:"activity,omitempty"`
 
 	AssignedTo *UserResponse `json:"assigned_to,omitempty"`
 
@@ -7158,6 +7236,30 @@ type ReviewQueueItemResponse struct {
 	Message *MessageResponse `json:"message,omitempty"`
 
 	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
+
+	Reaction *Reaction `json:"reaction,omitempty"`
+}
+
+// This event is sent when a moderation review queue item is updated
+type ReviewQueueItemUpdatedEvent struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	// The flags associated with this review queue item
+	Flags []FlagResponse `json:"flags,omitempty"`
+
+	Action *ActionLogResponse `json:"action,omitempty"`
+
+	ReviewQueueItem *ReviewQueueItemResponse `json:"review_queue_item,omitempty"`
+}
+
+func (*ReviewQueueItemUpdatedEvent) GetEventType() string {
+	return "review_queue_item.updated"
 }
 
 type RingSettings struct {
@@ -7169,10 +7271,13 @@ type RingSettings struct {
 }
 
 type RingSettingsRequest struct {
+	// When none of the callees accept a ring call in this time a rejection will be sent by the caller with reason 'timeout' by the SDKs
 	AutoCancelTimeoutMs int `json:"auto_cancel_timeout_ms"`
 
+	// When a callee is online but doesn't answer a ring call in this time a rejection will be sent with reason 'timeout' by the SDKs
 	IncomingCallTimeoutMs int `json:"incoming_call_timeout_ms"`
 
+	// When a callee doesn't accept or reject a ring call in this time a missed call event will be sent
 	MissedCallTimeoutMs *int `json:"missed_call_timeout_ms,omitempty"`
 }
 
@@ -7221,16 +7326,6 @@ type SDKUsageReportResponse struct {
 	Daily []DailyAggregateSDKUsageReportResponse `json:"daily"`
 }
 
-type SFULocationResponse struct {
-	Datacenter string `json:"datacenter"`
-
-	ID string `json:"id"`
-
-	Coordinates Coordinates `json:"coordinates"`
-
-	Location Location `json:"location"`
-}
-
 type ScreensharingSettings struct {
 	AccessRequestEnabled bool `json:"access_request_enabled"`
 
@@ -7276,6 +7371,8 @@ type SearchPayload struct {
 
 	// Message filter conditions
 	MessageFilterConditions map[string]any `json:"message_filter_conditions,omitempty"`
+
+	MessageOptions *MessageOptions `json:"message_options,omitempty"`
 }
 
 type SearchResponse struct {
@@ -7331,6 +7428,8 @@ type SearchResultMessage struct {
 
 	OwnReactions []ReactionResponse `json:"own_reactions"`
 
+	RestrictedVisibility []string `json:"restricted_visibility"`
+
 	Custom map[string]any `json:"custom"`
 
 	ReactionCounts map[string]int `json:"reaction_counts"`
@@ -7362,6 +7461,8 @@ type SearchResultMessage struct {
 	ThreadParticipants []UserResponse `json:"thread_participants,omitempty"`
 
 	Channel *ChannelResponse `json:"channel,omitempty"`
+
+	Draft *DraftResponse `json:"draft,omitempty"`
 
 	I18n map[string]string `json:"i18n,omitempty"`
 
@@ -7489,6 +7590,8 @@ type SessionSettingsResponse struct {
 	InactivityTimeoutSeconds int `json:"inactivity_timeout_seconds"`
 }
 
+type ShadowBlockActionRequest struct{}
+
 // Basic response information
 type ShowChannelResponse struct {
 	// Duration of the request in milliseconds
@@ -7509,6 +7612,8 @@ type StartCampaignResponse struct {
 	Duration string `json:"duration"`
 
 	Campaign *CampaignResponse `json:"campaign,omitempty"`
+
+	Users *PagerResponse `json:"users,omitempty"`
 }
 
 type StartClosedCaptionsResponse struct {
@@ -7598,28 +7703,18 @@ type StopTranscriptionResponse struct {
 	Duration string `json:"duration"`
 }
 
-// Basic response information
 type SubmitActionResponse struct {
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Item *ReviewQueueItem `json:"item,omitempty"`
 }
 
-type Subsession struct {
-	EndedAt int `json:"ended_at"`
+type SubscriberStatsResponse struct {
+	Total int `json:"total"`
 
-	JoinedAt int `json:"joined_at"`
+	TotalSubscribedDurationSeconds int `json:"total_subscribed_duration_seconds"`
 
-	SfuID string `json:"sfu_id"`
-
-	PubSubHint *MediaPubSubHint `json:"pub_sub_hint,omitempty"`
-}
-
-type TURNAggregatedStats struct {
-	Tcp *Count `json:"tcp,omitempty"`
-
-	Total *Count `json:"total,omitempty"`
+	Unique int `json:"unique"`
 }
 
 type TargetResolution struct {
@@ -7752,6 +7847,8 @@ type ThreadStateResponse struct {
 
 	CreatedBy *UserResponse `json:"created_by,omitempty"`
 
+	Draft *DraftResponse `json:"draft,omitempty"`
+
 	ParentMessage *MessageResponse `json:"parent_message,omitempty"`
 }
 
@@ -7802,10 +7899,10 @@ type ThumbnailsSettingsResponse struct {
 
 type Time struct{}
 
-type TimeStats struct {
-	AverageSeconds float64 `json:"average_seconds"`
+type TrackStatsResponse struct {
+	DurationSeconds int `json:"duration_seconds"`
 
-	MaxSeconds float64 `json:"max_seconds"`
+	TrackType string `json:"track_type"`
 }
 
 type TranscriptionSettings struct {
@@ -7852,9 +7949,7 @@ type TypingIndicatorsResponse struct {
 
 type UnbanActionRequest struct{}
 
-// Basic response information
 type UnbanResponse struct {
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
 
@@ -8196,29 +8291,29 @@ func (*UpdatedCallPermissionsEvent) GetEventType() string {
 	return "call.permissions_updated"
 }
 
-// Basic response information
 type UpsertConfigResponse struct {
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Config *ConfigResponse `json:"config,omitempty"`
 }
 
 type UpsertModerationTemplateRequest struct {
+	// Name of the moderation template
 	Name string `json:"name"`
 
 	Config FeedsModerationTemplateConfig `json:"config"`
 }
 
-// Basic response information
 type UpsertModerationTemplateResponse struct {
+	// When the template was created
 	CreatedAt Timestamp `json:"created_at"`
 
-	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
+	// Name of the moderation template
 	Name string `json:"name"`
 
+	// When the template was last updated
 	UpdatedAt Timestamp `json:"updated_at"`
 
 	Config *FeedsModerationTemplateConfig `json:"config,omitempty"`
@@ -8258,6 +8353,8 @@ type User struct {
 	Role string `json:"role"`
 
 	Custom map[string]any `json:"custom"`
+
+	TeamsRole map[string]string `json:"teams_role"`
 
 	BanExpires *Timestamp `json:"ban_expires,omitempty"`
 
@@ -8310,14 +8407,6 @@ type UserBannedEvent struct {
 
 func (*UserBannedEvent) GetEventType() string {
 	return "user.banned"
-}
-
-type UserBlock struct {
-	BlockedByUserID string `json:"blocked_by_user_id"`
-
-	BlockedUserID string `json:"blocked_user_id"`
-
-	CreatedAt Timestamp `json:"created_at"`
 }
 
 type UserCustomEventRequest struct {
@@ -8404,18 +8493,6 @@ func (*UserFlaggedEvent) GetEventType() string {
 	return "user.flagged"
 }
 
-type UserInfoResponse struct {
-	ID string `json:"id"`
-
-	Image string `json:"image"`
-
-	Name string `json:"name"`
-
-	Roles []string `json:"roles"`
-
-	Custom map[string]any `json:"custom"`
-}
-
 type UserMute struct {
 	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
@@ -8482,6 +8559,7 @@ type UserRequest struct {
 	// User ID
 	ID string `json:"id"`
 
+	// User's profile image URL
 	Image *string `json:"image,omitempty"`
 
 	Invisible *bool `json:"invisible,omitempty"`
@@ -8491,13 +8569,19 @@ type UserRequest struct {
 	// Optional name of user
 	Name *string `json:"name,omitempty"`
 
+	// User's global role
 	Role *string `json:"role,omitempty"`
 
+	// List of teams the user belongs to
 	Teams []string `json:"teams,omitempty"`
 
+	// Custom user data
 	Custom map[string]any `json:"custom,omitempty"`
 
 	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
+
+	// Map of team-specific roles for the user
+	TeamsRole map[string]string `json:"teams_role,omitempty"`
 }
 
 // User response object
@@ -8562,6 +8646,8 @@ type UserResponse struct {
 	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
 
 	PushNotifications *PushNotificationSettingsResponse `json:"push_notifications,omitempty"`
+
+	TeamsRole map[string]string `json:"teams_role,omitempty"`
 }
 
 type UserResponseCommonFields struct {
@@ -8596,6 +8682,8 @@ type UserResponseCommonFields struct {
 	Name *string `json:"name,omitempty"`
 
 	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
+
+	TeamsRole map[string]string `json:"teams_role,omitempty"`
 }
 
 type UserResponsePrivacyFields struct {
@@ -8634,122 +8722,8 @@ type UserResponsePrivacyFields struct {
 	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
 
 	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
-}
 
-type UserSessionStats struct {
-	FreezeDurationSeconds int `json:"freeze_duration_seconds"`
-
-	Group string `json:"group"`
-
-	MaxFreezeFraction float64 `json:"max_freeze_fraction"`
-
-	MaxFreezesDurationSeconds int `json:"max_freezes_duration_seconds"`
-
-	MinEventTs int `json:"min_event_ts"`
-
-	PacketLossFraction float64 `json:"packet_loss_fraction"`
-
-	PublisherPacketLossFraction float64 `json:"publisher_packet_loss_fraction"`
-
-	PublishingDurationSeconds int `json:"publishing_duration_seconds"`
-
-	QualityScore float64 `json:"quality_score"`
-
-	ReceivingDurationSeconds int `json:"receiving_duration_seconds"`
-
-	SessionID string `json:"session_id"`
-
-	TotalPixelsIn int `json:"total_pixels_in"`
-
-	TotalPixelsOut int `json:"total_pixels_out"`
-
-	AverageConnectionTime *float64 `json:"average_connection_time,omitempty"`
-
-	Browser *string `json:"browser,omitempty"`
-
-	BrowserVersion *string `json:"browser_version,omitempty"`
-
-	CurrentIp *string `json:"current_ip,omitempty"`
-
-	CurrentSfu *string `json:"current_sfu,omitempty"`
-
-	DeviceModel *string `json:"device_model,omitempty"`
-
-	DeviceVersion *string `json:"device_version,omitempty"`
-
-	DistanceToSfuKilometers *float64 `json:"distance_to_sfu_kilometers,omitempty"`
-
-	MaxFirPerSecond *float64 `json:"max_fir_per_second,omitempty"`
-
-	MaxFreezesPerSecond *float64 `json:"max_freezes_per_second,omitempty"`
-
-	MaxNackPerSecond *float64 `json:"max_nack_per_second,omitempty"`
-
-	MaxPliPerSecond *float64 `json:"max_pli_per_second,omitempty"`
-
-	Os *string `json:"os,omitempty"`
-
-	OsVersion *string `json:"os_version,omitempty"`
-
-	PublisherNoiseCancellationSeconds *float64 `json:"publisher_noise_cancellation_seconds,omitempty"`
-
-	PublisherQualityLimitationFraction *float64 `json:"publisher_quality_limitation_fraction,omitempty"`
-
-	PublishingAudioCodec *string `json:"publishing_audio_codec,omitempty"`
-
-	PublishingVideoCodec *string `json:"publishing_video_codec,omitempty"`
-
-	ReceivingAudioCodec *string `json:"receiving_audio_codec,omitempty"`
-
-	ReceivingVideoCodec *string `json:"receiving_video_codec,omitempty"`
-
-	Sdk *string `json:"sdk,omitempty"`
-
-	SdkVersion *string `json:"sdk_version,omitempty"`
-
-	SubscriberVideoQualityThrottledDurationSeconds *float64 `json:"subscriber_video_quality_throttled_duration_seconds,omitempty"`
-
-	Truncated *bool `json:"truncated,omitempty"`
-
-	WebrtcVersion *string `json:"webrtc_version,omitempty"`
-
-	PublishedTracks []PublishedTrackInfo `json:"published_tracks,omitempty"`
-
-	Subsessions []Subsession `json:"subsessions,omitempty"`
-
-	Geolocation *GeolocationResult `json:"geolocation,omitempty"`
-
-	Jitter *TimeStats `json:"jitter,omitempty"`
-
-	Latency *TimeStats `json:"latency,omitempty"`
-
-	MaxPublishingVideoQuality *VideoQuality `json:"max_publishing_video_quality,omitempty"`
-
-	MaxReceivingVideoQuality *VideoQuality `json:"max_receiving_video_quality,omitempty"`
-
-	PubSubHints *MediaPubSubHint `json:"pub_sub_hints,omitempty"`
-
-	PublisherJitter *TimeStats `json:"publisher_jitter,omitempty"`
-
-	PublisherLatency *TimeStats `json:"publisher_latency,omitempty"`
-
-	PublisherVideoQualityLimitationDurationSeconds map[string]float64 `json:"publisher_video_quality_limitation_duration_seconds,omitempty"`
-
-	SubscriberJitter *TimeStats `json:"subscriber_jitter,omitempty"`
-
-	SubscriberLatency *TimeStats `json:"subscriber_latency,omitempty"`
-
-	Timeline *CallTimeline `json:"timeline,omitempty"`
-}
-
-type UserStats struct {
-	MinEventTs int `json:"min_event_ts"`
-
-	SessionStats []UserSessionStats `json:"session_stats"`
-
-	Info UserInfoResponse `json:"info"`
-
-	Rating *int `json:"rating,omitempty"`
+	TeamsRole map[string]string `json:"teams_role,omitempty"`
 }
 
 type UserUnbannedEvent struct {
@@ -8824,7 +8798,11 @@ func (*UserUpdatedEvent) GetEventType() string {
 }
 
 type VelocityFilterConfig struct {
+	AdvancedFilters bool `json:"advanced_filters"`
+
 	CascadingActions bool `json:"cascading_actions"`
+
+	CidsPerUser int `json:"cids_per_user"`
 
 	Enabled bool `json:"enabled"`
 
@@ -8852,25 +8830,17 @@ type VelocityFilterConfigRule struct {
 
 	IpBan bool `json:"ip_ban"`
 
+	ProbationPeriod int `json:"probation_period"`
+
 	ShadowBan bool `json:"shadow_ban"`
 
 	SlowSpamThreshold int `json:"slow_spam_threshold"`
 
 	SlowSpamTtl int `json:"slow_spam_ttl"`
 
+	UrlOnly bool `json:"url_only"`
+
 	SlowSpamBanDuration *int `json:"slow_spam_ban_duration,omitempty"`
-}
-
-type VideoDimension struct {
-	Height int `json:"height"`
-
-	Width int `json:"width"`
-}
-
-type VideoQuality struct {
-	UsageType *string `json:"usage_type,omitempty"`
-
-	Resolution *VideoDimension `json:"resolution,omitempty"`
 }
 
 type VideoSettings struct {
