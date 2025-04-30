@@ -29,6 +29,14 @@ func (c *Channels) Update(ctx context.Context, request *UpdateChannelRequest) (*
 	return c.client.UpdateChannel(ctx, c.channelType, c.channelD, request)
 }
 
+func (c *Channels) DeleteDraft(ctx context.Context, request *DeleteDraftRequest) (*StreamResponse[Response], error) {
+	return c.client.DeleteDraft(ctx, c.channelType, c.channelD, request)
+}
+
+func (c *Channels) GetDraft(ctx context.Context, request *GetDraftRequest) (*StreamResponse[GetDraftResponse], error) {
+	return c.client.GetDraft(ctx, c.channelType, c.channelD, request)
+}
+
 func (c *Channels) SendEvent(ctx context.Context, request *SendEventRequest) (*StreamResponse[EventResponse], error) {
 	return c.client.SendEvent(ctx, c.channelType, c.channelD, request)
 }
@@ -53,8 +61,8 @@ func (c *Channels) UploadImage(ctx context.Context, request *UploadImageRequest)
 	return c.client.UploadImage(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) UpdateMemberPartial(ctx context.Context, userID string, request *UpdateMemberPartialRequest) (*StreamResponse[UpdateMemberPartialResponse], error) {
-	return c.client.UpdateMemberPartial(ctx, c.channelType, c.channelD, userID, request)
+func (c *Channels) UpdateMemberPartial(ctx context.Context, request *UpdateMemberPartialRequest) (*StreamResponse[UpdateMemberPartialResponse], error) {
+	return c.client.UpdateMemberPartial(ctx, c.channelType, c.channelD, request)
 }
 
 func (c *Channels) SendMessage(ctx context.Context, request *SendMessageRequest) (*StreamResponse[SendMessageResponse], error) {

@@ -114,6 +114,8 @@ func (c *VideoClient) SendCallEvent(ctx context.Context, _type string, id string
 	return res, err
 }
 
+// Sends events:
+// - call.user_feedback_submitted
 func (c *VideoClient) CollectUserFeedback(ctx context.Context, _type string, id string, request *CollectUserFeedbackRequest) (*StreamResponse[CollectUserFeedbackResponse], error) {
 	var result CollectUserFeedbackResponse
 	pathParams := map[string]string{
@@ -170,6 +172,18 @@ func (c *VideoClient) MuteUsers(ctx context.Context, _type string, id string, re
 		"id":   id,
 	}
 	res, err := MakeRequest[MuteUsersRequest, MuteUsersResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/mute_users", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Returns a list of participants connected to the call
+func (c *VideoClient) QueryCallParticipants(ctx context.Context, id string, _type string, request *QueryCallParticipantsRequest) (*StreamResponse[QueryCallParticipantsResponse], error) {
+	var result QueryCallParticipantsResponse
+	pathParams := map[string]string{
+		"id":   id,
+		"type": _type,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[QueryCallParticipantsRequest, QueryCallParticipantsResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/participants", params, request, &result, pathParams)
 	return res, err
 }
 
@@ -298,17 +312,6 @@ func (c *VideoClient) StartTranscription(ctx context.Context, _type string, id s
 		"id":   id,
 	}
 	res, err := MakeRequest[StartTranscriptionRequest, StartTranscriptionResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_transcription", nil, request, &result, pathParams)
-	return res, err
-}
-
-func (c *VideoClient) GetCallStats(ctx context.Context, _type string, id string, session string, request *GetCallStatsRequest) (*StreamResponse[GetCallStatsResponse], error) {
-	var result GetCallStatsResponse
-	pathParams := map[string]string{
-		"type":    _type,
-		"id":      id,
-		"session": session,
-	}
-	res, err := MakeRequest[any, GetCallStatsResponse](c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}/stats/{session}", nil, nil, &result, pathParams)
 	return res, err
 }
 
