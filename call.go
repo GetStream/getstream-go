@@ -61,6 +61,10 @@ func (c *Call) MuteUsers(ctx context.Context, request *MuteUsersRequest) (*Strea
 	return c.client.MuteUsers(ctx, c.callType, c.callID, request)
 }
 
+func (c *Call) QueryCallParticipants(ctx context.Context, request *QueryCallParticipantsRequest) (*StreamResponse[QueryCallParticipantsResponse], error) {
+	return c.client.QueryCallParticipants(ctx, c.callType, c.callID, request)
+}
+
 func (c *Call) VideoPin(ctx context.Context, request *VideoPinRequest) (*StreamResponse[PinResponse], error) {
 	return c.client.VideoPin(ctx, c.callType, c.callID, request)
 }
@@ -103,10 +107,6 @@ func (c *Call) StartRecording(ctx context.Context, request *StartRecordingReques
 
 func (c *Call) StartTranscription(ctx context.Context, request *StartTranscriptionRequest) (*StreamResponse[StartTranscriptionResponse], error) {
 	return c.client.StartTranscription(ctx, c.callType, c.callID, request)
-}
-
-func (c *Call) GetCallStats(ctx context.Context, session string, request *GetCallStatsRequest) (*StreamResponse[GetCallStatsResponse], error) {
-	return c.client.GetCallStats(ctx, c.callType, c.callID, session, request)
 }
 
 func (c *Call) StopHLSBroadcasting(ctx context.Context, request *StopHLSBroadcastingRequest) (*StreamResponse[StopHLSBroadcastingResponse], error) {

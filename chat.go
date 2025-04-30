@@ -15,7 +15,7 @@ func NewChatClient(client *Client) *ChatClient {
 	}
 }
 
-// Query campaigns
+// Query campaigns with filter query
 func (c *ChatClient) QueryCampaigns(ctx context.Context, request *QueryCampaignsRequest) (*StreamResponse[QueryCampaignsResponse], error) {
 	var result QueryCampaignsResponse
 	res, err := MakeRequest[QueryCampaignsRequest, QueryCampaignsResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns/query", nil, request, &result, nil)
@@ -28,7 +28,8 @@ func (c *ChatClient) GetCampaign(ctx context.Context, id string, request *GetCam
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[any, GetCampaignResponse](c.client, ctx, "GET", "/api/v2/chat/campaigns/{id}", nil, nil, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetCampaignResponse](c.client, ctx, "GET", "/api/v2/chat/campaigns/{id}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -152,6 +153,33 @@ func (c *ChatClient) UpdateChannel(ctx context.Context, _type string, id string,
 	return res, err
 }
 
+// Deletes a draft
+//
+// Sends events:
+// - draft.deleted
+func (c *ChatClient) DeleteDraft(ctx context.Context, _type string, id string, request *DeleteDraftRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/draft", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Get a draft
+func (c *ChatClient) GetDraft(ctx context.Context, _type string, id string, request *GetDraftRequest) (*StreamResponse[GetDraftResponse], error) {
+	var result GetDraftResponse
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetDraftResponse](c.client, ctx, "GET", "/api/v2/chat/channels/{type}/{id}/draft", params, nil, &result, pathParams)
+	return res, err
+}
+
 // Sends event to the channel
 func (c *ChatClient) SendEvent(ctx context.Context, _type string, id string, request *SendEventRequest) (*StreamResponse[EventResponse], error) {
 	var result EventResponse
@@ -224,14 +252,14 @@ func (c *ChatClient) UploadImage(ctx context.Context, _type string, id string, r
 	return res, err
 }
 
-func (c *ChatClient) UpdateMemberPartial(ctx context.Context, userID string, _type string, id string, request *UpdateMemberPartialRequest) (*StreamResponse[UpdateMemberPartialResponse], error) {
+func (c *ChatClient) UpdateMemberPartial(ctx context.Context, _type string, id string, request *UpdateMemberPartialRequest) (*StreamResponse[UpdateMemberPartialResponse], error) {
 	var result UpdateMemberPartialResponse
 	pathParams := map[string]string{
-		"user_id": userID,
-		"type":    _type,
-		"id":      id,
+		"type": _type,
+		"id":   id,
 	}
-	res, err := MakeRequest[UpdateMemberPartialRequest, UpdateMemberPartialResponse](c.client, ctx, "PATCH", "/api/v2/chat/channels/{type}/{id}/member/{user_id}", nil, request, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[UpdateMemberPartialRequest, UpdateMemberPartialResponse](c.client, ctx, "PATCH", "/api/v2/chat/channels/{type}/{id}/member", params, request, &result, pathParams)
 	return res, err
 }
 
@@ -426,19 +454,17 @@ func (c *ChatClient) UpdateCommand(ctx context.Context, name string, request *Up
 	return res, err
 }
 
+// Queries draft messages for a user
+func (c *ChatClient) QueryDrafts(ctx context.Context, request *QueryDraftsRequest) (*StreamResponse[QueryDraftsResponse], error) {
+	var result QueryDraftsResponse
+	res, err := MakeRequest[QueryDraftsRequest, QueryDraftsResponse](c.client, ctx, "POST", "/api/v2/chat/drafts/query", nil, request, &result, nil)
+	return res, err
+}
+
 // Exports channel data to JSON file
 func (c *ChatClient) ExportChannels(ctx context.Context, request *ExportChannelsRequest) (*StreamResponse[ExportChannelsResponse], error) {
 	var result ExportChannelsResponse
 	res, err := MakeRequest[ExportChannelsRequest, ExportChannelsResponse](c.client, ctx, "POST", "/api/v2/chat/export_channels", nil, request, &result, nil)
-	return res, err
-}
-
-func (c *ChatClient) GetExportChannelsStatus(ctx context.Context, id string, request *GetExportChannelsStatusRequest) (*StreamResponse[GetExportChannelsStatusResponse], error) {
-	var result GetExportChannelsStatusResponse
-	pathParams := map[string]string{
-		"id": id,
-	}
-	res, err := MakeRequest[any, GetExportChannelsStatusResponse](c.client, ctx, "GET", "/api/v2/chat/export_channels/{id}", nil, nil, &result, pathParams)
 	return res, err
 }
 
