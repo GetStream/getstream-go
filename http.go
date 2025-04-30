@@ -164,8 +164,7 @@ func newRequest[T any](c *Client, ctx context.Context, method, path string, para
 		c.logger.Debug("Data is of type %T, attempting to marshal to JSON", t)
 		b, err := json.Marshal(data)
 		if err != nil {
-			c.logger.Error("Error marshaling data: %v", err)
-			c.logger.Warn("Unable to marshal data, setting body to nil")
+			c.logger.Error("Error marshaling data: %+v, setting body to nil", err)
 			r.Body = nil
 		} else {
 			r.Body = io.NopCloser(bytes.NewReader(b))
