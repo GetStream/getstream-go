@@ -878,7 +878,9 @@ func TestEnableCallRecordingAndBackstageMode(t *testing.T) {
 		response, err := call.Update(ctx, &UpdateCallRequest{
 			SettingsOverride: &CallSettingsRequest{
 				Recording: &RecordSettingsRequest{
-					Mode: "available",
+					Mode:    "available",
+					// Backend API issue so we have to provide quality here
+					Quality: PtrTo("1080p"),
 				},
 			},
 		})
