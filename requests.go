@@ -788,6 +788,7 @@ type UpsertConfigRequest struct {
 	BlockListConfig                    *BlockListConfig                    `json:"block_list_config"`
 	BodyguardConfig                    *AITextConfig                       `json:"bodyguard_config"`
 	GoogleVisionConfig                 *GoogleVisionConfig                 `json:"google_vision_config"`
+	RuleBuilderConfig                  *RuleBuilderConfig                  `json:"rule_builder_config"`
 	User                               *UserRequest                        `json:"user"`
 	VelocityFilterConfig               *VelocityFilterConfig               `json:"velocity_filter_config"`
 }
