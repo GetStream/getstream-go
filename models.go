@@ -317,7 +317,7 @@ type AsyncExportErrorEvent struct {
 }
 
 func (*AsyncExportErrorEvent) GetEventType() string {
-	return "export.channels.error"
+	return "export.moderation_logs.error"
 }
 
 type AsyncExportModerationLogsEvent struct {
@@ -5102,7 +5102,7 @@ type MessageNewEvent struct {
 }
 
 func (*MessageNewEvent) GetEventType() string {
-	return "notification.thread_message_new"
+	return "message.new"
 }
 
 type MessageOptions struct {
@@ -7306,6 +7306,48 @@ type Role struct {
 	Scopes []string `json:"scopes"`
 }
 
+type RuleBuilderAction struct {
+	Duration *int `json:"duration,omitempty"`
+
+	IpBan *bool `json:"ip_ban,omitempty"`
+
+	Reason *string `json:"reason,omitempty"`
+
+	ShadowBan *bool `json:"shadow_ban,omitempty"`
+
+	Type *string `json:"type,omitempty"`
+}
+
+type RuleBuilderCondition struct {
+	Provider *string `json:"provider,omitempty"`
+
+	Threshold *int `json:"threshold,omitempty"`
+
+	TimeWindow *string `json:"time_window,omitempty"`
+
+	Labels []string `json:"labels,omitempty"`
+}
+
+type RuleBuilderConfig struct {
+	Async *bool `json:"async,omitempty"`
+
+	Enabled *bool `json:"enabled,omitempty"`
+
+	Rules []RuleBuilderRule `json:"rules,omitempty"`
+}
+
+type RuleBuilderRule struct {
+	Enabled *bool `json:"enabled,omitempty"`
+
+	ID *string `json:"id,omitempty"`
+
+	Name *string `json:"name,omitempty"`
+
+	Conditions []RuleBuilderCondition `json:"conditions,omitempty"`
+
+	Action *RuleBuilderAction `json:"action,omitempty"`
+}
+
 // Config for creating Amazon S3 storage.
 type S3Request struct {
 	// The AWS region where the bucket is hosted
@@ -7313,6 +7355,9 @@ type S3Request struct {
 
 	// The AWS API key. To use Amazon S3 as your storage provider, you have two authentication options: IAM role or API key. If you do not specify the `s3_api_key` parameter, Stream will use IAM role authentication. In that case make sure to have the correct IAM role configured for your application.
 	S3APIKey *string `json:"s3_api_key,omitempty"`
+
+	// The custom endpoint for S3. If you want to use a custom endpoint, you must also provide the `s3_api_key` and `s3_secret` parameters.
+	S3CustomEndpointUrl *string `json:"s3_custom_endpoint_url,omitempty"`
 
 	// The AWS API Secret
 	S3Secret *string `json:"s3_secret,omitempty"`
