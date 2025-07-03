@@ -5,49 +5,51 @@ type GetAppRequest struct {
 }
 
 type UpdateAppRequest struct {
-	AsyncUrlEnrichEnabled      *bool                         `json:"async_url_enrich_enabled"`
-	AutoTranslationEnabled     *bool                         `json:"auto_translation_enabled"`
-	BeforeMessageSendHookUrl   *string                       `json:"before_message_send_hook_url"`
-	CdnExpirationSeconds       *int                          `json:"cdn_expiration_seconds"`
-	ChannelHideMembersOnly     *bool                         `json:"channel_hide_members_only"`
-	CustomActionHandlerUrl     *string                       `json:"custom_action_handler_url"`
-	DisableAuthChecks          *bool                         `json:"disable_auth_checks"`
-	DisablePermissionsChecks   *bool                         `json:"disable_permissions_checks"`
-	EnforceUniqueUsernames     *string                       `json:"enforce_unique_usernames"`
-	FeedsModerationEnabled     *bool                         `json:"feeds_moderation_enabled"`
-	FeedsV2Region              *string                       `json:"feeds_v2_region"`
-	GuestUserCreationDisabled  *bool                         `json:"guest_user_creation_disabled"`
-	ImageModerationEnabled     *bool                         `json:"image_moderation_enabled"`
-	MigratePermissionsToV2     *bool                         `json:"migrate_permissions_to_v2"`
-	ModerationEnabled          *bool                         `json:"moderation_enabled"`
-	ModerationWebhookUrl       *string                       `json:"moderation_webhook_url"`
-	MultiTenantEnabled         *bool                         `json:"multi_tenant_enabled"`
-	PermissionVersion          *string                       `json:"permission_version"`
-	RemindersInterval          *int                          `json:"reminders_interval"`
-	RemindersMaxMembers        *int                          `json:"reminders_max_members"`
-	RevokeTokensIssuedBefore   *Timestamp                    `json:"revoke_tokens_issued_before"`
-	SnsKey                     *string                       `json:"sns_key"`
-	SnsSecret                  *string                       `json:"sns_secret"`
-	SnsTopicArn                *string                       `json:"sns_topic_arn"`
-	SqsKey                     *string                       `json:"sqs_key"`
-	SqsSecret                  *string                       `json:"sqs_secret"`
-	SqsUrl                     *string                       `json:"sqs_url"`
-	WebhookUrl                 *string                       `json:"webhook_url"`
-	AllowedFlagReasons         []string                      `json:"allowed_flag_reasons"`
-	ImageModerationBlockLabels []string                      `json:"image_moderation_block_labels"`
-	ImageModerationLabels      []string                      `json:"image_moderation_labels"`
-	UserSearchDisallowedRoles  []string                      `json:"user_search_disallowed_roles"`
-	WebhookEvents              []string                      `json:"webhook_events"`
-	ApnConfig                  *APNConfig                    `json:"apn_config"`
-	AsyncModerationConfig      *AsyncModerationConfiguration `json:"async_moderation_config"`
-	DatadogInfo                *DataDogInfo                  `json:"datadog_info"`
-	FileUploadConfig           *FileUploadConfig             `json:"file_upload_config"`
-	FirebaseConfig             *FirebaseConfig               `json:"firebase_config"`
-	Grants                     map[string][]string           `json:"grants"`
-	HuaweiConfig               *HuaweiConfig                 `json:"huawei_config"`
-	ImageUploadConfig          *FileUploadConfig             `json:"image_upload_config"`
-	PushConfig                 *PushConfig                   `json:"push_config"`
-	XiaomiConfig               *XiaomiConfig                 `json:"xiaomi_config"`
+	AsyncUrlEnrichEnabled          *bool                           `json:"async_url_enrich_enabled"`
+	AutoTranslationEnabled         *bool                           `json:"auto_translation_enabled"`
+	BeforeMessageSendHookUrl       *string                         `json:"before_message_send_hook_url"`
+	CdnExpirationSeconds           *int                            `json:"cdn_expiration_seconds"`
+	ChannelHideMembersOnly         *bool                           `json:"channel_hide_members_only"`
+	CustomActionHandlerUrl         *string                         `json:"custom_action_handler_url"`
+	DisableAuthChecks              *bool                           `json:"disable_auth_checks"`
+	DisablePermissionsChecks       *bool                           `json:"disable_permissions_checks"`
+	EnforceUniqueUsernames         *string                         `json:"enforce_unique_usernames"`
+	FeedsModerationEnabled         *bool                           `json:"feeds_moderation_enabled"`
+	FeedsV2Region                  *string                         `json:"feeds_v2_region"`
+	GuestUserCreationDisabled      *bool                           `json:"guest_user_creation_disabled"`
+	ImageModerationEnabled         *bool                           `json:"image_moderation_enabled"`
+	MigratePermissionsToV2         *bool                           `json:"migrate_permissions_to_v2"`
+	ModerationEnabled              *bool                           `json:"moderation_enabled"`
+	ModerationWebhookUrl           *string                         `json:"moderation_webhook_url"`
+	MultiTenantEnabled             *bool                           `json:"multi_tenant_enabled"`
+	PermissionVersion              *string                         `json:"permission_version"`
+	RemindersInterval              *int                            `json:"reminders_interval"`
+	RemindersMaxMembers            *int                            `json:"reminders_max_members"`
+	RevokeTokensIssuedBefore       *Timestamp                      `json:"revoke_tokens_issued_before"`
+	SnsKey                         *string                         `json:"sns_key"`
+	SnsSecret                      *string                         `json:"sns_secret"`
+	SnsTopicArn                    *string                         `json:"sns_topic_arn"`
+	SqsKey                         *string                         `json:"sqs_key"`
+	SqsSecret                      *string                         `json:"sqs_secret"`
+	SqsUrl                         *string                         `json:"sqs_url"`
+	WebhookUrl                     *string                         `json:"webhook_url"`
+	AllowedFlagReasons             []string                        `json:"allowed_flag_reasons"`
+	EventHooks                     []EventHook                     `json:"event_hooks"`
+	ImageModerationBlockLabels     []string                        `json:"image_moderation_block_labels"`
+	ImageModerationLabels          []string                        `json:"image_moderation_labels"`
+	UserSearchDisallowedRoles      []string                        `json:"user_search_disallowed_roles"`
+	WebhookEvents                  []string                        `json:"webhook_events"`
+	ApnConfig                      *APNConfig                      `json:"apn_config"`
+	AsyncModerationConfig          *AsyncModerationConfiguration   `json:"async_moderation_config"`
+	DatadogInfo                    *DataDogInfo                    `json:"datadog_info"`
+	FileUploadConfig               *FileUploadConfig               `json:"file_upload_config"`
+	FirebaseConfig                 *FirebaseConfig                 `json:"firebase_config"`
+	Grants                         map[string][]string             `json:"grants"`
+	HuaweiConfig                   *HuaweiConfig                   `json:"huawei_config"`
+	ImageUploadConfig              *FileUploadConfig               `json:"image_upload_config"`
+	ModerationDashboardPreferences *ModerationDashboardPreferences `json:"moderation_dashboard_preferences"`
+	PushConfig                     *PushConfig                     `json:"push_config"`
+	XiaomiConfig                   *XiaomiConfig                   `json:"xiaomi_config"`
 }
 
 type ListBlockListsRequest struct {
@@ -245,6 +247,7 @@ type TruncateChannelRequest struct {
 	SkipPush    *bool           `json:"skip_push"`
 	TruncatedAt *Timestamp      `json:"truncated_at"`
 	UserID      *string         `json:"user_id"`
+	MemberIds   []string        `json:"member_ids"`
 	Message     *MessageRequest `json:"message"`
 	User        *UserRequest    `json:"user"`
 }
@@ -279,10 +282,12 @@ type CreateChannelTypeRequest struct {
 	ReadEvents                     *bool               `json:"read_events"`
 	Replies                        *bool               `json:"replies"`
 	Search                         *bool               `json:"search"`
+	SharedLocations                *bool               `json:"shared_locations"`
 	SkipLastMsgUpdateForSystemMsgs *bool               `json:"skip_last_msg_update_for_system_msgs"`
 	TypingEvents                   *bool               `json:"typing_events"`
 	Uploads                        *bool               `json:"uploads"`
 	UrlEnrichment                  *bool               `json:"url_enrichment"`
+	UserMessageReminders           *bool               `json:"user_message_reminders"`
 	Blocklists                     []BlockListOptions  `json:"blocklists"`
 	Commands                       []string            `json:"commands"`
 	Permissions                    []PolicyRequest     `json:"permissions"`
@@ -315,10 +320,12 @@ type UpdateChannelTypeRequest struct {
 	Reminders                      *bool               `json:"reminders"`
 	Replies                        *bool               `json:"replies"`
 	Search                         *bool               `json:"search"`
+	SharedLocations                *bool               `json:"shared_locations"`
 	SkipLastMsgUpdateForSystemMsgs *bool               `json:"skip_last_msg_update_for_system_msgs"`
 	TypingEvents                   *bool               `json:"typing_events"`
 	Uploads                        *bool               `json:"uploads"`
 	UrlEnrichment                  *bool               `json:"url_enrichment"`
+	UserMessageReminders           *bool               `json:"user_message_reminders"`
 	AllowedFlagReasons             []string            `json:"allowed_flag_reasons"`
 	Blocklists                     []BlockListOptions  `json:"blocklists"`
 	Commands                       []string            `json:"commands"`
@@ -392,6 +399,7 @@ type GetMessageRequest struct {
 type UpdateMessageRequest struct {
 	Message       MessageRequest `json:"message"`
 	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
+	SkipPush      *bool          `json:"skip_push"`
 }
 
 type UpdateMessagePartialRequest struct {
@@ -443,6 +451,7 @@ type TranslateMessageRequest struct {
 type UndeleteMessageRequest struct {
 	Message       MessageRequest `json:"message"`
 	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
+	SkipPush      *bool          `json:"skip_push"`
 }
 
 type CastPollVoteRequest struct {
@@ -453,6 +462,22 @@ type CastPollVoteRequest struct {
 
 type RemovePollVoteRequest struct {
 	UserID *string `json:"-" query:"user_id"`
+}
+
+type DeleteReminderRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type UpdateReminderRequest struct {
+	RemindAt *Timestamp   `json:"remind_at"`
+	UserID   *string      `json:"user_id"`
+	User     *UserRequest `json:"user"`
+}
+
+type CreateReminderRequest struct {
+	RemindAt *Timestamp   `json:"remind_at"`
+	UserID   *string      `json:"user_id"`
+	User     *UserRequest `json:"user"`
 }
 
 type GetRepliesRequest struct {
@@ -582,8 +607,31 @@ type UpdatePushNotificationPreferencesRequest struct {
 	Preferences []PushPreferenceInput `json:"preferences"`
 }
 
+type GetPushTemplatesRequest struct {
+	PushProviderType string  `json:"-" query:"push_provider_type"`
+	PushProviderName *string `json:"-" query:"push_provider_name"`
+}
+
+type UpsertPushTemplateRequest struct {
+	EventType        string  `json:"event_type"`
+	PushProviderType string  `json:"push_provider_type"`
+	EnablePush       *bool   `json:"enable_push"`
+	PushProviderName *string `json:"push_provider_name"`
+	Template         *string `json:"template"`
+}
+
 type QueryBannedUsersRequest struct {
 	Payload *QueryBannedUsersPayload `json:"-" query:"payload"`
+}
+
+type QueryRemindersRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	UserID *string            `json:"user_id"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+	User   *UserRequest       `json:"user"`
 }
 
 type SearchRequest struct {
@@ -658,6 +706,7 @@ type SendUserCustomEventRequest struct {
 
 type CheckPushRequest struct {
 	ApnTemplate          *string      `json:"apn_template"`
+	EventType            *string      `json:"event_type"`
 	FirebaseDataTemplate *string      `json:"firebase_data_template"`
 	FirebaseTemplate     *string      `json:"firebase_template"`
 	MessageID            *string      `json:"message_id"`
@@ -750,14 +799,19 @@ type GetImportRequest struct {
 }
 
 type BanRequest struct {
-	TargetUserID string       `json:"target_user_id"`
-	BannedByID   *string      `json:"banned_by_id"`
-	ChannelCid   *string      `json:"channel_cid"`
-	IpBan        *bool        `json:"ip_ban"`
-	Reason       *string      `json:"reason"`
-	Shadow       *bool        `json:"shadow"`
-	Timeout      *int         `json:"timeout"`
-	BannedBy     *UserRequest `json:"banned_by"`
+	TargetUserID   string       `json:"target_user_id"`
+	BannedByID     *string      `json:"banned_by_id"`
+	ChannelCid     *string      `json:"channel_cid"`
+	DeleteMessages *string      `json:"delete_messages"`
+	IpBan          *bool        `json:"ip_ban"`
+	Reason         *string      `json:"reason"`
+	Shadow         *bool        `json:"shadow"`
+	Timeout        *int         `json:"timeout"`
+	BannedBy       *UserRequest `json:"banned_by"`
+}
+
+type BulkImageModerationRequest struct {
+	CsvFile string `json:"csv_file"`
 }
 
 type CheckRequest struct {
@@ -791,6 +845,7 @@ type UpsertConfigRequest struct {
 	RuleBuilderConfig                  *RuleBuilderConfig                  `json:"rule_builder_config"`
 	User                               *UserRequest                        `json:"user"`
 	VelocityFilterConfig               *VelocityFilterConfig               `json:"velocity_filter_config"`
+	VideoCallRuleConfig                *VideoCallRuleConfig                `json:"video_call_rule_config"`
 }
 
 type DeleteConfigRequest struct {
@@ -841,6 +896,14 @@ type FlagRequest struct {
 	Custom            map[string]any     `json:"custom"`
 	ModerationPayload *ModerationPayload `json:"moderation_payload"`
 	User              *UserRequest       `json:"user"`
+}
+
+type QueryModerationFlagsRequest struct {
+	Limit  *int           `json:"limit"`
+	Next   *string        `json:"next"`
+	Prev   *string        `json:"prev"`
+	Sort   []SortParam    `json:"sort"`
+	Filter map[string]any `json:"filter"`
 }
 
 type QueryModerationLogsRequest struct {
@@ -984,6 +1047,19 @@ type DeleteUsersRequest struct {
 	NewCallOwnerID    *string  `json:"new_call_owner_id"`
 	NewChannelOwnerID *string  `json:"new_channel_owner_id"`
 	User              *string  `json:"user"`
+}
+
+type GetUserLiveLocationsRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type UpdateLiveLocationRequest struct {
+	UserID            *string    `json:"-" query:"user_id"`
+	CreatedByDeviceID string     `json:"created_by_device_id"`
+	MessageID         string     `json:"message_id"`
+	EndAt             *Timestamp `json:"end_at"`
+	Latitude          *float64   `json:"latitude"`
+	Longitude         *float64   `json:"longitude"`
 }
 
 type ReactivateUsersRequest struct {
@@ -1248,6 +1324,59 @@ type UpdateCallTypeRequest struct {
 }
 
 type GetEdgesRequest struct {
+}
+
+type ResolveSipInboundRequest struct {
+	SipCallerNumber string            `json:"sip_caller_number"`
+	SipTrunkNumber  string            `json:"sip_trunk_number"`
+	Challenge       SIPChallenge      `json:"challenge"`
+	SipHeaders      map[string]string `json:"sip_headers"`
+}
+
+type ListSIPInboundRoutingRuleRequest struct {
+}
+
+type CreateSIPInboundRoutingRuleRequest struct {
+	Name                 string                                  `json:"name"`
+	TrunkIds             []string                                `json:"trunk_ids"`
+	CallerConfigs        SIPCallerConfigsRequest                 `json:"caller_configs"`
+	CalledNumbers        []string                                `json:"called_numbers"`
+	CallerNumbers        []string                                `json:"caller_numbers"`
+	CallConfigs          *SIPCallConfigsRequest                  `json:"call_configs"`
+	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsRequest `json:"direct_routing_configs"`
+	PinProtectionConfigs *SIPPinProtectionConfigsRequest         `json:"pin_protection_configs"`
+	PinRoutingConfigs    *SIPInboundRoutingRulePinConfigsRequest `json:"pin_routing_configs"`
+}
+
+type DeleteSIPInboundRoutingRuleRequest struct {
+}
+
+type UpdateSIPInboundRoutingRuleRequest struct {
+	Name                 string                                  `json:"name"`
+	CalledNumbers        []string                                `json:"called_numbers"`
+	TrunkIds             []string                                `json:"trunk_ids"`
+	CallerConfigs        SIPCallerConfigsRequest                 `json:"caller_configs"`
+	CallerNumbers        []string                                `json:"caller_numbers"`
+	CallConfigs          *SIPCallConfigsRequest                  `json:"call_configs"`
+	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsRequest `json:"direct_routing_configs"`
+	PinProtectionConfigs *SIPPinProtectionConfigsRequest         `json:"pin_protection_configs"`
+	PinRoutingConfigs    *SIPInboundRoutingRulePinConfigsRequest `json:"pin_routing_configs"`
+}
+
+type ListSIPTrunksRequest struct {
+}
+
+type CreateSIPTrunkRequest struct {
+	Name    string   `json:"name"`
+	Numbers []string `json:"numbers"`
+}
+
+type DeleteSIPTrunkRequest struct {
+}
+
+type UpdateSIPTrunkRequest struct {
+	Name    string   `json:"name"`
+	Numbers []string `json:"numbers"`
 }
 
 type QueryAggregateCallStatsRequest struct {

@@ -254,6 +254,34 @@ func TestCommonGetTask(t *testing.T) {
 	_, err = client.GetTask(context.Background(), "", &getstream.GetTaskRequest{})
 	require.NoError(t, err)
 }
+func TestCommonDeleteFile(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.DeleteFile(context.Background(), &getstream.DeleteFileRequest{})
+	require.NoError(t, err)
+}
+func TestCommonUploadFile(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.UploadFile(context.Background(), &getstream.UploadFileRequest{})
+	require.NoError(t, err)
+}
+func TestCommonDeleteImage(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.DeleteImage(context.Background(), &getstream.DeleteImageRequest{})
+	require.NoError(t, err)
+}
+func TestCommonUploadImage(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.UploadImage(context.Background(), &getstream.UploadImageRequest{})
+	require.NoError(t, err)
+}
 func TestCommonQueryUsers(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -301,6 +329,20 @@ func TestCommonDeleteUsers(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.DeleteUsers(context.Background(), &getstream.DeleteUsersRequest{})
+	require.NoError(t, err)
+}
+func TestCommonGetUserLiveLocations(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.GetUserLiveLocations(context.Background(), &getstream.GetUserLiveLocationsRequest{})
+	require.NoError(t, err)
+}
+func TestCommonUpdateLiveLocation(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.UpdateLiveLocation(context.Background(), &getstream.UpdateLiveLocationRequest{})
 	require.NoError(t, err)
 }
 func TestCommonReactivateUsers(t *testing.T) {

@@ -394,6 +394,27 @@ func TestChatRemovePollVote(t *testing.T) {
 	_, err = client.Chat().RemovePollVote(context.Background(), "", "", "", &getstream.RemovePollVoteRequest{})
 	require.NoError(t, err)
 }
+func TestChatDeleteReminder(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().DeleteReminder(context.Background(), "", &getstream.DeleteReminderRequest{})
+	require.NoError(t, err)
+}
+func TestChatUpdateReminder(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().UpdateReminder(context.Background(), "", &getstream.UpdateReminderRequest{})
+	require.NoError(t, err)
+}
+func TestChatCreateReminder(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().CreateReminder(context.Background(), "", &getstream.CreateReminderRequest{})
+	require.NoError(t, err)
+}
 func TestChatGetReplies(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -506,11 +527,32 @@ func TestChatUpdatePushNotificationPreferences(t *testing.T) {
 	_, err = client.Chat().UpdatePushNotificationPreferences(context.Background(), &getstream.UpdatePushNotificationPreferencesRequest{})
 	require.NoError(t, err)
 }
+func TestChatGetPushTemplates(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().GetPushTemplates(context.Background(), &getstream.GetPushTemplatesRequest{})
+	require.NoError(t, err)
+}
+func TestChatUpsertPushTemplate(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().UpsertPushTemplate(context.Background(), &getstream.UpsertPushTemplateRequest{})
+	require.NoError(t, err)
+}
 func TestChatQueryBannedUsers(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
 	_, err = client.Chat().QueryBannedUsers(context.Background(), &getstream.QueryBannedUsersRequest{})
+	require.NoError(t, err)
+}
+func TestChatQueryReminders(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().QueryReminders(context.Background(), &getstream.QueryRemindersRequest{})
 	require.NoError(t, err)
 }
 func TestChatSearch(t *testing.T) {

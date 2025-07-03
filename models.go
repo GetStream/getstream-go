@@ -84,8 +84,6 @@ type APNConfigFields struct {
 
 	Enabled bool `json:"enabled"`
 
-	NotificationTemplate string `json:"notification_template"`
-
 	AuthKey *string `json:"auth_key,omitempty"`
 
 	AuthType *string `json:"auth_type,omitempty"`
@@ -96,6 +94,8 @@ type APNConfigFields struct {
 
 	KeyID *string `json:"key_id,omitempty"`
 
+	NotificationTemplate *string `json:"notification_template,omitempty"`
+
 	P12Cert *string `json:"p12_cert,omitempty"`
 
 	TeamID *string `json:"team_id,omitempty"`
@@ -105,6 +105,14 @@ type APNS struct {
 	Body string `json:"body"`
 
 	Title string `json:"title"`
+
+	ContentAvailable *int `json:"content-available,omitempty"`
+
+	MutableContent *int `json:"mutable-content,omitempty"`
+
+	Sound *string `json:"sound,omitempty"`
+
+	Data map[string]any `json:"data,omitempty"`
 }
 
 type AWSRekognitionRule struct {
@@ -125,30 +133,6 @@ type Action struct {
 	Style *string `json:"style,omitempty"`
 
 	Value *string `json:"value,omitempty"`
-}
-
-type ActionLog struct {
-	CreatedAt Timestamp `json:"created_at"`
-
-	ID string `json:"id"`
-
-	Reason string `json:"reason"`
-
-	ReporterType string `json:"reporter_type"`
-
-	ReviewQueueItemID string `json:"review_queue_item_id"`
-
-	TargetUserID string `json:"target_user_id"`
-
-	Type string `json:"type"`
-
-	Custom map[string]any `json:"custom"`
-
-	ReviewQueueItem *ReviewQueueItem `json:"review_queue_item,omitempty"`
-
-	TargetUser *User `json:"target_user,omitempty"`
-
-	User *User `json:"user,omitempty"`
 }
 
 type ActionLogResponse struct {
@@ -173,11 +157,27 @@ type ActionLogResponse struct {
 	// Additional metadata about the action
 	Custom map[string]any `json:"custom"`
 
-	ReviewQueueItem *ReviewQueueItem `json:"review_queue_item,omitempty"`
+	ReviewQueueItem *ReviewQueueItemResponse `json:"review_queue_item,omitempty"`
 
 	TargetUser *UserResponse `json:"target_user,omitempty"`
 
 	User *UserResponse `json:"user,omitempty"`
+}
+
+type ActionSequence struct {
+	Action string `json:"action"`
+
+	Blur bool `json:"blur"`
+
+	CooldownPeriod int `json:"cooldown_period"`
+
+	Threshold int `json:"threshold"`
+
+	TimeWindow int `json:"time_window"`
+
+	Warning bool `json:"warning"`
+
+	WarningText string `json:"warning_text"`
 }
 
 type AnyEvent struct {
@@ -243,7 +243,11 @@ type AppResponseFields struct {
 
 	SuspendedExplanation string `json:"suspended_explanation"`
 
+	UseHookV2 bool `json:"use_hook_v2"`
+
 	WebhookUrl string `json:"webhook_url"`
+
+	EventHooks []EventHook `json:"event_hooks"`
 
 	UserSearchDisallowedRoles []string `json:"user_search_disallowed_roles"`
 
@@ -251,7 +255,7 @@ type AppResponseFields struct {
 
 	CallTypes map[string]*CallType `json:"call_types"`
 
-	ChannelConfigs map[string]*ChannelConfig `json:"channel_configs"`
+	ChannelConfigs map[string]ChannelConfig `json:"channel_configs"`
 
 	FileUploadConfig FileUploadConfig `json:"file_upload_config"`
 
@@ -274,6 +278,30 @@ type AppResponseFields struct {
 	ImageModerationLabels []string `json:"image_moderation_labels,omitempty"`
 
 	DatadogInfo *DataDogInfo `json:"datadog_info,omitempty"`
+
+	ModerationDashboardPreferences *ModerationDashboardPreferences `json:"moderation_dashboard_preferences,omitempty"`
+}
+
+type AsyncBulkImageModerationEvent struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	FinishedAt Timestamp `json:"finished_at"`
+
+	StartedAt Timestamp `json:"started_at"`
+
+	TaskID string `json:"task_id"`
+
+	Url string `json:"url"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*AsyncBulkImageModerationEvent) GetEventType() string {
+	return "export.bulk_image_moderation.success"
 }
 
 type AsyncExportChannelsEvent struct {
@@ -317,7 +345,7 @@ type AsyncExportErrorEvent struct {
 }
 
 func (*AsyncExportErrorEvent) GetEventType() string {
-	return "export.moderation_logs.error"
+	return "export.channels.error"
 }
 
 type AsyncExportModerationLogsEvent struct {
@@ -398,12 +426,6 @@ type Attachment struct {
 
 	ImageUrl *string `json:"image_url,omitempty"`
 
-	// The latitude of the location
-	Latitude *float64 `json:"latitude,omitempty"`
-
-	// The longitude of the location
-	Longitude *float64 `json:"longitude,omitempty"`
-
 	OGScrapeUrl *string `json:"og_scrape_url,omitempty"`
 
 	OriginalHeight *int `json:"original_height,omitempty"`
@@ -411,9 +433,6 @@ type Attachment struct {
 	OriginalWidth *int `json:"original_width,omitempty"`
 
 	Pretext *string `json:"pretext,omitempty"`
-
-	// If the user has stopped sharing their location
-	StoppedSharing *bool `json:"stopped_sharing,omitempty"`
 
 	Text *string `json:"text,omitempty"`
 
@@ -584,6 +603,8 @@ type Ban struct {
 
 type BanActionRequest struct {
 	ChannelBanOnly *bool `json:"channel_ban_only,omitempty"`
+
+	DeleteMessages *string `json:"delete_messages,omitempty"`
 
 	IpBan *bool `json:"ip_ban,omitempty"`
 
@@ -760,6 +781,13 @@ type BrowserDataResponse struct {
 	Version *string `json:"version,omitempty"`
 }
 
+type BulkImageModerationResponse struct {
+	Duration string `json:"duration"`
+
+	// ID of the task for processing the bulk image moderation
+	TaskID string `json:"task_id"`
+}
+
 // This event is sent when a user accepts a notification to join a call.
 type CallAcceptedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -887,6 +915,9 @@ type CallEndedEvent struct {
 
 	// The type of event: "call.ended" in this case
 	Type string `json:"type"`
+
+	// The reason why the call ended, if available
+	Reason *string `json:"reason,omitempty"`
 
 	User *UserResponse `json:"user,omitempty"`
 }
@@ -1150,6 +1181,40 @@ type CallMissedEvent struct {
 
 func (*CallMissedEvent) GetEventType() string {
 	return "call.missed"
+}
+
+type CallModerationBlurEvent struct {
+	CallCid string `json:"call_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	UserID string `json:"user_id"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+}
+
+func (*CallModerationBlurEvent) GetEventType() string {
+	return "call.moderation_blur"
+}
+
+type CallModerationWarningEvent struct {
+	CallCid string `json:"call_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	Message string `json:"message"`
+
+	UserID string `json:"user_id"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+}
+
+func (*CallModerationWarningEvent) GetEventType() string {
+	return "call.moderation_warning"
 }
 
 // This event is sent to all call members to notify they are getting called
@@ -1719,6 +1784,8 @@ type CallTranscription struct {
 
 	Filename string `json:"filename"`
 
+	SessionID string `json:"session_id"`
+
 	StartTime Timestamp `json:"start_time"`
 
 	Url string `json:"url"`
@@ -1734,6 +1801,9 @@ type CallTranscriptionFailedEvent struct {
 
 	// The type of event: "call.transcription_failed" in this case
 	Type string `json:"type"`
+
+	// The error message detailing why transcription failed.
+	Error *string `json:"error,omitempty"`
 }
 
 func (*CallTranscriptionFailedEvent) GetEventType() string {
@@ -1794,8 +1864,6 @@ type CallType struct {
 	AppPK int `json:"AppPK"`
 
 	CreatedAt Timestamp `json:"CreatedAt"`
-
-	EnableLiveInsights bool `json:"EnableLiveInsights"`
 
 	ExternalStorage string `json:"ExternalStorage"`
 
@@ -2059,6 +2127,8 @@ type Channel struct {
 
 	Team *string `json:"team,omitempty"`
 
+	ActiveLiveLocations []SharedLocation `json:"active_live_locations,omitempty"`
+
 	Invites []ChannelMember `json:"invites,omitempty"`
 
 	Members []ChannelMember `json:"members,omitempty"`
@@ -2107,6 +2177,8 @@ type ChannelConfig struct {
 
 	Search bool `json:"search"`
 
+	SharedLocations bool `json:"shared_locations"`
+
 	SkipLastMsgUpdateForSystemMsgs bool `json:"skip_last_msg_update_for_system_msgs"`
 
 	TypingEvents bool `json:"typing_events"`
@@ -2117,7 +2189,8 @@ type ChannelConfig struct {
 
 	UrlEnrichment bool `json:"url_enrichment"`
 
-	// List of commands that channel supports
+	UserMessageReminders bool `json:"user_message_reminders"`
+
 	Commands []string `json:"commands"`
 
 	Blocklist *string `json:"blocklist,omitempty"`
@@ -2126,7 +2199,7 @@ type ChannelConfig struct {
 
 	PartitionSize *int `json:"partition_size,omitempty"`
 
-	PartitionTtl *string `json:"partition_ttl,omitempty"`
+	PartitionTtl *int `json:"partition_ttl,omitempty"`
 
 	AllowedFlagReasons []string `json:"allowed_flag_reasons,omitempty"`
 
@@ -2170,6 +2243,8 @@ type ChannelConfigWithInfo struct {
 
 	Search bool `json:"search"`
 
+	SharedLocations bool `json:"shared_locations"`
+
 	SkipLastMsgUpdateForSystemMsgs bool `json:"skip_last_msg_update_for_system_msgs"`
 
 	TypingEvents bool `json:"typing_events"`
@@ -2179,6 +2254,8 @@ type ChannelConfigWithInfo struct {
 	Uploads bool `json:"uploads"`
 
 	UrlEnrichment bool `json:"url_enrichment"`
+
+	UserMessageReminders bool `json:"user_message_reminders"`
 
 	Commands []Command `json:"commands"`
 
@@ -2497,6 +2574,7 @@ const (
 	SEND_RESTRICTED_VISIBILITY_MESSAGE ChannelOwnCapability = "send-restricted-visibility-message"
 	SEND_TYPING_EVENTS                 ChannelOwnCapability = "send-typing-events"
 	SET_CHANNEL_COOLDOWN               ChannelOwnCapability = "set-channel-cooldown"
+	SHARE_LOCATION                     ChannelOwnCapability = "share-location"
 	SKIP_SLOW_MODE                     ChannelOwnCapability = "skip-slow-mode"
 	SLOW_MODE                          ChannelOwnCapability = "slow-mode"
 	TYPING_EVENTS                      ChannelOwnCapability = "typing-events"
@@ -2612,6 +2690,8 @@ type ChannelStateResponse struct {
 
 	WatcherCount *int `json:"watcher_count,omitempty"`
 
+	ActiveLiveLocations []SharedLocationResponseData `json:"active_live_locations,omitempty"`
+
 	PendingMessages []PendingMessageResponse `json:"pending_messages,omitempty"`
 
 	Read []ReadStateResponse `json:"read,omitempty"`
@@ -2647,6 +2727,9 @@ type ChannelStateResponseFields struct {
 
 	// Number of channel watchers
 	WatcherCount *int `json:"watcher_count,omitempty"`
+
+	// Active live locations in the channel
+	ActiveLiveLocations []SharedLocationResponseData `json:"active_live_locations,omitempty"`
 
 	// Pending messages that this user has sent
 	PendingMessages []PendingMessageResponse `json:"pending_messages,omitempty"`
@@ -2721,6 +2804,8 @@ type ChannelTypeConfig struct {
 
 	Search bool `json:"search"`
 
+	SharedLocations bool `json:"shared_locations"`
+
 	SkipLastMsgUpdateForSystemMsgs bool `json:"skip_last_msg_update_for_system_msgs"`
 
 	TypingEvents bool `json:"typing_events"`
@@ -2730,6 +2815,8 @@ type ChannelTypeConfig struct {
 	Uploads bool `json:"uploads"`
 
 	UrlEnrichment bool `json:"url_enrichment"`
+
+	UserMessageReminders bool `json:"user_message_reminders"`
 
 	Commands []Command `json:"commands"`
 
@@ -2837,6 +2924,9 @@ type CheckExternalStorageResponse struct {
 type CheckPushResponse struct {
 	Duration string `json:"duration"`
 
+	// The event type that was tested
+	EventType *string `json:"event_type,omitempty"`
+
 	RenderedApnTemplate *string `json:"rendered_apn_template,omitempty"`
 
 	RenderedFirebaseTemplate *string `json:"rendered_firebase_template,omitempty"`
@@ -2865,7 +2955,7 @@ type CheckResponse struct {
 	// ID of the running moderation task
 	TaskID *string `json:"task_id,omitempty"`
 
-	Item *ReviewQueueItem `json:"item,omitempty"`
+	Item *ReviewQueueItemResponse `json:"item,omitempty"`
 }
 
 type CheckSNSResponse struct {
@@ -2962,11 +3052,15 @@ type ConfigOverrides struct {
 
 	Replies *bool `json:"replies,omitempty"`
 
+	SharedLocations *bool `json:"shared_locations,omitempty"`
+
 	TypingEvents *bool `json:"typing_events,omitempty"`
 
 	Uploads *bool `json:"uploads,omitempty"`
 
 	UrlEnrichment *bool `json:"url_enrichment,omitempty"`
+
+	UserMessageReminders *bool `json:"user_message_reminders,omitempty"`
 }
 
 type ConfigResponse struct {
@@ -3000,6 +3094,8 @@ type ConfigResponse struct {
 	BlockListConfig *BlockListConfig `json:"block_list_config,omitempty"`
 
 	VelocityFilterConfig *VelocityFilterConfig `json:"velocity_filter_config,omitempty"`
+
+	VideoCallRuleConfig *VideoCallRuleConfig `json:"video_call_rule_config,omitempty"`
 }
 
 type CountByMinuteResponse struct {
@@ -3077,6 +3173,8 @@ type CreateChannelTypeResponse struct {
 
 	Search bool `json:"search"`
 
+	SharedLocations bool `json:"shared_locations"`
+
 	SkipLastMsgUpdateForSystemMsgs bool `json:"skip_last_msg_update_for_system_msgs"`
 
 	TypingEvents bool `json:"typing_events"`
@@ -3086,6 +3184,8 @@ type CreateChannelTypeResponse struct {
 	Uploads bool `json:"uploads"`
 
 	UrlEnrichment bool `json:"url_enrichment"`
+
+	UserMessageReminders bool `json:"user_message_reminders"`
 
 	Commands []string `json:"commands"`
 
@@ -3154,6 +3254,13 @@ type CreateRoleResponse struct {
 	Duration string `json:"duration"`
 
 	Role Role `json:"role"`
+}
+
+// Response containing the created SIP trunk
+type CreateSIPTrunkResponse struct {
+	Duration string `json:"duration"`
+
+	SipTrunk *SIPTrunkResponse `json:"sip_trunk,omitempty"`
 }
 
 type CustomActionRequest struct {
@@ -3349,6 +3456,22 @@ type DeleteReactionResponse struct {
 // Response for DeleteRecording
 type DeleteRecordingResponse struct {
 	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+}
+
+// Basic response information
+type DeleteReminderResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+}
+
+// Response confirming SIP Inbound Routing Rule deletion
+type DeleteSIPInboundRoutingRuleResponse struct {
+	Duration string `json:"duration"`
+}
+
+// Response confirming SIP trunk deletion
+type DeleteSIPTrunkResponse struct {
 	Duration string `json:"duration"`
 }
 
@@ -3587,48 +3710,6 @@ type EnrichedReaction struct {
 	User *Data `json:"user,omitempty"`
 }
 
-type EntityCreator struct {
-	BanCount int `json:"ban_count"`
-
-	Banned bool `json:"banned"`
-
-	DeletedContentCount int `json:"deleted_content_count"`
-
-	ID string `json:"id"`
-
-	Online bool `json:"online"`
-
-	Role string `json:"role"`
-
-	Custom map[string]any `json:"custom"`
-
-	TeamsRole map[string]string `json:"teams_role"`
-
-	BanExpires *Timestamp `json:"ban_expires,omitempty"`
-
-	CreatedAt *Timestamp `json:"created_at,omitempty"`
-
-	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
-
-	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
-
-	Invisible *bool `json:"invisible,omitempty"`
-
-	Language *string `json:"language,omitempty"`
-
-	LastActive *Timestamp `json:"last_active,omitempty"`
-
-	LastEngagedAt *Timestamp `json:"last_engaged_at,omitempty"`
-
-	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
-
-	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
-
-	Teams []string `json:"teams,omitempty"`
-
-	PrivacySettings *PrivacySettings `json:"privacy_settings,omitempty"`
-}
-
 type EntityCreatorResponse struct {
 	// Number of minor actions performed on the user
 	BanCount int `json:"ban_count"`
@@ -3694,10 +3775,56 @@ type ErrorResult struct {
 	Version *string `json:"version,omitempty"`
 }
 
+type EventHook struct {
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
+
+	Enabled *bool `json:"enabled,omitempty"`
+
+	HookType *string `json:"hook_type,omitempty"`
+
+	ID *string `json:"id,omitempty"`
+
+	SnsAuthType *string `json:"sns_auth_type,omitempty"`
+
+	SnsKey *string `json:"sns_key,omitempty"`
+
+	SnsRegion *string `json:"sns_region,omitempty"`
+
+	SnsRoleArn *string `json:"sns_role_arn,omitempty"`
+
+	SnsSecret *string `json:"sns_secret,omitempty"`
+
+	SnsTopicArn *string `json:"sns_topic_arn,omitempty"`
+
+	SqsAuthType *string `json:"sqs_auth_type,omitempty"`
+
+	SqsKey *string `json:"sqs_key,omitempty"`
+
+	SqsQueueUrl *string `json:"sqs_queue_url,omitempty"`
+
+	SqsRegion *string `json:"sqs_region,omitempty"`
+
+	SqsRoleArn *string `json:"sqs_role_arn,omitempty"`
+
+	SqsSecret *string `json:"sqs_secret,omitempty"`
+
+	TimeoutMs *int `json:"timeout_ms,omitempty"`
+
+	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
+
+	WebhookUrl *string `json:"webhook_url,omitempty"`
+
+	EventTypes []string `json:"event_types,omitempty"`
+
+	Callback *AsyncModerationCallbackConfig `json:"callback,omitempty"`
+}
+
 type EventNotificationSettings struct {
 	Enabled bool `json:"enabled"`
 
 	APNS APNS `json:"apns"`
+
+	Fcm FCM `json:"fcm"`
 }
 
 type EventRequest struct {
@@ -3759,6 +3886,10 @@ type ExternalStorageResponse struct {
 	Type string `json:"type"`
 }
 
+type FCM struct {
+	Data map[string]any `json:"data,omitempty"`
+}
+
 type FeedsModerationTemplateConfig struct {
 	ConfigKey string `json:"config_key"`
 
@@ -3818,15 +3949,15 @@ type FirebaseConfig struct {
 }
 
 type FirebaseConfigFields struct {
-	ApnTemplate string `json:"apn_template"`
-
-	DataTemplate string `json:"data_template"`
-
 	Enabled bool `json:"enabled"`
 
-	NotificationTemplate string `json:"notification_template"`
+	ApnTemplate *string `json:"apn_template,omitempty"`
 
 	CredentialsJson *string `json:"credentials_json,omitempty"`
+
+	DataTemplate *string `json:"data_template,omitempty"`
+
+	NotificationTemplate *string `json:"notification_template,omitempty"`
 
 	ServerKey *string `json:"server_key,omitempty"`
 }
@@ -3836,38 +3967,34 @@ type Flag struct {
 	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
 
-	// Unique identifier of the entity being flagged
-	EntityID string `json:"entity_id"`
-
-	// Type of entity being flagged (e.g., message, user)
-	EntityType string `json:"entity_type"`
+	CreatedByAutomod bool `json:"created_by_automod"`
 
 	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
 
-	// Result of bodyguard, API calls, our own AI etc
-	Result []map[string]any `json:"result"`
+	// Date of the approval
+	ApprovedAt *Timestamp `json:"approved_at,omitempty"`
 
-	// ID of the user who created the flagged entity
-	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
-
-	ModerationPayloadHash *string `json:"moderation_payload_hash,omitempty"`
-
-	// Optional explanation for why the content is being flagged
 	Reason *string `json:"reason,omitempty"`
 
-	// ID of the review queue item
-	ReviewQueueItemID *string `json:"review_queue_item_id,omitempty"`
+	// Date of the rejection
+	RejectedAt *Timestamp `json:"rejected_at,omitempty"`
 
-	Type *string `json:"type,omitempty"`
+	// Date of the review
+	ReviewedAt *Timestamp `json:"reviewed_at,omitempty"`
 
-	// Labels from bodyguard, API calls, our own AI etc
-	Labels []string `json:"labels,omitempty"`
+	ReviewedBy *string `json:"reviewed_by,omitempty"`
 
-	// Additional metadata about the flag
+	// ID of flagged message
+	TargetMessageID *string `json:"target_message_id,omitempty"`
+
 	Custom map[string]any `json:"custom,omitempty"`
 
-	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
+	Details *FlagDetails `json:"details,omitempty"`
+
+	TargetMessage *Message `json:"target_message,omitempty"`
+
+	TargetUser *User `json:"target_user,omitempty"`
 
 	User *User `json:"user,omitempty"`
 }
@@ -4067,6 +4194,8 @@ type GetCallReportResponse struct {
 
 	Report ReportResponse `json:"report"`
 
+	VideoReactions []VideoReactionsResponse `json:"video_reactions,omitempty"`
+
 	ChatActivity *ChatActivityStatsResponse `json:"chat_activity,omitempty"`
 }
 
@@ -4147,6 +4276,8 @@ type GetChannelTypeResponse struct {
 
 	Search bool `json:"search"`
 
+	SharedLocations bool `json:"shared_locations"`
+
 	SkipLastMsgUpdateForSystemMsgs bool `json:"skip_last_msg_update_for_system_msgs"`
 
 	TypingEvents bool `json:"typing_events"`
@@ -4156,6 +4287,8 @@ type GetChannelTypeResponse struct {
 	Uploads bool `json:"uploads"`
 
 	UrlEnrichment bool `json:"url_enrichment"`
+
+	UserMessageReminders bool `json:"user_message_reminders"`
 
 	Commands []Command `json:"commands"`
 
@@ -4276,10 +4409,6 @@ type GetOGResponse struct {
 	// URL of detected image
 	ImageUrl *string `json:"image_url,omitempty"`
 
-	Latitude *float64 `json:"latitude,omitempty"`
-
-	Longitude *float64 `json:"longitude,omitempty"`
-
 	// extracted url from the text
 	OGScrapeUrl *string `json:"og_scrape_url,omitempty"`
 
@@ -4288,8 +4417,6 @@ type GetOGResponse struct {
 	OriginalWidth *int `json:"original_width,omitempty"`
 
 	Pretext *string `json:"pretext,omitempty"`
-
-	StoppedSharing *bool `json:"stopped_sharing,omitempty"`
 
 	// og:description
 	Text *string `json:"text,omitempty"`
@@ -4323,6 +4450,14 @@ type GetOrCreateCallResponse struct {
 	OwnCapabilities []OwnCapability `json:"own_capabilities"`
 
 	Call CallResponse `json:"call"`
+}
+
+// Basic response information
+type GetPushTemplatesResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Templates []PushTemplate `json:"templates"`
 }
 
 type GetRateLimitsResponse struct {
@@ -4441,6 +4576,12 @@ type HLSSettingsResponse struct {
 	QualityTracks []string `json:"quality_tracks"`
 
 	Layout LayoutSettingsResponse `json:"layout"`
+}
+
+type HarmConfig struct {
+	Severity int `json:"severity"`
+
+	ActionSequences []ActionSequence `json:"action_sequences"`
 }
 
 // Basic response information
@@ -4618,21 +4759,33 @@ type LimitInfo struct {
 }
 
 type LimitsSettings struct {
+	MaxParticipantsExcludeRoles []string `json:"max_participants_exclude_roles"`
+
 	MaxDurationSeconds *int `json:"max_duration_seconds,omitempty"`
 
 	MaxParticipants *int `json:"max_participants,omitempty"`
+
+	MaxParticipantsExcludeOwner *bool `json:"max_participants_exclude_owner,omitempty"`
 }
 
 type LimitsSettingsRequest struct {
 	MaxDurationSeconds *int `json:"max_duration_seconds,omitempty"`
 
 	MaxParticipants *int `json:"max_participants,omitempty"`
+
+	MaxParticipantsExcludeOwner *bool `json:"max_participants_exclude_owner,omitempty"`
+
+	MaxParticipantsExcludeRoles []string `json:"max_participants_exclude_roles,omitempty"`
 }
 
 type LimitsSettingsResponse struct {
+	MaxParticipantsExcludeRoles []string `json:"max_participants_exclude_roles"`
+
 	MaxDurationSeconds *int `json:"max_duration_seconds,omitempty"`
 
 	MaxParticipants *int `json:"max_participants,omitempty"`
+
+	MaxParticipantsExcludeOwner *bool `json:"max_participants_exclude_owner,omitempty"`
 }
 
 // Basic response information
@@ -4717,6 +4870,22 @@ type ListRolesResponse struct {
 	Duration string `json:"duration"`
 
 	Roles []Role `json:"roles"`
+}
+
+// Response containing the list of SIP Inbound Routing Rules
+type ListSIPInboundRoutingRuleResponse struct {
+	Duration string `json:"duration"`
+
+	// List of SIP Inbound Routing Rules for the application
+	SipInboundRoutingRules []SIPInboundRoutingRuleResponse `json:"sip_inbound_routing_rules"`
+}
+
+// Response containing the list of SIP trunks
+type ListSIPTrunksResponse struct {
+	Duration string `json:"duration"`
+
+	// List of SIP trunks for the application
+	SipTrunks []SIPTrunkResponse `json:"sip_trunks"`
 }
 
 type ListTranscriptionsResponse struct {
@@ -4921,6 +5090,10 @@ type Message struct {
 
 	QuotedMessage *Message `json:"quoted_message,omitempty"`
 
+	Reminder *MessageReminder `json:"reminder,omitempty"`
+
+	SharedLocation *SharedLocation `json:"shared_location,omitempty"`
+
 	User *User `json:"user,omitempty"`
 }
 
@@ -5102,7 +5275,7 @@ type MessageNewEvent struct {
 }
 
 func (*MessageNewEvent) GetEventType() string {
-	return "message.new"
+	return "notification.thread_message_new"
 }
 
 type MessageOptions struct {
@@ -5131,6 +5304,28 @@ type MessageReadEvent struct {
 	Thread *ThreadResponse `json:"thread,omitempty"`
 
 	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+type MessageReminder struct {
+	ChannelCid string `json:"channel_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	MessageID string `json:"message_id"`
+
+	TaskID string `json:"task_id"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	UserID string `json:"user_id"`
+
+	RemindAt *Timestamp `json:"remind_at,omitempty"`
+
+	Channel *Channel `json:"channel,omitempty"`
+
+	Message *Message `json:"message,omitempty"`
+
+	User *User `json:"user,omitempty"`
 }
 
 type MessageRequest struct {
@@ -5169,6 +5364,8 @@ type MessageRequest struct {
 	RestrictedVisibility []string `json:"restricted_visibility,omitempty"`
 
 	Custom map[string]any `json:"custom,omitempty"`
+
+	SharedLocation *SharedLocation `json:"shared_location,omitempty"`
 
 	User *UserRequest `json:"user,omitempty"`
 }
@@ -5283,6 +5480,10 @@ type MessageResponse struct {
 	QuotedMessage *MessageResponse `json:"quoted_message,omitempty"`
 
 	ReactionGroups map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
+
+	Reminder *ReminderResponseData `json:"reminder,omitempty"`
+
+	SharedLocation *SharedLocationResponseData `json:"shared_location,omitempty"`
 }
 
 type MessageStatsResponse struct {
@@ -5473,6 +5674,10 @@ type MessageWithChannelResponse struct {
 	QuotedMessage *MessageResponse `json:"quoted_message,omitempty"`
 
 	ReactionGroups map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
+
+	Reminder *ReminderResponseData `json:"reminder,omitempty"`
+
+	SharedLocation *SharedLocationResponseData `json:"shared_location,omitempty"`
 }
 
 type ModerationActionConfig struct {
@@ -5516,20 +5721,65 @@ func (*ModerationCheckCompletedEvent) GetEventType() string {
 	return "moderation_check.completed"
 }
 
+// This event is sent when a custom moderation action is executed
 type ModerationCustomActionEvent struct {
+	// The ID of the custom action that was executed
+	ActionID string `json:"action_id"`
+
 	CreatedAt Timestamp `json:"created_at"`
+
+	Custom map[string]any `json:"custom"`
+
+	ReviewQueueItem ReviewQueueItemResponse `json:"review_queue_item"`
 
 	Type string `json:"type"`
 
-	Item *ReviewQueueItem `json:"item,omitempty"`
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
 
-	Message *Message `json:"message,omitempty"`
+	// Additional options passed to the custom action
+	ActionOptions map[string]any `json:"action_options,omitempty"`
 
-	User *User `json:"user,omitempty"`
+	Message *MessageResponse `json:"message,omitempty"`
 }
 
 func (*ModerationCustomActionEvent) GetEventType() string {
 	return "moderation.custom_action"
+}
+
+type ModerationDashboardPreferences struct {
+	MediaQueueBlurEnabled *bool `json:"media_queue_blur_enabled,omitempty"`
+}
+
+type ModerationFlagResponse struct {
+	CreatedAt string `json:"created_at"`
+
+	EntityID string `json:"entity_id"`
+
+	EntityType string `json:"entity_type"`
+
+	ID string `json:"id"`
+
+	UpdatedAt string `json:"updated_at"`
+
+	Type string `json:"type"`
+
+	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
+
+	Reason *string `json:"reason,omitempty"`
+
+	ReviewQueueItemID *string `json:"review_queue_item_id,omitempty"`
+
+	Labels []string `json:"labels,omitempty"`
+
+	Result []map[string]any `json:"result,omitempty"`
+
+	Custom map[string]any `json:"custom,omitempty"`
+
+	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
+
+	ReviewQueueItem *ReviewQueueItemResponse `json:"review_queue_item,omitempty"`
+
+	User *UserResponse `json:"user,omitempty"`
 }
 
 type ModerationFlaggedEvent struct {
@@ -5548,16 +5798,19 @@ func (*ModerationFlaggedEvent) GetEventType() string {
 	return "moderation.flagged"
 }
 
+// This event is sent when a moderation item is marked as reviewed
 type ModerationMarkReviewedEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 
+	Custom map[string]any `json:"custom"`
+
+	Item ReviewQueueItemResponse `json:"item"`
+
 	Type string `json:"type"`
 
-	Item *ReviewQueueItem `json:"item,omitempty"`
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
 
-	Message *Message `json:"message,omitempty"`
-
-	User *User `json:"user,omitempty"`
+	Message *MessageResponse `json:"message,omitempty"`
 }
 
 func (*ModerationMarkReviewedEvent) GetEventType() string {
@@ -5698,8 +5951,6 @@ type NotificationSettings struct {
 
 	SessionStarted EventNotificationSettings `json:"session_started"`
 }
-
-type NullTime struct{}
 
 type OCRRule struct {
 	Action string `json:"action"`
@@ -6357,6 +6608,8 @@ type PushProvider struct {
 	XiaomiAppSecret *string `json:"xiaomi_app_secret,omitempty"`
 
 	XiaomiPackageName *string `json:"xiaomi_package_name,omitempty"`
+
+	PushTemplates []PushTemplate `json:"push_templates,omitempty"`
 }
 
 type PushProviderResponse struct {
@@ -6415,6 +6668,18 @@ type PushProviderResponse struct {
 	XiaomiAppSecret *string `json:"xiaomi_app_secret,omitempty"`
 
 	XiaomiPackageName *string `json:"xiaomi_package_name,omitempty"`
+}
+
+type PushTemplate struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	EnablePush bool `json:"enable_push"`
+
+	EventType string `json:"event_type"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	Template *string `json:"template,omitempty"`
 }
 
 type QualityScoreReport struct {
@@ -6645,6 +6910,18 @@ type QueryModerationConfigsResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
+// Basic response information
+type QueryModerationFlagsResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Flags []ModerationFlagResponse `json:"flags"`
+
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
+}
+
 type QueryModerationLogsResponse struct {
 	Duration string `json:"duration"`
 
@@ -6674,6 +6951,18 @@ type QueryReactionsResponse struct {
 	Duration string `json:"duration"`
 
 	Reactions []ReactionResponse `json:"reactions"`
+
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
+}
+
+type QueryRemindersResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	// MessageReminders data returned by the query
+	Reminders []ReminderResponseData `json:"reminders"`
 
 	Next *string `json:"next,omitempty"`
 
@@ -7048,6 +7337,26 @@ type RecordSettingsResponse struct {
 	Layout LayoutSettingsResponse `json:"layout"`
 }
 
+type ReminderResponseData struct {
+	ChannelCid string `json:"channel_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	MessageID string `json:"message_id"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	UserID string `json:"user_id"`
+
+	RemindAt *Timestamp `json:"remind_at,omitempty"`
+
+	Channel *ChannelResponse `json:"channel,omitempty"`
+
+	Message *Message `json:"message,omitempty"`
+
+	User *User `json:"user,omitempty"`
+}
+
 type ReportByHistogramBucket struct {
 	Category string `json:"category"`
 
@@ -7068,6 +7377,20 @@ type ReportResponse struct {
 	UserRatings UserRatingReportResponse `json:"user_ratings"`
 }
 
+// Response containing resolved SIP inbound routing information
+type ResolveSipInboundResponse struct {
+	// The computed A1 hash
+	A1Hash string `json:"a1_hash"`
+
+	Duration string `json:"duration"`
+
+	Credentials SipInboundCredentials `json:"credentials"`
+
+	SipRoutingRule *SIPInboundRoutingRuleResponse `json:"sip_routing_rule,omitempty"`
+
+	SipTrunk *SIPTrunkResponse `json:"sip_trunk,omitempty"`
+}
+
 // Basic response information
 type Response struct {
 	// Duration of the request in milliseconds
@@ -7075,72 +7398,6 @@ type Response struct {
 }
 
 type RestoreActionRequest struct{}
-
-type ReviewQueueItem struct {
-	AiTextSeverity string `json:"ai_text_severity"`
-
-	BounceCount int `json:"bounce_count"`
-
-	ConfigKey string `json:"config_key"`
-
-	ContentChanged bool `json:"content_changed"`
-
-	CreatedAt Timestamp `json:"created_at"`
-
-	EntityID string `json:"entity_id"`
-
-	EntityType string `json:"entity_type"`
-
-	FlagsCount int `json:"flags_count"`
-
-	HasImage bool `json:"has_image"`
-
-	HasText bool `json:"has_text"`
-
-	HasVideo bool `json:"has_video"`
-
-	ID string `json:"id"`
-
-	ModerationPayloadHash string `json:"moderation_payload_hash"`
-
-	RecommendedAction string `json:"recommended_action"`
-
-	ReviewedBy string `json:"reviewed_by"`
-
-	Severity int `json:"severity"`
-
-	Status string `json:"status"`
-
-	UpdatedAt Timestamp `json:"updated_at"`
-
-	Actions []ActionLog `json:"actions"`
-
-	Bans []Ban `json:"bans"`
-
-	Flags []Flag `json:"flags"`
-
-	Languages []string `json:"languages"`
-
-	Teams []string `json:"teams"`
-
-	ReviewedAt NullTime `json:"reviewed_at"`
-
-	Activity *EnrichedActivity `json:"activity,omitempty"`
-
-	AssignedTo *User `json:"assigned_to,omitempty"`
-
-	EntityCreator *EntityCreator `json:"entity_creator,omitempty"`
-
-	FeedsV2Activity *EnrichedActivity `json:"feeds_v2_activity,omitempty"`
-
-	FeedsV2Reaction *Reaction `json:"feeds_v2_reaction,omitempty"`
-
-	Message *Message `json:"message,omitempty"`
-
-	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
-
-	Reaction *Reaction `json:"reaction,omitempty"`
-}
 
 // This event is sent when a new moderation review queue item is created
 type ReviewQueueItemNewEvent struct {
@@ -7226,6 +7483,8 @@ type ReviewQueueItemResponse struct {
 	Activity *EnrichedActivity `json:"activity,omitempty"`
 
 	AssignedTo *UserResponse `json:"assigned_to,omitempty"`
+
+	Call *CallResponse `json:"call,omitempty"`
 
 	EntityCreator *EntityCreatorResponse `json:"entity_creator,omitempty"`
 
@@ -7369,6 +7628,230 @@ type SDKUsageReport struct {
 
 type SDKUsageReportResponse struct {
 	Daily []DailyAggregateSDKUsageReportResponse `json:"daily"`
+}
+
+// Configuration for SIP call settings
+type SIPCallConfigsRequest struct {
+	// Custom data associated with the call
+	CustomData map[string]any `json:"custom_data,omitempty"`
+}
+
+// SIP call configuration response
+type SIPCallConfigsResponse struct {
+	// Custom data associated with the call
+	CustomData map[string]any `json:"custom_data"`
+}
+
+// Configuration for SIP caller settings
+type SIPCallerConfigsRequest struct {
+	// Unique identifier for the caller (handlebars template)
+	ID string `json:"id"`
+
+	// Custom data associated with the caller (values are handlebars templates)
+	CustomData map[string]any `json:"custom_data,omitempty"`
+}
+
+// SIP caller configuration response
+type SIPCallerConfigsResponse struct {
+	// Unique identifier for the caller
+	ID string `json:"id"`
+
+	// Custom data associated with the caller
+	CustomData map[string]any `json:"custom_data"`
+}
+
+type SIPChallenge struct {
+	A1 *string `json:"a1,omitempty"`
+
+	Algorithm *string `json:"algorithm,omitempty"`
+
+	Charset *string `json:"charset,omitempty"`
+
+	Nonce *string `json:"nonce,omitempty"`
+
+	Opaque *string `json:"opaque,omitempty"`
+
+	Realm *string `json:"realm,omitempty"`
+
+	Stale *bool `json:"stale,omitempty"`
+
+	Userhash *bool `json:"userhash,omitempty"`
+
+	Domain []string `json:"domain,omitempty"`
+
+	Qop []string `json:"qop,omitempty"`
+}
+
+// Configuration for direct routing rule calls
+type SIPDirectRoutingRuleCallConfigsRequest struct {
+	// ID of the call (handlebars template)
+	CallID string `json:"call_id"`
+
+	// Type of the call
+	CallType string `json:"call_type"`
+}
+
+// Direct routing rule call configuration response
+type SIPDirectRoutingRuleCallConfigsResponse struct {
+	// ID of the call
+	CallID string `json:"call_id"`
+
+	// Type of the call
+	CallType string `json:"call_type"`
+}
+
+// Configuration for PIN routing rule calls
+type SIPInboundRoutingRulePinConfigsRequest struct {
+	// Optional webhook URL for custom PIN handling
+	CustomWebhookUrl *string `json:"custom_webhook_url,omitempty"`
+
+	// Prompt message for failed PIN attempts
+	PinFailedAttemptPrompt *string `json:"pin_failed_attempt_prompt,omitempty"`
+
+	// Prompt message for hangup after PIN input
+	PinHangupPrompt *string `json:"pin_hangup_prompt,omitempty"`
+
+	// Prompt message for PIN input
+	PinPrompt *string `json:"pin_prompt,omitempty"`
+
+	// Prompt message for successful PIN input
+	PinSuccessPrompt *string `json:"pin_success_prompt,omitempty"`
+}
+
+// PIN routing rule call configuration response
+type SIPInboundRoutingRulePinConfigsResponse struct {
+	// Optional webhook URL for custom PIN handling
+	CustomWebhookUrl *string `json:"custom_webhook_url,omitempty"`
+
+	// Prompt message for failed PIN attempts
+	PinFailedAttemptPrompt *string `json:"pin_failed_attempt_prompt,omitempty"`
+
+	// Prompt message for hangup after PIN input
+	PinHangupPrompt *string `json:"pin_hangup_prompt,omitempty"`
+
+	// Prompt message for PIN input
+	PinPrompt *string `json:"pin_prompt,omitempty"`
+
+	// Prompt message for successful PIN input
+	PinSuccessPrompt *string `json:"pin_success_prompt,omitempty"`
+}
+
+// Request to create or update a SIP Inbound Routing Rule
+type SIPInboundRoutingRuleRequest struct {
+	// Name of the SIP Inbound Routing Rule
+	Name string `json:"name"`
+
+	// List of SIP trunk IDs
+	TrunkIds []string `json:"trunk_ids"`
+
+	CallerConfigs SIPCallerConfigsRequest `json:"caller_configs"`
+
+	// List of called numbers
+	CalledNumbers []string `json:"called_numbers,omitempty"`
+
+	// List of caller numbers (optional)
+	CallerNumbers []string `json:"caller_numbers,omitempty"`
+
+	CallConfigs *SIPCallConfigsRequest `json:"call_configs,omitempty"`
+
+	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsRequest `json:"direct_routing_configs,omitempty"`
+
+	PinProtectionConfigs *SIPPinProtectionConfigsRequest `json:"pin_protection_configs,omitempty"`
+
+	PinRoutingConfigs *SIPInboundRoutingRulePinConfigsRequest `json:"pin_routing_configs,omitempty"`
+}
+
+// SIP Inbound Routing Rule response
+type SIPInboundRoutingRuleResponse struct {
+	// Creation timestamp
+	CreatedAt Timestamp `json:"created_at"`
+
+	Duration string `json:"duration"`
+
+	// Unique identifier of the SIP Inbound Routing Rule
+	ID string `json:"id"`
+
+	// Name of the SIP Inbound Routing Rule
+	Name string `json:"name"`
+
+	// Last update timestamp
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	// List of called numbers
+	CalledNumbers []string `json:"called_numbers"`
+
+	// List of SIP trunk IDs
+	TrunkIds []string `json:"trunk_ids"`
+
+	// List of caller numbers
+	CallerNumbers []string `json:"caller_numbers,omitempty"`
+
+	CallConfigs *SIPCallConfigsResponse `json:"call_configs,omitempty"`
+
+	CallerConfigs *SIPCallerConfigsResponse `json:"caller_configs,omitempty"`
+
+	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsResponse `json:"direct_routing_configs,omitempty"`
+
+	PinProtectionConfigs *SIPPinProtectionConfigsResponse `json:"pin_protection_configs,omitempty"`
+
+	PinRoutingConfigs *SIPInboundRoutingRulePinConfigsResponse `json:"pin_routing_configs,omitempty"`
+}
+
+// Configuration for PIN protection settings
+type SIPPinProtectionConfigsRequest struct {
+	// Default PIN to use if there is no PIN set on the call object
+	DefaultPin *string `json:"default_pin,omitempty"`
+
+	// Whether PIN protection is enabled
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// Maximum number of PIN attempts allowed
+	MaxAttempts *int `json:"max_attempts,omitempty"`
+
+	// Number of digits required for the PIN
+	RequiredPinDigits *int `json:"required_pin_digits,omitempty"`
+}
+
+// PIN protection configuration response
+type SIPPinProtectionConfigsResponse struct {
+	// Whether PIN protection is enabled
+	Enabled bool `json:"enabled"`
+
+	// Default PIN to use if there is no PIN set on the call object
+	DefaultPin *string `json:"default_pin,omitempty"`
+
+	// Maximum number of PIN attempts allowed
+	MaxAttempts *int `json:"max_attempts,omitempty"`
+
+	// Number of digits required for the PIN
+	RequiredPinDigits *int `json:"required_pin_digits,omitempty"`
+}
+
+// SIP trunk information
+type SIPTrunkResponse struct {
+	// Creation timestamp
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Unique identifier for the SIP trunk
+	ID string `json:"id"`
+
+	// Name of the SIP trunk
+	Name string `json:"name"`
+
+	// Password for SIP trunk authentication
+	Password string `json:"password"`
+
+	// Last update timestamp
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	// The URI for the SIP trunk
+	Uri string `json:"uri"`
+
+	// Username for SIP trunk authentication
+	Username string `json:"username"`
+
+	// Phone numbers associated with this SIP trunk
+	Numbers []string `json:"numbers"`
 }
 
 type ScreensharingSettings struct {
@@ -7522,6 +8005,10 @@ type SearchResultMessage struct {
 	QuotedMessage *MessageResponse `json:"quoted_message,omitempty"`
 
 	ReactionGroups map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
+
+	Reminder *ReminderResponseData `json:"reminder,omitempty"`
+
+	SharedLocation *SharedLocationResponseData `json:"shared_location,omitempty"`
 }
 
 type SearchWarning struct {
@@ -7637,10 +8124,126 @@ type SessionSettingsResponse struct {
 
 type ShadowBlockActionRequest struct{}
 
+type SharedLocation struct {
+	ChannelCid string `json:"channel_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	CreatedByDeviceID string `json:"created_by_device_id"`
+
+	MessageID string `json:"message_id"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	UserID string `json:"user_id"`
+
+	EndAt *Timestamp `json:"end_at,omitempty"`
+
+	Latitude *float64 `json:"latitude,omitempty"`
+
+	Longitude *float64 `json:"longitude,omitempty"`
+
+	Channel *Channel `json:"channel,omitempty"`
+
+	Message *Message `json:"message,omitempty"`
+}
+
+type SharedLocationResponse struct {
+	// Channel CID
+	ChannelCid string `json:"channel_cid"`
+
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Device ID that created the live location
+	CreatedByDeviceID string `json:"created_by_device_id"`
+
+	Duration string `json:"duration"`
+
+	// Latitude coordinate
+	Latitude float64 `json:"latitude"`
+
+	// Longitude coordinate
+	Longitude float64 `json:"longitude"`
+
+	// Message ID
+	MessageID string `json:"message_id"`
+
+	// Date/time of the last update
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	// User ID
+	UserID string `json:"user_id"`
+
+	// Time when the live location expires
+	EndAt *Timestamp `json:"end_at,omitempty"`
+
+	Channel *ChannelResponse `json:"channel,omitempty"`
+
+	Message *MessageResponse `json:"message,omitempty"`
+}
+
+type SharedLocationResponseData struct {
+	ChannelCid string `json:"channel_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	CreatedByDeviceID string `json:"created_by_device_id"`
+
+	Latitude float64 `json:"latitude"`
+
+	Longitude float64 `json:"longitude"`
+
+	MessageID string `json:"message_id"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	UserID string `json:"user_id"`
+
+	EndAt *Timestamp `json:"end_at,omitempty"`
+
+	Channel *ChannelResponse `json:"channel,omitempty"`
+
+	Message *MessageResponse `json:"message,omitempty"`
+}
+
+type SharedLocationsResponse struct {
+	Duration string `json:"duration"`
+
+	ActiveLiveLocations []SharedLocationResponseData `json:"active_live_locations"`
+}
+
 // Basic response information
 type ShowChannelResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
+}
+
+// Credentials for SIP inbound call authentication
+type SipInboundCredentials struct {
+	// ID of the call
+	CallID string `json:"call_id"`
+
+	// Type of the call
+	CallType string `json:"call_type"`
+
+	// Authentication token for the call
+	Token string `json:"token"`
+
+	// User ID for the call
+	UserID string `json:"user_id"`
+
+	// Custom data associated with the call
+	CallCustomData map[string]any `json:"call_custom_data"`
+
+	// Custom data associated with the user
+	UserCustomData map[string]any `json:"user_custom_data"`
+}
+
+type SortParam struct {
+	Direction *int `json:"direction,omitempty"`
+
+	Field *string `json:"field,omitempty"`
 }
 
 type SortParamRequest struct {
@@ -7751,7 +8354,7 @@ type StopTranscriptionResponse struct {
 type SubmitActionResponse struct {
 	Duration string `json:"duration"`
 
-	Item *ReviewQueueItem `json:"item,omitempty"`
+	Item *ReviewQueueItemResponse `json:"item,omitempty"`
 }
 
 type SubscriberStatsResponse struct {
@@ -8085,6 +8688,8 @@ type UnreadCountsResponse struct {
 	Channels []UnreadCountsChannel `json:"channels"`
 
 	Threads []UnreadCountsThread `json:"threads"`
+
+	TotalUnreadCountByTeam map[string]int `json:"total_unread_count_by_team"`
 }
 
 type UnreadCountsThread struct {
@@ -8207,6 +8812,8 @@ type UpdateChannelTypeResponse struct {
 
 	Search bool `json:"search"`
 
+	SharedLocations bool `json:"shared_locations"`
+
 	SkipLastMsgUpdateForSystemMsgs bool `json:"skip_last_msg_update_for_system_msgs"`
 
 	TypingEvents bool `json:"typing_events"`
@@ -8216,6 +8823,8 @@ type UpdateChannelTypeResponse struct {
 	Uploads bool `json:"uploads"`
 
 	UrlEnrichment bool `json:"url_enrichment"`
+
+	UserMessageReminders bool `json:"user_message_reminders"`
 
 	Commands []string `json:"commands"`
 
@@ -8283,6 +8892,28 @@ type UpdateMessageResponse struct {
 	Message MessageResponse `json:"message"`
 
 	PendingMessageMetadata map[string]string `json:"pending_message_metadata,omitempty"`
+}
+
+// Basic response information
+type UpdateReminderResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Reminder ReminderResponseData `json:"reminder"`
+}
+
+// Response containing the updated SIP Inbound Routing Rule
+type UpdateSIPInboundRoutingRuleResponse struct {
+	Duration string `json:"duration"`
+
+	SipInboundRoutingRule *SIPInboundRoutingRuleResponse `json:"sip_inbound_routing_rule,omitempty"`
+}
+
+// Response containing the updated SIP trunk
+type UpdateSIPTrunkResponse struct {
+	Duration string `json:"duration"`
+
+	SipTrunk *SIPTrunkResponse `json:"sip_trunk,omitempty"`
 }
 
 type UpdateThreadPartialResponse struct {
@@ -8386,6 +9017,14 @@ type UpsertPushProviderResponse struct {
 	Duration string `json:"duration"`
 
 	PushProvider PushProviderResponse `json:"push_provider"`
+}
+
+// Basic response information
+type UpsertPushTemplateResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Template *PushTemplate `json:"template,omitempty"`
 }
 
 type User struct {
@@ -8888,6 +9527,24 @@ type VelocityFilterConfigRule struct {
 	SlowSpamBanDuration *int `json:"slow_spam_ban_duration,omitempty"`
 }
 
+type VideoCallRuleConfig struct {
+	Rules map[string]HarmConfig `json:"rules"`
+}
+
+type VideoEndCallRequest struct{}
+
+type VideoKickUserRequest struct{}
+
+type VideoReactionOverTimeResponse struct {
+	ByMinute []CountByMinuteResponse `json:"by_minute,omitempty"`
+}
+
+type VideoReactionsResponse struct {
+	Reaction string `json:"reaction"`
+
+	CountOverTime *VideoReactionOverTimeResponse `json:"count_over_time,omitempty"`
+}
+
 type VideoSettings struct {
 	AccessRequestEnabled bool `json:"access_request_enabled"`
 
@@ -9008,6 +9665,8 @@ type WrappedUnreadCountsResponse struct {
 	Channels []UnreadCountsChannel `json:"channels"`
 
 	Threads []UnreadCountsThread `json:"threads"`
+
+	TotalUnreadCountByTeam map[string]int `json:"total_unread_count_by_team"`
 }
 
 type XiaomiConfig struct {

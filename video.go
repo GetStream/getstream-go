@@ -523,6 +523,81 @@ func (c *VideoClient) GetEdges(ctx context.Context, request *GetEdgesRequest) (*
 	return res, err
 }
 
+// Resolve SIP inbound routing based on trunk number, caller number, and challenge authentication
+func (c *VideoClient) ResolveSipInbound(ctx context.Context, request *ResolveSipInboundRequest) (*StreamResponse[ResolveSipInboundResponse], error) {
+	var result ResolveSipInboundResponse
+	res, err := MakeRequest[ResolveSipInboundRequest, ResolveSipInboundResponse](c.client, ctx, "POST", "/api/v2/video/sip/resolve", nil, request, &result, nil)
+	return res, err
+}
+
+// List all SIP Inbound Routing Rules for the application
+func (c *VideoClient) ListSIPInboundRoutingRule(ctx context.Context, request *ListSIPInboundRoutingRuleRequest) (*StreamResponse[ListSIPInboundRoutingRuleResponse], error) {
+	var result ListSIPInboundRoutingRuleResponse
+	res, err := MakeRequest[any, ListSIPInboundRoutingRuleResponse](c.client, ctx, "GET", "/api/v2/video/sip/routing_rules", nil, nil, &result, nil)
+	return res, err
+}
+
+// Create a new SIP Inbound Routing Rule with either direct routing or PIN routing configuration
+func (c *VideoClient) CreateSIPInboundRoutingRule(ctx context.Context, request *CreateSIPInboundRoutingRuleRequest) (*StreamResponse[SIPInboundRoutingRuleResponse], error) {
+	var result SIPInboundRoutingRuleResponse
+	res, err := MakeRequest[CreateSIPInboundRoutingRuleRequest, SIPInboundRoutingRuleResponse](c.client, ctx, "POST", "/api/v2/video/sip/routing_rules", nil, request, &result, nil)
+	return res, err
+}
+
+// Delete a SIP Inbound Routing Rule for the application
+func (c *VideoClient) DeleteSIPInboundRoutingRule(ctx context.Context, id string, request *DeleteSIPInboundRoutingRuleRequest) (*StreamResponse[DeleteSIPInboundRoutingRuleResponse], error) {
+	var result DeleteSIPInboundRoutingRuleResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, DeleteSIPInboundRoutingRuleResponse](c.client, ctx, "DELETE", "/api/v2/video/sip/routing_rules/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Update an existing SIP Inbound Routing Rule with new configuration
+func (c *VideoClient) UpdateSIPInboundRoutingRule(ctx context.Context, id string, request *UpdateSIPInboundRoutingRuleRequest) (*StreamResponse[UpdateSIPInboundRoutingRuleResponse], error) {
+	var result UpdateSIPInboundRoutingRuleResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[UpdateSIPInboundRoutingRuleRequest, UpdateSIPInboundRoutingRuleResponse](c.client, ctx, "PUT", "/api/v2/video/sip/routing_rules/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
+// List all SIP trunks for the application
+func (c *VideoClient) ListSIPTrunks(ctx context.Context, request *ListSIPTrunksRequest) (*StreamResponse[ListSIPTrunksResponse], error) {
+	var result ListSIPTrunksResponse
+	res, err := MakeRequest[any, ListSIPTrunksResponse](c.client, ctx, "GET", "/api/v2/video/sip/trunks", nil, nil, &result, nil)
+	return res, err
+}
+
+// Create a new SIP trunk for the application
+func (c *VideoClient) CreateSIPTrunk(ctx context.Context, request *CreateSIPTrunkRequest) (*StreamResponse[CreateSIPTrunkResponse], error) {
+	var result CreateSIPTrunkResponse
+	res, err := MakeRequest[CreateSIPTrunkRequest, CreateSIPTrunkResponse](c.client, ctx, "POST", "/api/v2/video/sip/trunks", nil, request, &result, nil)
+	return res, err
+}
+
+// Delete a SIP trunk for the application
+func (c *VideoClient) DeleteSIPTrunk(ctx context.Context, id string, request *DeleteSIPTrunkRequest) (*StreamResponse[DeleteSIPTrunkResponse], error) {
+	var result DeleteSIPTrunkResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, DeleteSIPTrunkResponse](c.client, ctx, "DELETE", "/api/v2/video/sip/trunks/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Update a SIP trunk for the application
+func (c *VideoClient) UpdateSIPTrunk(ctx context.Context, id string, request *UpdateSIPTrunkRequest) (*StreamResponse[UpdateSIPTrunkResponse], error) {
+	var result UpdateSIPTrunkResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[UpdateSIPTrunkRequest, UpdateSIPTrunkResponse](c.client, ctx, "PUT", "/api/v2/video/sip/trunks/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
 func (c *VideoClient) QueryAggregateCallStats(ctx context.Context, request *QueryAggregateCallStatsRequest) (*StreamResponse[QueryAggregateCallStatsResponse], error) {
 	var result QueryAggregateCallStatsResponse
 	res, err := MakeRequest[QueryAggregateCallStatsRequest, QueryAggregateCallStatsResponse](c.client, ctx, "POST", "/api/v2/video/stats", nil, request, &result, nil)

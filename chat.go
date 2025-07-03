@@ -340,7 +340,7 @@ func (c *ChatClient) ShowChannel(ctx context.Context, _type string, id string, r
 	return res, err
 }
 
-// Truncates channel
+// Truncates messages from a channel. Can be applied to the entire channel or scoped to specific members.
 //
 // Sends events:
 // - channel.truncated
@@ -675,6 +675,46 @@ func (c *ChatClient) RemovePollVote(ctx context.Context, messageID string, pollI
 	return res, err
 }
 
+// Deletes a user's created reminder
+//
+// Sends events:
+// - reminder.deleted
+func (c *ChatClient) DeleteReminder(ctx context.Context, messageID string, request *DeleteReminderRequest) (*StreamResponse[DeleteReminderResponse], error) {
+	var result DeleteReminderResponse
+	pathParams := map[string]string{
+		"message_id": messageID,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, DeleteReminderResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{message_id}/reminders", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Updates an existing reminder
+//
+// Sends events:
+// - reminder.updated
+func (c *ChatClient) UpdateReminder(ctx context.Context, messageID string, request *UpdateReminderRequest) (*StreamResponse[UpdateReminderResponse], error) {
+	var result UpdateReminderResponse
+	pathParams := map[string]string{
+		"message_id": messageID,
+	}
+	res, err := MakeRequest[UpdateReminderRequest, UpdateReminderResponse](c.client, ctx, "PATCH", "/api/v2/chat/messages/{message_id}/reminders", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Creates a new reminder
+//
+// Sends events:
+// - reminder.created
+func (c *ChatClient) CreateReminder(ctx context.Context, messageID string, request *CreateReminderRequest) (*StreamResponse[ReminderResponseData], error) {
+	var result ReminderResponseData
+	pathParams := map[string]string{
+		"message_id": messageID,
+	}
+	res, err := MakeRequest[CreateReminderRequest, ReminderResponseData](c.client, ctx, "POST", "/api/v2/chat/messages/{message_id}/reminders", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Returns replies (thread) of the message
 func (c *ChatClient) GetReplies(ctx context.Context, parentID string, request *GetRepliesRequest) (*StreamResponse[GetRepliesResponse], error) {
 	var result GetRepliesResponse
@@ -851,11 +891,33 @@ func (c *ChatClient) UpdatePushNotificationPreferences(ctx context.Context, requ
 	return res, err
 }
 
+// Retrieve push notification templates for Chat.
+func (c *ChatClient) GetPushTemplates(ctx context.Context, request *GetPushTemplatesRequest) (*StreamResponse[GetPushTemplatesResponse], error) {
+	var result GetPushTemplatesResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetPushTemplatesResponse](c.client, ctx, "GET", "/api/v2/chat/push_templates", params, nil, &result, nil)
+	return res, err
+}
+
+// Create or update a push notification template for a specific event type and push provider
+func (c *ChatClient) UpsertPushTemplate(ctx context.Context, request *UpsertPushTemplateRequest) (*StreamResponse[UpsertPushTemplateResponse], error) {
+	var result UpsertPushTemplateResponse
+	res, err := MakeRequest[UpsertPushTemplateRequest, UpsertPushTemplateResponse](c.client, ctx, "POST", "/api/v2/chat/push_templates", nil, request, &result, nil)
+	return res, err
+}
+
 // Find and filter channel scoped or global user bans
 func (c *ChatClient) QueryBannedUsers(ctx context.Context, request *QueryBannedUsersRequest) (*StreamResponse[QueryBannedUsersResponse], error) {
 	var result QueryBannedUsersResponse
 	params := extractQueryParams(request)
 	res, err := MakeRequest[any, QueryBannedUsersResponse](c.client, ctx, "GET", "/api/v2/chat/query_banned_users", params, nil, &result, nil)
+	return res, err
+}
+
+// Queries reminders
+func (c *ChatClient) QueryReminders(ctx context.Context, request *QueryRemindersRequest) (*StreamResponse[QueryRemindersResponse], error) {
+	var result QueryRemindersResponse
+	res, err := MakeRequest[QueryRemindersRequest, QueryRemindersResponse](c.client, ctx, "POST", "/api/v2/chat/reminders/query", nil, request, &result, nil)
 	return res, err
 }
 

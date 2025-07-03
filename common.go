@@ -288,6 +288,36 @@ func (c *Client) GetTask(ctx context.Context, id string, request *GetTaskRequest
 	return res, err
 }
 
+// Deletes previously uploaded file
+func (c *Client) DeleteFile(ctx context.Context, request *DeleteFileRequest) (*StreamResponse[Response], error) {
+	var result Response
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/uploads/file", params, nil, &result, nil)
+	return res, err
+}
+
+// Uploads file
+func (c *Client) UploadFile(ctx context.Context, request *UploadFileRequest) (*StreamResponse[FileUploadResponse], error) {
+	var result FileUploadResponse
+	res, err := MakeRequest[UploadFileRequest, FileUploadResponse](c, ctx, "POST", "/api/v2/uploads/file", nil, request, &result, nil)
+	return res, err
+}
+
+// Deletes previously uploaded image
+func (c *Client) DeleteImage(ctx context.Context, request *DeleteImageRequest) (*StreamResponse[Response], error) {
+	var result Response
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/uploads/image", params, nil, &result, nil)
+	return res, err
+}
+
+// Uploads image
+func (c *Client) UploadImage(ctx context.Context, request *UploadImageRequest) (*StreamResponse[ImageUploadResponse], error) {
+	var result ImageUploadResponse
+	res, err := MakeRequest[UploadImageRequest, ImageUploadResponse](c, ctx, "POST", "/api/v2/uploads/image", nil, request, &result, nil)
+	return res, err
+}
+
 // Find and filter users
 func (c *Client) QueryUsers(ctx context.Context, request *QueryUsersRequest) (*StreamResponse[QueryUsersResponse], error) {
 	var result QueryUsersResponse
@@ -351,6 +381,22 @@ func (c *Client) DeactivateUsers(ctx context.Context, request *DeactivateUsersRe
 func (c *Client) DeleteUsers(ctx context.Context, request *DeleteUsersRequest) (*StreamResponse[DeleteUsersResponse], error) {
 	var result DeleteUsersResponse
 	res, err := MakeRequest[DeleteUsersRequest, DeleteUsersResponse](c, ctx, "POST", "/api/v2/users/delete", nil, request, &result, nil)
+	return res, err
+}
+
+// Retrieves all active live locations for a user
+func (c *Client) GetUserLiveLocations(ctx context.Context, request *GetUserLiveLocationsRequest) (*StreamResponse[SharedLocationsResponse], error) {
+	var result SharedLocationsResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, SharedLocationsResponse](c, ctx, "GET", "/api/v2/users/live_locations", params, nil, &result, nil)
+	return res, err
+}
+
+// Updates an existing live location with new coordinates or expiration time
+func (c *Client) UpdateLiveLocation(ctx context.Context, request *UpdateLiveLocationRequest) (*StreamResponse[SharedLocationResponse], error) {
+	var result SharedLocationResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[UpdateLiveLocationRequest, SharedLocationResponse](c, ctx, "PUT", "/api/v2/users/live_locations", params, request, &result, nil)
 	return res, err
 }
 
