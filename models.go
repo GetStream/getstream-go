@@ -345,7 +345,7 @@ type AsyncExportErrorEvent struct {
 }
 
 func (*AsyncExportErrorEvent) GetEventType() string {
-	return "export.channels.error"
+	return "export.moderation_logs.error"
 }
 
 type AsyncExportModerationLogsEvent struct {
@@ -7677,6 +7677,8 @@ type SIPChallenge struct {
 
 	Userhash *bool `json:"userhash,omitempty"`
 
+	Username *string `json:"username,omitempty"`
+
 	Domain []string `json:"domain,omitempty"`
 
 	Qop []string `json:"qop,omitempty"`
@@ -8965,6 +8967,38 @@ type UpdatedCallPermissionsEvent struct {
 
 func (*UpdatedCallPermissionsEvent) GetEventType() string {
 	return "call.permissions_updated"
+}
+
+type UploadChannelFileResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	// URL to the uploaded asset. Should be used to put to `asset_url` attachment field
+	File *string `json:"file,omitempty"`
+
+	// URL of the file thumbnail for supported file formats. Should be put to `thumb_url` attachment field
+	ThumbUrl *string `json:"thumb_url,omitempty"`
+}
+
+type UploadChannelRequest struct {
+	File *string `json:"file,omitempty"`
+
+	// field with JSON-encoded array of image size configurations
+	UploadSizes []ImageSize `json:"upload_sizes,omitempty"`
+
+	User *OnlyUserID `json:"user,omitempty"`
+}
+
+type UploadChannelResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	File *string `json:"file,omitempty"`
+
+	ThumbUrl *string `json:"thumb_url,omitempty"`
+
+	// Array of image size configurations
+	UploadSizes []ImageSize `json:"upload_sizes,omitempty"`
 }
 
 type UpsertConfigResponse struct {

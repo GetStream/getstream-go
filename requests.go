@@ -175,11 +175,11 @@ type SendEventRequest struct {
 	Event EventRequest `json:"event"`
 }
 
-type DeleteFileRequest struct {
+type DeleteChannelFileRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 
-type UploadFileRequest struct {
+type UploadChannelFileRequest struct {
 	File *string     `json:"file"`
 	User *OnlyUserID `json:"user"`
 }
@@ -190,11 +190,11 @@ type HideChannelRequest struct {
 	User         *UserRequest `json:"user"`
 }
 
-type DeleteImageRequest struct {
+type DeleteChannelImageRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 
-type UploadImageRequest struct {
+type UploadChannelImageRequest struct {
 	File        *string     `json:"file"`
 	UploadSizes []ImageSize `json:"upload_sizes"`
 	User        *OnlyUserID `json:"user"`
@@ -1008,6 +1008,25 @@ type DeleteRoleRequest struct {
 }
 
 type GetTaskRequest struct {
+}
+
+type DeleteFileRequest struct {
+	Url *string `json:"-" query:"url"`
+}
+
+type UploadFileRequest struct {
+	File *string     `json:"file"`
+	User *OnlyUserID `json:"user"`
+}
+
+type DeleteImageRequest struct {
+	Url *string `json:"-" query:"url"`
+}
+
+type UploadImageRequest struct {
+	File        *string     `json:"file"`
+	UploadSizes []ImageSize `json:"upload_sizes"`
+	User        *OnlyUserID `json:"user"`
 }
 
 type QueryUsersRequest struct {
