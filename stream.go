@@ -4,6 +4,7 @@ type Stream struct {
 	*Client
 	chat  *ChatClient
 	video *VideoClient
+	feeds *FeedsClient
 }
 
 func NewClientFromEnvVars(options ...ClientOption) (*Stream, error) {
@@ -57,4 +58,10 @@ func (s *Stream) Video() *VideoClient {
 		s.video = NewVideoClient(s.Client)
 	}
 	return s.video
+}
+func (s *Stream) Feeds() *FeedsClient {
+	if s.feeds == nil {
+		s.feeds = NewFeedsClient(s.Client)
+	}
+	return s.feeds
 }
