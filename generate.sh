@@ -12,6 +12,6 @@ fi
 set -ex
 
 # cd in API repo, generate new spec and then generate code from it
-( cd $SOURCE_PATH ; make openapi ; go run ./cmd/chat-manager openapi generate-client --language go-serverside --spec ./releases/v2/serverside-api.yaml --output $DST_PATH )
+( cd $SOURCE_PATH ; make openapi ; go run ./cmd/chat-manager openapi generate-client --language go-serverside --spec ./releases/v2/feeds-serverside-api.yaml --output $DST_PATH )
 
 ./lint.sh

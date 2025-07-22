@@ -198,6 +198,83 @@ func TestCommonGetPermission(t *testing.T) {
 	_, err = client.GetPermission(context.Background(), "", &getstream.GetPermissionRequest{})
 	require.NoError(t, err)
 }
+func TestCommonCreatePoll(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.CreatePoll(context.Background(), &getstream.CreatePollRequest{})
+	require.NoError(t, err)
+}
+func TestCommonUpdatePoll(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.UpdatePoll(context.Background(), &getstream.UpdatePollRequest{})
+	require.NoError(t, err)
+}
+func TestCommonQueryPolls(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.QueryPolls(context.Background(), &getstream.QueryPollsRequest{})
+	require.NoError(t, err)
+}
+func TestCommonDeletePoll(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.DeletePoll(context.Background(), "", &getstream.DeletePollRequest{})
+	require.NoError(t, err)
+}
+func TestCommonGetPoll(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.GetPoll(context.Background(), "", &getstream.GetPollRequest{})
+	require.NoError(t, err)
+}
+func TestCommonUpdatePollPartial(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.UpdatePollPartial(context.Background(), "", &getstream.UpdatePollPartialRequest{})
+	require.NoError(t, err)
+}
+func TestCommonCreatePollOption(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.CreatePollOption(context.Background(), "", &getstream.CreatePollOptionRequest{})
+	require.NoError(t, err)
+}
+func TestCommonUpdatePollOption(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.UpdatePollOption(context.Background(), "", &getstream.UpdatePollOptionRequest{})
+	require.NoError(t, err)
+}
+func TestCommonDeletePollOption(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.DeletePollOption(context.Background(), "", "", &getstream.DeletePollOptionRequest{})
+	require.NoError(t, err)
+}
+func TestCommonGetPollOption(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.GetPollOption(context.Background(), "", "", &getstream.GetPollOptionRequest{})
+	require.NoError(t, err)
+}
+func TestCommonQueryPollVotes(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.QueryPollVotes(context.Background(), "", &getstream.QueryPollVotesRequest{})
+	require.NoError(t, err)
+}
 func TestCommonListPushProviders(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -254,6 +331,34 @@ func TestCommonGetTask(t *testing.T) {
 	_, err = client.GetTask(context.Background(), "", &getstream.GetTaskRequest{})
 	require.NoError(t, err)
 }
+func TestCommonDeleteFile(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.DeleteFile(context.Background(), &getstream.DeleteFileRequest{})
+	require.NoError(t, err)
+}
+func TestCommonUploadFile(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.UploadFile(context.Background(), &getstream.UploadFileRequest{})
+	require.NoError(t, err)
+}
+func TestCommonDeleteImage(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.DeleteImage(context.Background(), &getstream.DeleteImageRequest{})
+	require.NoError(t, err)
+}
+func TestCommonUploadImage(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.UploadImage(context.Background(), &getstream.UploadImageRequest{})
+	require.NoError(t, err)
+}
 func TestCommonQueryUsers(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -301,6 +406,20 @@ func TestCommonDeleteUsers(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.DeleteUsers(context.Background(), &getstream.DeleteUsersRequest{})
+	require.NoError(t, err)
+}
+func TestCommonGetUserLiveLocations(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.GetUserLiveLocations(context.Background(), &getstream.GetUserLiveLocationsRequest{})
+	require.NoError(t, err)
+}
+func TestCommonUpdateLiveLocation(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.UpdateLiveLocation(context.Background(), &getstream.UpdateLiveLocationRequest{})
 	require.NoError(t, err)
 }
 func TestCommonReactivateUsers(t *testing.T) {

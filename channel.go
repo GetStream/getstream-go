@@ -41,24 +41,24 @@ func (c *Channels) SendEvent(ctx context.Context, request *SendEventRequest) (*S
 	return c.client.SendEvent(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) DeleteFile(ctx context.Context, request *DeleteFileRequest) (*StreamResponse[Response], error) {
-	return c.client.DeleteFile(ctx, c.channelType, c.channelD, request)
+func (c *Channels) DeleteChannelFile(ctx context.Context, request *DeleteChannelFileRequest) (*StreamResponse[Response], error) {
+	return c.client.DeleteChannelFile(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) UploadFile(ctx context.Context, request *UploadFileRequest) (*StreamResponse[FileUploadResponse], error) {
-	return c.client.UploadFile(ctx, c.channelType, c.channelD, request)
+func (c *Channels) UploadChannelFile(ctx context.Context, request *UploadChannelFileRequest) (*StreamResponse[UploadChannelFileResponse], error) {
+	return c.client.UploadChannelFile(ctx, c.channelType, c.channelD, request)
 }
 
 func (c *Channels) Hide(ctx context.Context, request *HideChannelRequest) (*StreamResponse[HideChannelResponse], error) {
 	return c.client.HideChannel(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) DeleteImage(ctx context.Context, request *DeleteImageRequest) (*StreamResponse[Response], error) {
-	return c.client.DeleteImage(ctx, c.channelType, c.channelD, request)
+func (c *Channels) DeleteChannelImage(ctx context.Context, request *DeleteChannelImageRequest) (*StreamResponse[Response], error) {
+	return c.client.DeleteChannelImage(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) UploadImage(ctx context.Context, request *UploadImageRequest) (*StreamResponse[ImageUploadResponse], error) {
-	return c.client.UploadImage(ctx, c.channelType, c.channelD, request)
+func (c *Channels) UploadChannelImage(ctx context.Context, request *UploadChannelImageRequest) (*StreamResponse[UploadChannelResponse], error) {
+	return c.client.UploadChannelImage(ctx, c.channelType, c.channelD, request)
 }
 
 func (c *Channels) UpdateMemberPartial(ctx context.Context, request *UpdateMemberPartialRequest) (*StreamResponse[UpdateMemberPartialResponse], error) {
