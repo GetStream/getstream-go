@@ -5,49 +5,52 @@ type GetAppRequest struct {
 }
 
 type UpdateAppRequest struct {
-	AsyncUrlEnrichEnabled      *bool                         `json:"async_url_enrich_enabled"`
-	AutoTranslationEnabled     *bool                         `json:"auto_translation_enabled"`
-	BeforeMessageSendHookUrl   *string                       `json:"before_message_send_hook_url"`
-	CdnExpirationSeconds       *int                          `json:"cdn_expiration_seconds"`
-	ChannelHideMembersOnly     *bool                         `json:"channel_hide_members_only"`
-	CustomActionHandlerUrl     *string                       `json:"custom_action_handler_url"`
-	DisableAuthChecks          *bool                         `json:"disable_auth_checks"`
-	DisablePermissionsChecks   *bool                         `json:"disable_permissions_checks"`
-	EnforceUniqueUsernames     *string                       `json:"enforce_unique_usernames"`
-	FeedsModerationEnabled     *bool                         `json:"feeds_moderation_enabled"`
-	FeedsV2Region              *string                       `json:"feeds_v2_region"`
-	GuestUserCreationDisabled  *bool                         `json:"guest_user_creation_disabled"`
-	ImageModerationEnabled     *bool                         `json:"image_moderation_enabled"`
-	MigratePermissionsToV2     *bool                         `json:"migrate_permissions_to_v2"`
-	ModerationEnabled          *bool                         `json:"moderation_enabled"`
-	ModerationWebhookUrl       *string                       `json:"moderation_webhook_url"`
-	MultiTenantEnabled         *bool                         `json:"multi_tenant_enabled"`
-	PermissionVersion          *string                       `json:"permission_version"`
-	RemindersInterval          *int                          `json:"reminders_interval"`
-	RemindersMaxMembers        *int                          `json:"reminders_max_members"`
-	RevokeTokensIssuedBefore   *Timestamp                    `json:"revoke_tokens_issued_before"`
-	SnsKey                     *string                       `json:"sns_key"`
-	SnsSecret                  *string                       `json:"sns_secret"`
-	SnsTopicArn                *string                       `json:"sns_topic_arn"`
-	SqsKey                     *string                       `json:"sqs_key"`
-	SqsSecret                  *string                       `json:"sqs_secret"`
-	SqsUrl                     *string                       `json:"sqs_url"`
-	WebhookUrl                 *string                       `json:"webhook_url"`
-	AllowedFlagReasons         []string                      `json:"allowed_flag_reasons"`
-	ImageModerationBlockLabels []string                      `json:"image_moderation_block_labels"`
-	ImageModerationLabels      []string                      `json:"image_moderation_labels"`
-	UserSearchDisallowedRoles  []string                      `json:"user_search_disallowed_roles"`
-	WebhookEvents              []string                      `json:"webhook_events"`
-	ApnConfig                  *APNConfig                    `json:"apn_config"`
-	AsyncModerationConfig      *AsyncModerationConfiguration `json:"async_moderation_config"`
-	DatadogInfo                *DataDogInfo                  `json:"datadog_info"`
-	FileUploadConfig           *FileUploadConfig             `json:"file_upload_config"`
-	FirebaseConfig             *FirebaseConfig               `json:"firebase_config"`
-	Grants                     map[string][]string           `json:"grants"`
-	HuaweiConfig               *HuaweiConfig                 `json:"huawei_config"`
-	ImageUploadConfig          *FileUploadConfig             `json:"image_upload_config"`
-	PushConfig                 *PushConfig                   `json:"push_config"`
-	XiaomiConfig               *XiaomiConfig                 `json:"xiaomi_config"`
+	AsyncUrlEnrichEnabled          *bool                           `json:"async_url_enrich_enabled"`
+	AutoTranslationEnabled         *bool                           `json:"auto_translation_enabled"`
+	BeforeMessageSendHookUrl       *string                         `json:"before_message_send_hook_url"`
+	CdnExpirationSeconds           *int                            `json:"cdn_expiration_seconds"`
+	ChannelHideMembersOnly         *bool                           `json:"channel_hide_members_only"`
+	CustomActionHandlerUrl         *string                         `json:"custom_action_handler_url"`
+	DisableAuthChecks              *bool                           `json:"disable_auth_checks"`
+	DisablePermissionsChecks       *bool                           `json:"disable_permissions_checks"`
+	EnforceUniqueUsernames         *string                         `json:"enforce_unique_usernames"`
+	FeedsModerationEnabled         *bool                           `json:"feeds_moderation_enabled"`
+	FeedsV2Region                  *string                         `json:"feeds_v2_region"`
+	GuestUserCreationDisabled      *bool                           `json:"guest_user_creation_disabled"`
+	ImageModerationEnabled         *bool                           `json:"image_moderation_enabled"`
+	MigratePermissionsToV2         *bool                           `json:"migrate_permissions_to_v2"`
+	ModerationEnabled              *bool                           `json:"moderation_enabled"`
+	ModerationWebhookUrl           *string                         `json:"moderation_webhook_url"`
+	MultiTenantEnabled             *bool                           `json:"multi_tenant_enabled"`
+	PermissionVersion              *string                         `json:"permission_version"`
+	RemindersInterval              *int                            `json:"reminders_interval"`
+	RemindersMaxMembers            *int                            `json:"reminders_max_members"`
+	RevokeTokensIssuedBefore       *Timestamp                      `json:"revoke_tokens_issued_before"`
+	SnsKey                         *string                         `json:"sns_key"`
+	SnsSecret                      *string                         `json:"sns_secret"`
+	SnsTopicArn                    *string                         `json:"sns_topic_arn"`
+	SqsKey                         *string                         `json:"sqs_key"`
+	SqsSecret                      *string                         `json:"sqs_secret"`
+	SqsUrl                         *string                         `json:"sqs_url"`
+	UserResponseTimeEnabled        *bool                           `json:"user_response_time_enabled"`
+	WebhookUrl                     *string                         `json:"webhook_url"`
+	AllowedFlagReasons             []string                        `json:"allowed_flag_reasons"`
+	EventHooks                     []EventHook                     `json:"event_hooks"`
+	ImageModerationBlockLabels     []string                        `json:"image_moderation_block_labels"`
+	ImageModerationLabels          []string                        `json:"image_moderation_labels"`
+	UserSearchDisallowedRoles      []string                        `json:"user_search_disallowed_roles"`
+	WebhookEvents                  []string                        `json:"webhook_events"`
+	ApnConfig                      *APNConfig                      `json:"apn_config"`
+	AsyncModerationConfig          *AsyncModerationConfiguration   `json:"async_moderation_config"`
+	DatadogInfo                    *DataDogInfo                    `json:"datadog_info"`
+	FileUploadConfig               *FileUploadConfig               `json:"file_upload_config"`
+	FirebaseConfig                 *FirebaseConfig                 `json:"firebase_config"`
+	Grants                         map[string][]string             `json:"grants"`
+	HuaweiConfig                   *HuaweiConfig                   `json:"huawei_config"`
+	ImageUploadConfig              *FileUploadConfig               `json:"image_upload_config"`
+	ModerationDashboardPreferences *ModerationDashboardPreferences `json:"moderation_dashboard_preferences"`
+	PushConfig                     *PushConfig                     `json:"push_config"`
+	XiaomiConfig                   *XiaomiConfig                   `json:"xiaomi_config"`
 }
 
 type ListBlockListsRequest struct {
@@ -173,11 +176,11 @@ type SendEventRequest struct {
 	Event EventRequest `json:"event"`
 }
 
-type DeleteFileRequest struct {
+type DeleteChannelFileRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 
-type UploadFileRequest struct {
+type UploadChannelFileRequest struct {
 	File *string     `json:"file"`
 	User *OnlyUserID `json:"user"`
 }
@@ -188,11 +191,11 @@ type HideChannelRequest struct {
 	User         *UserRequest `json:"user"`
 }
 
-type DeleteImageRequest struct {
+type DeleteChannelImageRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 
-type UploadImageRequest struct {
+type UploadChannelImageRequest struct {
 	File        *string     `json:"file"`
 	UploadSizes []ImageSize `json:"upload_sizes"`
 	User        *OnlyUserID `json:"user"`
@@ -245,6 +248,7 @@ type TruncateChannelRequest struct {
 	SkipPush    *bool           `json:"skip_push"`
 	TruncatedAt *Timestamp      `json:"truncated_at"`
 	UserID      *string         `json:"user_id"`
+	MemberIds   []string        `json:"member_ids"`
 	Message     *MessageRequest `json:"message"`
 	User        *UserRequest    `json:"user"`
 }
@@ -279,10 +283,12 @@ type CreateChannelTypeRequest struct {
 	ReadEvents                     *bool               `json:"read_events"`
 	Replies                        *bool               `json:"replies"`
 	Search                         *bool               `json:"search"`
+	SharedLocations                *bool               `json:"shared_locations"`
 	SkipLastMsgUpdateForSystemMsgs *bool               `json:"skip_last_msg_update_for_system_msgs"`
 	TypingEvents                   *bool               `json:"typing_events"`
 	Uploads                        *bool               `json:"uploads"`
 	UrlEnrichment                  *bool               `json:"url_enrichment"`
+	UserMessageReminders           *bool               `json:"user_message_reminders"`
 	Blocklists                     []BlockListOptions  `json:"blocklists"`
 	Commands                       []string            `json:"commands"`
 	Permissions                    []PolicyRequest     `json:"permissions"`
@@ -315,10 +321,12 @@ type UpdateChannelTypeRequest struct {
 	Reminders                      *bool               `json:"reminders"`
 	Replies                        *bool               `json:"replies"`
 	Search                         *bool               `json:"search"`
+	SharedLocations                *bool               `json:"shared_locations"`
 	SkipLastMsgUpdateForSystemMsgs *bool               `json:"skip_last_msg_update_for_system_msgs"`
 	TypingEvents                   *bool               `json:"typing_events"`
 	Uploads                        *bool               `json:"uploads"`
 	UrlEnrichment                  *bool               `json:"url_enrichment"`
+	UserMessageReminders           *bool               `json:"user_message_reminders"`
 	AllowedFlagReasons             []string            `json:"allowed_flag_reasons"`
 	Blocklists                     []BlockListOptions  `json:"blocklists"`
 	Commands                       []string            `json:"commands"`
@@ -392,6 +400,7 @@ type GetMessageRequest struct {
 type UpdateMessageRequest struct {
 	Message       MessageRequest `json:"message"`
 	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
+	SkipPush      *bool          `json:"skip_push"`
 }
 
 type UpdateMessagePartialRequest struct {
@@ -443,6 +452,7 @@ type TranslateMessageRequest struct {
 type UndeleteMessageRequest struct {
 	Message       MessageRequest `json:"message"`
 	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
+	SkipPush      *bool          `json:"skip_push"`
 }
 
 type CastPollVoteRequest struct {
@@ -451,8 +461,24 @@ type CastPollVoteRequest struct {
 	Vote   *VoteData    `json:"vote"`
 }
 
-type RemovePollVoteRequest struct {
+type DeletePollVoteRequest struct {
 	UserID *string `json:"-" query:"user_id"`
+}
+
+type DeleteReminderRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type UpdateReminderRequest struct {
+	RemindAt *Timestamp   `json:"remind_at"`
+	UserID   *string      `json:"user_id"`
+	User     *UserRequest `json:"user"`
+}
+
+type CreateReminderRequest struct {
+	RemindAt *Timestamp   `json:"remind_at"`
+	UserID   *string      `json:"user_id"`
+	User     *UserRequest `json:"user"`
 }
 
 type GetRepliesRequest struct {
@@ -489,101 +515,35 @@ type UnmuteChannelRequest struct {
 	User        *UserRequest `json:"user"`
 }
 
-type CreatePollRequest struct {
-	Name                      string            `json:"name"`
-	AllowAnswers              *bool             `json:"allow_answers"`
-	AllowUserSuggestedOptions *bool             `json:"allow_user_suggested_options"`
-	Description               *string           `json:"description"`
-	EnforceUniqueVote         *bool             `json:"enforce_unique_vote"`
-	ID                        *string           `json:"id"`
-	IsClosed                  *bool             `json:"is_closed"`
-	MaxVotesAllowed           *int              `json:"max_votes_allowed"`
-	UserID                    *string           `json:"user_id"`
-	VotingVisibility          *string           `json:"voting_visibility"`
-	Options                   []PollOptionInput `json:"options"`
-	Custom                    map[string]any    `json:"Custom"`
-	User                      *UserRequest      `json:"user"`
-}
-
-type UpdatePollRequest struct {
-	ID                        string              `json:"id"`
-	Name                      string              `json:"name"`
-	AllowAnswers              *bool               `json:"allow_answers"`
-	AllowUserSuggestedOptions *bool               `json:"allow_user_suggested_options"`
-	Description               *string             `json:"description"`
-	EnforceUniqueVote         *bool               `json:"enforce_unique_vote"`
-	IsClosed                  *bool               `json:"is_closed"`
-	MaxVotesAllowed           *int                `json:"max_votes_allowed"`
-	UserID                    *string             `json:"user_id"`
-	VotingVisibility          *string             `json:"voting_visibility"`
-	Options                   []PollOptionRequest `json:"options"`
-	Custom                    map[string]any      `json:"Custom"`
-	User                      *UserRequest        `json:"user"`
-}
-
-type QueryPollsRequest struct {
-	UserID *string            `json:"-" query:"user_id"`
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
-}
-
-type DeletePollRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
-type GetPollRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
-type UpdatePollPartialRequest struct {
-	UserID *string        `json:"user_id"`
-	Unset  []string       `json:"unset"`
-	Set    map[string]any `json:"set"`
-	User   *UserRequest   `json:"user"`
-}
-
-type CreatePollOptionRequest struct {
-	Text     string         `json:"text"`
-	Position *int           `json:"position"`
-	UserID   *string        `json:"user_id"`
-	Custom   map[string]any `json:"Custom"`
-	User     *UserRequest   `json:"user"`
-}
-
-type UpdatePollOptionRequest struct {
-	ID     string         `json:"id"`
-	Text   string         `json:"text"`
-	UserID *string        `json:"user_id"`
-	Custom map[string]any `json:"Custom"`
-	User   *UserRequest   `json:"user"`
-}
-
-type DeletePollOptionRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
-type GetPollOptionRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
-type QueryPollVotesRequest struct {
-	UserID *string            `json:"-" query:"user_id"`
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
-}
-
 type UpdatePushNotificationPreferencesRequest struct {
 	Preferences []PushPreferenceInput `json:"preferences"`
 }
 
+type GetPushTemplatesRequest struct {
+	PushProviderType string  `json:"-" query:"push_provider_type"`
+	PushProviderName *string `json:"-" query:"push_provider_name"`
+}
+
+type UpsertPushTemplateRequest struct {
+	EventType        string  `json:"event_type"`
+	PushProviderType string  `json:"push_provider_type"`
+	EnablePush       *bool   `json:"enable_push"`
+	PushProviderName *string `json:"push_provider_name"`
+	Template         *string `json:"template"`
+}
+
 type QueryBannedUsersRequest struct {
 	Payload *QueryBannedUsersPayload `json:"-" query:"payload"`
+}
+
+type QueryRemindersRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	UserID *string            `json:"user_id"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+	User   *UserRequest       `json:"user"`
 }
 
 type SearchRequest struct {
@@ -658,6 +618,7 @@ type SendUserCustomEventRequest struct {
 
 type CheckPushRequest struct {
 	ApnTemplate          *string      `json:"apn_template"`
+	EventType            *string      `json:"event_type"`
 	FirebaseDataTemplate *string      `json:"firebase_data_template"`
 	FirebaseTemplate     *string      `json:"firebase_template"`
 	MessageID            *string      `json:"message_id"`
@@ -730,6 +691,416 @@ type UpdateExternalStorageRequest struct {
 type CheckExternalStorageRequest struct {
 }
 
+type AddActivityRequest struct {
+	Type             string            `json:"type"`
+	Fids             []string          `json:"fids"`
+	ExpiresAt        *string           `json:"expires_at"`
+	ID               *string           `json:"id"`
+	ParentID         *string           `json:"parent_id"`
+	PollID           *string           `json:"poll_id"`
+	Text             *string           `json:"text"`
+	UserID           *string           `json:"user_id"`
+	Visibility       *string           `json:"visibility"`
+	VisibilityTag    *string           `json:"visibility_tag"`
+	Attachments      []Attachment      `json:"attachments"`
+	FilterTags       []string          `json:"filter_tags"`
+	InterestTags     []string          `json:"interest_tags"`
+	MentionedUserIds []string          `json:"mentioned_user_ids"`
+	Custom           map[string]any    `json:"custom"`
+	Location         *ActivityLocation `json:"location"`
+	SearchData       map[string]any    `json:"search_data"`
+}
+
+type UpsertActivitiesRequest struct {
+	Activities []ActivityRequest `json:"activities"`
+}
+
+type DeleteActivitiesRequest struct {
+	ActivityIds []string     `json:"activity_ids"`
+	HardDelete  *bool        `json:"hard_delete"`
+	UserID      *string      `json:"user_id"`
+	User        *UserRequest `json:"user"`
+}
+
+type QueryActivitiesRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+}
+
+type DeleteActivityRequest struct {
+	HardDelete *bool `json:"-" query:"hard_delete"`
+}
+
+type GetActivityRequest struct {
+}
+
+type UpdateActivityPartialRequest struct {
+	UserID *string        `json:"user_id"`
+	Unset  []string       `json:"unset"`
+	Set    map[string]any `json:"set"`
+	User   *UserRequest   `json:"user"`
+}
+
+type UpdateActivityRequest struct {
+	ExpiresAt    *Timestamp        `json:"expires_at"`
+	PollID       *string           `json:"poll_id"`
+	Text         *string           `json:"text"`
+	UserID       *string           `json:"user_id"`
+	Visibility   *string           `json:"visibility"`
+	Attachments  []Attachment      `json:"attachments"`
+	FilterTags   []string          `json:"filter_tags"`
+	InterestTags []string          `json:"interest_tags"`
+	Custom       map[string]any    `json:"custom"`
+	Location     *ActivityLocation `json:"location"`
+	User         *UserRequest      `json:"user"`
+}
+
+type DeleteBookmarkRequest struct {
+	FolderID *string `json:"-" query:"folder_id"`
+	UserID   *string `json:"-" query:"user_id"`
+}
+
+type UpdateBookmarkRequest struct {
+	FolderID    *string           `json:"folder_id"`
+	NewFolderID *string           `json:"new_folder_id"`
+	UserID      *string           `json:"user_id"`
+	Custom      map[string]any    `json:"custom"`
+	NewFolder   *AddFolderRequest `json:"new_folder"`
+	User        *UserRequest      `json:"user"`
+}
+
+type AddBookmarkRequest struct {
+	FolderID  *string           `json:"folder_id"`
+	UserID    *string           `json:"user_id"`
+	Custom    map[string]any    `json:"custom"`
+	NewFolder *AddFolderRequest `json:"new_folder"`
+	User      *UserRequest      `json:"user"`
+}
+
+type CastPollVoteRequest struct {
+	UserID *string      `json:"user_id"`
+	User   *UserRequest `json:"user"`
+	Vote   *VoteData    `json:"vote"`
+}
+
+type DeletePollVoteRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type AddReactionRequest struct {
+	Type                       string         `json:"type"`
+	CreateNotificationActivity *bool          `json:"create_notification_activity"`
+	UserID                     *string        `json:"user_id"`
+	Custom                     map[string]any `json:"custom"`
+	User                       *UserRequest   `json:"user"`
+}
+
+type QueryActivityReactionsRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+}
+
+type DeleteActivityReactionRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type QueryBookmarkFoldersRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+}
+
+type DeleteBookmarkFolderRequest struct {
+}
+
+type UpdateBookmarkFolderRequest struct {
+	Name   *string        `json:"name"`
+	UserID *string        `json:"user_id"`
+	Custom map[string]any `json:"custom"`
+	User   *UserRequest   `json:"user"`
+}
+
+type QueryBookmarksRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+}
+
+type GetCommentsRequest struct {
+	ObjectID     string  `json:"-" query:"object_id"`
+	ObjectType   string  `json:"-" query:"object_type"`
+	Depth        *int    `json:"-" query:"depth"`
+	Sort         *string `json:"-" query:"sort"`
+	RepliesLimit *int    `json:"-" query:"replies_limit"`
+	Limit        *int    `json:"-" query:"limit"`
+	Prev         *string `json:"-" query:"prev"`
+	Next         *string `json:"-" query:"next"`
+}
+
+type AddCommentRequest struct {
+	Comment                    string         `json:"comment"`
+	ObjectID                   string         `json:"object_id"`
+	ObjectType                 string         `json:"object_type"`
+	CreateNotificationActivity *bool          `json:"create_notification_activity"`
+	ParentID                   *string        `json:"parent_id"`
+	UserID                     *string        `json:"user_id"`
+	Attachments                []Attachment   `json:"attachments"`
+	MentionedUserIds           []string       `json:"mentioned_user_ids"`
+	Custom                     map[string]any `json:"custom"`
+	User                       *UserRequest   `json:"user"`
+}
+
+type AddCommentsBatchRequest struct {
+	Comments []AddCommentRequest `json:"comments"`
+}
+
+type QueryCommentsRequest struct {
+	Filter map[string]any `json:"filter"`
+	Limit  *int           `json:"limit"`
+	Next   *string        `json:"next"`
+	Prev   *string        `json:"prev"`
+	Sort   *string        `json:"sort"`
+}
+
+type DeleteCommentRequest struct {
+}
+
+type GetCommentRequest struct {
+}
+
+type UpdateCommentRequest struct {
+	Comment *string        `json:"comment"`
+	Custom  map[string]any `json:"custom"`
+}
+
+type AddCommentReactionRequest struct {
+	Type                       string         `json:"type"`
+	CreateNotificationActivity *bool          `json:"create_notification_activity"`
+	UserID                     *string        `json:"user_id"`
+	Custom                     map[string]any `json:"custom"`
+	User                       *UserRequest   `json:"user"`
+}
+
+type QueryCommentReactionsRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+}
+
+type DeleteCommentReactionRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type GetCommentRepliesRequest struct {
+	Depth        *int    `json:"-" query:"depth"`
+	Sort         *string `json:"-" query:"sort"`
+	RepliesLimit *int    `json:"-" query:"replies_limit"`
+	Limit        *int    `json:"-" query:"limit"`
+	Prev         *string `json:"-" query:"prev"`
+	Next         *string `json:"-" query:"next"`
+}
+
+type ListFeedGroupsRequest struct {
+}
+
+type CreateFeedGroupRequest struct {
+	FeedGroupID       string              `json:"feed_group_id"`
+	DefaultViewID     *string             `json:"default_view_id"`
+	DefaultVisibility *string             `json:"default_visibility"`
+	Custom            map[string]any      `json:"custom"`
+	Notification      *NotificationConfig `json:"notification"`
+}
+
+type DeleteFeedGroupRequest struct {
+	HardDelete *bool `json:"-" query:"hard_delete"`
+}
+
+type GetFeedGroupRequest struct {
+}
+
+type UpdateFeedGroupRequest struct {
+	DefaultViewID *string             `json:"default_view_id"`
+	Custom        map[string]any      `json:"custom"`
+	Notification  *NotificationConfig `json:"notification"`
+}
+
+type DeleteFeedRequest struct {
+	HardDelete *bool `json:"-" query:"hard_delete"`
+}
+
+type GetOrCreateFeedRequest struct {
+	Limit                   *int               `json:"limit"`
+	Next                    *string            `json:"next"`
+	Prev                    *string            `json:"prev"`
+	UserID                  *string            `json:"user_id"`
+	View                    *string            `json:"view"`
+	Watch                   *bool              `json:"watch"`
+	ActivitySelectorOptions map[string]any     `json:"activity_selector_options"`
+	Data                    *FeedInput         `json:"data"`
+	ExternalRanking         map[string]any     `json:"external_ranking"`
+	Filter                  map[string]any     `json:"filter"`
+	FollowersPagination     *PagerRequest      `json:"followers_pagination"`
+	FollowingPagination     *PagerRequest      `json:"following_pagination"`
+	InterestWeights         map[string]float64 `json:"interest_weights"`
+	MemberPagination        *PagerRequest      `json:"member_pagination"`
+	User                    *UserRequest       `json:"user"`
+}
+
+type UpdateFeedRequest struct {
+	CreatedByID *string        `json:"created_by_id"`
+	Custom      map[string]any `json:"custom"`
+}
+
+type MarkActivityRequest struct {
+	MarkAllRead *bool        `json:"mark_all_read"`
+	MarkAllSeen *bool        `json:"mark_all_seen"`
+	UserID      *string      `json:"user_id"`
+	MarkRead    []string     `json:"mark_read"`
+	MarkWatched []string     `json:"mark_watched"`
+	User        *UserRequest `json:"user"`
+}
+
+type UnpinActivityRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type PinActivityRequest struct {
+	UserID *string      `json:"user_id"`
+	User   *UserRequest `json:"user"`
+}
+
+type UpdateFeedMembersRequest struct {
+	Operation string              `json:"operation"`
+	Limit     *int                `json:"limit"`
+	Next      *string             `json:"next"`
+	Prev      *string             `json:"prev"`
+	Members   []FeedMemberRequest `json:"members"`
+}
+
+type AcceptFeedMemberInviteRequest struct {
+	UserID *string      `json:"user_id"`
+	User   *UserRequest `json:"user"`
+}
+
+type QueryFeedMembersRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+}
+
+type RejectFeedMemberInviteRequest struct {
+	UserID *string      `json:"user_id"`
+	User   *UserRequest `json:"user"`
+}
+
+type GetFollowSuggestionsRequest struct {
+	Limit *int `json:"-" query:"limit"`
+}
+
+type ListFeedViewsRequest struct {
+}
+
+type CreateFeedViewRequest struct {
+	ViewID             string                    `json:"view_id"`
+	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
+	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
+	Aggregation        *AggregationConfig        `json:"aggregation"`
+	Ranking            *RankingConfig            `json:"ranking"`
+}
+
+type DeleteFeedViewRequest struct {
+}
+
+type GetFeedViewRequest struct {
+}
+
+type UpdateFeedViewRequest struct {
+	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
+	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
+	Aggregation        *AggregationConfig        `json:"aggregation"`
+	Ranking            *RankingConfig            `json:"ranking"`
+}
+
+type CreateFeedsBatchRequest struct {
+	Feeds []FeedRequest `json:"feeds"`
+}
+
+type FeedsQueryFeedsRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Watch  *bool              `json:"watch"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+}
+
+type UpdateFollowRequest struct {
+	Source                     string         `json:"source"`
+	Target                     string         `json:"target"`
+	CreateNotificationActivity *bool          `json:"create_notification_activity"`
+	FollowerRole               *string        `json:"follower_role"`
+	PushPreference             *string        `json:"push_preference"`
+	Custom                     map[string]any `json:"custom"`
+}
+
+type FollowRequest struct {
+	Source                     string         `json:"source"`
+	Target                     string         `json:"target"`
+	CreateNotificationActivity *bool          `json:"create_notification_activity"`
+	PushPreference             *string        `json:"push_preference"`
+	Custom                     map[string]any `json:"custom"`
+}
+
+type AcceptFollowRequest struct {
+	SourceFid    string  `json:"source_fid"`
+	TargetFid    string  `json:"target_fid"`
+	FollowerRole *string `json:"follower_role"`
+}
+
+type FollowBatchRequest struct {
+	Follows []FollowRequest `json:"follows"`
+}
+
+type QueryFollowsRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+}
+
+type RejectFollowRequest struct {
+	SourceFid string `json:"source_fid"`
+	TargetFid string `json:"target_fid"`
+}
+
+type UnfollowRequest struct {
+}
+
+type UnfollowBatchRequest struct {
+	Follows []FollowPair `json:"follows"`
+}
+
+type DeleteFeedUserDataRequest struct {
+}
+
+type ExportFeedUserDataRequest struct {
+}
+
 type CreateGuestRequest struct {
 	User UserRequest `json:"user"`
 }
@@ -750,14 +1121,19 @@ type GetImportRequest struct {
 }
 
 type BanRequest struct {
-	TargetUserID string       `json:"target_user_id"`
-	BannedByID   *string      `json:"banned_by_id"`
-	ChannelCid   *string      `json:"channel_cid"`
-	IpBan        *bool        `json:"ip_ban"`
-	Reason       *string      `json:"reason"`
-	Shadow       *bool        `json:"shadow"`
-	Timeout      *int         `json:"timeout"`
-	BannedBy     *UserRequest `json:"banned_by"`
+	TargetUserID   string       `json:"target_user_id"`
+	BannedByID     *string      `json:"banned_by_id"`
+	ChannelCid     *string      `json:"channel_cid"`
+	DeleteMessages *string      `json:"delete_messages"`
+	IpBan          *bool        `json:"ip_ban"`
+	Reason         *string      `json:"reason"`
+	Shadow         *bool        `json:"shadow"`
+	Timeout        *int         `json:"timeout"`
+	BannedBy       *UserRequest `json:"banned_by"`
+}
+
+type BulkImageModerationRequest struct {
+	CsvFile string `json:"csv_file"`
 }
 
 type CheckRequest struct {
@@ -791,6 +1167,7 @@ type UpsertConfigRequest struct {
 	RuleBuilderConfig                  *RuleBuilderConfig                  `json:"rule_builder_config"`
 	User                               *UserRequest                        `json:"user"`
 	VelocityFilterConfig               *VelocityFilterConfig               `json:"velocity_filter_config"`
+	VideoCallRuleConfig                *VideoCallRuleConfig                `json:"video_call_rule_config"`
 }
 
 type DeleteConfigRequest struct {
@@ -841,6 +1218,14 @@ type FlagRequest struct {
 	Custom            map[string]any     `json:"custom"`
 	ModerationPayload *ModerationPayload `json:"moderation_payload"`
 	User              *UserRequest       `json:"user"`
+}
+
+type QueryModerationFlagsRequest struct {
+	Limit  *int           `json:"limit"`
+	Next   *string        `json:"next"`
+	Prev   *string        `json:"prev"`
+	Sort   []SortParam    `json:"sort"`
+	Filter map[string]any `json:"filter"`
 }
 
 type QueryModerationLogsRequest struct {
@@ -916,6 +1301,94 @@ type ListPermissionsRequest struct {
 type GetPermissionRequest struct {
 }
 
+type CreatePollRequest struct {
+	Name                      string            `json:"name"`
+	AllowAnswers              *bool             `json:"allow_answers"`
+	AllowUserSuggestedOptions *bool             `json:"allow_user_suggested_options"`
+	Description               *string           `json:"description"`
+	EnforceUniqueVote         *bool             `json:"enforce_unique_vote"`
+	ID                        *string           `json:"id"`
+	IsClosed                  *bool             `json:"is_closed"`
+	MaxVotesAllowed           *int              `json:"max_votes_allowed"`
+	UserID                    *string           `json:"user_id"`
+	VotingVisibility          *string           `json:"voting_visibility"`
+	Options                   []PollOptionInput `json:"options"`
+	Custom                    map[string]any    `json:"Custom"`
+	User                      *UserRequest      `json:"user"`
+}
+
+type UpdatePollRequest struct {
+	ID                        string              `json:"id"`
+	Name                      string              `json:"name"`
+	AllowAnswers              *bool               `json:"allow_answers"`
+	AllowUserSuggestedOptions *bool               `json:"allow_user_suggested_options"`
+	Description               *string             `json:"description"`
+	EnforceUniqueVote         *bool               `json:"enforce_unique_vote"`
+	IsClosed                  *bool               `json:"is_closed"`
+	MaxVotesAllowed           *int                `json:"max_votes_allowed"`
+	UserID                    *string             `json:"user_id"`
+	VotingVisibility          *string             `json:"voting_visibility"`
+	Options                   []PollOptionRequest `json:"options"`
+	Custom                    map[string]any      `json:"Custom"`
+	User                      *UserRequest        `json:"user"`
+}
+
+type QueryPollsRequest struct {
+	UserID *string            `json:"-" query:"user_id"`
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+}
+
+type DeletePollRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type GetPollRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type UpdatePollPartialRequest struct {
+	UserID *string        `json:"user_id"`
+	Unset  []string       `json:"unset"`
+	Set    map[string]any `json:"set"`
+	User   *UserRequest   `json:"user"`
+}
+
+type CreatePollOptionRequest struct {
+	Text   string         `json:"text"`
+	UserID *string        `json:"user_id"`
+	Custom map[string]any `json:"Custom"`
+	User   *UserRequest   `json:"user"`
+}
+
+type UpdatePollOptionRequest struct {
+	ID     string         `json:"id"`
+	Text   string         `json:"text"`
+	UserID *string        `json:"user_id"`
+	Custom map[string]any `json:"Custom"`
+	User   *UserRequest   `json:"user"`
+}
+
+type DeletePollOptionRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type GetPollOptionRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type QueryPollVotesRequest struct {
+	UserID *string            `json:"-" query:"user_id"`
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+}
+
 type ListPushProvidersRequest struct {
 }
 
@@ -945,6 +1418,25 @@ type DeleteRoleRequest struct {
 }
 
 type GetTaskRequest struct {
+}
+
+type DeleteFileRequest struct {
+	Url *string `json:"-" query:"url"`
+}
+
+type UploadFileRequest struct {
+	File *string     `json:"file"`
+	User *OnlyUserID `json:"user"`
+}
+
+type DeleteImageRequest struct {
+	Url *string `json:"-" query:"url"`
+}
+
+type UploadImageRequest struct {
+	File        *string     `json:"file"`
+	UploadSizes []ImageSize `json:"upload_sizes"`
+	User        *OnlyUserID `json:"user"`
 }
 
 type QueryUsersRequest struct {
@@ -986,6 +1478,18 @@ type DeleteUsersRequest struct {
 	User              *string  `json:"user"`
 }
 
+type GetUserLiveLocationsRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type UpdateLiveLocationRequest struct {
+	UserID    *string    `json:"-" query:"user_id"`
+	MessageID string     `json:"message_id"`
+	EndAt     *Timestamp `json:"end_at"`
+	Latitude  *float64   `json:"latitude"`
+	Longitude *float64   `json:"longitude"`
+}
+
 type ReactivateUsersRequest struct {
 	UserIds         []string `json:"user_ids"`
 	CreatedByID     *string  `json:"created_by_id"`
@@ -1015,6 +1519,9 @@ type ReactivateUserRequest struct {
 	CreatedByID     *string `json:"created_by_id"`
 	Name            *string `json:"name"`
 	RestoreMessages *bool   `json:"restore_messages"`
+}
+
+type GetActiveCallsStatusRequest struct {
 }
 
 type QueryUserFeedbackRequest struct {
