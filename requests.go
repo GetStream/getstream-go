@@ -455,16 +455,6 @@ type UndeleteMessageRequest struct {
 	SkipPush      *bool          `json:"skip_push"`
 }
 
-type CastPollVoteRequest struct {
-	UserID *string      `json:"user_id"`
-	User   *UserRequest `json:"user"`
-	Vote   *VoteData    `json:"vote"`
-}
-
-type DeletePollVoteRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
 type DeleteReminderRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
