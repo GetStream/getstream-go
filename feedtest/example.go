@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"math/rand"
+	"os"
 
 	"github.com/GetStream/getstream-go"
 )
@@ -20,7 +21,10 @@ func getRandomString(length int) string {
 func main() {
 	// init client, create feed, add activities, etc.
 
-	client, err := getstream.NewClient("fa5xpkvxrdw4", "2nxhpg7v7v3nwnnbtgkebugme3439t2z2b22h22atdg2f5pvktaa26aftnh747bx")
+	//read API key and secret from environment
+	apiKey := os.Getenv("STREAM_API_KEY")
+	apiSecret := os.Getenv("STREAM_API_SECRET")
+	client, err := getstream.NewClient(apiKey, apiSecret)
 	if err != nil {
 		panic(err)
 	}
