@@ -54,7 +54,7 @@ func main() {
 		panic(err)
 	}
 
-	feedFollower, err := client.Feeds().GetOrCreateFeed(ctx, "user", "follower_"+userID2, &getstream.GetOrCreateFeedRequest{
+	feedFollower, err := client.Feeds().GetOrCreateFeed(ctx, "user", userID2, &getstream.GetOrCreateFeedRequest{
 		UserID: getstream.PtrTo(userID2),
 	})
 	if err != nil {
@@ -68,7 +68,7 @@ func main() {
 		panic(err)
 	}
 	activity := &getstream.AddActivityRequest{
-		Type:   "post",
+		Type:   "post1",
 		Fids:   []string{feedOrigin.Data.Feed.Fid},
 		Text:   getstream.PtrTo(getRandomString(10)),
 		UserID: getstream.PtrTo(userID1),
@@ -80,14 +80,14 @@ func main() {
 	}
 
 	// fetch both feeds
-	originActivities, err := client.Feeds().GetOrCreateFeed(ctx, "user", "origin", &getstream.GetOrCreateFeedRequest{
+	originActivities, err := client.Feeds().GetOrCreateFeed(ctx, "user", userID1, &getstream.GetOrCreateFeedRequest{
 		UserID: getstream.PtrTo(userID1),
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	followerActivities, err := client.Feeds().GetOrCreateFeed(ctx, "user", "follower", &getstream.GetOrCreateFeedRequest{
+	followerActivities, err := client.Feeds().GetOrCreateFeed(ctx, "user", userID2, &getstream.GetOrCreateFeedRequest{
 		UserID: getstream.PtrTo(userID2),
 	})
 	if err != nil {
@@ -96,9 +96,9 @@ func main() {
 
 	// Print activities
 	for _, activity := range originActivities.Data.Activities {
-		println("Origin Activity:", activity.ID, *activity.Text, activity.Object)
+		println("Origin Activity:", activity.ID, *activity.Text, activity.Type)
 	}
 	for _, activity := range followerActivities.Data.Activities {
-		println("Follower Activity:", activity.ID, *activity.Text, activity.Object)
+		println("Follower Activity:", activity.ID, *activity.Text, activity.Type)
 	}
 }
