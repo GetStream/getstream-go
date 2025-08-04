@@ -107,18 +107,18 @@ func TestChatSendEvent(t *testing.T) {
 	_, err = client.Chat().SendEvent(context.Background(), "", "", &getstream.SendEventRequest{})
 	require.NoError(t, err)
 }
-func TestChatDeleteChannelFile(t *testing.T) {
+func TestChatDeleteFile(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Chat().DeleteChannelFile(context.Background(), "", "", &getstream.DeleteChannelFileRequest{})
+	_, err = client.Chat().DeleteFile(context.Background(), "", "", &getstream.DeleteFileRequest{})
 	require.NoError(t, err)
 }
-func TestChatUploadChannelFile(t *testing.T) {
+func TestChatUploadFile(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Chat().UploadChannelFile(context.Background(), "", "", &getstream.UploadChannelFileRequest{})
+	_, err = client.Chat().UploadFile(context.Background(), "", "", &getstream.UploadFileRequest{})
 	require.NoError(t, err)
 }
 func TestChatHideChannel(t *testing.T) {
@@ -128,18 +128,18 @@ func TestChatHideChannel(t *testing.T) {
 	_, err = client.Chat().HideChannel(context.Background(), "", "", &getstream.HideChannelRequest{})
 	require.NoError(t, err)
 }
-func TestChatDeleteChannelImage(t *testing.T) {
+func TestChatDeleteImage(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Chat().DeleteChannelImage(context.Background(), "", "", &getstream.DeleteChannelImageRequest{})
+	_, err = client.Chat().DeleteImage(context.Background(), "", "", &getstream.DeleteImageRequest{})
 	require.NoError(t, err)
 }
-func TestChatUploadChannelImage(t *testing.T) {
+func TestChatUploadImage(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Chat().UploadChannelImage(context.Background(), "", "", &getstream.UploadChannelImageRequest{})
+	_, err = client.Chat().UploadImage(context.Background(), "", "", &getstream.UploadImageRequest{})
 	require.NoError(t, err)
 }
 func TestChatUpdateMemberPartial(t *testing.T) {
