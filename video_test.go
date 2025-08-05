@@ -9,6 +9,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestVideoGetActiveCallsStatus(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().GetActiveCallsStatus(context.Background(), &getstream.GetActiveCallsStatusRequest{})
+	require.NoError(t, err)
+}
 func TestVideoQueryUserFeedback(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

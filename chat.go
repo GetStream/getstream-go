@@ -340,7 +340,7 @@ func (c *ChatClient) ShowChannel(ctx context.Context, _type string, id string, r
 	return res, err
 }
 
-// Truncates channel
+// Truncates messages from a channel. Can be applied to the entire channel or scoped to specific members.
 //
 // Sends events:
 // - channel.truncated
@@ -648,7 +648,12 @@ func (c *ChatClient) UndeleteMessage(ctx context.Context, id string, request *Un
 // Cast a vote on a poll
 //
 // Sends events:
+// - feeds.poll.vote_casted
+// - feeds.poll.vote_changed
+// - feeds.poll.vote_removed
 // - poll.vote_casted
+// - poll.vote_changed
+// - poll.vote_removed
 func (c *ChatClient) CastPollVote(ctx context.Context, messageID string, pollID string, request *CastPollVoteRequest) (*StreamResponse[PollVoteResponse], error) {
 	var result PollVoteResponse
 	pathParams := map[string]string{
@@ -662,8 +667,9 @@ func (c *ChatClient) CastPollVote(ctx context.Context, messageID string, pollID 
 // Delete a vote from a poll
 //
 // Sends events:
+// - feeds.poll.vote_removed
 // - poll.vote_removed
-func (c *ChatClient) RemovePollVote(ctx context.Context, messageID string, pollID string, voteID string, request *RemovePollVoteRequest) (*StreamResponse[PollVoteResponse], error) {
+func (c *ChatClient) DeletePollVote(ctx context.Context, messageID string, pollID string, voteID string, request *DeletePollVoteRequest) (*StreamResponse[PollVoteResponse], error) {
 	var result PollVoteResponse
 	pathParams := map[string]string{
 		"message_id": messageID,
@@ -672,6 +678,46 @@ func (c *ChatClient) RemovePollVote(ctx context.Context, messageID string, pollI
 	}
 	params := extractQueryParams(request)
 	res, err := MakeRequest[any, PollVoteResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{message_id}/polls/{poll_id}/vote/{vote_id}", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Deletes a user's created reminder
+//
+// Sends events:
+// - reminder.deleted
+func (c *ChatClient) DeleteReminder(ctx context.Context, messageID string, request *DeleteReminderRequest) (*StreamResponse[DeleteReminderResponse], error) {
+	var result DeleteReminderResponse
+	pathParams := map[string]string{
+		"message_id": messageID,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, DeleteReminderResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{message_id}/reminders", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Updates an existing reminder
+//
+// Sends events:
+// - reminder.updated
+func (c *ChatClient) UpdateReminder(ctx context.Context, messageID string, request *UpdateReminderRequest) (*StreamResponse[UpdateReminderResponse], error) {
+	var result UpdateReminderResponse
+	pathParams := map[string]string{
+		"message_id": messageID,
+	}
+	res, err := MakeRequest[UpdateReminderRequest, UpdateReminderResponse](c.client, ctx, "PATCH", "/api/v2/chat/messages/{message_id}/reminders", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Creates a new reminder
+//
+// Sends events:
+// - reminder.created
+func (c *ChatClient) CreateReminder(ctx context.Context, messageID string, request *CreateReminderRequest) (*StreamResponse[ReminderResponseData], error) {
+	var result ReminderResponseData
+	pathParams := map[string]string{
+		"message_id": messageID,
+	}
+	res, err := MakeRequest[CreateReminderRequest, ReminderResponseData](c.client, ctx, "POST", "/api/v2/chat/messages/{message_id}/reminders", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -716,138 +762,25 @@ func (c *ChatClient) UnmuteChannel(ctx context.Context, request *UnmuteChannelRe
 	return res, err
 }
 
-// Creates a new poll
-func (c *ChatClient) CreatePoll(ctx context.Context, request *CreatePollRequest) (*StreamResponse[PollResponse], error) {
-	var result PollResponse
-	res, err := MakeRequest[CreatePollRequest, PollResponse](c.client, ctx, "POST", "/api/v2/chat/polls", nil, request, &result, nil)
-	return res, err
-}
-
-// Updates a poll
-//
-// Sends events:
-// - poll.closed
-// - poll.updated
-func (c *ChatClient) UpdatePoll(ctx context.Context, request *UpdatePollRequest) (*StreamResponse[PollResponse], error) {
-	var result PollResponse
-	res, err := MakeRequest[UpdatePollRequest, PollResponse](c.client, ctx, "PUT", "/api/v2/chat/polls", nil, request, &result, nil)
-	return res, err
-}
-
-// Queries polls
-func (c *ChatClient) QueryPolls(ctx context.Context, request *QueryPollsRequest) (*StreamResponse[QueryPollsResponse], error) {
-	var result QueryPollsResponse
-	params := extractQueryParams(request)
-	res, err := MakeRequest[QueryPollsRequest, QueryPollsResponse](c.client, ctx, "POST", "/api/v2/chat/polls/query", params, request, &result, nil)
-	return res, err
-}
-
-// Deletes a poll
-//
-// Sends events:
-// - poll.deleted
-func (c *ChatClient) DeletePoll(ctx context.Context, pollID string, request *DeletePollRequest) (*StreamResponse[Response], error) {
-	var result Response
-	pathParams := map[string]string{
-		"poll_id": pollID,
-	}
-	params := extractQueryParams(request)
-	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/polls/{poll_id}", params, nil, &result, pathParams)
-	return res, err
-}
-
-// Retrieves a poll
-func (c *ChatClient) GetPoll(ctx context.Context, pollID string, request *GetPollRequest) (*StreamResponse[PollResponse], error) {
-	var result PollResponse
-	pathParams := map[string]string{
-		"poll_id": pollID,
-	}
-	params := extractQueryParams(request)
-	res, err := MakeRequest[any, PollResponse](c.client, ctx, "GET", "/api/v2/chat/polls/{poll_id}", params, nil, &result, pathParams)
-	return res, err
-}
-
-// Updates a poll partially
-//
-// Sends events:
-// - poll.updated
-func (c *ChatClient) UpdatePollPartial(ctx context.Context, pollID string, request *UpdatePollPartialRequest) (*StreamResponse[PollResponse], error) {
-	var result PollResponse
-	pathParams := map[string]string{
-		"poll_id": pollID,
-	}
-	res, err := MakeRequest[UpdatePollPartialRequest, PollResponse](c.client, ctx, "PATCH", "/api/v2/chat/polls/{poll_id}", nil, request, &result, pathParams)
-	return res, err
-}
-
-// Creates a poll option
-//
-// Sends events:
-// - poll.updated
-func (c *ChatClient) CreatePollOption(ctx context.Context, pollID string, request *CreatePollOptionRequest) (*StreamResponse[PollOptionResponse], error) {
-	var result PollOptionResponse
-	pathParams := map[string]string{
-		"poll_id": pollID,
-	}
-	res, err := MakeRequest[CreatePollOptionRequest, PollOptionResponse](c.client, ctx, "POST", "/api/v2/chat/polls/{poll_id}/options", nil, request, &result, pathParams)
-	return res, err
-}
-
-// Updates a poll option
-//
-// Sends events:
-// - poll.updated
-func (c *ChatClient) UpdatePollOption(ctx context.Context, pollID string, request *UpdatePollOptionRequest) (*StreamResponse[PollOptionResponse], error) {
-	var result PollOptionResponse
-	pathParams := map[string]string{
-		"poll_id": pollID,
-	}
-	res, err := MakeRequest[UpdatePollOptionRequest, PollOptionResponse](c.client, ctx, "PUT", "/api/v2/chat/polls/{poll_id}/options", nil, request, &result, pathParams)
-	return res, err
-}
-
-// Deletes a poll option
-//
-// Sends events:
-// - poll.updated
-func (c *ChatClient) DeletePollOption(ctx context.Context, pollID string, optionID string, request *DeletePollOptionRequest) (*StreamResponse[Response], error) {
-	var result Response
-	pathParams := map[string]string{
-		"poll_id":   pollID,
-		"option_id": optionID,
-	}
-	params := extractQueryParams(request)
-	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/polls/{poll_id}/options/{option_id}", params, nil, &result, pathParams)
-	return res, err
-}
-
-// Retrieves a poll option
-func (c *ChatClient) GetPollOption(ctx context.Context, pollID string, optionID string, request *GetPollOptionRequest) (*StreamResponse[PollOptionResponse], error) {
-	var result PollOptionResponse
-	pathParams := map[string]string{
-		"poll_id":   pollID,
-		"option_id": optionID,
-	}
-	params := extractQueryParams(request)
-	res, err := MakeRequest[any, PollOptionResponse](c.client, ctx, "GET", "/api/v2/chat/polls/{poll_id}/options/{option_id}", params, nil, &result, pathParams)
-	return res, err
-}
-
-// Queries votes
-func (c *ChatClient) QueryPollVotes(ctx context.Context, pollID string, request *QueryPollVotesRequest) (*StreamResponse[PollVotesResponse], error) {
-	var result PollVotesResponse
-	pathParams := map[string]string{
-		"poll_id": pollID,
-	}
-	params := extractQueryParams(request)
-	res, err := MakeRequest[QueryPollVotesRequest, PollVotesResponse](c.client, ctx, "POST", "/api/v2/chat/polls/{poll_id}/votes", params, request, &result, pathParams)
-	return res, err
-}
-
 // Update the push preferences for a user and or channel member. Set to all, mentions or none
 func (c *ChatClient) UpdatePushNotificationPreferences(ctx context.Context, request *UpdatePushNotificationPreferencesRequest) (*StreamResponse[UpsertPushPreferencesResponse], error) {
 	var result UpsertPushPreferencesResponse
 	res, err := MakeRequest[UpdatePushNotificationPreferencesRequest, UpsertPushPreferencesResponse](c.client, ctx, "POST", "/api/v2/chat/push_preferences", nil, request, &result, nil)
+	return res, err
+}
+
+// Retrieve push notification templates for Chat.
+func (c *ChatClient) GetPushTemplates(ctx context.Context, request *GetPushTemplatesRequest) (*StreamResponse[GetPushTemplatesResponse], error) {
+	var result GetPushTemplatesResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetPushTemplatesResponse](c.client, ctx, "GET", "/api/v2/chat/push_templates", params, nil, &result, nil)
+	return res, err
+}
+
+// Create or update a push notification template for a specific event type and push provider
+func (c *ChatClient) UpsertPushTemplate(ctx context.Context, request *UpsertPushTemplateRequest) (*StreamResponse[UpsertPushTemplateResponse], error) {
+	var result UpsertPushTemplateResponse
+	res, err := MakeRequest[UpsertPushTemplateRequest, UpsertPushTemplateResponse](c.client, ctx, "POST", "/api/v2/chat/push_templates", nil, request, &result, nil)
 	return res, err
 }
 
@@ -856,6 +789,13 @@ func (c *ChatClient) QueryBannedUsers(ctx context.Context, request *QueryBannedU
 	var result QueryBannedUsersResponse
 	params := extractQueryParams(request)
 	res, err := MakeRequest[any, QueryBannedUsersResponse](c.client, ctx, "GET", "/api/v2/chat/query_banned_users", params, nil, &result, nil)
+	return res, err
+}
+
+// Queries reminders
+func (c *ChatClient) QueryReminders(ctx context.Context, request *QueryRemindersRequest) (*StreamResponse[QueryRemindersResponse], error) {
+	var result QueryRemindersResponse
+	res, err := MakeRequest[QueryRemindersRequest, QueryRemindersResponse](c.client, ctx, "POST", "/api/v2/chat/reminders/query", nil, request, &result, nil)
 	return res, err
 }
 
