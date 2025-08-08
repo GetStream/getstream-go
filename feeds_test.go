@@ -13,7 +13,10 @@ func TestFeedsAddActivity(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
+	// snippet-start: AddActivity
 	_, err = client.Feeds().AddActivity(context.Background(), &getstream.AddActivityRequest{})
+	// snippet-end: AddActivity
+
 	require.NoError(t, err)
 }
 func TestFeedsUpsertActivities(t *testing.T) {
