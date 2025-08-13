@@ -84,8 +84,6 @@ type APNConfigFields struct {
 
 	Enabled bool `json:"enabled"`
 
-	NotificationTemplate string `json:"notification_template"`
-
 	AuthKey *string `json:"auth_key,omitempty"`
 
 	AuthType *string `json:"auth_type,omitempty"`
@@ -96,6 +94,8 @@ type APNConfigFields struct {
 
 	KeyID *string `json:"key_id,omitempty"`
 
+	NotificationTemplate *string `json:"notification_template,omitempty"`
+
 	P12Cert *string `json:"p12_cert,omitempty"`
 
 	TeamID *string `json:"team_id,omitempty"`
@@ -105,6 +105,14 @@ type APNS struct {
 	Body string `json:"body"`
 
 	Title string `json:"title"`
+
+	ContentAvailable *int `json:"content-available,omitempty"`
+
+	MutableContent *int `json:"mutable-content,omitempty"`
+
+	Sound *string `json:"sound,omitempty"`
+
+	Data map[string]any `json:"data,omitempty"`
 }
 
 type AWSRekognitionRule struct {
@@ -113,6 +121,18 @@ type AWSRekognitionRule struct {
 	Label string `json:"label"`
 
 	MinConfidence float64 `json:"min_confidence"`
+}
+
+type AcceptFeedMemberInviteResponse struct {
+	Duration string `json:"duration"`
+
+	Member FeedMemberResponse `json:"member"`
+}
+
+type AcceptFollowResponse struct {
+	Duration string `json:"duration"`
+
+	Follow FollowResponse `json:"follow"`
 }
 
 type Action struct {
@@ -173,11 +193,606 @@ type ActionLogResponse struct {
 	// Additional metadata about the action
 	Custom map[string]any `json:"custom"`
 
-	ReviewQueueItem *ReviewQueueItem `json:"review_queue_item,omitempty"`
+	ReviewQueueItem *ReviewQueueItemResponse `json:"review_queue_item,omitempty"`
 
 	TargetUser *UserResponse `json:"target_user,omitempty"`
 
 	User *UserResponse `json:"user,omitempty"`
+}
+
+type ActionSequence struct {
+	Action string `json:"action"`
+
+	Blur bool `json:"blur"`
+
+	CooldownPeriod int `json:"cooldown_period"`
+
+	Threshold int `json:"threshold"`
+
+	TimeWindow int `json:"time_window"`
+
+	Warning bool `json:"warning"`
+
+	WarningText string `json:"warning_text"`
+}
+
+type ActiveCallsFPSStats struct {
+	P05 float64 `json:"p05"`
+
+	P10 float64 `json:"p10"`
+
+	P50 float64 `json:"p50"`
+
+	P90 float64 `json:"p90"`
+}
+
+type ActiveCallsLatencyStats struct {
+	P50 float64 `json:"p50"`
+
+	P90 float64 `json:"p90"`
+}
+
+type ActiveCallsMetrics struct {
+	JoinCallAPI *JoinCallAPIMetrics `json:"join_call_api,omitempty"`
+
+	Publishers *PublishersMetrics `json:"publishers,omitempty"`
+
+	Subscribers *SubscribersMetrics `json:"subscribers,omitempty"`
+}
+
+type ActiveCallsSummary struct {
+	ActiveCalls int `json:"active_calls"`
+
+	ActivePublishers int `json:"active_publishers"`
+
+	ActiveSubscribers int `json:"active_subscribers"`
+
+	Participants int `json:"participants"`
+}
+
+// Emitted when an activity is added to a feed.
+type ActivityAddedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Activity ActivityResponse `json:"activity"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.activity.added" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*ActivityAddedEvent) GetEventType() string {
+	return "feeds.activity.added"
+}
+
+// Emitted when an activity is deleted.
+type ActivityDeletedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Activity ActivityResponse `json:"activity"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.activity.deleted" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*ActivityDeletedEvent) GetEventType() string {
+	return "feeds.activity.deleted"
+}
+
+type ActivityLocation struct {
+	// Latitude coordinate
+	Lat float64 `json:"lat"`
+
+	// Longitude coordinate
+	Lng float64 `json:"lng"`
+}
+
+// Emitted when activities are marked as read, seen, or watched.
+type ActivityMarkEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.activity.marked" in this case
+	Type string `json:"type"`
+
+	// Whether all activities were marked as read
+	MarkAllRead *bool `json:"mark_all_read,omitempty"`
+
+	// Whether all activities were marked as seen
+	MarkAllSeen *bool `json:"mark_all_seen,omitempty"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	// The IDs of activities marked as read
+	MarkRead []string `json:"mark_read,omitempty"`
+
+	// The IDs of activities marked as seen
+	MarkSeen []string `json:"mark_seen,omitempty"`
+
+	// The IDs of activities marked as watched
+	MarkWatched []string `json:"mark_watched,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*ActivityMarkEvent) GetEventType() string {
+	return "feeds.activity.marked"
+}
+
+type ActivityMarkedEvent struct {
+	AllRead bool `json:"all_read"`
+
+	AllSeen bool `json:"all_seen"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	FeedID string `json:"feed_id"`
+
+	UserID string `json:"user_id"`
+
+	Type string `json:"type"`
+
+	MarkedRead []string `json:"marked_read,omitempty"`
+
+	MarkedWatched []string `json:"marked_watched,omitempty"`
+}
+
+func (*ActivityMarkedEvent) GetEventType() string {
+	return "activity.marked"
+}
+
+type ActivityPinResponse struct {
+	// When the pin was created
+	CreatedAt Timestamp `json:"created_at"`
+
+	// ID of the feed where activity is pinned
+	Feed string `json:"feed"`
+
+	// When the pin was last updated
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	Activity ActivityResponse `json:"activity"`
+
+	User UserResponse `json:"user"`
+}
+
+// Emitted when an activity is pinned.
+type ActivityPinnedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	// The ID of the feed
+	Fid string `json:"fid"`
+
+	Custom map[string]any `json:"custom"`
+
+	PinnedActivity PinActivityResponse `json:"pinned_activity"`
+
+	// The type of event: "feeds.activity.pinned" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*ActivityPinnedEvent) GetEventType() string {
+	return "feeds.activity.pinned"
+}
+
+type ActivityProcessorConfig struct{}
+
+// Emitted when a reaction is added to an activity.
+type ActivityReactionAddedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Activity ActivityResponse `json:"activity"`
+
+	Custom map[string]any `json:"custom"`
+
+	Reaction FeedsReactionResponse `json:"reaction"`
+
+	// The type of event: "feeds.activity.reaction.added" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*ActivityReactionAddedEvent) GetEventType() string {
+	return "feeds.activity.reaction.added"
+}
+
+// Emitted when a reaction is deleted from an activity.
+type ActivityReactionDeletedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Activity ActivityResponse `json:"activity"`
+
+	Custom map[string]any `json:"custom"`
+
+	Reaction FeedsReactionResponse `json:"reaction"`
+
+	// The type of the reaction that was removed
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*ActivityReactionDeletedEvent) GetEventType() string {
+	return "feeds.activity.reaction.deleted"
+}
+
+// Emitted when a reaction is updated on an activity.
+type ActivityReactionUpdatedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Activity ActivityResponse `json:"activity"`
+
+	Custom map[string]any `json:"custom"`
+
+	Reaction FeedsReactionResponse `json:"reaction"`
+
+	// The type of event: "feeds.activity.reaction.updated" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*ActivityReactionUpdatedEvent) GetEventType() string {
+	return "feeds.activity.reaction.updated"
+}
+
+// Emitted when an activity is removed from a feed.
+type ActivityRemovedFromFeedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Activity ActivityResponse `json:"activity"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.activity.removed_from_feed" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*ActivityRemovedFromFeedEvent) GetEventType() string {
+	return "feeds.activity.removed_from_feed"
+}
+
+type ActivityRequest struct {
+	// Type of activity
+	Type string `json:"type"`
+
+	// List of feed IDs to add the activity to
+	Fids []string `json:"fids"`
+
+	// Expiration time for the activity
+	ExpiresAt *string `json:"expires_at,omitempty"`
+
+	// Optional ID for the activity
+	ID *string `json:"id,omitempty"`
+
+	// ID of parent activity for replies/comments
+	ParentID *string `json:"parent_id,omitempty"`
+
+	// ID of a poll to attach to activity
+	PollID *string `json:"poll_id,omitempty"`
+
+	// Text content of the activity
+	Text *string `json:"text,omitempty"`
+
+	// ID of the user creating the activity
+	UserID *string `json:"user_id,omitempty"`
+
+	// Visibility setting for the activity
+	Visibility *string `json:"visibility,omitempty"`
+
+	// If visibility is 'tag', this is the tag name and is required
+	VisibilityTag *string `json:"visibility_tag,omitempty"`
+
+	// List of attachments for the activity
+	Attachments []Attachment `json:"attachments,omitempty"`
+
+	// Tags for filtering activities
+	FilterTags []string `json:"filter_tags,omitempty"`
+
+	// Tags for indicating user interests
+	InterestTags []string `json:"interest_tags,omitempty"`
+
+	// List of users mentioned in the activity
+	MentionedUserIds []string `json:"mentioned_user_ids,omitempty"`
+
+	// Custom data for the activity
+	Custom map[string]any `json:"custom,omitempty"`
+
+	Location *ActivityLocation `json:"location,omitempty"`
+
+	// Additional data for search indexing
+	SearchData map[string]any `json:"search_data,omitempty"`
+}
+
+type ActivityResponse struct {
+	// Number of bookmarks on the activity
+	BookmarkCount int `json:"bookmark_count"`
+
+	// Number of comments on the activity
+	CommentCount int `json:"comment_count"`
+
+	// When the activity was created
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Unique identifier for the activity
+	ID string `json:"id"`
+
+	// Popularity score of the activity
+	Popularity int `json:"popularity"`
+
+	// Number of reactions to the activity
+	ReactionCount int `json:"reaction_count"`
+
+	// Ranking score for this activity
+	Score float64 `json:"score"`
+
+	// Number of times the activity was shared
+	ShareCount int `json:"share_count"`
+
+	// When the activity was last updated
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	// Visibility setting for the activity
+	Visibility string `json:"visibility"`
+
+	// Type of activity
+	Type string `json:"type"`
+
+	// Media attachments for the activity
+	Attachments []Attachment `json:"attachments"`
+
+	// Comments on this activity
+	Comments []CommentResponse `json:"comments"`
+
+	// List of feed IDs containing this activity
+	Feeds []string `json:"feeds"`
+
+	// Tags for filtering
+	FilterTags []string `json:"filter_tags"`
+
+	// Tags for user interests
+	InterestTags []string `json:"interest_tags"`
+
+	// Recent reactions to the activity
+	LatestReactions []FeedsReactionResponse `json:"latest_reactions"`
+
+	// Users mentioned in the activity
+	MentionedUsers []UserResponse `json:"mentioned_users"`
+
+	OwnBookmarks []BookmarkResponse `json:"own_bookmarks"`
+
+	// Current user's reactions to this activity
+	OwnReactions []FeedsReactionResponse `json:"own_reactions"`
+
+	// Custom data for the activity
+	Custom map[string]any `json:"custom"`
+
+	// Grouped reactions by type
+	ReactionGroups map[string]*ReactionGroupResponse `json:"reaction_groups"`
+
+	// Data for search indexing
+	SearchData map[string]any `json:"search_data"`
+
+	User UserResponse `json:"user"`
+
+	// When the activity was deleted
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
+
+	// When the activity was last edited
+	EditedAt *Timestamp `json:"edited_at,omitempty"`
+
+	// When the activity will expire
+	ExpiresAt *Timestamp `json:"expires_at,omitempty"`
+
+	// Text content of the activity
+	Text *string `json:"text,omitempty"`
+
+	// If visibility is 'tag', this is the tag name
+	VisibilityTag *string `json:"visibility_tag,omitempty"`
+
+	CurrentFeed *FeedResponse `json:"current_feed,omitempty"`
+
+	Location *ActivityLocation `json:"location,omitempty"`
+
+	Moderation *ModerationV2Response `json:"moderation,omitempty"`
+
+	// Notification context data for the activity (if this is a reaction, comment, follow, etc.)
+	NotificationContext map[string]any `json:"notification_context,omitempty"`
+
+	Parent *ActivityResponse `json:"parent,omitempty"`
+
+	Poll *PollResponseData `json:"poll,omitempty"`
+}
+
+type ActivitySelectorConfig struct {
+	// Time threshold for activity selection
+	CutoffTime *Timestamp `json:"cutoff_time,omitempty"`
+
+	// Minimum popularity threshold
+	MinPopularity *int `json:"min_popularity,omitempty"`
+
+	// Type of selector
+	Type *string `json:"type,omitempty"`
+
+	// Sort parameters for activity selection
+	Sort []SortParam `json:"sort,omitempty"`
+
+	// Filter for activity selection
+	Filter map[string]any `json:"filter,omitempty"`
+}
+
+// Emitted when an activity is unpinned.
+type ActivityUnpinnedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	// The ID of the feed
+	Fid string `json:"fid"`
+
+	Custom map[string]any `json:"custom"`
+
+	PinnedActivity PinActivityResponse `json:"pinned_activity"`
+
+	// The type of event: "feeds.activity.unpinned" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*ActivityUnpinnedEvent) GetEventType() string {
+	return "feeds.activity.unpinned"
+}
+
+// Emitted when an activity is updated.
+type ActivityUpdatedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Activity ActivityResponse `json:"activity"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of the event
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*ActivityUpdatedEvent) GetEventType() string {
+	return "feeds.activity.updated"
+}
+
+type AddActivityResponse struct {
+	Duration string `json:"duration"`
+
+	Activity ActivityResponse `json:"activity"`
+}
+
+type AddBookmarkResponse struct {
+	Duration string `json:"duration"`
+
+	Bookmark BookmarkResponse `json:"bookmark"`
+}
+
+type AddCommentReactionResponse struct {
+	// Duration of the request
+	Duration string `json:"duration"`
+
+	Comment CommentResponse `json:"comment"`
+
+	Reaction FeedsReactionResponse `json:"reaction"`
+}
+
+type AddCommentResponse struct {
+	Duration string `json:"duration"`
+
+	Comment CommentResponse `json:"comment"`
+}
+
+type AddCommentsBatchResponse struct {
+	Duration string `json:"duration"`
+
+	// List of comments added
+	Comments []CommentResponse `json:"comments"`
+}
+
+type AddFolderRequest struct {
+	// Name of the folder
+	Name string `json:"name"`
+
+	// Custom data for the folder
+	Custom map[string]any `json:"custom,omitempty"`
+}
+
+type AddReactionResponse struct {
+	Duration string `json:"duration"`
+
+	Activity ActivityResponse `json:"activity"`
+
+	Reaction FeedsReactionResponse `json:"reaction"`
+}
+
+type AggregatedActivityResponse struct {
+	// Number of activities in this aggregation
+	ActivityCount int `json:"activity_count"`
+
+	// When the aggregation was created
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Grouping identifier
+	Group string `json:"group"`
+
+	// Ranking score for this aggregation
+	Score float64 `json:"score"`
+
+	// When the aggregation was last updated
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	// Number of unique users in this aggregation
+	UserCount int `json:"user_count"`
+
+	// List of activities in this aggregation
+	Activities []ActivityResponse `json:"activities"`
+}
+
+type AggregationConfig struct {
+	// Format for activity aggregation
+	Format *string `json:"format,omitempty"`
 }
 
 type AnyEvent struct {
@@ -211,6 +826,8 @@ type AppResponseFields struct {
 
 	ImageModerationEnabled bool `json:"image_moderation_enabled"`
 
+	ModerationBulkSubmitActionEnabled bool `json:"moderation_bulk_submit_action_enabled"`
+
 	ModerationEnabled bool `json:"moderation_enabled"`
 
 	ModerationMultitenantBlocklistEnabled bool `json:"moderation_multitenant_blocklist_enabled"`
@@ -243,7 +860,13 @@ type AppResponseFields struct {
 
 	SuspendedExplanation string `json:"suspended_explanation"`
 
+	UseHookV2 bool `json:"use_hook_v2"`
+
+	UserResponseTimeEnabled bool `json:"user_response_time_enabled"`
+
 	WebhookUrl string `json:"webhook_url"`
+
+	EventHooks []EventHook `json:"event_hooks"`
 
 	UserSearchDisallowedRoles []string `json:"user_search_disallowed_roles"`
 
@@ -251,7 +874,7 @@ type AppResponseFields struct {
 
 	CallTypes map[string]*CallType `json:"call_types"`
 
-	ChannelConfigs map[string]*ChannelConfig `json:"channel_configs"`
+	ChannelConfigs map[string]ChannelConfig `json:"channel_configs"`
 
 	FileUploadConfig FileUploadConfig `json:"file_upload_config"`
 
@@ -274,6 +897,30 @@ type AppResponseFields struct {
 	ImageModerationLabels []string `json:"image_moderation_labels,omitempty"`
 
 	DatadogInfo *DataDogInfo `json:"datadog_info,omitempty"`
+
+	ModerationDashboardPreferences *ModerationDashboardPreferences `json:"moderation_dashboard_preferences,omitempty"`
+}
+
+type AsyncBulkImageModerationEvent struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	FinishedAt Timestamp `json:"finished_at"`
+
+	StartedAt Timestamp `json:"started_at"`
+
+	TaskID string `json:"task_id"`
+
+	Url string `json:"url"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*AsyncBulkImageModerationEvent) GetEventType() string {
+	return "export.bulk_image_moderation.success"
 }
 
 type AsyncExportChannelsEvent struct {
@@ -317,7 +964,7 @@ type AsyncExportErrorEvent struct {
 }
 
 func (*AsyncExportErrorEvent) GetEventType() string {
-	return "export.moderation_logs.error"
+	return "export.bulk_image_moderation.error"
 }
 
 type AsyncExportModerationLogsEvent struct {
@@ -398,12 +1045,6 @@ type Attachment struct {
 
 	ImageUrl *string `json:"image_url,omitempty"`
 
-	// The latitude of the location
-	Latitude *float64 `json:"latitude,omitempty"`
-
-	// The longitude of the location
-	Longitude *float64 `json:"longitude,omitempty"`
-
 	OGScrapeUrl *string `json:"og_scrape_url,omitempty"`
 
 	OriginalHeight *int `json:"original_height,omitempty"`
@@ -411,9 +1052,6 @@ type Attachment struct {
 	OriginalWidth *int `json:"original_width,omitempty"`
 
 	Pretext *string `json:"pretext,omitempty"`
-
-	// If the user has stopped sharing their location
-	StoppedSharing *bool `json:"stopped_sharing,omitempty"`
 
 	Text *string `json:"text,omitempty"`
 
@@ -585,6 +1223,8 @@ type Ban struct {
 type BanActionRequest struct {
 	ChannelBanOnly *bool `json:"channel_ban_only,omitempty"`
 
+	DeleteMessages *string `json:"delete_messages,omitempty"`
+
 	IpBan *bool `json:"ip_ban,omitempty"`
 
 	Reason *string `json:"reason,omitempty"`
@@ -592,6 +1232,16 @@ type BanActionRequest struct {
 	Shadow *bool `json:"shadow,omitempty"`
 
 	Timeout *int `json:"timeout,omitempty"`
+}
+
+type BanOptions struct {
+	Duration int `json:"duration"`
+
+	IpBan bool `json:"ip_ban"`
+
+	Reason string `json:"reason"`
+
+	ShadowBan bool `json:"shadow_ban"`
 }
 
 type BanResponse struct {
@@ -608,6 +1258,10 @@ type BanResponse struct {
 	Channel *ChannelResponse `json:"channel,omitempty"`
 
 	User *UserResponse `json:"user,omitempty"`
+}
+
+type BlockContentOptions struct {
+	Reason string `json:"reason"`
 }
 
 type BlockListConfig struct {
@@ -723,6 +1377,145 @@ type BodyguardSeverityRule struct {
 	Severity string `json:"severity"`
 }
 
+// Emitted when a user bookmarks an activity.
+type BookmarkAddedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Bookmark BookmarkResponse `json:"bookmark"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.bookmark.added" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*BookmarkAddedEvent) GetEventType() string {
+	return "feeds.bookmark.added"
+}
+
+// Emitted when a user deletes a bookmark from an activity.
+type BookmarkDeletedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Bookmark BookmarkResponse `json:"bookmark"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.bookmark.deleted" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*BookmarkDeletedEvent) GetEventType() string {
+	return "feeds.bookmark.deleted"
+}
+
+// Emitted when a bookmark folder is deleted.
+type BookmarkFolderDeletedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	BookmarkFolder BookmarkFolderResponse `json:"bookmark_folder"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.bookmark_folder.deleted" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*BookmarkFolderDeletedEvent) GetEventType() string {
+	return "feeds.bookmark_folder.deleted"
+}
+
+type BookmarkFolderResponse struct {
+	// When the folder was created
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Unique identifier for the folder
+	ID string `json:"id"`
+
+	// Name of the folder
+	Name string `json:"name"`
+
+	// When the folder was last updated
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	// Custom data for the folder
+	Custom map[string]any `json:"custom,omitempty"`
+}
+
+// Emitted when a bookmark folder is updated.
+type BookmarkFolderUpdatedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	BookmarkFolder BookmarkFolderResponse `json:"bookmark_folder"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.bookmark_folder.updated" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*BookmarkFolderUpdatedEvent) GetEventType() string {
+	return "feeds.bookmark_folder.updated"
+}
+
+type BookmarkResponse struct {
+	// When the bookmark was created
+	CreatedAt Timestamp `json:"created_at"`
+
+	// When the bookmark was last updated
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	Activity ActivityResponse `json:"activity"`
+
+	User UserResponse `json:"user"`
+
+	// Custom data for the bookmark
+	Custom map[string]any `json:"custom,omitempty"`
+
+	Folder *BookmarkFolderResponse `json:"folder,omitempty"`
+}
+
+// Emitted when a user updates a bookmark.
+type BookmarkUpdatedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Bookmark BookmarkResponse `json:"bookmark"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.bookmark.updated" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*BookmarkUpdatedEvent) GetEventType() string {
+	return "feeds.bookmark.updated"
+}
+
 type Bound struct {
 	Inclusive bool `json:"inclusive"`
 
@@ -758,6 +1551,13 @@ type BrowserDataResponse struct {
 	Name *string `json:"name,omitempty"`
 
 	Version *string `json:"version,omitempty"`
+}
+
+type BulkImageModerationResponse struct {
+	Duration string `json:"duration"`
+
+	// ID of the task for processing the bulk image moderation
+	TaskID string `json:"task_id"`
 }
 
 // This event is sent when a user accepts a notification to join a call.
@@ -877,6 +1677,30 @@ type CallDurationReportResponse struct {
 	Daily []DailyAggregateCallDurationReportResponse `json:"daily"`
 }
 
+type CallEgress struct {
+	AppPk int `json:"app_pk"`
+
+	CallID string `json:"call_id"`
+
+	CallType string `json:"call_type"`
+
+	EgressID string `json:"egress_id"`
+
+	EgressType string `json:"egress_type"`
+
+	InstanceIp string `json:"instance_ip"`
+
+	StartedAt Timestamp `json:"started_at"`
+
+	State string `json:"state"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	StoppedAt *Timestamp `json:"stopped_at,omitempty"`
+
+	Config *EgressTaskConfig `json:"config,omitempty"`
+}
+
 // This event is sent when a call is mark as ended for all its participants. Clients receiving this event should leave the call screen
 type CallEndedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -887,6 +1711,9 @@ type CallEndedEvent struct {
 
 	// The type of event: "call.ended" in this case
 	Type string `json:"type"`
+
+	// The reason why the call ended, if available
+	Reason *string `json:"reason,omitempty"`
 
 	User *UserResponse `json:"user,omitempty"`
 }
@@ -1047,6 +1874,22 @@ func (*CallLiveStartedEvent) GetEventType() string {
 	return "call.live_started"
 }
 
+type CallMember struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	Role string `json:"role"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	UserID string `json:"user_id"`
+
+	Custom map[string]any `json:"custom"`
+
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
+
+	User *User `json:"user,omitempty"`
+}
+
 // This event is sent when one or more members are added to a call
 type CallMemberAddedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -1152,6 +1995,40 @@ func (*CallMissedEvent) GetEventType() string {
 	return "call.missed"
 }
 
+type CallModerationBlurEvent struct {
+	CallCid string `json:"call_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	UserID string `json:"user_id"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+}
+
+func (*CallModerationBlurEvent) GetEventType() string {
+	return "call.moderation_blur"
+}
+
+type CallModerationWarningEvent struct {
+	CallCid string `json:"call_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	Message string `json:"message"`
+
+	UserID string `json:"user_id"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+}
+
+func (*CallModerationWarningEvent) GetEventType() string {
+	return "call.moderation_warning"
+}
+
 // This event is sent to all call members to notify they are getting called
 type CallNotificationEvent struct {
 	CallCid string `json:"call_cid"`
@@ -1174,6 +2051,50 @@ type CallNotificationEvent struct {
 
 func (*CallNotificationEvent) GetEventType() string {
 	return "call.notification"
+}
+
+type CallParticipant struct {
+	Banned bool `json:"banned"`
+
+	ID string `json:"id"`
+
+	JoinedAt Timestamp `json:"JoinedAt"`
+
+	Online bool `json:"online"`
+
+	Role string `json:"Role"`
+
+	UserSessionID string `json:"UserSessionID"`
+
+	Custom map[string]any `json:"custom"`
+
+	TeamsRole map[string]string `json:"teams_role"`
+
+	AvgResponseTime *int `json:"avg_response_time,omitempty"`
+
+	BanExpires *Timestamp `json:"ban_expires,omitempty"`
+
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
+
+	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
+
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
+
+	Invisible *bool `json:"invisible,omitempty"`
+
+	Language *string `json:"language,omitempty"`
+
+	LastActive *Timestamp `json:"last_active,omitempty"`
+
+	LastEngagedAt *Timestamp `json:"last_engaged_at,omitempty"`
+
+	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
+
+	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
+
+	Teams []string `json:"teams,omitempty"`
+
+	PrivacySettings *PrivacySettings `json:"privacy_settings,omitempty"`
 }
 
 type CallParticipantCountReport struct {
@@ -1479,6 +2400,50 @@ func (*CallRtmpBroadcastStoppedEvent) GetEventType() string {
 	return "call.rtmp_broadcast_stopped"
 }
 
+type CallSession struct {
+	AnonymousParticipantCount int `json:"AnonymousParticipantCount"`
+
+	AppPK int `json:"AppPK"`
+
+	CallID string `json:"CallID"`
+
+	CallType string `json:"CallType"`
+
+	CreatedAt Timestamp `json:"CreatedAt"`
+
+	SessionID string `json:"SessionID"`
+
+	ActiveSFUs []SFUIDLastSeen `json:"ActiveSFUs"`
+
+	Participants []CallParticipant `json:"Participants"`
+
+	SFUIDs []string `json:"SFUIDs"`
+
+	AcceptedBy map[string]Timestamp `json:"AcceptedBy"`
+
+	MissedBy map[string]Timestamp `json:"MissedBy"`
+
+	ParticipantsCountByRole map[string]int `json:"ParticipantsCountByRole"`
+
+	RejectedBy map[string]Timestamp `json:"RejectedBy"`
+
+	UserPermissionOverrides map[string]map[string]bool `json:"UserPermissionOverrides"`
+
+	DeletedAt *Timestamp `json:"DeletedAt,omitempty"`
+
+	EndedAt *Timestamp `json:"EndedAt,omitempty"`
+
+	LiveEndedAt *Timestamp `json:"LiveEndedAt,omitempty"`
+
+	LiveStartedAt *Timestamp `json:"LiveStartedAt,omitempty"`
+
+	RingAt *Timestamp `json:"RingAt,omitempty"`
+
+	StartedAt *Timestamp `json:"StartedAt,omitempty"`
+
+	TimerEndsAt *Timestamp `json:"TimerEndsAt,omitempty"`
+}
+
 // This event is sent when a call session ends
 type CallSessionEndedEvent struct {
 	CallCid string `json:"call_cid"`
@@ -1496,6 +2461,27 @@ type CallSessionEndedEvent struct {
 
 func (*CallSessionEndedEvent) GetEventType() string {
 	return "call.session_ended"
+}
+
+// This event is sent when the participant counts in a call session are updated
+type CallSessionParticipantCountsUpdatedEvent struct {
+	AnonymousParticipantCount int `json:"anonymous_participant_count"`
+
+	CallCid string `json:"call_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Call session ID
+	SessionID string `json:"session_id"`
+
+	ParticipantsCountByRole map[string]int `json:"participants_count_by_role"`
+
+	// The type of event: "call.session_participant_count_updated" in this case
+	Type string `json:"type"`
+}
+
+func (*CallSessionParticipantCountsUpdatedEvent) GetEventType() string {
+	return "call.session_participant_count_updated"
 }
 
 // This event is sent when a participant joins a call session
@@ -1595,6 +2581,8 @@ type CallSettings struct {
 
 	Geofencing *GeofenceSettings `json:"geofencing,omitempty"`
 
+	Ingress *IngressSettings `json:"ingress,omitempty"`
+
 	Limits *LimitsSettings `json:"limits,omitempty"`
 
 	Recording *RecordSettings `json:"recording,omitempty"`
@@ -1622,6 +2610,8 @@ type CallSettingsRequest struct {
 	FrameRecording *FrameRecordingSettingsRequest `json:"frame_recording,omitempty"`
 
 	Geofencing *GeofenceSettingsRequest `json:"geofencing,omitempty"`
+
+	Ingress *IngressSettingsRequest `json:"ingress,omitempty"`
 
 	Limits *LimitsSettingsRequest `json:"limits,omitempty"`
 
@@ -1666,6 +2656,8 @@ type CallSettingsResponse struct {
 	Transcription TranscriptionSettingsResponse `json:"transcription"`
 
 	Video VideoSettingsResponse `json:"video"`
+
+	Ingress *IngressSettingsResponse `json:"ingress,omitempty"`
 }
 
 // CallStateResponseFields is the payload for call state response
@@ -1719,6 +2711,8 @@ type CallTranscription struct {
 
 	Filename string `json:"filename"`
 
+	SessionID string `json:"session_id"`
+
 	StartTime Timestamp `json:"start_time"`
 
 	Url string `json:"url"`
@@ -1734,6 +2728,9 @@ type CallTranscriptionFailedEvent struct {
 
 	// The type of event: "call.transcription_failed" in this case
 	Type string `json:"type"`
+
+	// The error message detailing why transcription failed.
+	Error *string `json:"error,omitempty"`
 }
 
 func (*CallTranscriptionFailedEvent) GetEventType() string {
@@ -1794,8 +2791,6 @@ type CallType struct {
 	AppPK int `json:"AppPK"`
 
 	CreatedAt Timestamp `json:"CreatedAt"`
-
-	EnableLiveInsights bool `json:"EnableLiveInsights"`
 
 	ExternalStorage string `json:"ExternalStorage"`
 
@@ -2059,6 +3054,8 @@ type Channel struct {
 
 	Team *string `json:"team,omitempty"`
 
+	ActiveLiveLocations []SharedLocation `json:"active_live_locations,omitempty"`
+
 	Invites []ChannelMember `json:"invites,omitempty"`
 
 	Members []ChannelMember `json:"members,omitempty"`
@@ -2107,6 +3104,8 @@ type ChannelConfig struct {
 
 	Search bool `json:"search"`
 
+	SharedLocations bool `json:"shared_locations"`
+
 	SkipLastMsgUpdateForSystemMsgs bool `json:"skip_last_msg_update_for_system_msgs"`
 
 	TypingEvents bool `json:"typing_events"`
@@ -2117,7 +3116,8 @@ type ChannelConfig struct {
 
 	UrlEnrichment bool `json:"url_enrichment"`
 
-	// List of commands that channel supports
+	UserMessageReminders bool `json:"user_message_reminders"`
+
 	Commands []string `json:"commands"`
 
 	Blocklist *string `json:"blocklist,omitempty"`
@@ -2126,7 +3126,7 @@ type ChannelConfig struct {
 
 	PartitionSize *int `json:"partition_size,omitempty"`
 
-	PartitionTtl *string `json:"partition_ttl,omitempty"`
+	PartitionTtl *int `json:"partition_ttl,omitempty"`
 
 	AllowedFlagReasons []string `json:"allowed_flag_reasons,omitempty"`
 
@@ -2170,6 +3170,8 @@ type ChannelConfigWithInfo struct {
 
 	Search bool `json:"search"`
 
+	SharedLocations bool `json:"shared_locations"`
+
 	SkipLastMsgUpdateForSystemMsgs bool `json:"skip_last_msg_update_for_system_msgs"`
 
 	TypingEvents bool `json:"typing_events"`
@@ -2179,6 +3181,8 @@ type ChannelConfigWithInfo struct {
 	Uploads bool `json:"uploads"`
 
 	UrlEnrichment bool `json:"url_enrichment"`
+
+	UserMessageReminders bool `json:"user_message_reminders"`
 
 	Commands []Command `json:"commands"`
 
@@ -2497,6 +3501,7 @@ const (
 	SEND_RESTRICTED_VISIBILITY_MESSAGE ChannelOwnCapability = "send-restricted-visibility-message"
 	SEND_TYPING_EVENTS                 ChannelOwnCapability = "send-typing-events"
 	SET_CHANNEL_COOLDOWN               ChannelOwnCapability = "set-channel-cooldown"
+	SHARE_LOCATION                     ChannelOwnCapability = "share-location"
 	SKIP_SLOW_MODE                     ChannelOwnCapability = "skip-slow-mode"
 	SLOW_MODE                          ChannelOwnCapability = "slow-mode"
 	TYPING_EVENTS                      ChannelOwnCapability = "typing-events"
@@ -2612,6 +3617,8 @@ type ChannelStateResponse struct {
 
 	WatcherCount *int `json:"watcher_count,omitempty"`
 
+	ActiveLiveLocations []SharedLocationResponseData `json:"active_live_locations,omitempty"`
+
 	PendingMessages []PendingMessageResponse `json:"pending_messages,omitempty"`
 
 	Read []ReadStateResponse `json:"read,omitempty"`
@@ -2647,6 +3654,9 @@ type ChannelStateResponseFields struct {
 
 	// Number of channel watchers
 	WatcherCount *int `json:"watcher_count,omitempty"`
+
+	// Active live locations in the channel
+	ActiveLiveLocations []SharedLocationResponseData `json:"active_live_locations,omitempty"`
 
 	// Pending messages that this user has sent
 	PendingMessages []PendingMessageResponse `json:"pending_messages,omitempty"`
@@ -2721,6 +3731,8 @@ type ChannelTypeConfig struct {
 
 	Search bool `json:"search"`
 
+	SharedLocations bool `json:"shared_locations"`
+
 	SkipLastMsgUpdateForSystemMsgs bool `json:"skip_last_msg_update_for_system_msgs"`
 
 	TypingEvents bool `json:"typing_events"`
@@ -2730,6 +3742,8 @@ type ChannelTypeConfig struct {
 	Uploads bool `json:"uploads"`
 
 	UrlEnrichment bool `json:"url_enrichment"`
+
+	UserMessageReminders bool `json:"user_message_reminders"`
 
 	Commands []Command `json:"commands"`
 
@@ -2837,6 +3851,9 @@ type CheckExternalStorageResponse struct {
 type CheckPushResponse struct {
 	Duration string `json:"duration"`
 
+	// The event type that was tested
+	EventType *string `json:"event_type,omitempty"`
+
 	RenderedApnTemplate *string `json:"rendered_apn_template,omitempty"`
 
 	RenderedFirebaseTemplate *string `json:"rendered_firebase_template,omitempty"`
@@ -2865,7 +3882,7 @@ type CheckResponse struct {
 	// ID of the running moderation task
 	TaskID *string `json:"task_id,omitempty"`
 
-	Item *ReviewQueueItem `json:"item,omitempty"`
+	Item *ReviewQueueItemResponse `json:"item,omitempty"`
 }
 
 type CheckSNSResponse struct {
@@ -2945,6 +3962,225 @@ type Command struct {
 	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 }
 
+// Emitted when a comment is added to an activity.
+type CommentAddedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Comment CommentResponse `json:"comment"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.comment.added" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*CommentAddedEvent) GetEventType() string {
+	return "feeds.comment.added"
+}
+
+// Emitted when a comment is deleted.
+type CommentDeletedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Comment CommentResponse `json:"comment"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.comment.deleted" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*CommentDeletedEvent) GetEventType() string {
+	return "feeds.comment.deleted"
+}
+
+// Emitted when a reaction is added to a comment.
+type CommentReactionAddedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Comment CommentResponse `json:"comment"`
+
+	Custom map[string]any `json:"custom"`
+
+	Reaction FeedsReactionResponse `json:"reaction"`
+
+	// The type of event: "feeds.comment.reaction.added" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*CommentReactionAddedEvent) GetEventType() string {
+	return "feeds.comment.reaction.added"
+}
+
+// Emitted when a reaction is deleted from a comment.
+type CommentReactionDeletedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Comment CommentResponse `json:"comment"`
+
+	Custom map[string]any `json:"custom"`
+
+	Reaction FeedsReactionResponse `json:"reaction"`
+
+	// The type of reaction that was removed
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*CommentReactionDeletedEvent) GetEventType() string {
+	return "feeds.comment.reaction.deleted"
+}
+
+// Emitted when a reaction is updated on a comment.
+type CommentReactionUpdatedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Comment CommentResponse `json:"comment"`
+
+	Custom map[string]any `json:"custom"`
+
+	Reaction FeedsReactionResponse `json:"reaction"`
+
+	// The type of event: "feeds.comment.reaction.updated" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*CommentReactionUpdatedEvent) GetEventType() string {
+	return "feeds.comment.reaction.updated"
+}
+
+type CommentResponse struct {
+	// Confidence score of the comment
+	ConfidenceScore float64 `json:"confidence_score"`
+
+	// When the comment was created
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Number of downvotes for this comment
+	DownvoteCount int `json:"downvote_count"`
+
+	// Unique identifier for the comment
+	ID string `json:"id"`
+
+	// ID of the object this comment is associated with
+	ObjectID string `json:"object_id"`
+
+	// Type of the object this comment is associated with
+	ObjectType string `json:"object_type"`
+
+	// Number of reactions to this comment
+	ReactionCount int `json:"reaction_count"`
+
+	// Number of replies to this comment
+	ReplyCount int `json:"reply_count"`
+
+	// Score of the comment based on reactions
+	Score int `json:"score"`
+
+	// Status of the comment (e.g., active, deleted)
+	Status string `json:"status"`
+
+	// When the comment was last updated
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	// Number of upvotes for this comment
+	UpvoteCount int `json:"upvote_count"`
+
+	// Users mentioned in the comment
+	MentionedUsers []UserResponse `json:"mentioned_users"`
+
+	// Current user's reactions to this activity
+	OwnReactions []FeedsReactionResponse `json:"own_reactions"`
+
+	User UserResponse `json:"user"`
+
+	// Controversy score of the comment
+	ControversyScore *float64 `json:"controversy_score,omitempty"`
+
+	// When the comment was deleted
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
+
+	// ID of parent comment for nested replies
+	ParentID *string `json:"parent_id,omitempty"`
+
+	// Text content of the comment
+	Text *string `json:"text,omitempty"`
+
+	Attachments []Attachment `json:"attachments,omitempty"`
+
+	// Recent reactions to the comment
+	LatestReactions []FeedsReactionResponse `json:"latest_reactions,omitempty"`
+
+	// Custom data for the comment
+	Custom map[string]any `json:"custom,omitempty"`
+
+	Moderation *ModerationV2Response `json:"moderation,omitempty"`
+
+	// Grouped reactions by type
+	ReactionGroups map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
+}
+
+// Emitted when a comment is updated.
+type CommentUpdatedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Comment CommentResponse `json:"comment"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.comment.updated" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*CommentUpdatedEvent) GetEventType() string {
+	return "feeds.comment.updated"
+}
+
+type CompositeAppSettings struct {
+	JsonEncodedSettings *string `json:"json_encoded_settings,omitempty"`
+
+	Url *string `json:"url,omitempty"`
+}
+
 type ConfigOverrides struct {
 	Commands []string `json:"commands"`
 
@@ -2962,11 +4198,15 @@ type ConfigOverrides struct {
 
 	Replies *bool `json:"replies,omitempty"`
 
+	SharedLocations *bool `json:"shared_locations,omitempty"`
+
 	TypingEvents *bool `json:"typing_events,omitempty"`
 
 	Uploads *bool `json:"uploads,omitempty"`
 
 	UrlEnrichment *bool `json:"url_enrichment,omitempty"`
+
+	UserMessageReminders *bool `json:"user_message_reminders,omitempty"`
 }
 
 type ConfigResponse struct {
@@ -2999,7 +4239,17 @@ type ConfigResponse struct {
 
 	BlockListConfig *BlockListConfig `json:"block_list_config,omitempty"`
 
+	RuleBuilderConfig *RuleBuilderConfig `json:"rule_builder_config,omitempty"`
+
 	VelocityFilterConfig *VelocityFilterConfig `json:"velocity_filter_config,omitempty"`
+
+	VideoCallRuleConfig *VideoCallRuleConfig `json:"video_call_rule_config,omitempty"`
+}
+
+type ContentCountRuleParameters struct {
+	Threshold int `json:"threshold"`
+
+	TimeWindow string `json:"time_window"`
 }
 
 type CountByMinuteResponse struct {
@@ -3077,6 +4327,8 @@ type CreateChannelTypeResponse struct {
 
 	Search bool `json:"search"`
 
+	SharedLocations bool `json:"shared_locations"`
+
 	SkipLastMsgUpdateForSystemMsgs bool `json:"skip_last_msg_update_for_system_msgs"`
 
 	TypingEvents bool `json:"typing_events"`
@@ -3086,6 +4338,8 @@ type CreateChannelTypeResponse struct {
 	Uploads bool `json:"uploads"`
 
 	UrlEnrichment bool `json:"url_enrichment"`
+
+	UserMessageReminders bool `json:"user_message_reminders"`
 
 	Commands []string `json:"commands"`
 
@@ -3118,6 +4372,25 @@ type CreateCommandResponse struct {
 type CreateExternalStorageResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
+}
+
+type CreateFeedGroupResponse struct {
+	Duration string `json:"duration"`
+
+	FeedGroup FeedGroupResponse `json:"feed_group"`
+}
+
+type CreateFeedViewResponse struct {
+	Duration string `json:"duration"`
+
+	FeedView FeedViewResponse `json:"feed_view"`
+}
+
+type CreateFeedsBatchResponse struct {
+	Duration string `json:"duration"`
+
+	// List of created feeds
+	Feeds []FeedResponse `json:"feeds"`
 }
 
 type CreateGuestResponse struct {
@@ -3270,8 +4543,53 @@ type DeactivateUsersResponse struct {
 	TaskID string `json:"task_id"`
 }
 
-type DeleteActivityRequest struct {
-	HardDelete *bool `json:"hard_delete,omitempty"`
+type DecayFunctionConfig struct {
+	// Base value for decay function
+	Base *string `json:"base,omitempty"`
+
+	// Decay rate
+	Decay *string `json:"decay,omitempty"`
+
+	// Direction of decay
+	Direction *string `json:"direction,omitempty"`
+
+	// Offset value for decay function
+	Offset *string `json:"offset,omitempty"`
+
+	// Origin value for decay function
+	Origin *string `json:"origin,omitempty"`
+
+	// Scale factor for decay function
+	Scale *string `json:"scale,omitempty"`
+}
+
+type DeleteActivitiesResponse struct {
+	Duration string `json:"duration"`
+
+	// List of activity IDs that were successfully deleted
+	DeletedActivityIds []string `json:"deleted_activity_ids"`
+}
+
+type DeleteActivityReactionResponse struct {
+	Duration string `json:"duration"`
+
+	Activity ActivityResponse `json:"activity"`
+
+	Reaction FeedsReactionResponse `json:"reaction"`
+}
+
+type DeleteActivityResponse struct {
+	Duration string `json:"duration"`
+}
+
+type DeleteBookmarkFolderResponse struct {
+	Duration string `json:"duration"`
+}
+
+type DeleteBookmarkResponse struct {
+	Duration string `json:"duration"`
+
+	Bookmark BookmarkResponse `json:"bookmark"`
 }
 
 // DeleteCallResponse is the payload for deleting a call.
@@ -3314,9 +4632,52 @@ type DeleteCommandResponse struct {
 	Name string `json:"name"`
 }
 
+type DeleteCommentReactionResponse struct {
+	Duration string `json:"duration"`
+
+	Comment CommentResponse `json:"comment"`
+
+	Reaction FeedsReactionResponse `json:"reaction"`
+}
+
+type DeleteCommentResponse struct {
+	Duration string `json:"duration"`
+}
+
 // Basic response information
 type DeleteExternalStorageResponse struct {
 	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+}
+
+// Basic response information
+type DeleteFeedGroupResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+}
+
+type DeleteFeedResponse struct {
+	Duration string `json:"duration"`
+}
+
+// Response for deleting feed user data
+type DeleteFeedUserDataResponse struct {
+	// Number of activities that were deleted
+	DeletedActivities int `json:"deleted_activities"`
+
+	// Number of bookmarks that were deleted
+	DeletedBookmarks int `json:"deleted_bookmarks"`
+
+	// Number of comments that were deleted
+	DeletedComments int `json:"deleted_comments"`
+
+	// Number of reactions that were deleted
+	DeletedReactions int `json:"deleted_reactions"`
+
+	Duration string `json:"duration"`
+}
+
+type DeleteFeedViewResponse struct {
 	Duration string `json:"duration"`
 }
 
@@ -3348,6 +4709,12 @@ type DeleteReactionResponse struct {
 
 // Response for DeleteRecording
 type DeleteRecordingResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+}
+
+// Basic response information
+type DeleteReminderResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
@@ -3527,6 +4894,24 @@ type EgressResponse struct {
 	HLS *EgressHLSResponse `json:"hls,omitempty"`
 }
 
+type EgressTaskConfig struct {
+	EgressUser *EgressUser `json:"egress_user,omitempty"`
+
+	FrameRecordingEgressConfig *FrameRecordingEgressConfig `json:"frame_recording_egress_config,omitempty"`
+
+	HLSEgressConfig *HLSEgressConfig `json:"hls_egress_config,omitempty"`
+
+	RTMPEgressConfig *RTMPEgressConfig `json:"rtmp_egress_config,omitempty"`
+
+	RecordingEgressConfig *RecordingEgressConfig `json:"recording_egress_config,omitempty"`
+
+	SttEgressConfig *STTEgressConfig `json:"stt_egress_config,omitempty"`
+}
+
+type EgressUser struct {
+	Token *string `json:"token,omitempty"`
+}
+
 // Response for ending a call
 type EndCallResponse struct {
 	// Duration of the request in milliseconds
@@ -3604,6 +4989,8 @@ type EntityCreator struct {
 
 	TeamsRole map[string]string `json:"teams_role"`
 
+	AvgResponseTime *int `json:"avg_response_time,omitempty"`
+
 	BanExpires *Timestamp `json:"ban_expires,omitempty"`
 
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
@@ -3663,6 +5050,8 @@ type EntityCreatorResponse struct {
 
 	Custom map[string]any `json:"custom"`
 
+	AvgResponseTime *int `json:"avg_response_time,omitempty"`
+
 	BanExpires *Timestamp `json:"ban_expires,omitempty"`
 
 	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
@@ -3694,10 +5083,56 @@ type ErrorResult struct {
 	Version *string `json:"version,omitempty"`
 }
 
+type EventHook struct {
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
+
+	Enabled *bool `json:"enabled,omitempty"`
+
+	HookType *string `json:"hook_type,omitempty"`
+
+	ID *string `json:"id,omitempty"`
+
+	SnsAuthType *string `json:"sns_auth_type,omitempty"`
+
+	SnsKey *string `json:"sns_key,omitempty"`
+
+	SnsRegion *string `json:"sns_region,omitempty"`
+
+	SnsRoleArn *string `json:"sns_role_arn,omitempty"`
+
+	SnsSecret *string `json:"sns_secret,omitempty"`
+
+	SnsTopicArn *string `json:"sns_topic_arn,omitempty"`
+
+	SqsAuthType *string `json:"sqs_auth_type,omitempty"`
+
+	SqsKey *string `json:"sqs_key,omitempty"`
+
+	SqsQueueUrl *string `json:"sqs_queue_url,omitempty"`
+
+	SqsRegion *string `json:"sqs_region,omitempty"`
+
+	SqsRoleArn *string `json:"sqs_role_arn,omitempty"`
+
+	SqsSecret *string `json:"sqs_secret,omitempty"`
+
+	TimeoutMs *int `json:"timeout_ms,omitempty"`
+
+	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
+
+	WebhookUrl *string `json:"webhook_url,omitempty"`
+
+	EventTypes []string `json:"event_types,omitempty"`
+
+	Callback *AsyncModerationCallbackConfig `json:"callback,omitempty"`
+}
+
 type EventNotificationSettings struct {
 	Enabled bool `json:"enabled"`
 
 	APNS APNS `json:"apns"`
+
+	Fcm FCM `json:"fcm"`
 }
 
 type EventRequest struct {
@@ -3728,6 +5163,14 @@ type ExportChannelsResponse struct {
 	TaskID string `json:"task_id"`
 }
 
+// Response for exporting feed user data
+type ExportFeedUserDataResponse struct {
+	Duration string `json:"duration"`
+
+	// The task ID for the export task
+	TaskID string `json:"task_id"`
+}
+
 type ExportUserResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -3749,6 +5192,34 @@ type ExportUsersResponse struct {
 	TaskID string `json:"task_id"`
 }
 
+type ExternalStorage struct {
+	AbsAccountName *string `json:"abs_account_name,omitempty"`
+
+	AbsClientID *string `json:"abs_client_id,omitempty"`
+
+	AbsClientSecret *string `json:"abs_client_secret,omitempty"`
+
+	AbsTenantID *string `json:"abs_tenant_id,omitempty"`
+
+	Bucket *string `json:"bucket,omitempty"`
+
+	GcsCredentials *string `json:"gcs_credentials,omitempty"`
+
+	Path *string `json:"path,omitempty"`
+
+	S3APIKey *string `json:"s3_api_key,omitempty"`
+
+	S3CustomEndpoint *string `json:"s3_custom_endpoint,omitempty"`
+
+	S3Region *string `json:"s3_region,omitempty"`
+
+	S3SecretKey *string `json:"s3_secret_key,omitempty"`
+
+	StorageName *string `json:"storage_name,omitempty"`
+
+	StorageType *int `json:"storage_type,omitempty"`
+}
+
 type ExternalStorageResponse struct {
 	Bucket string `json:"bucket"`
 
@@ -3759,10 +5230,455 @@ type ExternalStorageResponse struct {
 	Type string `json:"type"`
 }
 
+type FCM struct {
+	Data map[string]any `json:"data,omitempty"`
+}
+
+// Emitted when a feed is created.
+type FeedCreatedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Members []FeedMemberResponse `json:"members"`
+
+	Custom map[string]any `json:"custom"`
+
+	Feed FeedResponse `json:"feed"`
+
+	User UserResponseCommonFields `json:"user"`
+
+	// The type of event: "feeds.feed.created" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*FeedCreatedEvent) GetEventType() string {
+	return "feeds.feed.created"
+}
+
+// Emitted when a feed is deleted.
+type FeedDeletedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.feed.deleted" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*FeedDeletedEvent) GetEventType() string {
+	return "feeds.feed.deleted"
+}
+
+type FeedGroup struct {
+	AppPK int `json:"AppPK"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	DefaultViewID string `json:"DefaultViewID"`
+
+	DefaultVisibility string `json:"DefaultVisibility"`
+
+	ID string `json:"ID"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	Custom map[string]any `json:"Custom"`
+
+	DeletedAt *Timestamp `json:"DeletedAt,omitempty"`
+
+	LastFeedGetAt *Timestamp `json:"LastFeedGetAt,omitempty"`
+
+	Notification *NotificationConfig `json:"Notification,omitempty"`
+
+	Stories *StoriesConfig `json:"Stories,omitempty"`
+}
+
+// Emitted when a feed group is changed.
+type FeedGroupChangedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.feed_group.changed" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	FeedGroup *FeedGroup `json:"feed_group,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*FeedGroupChangedEvent) GetEventType() string {
+	return "feeds.feed_group.changed"
+}
+
+// Emitted when a feed group is deleted.
+type FeedGroupDeletedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	// The ID of the feed group that was deleted
+	GroupID string `json:"group_id"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.feed_group.deleted" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*FeedGroupDeletedEvent) GetEventType() string {
+	return "feeds.feed_group.deleted"
+}
+
+type FeedGroupResponse struct {
+	// When the feed group was created
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Identifier within the group
+	ID string `json:"id"`
+
+	// When the feed group was last updated
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	DefaultViewID *string `json:"default_view_id,omitempty"`
+
+	// Default visibility for activities
+	DefaultVisibility *string `json:"default_visibility,omitempty"`
+
+	// Custom data for the feed group
+	Custom map[string]any `json:"custom,omitempty"`
+
+	Notification *NotificationConfig `json:"notification,omitempty"`
+
+	Stories *StoriesConfig `json:"stories,omitempty"`
+}
+
+type FeedInput struct {
+	Description *string `json:"description,omitempty"`
+
+	Name *string `json:"name,omitempty"`
+
+	Visibility *string `json:"visibility,omitempty"`
+
+	FilterTags []string `json:"filter_tags,omitempty"`
+
+	Members []FeedMemberRequest `json:"members,omitempty"`
+
+	Custom map[string]any `json:"custom,omitempty"`
+}
+
+// Emitted when a feed member is added.
+type FeedMemberAddedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Custom map[string]any `json:"custom"`
+
+	Member FeedMemberResponse `json:"member"`
+
+	// The type of event: "feeds.feed_member.added" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*FeedMemberAddedEvent) GetEventType() string {
+	return "feeds.feed_member.added"
+}
+
+// Emitted when a feed member is removed.
+type FeedMemberRemovedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	MemberID string `json:"member_id"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.feed_member.removed" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*FeedMemberRemovedEvent) GetEventType() string {
+	return "feeds.feed_member.removed"
+}
+
+type FeedMemberRequest struct {
+	// ID of the user to add as a member
+	UserID string `json:"user_id"`
+
+	Invite *bool `json:"invite,omitempty"`
+
+	// Role of the member in the feed
+	Role *string `json:"role,omitempty"`
+
+	// Custom data for the member
+	Custom map[string]any `json:"custom,omitempty"`
+}
+
+type FeedMemberResponse struct {
+	// When the membership was created
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Role of the member in the feed
+	Role string `json:"role"`
+
+	// Status of the membership
+	Status string `json:"status"`
+
+	// When the membership was last updated
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	User UserResponse `json:"user"`
+
+	// When the invite was accepted
+	InviteAcceptedAt *Timestamp `json:"invite_accepted_at,omitempty"`
+
+	// When the invite was rejected
+	InviteRejectedAt *Timestamp `json:"invite_rejected_at,omitempty"`
+
+	// Custom data for the membership
+	Custom map[string]any `json:"custom,omitempty"`
+}
+
+// Emitted when a feed member is updated.
+type FeedMemberUpdatedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Custom map[string]any `json:"custom"`
+
+	Member FeedMemberResponse `json:"member"`
+
+	// The type of event: "feeds.feed_member.updated" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*FeedMemberUpdatedEvent) GetEventType() string {
+	return "feeds.feed_member.updated"
+}
+
+type FeedOwnCapability string
+
+const (
+	ADD_ACTIVITY             FeedOwnCapability = "add-activity"
+	ADD_ACTIVITY_REACTION    FeedOwnCapability = "add-activity-reaction"
+	ADD_COMMENT              FeedOwnCapability = "add-comment"
+	ADD_COMMENT_REACTION     FeedOwnCapability = "add-comment-reaction"
+	BOOKMARK_ACTIVITY        FeedOwnCapability = "bookmark-activity"
+	CREATE_FEED              FeedOwnCapability = "create-feed"
+	DELETE_BOOKMARK          FeedOwnCapability = "delete-bookmark"
+	DELETE_COMMENT           FeedOwnCapability = "delete-comment"
+	DELETE_FEED              FeedOwnCapability = "delete-feed"
+	EDIT_BOOKMARK            FeedOwnCapability = "edit-bookmark"
+	FOLLOW                   FeedOwnCapability = "follow"
+	INVITE_FEED              FeedOwnCapability = "invite-feed"
+	JOIN_FEED                FeedOwnCapability = "join-feed"
+	LEAVE_FEED               FeedOwnCapability = "leave-feed"
+	MANAGE_FEED_GROUP        FeedOwnCapability = "manage-feed-group"
+	MARK_ACTIVITY            FeedOwnCapability = "mark-activity"
+	PIN_ACTIVITY             FeedOwnCapability = "pin-activity"
+	QUERY_FEED_MEMBERS       FeedOwnCapability = "query-feed-members"
+	QUERY_FOLLOWS            FeedOwnCapability = "query-follows"
+	READ_ACTIVITIES          FeedOwnCapability = "read-activities"
+	READ_FEED                FeedOwnCapability = "read-feed"
+	REMOVE_ACTIVITY          FeedOwnCapability = "remove-activity"
+	REMOVE_ACTIVITY_REACTION FeedOwnCapability = "remove-activity-reaction"
+	REMOVE_COMMENT_REACTION  FeedOwnCapability = "remove-comment-reaction"
+	UNFOLLOW                 FeedOwnCapability = "unfollow"
+	UPDATE_ACTIVITY          FeedOwnCapability = "update-activity"
+	UPDATE_COMMENT           FeedOwnCapability = "update-comment"
+	UPDATE_FEED              FeedOwnCapability = "update-feed"
+	UPDATE_FEED_FOLLOWERS    FeedOwnCapability = "update-feed-followers"
+	UPDATE_FEED_MEMBERS      FeedOwnCapability = "update-feed-members"
+)
+
+func (c FeedOwnCapability) String() string {
+	return string(c)
+}
+
+type FeedRequest struct {
+	// ID of the feed group
+	FeedGroupID string `json:"feed_group_id"`
+
+	// ID of the feed
+	FeedID string `json:"feed_id"`
+
+	// ID of the feed creator
+	CreatedByID *string `json:"created_by_id,omitempty"`
+
+	// Description of the feed
+	Description *string `json:"description,omitempty"`
+
+	// Name of the feed
+	Name *string `json:"name,omitempty"`
+
+	// Visibility setting for the feed
+	Visibility *string `json:"visibility,omitempty"`
+
+	// Tags used for filtering feeds
+	FilterTags []string `json:"filter_tags,omitempty"`
+
+	// Initial members for the feed
+	Members []FeedMemberRequest `json:"members,omitempty"`
+
+	// Custom data for the feed
+	Custom map[string]any `json:"custom,omitempty"`
+}
+
+type FeedResponse struct {
+	// When the feed was created
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Description of the feed
+	Description string `json:"description"`
+
+	// Fully qualified feed ID (group_id:id)
+	Fid string `json:"fid"`
+
+	// Number of followers of this feed
+	FollowerCount int `json:"follower_count"`
+
+	// Number of feeds this feed follows
+	FollowingCount int `json:"following_count"`
+
+	// Group this feed belongs to
+	GroupID string `json:"group_id"`
+
+	// Unique identifier for the feed
+	ID string `json:"id"`
+
+	// Number of members in this feed
+	MemberCount int `json:"member_count"`
+
+	// Name of the feed
+	Name string `json:"name"`
+
+	// Number of pinned activities in this feed
+	PinCount int `json:"pin_count"`
+
+	// When the feed was last updated
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	CreatedBy UserResponse `json:"created_by"`
+
+	// When the feed was deleted
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
+
+	// Visibility setting for the feed
+	Visibility *string `json:"visibility,omitempty"`
+
+	// Tags used for filtering feeds
+	FilterTags []string `json:"filter_tags,omitempty"`
+
+	// Follow relationships where the current user's feeds are following this feed
+	OwnFollows []FollowResponse `json:"own_follows,omitempty"`
+
+	// Custom data for the feed
+	Custom map[string]any `json:"custom,omitempty"`
+}
+
+// Emitted when a feed is created.
+type FeedUpdatedEvent struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Custom map[string]any `json:"custom"`
+
+	Feed FeedResponse `json:"feed"`
+
+	// The type of event: "feeds.feed.updated" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*FeedUpdatedEvent) GetEventType() string {
+	return "feeds.feed.updated"
+}
+
+type FeedViewResponse struct {
+	// Unique identifier for the custom feed view
+	ID string `json:"id"`
+
+	// When the feed view was last used
+	LastUsedAt *Timestamp `json:"last_used_at,omitempty"`
+
+	// Configured activity processors
+	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors,omitempty"`
+
+	// Configured activity selectors
+	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors,omitempty"`
+
+	Aggregation *AggregationConfig `json:"aggregation,omitempty"`
+
+	Ranking *RankingConfig `json:"ranking,omitempty"`
+}
+
 type FeedsModerationTemplateConfig struct {
 	ConfigKey string `json:"config_key"`
 
 	DataTypes map[string]string `json:"data_types"`
+}
+
+type FeedsReactionResponse struct {
+	// ID of the activity that was reacted to
+	ActivityID string `json:"activity_id"`
+
+	// When the reaction was created
+	CreatedAt Timestamp `json:"created_at"`
+
+	// When the reaction was last updated
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	// Type of reaction
+	Type string `json:"type"`
+
+	User UserResponse `json:"user"`
+
+	// ID of the comment that was reacted to
+	CommentID *string `json:"comment_id,omitempty"`
+
+	// Custom data for the reaction
+	Custom map[string]any `json:"custom,omitempty"`
 }
 
 type Field struct {
@@ -3818,15 +5734,15 @@ type FirebaseConfig struct {
 }
 
 type FirebaseConfigFields struct {
-	ApnTemplate string `json:"apn_template"`
-
-	DataTemplate string `json:"data_template"`
-
 	Enabled bool `json:"enabled"`
 
-	NotificationTemplate string `json:"notification_template"`
+	ApnTemplate *string `json:"apn_template,omitempty"`
 
 	CredentialsJson *string `json:"credentials_json,omitempty"`
+
+	DataTemplate *string `json:"data_template,omitempty"`
+
+	NotificationTemplate *string `json:"notification_template,omitempty"`
 
 	ServerKey *string `json:"server_key,omitempty"`
 }
@@ -3836,40 +5752,40 @@ type Flag struct {
 	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
 
-	// Unique identifier of the entity being flagged
-	EntityID string `json:"entity_id"`
-
-	// Type of entity being flagged (e.g., message, user)
-	EntityType string `json:"entity_type"`
+	CreatedByAutomod bool `json:"created_by_automod"`
 
 	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
 
-	// Result of bodyguard, API calls, our own AI etc
-	Result []map[string]any `json:"result"`
+	// Date of the approval
+	ApprovedAt *Timestamp `json:"approved_at,omitempty"`
 
-	// ID of the user who created the flagged entity
-	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
-
-	ModerationPayloadHash *string `json:"moderation_payload_hash,omitempty"`
-
-	// Optional explanation for why the content is being flagged
 	Reason *string `json:"reason,omitempty"`
 
-	// ID of the review queue item
-	ReviewQueueItemID *string `json:"review_queue_item_id,omitempty"`
+	// Date of the rejection
+	RejectedAt *Timestamp `json:"rejected_at,omitempty"`
 
-	Type *string `json:"type,omitempty"`
+	// Date of the review
+	ReviewedAt *Timestamp `json:"reviewed_at,omitempty"`
 
-	// Labels from bodyguard, API calls, our own AI etc
-	Labels []string `json:"labels,omitempty"`
+	ReviewedBy *string `json:"reviewed_by,omitempty"`
 
-	// Additional metadata about the flag
+	// ID of flagged message
+	TargetMessageID *string `json:"target_message_id,omitempty"`
+
 	Custom map[string]any `json:"custom,omitempty"`
 
-	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
+	Details *FlagDetails `json:"details,omitempty"`
+
+	TargetMessage *Message `json:"target_message,omitempty"`
+
+	TargetUser *User `json:"target_user,omitempty"`
 
 	User *User `json:"user,omitempty"`
+}
+
+type FlagContentOptions struct {
+	Reason string `json:"reason"`
 }
 
 type FlagDetails struct {
@@ -3925,12 +5841,131 @@ func (*FlagUpdatedEvent) GetEventType() string {
 	return "flag.updated"
 }
 
+type FlagUserOptions struct {
+	Reason string `json:"reason"`
+}
+
+type FollowBatchResponse struct {
+	Duration string `json:"duration"`
+
+	// List of created follow relationships
+	Follows []FollowResponse `json:"follows"`
+}
+
+// Emitted when a feed follows another feed.
+type FollowCreatedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Custom map[string]any `json:"custom"`
+
+	Follow FollowResponse `json:"follow"`
+
+	// The type of event: "feeds.follow.created" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*FollowCreatedEvent) GetEventType() string {
+	return "feeds.follow.created"
+}
+
+// Emitted when a feed unfollows another feed.
+type FollowDeletedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Custom map[string]any `json:"custom"`
+
+	Follow FollowResponse `json:"follow"`
+
+	// The type of event: "feeds.follow.deleted" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*FollowDeletedEvent) GetEventType() string {
+	return "feeds.follow.deleted"
+}
+
+type FollowPair struct {
+	// Fully qualified ID of the source feed
+	Source string `json:"source"`
+
+	// Fully qualified ID of the target feed
+	Target string `json:"target"`
+}
+
+type FollowResponse struct {
+	// When the follow relationship was created
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Role of the follower (source user) in the follow relationship
+	FollowerRole string `json:"follower_role"`
+
+	PushPreference string `json:"push_preference"`
+
+	// Status of the follow relationship
+	Status string `json:"status"`
+
+	// When the follow relationship was last updated
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	SourceFeed FeedResponse `json:"source_feed"`
+
+	TargetFeed FeedResponse `json:"target_feed"`
+
+	RequestAcceptedAt *Timestamp `json:"request_accepted_at,omitempty"`
+
+	RequestRejectedAt *Timestamp `json:"request_rejected_at,omitempty"`
+
+	// Custom data for the follow relationship
+	Custom map[string]any `json:"custom,omitempty"`
+}
+
+// Emitted when a follow relationship is updated.
+type FollowUpdatedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	Fid string `json:"fid"`
+
+	Custom map[string]any `json:"custom"`
+
+	Follow FollowResponse `json:"follow"`
+
+	// The type of event: "feeds.follow.updated" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*FollowUpdatedEvent) GetEventType() string {
+	return "feeds.follow.updated"
+}
+
 type FrameRecordSettings struct {
 	CaptureIntervalInSeconds int `json:"capture_interval_in_seconds"`
 
 	Mode string `json:"mode"`
 
 	Quality *string `json:"quality,omitempty"`
+}
+
+type FrameRecordingEgressConfig struct {
+	CaptureIntervalInSeconds *int `json:"capture_interval_in_seconds,omitempty"`
+
+	StorageName *string `json:"storage_name,omitempty"`
+
+	ExternalStorage *ExternalStorage `json:"external_storage,omitempty"`
+
+	Quality *Quality `json:"quality,omitempty"`
 }
 
 type FrameRecordingResponse struct {
@@ -3992,6 +6027,8 @@ type FullUserResponse struct {
 
 	Custom map[string]any `json:"custom"`
 
+	AvgResponseTime *int `json:"avg_response_time,omitempty"`
+
 	BanExpires *Timestamp `json:"ban_expires,omitempty"`
 
 	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
@@ -4035,6 +6072,27 @@ type GeofenceSettingsResponse struct {
 	Names []string `json:"names"`
 }
 
+// Response containing active calls status information
+type GetActiveCallsStatusResponse struct {
+	Duration string `json:"duration"`
+
+	// End time of the status period
+	EndTime Timestamp `json:"end_time"`
+
+	// Start time of the status period
+	StartTime Timestamp `json:"start_time"`
+
+	Metrics *ActiveCallsMetrics `json:"metrics,omitempty"`
+
+	Summary *ActiveCallsSummary `json:"summary,omitempty"`
+}
+
+type GetActivityResponse struct {
+	Duration string `json:"duration"`
+
+	Activity ActivityResponse `json:"activity"`
+}
+
 // Basic response information
 type GetApplicationResponse struct {
 	// Duration of the request in milliseconds
@@ -4066,6 +6124,8 @@ type GetCallReportResponse struct {
 	SessionID string `json:"session_id"`
 
 	Report ReportResponse `json:"report"`
+
+	VideoReactions []VideoReactionsResponse `json:"video_reactions,omitempty"`
 
 	ChatActivity *ChatActivityStatsResponse `json:"chat_activity,omitempty"`
 }
@@ -4147,6 +6207,8 @@ type GetChannelTypeResponse struct {
 
 	Search bool `json:"search"`
 
+	SharedLocations bool `json:"shared_locations"`
+
 	SkipLastMsgUpdateForSystemMsgs bool `json:"skip_last_msg_update_for_system_msgs"`
 
 	TypingEvents bool `json:"typing_events"`
@@ -4156,6 +6218,8 @@ type GetChannelTypeResponse struct {
 	Uploads bool `json:"uploads"`
 
 	UrlEnrichment bool `json:"url_enrichment"`
+
+	UserMessageReminders bool `json:"user_message_reminders"`
 
 	Commands []Command `json:"commands"`
 
@@ -4194,6 +6258,34 @@ type GetCommandResponse struct {
 	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 }
 
+type GetCommentRepliesResponse struct {
+	Duration string `json:"duration"`
+
+	// Threaded listing of replies to the comment
+	Comments []ThreadedCommentResponse `json:"comments"`
+
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
+}
+
+type GetCommentResponse struct {
+	Duration string `json:"duration"`
+
+	Comment CommentResponse `json:"comment"`
+}
+
+type GetCommentsResponse struct {
+	Duration string `json:"duration"`
+
+	// Threaded listing for the activity
+	Comments []ThreadedCommentResponse `json:"comments"`
+
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
+}
+
 type GetConfigResponse struct {
 	Duration string `json:"duration"`
 
@@ -4222,6 +6314,25 @@ type GetEdgesResponse struct {
 	Duration string `json:"duration"`
 
 	Edges []EdgeResponse `json:"edges"`
+}
+
+type GetFeedGroupResponse struct {
+	Duration string `json:"duration"`
+
+	FeedGroup FeedGroupResponse `json:"feed_group"`
+}
+
+type GetFeedViewResponse struct {
+	Duration string `json:"duration"`
+
+	FeedView FeedViewResponse `json:"feed_view"`
+}
+
+type GetFollowSuggestionsResponse struct {
+	Duration string `json:"duration"`
+
+	// List of suggested feeds to follow
+	Suggestions []FeedResponse `json:"suggestions"`
 }
 
 // Basic response information
@@ -4276,10 +6387,6 @@ type GetOGResponse struct {
 	// URL of detected image
 	ImageUrl *string `json:"image_url,omitempty"`
 
-	Latitude *float64 `json:"latitude,omitempty"`
-
-	Longitude *float64 `json:"longitude,omitempty"`
-
 	// extracted url from the text
 	OGScrapeUrl *string `json:"og_scrape_url,omitempty"`
 
@@ -4288,8 +6395,6 @@ type GetOGResponse struct {
 	OriginalWidth *int `json:"original_width,omitempty"`
 
 	Pretext *string `json:"pretext,omitempty"`
-
-	StoppedSharing *bool `json:"stopped_sharing,omitempty"`
 
 	// og:description
 	Text *string `json:"text,omitempty"`
@@ -4323,6 +6428,54 @@ type GetOrCreateCallResponse struct {
 	OwnCapabilities []OwnCapability `json:"own_capabilities"`
 
 	Call CallResponse `json:"call"`
+}
+
+// Basic response information
+type GetOrCreateFeedResponse struct {
+	Created bool `json:"created"`
+
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Activities []ActivityResponse `json:"activities"`
+
+	AggregatedActivities []AggregatedActivityResponse `json:"aggregated_activities"`
+
+	Followers []FollowResponse `json:"followers"`
+
+	Following []FollowResponse `json:"following"`
+
+	Members []FeedMemberResponse `json:"members"`
+
+	OwnCapabilities []FeedOwnCapability `json:"own_capabilities"`
+
+	PinnedActivities []ActivityPinResponse `json:"pinned_activities"`
+
+	Feed FeedResponse `json:"feed"`
+
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
+
+	OwnFollows []FollowResponse `json:"own_follows,omitempty"`
+
+	FollowersPagination *PagerResponse `json:"followers_pagination,omitempty"`
+
+	FollowingPagination *PagerResponse `json:"following_pagination,omitempty"`
+
+	MemberPagination *PagerResponse `json:"member_pagination,omitempty"`
+
+	NotificationStatus *NotificationStatusResponse `json:"notification_status,omitempty"`
+
+	OwnMembership *FeedMemberResponse `json:"own_membership,omitempty"`
+}
+
+// Basic response information
+type GetPushTemplatesResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Templates []PushTemplate `json:"templates"`
 }
 
 type GetRateLimitsResponse struct {
@@ -4412,6 +6565,16 @@ type GroupedStatsResponse struct {
 	Unique int `json:"unique"`
 }
 
+type HLSEgressConfig struct {
+	PlaylistUrl *string `json:"playlist_url,omitempty"`
+
+	StartUnixNano *int `json:"start_unix_nano,omitempty"`
+
+	Qualities []Quality `json:"qualities,omitempty"`
+
+	CompositeAppSettings *CompositeAppSettings `json:"composite_app_settings,omitempty"`
+}
+
 type HLSSettings struct {
 	AutoOn bool `json:"auto_on"`
 
@@ -4443,6 +6606,12 @@ type HLSSettingsResponse struct {
 	Layout LayoutSettingsResponse `json:"layout"`
 }
 
+type HarmConfig struct {
+	Severity int `json:"severity"`
+
+	ActionSequences []ActionSequence `json:"action_sequences"`
+}
+
 // Basic response information
 type HideChannelResponse struct {
 	// Duration of the request in milliseconds
@@ -4465,6 +6634,10 @@ type HuaweiConfigFields struct {
 	Secret *string `json:"secret,omitempty"`
 }
 
+type ImageContentParameters struct {
+	HarmLabels []string `json:"harm_labels,omitempty"`
+}
+
 type ImageData struct {
 	Frames string `json:"frames"`
 
@@ -4475,6 +6648,14 @@ type ImageData struct {
 	Url string `json:"url"`
 
 	Width string `json:"width"`
+}
+
+type ImageRuleParameters struct {
+	Threshold int `json:"threshold"`
+
+	TimeWindow string `json:"time_window"`
+
+	HarmLabels []string `json:"harm_labels,omitempty"`
 }
 
 type ImageSize struct {
@@ -4554,6 +6735,110 @@ type ImportTaskHistory struct {
 	PrevState string `json:"prev_state"`
 }
 
+type IngressAudioEncodingOptions struct {
+	Bitrate int `json:"bitrate"`
+
+	Channels int `json:"channels"`
+
+	EnableDtx bool `json:"enable_dtx"`
+}
+
+type IngressAudioEncodingOptionsRequest struct {
+	Bitrate int `json:"bitrate"`
+
+	Channels int `json:"channels"`
+
+	EnableDtx *bool `json:"enable_dtx,omitempty"`
+}
+
+type IngressAudioEncodingResponse struct {
+	Bitrate int `json:"bitrate"`
+
+	Channels int `json:"channels"`
+
+	EnableDtx bool `json:"enable_dtx"`
+}
+
+type IngressSettings struct {
+	Enabled bool `json:"enabled"`
+
+	AudioEncodingOptions *IngressAudioEncodingOptions `json:"audio_encoding_options,omitempty"`
+
+	VideoEncodingOptions map[string]IngressVideoEncodingOptions `json:"video_encoding_options,omitempty"`
+}
+
+type IngressSettingsRequest struct {
+	Enabled *bool `json:"enabled,omitempty"`
+
+	AudioEncodingOptions *IngressAudioEncodingOptionsRequest `json:"audio_encoding_options,omitempty"`
+
+	VideoEncodingOptions map[string]IngressVideoEncodingOptionsRequest `json:"video_encoding_options,omitempty"`
+}
+
+type IngressSettingsResponse struct {
+	Enabled bool `json:"enabled"`
+
+	AudioEncodingOptions *IngressAudioEncodingResponse `json:"audio_encoding_options,omitempty"`
+
+	VideoEncodingOptions map[string]IngressVideoEncodingResponse `json:"video_encoding_options,omitempty"`
+}
+
+type IngressVideoEncodingOptions struct {
+	Layers []IngressVideoLayer `json:"layers"`
+}
+
+type IngressVideoEncodingOptionsRequest struct {
+	Layers []IngressVideoLayerRequest `json:"layers"`
+}
+
+type IngressVideoEncodingResponse struct {
+	Layers []IngressVideoLayerResponse `json:"layers"`
+}
+
+type IngressVideoLayer struct {
+	Bitrate int `json:"bitrate"`
+
+	Codec string `json:"codec"`
+
+	FrameRate int `json:"frame_rate"`
+
+	MaxDimension int `json:"max_dimension"`
+
+	MinDimension int `json:"min_dimension"`
+}
+
+type IngressVideoLayerRequest struct {
+	Bitrate int `json:"bitrate"`
+
+	Codec string `json:"codec"`
+
+	FrameRateLimit int `json:"frame_rate_limit"`
+
+	MaxDimension int `json:"max_dimension"`
+
+	MinDimension int `json:"min_dimension"`
+}
+
+type IngressVideoLayerResponse struct {
+	Bitrate int `json:"bitrate"`
+
+	Codec string `json:"codec"`
+
+	FrameRateLimit int `json:"frame_rate_limit"`
+
+	MaxDimension int `json:"max_dimension"`
+
+	MinDimension int `json:"min_dimension"`
+}
+
+type JoinCallAPIMetrics struct {
+	Failures float64 `json:"failures"`
+
+	Total float64 `json:"total"`
+
+	Latency *ActiveCallsLatencyStats `json:"latency,omitempty"`
+}
+
 type Label struct {
 	Name string `json:"name"`
 
@@ -4618,21 +6903,33 @@ type LimitInfo struct {
 }
 
 type LimitsSettings struct {
+	MaxParticipantsExcludeRoles []string `json:"max_participants_exclude_roles"`
+
 	MaxDurationSeconds *int `json:"max_duration_seconds,omitempty"`
 
 	MaxParticipants *int `json:"max_participants,omitempty"`
+
+	MaxParticipantsExcludeOwner *bool `json:"max_participants_exclude_owner,omitempty"`
 }
 
 type LimitsSettingsRequest struct {
 	MaxDurationSeconds *int `json:"max_duration_seconds,omitempty"`
 
 	MaxParticipants *int `json:"max_participants,omitempty"`
+
+	MaxParticipantsExcludeOwner *bool `json:"max_participants_exclude_owner,omitempty"`
+
+	MaxParticipantsExcludeRoles []string `json:"max_participants_exclude_roles,omitempty"`
 }
 
 type LimitsSettingsResponse struct {
+	MaxParticipantsExcludeRoles []string `json:"max_participants_exclude_roles"`
+
 	MaxDurationSeconds *int `json:"max_duration_seconds,omitempty"`
 
 	MaxParticipants *int `json:"max_participants,omitempty"`
+
+	MaxParticipantsExcludeOwner *bool `json:"max_participants_exclude_owner,omitempty"`
 }
 
 // Basic response information
@@ -4678,6 +6975,21 @@ type ListExternalStorageResponse struct {
 	Duration string `json:"duration"`
 
 	ExternalStorages map[string]ExternalStorageResponse `json:"external_storages"`
+}
+
+// Basic response information
+type ListFeedGroupsResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Groups map[string]FeedGroupResponse `json:"groups"`
+}
+
+type ListFeedViewsResponse struct {
+	Duration string `json:"duration"`
+
+	// Map of feed view ID to feed view
+	Views map[string]FeedViewResponse `json:"views"`
 }
 
 // Basic response information
@@ -4759,6 +7071,10 @@ type MemberAddedEvent struct {
 
 func (*MemberAddedEvent) GetEventType() string {
 	return "member.added"
+}
+
+type MemberLookup struct {
+	Limit int `json:"Limit"`
 }
 
 type MemberRemovedEvent struct {
@@ -4920,6 +7236,10 @@ type Message struct {
 	Poll *Poll `json:"poll,omitempty"`
 
 	QuotedMessage *Message `json:"quoted_message,omitempty"`
+
+	Reminder *MessageReminder `json:"reminder,omitempty"`
+
+	SharedLocation *SharedLocation `json:"shared_location,omitempty"`
 
 	User *User `json:"user,omitempty"`
 }
@@ -5133,6 +7453,28 @@ type MessageReadEvent struct {
 	User *UserResponseCommonFields `json:"user,omitempty"`
 }
 
+type MessageReminder struct {
+	ChannelCid string `json:"channel_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	MessageID string `json:"message_id"`
+
+	TaskID string `json:"task_id"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	UserID string `json:"user_id"`
+
+	RemindAt *Timestamp `json:"remind_at,omitempty"`
+
+	Channel *Channel `json:"channel,omitempty"`
+
+	Message *Message `json:"message,omitempty"`
+
+	User *User `json:"user,omitempty"`
+}
+
 type MessageRequest struct {
 	Html *string `json:"html,omitempty"`
 
@@ -5169,6 +7511,8 @@ type MessageRequest struct {
 	RestrictedVisibility []string `json:"restricted_visibility,omitempty"`
 
 	Custom map[string]any `json:"custom,omitempty"`
+
+	SharedLocation *SharedLocation `json:"shared_location,omitempty"`
 
 	User *UserRequest `json:"user,omitempty"`
 }
@@ -5283,6 +7627,10 @@ type MessageResponse struct {
 	QuotedMessage *MessageResponse `json:"quoted_message,omitempty"`
 
 	ReactionGroups map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
+
+	Reminder *ReminderResponseData `json:"reminder,omitempty"`
+
+	SharedLocation *SharedLocationResponseData `json:"shared_location,omitempty"`
 }
 
 type MessageStatsResponse struct {
@@ -5473,6 +7821,10 @@ type MessageWithChannelResponse struct {
 	QuotedMessage *MessageResponse `json:"quoted_message,omitempty"`
 
 	ReactionGroups map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
+
+	Reminder *ReminderResponseData `json:"reminder,omitempty"`
+
+	SharedLocation *SharedLocationResponseData `json:"shared_location,omitempty"`
 }
 
 type ModerationActionConfig struct {
@@ -5530,6 +7882,44 @@ type ModerationCustomActionEvent struct {
 
 func (*ModerationCustomActionEvent) GetEventType() string {
 	return "moderation.custom_action"
+}
+
+type ModerationDashboardPreferences struct {
+	FlagUserOnFlaggedContent *bool `json:"flag_user_on_flagged_content,omitempty"`
+
+	MediaQueueBlurEnabled *bool `json:"media_queue_blur_enabled,omitempty"`
+}
+
+type ModerationFlagResponse struct {
+	CreatedAt string `json:"created_at"`
+
+	EntityID string `json:"entity_id"`
+
+	EntityType string `json:"entity_type"`
+
+	ID string `json:"id"`
+
+	UpdatedAt string `json:"updated_at"`
+
+	Type string `json:"type"`
+
+	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
+
+	Reason *string `json:"reason,omitempty"`
+
+	ReviewQueueItemID *string `json:"review_queue_item_id,omitempty"`
+
+	Labels []string `json:"labels,omitempty"`
+
+	Result []map[string]any `json:"result,omitempty"`
+
+	Custom map[string]any `json:"custom,omitempty"`
+
+	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
+
+	ReviewQueueItem *ReviewQueueItemResponse `json:"review_queue_item,omitempty"`
+
+	User *UserResponse `json:"user,omitempty"`
 }
 
 type ModerationFlaggedEvent struct {
@@ -5643,6 +8033,41 @@ type NoiseCancellationSettings struct {
 	Mode string `json:"mode"`
 }
 
+type NotificationConfig struct {
+	// Whether to track read status
+	TrackRead *bool `json:"track_read,omitempty"`
+
+	// Whether to track seen status
+	TrackSeen *bool `json:"track_seen,omitempty"`
+}
+
+// Emitted when notification feed is updated.
+type NotificationFeedUpdatedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	// The ID of the feed
+	Fid string `json:"fid"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "feeds.notification_feed.updated" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	// Aggregated activities for notification feeds
+	AggregatedActivities []AggregatedActivityResponse `json:"aggregated_activities,omitempty"`
+
+	NotificationStatus *NotificationStatusResponse `json:"notification_status,omitempty"`
+
+	User *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (*NotificationFeedUpdatedEvent) GetEventType() string {
+	return "feeds.notification_feed.updated"
+}
+
 type NotificationMarkUnreadEvent struct {
 	ChannelID string `json:"channel_id"`
 
@@ -5697,6 +8122,24 @@ type NotificationSettings struct {
 	CallRing EventNotificationSettings `json:"call_ring"`
 
 	SessionStarted EventNotificationSettings `json:"session_started"`
+}
+
+type NotificationStatusResponse struct {
+	// Number of unread notifications
+	Unread int `json:"unread"`
+
+	// Number of unseen notifications
+	Unseen int `json:"unseen"`
+
+	LastReadAt *Timestamp `json:"last_read_at,omitempty"`
+
+	// When notifications were last seen
+	LastSeenAt *Timestamp `json:"last_seen_at,omitempty"`
+
+	// IDs of activities that have been read
+	ReadActivities []string `json:"read_activities,omitempty"`
+
+	SeenActivities []string `json:"seen_activities,omitempty"`
 }
 
 type NullTime struct{}
@@ -5781,6 +8224,10 @@ type OwnUser struct {
 
 	Custom map[string]any `json:"custom"`
 
+	TotalUnreadCountByTeam map[string]int `json:"total_unread_count_by_team"`
+
+	AvgResponseTime *int `json:"avg_response_time,omitempty"`
+
 	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
 
 	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
@@ -5839,6 +8286,8 @@ type OwnUserResponse struct {
 
 	Custom map[string]any `json:"custom"`
 
+	AvgResponseTime *int `json:"avg_response_time,omitempty"`
+
 	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
 
 	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
@@ -5860,6 +8309,16 @@ type OwnUserResponse struct {
 	PushPreferences *PushPreferences `json:"push_preferences,omitempty"`
 
 	TeamsRole map[string]string `json:"teams_role,omitempty"`
+
+	TotalUnreadCountByTeam map[string]int `json:"total_unread_count_by_team,omitempty"`
+}
+
+type PagerRequest struct {
+	Limit *int `json:"limit,omitempty"`
+
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
 }
 
 type PagerResponse struct {
@@ -5910,6 +8369,34 @@ type ParticipantReportResponse struct {
 	Publishers *PublisherStatsResponse `json:"publishers,omitempty"`
 
 	Subscribers *SubscriberStatsResponse `json:"subscribers,omitempty"`
+}
+
+// Pending message event for async moderation
+type PendingMessageEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	// The method used for the pending message
+	Method string `json:"method"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "message.pending" in this case
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	Channel *Channel `json:"channel,omitempty"`
+
+	Message *Message `json:"message,omitempty"`
+
+	Metadata map[string]string `json:"metadata,omitempty"`
+
+	User *User `json:"user,omitempty"`
+}
+
+func (*PendingMessageEvent) GetEventType() string {
+	return "message.pending"
 }
 
 type PendingMessageResponse struct {
@@ -5978,6 +8465,21 @@ type PermissionRequestEvent struct {
 
 func (*PermissionRequestEvent) GetEventType() string {
 	return "call.permission_request"
+}
+
+type PinActivityResponse struct {
+	// When the activity was pinned
+	CreatedAt Timestamp `json:"created_at"`
+
+	Duration string `json:"duration"`
+
+	// Fully qualified ID of the feed the activity was pinned to
+	Fid string `json:"fid"`
+
+	// ID of the user who pinned the activity
+	UserID string `json:"user_id"`
+
+	Activity ActivityResponse `json:"activity"`
 }
 
 // PinRequest is the payload for pinning a message.
@@ -6160,7 +8662,7 @@ type PollResponseData struct {
 
 	OwnVotes []PollVoteResponseData `json:"own_votes"`
 
-	Custom map[string]any `json:"Custom"`
+	Custom map[string]any `json:"custom"`
 
 	LatestVotesByOption map[string][]PollVoteResponseData `json:"latest_votes_by_option"`
 
@@ -6244,12 +8746,36 @@ type PrivacySettingsResponse struct {
 	TypingIndicators *TypingIndicatorsResponse `json:"typing_indicators,omitempty"`
 }
 
+type PublisherAllMetrics struct {
+	Audio *PublisherAudioMetrics `json:"audio,omitempty"`
+
+	RttMs *ActiveCallsLatencyStats `json:"rtt_ms,omitempty"`
+
+	Video *PublisherVideoMetrics `json:"video,omitempty"`
+}
+
+type PublisherAudioMetrics struct {
+	JitterMs *ActiveCallsLatencyStats `json:"jitter_ms,omitempty"`
+}
+
 type PublisherStatsResponse struct {
 	Total int `json:"total"`
 
 	Unique int `json:"unique"`
 
 	ByTrack []TrackStatsResponse `json:"by_track,omitempty"`
+}
+
+type PublisherVideoMetrics struct {
+	Fps30 *ActiveCallsFPSStats `json:"fps_30,omitempty"`
+
+	FrameEncodingTimeMs *ActiveCallsLatencyStats `json:"frame_encoding_time_ms,omitempty"`
+
+	JitterMs *ActiveCallsLatencyStats `json:"jitter_ms,omitempty"`
+}
+
+type PublishersMetrics struct {
+	All *PublisherAllMetrics `json:"all,omitempty"`
 }
 
 type PushConfig struct {
@@ -6281,10 +8807,13 @@ type PushNotificationSettingsResponse struct {
 }
 
 type PushPreferenceInput struct {
+	// Set the level of call push notifications for the user. One of all, none, default
+	CallLevel *string `json:"call_level,omitempty"`
+
 	// Set the push preferences for a specific channel. If empty it sets the default for the user
 	ChannelCid *string `json:"channel_cid,omitempty"`
 
-	// Set the level of push notifications for the user. One of all, mentions, none, default
+	// Set the level of chat push notifications for the user. One of all, mentions, none, default
 	ChatLevel *string `json:"chat_level,omitempty"`
 
 	// Disable push notifications till a certain time
@@ -6357,6 +8886,8 @@ type PushProvider struct {
 	XiaomiAppSecret *string `json:"xiaomi_app_secret,omitempty"`
 
 	XiaomiPackageName *string `json:"xiaomi_package_name,omitempty"`
+
+	PushTemplates []PushTemplate `json:"push_templates,omitempty"`
 }
 
 type PushProviderResponse struct {
@@ -6417,12 +8948,63 @@ type PushProviderResponse struct {
 	XiaomiPackageName *string `json:"xiaomi_package_name,omitempty"`
 }
 
+type PushTemplate struct {
+	CreatedAt Timestamp `json:"created_at"`
+
+	EnablePush bool `json:"enable_push"`
+
+	EventType string `json:"event_type"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	Template *string `json:"template,omitempty"`
+}
+
+type Quality struct {
+	Bitdepth *int `json:"bitdepth,omitempty"`
+
+	Framerate *int `json:"framerate,omitempty"`
+
+	Height *int `json:"height,omitempty"`
+
+	Name *string `json:"name,omitempty"`
+
+	VideoBitrate *int `json:"video_bitrate,omitempty"`
+
+	Width *int `json:"width,omitempty"`
+}
+
 type QualityScoreReport struct {
 	Histogram []ReportByHistogramBucket `json:"histogram"`
 }
 
 type QualityScoreReportResponse struct {
 	Daily []DailyAggregateQualityScoreReportResponse `json:"daily"`
+}
+
+type QueryActivitiesResponse struct {
+	Duration string `json:"duration"`
+
+	// List of activities matching the query
+	Activities []ActivityResponse `json:"activities"`
+
+	// Cursor for next page
+	Next *string `json:"next,omitempty"`
+
+	// Cursor for previous page
+	Prev *string `json:"prev,omitempty"`
+}
+
+// Basic response information
+type QueryActivityReactionsResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Reactions []FeedsReactionResponse `json:"reactions"`
+
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
 }
 
 // Basic response information
@@ -6471,6 +9053,32 @@ type QueryBannedUsersResponse struct {
 
 	// List of found bans
 	Bans []BanResponse `json:"bans"`
+}
+
+type QueryBookmarkFoldersResponse struct {
+	Duration string `json:"duration"`
+
+	// List of bookmark folders matching the query
+	BookmarkFolders []BookmarkFolderResponse `json:"bookmark_folders"`
+
+	// Cursor for next page
+	Next *string `json:"next,omitempty"`
+
+	// Cursor for previous page
+	Prev *string `json:"prev,omitempty"`
+}
+
+type QueryBookmarksResponse struct {
+	Duration string `json:"duration"`
+
+	// List of bookmarks matching the query
+	Bookmarks []BookmarkResponse `json:"bookmarks"`
+
+	// Cursor for next page
+	Next *string `json:"next,omitempty"`
+
+	// Cursor for previous page
+	Prev *string `json:"prev,omitempty"`
 }
 
 // Basic response information
@@ -6543,6 +9151,31 @@ type QueryChannelsResponse struct {
 	Channels []ChannelStateResponseFields `json:"channels"`
 }
 
+// Basic response information
+type QueryCommentReactionsResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Reactions []FeedsReactionResponse `json:"reactions"`
+
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
+}
+
+type QueryCommentsResponse struct {
+	Duration string `json:"duration"`
+
+	// List of comments matching the query
+	Comments []CommentResponse `json:"comments"`
+
+	// Cursor for next page
+	Next *string `json:"next,omitempty"`
+
+	// Cursor for previous page
+	Prev *string `json:"prev,omitempty"`
+}
+
 type QueryDraftsResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -6552,6 +9185,19 @@ type QueryDraftsResponse struct {
 
 	Next *string `json:"next,omitempty"`
 
+	Prev *string `json:"prev,omitempty"`
+}
+
+type QueryFeedMembersResponse struct {
+	Duration string `json:"duration"`
+
+	// List of feed members
+	Members []FeedMemberResponse `json:"members"`
+
+	// Cursor for next page
+	Next *string `json:"next,omitempty"`
+
+	// Cursor for previous page
 	Prev *string `json:"prev,omitempty"`
 }
 
@@ -6573,6 +9219,49 @@ type QueryFeedModerationTemplatesResponse struct {
 
 	// List of moderation templates
 	Templates []QueryFeedModerationTemplate `json:"templates"`
+}
+
+type QueryFeedsRequest struct {
+	Limit *int `json:"limit,omitempty"`
+
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
+
+	// Whether to subscribe to realtime updates
+	Watch *bool `json:"watch,omitempty"`
+
+	// Sorting parameters for the query
+	Sort []SortParamRequest `json:"sort,omitempty"`
+
+	// Filters to apply to the query
+	Filter map[string]any `json:"filter,omitempty"`
+}
+
+type QueryFeedsResponse struct {
+	Duration string `json:"duration"`
+
+	// List of feeds matching the query
+	Feeds []FeedResponse `json:"feeds"`
+
+	// Cursor for next page
+	Next *string `json:"next,omitempty"`
+
+	// Cursor for previous page
+	Prev *string `json:"prev,omitempty"`
+}
+
+type QueryFollowsResponse struct {
+	Duration string `json:"duration"`
+
+	// List of follow relationships matching the query
+	Follows []FollowResponse `json:"follows"`
+
+	// Cursor for next page
+	Next *string `json:"next,omitempty"`
+
+	// Cursor for previous page
+	Prev *string `json:"prev,omitempty"`
 }
 
 // Client request
@@ -6645,6 +9334,18 @@ type QueryModerationConfigsResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
+// Basic response information
+type QueryModerationFlagsResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Flags []ModerationFlagResponse `json:"flags"`
+
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
+}
+
 type QueryModerationLogsResponse struct {
 	Duration string `json:"duration"`
 
@@ -6674,6 +9375,18 @@ type QueryReactionsResponse struct {
 	Duration string `json:"duration"`
 
 	Reactions []ReactionResponse `json:"reactions"`
+
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
+}
+
+type QueryRemindersResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	// MessageReminders data returned by the query
+	Reminders []ReminderResponseData `json:"reminders"`
 
 	Next *string `json:"next,omitempty"`
 
@@ -6788,6 +9501,14 @@ type RTMPBroadcastRequest struct {
 	Layout *LayoutSettingsRequest `json:"layout,omitempty"`
 }
 
+type RTMPEgressConfig struct {
+	RTMPLocation *string `json:"rtmp_location,omitempty"`
+
+	CompositeAppSettings *CompositeAppSettings `json:"composite_app_settings,omitempty"`
+
+	Quality *Quality `json:"quality,omitempty"`
+}
+
 // RTMP input settings
 type RTMPIngress struct {
 	Address string `json:"address"`
@@ -6827,6 +9548,20 @@ type RTMPSettingsResponse struct {
 	Quality string `json:"quality"`
 
 	Layout LayoutSettingsResponse `json:"layout"`
+}
+
+type RankingConfig struct {
+	// Scoring formula
+	Score *string `json:"score,omitempty"`
+
+	// Type of ranking algorithm
+	Type *string `json:"type,omitempty"`
+
+	// Default values for ranking
+	Defaults map[string]any `json:"defaults,omitempty"`
+
+	// Decay functions configuration
+	Functions map[string]DecayFunctionConfig `json:"functions,omitempty"`
 }
 
 type Reaction struct {
@@ -7048,6 +9783,190 @@ type RecordSettingsResponse struct {
 	Layout LayoutSettingsResponse `json:"layout"`
 }
 
+type RecordingEgressConfig struct {
+	AudioOnly *bool `json:"audio_only,omitempty"`
+
+	StorageName *string `json:"storage_name,omitempty"`
+
+	CompositeAppSettings *CompositeAppSettings `json:"composite_app_settings,omitempty"`
+
+	ExternalStorage *ExternalStorage `json:"external_storage,omitempty"`
+
+	Quality *Quality `json:"quality,omitempty"`
+
+	VideoOrientationHint *VideoOrientation `json:"video_orientation_hint,omitempty"`
+}
+
+type RejectFeedMemberInviteResponse struct {
+	Duration string `json:"duration"`
+
+	Member FeedMemberResponse `json:"member"`
+}
+
+type RejectFollowResponse struct {
+	Duration string `json:"duration"`
+
+	Follow FollowResponse `json:"follow"`
+}
+
+// Emitted when a reminder is created.
+type ReminderCreatedEvent struct {
+	// The CID of the Channel for which the reminder was created
+	Cid string `json:"cid"`
+
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	// The ID of the message for which the reminder was created
+	MessageID string `json:"message_id"`
+
+	// The ID of the user for whom the reminder was created
+	UserID string `json:"user_id"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "reminder.created" in this case
+	Type string `json:"type"`
+
+	// The ID of the parent message, if the reminder is for a thread message
+	ParentID *string `json:"parent_id,omitempty"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	Reminder *ReminderResponseData `json:"reminder,omitempty"`
+}
+
+func (*ReminderCreatedEvent) GetEventType() string {
+	return "reminder.created"
+}
+
+// Emitted when a reminder is deleted.
+type ReminderDeletedEvent struct {
+	// The CID of the Channel for which the reminder was created
+	Cid string `json:"cid"`
+
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	// The ID of the message for which the reminder was created
+	MessageID string `json:"message_id"`
+
+	// The ID of the user for whom the reminder was created
+	UserID string `json:"user_id"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "reminder.deleted" in this case
+	Type string `json:"type"`
+
+	// The ID of the parent message, if the reminder is for a thread message
+	ParentID *string `json:"parent_id,omitempty"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	Reminder *ReminderResponseData `json:"reminder,omitempty"`
+}
+
+func (*ReminderDeletedEvent) GetEventType() string {
+	return "reminder.deleted"
+}
+
+// Emitted when a reminder becomes due, triggering a notification for the user.
+type ReminderNotificationEvent struct {
+	// The CID of the Channel for which the reminder was created
+	Cid string `json:"cid"`
+
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	// The ID of the message for which the reminder was created
+	MessageID string `json:"message_id"`
+
+	// The ID of the user for whom the reminder was created
+	UserID string `json:"user_id"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "notification.reminder_due" in this case
+	Type string `json:"type"`
+
+	ParentID *string `json:"parent_id,omitempty"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	Reminder *ReminderResponseData `json:"reminder,omitempty"`
+}
+
+func (*ReminderNotificationEvent) GetEventType() string {
+	return "notification.reminder_due"
+}
+
+type ReminderResponseData struct {
+	ChannelCid string `json:"channel_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	MessageID string `json:"message_id"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	UserID string `json:"user_id"`
+
+	RemindAt *Timestamp `json:"remind_at,omitempty"`
+
+	Channel *ChannelResponse `json:"channel,omitempty"`
+
+	Message *Message `json:"message,omitempty"`
+
+	User *User `json:"user,omitempty"`
+}
+
+// Emitted when a reminder is updated.
+type ReminderUpdatedEvent struct {
+	// The CID of the Channel for which the reminder was created
+	Cid string `json:"cid"`
+
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	// The ID of the message for which the reminder was created
+	MessageID string `json:"message_id"`
+
+	// The ID of the user for whom the reminder was created
+	UserID string `json:"user_id"`
+
+	Custom map[string]any `json:"custom"`
+
+	// The type of event: "reminder.updated" in this case
+	Type string `json:"type"`
+
+	// The ID of the parent message, if the reminder is for a thread message
+	ParentID *string `json:"parent_id,omitempty"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+
+	Reminder *ReminderResponseData `json:"reminder,omitempty"`
+}
+
+func (*ReminderUpdatedEvent) GetEventType() string {
+	return "reminder.updated"
+}
+
+// Cursor & depth information for a comment's direct replies. Mirrors Reddit's 'load more replies' semantics.
+type RepliesMeta struct {
+	// True if the subtree was cut because the requested depth was reached.
+	DepthTruncated bool `json:"depth_truncated"`
+
+	// True if more siblings exist in the database.
+	HasMore bool `json:"has_more"`
+
+	// Number of unread siblings that match current filters.
+	Remaining int `json:"remaining"`
+
+	// Opaque cursor to request the next page of siblings.
+	NextCursor *string `json:"next_cursor,omitempty"`
+}
+
 type ReportByHistogramBucket struct {
 	Category string `json:"category"`
 
@@ -7117,17 +10036,29 @@ type ReviewQueueItem struct {
 
 	Bans []Ban `json:"bans"`
 
+	FlagLabels []string `json:"flag_labels"`
+
+	FlagTypes []string `json:"flag_types"`
+
 	Flags []Flag `json:"flags"`
 
 	Languages []string `json:"languages"`
 
+	ReporterIds []string `json:"reporter_ids"`
+
 	Teams []string `json:"teams"`
+
+	ArchivedAt NullTime `json:"archived_at"`
+
+	CompletedAt NullTime `json:"completed_at"`
 
 	ReviewedAt NullTime `json:"reviewed_at"`
 
 	Activity *EnrichedActivity `json:"activity,omitempty"`
 
 	AssignedTo *User `json:"assigned_to,omitempty"`
+
+	Call *Call `json:"call,omitempty"`
 
 	EntityCreator *EntityCreator `json:"entity_creator,omitempty"`
 
@@ -7227,6 +10158,8 @@ type ReviewQueueItemResponse struct {
 
 	AssignedTo *UserResponse `json:"assigned_to,omitempty"`
 
+	Call *CallResponse `json:"call,omitempty"`
+
 	EntityCreator *EntityCreatorResponse `json:"entity_creator,omitempty"`
 
 	FeedsV2Activity *EnrichedActivity `json:"feeds_v2_activity,omitempty"`
@@ -7307,45 +10240,71 @@ type Role struct {
 }
 
 type RuleBuilderAction struct {
-	Duration *int `json:"duration,omitempty"`
+	Type string `json:"type"`
 
-	IpBan *bool `json:"ip_ban,omitempty"`
+	BanOptions *BanOptions `json:"ban_options,omitempty"`
 
-	Reason *string `json:"reason,omitempty"`
+	FlagContentOptions *FlagContentOptions `json:"flag_content_options,omitempty"`
 
-	ShadowBan *bool `json:"shadow_ban,omitempty"`
+	FlagUserOptions *FlagUserOptions `json:"flag_user_options,omitempty"`
 
-	Type *string `json:"type,omitempty"`
+	RemoveContentOptions *BlockContentOptions `json:"remove_content_options,omitempty"`
 }
 
 type RuleBuilderCondition struct {
-	Provider *string `json:"provider,omitempty"`
+	Type string `json:"type"`
 
-	Threshold *int `json:"threshold,omitempty"`
+	Confidence *float64 `json:"confidence,omitempty"`
 
-	TimeWindow *string `json:"time_window,omitempty"`
+	ContentCountRuleParams *ContentCountRuleParameters `json:"content_count_rule_params,omitempty"`
 
-	Labels []string `json:"labels,omitempty"`
+	ImageContentParams *ImageContentParameters `json:"image_content_params,omitempty"`
+
+	ImageRuleParams *ImageRuleParameters `json:"image_rule_params,omitempty"`
+
+	TextContentParams *TextContentParameters `json:"text_content_params,omitempty"`
+
+	TextRuleParams *TextRuleParameters `json:"text_rule_params,omitempty"`
+
+	UserCreatedWithinParams *UserCreatedWithinParameters `json:"user_created_within_params,omitempty"`
+
+	UserRuleParams *UserRuleParameters `json:"user_rule_params,omitempty"`
+
+	VideoContentParams *VideoContentParameters `json:"video_content_params,omitempty"`
+
+	VideoRuleParams *VideoRuleParameters `json:"video_rule_params,omitempty"`
+}
+
+type RuleBuilderConditionGroup struct {
+	Logic string `json:"logic"`
+
+	Conditions []RuleBuilderCondition `json:"conditions"`
 }
 
 type RuleBuilderConfig struct {
+	Rules []RuleBuilderRule `json:"rules"`
+
 	Async *bool `json:"async,omitempty"`
-
-	Enabled *bool `json:"enabled,omitempty"`
-
-	Rules []RuleBuilderRule `json:"rules,omitempty"`
 }
 
 type RuleBuilderRule struct {
-	Enabled *bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
-	ID *string `json:"id,omitempty"`
+	ID string `json:"id"`
 
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
+
+	RuleType string `json:"rule_type"`
+
+	Action RuleBuilderAction `json:"action"`
+
+	CooldownPeriod *string `json:"cooldown_period,omitempty"`
+
+	Logic *string `json:"logic,omitempty"`
 
 	Conditions []RuleBuilderCondition `json:"conditions,omitempty"`
 
-	Action *RuleBuilderAction `json:"action,omitempty"`
+	Groups []RuleBuilderConditionGroup `json:"groups,omitempty"`
 }
 
 // Config for creating Amazon S3 storage.
@@ -7369,6 +10328,32 @@ type SDKUsageReport struct {
 
 type SDKUsageReportResponse struct {
 	Daily []DailyAggregateSDKUsageReportResponse `json:"daily"`
+}
+
+type SFUIDLastSeen struct {
+	ID string `json:"id"`
+
+	LastSeen Timestamp `json:"last_seen"`
+
+	ProcessStartTime int `json:"process_start_time"`
+}
+
+type STTEgressConfig struct {
+	ClosedCaptionsEnabled *bool `json:"closed_captions_enabled,omitempty"`
+
+	Language *string `json:"language,omitempty"`
+
+	StorageName *string `json:"storage_name,omitempty"`
+
+	TranslationsEnabled *bool `json:"translations_enabled,omitempty"`
+
+	UploadTranscriptions *bool `json:"upload_transcriptions,omitempty"`
+
+	WhisperServerBaseUrl *string `json:"whisper_server_base_url,omitempty"`
+
+	TranslationLanguages []string `json:"translation_languages,omitempty"`
+
+	ExternalStorage *ExternalStorage `json:"external_storage,omitempty"`
 }
 
 type ScreensharingSettings struct {
@@ -7522,6 +10507,10 @@ type SearchResultMessage struct {
 	QuotedMessage *MessageResponse `json:"quoted_message,omitempty"`
 
 	ReactionGroups map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
+
+	Reminder *ReminderResponseData `json:"reminder,omitempty"`
+
+	SharedLocation *SharedLocationResponseData `json:"shared_location,omitempty"`
 }
 
 type SearchWarning struct {
@@ -7637,10 +10626,128 @@ type SessionSettingsResponse struct {
 
 type ShadowBlockActionRequest struct{}
 
+type SharedLocation struct {
+	ChannelCid string `json:"channel_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	CreatedByDeviceID string `json:"created_by_device_id"`
+
+	MessageID string `json:"message_id"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	UserID string `json:"user_id"`
+
+	EndAt *Timestamp `json:"end_at,omitempty"`
+
+	Latitude *float64 `json:"latitude,omitempty"`
+
+	Longitude *float64 `json:"longitude,omitempty"`
+
+	Channel *Channel `json:"channel,omitempty"`
+
+	Message *Message `json:"message,omitempty"`
+}
+
+type SharedLocationResponse struct {
+	// Channel CID
+	ChannelCid string `json:"channel_cid"`
+
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Device ID that created the live location
+	CreatedByDeviceID string `json:"created_by_device_id"`
+
+	Duration string `json:"duration"`
+
+	// Latitude coordinate
+	Latitude float64 `json:"latitude"`
+
+	// Longitude coordinate
+	Longitude float64 `json:"longitude"`
+
+	// Message ID
+	MessageID string `json:"message_id"`
+
+	// Date/time of the last update
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	// User ID
+	UserID string `json:"user_id"`
+
+	// Time when the live location expires
+	EndAt *Timestamp `json:"end_at,omitempty"`
+
+	Channel *ChannelResponse `json:"channel,omitempty"`
+
+	Message *MessageResponse `json:"message,omitempty"`
+}
+
+type SharedLocationResponseData struct {
+	ChannelCid string `json:"channel_cid"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	CreatedByDeviceID string `json:"created_by_device_id"`
+
+	Latitude float64 `json:"latitude"`
+
+	Longitude float64 `json:"longitude"`
+
+	MessageID string `json:"message_id"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	UserID string `json:"user_id"`
+
+	EndAt *Timestamp `json:"end_at,omitempty"`
+
+	Channel *ChannelResponse `json:"channel,omitempty"`
+
+	Message *MessageResponse `json:"message,omitempty"`
+}
+
+type SharedLocationsResponse struct {
+	Duration string `json:"duration"`
+
+	ActiveLiveLocations []SharedLocationResponseData `json:"active_live_locations"`
+}
+
 // Basic response information
 type ShowChannelResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
+}
+
+type SingleFollowRequest struct {
+	// Fully qualified ID of the source feed
+	Source string `json:"source"`
+
+	// Fully qualified ID of the target feed
+	Target string `json:"target"`
+
+	// Whether to create a notification activity for this follow
+	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+
+	// Push preference for the follow relationship
+	PushPreference *string `json:"push_preference,omitempty"`
+
+	// Custom data for the follow relationship
+	Custom map[string]any `json:"custom,omitempty"`
+}
+
+type SingleFollowResponse struct {
+	Duration string `json:"duration"`
+
+	Follow FollowResponse `json:"follow"`
+}
+
+type SortParam struct {
+	Direction *int `json:"direction,omitempty"`
+
+	Field *string `json:"field,omitempty"`
 }
 
 type SortParamRequest struct {
@@ -7748,10 +10855,34 @@ type StopTranscriptionResponse struct {
 	Duration string `json:"duration"`
 }
 
+type StoriesConfig struct {
+	// Behavior when stories expire
+	ExpirationBehaviour *string `json:"expiration_behaviour,omitempty"`
+
+	// Whether to skip already watched stories
+	SkipWatched *bool `json:"skip_watched,omitempty"`
+}
+
 type SubmitActionResponse struct {
 	Duration string `json:"duration"`
 
-	Item *ReviewQueueItem `json:"item,omitempty"`
+	Item *ReviewQueueItemResponse `json:"item,omitempty"`
+}
+
+type SubscriberAllMetrics struct {
+	Audio *SubscriberAudioMetrics `json:"audio,omitempty"`
+
+	RttMs *ActiveCallsLatencyStats `json:"rtt_ms,omitempty"`
+
+	Video *SubscriberVideoMetrics `json:"video,omitempty"`
+}
+
+type SubscriberAudioMetrics struct {
+	ConcealmentPct *ActiveCallsLatencyStats `json:"concealment_pct,omitempty"`
+
+	JitterMs *ActiveCallsLatencyStats `json:"jitter_ms,omitempty"`
+
+	PacketsLostPct *ActiveCallsLatencyStats `json:"packets_lost_pct,omitempty"`
 }
 
 type SubscriberStatsResponse struct {
@@ -7762,12 +10893,48 @@ type SubscriberStatsResponse struct {
 	Unique int `json:"unique"`
 }
 
+type SubscriberVideoMetrics struct {
+	Fps30 *ActiveCallsFPSStats `json:"fps_30,omitempty"`
+
+	JitterMs *ActiveCallsLatencyStats `json:"jitter_ms,omitempty"`
+
+	PacketsLostPct *ActiveCallsLatencyStats `json:"packets_lost_pct,omitempty"`
+}
+
+type SubscribersMetrics struct {
+	All *SubscriberAllMetrics `json:"all,omitempty"`
+}
+
 type TargetResolution struct {
 	Bitrate int `json:"bitrate"`
 
 	Height int `json:"height"`
 
 	Width int `json:"width"`
+}
+
+type TextContentParameters struct {
+	ContainsUrl *bool `json:"contains_url,omitempty"`
+
+	Severity *string `json:"severity,omitempty"`
+
+	BlocklistMatch []string `json:"blocklist_match,omitempty"`
+
+	HarmLabels []string `json:"harm_labels,omitempty"`
+}
+
+type TextRuleParameters struct {
+	Threshold int `json:"threshold"`
+
+	TimeWindow string `json:"time_window"`
+
+	ContainsUrl *bool `json:"contains_url,omitempty"`
+
+	Severity *string `json:"severity,omitempty"`
+
+	BlocklistMatch []string `json:"blocklist_match,omitempty"`
+
+	HarmLabels []string `json:"harm_labels,omitempty"`
 }
 
 // Represents a user that is participating in a thread.
@@ -7917,6 +11084,62 @@ func (*ThreadUpdatedEvent) GetEventType() string {
 	return "thread.updated"
 }
 
+// A comment with an optional, depth‑limited slice of nested replies.
+type ThreadedCommentResponse struct {
+	ConfidenceScore float64 `json:"confidence_score"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	DownvoteCount int `json:"downvote_count"`
+
+	ID string `json:"id"`
+
+	ObjectID string `json:"object_id"`
+
+	ObjectType string `json:"object_type"`
+
+	ReactionCount int `json:"reaction_count"`
+
+	ReplyCount int `json:"reply_count"`
+
+	Score int `json:"score"`
+
+	Status string `json:"status"`
+
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	UpvoteCount int `json:"upvote_count"`
+
+	MentionedUsers []UserResponse `json:"mentioned_users"`
+
+	OwnReactions []FeedsReactionResponse `json:"own_reactions"`
+
+	User UserResponse `json:"user"`
+
+	ControversyScore *float64 `json:"controversy_score,omitempty"`
+
+	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
+
+	ParentID *string `json:"parent_id,omitempty"`
+
+	Text *string `json:"text,omitempty"`
+
+	Attachments []Attachment `json:"attachments,omitempty"`
+
+	LatestReactions []FeedsReactionResponse `json:"latest_reactions,omitempty"`
+
+	// Slice of nested comments (may be empty).
+	Replies []ThreadedCommentResponse `json:"replies,omitempty"`
+
+	Custom map[string]any `json:"custom,omitempty"`
+
+	Meta *RepliesMeta `json:"meta,omitempty"`
+
+	Moderation *ModerationV2Response `json:"moderation,omitempty"`
+
+	ReactionGroups map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
+}
+
 // Sets thresholds for AI moderation
 type Thresholds struct {
 	Explicit *LabelThresholds `json:"explicit,omitempty"`
@@ -8028,12 +11251,37 @@ func (*UnblockedUserEvent) GetEventType() string {
 	return "call.unblocked_user"
 }
 
+type UnfollowBatchResponse struct {
+	Duration string `json:"duration"`
+
+	// List of follow relationships that were removed
+	Follows []FollowResponse `json:"follows"`
+}
+
+type UnfollowResponse struct {
+	Duration string `json:"duration"`
+
+	Follow FollowResponse `json:"follow"`
+}
+
 // Basic response information
 type UnmuteResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	NonExistingUsers []string `json:"non_existing_users,omitempty"`
+}
+
+type UnpinActivityResponse struct {
+	Duration string `json:"duration"`
+
+	// Fully qualified ID of the feed the activity was unpinned from
+	Fid string `json:"fid"`
+
+	// ID of the user who unpinned the activity
+	UserID string `json:"user_id"`
+
+	Activity ActivityResponse `json:"activity"`
 }
 
 // UnpinRequest is the payload for unpinning a message.
@@ -8085,6 +11333,8 @@ type UnreadCountsResponse struct {
 	Channels []UnreadCountsChannel `json:"channels"`
 
 	Threads []UnreadCountsThread `json:"threads"`
+
+	TotalUnreadCountByTeam map[string]int `json:"total_unread_count_by_team,omitempty"`
 }
 
 type UnreadCountsThread struct {
@@ -8097,12 +11347,36 @@ type UnreadCountsThread struct {
 	UnreadCount int `json:"unread_count"`
 }
 
+type UpdateActivityPartialResponse struct {
+	Duration string `json:"duration"`
+
+	Activity ActivityResponse `json:"activity"`
+}
+
+type UpdateActivityResponse struct {
+	Duration string `json:"duration"`
+
+	Activity ActivityResponse `json:"activity"`
+}
+
 // Basic response information
 type UpdateBlockListResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 
 	Blocklist *BlockListResponse `json:"blocklist,omitempty"`
+}
+
+type UpdateBookmarkFolderResponse struct {
+	Duration string `json:"duration"`
+
+	BookmarkFolder BookmarkFolderResponse `json:"bookmark_folder"`
+}
+
+type UpdateBookmarkResponse struct {
+	Duration string `json:"duration"`
+
+	Bookmark BookmarkResponse `json:"bookmark"`
 }
 
 // Basic response information
@@ -8207,6 +11481,8 @@ type UpdateChannelTypeResponse struct {
 
 	Search bool `json:"search"`
 
+	SharedLocations bool `json:"shared_locations"`
+
 	SkipLastMsgUpdateForSystemMsgs bool `json:"skip_last_msg_update_for_system_msgs"`
 
 	TypingEvents bool `json:"typing_events"`
@@ -8216,6 +11492,8 @@ type UpdateChannelTypeResponse struct {
 	Uploads bool `json:"uploads"`
 
 	UrlEnrichment bool `json:"url_enrichment"`
+
+	UserMessageReminders bool `json:"user_message_reminders"`
 
 	Commands []string `json:"commands"`
 
@@ -8244,6 +11522,12 @@ type UpdateCommandResponse struct {
 	Command *Command `json:"command,omitempty"`
 }
 
+type UpdateCommentResponse struct {
+	Duration string `json:"duration"`
+
+	Comment CommentResponse `json:"comment"`
+}
+
 // Basic response information
 type UpdateExternalStorageResponse struct {
 	Bucket string `json:"bucket"`
@@ -8256,6 +11540,42 @@ type UpdateExternalStorageResponse struct {
 	Path string `json:"path"`
 
 	Type string `json:"type"`
+}
+
+type UpdateFeedGroupResponse struct {
+	Duration string `json:"duration"`
+
+	FeedGroup FeedGroupResponse `json:"feed_group"`
+}
+
+// Basic response information
+type UpdateFeedMembersResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Added []FeedMemberResponse `json:"added"`
+
+	RemovedIds []string `json:"removed_ids"`
+
+	Updated []FeedMemberResponse `json:"updated"`
+}
+
+type UpdateFeedResponse struct {
+	Duration string `json:"duration"`
+
+	Feed FeedResponse `json:"feed"`
+}
+
+type UpdateFeedViewResponse struct {
+	Duration string `json:"duration"`
+
+	FeedView FeedViewResponse `json:"feed_view"`
+}
+
+type UpdateFollowResponse struct {
+	Duration string `json:"duration"`
+
+	Follow FollowResponse `json:"follow"`
 }
 
 type UpdateMemberPartialResponse struct {
@@ -8283,6 +11603,14 @@ type UpdateMessageResponse struct {
 	Message MessageResponse `json:"message"`
 
 	PendingMessageMetadata map[string]string `json:"pending_message_metadata,omitempty"`
+}
+
+// Basic response information
+type UpdateReminderResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Reminder ReminderResponseData `json:"reminder"`
 }
 
 type UpdateThreadPartialResponse struct {
@@ -8334,6 +11662,13 @@ type UpdatedCallPermissionsEvent struct {
 
 func (*UpdatedCallPermissionsEvent) GetEventType() string {
 	return "call.permissions_updated"
+}
+
+type UpsertActivitiesResponse struct {
+	Duration string `json:"duration"`
+
+	// List of created or updated activities
+	Activities []ActivityResponse `json:"activities"`
 }
 
 type UpsertConfigResponse struct {
@@ -8388,6 +11723,14 @@ type UpsertPushProviderResponse struct {
 	PushProvider PushProviderResponse `json:"push_provider"`
 }
 
+// Basic response information
+type UpsertPushTemplateResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Template *PushTemplate `json:"template,omitempty"`
+}
+
 type User struct {
 	Banned bool `json:"banned"`
 
@@ -8400,6 +11743,8 @@ type User struct {
 	Custom map[string]any `json:"custom"`
 
 	TeamsRole map[string]string `json:"teams_role"`
+
+	AvgResponseTime *int `json:"avg_response_time,omitempty"`
 
 	BanExpires *Timestamp `json:"ban_expires,omitempty"`
 
@@ -8452,6 +11797,10 @@ type UserBannedEvent struct {
 
 func (*UserBannedEvent) GetEventType() string {
 	return "user.banned"
+}
+
+type UserCreatedWithinParameters struct {
+	MaxAge *string `json:"max_age,omitempty"`
 }
 
 type UserCustomEventRequest struct {
@@ -8665,6 +12014,8 @@ type UserResponse struct {
 	// Custom data for this object
 	Custom map[string]any `json:"custom"`
 
+	AvgResponseTime *int `json:"avg_response_time,omitempty"`
+
 	// Date when ban expires
 	BanExpires *Timestamp `json:"ban_expires,omitempty"`
 
@@ -8716,6 +12067,8 @@ type UserResponseCommonFields struct {
 
 	Custom map[string]any `json:"custom"`
 
+	AvgResponseTime *int `json:"avg_response_time,omitempty"`
+
 	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
 
 	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
@@ -8752,6 +12105,8 @@ type UserResponsePrivacyFields struct {
 
 	Custom map[string]any `json:"custom"`
 
+	AvgResponseTime *int `json:"avg_response_time,omitempty"`
+
 	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
 
 	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
@@ -8769,6 +12124,10 @@ type UserResponsePrivacyFields struct {
 	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
 
 	TeamsRole map[string]string `json:"teams_role,omitempty"`
+}
+
+type UserRuleParameters struct {
+	MaxAge *string `json:"max_age,omitempty"`
 }
 
 type UserUnbannedEvent struct {
@@ -8888,6 +12247,40 @@ type VelocityFilterConfigRule struct {
 	SlowSpamBanDuration *int `json:"slow_spam_ban_duration,omitempty"`
 }
 
+type VideoCallRuleConfig struct {
+	Rules map[string]HarmConfig `json:"rules"`
+}
+
+type VideoContentParameters struct {
+	HarmLabels []string `json:"harm_labels,omitempty"`
+}
+
+type VideoEndCallRequest struct{}
+
+type VideoKickUserRequest struct{}
+
+type VideoOrientation struct {
+	Orientation *int `json:"orientation,omitempty"`
+}
+
+type VideoReactionOverTimeResponse struct {
+	ByMinute []CountByMinuteResponse `json:"by_minute,omitempty"`
+}
+
+type VideoReactionsResponse struct {
+	Reaction string `json:"reaction"`
+
+	CountOverTime *VideoReactionOverTimeResponse `json:"count_over_time,omitempty"`
+}
+
+type VideoRuleParameters struct {
+	Threshold int `json:"threshold"`
+
+	TimeWindow string `json:"time_window"`
+
+	HarmLabels []string `json:"harm_labels,omitempty"`
+}
+
 type VideoSettings struct {
 	AccessRequestEnabled bool `json:"access_request_enabled"`
 
@@ -8928,8 +12321,6 @@ type VoteData struct {
 	AnswerText *string `json:"answer_text,omitempty"`
 
 	OptionID *string `json:"option_id,omitempty"`
-
-	Option *PollOptionResponseData `json:"Option,omitempty"`
 }
 
 // Represents an BaseEvent that happened in Stream Chat
@@ -9008,6 +12399,8 @@ type WrappedUnreadCountsResponse struct {
 	Channels []UnreadCountsChannel `json:"channels"`
 
 	Threads []UnreadCountsThread `json:"threads"`
+
+	TotalUnreadCountByTeam map[string]int `json:"total_unread_count_by_team,omitempty"`
 }
 
 type XiaomiConfig struct {

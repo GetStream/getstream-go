@@ -15,6 +15,13 @@ func NewVideoClient(client *Client) *VideoClient {
 	}
 }
 
+// Get the current status of all active calls including metrics and summary information
+func (c *VideoClient) GetActiveCallsStatus(ctx context.Context, request *GetActiveCallsStatusRequest) (*StreamResponse[GetActiveCallsStatusResponse], error) {
+	var result GetActiveCallsStatusResponse
+	res, err := MakeRequest[any, GetActiveCallsStatusResponse](c.client, ctx, "GET", "/api/v2/video/active_calls_status", nil, nil, &result, nil)
+	return res, err
+}
+
 func (c *VideoClient) QueryUserFeedback(ctx context.Context, request *QueryUserFeedbackRequest) (*StreamResponse[QueryUserFeedbackResponse], error) {
 	var result QueryUserFeedbackResponse
 	params := extractQueryParams(request)

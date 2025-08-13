@@ -221,6 +221,143 @@ func (c *Client) GetPermission(ctx context.Context, id string, request *GetPermi
 	return res, err
 }
 
+// Creates a new poll
+func (c *Client) CreatePoll(ctx context.Context, request *CreatePollRequest) (*StreamResponse[PollResponse], error) {
+	var result PollResponse
+	res, err := MakeRequest[CreatePollRequest, PollResponse](c, ctx, "POST", "/api/v2/polls", nil, request, &result, nil)
+	return res, err
+}
+
+// Updates a poll
+//
+// Sends events:
+// - feeds.poll.closed
+// - feeds.poll.updated
+// - poll.closed
+// - poll.updated
+func (c *Client) UpdatePoll(ctx context.Context, request *UpdatePollRequest) (*StreamResponse[PollResponse], error) {
+	var result PollResponse
+	res, err := MakeRequest[UpdatePollRequest, PollResponse](c, ctx, "PUT", "/api/v2/polls", nil, request, &result, nil)
+	return res, err
+}
+
+// Queries polls
+func (c *Client) QueryPolls(ctx context.Context, request *QueryPollsRequest) (*StreamResponse[QueryPollsResponse], error) {
+	var result QueryPollsResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[QueryPollsRequest, QueryPollsResponse](c, ctx, "POST", "/api/v2/polls/query", params, request, &result, nil)
+	return res, err
+}
+
+// Deletes a poll
+//
+// Sends events:
+// - feeds.poll.deleted
+// - poll.deleted
+func (c *Client) DeletePoll(ctx context.Context, pollID string, request *DeletePollRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"poll_id": pollID,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/polls/{poll_id}", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Retrieves a poll
+func (c *Client) GetPoll(ctx context.Context, pollID string, request *GetPollRequest) (*StreamResponse[PollResponse], error) {
+	var result PollResponse
+	pathParams := map[string]string{
+		"poll_id": pollID,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, PollResponse](c, ctx, "GET", "/api/v2/polls/{poll_id}", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Updates a poll partially
+//
+// Sends events:
+// - feeds.poll.closed
+// - feeds.poll.updated
+// - poll.closed
+// - poll.updated
+func (c *Client) UpdatePollPartial(ctx context.Context, pollID string, request *UpdatePollPartialRequest) (*StreamResponse[PollResponse], error) {
+	var result PollResponse
+	pathParams := map[string]string{
+		"poll_id": pollID,
+	}
+	res, err := MakeRequest[UpdatePollPartialRequest, PollResponse](c, ctx, "PATCH", "/api/v2/polls/{poll_id}", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Creates a poll option
+//
+// Sends events:
+// - feeds.poll.updated
+// - poll.updated
+func (c *Client) CreatePollOption(ctx context.Context, pollID string, request *CreatePollOptionRequest) (*StreamResponse[PollOptionResponse], error) {
+	var result PollOptionResponse
+	pathParams := map[string]string{
+		"poll_id": pollID,
+	}
+	res, err := MakeRequest[CreatePollOptionRequest, PollOptionResponse](c, ctx, "POST", "/api/v2/polls/{poll_id}/options", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Updates a poll option
+//
+// Sends events:
+// - feeds.poll.updated
+// - poll.updated
+func (c *Client) UpdatePollOption(ctx context.Context, pollID string, request *UpdatePollOptionRequest) (*StreamResponse[PollOptionResponse], error) {
+	var result PollOptionResponse
+	pathParams := map[string]string{
+		"poll_id": pollID,
+	}
+	res, err := MakeRequest[UpdatePollOptionRequest, PollOptionResponse](c, ctx, "PUT", "/api/v2/polls/{poll_id}/options", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Deletes a poll option
+//
+// Sends events:
+// - feeds.poll.updated
+// - poll.updated
+func (c *Client) DeletePollOption(ctx context.Context, pollID string, optionID string, request *DeletePollOptionRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"poll_id":   pollID,
+		"option_id": optionID,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/polls/{poll_id}/options/{option_id}", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Retrieves a poll option
+func (c *Client) GetPollOption(ctx context.Context, pollID string, optionID string, request *GetPollOptionRequest) (*StreamResponse[PollOptionResponse], error) {
+	var result PollOptionResponse
+	pathParams := map[string]string{
+		"poll_id":   pollID,
+		"option_id": optionID,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, PollOptionResponse](c, ctx, "GET", "/api/v2/polls/{poll_id}/options/{option_id}", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Queries votes
+func (c *Client) QueryPollVotes(ctx context.Context, pollID string, request *QueryPollVotesRequest) (*StreamResponse[PollVotesResponse], error) {
+	var result PollVotesResponse
+	pathParams := map[string]string{
+		"poll_id": pollID,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[QueryPollVotesRequest, PollVotesResponse](c, ctx, "POST", "/api/v2/polls/{poll_id}/votes", params, request, &result, pathParams)
+	return res, err
+}
+
 // List details of all push providers.
 func (c *Client) ListPushProviders(ctx context.Context, request *ListPushProvidersRequest) (*StreamResponse[ListPushProvidersResponse], error) {
 	var result ListPushProvidersResponse
@@ -288,6 +425,36 @@ func (c *Client) GetTask(ctx context.Context, id string, request *GetTaskRequest
 	return res, err
 }
 
+// Deletes previously uploaded file
+func (c *Client) DeleteFile(ctx context.Context, request *DeleteFileRequest) (*StreamResponse[Response], error) {
+	var result Response
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/uploads/file", params, nil, &result, nil)
+	return res, err
+}
+
+// Uploads file
+func (c *Client) UploadFile(ctx context.Context, request *UploadFileRequest) (*StreamResponse[FileUploadResponse], error) {
+	var result FileUploadResponse
+	res, err := MakeRequest[UploadFileRequest, FileUploadResponse](c, ctx, "POST", "/api/v2/uploads/file", nil, request, &result, nil)
+	return res, err
+}
+
+// Deletes previously uploaded image
+func (c *Client) DeleteImage(ctx context.Context, request *DeleteImageRequest) (*StreamResponse[Response], error) {
+	var result Response
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/uploads/image", params, nil, &result, nil)
+	return res, err
+}
+
+// Uploads image
+func (c *Client) UploadImage(ctx context.Context, request *UploadImageRequest) (*StreamResponse[ImageUploadResponse], error) {
+	var result ImageUploadResponse
+	res, err := MakeRequest[UploadImageRequest, ImageUploadResponse](c, ctx, "POST", "/api/v2/uploads/image", nil, request, &result, nil)
+	return res, err
+}
+
 // Find and filter users
 func (c *Client) QueryUsers(ctx context.Context, request *QueryUsersRequest) (*StreamResponse[QueryUsersResponse], error) {
 	var result QueryUsersResponse
@@ -351,6 +518,22 @@ func (c *Client) DeactivateUsers(ctx context.Context, request *DeactivateUsersRe
 func (c *Client) DeleteUsers(ctx context.Context, request *DeleteUsersRequest) (*StreamResponse[DeleteUsersResponse], error) {
 	var result DeleteUsersResponse
 	res, err := MakeRequest[DeleteUsersRequest, DeleteUsersResponse](c, ctx, "POST", "/api/v2/users/delete", nil, request, &result, nil)
+	return res, err
+}
+
+// Retrieves all active live locations for a user
+func (c *Client) GetUserLiveLocations(ctx context.Context, request *GetUserLiveLocationsRequest) (*StreamResponse[SharedLocationsResponse], error) {
+	var result SharedLocationsResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, SharedLocationsResponse](c, ctx, "GET", "/api/v2/users/live_locations", params, nil, &result, nil)
+	return res, err
+}
+
+// Updates an existing live location with new coordinates or expiration time
+func (c *Client) UpdateLiveLocation(ctx context.Context, request *UpdateLiveLocationRequest) (*StreamResponse[SharedLocationResponse], error) {
+	var result SharedLocationResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[UpdateLiveLocationRequest, SharedLocationResponse](c, ctx, "PUT", "/api/v2/users/live_locations", params, request, &result, nil)
 	return res, err
 }
 
