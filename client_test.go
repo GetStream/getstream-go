@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/GetStream/getstream-go"
+	. "github.com/GetStream/getstream-go/v3"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
