@@ -43,53 +43,6 @@ func (c *FeedsClient) QueryActivities(ctx context.Context, request *QueryActivit
 	return res, err
 }
 
-// Delete a single activity by its ID
-func (c *FeedsClient) DeleteActivity(ctx context.Context, activityID string, request *DeleteActivityRequest) (*StreamResponse[DeleteActivityResponse], error) {
-	var result DeleteActivityResponse
-	pathParams := map[string]string{
-		"activity_id": activityID,
-	}
-	params := extractQueryParams(request)
-	res, err := MakeRequest[any, DeleteActivityResponse](c.client, ctx, "DELETE", "/api/v2/feeds/activities/{activity_id}", params, nil, &result, pathParams)
-	return res, err
-}
-
-// Returns activity by ID
-func (c *FeedsClient) GetActivity(ctx context.Context, activityID string, request *GetActivityRequest) (*StreamResponse[GetActivityResponse], error) {
-	var result GetActivityResponse
-	pathParams := map[string]string{
-		"activity_id": activityID,
-	}
-	res, err := MakeRequest[any, GetActivityResponse](c.client, ctx, "GET", "/api/v2/feeds/activities/{activity_id}", nil, nil, &result, pathParams)
-	return res, err
-}
-
-// Updates certain fields of the activity
-//
-// Sends events:
-// - feeds.activity.updated
-func (c *FeedsClient) UpdateActivityPartial(ctx context.Context, activityID string, request *UpdateActivityPartialRequest) (*StreamResponse[UpdateActivityPartialResponse], error) {
-	var result UpdateActivityPartialResponse
-	pathParams := map[string]string{
-		"activity_id": activityID,
-	}
-	res, err := MakeRequest[UpdateActivityPartialRequest, UpdateActivityPartialResponse](c.client, ctx, "PATCH", "/api/v2/feeds/activities/{activity_id}", nil, request, &result, pathParams)
-	return res, err
-}
-
-// Replaces an activity with the provided data
-//
-// Sends events:
-// - feeds.activity.updated
-func (c *FeedsClient) UpdateActivity(ctx context.Context, activityID string, request *UpdateActivityRequest) (*StreamResponse[UpdateActivityResponse], error) {
-	var result UpdateActivityResponse
-	pathParams := map[string]string{
-		"activity_id": activityID,
-	}
-	res, err := MakeRequest[UpdateActivityRequest, UpdateActivityResponse](c.client, ctx, "PUT", "/api/v2/feeds/activities/{activity_id}", nil, request, &result, pathParams)
-	return res, err
-}
-
 // Deletes a bookmark from an activity
 func (c *FeedsClient) DeleteBookmark(ctx context.Context, activityID string, request *DeleteBookmarkRequest) (*StreamResponse[DeleteBookmarkResponse], error) {
 	var result DeleteBookmarkResponse
@@ -118,6 +71,16 @@ func (c *FeedsClient) AddBookmark(ctx context.Context, activityID string, reques
 		"activity_id": activityID,
 	}
 	res, err := MakeRequest[AddBookmarkRequest, AddBookmarkResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/{activity_id}/bookmarks", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Submit feedback for an activity including options to show less, hide, report, or mute the user
+func (c *FeedsClient) ActivityFeedback(ctx context.Context, activityID string, request *ActivityFeedbackRequest) (*StreamResponse[ActivityFeedbackResponse], error) {
+	var result ActivityFeedbackResponse
+	pathParams := map[string]string{
+		"activity_id": activityID,
+	}
+	res, err := MakeRequest[ActivityFeedbackRequest, ActivityFeedbackResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/{activity_id}/feedback", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -189,6 +152,53 @@ func (c *FeedsClient) DeleteActivityReaction(ctx context.Context, activityID str
 	return res, err
 }
 
+// Delete a single activity by its ID
+func (c *FeedsClient) DeleteActivity(ctx context.Context, id string, request *DeleteActivityRequest) (*StreamResponse[DeleteActivityResponse], error) {
+	var result DeleteActivityResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, DeleteActivityResponse](c.client, ctx, "DELETE", "/api/v2/feeds/activities/{id}", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Returns activity by ID
+func (c *FeedsClient) GetActivity(ctx context.Context, id string, request *GetActivityRequest) (*StreamResponse[GetActivityResponse], error) {
+	var result GetActivityResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, GetActivityResponse](c.client, ctx, "GET", "/api/v2/feeds/activities/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Updates certain fields of the activity
+//
+// Sends events:
+// - feeds.activity.updated
+func (c *FeedsClient) UpdateActivityPartial(ctx context.Context, id string, request *UpdateActivityPartialRequest) (*StreamResponse[UpdateActivityPartialResponse], error) {
+	var result UpdateActivityPartialResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[UpdateActivityPartialRequest, UpdateActivityPartialResponse](c.client, ctx, "PATCH", "/api/v2/feeds/activities/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Replaces an activity with the provided data
+//
+// Sends events:
+// - feeds.activity.updated
+func (c *FeedsClient) UpdateActivity(ctx context.Context, id string, request *UpdateActivityRequest) (*StreamResponse[UpdateActivityResponse], error) {
+	var result UpdateActivityResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[UpdateActivityRequest, UpdateActivityResponse](c.client, ctx, "PUT", "/api/v2/feeds/activities/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Query bookmark folders with filter query
 func (c *FeedsClient) QueryBookmarkFolders(ctx context.Context, request *QueryBookmarkFoldersRequest) (*StreamResponse[QueryBookmarkFoldersResponse], error) {
 	var result QueryBookmarkFoldersResponse
@@ -253,75 +263,76 @@ func (c *FeedsClient) QueryComments(ctx context.Context, request *QueryCommentsR
 }
 
 // Deletes a comment from an object (e.g., activity) and broadcasts appropriate events
-func (c *FeedsClient) DeleteComment(ctx context.Context, commentID string, request *DeleteCommentRequest) (*StreamResponse[DeleteCommentResponse], error) {
+func (c *FeedsClient) DeleteComment(ctx context.Context, id string, request *DeleteCommentRequest) (*StreamResponse[DeleteCommentResponse], error) {
 	var result DeleteCommentResponse
 	pathParams := map[string]string{
-		"comment_id": commentID,
+		"id": id,
 	}
-	res, err := MakeRequest[any, DeleteCommentResponse](c.client, ctx, "DELETE", "/api/v2/feeds/comments/{comment_id}", nil, nil, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, DeleteCommentResponse](c.client, ctx, "DELETE", "/api/v2/feeds/comments/{id}", params, nil, &result, pathParams)
 	return res, err
 }
 
 // Get a comment by ID
-func (c *FeedsClient) GetComment(ctx context.Context, commentID string, request *GetCommentRequest) (*StreamResponse[GetCommentResponse], error) {
+func (c *FeedsClient) GetComment(ctx context.Context, id string, request *GetCommentRequest) (*StreamResponse[GetCommentResponse], error) {
 	var result GetCommentResponse
 	pathParams := map[string]string{
-		"comment_id": commentID,
+		"id": id,
 	}
-	res, err := MakeRequest[any, GetCommentResponse](c.client, ctx, "GET", "/api/v2/feeds/comments/{comment_id}", nil, nil, &result, pathParams)
+	res, err := MakeRequest[any, GetCommentResponse](c.client, ctx, "GET", "/api/v2/feeds/comments/{id}", nil, nil, &result, pathParams)
 	return res, err
 }
 
 // Updates a comment on an object (e.g., activity) and broadcasts appropriate events
-func (c *FeedsClient) UpdateComment(ctx context.Context, commentID string, request *UpdateCommentRequest) (*StreamResponse[UpdateCommentResponse], error) {
+func (c *FeedsClient) UpdateComment(ctx context.Context, id string, request *UpdateCommentRequest) (*StreamResponse[UpdateCommentResponse], error) {
 	var result UpdateCommentResponse
 	pathParams := map[string]string{
-		"comment_id": commentID,
+		"id": id,
 	}
-	res, err := MakeRequest[UpdateCommentRequest, UpdateCommentResponse](c.client, ctx, "PATCH", "/api/v2/feeds/comments/{comment_id}", nil, request, &result, pathParams)
+	res, err := MakeRequest[UpdateCommentRequest, UpdateCommentResponse](c.client, ctx, "PATCH", "/api/v2/feeds/comments/{id}", nil, request, &result, pathParams)
 	return res, err
 }
 
 // Adds a reaction to a comment
-func (c *FeedsClient) AddCommentReaction(ctx context.Context, commentID string, request *AddCommentReactionRequest) (*StreamResponse[AddCommentReactionResponse], error) {
+func (c *FeedsClient) AddCommentReaction(ctx context.Context, id string, request *AddCommentReactionRequest) (*StreamResponse[AddCommentReactionResponse], error) {
 	var result AddCommentReactionResponse
 	pathParams := map[string]string{
-		"comment_id": commentID,
+		"id": id,
 	}
-	res, err := MakeRequest[AddCommentReactionRequest, AddCommentReactionResponse](c.client, ctx, "POST", "/api/v2/feeds/comments/{comment_id}/reactions", nil, request, &result, pathParams)
+	res, err := MakeRequest[AddCommentReactionRequest, AddCommentReactionResponse](c.client, ctx, "POST", "/api/v2/feeds/comments/{id}/reactions", nil, request, &result, pathParams)
 	return res, err
 }
 
 // Query comment reactions
-func (c *FeedsClient) QueryCommentReactions(ctx context.Context, commentID string, request *QueryCommentReactionsRequest) (*StreamResponse[QueryCommentReactionsResponse], error) {
+func (c *FeedsClient) QueryCommentReactions(ctx context.Context, id string, request *QueryCommentReactionsRequest) (*StreamResponse[QueryCommentReactionsResponse], error) {
 	var result QueryCommentReactionsResponse
 	pathParams := map[string]string{
-		"comment_id": commentID,
+		"id": id,
 	}
-	res, err := MakeRequest[QueryCommentReactionsRequest, QueryCommentReactionsResponse](c.client, ctx, "POST", "/api/v2/feeds/comments/{comment_id}/reactions/query", nil, request, &result, pathParams)
+	res, err := MakeRequest[QueryCommentReactionsRequest, QueryCommentReactionsResponse](c.client, ctx, "POST", "/api/v2/feeds/comments/{id}/reactions/query", nil, request, &result, pathParams)
 	return res, err
 }
 
 // Deletes a reaction from a comment
-func (c *FeedsClient) DeleteCommentReaction(ctx context.Context, commentID string, _type string, request *DeleteCommentReactionRequest) (*StreamResponse[DeleteCommentReactionResponse], error) {
+func (c *FeedsClient) DeleteCommentReaction(ctx context.Context, id string, _type string, request *DeleteCommentReactionRequest) (*StreamResponse[DeleteCommentReactionResponse], error) {
 	var result DeleteCommentReactionResponse
 	pathParams := map[string]string{
-		"comment_id": commentID,
-		"type":       _type,
+		"id":   id,
+		"type": _type,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[any, DeleteCommentReactionResponse](c.client, ctx, "DELETE", "/api/v2/feeds/comments/{comment_id}/reactions/{type}", params, nil, &result, pathParams)
+	res, err := MakeRequest[any, DeleteCommentReactionResponse](c.client, ctx, "DELETE", "/api/v2/feeds/comments/{id}/reactions/{type}", params, nil, &result, pathParams)
 	return res, err
 }
 
 // Retrieve a threaded list of replies for a single comment, with configurable depth, sorting, and pagination
-func (c *FeedsClient) GetCommentReplies(ctx context.Context, commentID string, request *GetCommentRepliesRequest) (*StreamResponse[GetCommentRepliesResponse], error) {
+func (c *FeedsClient) GetCommentReplies(ctx context.Context, id string, request *GetCommentRepliesRequest) (*StreamResponse[GetCommentRepliesResponse], error) {
 	var result GetCommentRepliesResponse
 	pathParams := map[string]string{
-		"comment_id": commentID,
+		"id": id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[any, GetCommentRepliesResponse](c.client, ctx, "GET", "/api/v2/feeds/comments/{comment_id}/replies", params, nil, &result, pathParams)
+	res, err := MakeRequest[any, GetCommentRepliesResponse](c.client, ctx, "GET", "/api/v2/feeds/comments/{id}/replies", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -336,37 +347,6 @@ func (c *FeedsClient) ListFeedGroups(ctx context.Context, request *ListFeedGroup
 func (c *FeedsClient) CreateFeedGroup(ctx context.Context, request *CreateFeedGroupRequest) (*StreamResponse[CreateFeedGroupResponse], error) {
 	var result CreateFeedGroupResponse
 	res, err := MakeRequest[CreateFeedGroupRequest, CreateFeedGroupResponse](c.client, ctx, "POST", "/api/v2/feeds/feed_groups", nil, request, &result, nil)
-	return res, err
-}
-
-// Delete a feed group by its ID. Can perform a soft delete (default) or hard delete.
-func (c *FeedsClient) DeleteFeedGroup(ctx context.Context, feedGroupID string, request *DeleteFeedGroupRequest) (*StreamResponse[DeleteFeedGroupResponse], error) {
-	var result DeleteFeedGroupResponse
-	pathParams := map[string]string{
-		"feed_group_id": feedGroupID,
-	}
-	params := extractQueryParams(request)
-	res, err := MakeRequest[any, DeleteFeedGroupResponse](c.client, ctx, "DELETE", "/api/v2/feeds/feed_groups/{feed_group_id}", params, nil, &result, pathParams)
-	return res, err
-}
-
-// Get a feed group by ID
-func (c *FeedsClient) GetFeedGroup(ctx context.Context, feedGroupID string, request *GetFeedGroupRequest) (*StreamResponse[GetFeedGroupResponse], error) {
-	var result GetFeedGroupResponse
-	pathParams := map[string]string{
-		"feed_group_id": feedGroupID,
-	}
-	res, err := MakeRequest[any, GetFeedGroupResponse](c.client, ctx, "GET", "/api/v2/feeds/feed_groups/{feed_group_id}", nil, nil, &result, pathParams)
-	return res, err
-}
-
-// Update a feed group by ID
-func (c *FeedsClient) UpdateFeedGroup(ctx context.Context, feedGroupID string, request *UpdateFeedGroupRequest) (*StreamResponse[UpdateFeedGroupResponse], error) {
-	var result UpdateFeedGroupResponse
-	pathParams := map[string]string{
-		"feed_group_id": feedGroupID,
-	}
-	res, err := MakeRequest[UpdateFeedGroupRequest, UpdateFeedGroupResponse](c.client, ctx, "PUT", "/api/v2/feeds/feed_groups/{feed_group_id}", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -495,6 +475,47 @@ func (c *FeedsClient) GetFollowSuggestions(ctx context.Context, feedGroupID stri
 	return res, err
 }
 
+// Delete a feed group by its ID. Can perform a soft delete (default) or hard delete.
+func (c *FeedsClient) DeleteFeedGroup(ctx context.Context, id string, request *DeleteFeedGroupRequest) (*StreamResponse[DeleteFeedGroupResponse], error) {
+	var result DeleteFeedGroupResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, DeleteFeedGroupResponse](c.client, ctx, "DELETE", "/api/v2/feeds/feed_groups/{id}", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Get a feed group by ID
+func (c *FeedsClient) GetFeedGroup(ctx context.Context, id string, request *GetFeedGroupRequest) (*StreamResponse[GetFeedGroupResponse], error) {
+	var result GetFeedGroupResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, GetFeedGroupResponse](c.client, ctx, "GET", "/api/v2/feeds/feed_groups/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Get an existing feed group or create a new one if it doesn't exist
+func (c *FeedsClient) GetOrCreateFeedGroup(ctx context.Context, id string, request *GetOrCreateFeedGroupRequest) (*StreamResponse[GetOrCreateFeedGroupResponse], error) {
+	var result GetOrCreateFeedGroupResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[GetOrCreateFeedGroupRequest, GetOrCreateFeedGroupResponse](c.client, ctx, "POST", "/api/v2/feeds/feed_groups/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Update a feed group by ID
+func (c *FeedsClient) UpdateFeedGroup(ctx context.Context, id string, request *UpdateFeedGroupRequest) (*StreamResponse[UpdateFeedGroupResponse], error) {
+	var result UpdateFeedGroupResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[UpdateFeedGroupRequest, UpdateFeedGroupResponse](c.client, ctx, "PUT", "/api/v2/feeds/feed_groups/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
 // List all feed views for a feed group
 func (c *FeedsClient) ListFeedViews(ctx context.Context, request *ListFeedViewsRequest) (*StreamResponse[ListFeedViewsResponse], error) {
 	var result ListFeedViewsResponse
@@ -510,32 +531,42 @@ func (c *FeedsClient) CreateFeedView(ctx context.Context, request *CreateFeedVie
 }
 
 // Delete an existing custom feed view
-func (c *FeedsClient) DeleteFeedView(ctx context.Context, viewID string, request *DeleteFeedViewRequest) (*StreamResponse[DeleteFeedViewResponse], error) {
+func (c *FeedsClient) DeleteFeedView(ctx context.Context, id string, request *DeleteFeedViewRequest) (*StreamResponse[DeleteFeedViewResponse], error) {
 	var result DeleteFeedViewResponse
 	pathParams := map[string]string{
-		"view_id": viewID,
+		"id": id,
 	}
-	res, err := MakeRequest[any, DeleteFeedViewResponse](c.client, ctx, "DELETE", "/api/v2/feeds/feed_views/{view_id}", nil, nil, &result, pathParams)
+	res, err := MakeRequest[any, DeleteFeedViewResponse](c.client, ctx, "DELETE", "/api/v2/feeds/feed_views/{id}", nil, nil, &result, pathParams)
 	return res, err
 }
 
 // Get a feed view by its ID
-func (c *FeedsClient) GetFeedView(ctx context.Context, viewID string, request *GetFeedViewRequest) (*StreamResponse[GetFeedViewResponse], error) {
+func (c *FeedsClient) GetFeedView(ctx context.Context, id string, request *GetFeedViewRequest) (*StreamResponse[GetFeedViewResponse], error) {
 	var result GetFeedViewResponse
 	pathParams := map[string]string{
-		"view_id": viewID,
+		"id": id,
 	}
-	res, err := MakeRequest[any, GetFeedViewResponse](c.client, ctx, "GET", "/api/v2/feeds/feed_views/{view_id}", nil, nil, &result, pathParams)
+	res, err := MakeRequest[any, GetFeedViewResponse](c.client, ctx, "GET", "/api/v2/feeds/feed_views/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Get an existing feed view or create a new one if it doesn't exist
+func (c *FeedsClient) GetOrCreateFeedView(ctx context.Context, id string, request *GetOrCreateFeedViewRequest) (*StreamResponse[GetOrCreateFeedViewResponse], error) {
+	var result GetOrCreateFeedViewResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[GetOrCreateFeedViewRequest, GetOrCreateFeedViewResponse](c.client, ctx, "POST", "/api/v2/feeds/feed_views/{id}", nil, request, &result, pathParams)
 	return res, err
 }
 
 // Update an existing custom feed view with new selectors, ranking, or aggregation options
-func (c *FeedsClient) UpdateFeedView(ctx context.Context, viewID string, request *UpdateFeedViewRequest) (*StreamResponse[UpdateFeedViewResponse], error) {
+func (c *FeedsClient) UpdateFeedView(ctx context.Context, id string, request *UpdateFeedViewRequest) (*StreamResponse[UpdateFeedViewResponse], error) {
 	var result UpdateFeedViewResponse
 	pathParams := map[string]string{
-		"view_id": viewID,
+		"id": id,
 	}
-	res, err := MakeRequest[UpdateFeedViewRequest, UpdateFeedViewResponse](c.client, ctx, "PUT", "/api/v2/feeds/feed_views/{view_id}", nil, request, &result, pathParams)
+	res, err := MakeRequest[UpdateFeedViewRequest, UpdateFeedViewResponse](c.client, ctx, "PUT", "/api/v2/feeds/feed_views/{id}", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -547,9 +578,9 @@ func (c *FeedsClient) CreateFeedsBatch(ctx context.Context, request *CreateFeeds
 }
 
 // Query feeds with filter query
-func (c *FeedsClient) FeedsQueryFeeds(ctx context.Context, request *FeedsQueryFeedsRequest) (*StreamResponse[QueryFeedsResponse], error) {
+func (c *FeedsClient) QueryFeeds(ctx context.Context, request *QueryFeedsRequest) (*StreamResponse[QueryFeedsResponse], error) {
 	var result QueryFeedsResponse
-	res, err := MakeRequest[FeedsQueryFeedsRequest, QueryFeedsResponse](c.client, ctx, "POST", "/api/v2/feeds/feeds/query", nil, request, &result, nil)
+	res, err := MakeRequest[QueryFeedsRequest, QueryFeedsResponse](c.client, ctx, "POST", "/api/v2/feeds/feeds/query", nil, request, &result, nil)
 	return res, err
 }
 
@@ -603,6 +634,40 @@ func (c *FeedsClient) Unfollow(ctx context.Context, source string, target string
 		"target": target,
 	}
 	res, err := MakeRequest[any, UnfollowResponse](c.client, ctx, "DELETE", "/api/v2/feeds/follows/{source}/{target}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Create a new membership level with tag-based access controls
+func (c *FeedsClient) CreateMembershipLevel(ctx context.Context, request *CreateMembershipLevelRequest) (*StreamResponse[CreateMembershipLevelResponse], error) {
+	var result CreateMembershipLevelResponse
+	res, err := MakeRequest[CreateMembershipLevelRequest, CreateMembershipLevelResponse](c.client, ctx, "POST", "/api/v2/feeds/membership_levels", nil, request, &result, nil)
+	return res, err
+}
+
+// Query membership levels with filter query
+func (c *FeedsClient) QueryMembershipLevels(ctx context.Context, request *QueryMembershipLevelsRequest) (*StreamResponse[QueryMembershipLevelsResponse], error) {
+	var result QueryMembershipLevelsResponse
+	res, err := MakeRequest[QueryMembershipLevelsRequest, QueryMembershipLevelsResponse](c.client, ctx, "POST", "/api/v2/feeds/membership_levels/query", nil, request, &result, nil)
+	return res, err
+}
+
+// Delete a membership level by its UUID. This operation is irreversible.
+func (c *FeedsClient) DeleteMembershipLevel(ctx context.Context, id string, request *DeleteMembershipLevelRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/feeds/membership_levels/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Update a membership level with partial updates. Only specified fields will be updated.
+func (c *FeedsClient) UpdateMembershipLevel(ctx context.Context, id string, request *UpdateMembershipLevelRequest) (*StreamResponse[UpdateMembershipLevelResponse], error) {
+	var result UpdateMembershipLevelResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[UpdateMembershipLevelRequest, UpdateMembershipLevelResponse](c.client, ctx, "PATCH", "/api/v2/feeds/membership_levels/{id}", nil, request, &result, pathParams)
 	return res, err
 }
 

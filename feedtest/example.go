@@ -60,15 +60,15 @@ func main() {
 		panic(err)
 	}
 	_, err = feedsClient.Follow(ctx, &getstream.FollowRequest{
-		Source: feedFollowerRes.Data.Feed.Fid,
-		Target: feedOriginRes.Data.Feed.Fid,
+		Source: feedFollowerRes.Data.Feed.Feed,
+		Target: feedOriginRes.Data.Feed.Feed,
 	})
 	if err != nil {
 		panic(err)
 	}
 	activity := &getstream.AddActivityRequest{
 		Type:   "post1",
-		Fids:   []string{feedOriginRes.Data.Feed.Fid},
+		Feeds:  []string{feedOriginRes.Data.Feed.Feed},
 		Text:   getstream.PtrTo(getRandomString(10)),
 		UserID: getstream.PtrTo(userID1),
 	}

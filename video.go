@@ -145,6 +145,21 @@ func (c *VideoClient) GoLive(ctx context.Context, _type string, id string, reque
 	return res, err
 }
 
+// Kicks a user from the call. Optionally block the user from rejoining by setting block=true.
+//
+// Sends events:
+// - call.blocked_user
+// - call.kicked_user
+func (c *VideoClient) KickUser(ctx context.Context, _type string, id string, request *KickUserRequest) (*StreamResponse[KickUserResponse], error) {
+	var result KickUserResponse
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	res, err := MakeRequest[KickUserRequest, KickUserResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/kick", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Sends events:
 // - call.ended
 func (c *VideoClient) EndCall(ctx context.Context, _type string, id string, request *EndCallRequest) (*StreamResponse[EndCallResponse], error) {

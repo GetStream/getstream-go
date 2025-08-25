@@ -93,6 +93,13 @@ func TestVideoGoLive(t *testing.T) {
 	_, err = client.Video().GoLive(context.Background(), "", "", &getstream.GoLiveRequest{})
 	require.NoError(t, err)
 }
+func TestVideoKickUser(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().KickUser(context.Background(), "", "", &getstream.KickUserRequest{})
+	require.NoError(t, err)
+}
 func TestVideoEndCall(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
