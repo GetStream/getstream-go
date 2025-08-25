@@ -48,14 +48,13 @@ func TestFeedIntegrationSuite(t *testing.T) {
 	feedsClient := client.Feeds()
 	testUserID := "test-user-" + uuid.New().String()
 	testUserID2 := "test-user-2-" + uuid.New().String()
-	testUserID3 := "test-user-3-" + uuid.New().String()
 
 	// Track created resources for cleanup
 	var createdActivityIDs []string
 	var createdCommentIDs []string
 
 	// Setup environment
-	setupEnvironment(t, ctx, client, testUserID, testUserID2, testUserID3)
+	setupEnvironment(t, ctx, client, testUserID, testUserID2)
 
 	// Cleanup function
 	defer func() {
@@ -164,7 +163,7 @@ func TestFeedIntegrationSuite(t *testing.T) {
 	})
 
 	t.Run("Test22_UnfollowUser", func(t *testing.T) {
-		test22UnfollowUser(t, ctx, feedsClient, testUserID, testUserID3)
+		test22UnfollowUser(t, ctx, feedsClient, testUserID2, testUserID)
 	})
 
 	t.Run("Test23_DeleteActivities", func(t *testing.T) {
@@ -212,7 +211,7 @@ func TestFeedIntegrationSuite(t *testing.T) {
 // ENVIRONMENT SETUP
 // =================================================================
 
-func setupEnvironment(t *testing.T, ctx context.Context, client *getstream.Stream, testUserID, testUserID2, testUserID3 string) {
+func setupEnvironment(t *testing.T, ctx context.Context, client *getstream.Stream, testUserID, testUserID2 string) {
 	// Create test users
 	// snippet-start: CreateUsers
 	_, err := client.UpdateUsers(ctx, &getstream.UpdateUsersRequest{
@@ -225,11 +224,6 @@ func setupEnvironment(t *testing.T, ctx context.Context, client *getstream.Strea
 			testUserID2: {
 				ID:   testUserID2,
 				Name: getstream.PtrTo("Test User 2"),
-				Role: getstream.PtrTo("user"),
-			},
-			testUserID3: {
-				ID:   testUserID3,
-				Name: getstream.PtrTo("Test User 3"),
 				Role: getstream.PtrTo("user"),
 			},
 		},
