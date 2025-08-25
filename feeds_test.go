@@ -37,34 +37,6 @@ func TestFeedsQueryActivities(t *testing.T) {
 	_, err = client.Feeds().QueryActivities(context.Background(), &getstream.QueryActivitiesRequest{})
 	require.NoError(t, err)
 }
-func TestFeedsDeleteActivity(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Feeds().DeleteActivity(context.Background(), "", &getstream.DeleteActivityRequest{})
-	require.NoError(t, err)
-}
-func TestFeedsGetActivity(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Feeds().GetActivity(context.Background(), "", &getstream.GetActivityRequest{})
-	require.NoError(t, err)
-}
-func TestFeedsUpdateActivityPartial(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Feeds().UpdateActivityPartial(context.Background(), "", &getstream.UpdateActivityPartialRequest{})
-	require.NoError(t, err)
-}
-func TestFeedsUpdateActivity(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Feeds().UpdateActivity(context.Background(), "", &getstream.UpdateActivityRequest{})
-	require.NoError(t, err)
-}
 func TestFeedsDeleteBookmark(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -84,6 +56,13 @@ func TestFeedsAddBookmark(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().AddBookmark(context.Background(), "", &getstream.AddBookmarkRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsActivityFeedback(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().ActivityFeedback(context.Background(), "", &getstream.ActivityFeedbackRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsCastPollVote(t *testing.T) {
@@ -119,6 +98,34 @@ func TestFeedsDeleteActivityReaction(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().DeleteActivityReaction(context.Background(), "", "", &getstream.DeleteActivityReactionRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsDeleteActivity(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().DeleteActivity(context.Background(), "", &getstream.DeleteActivityRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsGetActivity(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().GetActivity(context.Background(), "", &getstream.GetActivityRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsUpdateActivityPartial(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().UpdateActivityPartial(context.Background(), "", &getstream.UpdateActivityPartialRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsUpdateActivity(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().UpdateActivity(context.Background(), "", &getstream.UpdateActivityRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsQueryBookmarkFolders(t *testing.T) {
@@ -240,27 +247,6 @@ func TestFeedsCreateFeedGroup(t *testing.T) {
 	_, err = client.Feeds().CreateFeedGroup(context.Background(), &getstream.CreateFeedGroupRequest{})
 	require.NoError(t, err)
 }
-func TestFeedsDeleteFeedGroup(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Feeds().DeleteFeedGroup(context.Background(), "", &getstream.DeleteFeedGroupRequest{})
-	require.NoError(t, err)
-}
-func TestFeedsGetFeedGroup(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Feeds().GetFeedGroup(context.Background(), "", &getstream.GetFeedGroupRequest{})
-	require.NoError(t, err)
-}
-func TestFeedsUpdateFeedGroup(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Feeds().UpdateFeedGroup(context.Background(), "", &getstream.UpdateFeedGroupRequest{})
-	require.NoError(t, err)
-}
 func TestFeedsDeleteFeed(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -338,6 +324,34 @@ func TestFeedsGetFollowSuggestions(t *testing.T) {
 	_, err = client.Feeds().GetFollowSuggestions(context.Background(), "", &getstream.GetFollowSuggestionsRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsDeleteFeedGroup(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().DeleteFeedGroup(context.Background(), "", &getstream.DeleteFeedGroupRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsGetFeedGroup(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().GetFeedGroup(context.Background(), "", &getstream.GetFeedGroupRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsGetOrCreateFeedGroup(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().GetOrCreateFeedGroup(context.Background(), "", &getstream.GetOrCreateFeedGroupRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsUpdateFeedGroup(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().UpdateFeedGroup(context.Background(), "", &getstream.UpdateFeedGroupRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsListFeedViews(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -366,6 +380,13 @@ func TestFeedsGetFeedView(t *testing.T) {
 	_, err = client.Feeds().GetFeedView(context.Background(), "", &getstream.GetFeedViewRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsGetOrCreateFeedView(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().GetOrCreateFeedView(context.Background(), "", &getstream.GetOrCreateFeedViewRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsUpdateFeedView(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -380,11 +401,11 @@ func TestFeedsCreateFeedsBatch(t *testing.T) {
 	_, err = client.Feeds().CreateFeedsBatch(context.Background(), &getstream.CreateFeedsBatchRequest{})
 	require.NoError(t, err)
 }
-func TestFeedsFeedsQueryFeeds(t *testing.T) {
+func TestFeedsQueryFeeds(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Feeds().FeedsQueryFeeds(context.Background(), &getstream.FeedsQueryFeedsRequest{})
+	_, err = client.Feeds().QueryFeeds(context.Background(), &getstream.QueryFeedsRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsUpdateFollow(t *testing.T) {
@@ -434,6 +455,34 @@ func TestFeedsUnfollow(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().Unfollow(context.Background(), "", "", &getstream.UnfollowRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsCreateMembershipLevel(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().CreateMembershipLevel(context.Background(), &getstream.CreateMembershipLevelRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsQueryMembershipLevels(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().QueryMembershipLevels(context.Background(), &getstream.QueryMembershipLevelsRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsDeleteMembershipLevel(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().DeleteMembershipLevel(context.Background(), "", &getstream.DeleteMembershipLevelRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsUpdateMembershipLevel(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().UpdateMembershipLevel(context.Background(), "", &getstream.UpdateMembershipLevelRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsUnfollowBatch(t *testing.T) {

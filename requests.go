@@ -18,6 +18,7 @@ type UpdateAppRequest struct {
 	FeedsV2Region                  *string                         `json:"feeds_v2_region"`
 	GuestUserCreationDisabled      *bool                           `json:"guest_user_creation_disabled"`
 	ImageModerationEnabled         *bool                           `json:"image_moderation_enabled"`
+	MaxAggregatedActivitiesLength  *int                            `json:"max_aggregated_activities_length"`
 	MigratePermissionsToV2         *bool                           `json:"migrate_permissions_to_v2"`
 	ModerationEnabled              *bool                           `json:"moderation_enabled"`
 	ModerationWebhookUrl           *string                         `json:"moderation_webhook_url"`
@@ -308,6 +309,7 @@ type UpdateChannelTypeRequest struct {
 	Blocklist                      *string             `json:"blocklist"`
 	BlocklistBehavior              *string             `json:"blocklist_behavior"`
 	ConnectEvents                  *bool               `json:"connect_events"`
+	CountMessages                  *bool               `json:"count_messages"`
 	CustomEvents                   *bool               `json:"custom_events"`
 	MarkMessagesPending            *bool               `json:"mark_messages_pending"`
 	Mutes                          *bool               `json:"mutes"`
@@ -389,8 +391,9 @@ type QueryMessageHistoryRequest struct {
 }
 
 type DeleteMessageRequest struct {
-	Hard      *bool   `json:"-" query:"hard"`
-	DeletedBy *string `json:"-" query:"deleted_by"`
+	Hard        *bool   `json:"-" query:"hard"`
+	DeletedBy   *string `json:"-" query:"deleted_by"`
+	DeleteForMe *bool   `json:"-" query:"delete_for_me"`
 }
 
 type GetMessageRequest struct {
@@ -683,7 +686,7 @@ type CheckExternalStorageRequest struct {
 
 type AddActivityRequest struct {
 	Type             string            `json:"type"`
-	Fids             []string          `json:"fids"`
+	Feeds            []string          `json:"feeds"`
 	ExpiresAt        *string           `json:"expires_at"`
 	ID               *string           `json:"id"`
 	ParentID         *string           `json:"parent_id"`
@@ -706,10 +709,10 @@ type UpsertActivitiesRequest struct {
 }
 
 type DeleteActivitiesRequest struct {
-	ActivityIds []string     `json:"activity_ids"`
-	HardDelete  *bool        `json:"hard_delete"`
-	UserID      *string      `json:"user_id"`
-	User        *UserRequest `json:"user"`
+	Ids        []string     `json:"ids"`
+	HardDelete *bool        `json:"hard_delete"`
+	UserID     *string      `json:"user_id"`
+	User       *UserRequest `json:"user"`
 }
 
 type QueryActivitiesRequest struct {
@@ -718,6 +721,69 @@ type QueryActivitiesRequest struct {
 	Prev   *string            `json:"prev"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
+}
+
+type DeleteBookmarkRequest struct {
+	FolderID *string `json:"-" query:"folder_id"`
+	UserID   *string `json:"-" query:"user_id"`
+}
+
+type UpdateBookmarkRequest struct {
+	FolderID    *string           `json:"folder_id"`
+	NewFolderID *string           `json:"new_folder_id"`
+	UserID      *string           `json:"user_id"`
+	Custom      map[string]any    `json:"custom"`
+	NewFolder   *AddFolderRequest `json:"new_folder"`
+	User        *UserRequest      `json:"user"`
+}
+
+type AddBookmarkRequest struct {
+	FolderID  *string           `json:"folder_id"`
+	UserID    *string           `json:"user_id"`
+	Custom    map[string]any    `json:"custom"`
+	NewFolder *AddFolderRequest `json:"new_folder"`
+	User      *UserRequest      `json:"user"`
+}
+
+type ActivityFeedbackRequest struct {
+	Hide     *bool        `json:"hide"`
+	MuteUser *bool        `json:"mute_user"`
+	Reason   *string      `json:"reason"`
+	Report   *bool        `json:"report"`
+	ShowLess *bool        `json:"show_less"`
+	UserID   *string      `json:"user_id"`
+	User     *UserRequest `json:"user"`
+}
+
+type CastPollVoteRequest struct {
+	UserID *string      `json:"user_id"`
+	User   *UserRequest `json:"user"`
+	Vote   *VoteData    `json:"vote"`
+}
+
+type DeletePollVoteRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type AddReactionRequest struct {
+	Type                       string         `json:"type"`
+	CreateNotificationActivity *bool          `json:"create_notification_activity"`
+	SkipPush                   *bool          `json:"skip_push"`
+	UserID                     *string        `json:"user_id"`
+	Custom                     map[string]any `json:"custom"`
+	User                       *UserRequest   `json:"user"`
+}
+
+type QueryActivityReactionsRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+}
+
+type DeleteActivityReactionRequest struct {
+	UserID *string `json:"-" query:"user_id"`
 }
 
 type DeleteActivityRequest struct {
@@ -746,57 +812,6 @@ type UpdateActivityRequest struct {
 	Custom       map[string]any    `json:"custom"`
 	Location     *ActivityLocation `json:"location"`
 	User         *UserRequest      `json:"user"`
-}
-
-type DeleteBookmarkRequest struct {
-	FolderID *string `json:"-" query:"folder_id"`
-	UserID   *string `json:"-" query:"user_id"`
-}
-
-type UpdateBookmarkRequest struct {
-	FolderID    *string           `json:"folder_id"`
-	NewFolderID *string           `json:"new_folder_id"`
-	UserID      *string           `json:"user_id"`
-	Custom      map[string]any    `json:"custom"`
-	NewFolder   *AddFolderRequest `json:"new_folder"`
-	User        *UserRequest      `json:"user"`
-}
-
-type AddBookmarkRequest struct {
-	FolderID  *string           `json:"folder_id"`
-	UserID    *string           `json:"user_id"`
-	Custom    map[string]any    `json:"custom"`
-	NewFolder *AddFolderRequest `json:"new_folder"`
-	User      *UserRequest      `json:"user"`
-}
-type CastPollVoteRequest struct {
-	UserID *string      `json:"user_id"`
-	User   *UserRequest `json:"user"`
-	Vote   *VoteData    `json:"vote"`
-}
-
-type DeletePollVoteRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
-type AddReactionRequest struct {
-	Type                       string         `json:"type"`
-	CreateNotificationActivity *bool          `json:"create_notification_activity"`
-	UserID                     *string        `json:"user_id"`
-	Custom                     map[string]any `json:"custom"`
-	User                       *UserRequest   `json:"user"`
-}
-
-type QueryActivityReactionsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
-}
-
-type DeleteActivityReactionRequest struct {
-	UserID *string `json:"-" query:"user_id"`
 }
 
 type QueryBookmarkFoldersRequest struct {
@@ -842,6 +857,7 @@ type AddCommentRequest struct {
 	ObjectType                 string         `json:"object_type"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
 	ParentID                   *string        `json:"parent_id"`
+	SkipPush                   *bool          `json:"skip_push"`
 	UserID                     *string        `json:"user_id"`
 	Attachments                []Attachment   `json:"attachments"`
 	MentionedUserIds           []string       `json:"mentioned_user_ids"`
@@ -862,19 +878,22 @@ type QueryCommentsRequest struct {
 }
 
 type DeleteCommentRequest struct {
+	HardDelete *bool `json:"-" query:"hard_delete"`
 }
 
 type GetCommentRequest struct {
 }
 
 type UpdateCommentRequest struct {
-	Comment *string        `json:"comment"`
-	Custom  map[string]any `json:"custom"`
+	Comment  *string        `json:"comment"`
+	SkipPush *bool          `json:"skip_push"`
+	Custom   map[string]any `json:"custom"`
 }
 
 type AddCommentReactionRequest struct {
 	Type                       string         `json:"type"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
+	SkipPush                   *bool          `json:"skip_push"`
 	UserID                     *string        `json:"user_id"`
 	Custom                     map[string]any `json:"custom"`
 	User                       *UserRequest   `json:"user"`
@@ -905,24 +924,15 @@ type ListFeedGroupsRequest struct {
 }
 
 type CreateFeedGroupRequest struct {
-	FeedGroupID       string              `json:"feed_group_id"`
-	DefaultViewID     *string             `json:"default_view_id"`
-	DefaultVisibility *string             `json:"default_visibility"`
-	Custom            map[string]any      `json:"custom"`
-	Notification      *NotificationConfig `json:"notification"`
-}
-
-type DeleteFeedGroupRequest struct {
-	HardDelete *bool `json:"-" query:"hard_delete"`
-}
-
-type GetFeedGroupRequest struct {
-}
-
-type UpdateFeedGroupRequest struct {
-	DefaultViewID *string             `json:"default_view_id"`
-	Custom        map[string]any      `json:"custom"`
-	Notification  *NotificationConfig `json:"notification"`
+	ID                 string                    `json:"id"`
+	DefaultVisibility  *string                   `json:"default_visibility"`
+	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
+	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
+	Aggregation        *AggregationConfig        `json:"aggregation"`
+	Custom             map[string]any            `json:"custom"`
+	Notification       *NotificationConfig       `json:"notification"`
+	PushNotification   *PushNotificationConfig   `json:"push_notification"`
+	Ranking            *RankingConfig            `json:"ranking"`
 }
 
 type DeleteFeedRequest struct {
@@ -998,14 +1008,43 @@ type RejectFeedMemberInviteRequest struct {
 }
 
 type GetFollowSuggestionsRequest struct {
-	Limit *int `json:"-" query:"limit"`
+	Limit  *int    `json:"-" query:"limit"`
+	UserID *string `json:"-" query:"user_id"`
+}
+
+type DeleteFeedGroupRequest struct {
+	HardDelete *bool `json:"-" query:"hard_delete"`
+}
+
+type GetFeedGroupRequest struct {
+}
+
+type GetOrCreateFeedGroupRequest struct {
+	DefaultVisibility  *string                   `json:"default_visibility"`
+	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
+	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
+	Aggregation        *AggregationConfig        `json:"aggregation"`
+	Custom             map[string]any            `json:"custom"`
+	Notification       *NotificationConfig       `json:"notification"`
+	PushNotification   *PushNotificationConfig   `json:"push_notification"`
+	Ranking            *RankingConfig            `json:"ranking"`
+}
+
+type UpdateFeedGroupRequest struct {
+	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
+	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
+	Aggregation        *AggregationConfig        `json:"aggregation"`
+	Custom             map[string]any            `json:"custom"`
+	Notification       *NotificationConfig       `json:"notification"`
+	PushNotification   *PushNotificationConfig   `json:"push_notification"`
+	Ranking            *RankingConfig            `json:"ranking"`
 }
 
 type ListFeedViewsRequest struct {
 }
 
 type CreateFeedViewRequest struct {
-	ViewID             string                    `json:"view_id"`
+	ID                 string                    `json:"id"`
 	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
 	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
 	Aggregation        *AggregationConfig        `json:"aggregation"`
@@ -1016,6 +1055,13 @@ type DeleteFeedViewRequest struct {
 }
 
 type GetFeedViewRequest struct {
+}
+
+type GetOrCreateFeedViewRequest struct {
+	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
+	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
+	Aggregation        *AggregationConfig        `json:"aggregation"`
+	Ranking            *RankingConfig            `json:"ranking"`
 }
 
 type UpdateFeedViewRequest struct {
@@ -1029,7 +1075,7 @@ type CreateFeedsBatchRequest struct {
 	Feeds []FeedRequest `json:"feeds"`
 }
 
-type FeedsQueryFeedsRequest struct {
+type QueryFeedsRequest struct {
 	Limit  *int               `json:"limit"`
 	Next   *string            `json:"next"`
 	Prev   *string            `json:"prev"`
@@ -1044,6 +1090,7 @@ type UpdateFollowRequest struct {
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
 	FollowerRole               *string        `json:"follower_role"`
 	PushPreference             *string        `json:"push_preference"`
+	SkipPush                   *bool          `json:"skip_push"`
 	Custom                     map[string]any `json:"custom"`
 }
 
@@ -1052,12 +1099,13 @@ type FollowRequest struct {
 	Target                     string         `json:"target"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
 	PushPreference             *string        `json:"push_preference"`
+	SkipPush                   *bool          `json:"skip_push"`
 	Custom                     map[string]any `json:"custom"`
 }
 
 type AcceptFollowRequest struct {
-	SourceFid    string  `json:"source_fid"`
-	TargetFid    string  `json:"target_fid"`
+	Source       string  `json:"source"`
+	Target       string  `json:"target"`
 	FollowerRole *string `json:"follower_role"`
 }
 
@@ -1074,11 +1122,39 @@ type QueryFollowsRequest struct {
 }
 
 type RejectFollowRequest struct {
-	SourceFid string `json:"source_fid"`
-	TargetFid string `json:"target_fid"`
+	Source string `json:"source"`
+	Target string `json:"target"`
 }
 
 type UnfollowRequest struct {
+}
+
+type CreateMembershipLevelRequest struct {
+	ID          string         `json:"id"`
+	Name        string         `json:"name"`
+	Description *string        `json:"description"`
+	Priority    *int           `json:"priority"`
+	Tags        []string       `json:"tags"`
+	Custom      map[string]any `json:"custom"`
+}
+
+type QueryMembershipLevelsRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+}
+
+type DeleteMembershipLevelRequest struct {
+}
+
+type UpdateMembershipLevelRequest struct {
+	Description *string        `json:"description"`
+	Name        *string        `json:"name"`
+	Priority    *int           `json:"priority"`
+	Tags        []string       `json:"tags"`
+	Custom      map[string]any `json:"custom"`
 }
 
 type UnfollowBatchRequest struct {
@@ -1154,6 +1230,7 @@ type UpsertConfigRequest struct {
 	BlockListConfig                    *BlockListConfig                    `json:"block_list_config"`
 	BodyguardConfig                    *AITextConfig                       `json:"bodyguard_config"`
 	GoogleVisionConfig                 *GoogleVisionConfig                 `json:"google_vision_config"`
+	LlmConfig                          *LLMConfig                          `json:"llm_config"`
 	RuleBuilderConfig                  *RuleBuilderConfig                  `json:"rule_builder_config"`
 	User                               *UserRequest                        `json:"user"`
 	VelocityFilterConfig               *VelocityFilterConfig               `json:"velocity_filter_config"`
@@ -1443,6 +1520,7 @@ type DeleteUsersRequest struct {
 	UserIds           []string `json:"user_ids"`
 	Calls             *string  `json:"calls"`
 	Conversations     *string  `json:"conversations"`
+	Files             *bool    `json:"files"`
 	Messages          *string  `json:"messages"`
 	NewCallOwnerID    *string  `json:"new_call_owner_id"`
 	NewChannelOwnerID *string  `json:"new_channel_owner_id"`
@@ -1573,6 +1651,13 @@ type GoLiveRequest struct {
 	StartRecording           *bool   `json:"start_recording"`
 	StartTranscription       *bool   `json:"start_transcription"`
 	TranscriptionStorageName *string `json:"transcription_storage_name"`
+}
+
+type KickUserRequest struct {
+	UserID     string       `json:"user_id"`
+	Block      *bool        `json:"block"`
+	KickedByID *string      `json:"kicked_by_id"`
+	KickedBy   *UserRequest `json:"kicked_by"`
 }
 
 type EndCallRequest struct {

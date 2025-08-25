@@ -49,6 +49,10 @@ func (c *Call) GoLive(ctx context.Context, request *GoLiveRequest) (*StreamRespo
 	return c.client.GoLive(ctx, c.callType, c.callID, request)
 }
 
+func (c *Call) KickUser(ctx context.Context, request *KickUserRequest) (*StreamResponse[KickUserResponse], error) {
+	return c.client.KickUser(ctx, c.callType, c.callID, request)
+}
+
 func (c *Call) End(ctx context.Context, request *EndCallRequest) (*StreamResponse[EndCallResponse], error) {
 	return c.client.EndCall(ctx, c.callType, c.callID, request)
 }
