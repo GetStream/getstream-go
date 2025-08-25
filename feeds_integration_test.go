@@ -205,6 +205,17 @@ func TestFeedIntegrationSuite(t *testing.T) {
 	t.Run("Test32_RealWorldUsageDemo", func(t *testing.T) {
 		test32RealWorldUsageDemo(t, ctx, feedsClient, testUserID, testUserID2, &createdActivityIDs)
 	})
+
+	// Feed Group CRUD Operations
+	t.Run("Test33_FeedGroupCRUD", func(t *testing.T) {
+		test33FeedGroupCRUD(t, ctx, feedsClient)
+	})
+
+	// Feed View CRUD Operations
+	t.Run("Test34_FeedViewCRUD", func(t *testing.T) {
+		test34FeedViewCRUD(t, ctx, feedsClient)
+	})
+
 }
 
 // =================================================================
@@ -241,6 +252,7 @@ func setupEnvironment(t *testing.T, ctx context.Context, client *getstream.Strea
 	_, err = feedsClient.GetOrCreateFeed(ctx, userFeedType, testUserID, &getstream.GetOrCreateFeedRequest{
 		UserID: &testUserID,
 	})
+
 	if err != nil {
 		t.Logf("Failed to create feed 1: %v", err)
 	}
@@ -1594,6 +1606,290 @@ func test32RealWorldUsageDemo(t *testing.T, ctx context.Context, feedsClient *ge
 	// snippet-end: RealWorldScenario
 
 	fmt.Println("✅ Completed real-world usage scenario demonstration")
+}
+
+// =================================================================
+// 11. FEED GROUP CRUD OPERATIONS
+// =================================================================
+
+func test33FeedGroupCRUD(t *testing.T, ctx context.Context, feedsClient *getstream.FeedsClient) {
+	fmt.Println("\n📁 Testing Feed Group CRUD operations...")
+
+	feedGroupID := "test-feed-group-" + uuid.New().String()[:8]
+
+	// Test 1: List Feed Groups
+	fmt.Println("\n📋 Testing list feed groups...")
+	// snippet-start: ListFeedGroups
+	listResponse, err := feedsClient.ListFeedGroups(ctx, &getstream.ListFeedGroupsRequest{})
+	// snippet-end: ListFeedGroups
+
+	assertResponseSuccess(t, listResponse, err, "list feed groups")
+	fmt.Printf("✅ Listed %d existing feed groups\n", len(listResponse.Data.Groups))
+
+	// Test 2: Create Feed Group
+	fmt.Println("\n➕ Testing create feed group...")
+	// snippet-start: CreateFeedGroup
+	createResponse, err := feedsClient.CreateFeedGroup(ctx, &getstream.CreateFeedGroupRequest{
+		ID:                feedGroupID,
+		DefaultVisibility: getstream.PtrTo("public"),
+		ActivityProcessors: []getstream.ActivityProcessorConfig{
+			{Type: "default"},
+		},
+	})
+	// snippet-end: CreateFeedGroup
+
+	assertResponseSuccess(t, createResponse, err, "create feed group")
+	assert.Equal(t, feedGroupID, createResponse.Data.FeedGroup.ID)
+	fmt.Printf("✅ Created feed group: %s\n", feedGroupID)
+
+	// Test 3: Get Feed Group
+	fmt.Println("\n🔍 Testing get feed group...")
+	// snippet-start: GetFeedGroup
+	getResponse, err := feedsClient.GetFeedGroup(ctx, "feed_group_id", &getstream.GetFeedGroupRequest{})
+	// snippet-end: GetFeedGroup
+
+	assertResponseSuccess(t, getResponse, err, "get feed group")
+	assert.Equal(t, "feed_group_id", getResponse.Data.FeedGroup.ID)
+	fmt.Printf("✅ Retrieved feed group: %s\n", feedGroupID)
+
+	// Test 4: Update Feed Group
+	fmt.Println("\n✏️ Testing update feed group...")
+	// snippet-start: UpdateFeedGroup
+	updateResponse, err := feedsClient.UpdateFeedGroup(ctx, "feed_group_id", &getstream.UpdateFeedGroupRequest{
+		ActivityProcessors: []getstream.ActivityProcessorConfig{
+			{Type: "default"},
+		},
+		Aggregation: &getstream.AggregationConfig{
+			Format: getstream.PtrTo("time_based"),
+		},
+	})
+	// snippet-end: UpdateFeedGroup
+
+	assertResponseSuccess(t, updateResponse, err, "update feed group")
+	fmt.Printf("✅ Updated feed group: %s\n", feedGroupID)
+
+	// Test 5: Get or Create Feed Group (should get existing)
+	fmt.Println("\n🔄 Testing get or create feed group (existing)...")
+	// snippet-start: GetOrCreateFeedGroupExisting
+	getOrCreateResponse, err := feedsClient.GetOrCreateFeedGroup(ctx, "feed_group_id", &getstream.GetOrCreateFeedGroupRequest{
+		DefaultVisibility: getstream.PtrTo("public"),
+	})
+	// snippet-end: GetOrCreateFeedGroupExisting
+
+	assertResponseSuccess(t, getOrCreateResponse, err, "get or create existing feed group")
+	assert.False(t, getOrCreateResponse.Data.WasCreated, "Should not create new feed group")
+	fmt.Printf("✅ Got existing feed group: %s\n", feedGroupID)
+
+	// Test 6: Get or Create Feed Group (should create new)
+	newFeedGroupID := "test-new-feed-group-" + uuid.New().String()[:8]
+	fmt.Println("\n🆕 Testing get or create feed group (new)...")
+	// snippet-start: GetOrCreateFeedGroupNew
+	newGetOrCreateResponse, err := feedsClient.GetOrCreateFeedGroup(ctx, newFeedGroupID, &getstream.GetOrCreateFeedGroupRequest{
+		DefaultVisibility: getstream.PtrTo("private"),
+		ActivityProcessors: []getstream.ActivityProcessorConfig{
+			{Type: "default"},
+		},
+	})
+	// snippet-end: GetOrCreateFeedGroupNew
+
+	assertResponseSuccess(t, newGetOrCreateResponse, err, "get or create new feed group")
+	assert.True(t, newGetOrCreateResponse.Data.WasCreated, "Should create new feed group")
+	fmt.Printf("✅ Created new feed group: %s\n", newFeedGroupID)
+
+	// Test 7: Delete Feed Groups (cleanup)
+	fmt.Println("\n🗑️ Testing delete feed groups...")
+	// snippet-start: DeleteFeedGroup
+	_, err = feedsClient.DeleteFeedGroup(ctx, "groupID-123", &getstream.DeleteFeedGroupRequest{
+		HardDelete: getstream.PtrTo(false), // soft delete
+	})
+	// snippet-end: DeleteFeedGroup
+
+	fmt.Println("✅ Completed Feed Group CRUD operations")
+}
+
+// =================================================================
+// 12. FEED VIEW CRUD OPERATIONS
+// =================================================================
+
+func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstream.FeedsClient) {
+	fmt.Println("\n👁️ Testing Feed View CRUD operations...")
+
+	feedViewID := "test-feed-view-" + uuid.New().String()[:8]
+
+	// Test 1: List Feed Views
+	fmt.Println("\n📋 Testing list feed views...")
+	// snippet-start: ListFeedViews
+	listResponse, err := feedsClient.ListFeedViews(ctx, &getstream.ListFeedViewsRequest{})
+	// snippet-end: ListFeedViews
+
+	assertResponseSuccess(t, listResponse, err, "list feed views")
+	fmt.Printf("✅ Listed %d existing feed views\n", len(listResponse.Data.Views))
+
+	// Test 2: Create Feed View
+	fmt.Println("\n➕ Testing create feed view...")
+	// snippet-start: CreateFeedView
+	createResponse, err := feedsClient.CreateFeedView(ctx, &getstream.CreateFeedViewRequest{
+		ID: feedViewID,
+		ActivitySelectors: []getstream.ActivitySelectorConfig{
+			{
+				Type: getstream.PtrTo("recent"),
+			},
+		},
+		ActivityProcessors: []getstream.ActivityProcessorConfig{
+			{Type: "default"},
+		},
+		Aggregation: &getstream.AggregationConfig{
+			Format: getstream.PtrTo("time_based"),
+		},
+	})
+	// snippet-end: CreateFeedView
+
+	assertResponseSuccess(t, createResponse, err, "create feed view")
+	assert.Equal(t, feedViewID, createResponse.Data.FeedView.ID)
+	fmt.Printf("✅ Created feed view: %s\n", feedViewID)
+
+	// Test 3: Get Feed View
+	fmt.Println("\n🔍 Testing get feed view...")
+	// snippet-start: GetFeedView
+	getResponse, err := feedsClient.GetFeedView(ctx, "feedViewID", &getstream.GetFeedViewRequest{})
+	// snippet-end: GetFeedView
+
+	assertResponseSuccess(t, getResponse, err, "get feed view")
+	assert.Equal(t, "feedViewID", getResponse.Data.FeedView.ID)
+	fmt.Printf("✅ Retrieved feed view: %s\n", feedViewID)
+
+	// Test 4: Update Feed View
+	fmt.Println("\n✏️ Testing update feed view...")
+	// snippet-start: UpdateFeedView
+	updateResponse, err := feedsClient.UpdateFeedView(ctx, "feedViewID", &getstream.UpdateFeedViewRequest{
+		ActivitySelectors: []getstream.ActivitySelectorConfig{
+			{
+				Type:          getstream.PtrTo("popular"),
+				MinPopularity: getstream.PtrTo(10),
+			},
+		},
+		Aggregation: &getstream.AggregationConfig{
+			Format: getstream.PtrTo("popularity_based"),
+		},
+	})
+	// snippet-end: UpdateFeedView
+
+	assertResponseSuccess(t, updateResponse, err, "update feed view")
+	fmt.Printf("✅ Updated feed view: %s\n", feedViewID)
+
+	// Test 5: Get or Create Feed View (should get existing)
+	fmt.Println("\n🔄 Testing get or create feed view (existing)...")
+	// snippet-start: GetOrCreateFeedViewExisting
+	getOrCreateResponse, err := feedsClient.GetOrCreateFeedView(ctx, feedViewID, &getstream.GetOrCreateFeedViewRequest{
+		ActivitySelectors: []getstream.ActivitySelectorConfig{
+			{Type: getstream.PtrTo("recent")},
+		},
+	})
+	// snippet-end: GetOrCreateFeedViewExisting
+
+	assertResponseSuccess(t, getOrCreateResponse, err, "get or create existing feed view")
+	fmt.Printf("✅ Got existing feed view: %s\n", feedViewID)
+
+	// Test 6: Delete Feed Views (cleanup)
+	// snippet-start: DeleteFeedView
+	_, err = feedsClient.DeleteFeedView(ctx, "viewID-123", &getstream.DeleteFeedViewRequest{})
+	// snippet-end: DeleteFeedView
+
+}
+
+// =================================================================
+// 14. BATCH FEED OPERATIONS
+// =================================================================
+
+func test36BatchFeedOperations(t *testing.T, ctx context.Context, feedsClient *getstream.FeedsClient, testUserID string) {
+	fmt.Println("\n📦 Testing Batch Feed operations...")
+
+	batchFeedGroupID := "test-batch-group-" + uuid.New().String()[:8]
+
+	// Create a feed group for batch operations
+	fmt.Println("\n➕ Creating feed group for batch operations...")
+	_, err := feedsClient.CreateFeedGroup(ctx, &getstream.CreateFeedGroupRequest{
+		ID:                batchFeedGroupID,
+		DefaultVisibility: getstream.PtrTo("public"),
+		ActivityProcessors: []getstream.ActivityProcessorConfig{
+			{Type: "default"},
+		},
+	})
+	assertResponseSuccess(t, nil, err, "create batch feed group")
+
+	// Test 1: Create Multiple Feeds in Batch
+	fmt.Println("\n📝 Testing batch feed creation...")
+	// snippet-start: CreateFeedsBatch
+	batchCreateResponse, err := feedsClient.CreateFeedsBatch(ctx, &getstream.CreateFeedsBatchRequest{
+		Feeds: []getstream.FeedRequest{
+			{
+				FeedGroupID: batchFeedGroupID,
+				FeedID:      "batch-feed-1",
+				CreatedByID: &testUserID,
+			},
+			{
+				FeedGroupID: batchFeedGroupID,
+				FeedID:      "batch-feed-2",
+				CreatedByID: &testUserID,
+			},
+			{
+				FeedGroupID: batchFeedGroupID,
+				FeedID:      "batch-feed-3",
+				CreatedByID: &testUserID,
+			},
+		},
+	})
+	// snippet-end: CreateFeedsBatch
+
+	assertResponseSuccess(t, batchCreateResponse, err, "create feeds batch")
+	fmt.Printf("✅ Created %d feeds in batch\n", len(batchCreateResponse.Data.Feeds))
+
+	// Test 2: Query the batch-created feeds
+	fmt.Println("\n🔍 Testing query of batch-created feeds...")
+	// snippet-start: QueryBatchCreatedFeeds
+	queryBatchResponse, err := feedsClient.QueryFeeds(ctx, &getstream.QueryFeedsRequest{
+		Filter: map[string]interface{}{
+			"feed_group_id": batchFeedGroupID,
+			"user_id":       testUserID,
+		},
+		Limit: getstream.PtrTo(10),
+	})
+	// snippet-end: QueryBatchCreatedFeeds
+
+	assertResponseSuccess(t, queryBatchResponse, err, "query batch created feeds")
+	assert.GreaterOrEqual(t, len(queryBatchResponse.Data.Feeds), 3, "Should find at least 3 batch-created feeds")
+	fmt.Printf("✅ Found %d batch-created feeds\n", len(queryBatchResponse.Data.Feeds))
+
+	// Test 3: Add activities to batch-created feeds
+	fmt.Println("\n📝 Testing activities on batch-created feeds...")
+	for i := 1; i <= 3; i++ {
+		feedIdentifier := fmt.Sprintf("%s:batch-feed-%d", batchFeedGroupID, i)
+		// snippet-start: AddActivityToBatchFeed
+		activityResponse, err := feedsClient.AddActivity(ctx, &getstream.AddActivityRequest{
+			Type:   "post",
+			Feeds:  []string{feedIdentifier},
+			Text:   getstream.PtrTo(fmt.Sprintf("Test activity for batch feed %d", i)),
+			UserID: &testUserID,
+			Custom: map[string]interface{}{
+				"batch_feed_test": true,
+				"feed_number":     i,
+			},
+		})
+		// snippet-end: AddActivityToBatchFeed
+
+		assertResponseSuccess(t, activityResponse, err, fmt.Sprintf("add activity to batch feed %d", i))
+	}
+	fmt.Println("✅ Added activities to all batch-created feeds")
+
+	// Cleanup: Delete the batch feed group (this will also delete all feeds in it)
+	_, err = feedsClient.DeleteFeedGroup(ctx, batchFeedGroupID, &getstream.DeleteFeedGroupRequest{
+		HardDelete: getstream.PtrTo(true), // hard delete for cleanup
+	})
+	if err != nil {
+		fmt.Printf("Warning: Failed to cleanup batch feed group %s: %v\n", batchFeedGroupID, err)
+	}
+
+	fmt.Println("✅ Completed Batch Feed operations")
 }
 
 // =================================================================
