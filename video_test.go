@@ -65,6 +65,13 @@ func TestVideoBlockUser(t *testing.T) {
 	_, err = client.Video().BlockUser(context.Background(), "", "", &getstream.BlockUserRequest{})
 	require.NoError(t, err)
 }
+func TestVideoSendClosedCaption(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().SendClosedCaption(context.Background(), "", "", &getstream.SendClosedCaptionRequest{})
+	require.NoError(t, err)
+}
 func TestVideoDeleteCall(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

@@ -33,6 +33,10 @@ func (c *Call) BlockUser(ctx context.Context, request *BlockUserRequest) (*Strea
 	return c.client.BlockUser(ctx, c.callType, c.callID, request)
 }
 
+func (c *Call) SendClosedCaption(ctx context.Context, request *SendClosedCaptionRequest) (*StreamResponse[SendClosedCaptionResponse], error) {
+	return c.client.SendClosedCaption(ctx, c.callType, c.callID, request)
+}
+
 func (c *Call) Delete(ctx context.Context, request *DeleteCallRequest) (*StreamResponse[DeleteCallResponse], error) {
 	return c.client.DeleteCall(ctx, c.callType, c.callID, request)
 }
