@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.1.1](https://github.com/GetStream/getstream-go/compare/v3.1.0...v3.1.1) (2025-09-02)
+
+
+### Features
+
+* add SendClosedCaption + other updates ([#45](https://github.com/GetStream/getstream-go/issues/45)) ([21e8050](https://github.com/GetStream/getstream-go/commit/21e8050fbffe283fe50b3b3dab562c3ff2511461))
+
 ## [3.1.0-feeds](https://github.com/GetStream/getstream-go/compare/v3.0.1...v3.1.0-feeds) (2025-08-25)
 
 ## [3.0.0-feeds](https://github.com/GetStream/getstream-go/compare/v3.0.1...v3.0.0-feeds) (2025-08-13)
