@@ -95,6 +95,20 @@ func (c *VideoClient) BlockUser(ctx context.Context, _type string, id string, re
 	return res, err
 }
 
+// Sends a closed caption event to the call
+//
+// Sends events:
+// - call.closed_caption
+func (c *VideoClient) SendClosedCaption(ctx context.Context, _type string, id string, request *SendClosedCaptionRequest) (*StreamResponse[SendClosedCaptionResponse], error) {
+	var result SendClosedCaptionResponse
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	res, err := MakeRequest[SendClosedCaptionRequest, SendClosedCaptionResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/closed_captions", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Sends events:
 // - call.deleted
 func (c *VideoClient) DeleteCall(ctx context.Context, _type string, id string, request *DeleteCallRequest) (*StreamResponse[DeleteCallResponse], error) {

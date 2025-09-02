@@ -215,7 +215,6 @@ func TestFeedIntegrationSuite(t *testing.T) {
 	t.Run("Test34_FeedViewCRUD", func(t *testing.T) {
 		test34FeedViewCRUD(t, ctx, feedsClient)
 	})
-
 }
 
 // =================================================================
@@ -240,7 +239,6 @@ func setupEnvironment(t *testing.T, ctx context.Context, client *getstream.Strea
 		},
 	})
 	// snippet-end: CreateUsers
-
 	if err != nil {
 		t.Logf("⚠️ Setup failed: %v", err)
 		// Continue with tests even if setup partially fails
@@ -252,7 +250,6 @@ func setupEnvironment(t *testing.T, ctx context.Context, client *getstream.Strea
 	_, err = feedsClient.GetOrCreateFeed(ctx, userFeedType, testUserID, &getstream.GetOrCreateFeedRequest{
 		UserID: &testUserID,
 	})
-
 	if err != nil {
 		t.Logf("Failed to create feed 1: %v", err)
 	}
@@ -261,7 +258,6 @@ func setupEnvironment(t *testing.T, ctx context.Context, client *getstream.Strea
 		UserID: &testUserID2,
 	})
 	// snippet-end: GetOrCreateFeed
-
 	if err != nil {
 		t.Logf("Failed to create feed 2: %v", err)
 	}
@@ -592,7 +588,6 @@ func test07QueryReactions(t *testing.T, ctx context.Context, feedsClient *getstr
 		},
 	})
 	// snippet-end: QueryActivityReactions
-
 	if err != nil {
 		fmt.Printf("Query reactions skipped: %v\n", err)
 		t.Skip("Query reactions not supported: " + err.Error())
@@ -753,7 +748,6 @@ func test11AddBookmark(t *testing.T, ctx context.Context, feedsClient *getstream
 		},
 	})
 	// snippet-end: AddBookmark
-
 	if err != nil {
 		fmt.Printf("Add bookmark failed: %v\n", err)
 		t.Skip("Add bookmark not supported: " + err.Error())
@@ -833,7 +827,6 @@ func test14FollowUser(t *testing.T, ctx context.Context, feedsClient *getstream.
 		Target: target,
 	})
 	// snippet-end: Follow
-
 	if err != nil {
 		fmt.Printf("Follow failed: %v\n", err)
 		t.Skip("Follow operation not supported: " + err.Error())
@@ -1093,7 +1086,6 @@ func test22UnfollowUser(t *testing.T, ctx context.Context, feedsClient *getstrea
 	// snippet-start: Unfollow
 	response, err := feedsClient.Unfollow(ctx, source, target, &getstream.UnfollowRequest{})
 	// snippet-end: Unfollow
-
 	if err != nil {
 		fmt.Printf("Unfollow operation skipped: %v\n", err)
 		t.Skip("Unfollow operation not supported: " + err.Error())
@@ -1153,7 +1145,6 @@ func test24CreatePoll(t *testing.T, ctx context.Context, client *getstream.Strea
 		UserID:      &testUserID,
 		Options:     []getstream.PollOptionInput{{Text: getstream.PtrTo("Red")}, {Text: getstream.PtrTo("Blue")}},
 	})
-
 	if err != nil {
 		fmt.Printf("Poll creation skipped: %v\n", err)
 		t.Skip("Poll operations not supported: " + err.Error())
@@ -1197,7 +1188,6 @@ func test25VotePoll(t *testing.T, ctx context.Context, client *getstream.Stream,
 		UserID:      &testUserID,
 		Options:     []getstream.PollOptionInput{{Text: getstream.PtrTo("Red")}, {Text: getstream.PtrTo("Blue")}, {Text: getstream.PtrTo("Green")}},
 	})
-
 	if err != nil {
 		fmt.Printf("Poll voting skipped: %v\n", err)
 		t.Skip("Poll voting not supported: " + err.Error())
@@ -1241,7 +1231,6 @@ func test25VotePoll(t *testing.T, ctx context.Context, client *getstream.Stream,
 			},
 		})
 		// snippet-end: VotePoll
-
 		if err != nil {
 			fmt.Printf("Poll voting skipped: %v\n", err)
 			t.Skip("Poll voting not supported: " + err.Error())
@@ -1280,7 +1269,6 @@ func test26ModerateActivity(t *testing.T, ctx context.Context, feedsClient *gets
 		UserID: &testUserID2, // Different user reporting
 	})
 	// snippet-end: ModerateActivity
-
 	if err != nil {
 		fmt.Printf("Activity moderation skipped: %v\n", err)
 		t.Skip("Activity moderation not supported: " + err.Error())
@@ -1303,7 +1291,6 @@ func test27DeviceManagement(t *testing.T, ctx context.Context, client *getstream
 		UserID:       &testUserID,
 	})
 	// snippet-end: AddDevice
-
 	if err != nil {
 		fmt.Printf("Device management skipped: %v\n", err)
 		t.Skip("Device management not supported: " + err.Error())
@@ -1794,7 +1781,6 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	// snippet-start: DeleteFeedView
 	_, err = feedsClient.DeleteFeedView(ctx, "viewID-123", &getstream.DeleteFeedViewRequest{})
 	// snippet-end: DeleteFeedView
-
 }
 
 // =================================================================

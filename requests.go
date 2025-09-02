@@ -458,6 +458,16 @@ type UndeleteMessageRequest struct {
 	SkipPush      *bool          `json:"skip_push"`
 }
 
+type CastPollVoteRequest struct {
+	UserID *string      `json:"user_id"`
+	User   *UserRequest `json:"user"`
+	Vote   *VoteData    `json:"vote"`
+}
+
+type DeletePollVoteRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
 type DeleteReminderRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
@@ -753,16 +763,6 @@ type ActivityFeedbackRequest struct {
 	ShowLess *bool        `json:"show_less"`
 	UserID   *string      `json:"user_id"`
 	User     *UserRequest `json:"user"`
-}
-
-type CastPollVoteRequest struct {
-	UserID *string      `json:"user_id"`
-	User   *UserRequest `json:"user"`
-	Vote   *VoteData    `json:"vote"`
-}
-
-type DeletePollVoteRequest struct {
-	UserID *string `json:"-" query:"user_id"`
 }
 
 type AddReactionRequest struct {
@@ -1203,13 +1203,14 @@ type BulkImageModerationRequest struct {
 }
 
 type CheckRequest struct {
-	ConfigKey         string             `json:"config_key"`
 	EntityCreatorID   string             `json:"entity_creator_id"`
 	EntityID          string             `json:"entity_id"`
 	EntityType        string             `json:"entity_type"`
+	ConfigKey         *string            `json:"config_key"`
 	ConfigTeam        *string            `json:"config_team"`
 	TestMode          *bool              `json:"test_mode"`
 	UserID            *string            `json:"user_id"`
+	Config            *ModerationConfig  `json:"config"`
 	ModerationPayload *ModerationPayload `json:"moderation_payload"`
 	Options           map[string]any     `json:"options"`
 	User              *UserRequest       `json:"user"`
@@ -1296,6 +1297,36 @@ type QueryModerationFlagsRequest struct {
 }
 
 type QueryModerationLogsRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	UserID *string            `json:"user_id"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+	User   *UserRequest       `json:"user"`
+}
+
+type UpsertModerationRuleRequest struct {
+	Name           string                      `json:"name"`
+	RuleType       string                      `json:"rule_type"`
+	Action         RuleBuilderAction           `json:"action"`
+	CooldownPeriod *string                     `json:"cooldown_period"`
+	Description    *string                     `json:"description"`
+	Enabled        *bool                       `json:"enabled"`
+	Logic          *string                     `json:"logic"`
+	Team           *string                     `json:"team"`
+	Conditions     []RuleBuilderCondition      `json:"conditions"`
+	ConfigKeys     []string                    `json:"config_keys"`
+	Groups         []RuleBuilderConditionGroup `json:"groups"`
+}
+
+type DeleteModerationRuleRequest struct {
+}
+
+type GetModerationRuleRequest struct {
+}
+
+type QueryModerationRulesRequest struct {
 	Limit  *int               `json:"limit"`
 	Next   *string            `json:"next"`
 	Prev   *string            `json:"prev"`
@@ -1625,6 +1656,18 @@ type BlockUserRequest struct {
 	UserID string `json:"user_id"`
 }
 
+type SendClosedCaptionRequest struct {
+	SpeakerID  string       `json:"speaker_id"`
+	Text       string       `json:"text"`
+	EndTime    *Timestamp   `json:"end_time"`
+	Language   *string      `json:"language"`
+	Service    *string      `json:"service"`
+	StartTime  *Timestamp   `json:"start_time"`
+	Translated *bool        `json:"translated"`
+	UserID     *string      `json:"user_id"`
+	User       *UserRequest `json:"user"`
+}
+
 type DeleteCallRequest struct {
 	Hard *bool `json:"hard"`
 }
@@ -1710,9 +1753,10 @@ type StartHLSBroadcastingRequest struct {
 }
 
 type StartClosedCaptionsRequest struct {
-	EnableTranscription *bool   `json:"enable_transcription"`
-	ExternalStorage     *string `json:"external_storage"`
-	Language            *string `json:"language"`
+	EnableTranscription *bool                `json:"enable_transcription"`
+	ExternalStorage     *string              `json:"external_storage"`
+	Language            *string              `json:"language"`
+	SpeechSegmentConfig *SpeechSegmentConfig `json:"speech_segment_config"`
 }
 
 type StartFrameRecordingRequest struct {
