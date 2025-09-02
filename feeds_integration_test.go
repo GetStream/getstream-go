@@ -1620,7 +1620,7 @@ func test33FeedGroupCRUD(t *testing.T, ctx context.Context, feedsClient *getstre
 		ID:                feedGroupID,
 		DefaultVisibility: getstream.PtrTo("public"),
 		ActivityProcessors: []getstream.ActivityProcessorConfig{
-			{Type: "default"},
+			{Type: "dummy"},
 		},
 	})
 	// snippet-end: CreateFeedGroup
@@ -1644,7 +1644,7 @@ func test33FeedGroupCRUD(t *testing.T, ctx context.Context, feedsClient *getstre
 	// snippet-start: UpdateFeedGroup
 	updateResponse, err := feedsClient.UpdateFeedGroup(ctx, "feed_group_id", &getstream.UpdateFeedGroupRequest{
 		ActivityProcessors: []getstream.ActivityProcessorConfig{
-			{Type: "default"},
+			{Type: "dummy"},
 		},
 		Aggregation: &getstream.AggregationConfig{
 			Format: getstream.PtrTo("time_based"),
@@ -1674,7 +1674,7 @@ func test33FeedGroupCRUD(t *testing.T, ctx context.Context, feedsClient *getstre
 	newGetOrCreateResponse, err := feedsClient.GetOrCreateFeedGroup(ctx, newFeedGroupID, &getstream.GetOrCreateFeedGroupRequest{
 		DefaultVisibility: getstream.PtrTo("private"),
 		ActivityProcessors: []getstream.ActivityProcessorConfig{
-			{Type: "default"},
+			{Type: "dummy"},
 		},
 	})
 	// snippet-end: GetOrCreateFeedGroupNew
