@@ -756,16 +756,6 @@ type ActivityFeedbackRequest struct {
 	User     *UserRequest `json:"user"`
 }
 
-type CastPollVoteRequest struct {
-	UserID *string      `json:"user_id"`
-	User   *UserRequest `json:"user"`
-	Vote   *VoteData    `json:"vote"`
-}
-
-type DeletePollVoteRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
 type AddReactionRequest struct {
 	Type                       string         `json:"type"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
@@ -1535,25 +1525,6 @@ type DeleteRoleRequest struct {
 }
 
 type GetTaskRequest struct {
-}
-
-type DeleteFileRequest struct {
-	Url *string `json:"-" query:"url"`
-}
-
-type UploadFileRequest struct {
-	File *string     `json:"file"`
-	User *OnlyUserID `json:"user"`
-}
-
-type DeleteImageRequest struct {
-	Url *string `json:"-" query:"url"`
-}
-
-type UploadImageRequest struct {
-	File        *string     `json:"file"`
-	UploadSizes []ImageSize `json:"upload_sizes"`
-	User        *OnlyUserID `json:"user"`
 }
 
 type QueryUsersRequest struct {
