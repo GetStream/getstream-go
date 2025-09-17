@@ -192,7 +192,7 @@ func (c *ChatClient) SendEvent(ctx context.Context, _type string, id string, req
 }
 
 // Deletes previously uploaded file
-func (c *ChatClient) DeleteFile(ctx context.Context, _type string, id string, request *DeleteFileRequest) (*StreamResponse[Response], error) {
+func (c *ChatClient) DeleteChannelFile(ctx context.Context, _type string, id string, request *DeleteChannelFileRequest) (*StreamResponse[Response], error) {
 	var result Response
 	pathParams := map[string]string{
 		"type": _type,
@@ -204,13 +204,13 @@ func (c *ChatClient) DeleteFile(ctx context.Context, _type string, id string, re
 }
 
 // Uploads file
-func (c *ChatClient) UploadFile(ctx context.Context, _type string, id string, request *UploadFileRequest) (*StreamResponse[FileUploadResponse], error) {
-	var result FileUploadResponse
+func (c *ChatClient) UploadChannelFile(ctx context.Context, _type string, id string, request *UploadChannelFileRequest) (*StreamResponse[UploadChannelFileResponse], error) {
+	var result UploadChannelFileResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	res, err := MakeRequest[UploadFileRequest, FileUploadResponse](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/file", nil, request, &result, pathParams)
+	res, err := MakeRequest[UploadChannelFileRequest, UploadChannelFileResponse](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/file", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -230,7 +230,7 @@ func (c *ChatClient) HideChannel(ctx context.Context, _type string, id string, r
 }
 
 // Deletes previously uploaded image
-func (c *ChatClient) DeleteImage(ctx context.Context, _type string, id string, request *DeleteImageRequest) (*StreamResponse[Response], error) {
+func (c *ChatClient) DeleteChannelImage(ctx context.Context, _type string, id string, request *DeleteChannelImageRequest) (*StreamResponse[Response], error) {
 	var result Response
 	pathParams := map[string]string{
 		"type": _type,
@@ -242,13 +242,13 @@ func (c *ChatClient) DeleteImage(ctx context.Context, _type string, id string, r
 }
 
 // Uploads image
-func (c *ChatClient) UploadImage(ctx context.Context, _type string, id string, request *UploadImageRequest) (*StreamResponse[ImageUploadResponse], error) {
-	var result ImageUploadResponse
+func (c *ChatClient) UploadChannelImage(ctx context.Context, _type string, id string, request *UploadChannelImageRequest) (*StreamResponse[UploadChannelResponse], error) {
+	var result UploadChannelResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	res, err := MakeRequest[UploadImageRequest, ImageUploadResponse](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/image", nil, request, &result, pathParams)
+	res, err := MakeRequest[UploadChannelImageRequest, UploadChannelResponse](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/image", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -567,6 +567,20 @@ func (c *ChatClient) CommitMessage(ctx context.Context, id string, request *Comm
 	return res, err
 }
 
+// Updates message fields without storing in database, only sends update event
+//
+// Sends events:
+// - message.updated
+// - message.updated
+func (c *ChatClient) EphemeralMessageUpdate(ctx context.Context, id string, request *EphemeralMessageUpdateRequest) (*StreamResponse[UpdateMessagePartialResponse], error) {
+	var result UpdateMessagePartialResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[EphemeralMessageUpdateRequest, UpdateMessagePartialResponse](c.client, ctx, "PATCH", "/api/v2/chat/messages/{id}/ephemeral", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Sends reaction to specified message
 //
 // Sends events:
@@ -759,28 +773,6 @@ func (c *ChatClient) MuteChannel(ctx context.Context, request *MuteChannelReques
 func (c *ChatClient) UnmuteChannel(ctx context.Context, request *UnmuteChannelRequest) (*StreamResponse[UnmuteResponse], error) {
 	var result UnmuteResponse
 	res, err := MakeRequest[UnmuteChannelRequest, UnmuteResponse](c.client, ctx, "POST", "/api/v2/chat/moderation/unmute/channel", nil, request, &result, nil)
-	return res, err
-}
-
-// Update the push preferences for a user and or channel member. Set to all, mentions or none
-func (c *ChatClient) UpdatePushNotificationPreferences(ctx context.Context, request *UpdatePushNotificationPreferencesRequest) (*StreamResponse[UpsertPushPreferencesResponse], error) {
-	var result UpsertPushPreferencesResponse
-	res, err := MakeRequest[UpdatePushNotificationPreferencesRequest, UpsertPushPreferencesResponse](c.client, ctx, "POST", "/api/v2/chat/push_preferences", nil, request, &result, nil)
-	return res, err
-}
-
-// Retrieve push notification templates for Chat.
-func (c *ChatClient) GetPushTemplates(ctx context.Context, request *GetPushTemplatesRequest) (*StreamResponse[GetPushTemplatesResponse], error) {
-	var result GetPushTemplatesResponse
-	params := extractQueryParams(request)
-	res, err := MakeRequest[any, GetPushTemplatesResponse](c.client, ctx, "GET", "/api/v2/chat/push_templates", params, nil, &result, nil)
-	return res, err
-}
-
-// Create or update a push notification template for a specific event type and push provider
-func (c *ChatClient) UpsertPushTemplate(ctx context.Context, request *UpsertPushTemplateRequest) (*StreamResponse[UpsertPushTemplateResponse], error) {
-	var result UpsertPushTemplateResponse
-	res, err := MakeRequest[UpsertPushTemplateRequest, UpsertPushTemplateResponse](c.client, ctx, "POST", "/api/v2/chat/push_templates", nil, request, &result, nil)
 	return res, err
 }
 

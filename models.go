@@ -664,8 +664,7 @@ type ActivityResponse struct {
 
 	Moderation *ModerationV2Response `json:"moderation,omitempty"`
 
-	// Notification context data for the activity (if this is a reaction, comment, follow, etc.)
-	NotificationContext map[string]any `json:"notification_context,omitempty"`
+	NotificationContext *NotificationContext `json:"notification_context,omitempty"`
 
 	Parent *ActivityResponse `json:"parent,omitempty"`
 
@@ -808,6 +807,9 @@ type AggregatedActivityResponse struct {
 
 	// Number of unique users in this aggregation
 	UserCount int `json:"user_count"`
+
+	// Whether this activity group has been truncated due to exceeding the group size limit
+	UserCountTruncated bool `json:"user_count_truncated"`
 
 	// List of activities in this aggregation
 	Activities []ActivityResponse `json:"activities"`
@@ -989,7 +991,7 @@ type AsyncExportErrorEvent struct {
 }
 
 func (*AsyncExportErrorEvent) GetEventType() string {
-	return "export.users.error"
+	return "export.bulk_image_moderation.error"
 }
 
 type AsyncExportModerationLogsEvent struct {
@@ -1260,6 +1262,8 @@ type BanActionRequest struct {
 }
 
 type BanOptions struct {
+	DeleteMessages *string `json:"delete_messages,omitempty"`
+
 	Duration *int `json:"duration,omitempty"`
 
 	IpBan *bool `json:"ip_ban,omitempty"`
@@ -1869,6 +1873,10 @@ func (*CallHLSBroadcastingStoppedEvent) GetEventType() string {
 // CallIngressResponse is the payload for ingress settings
 type CallIngressResponse struct {
 	RTMP RTMPIngress `json:"rtmp"`
+
+	Srt SRTIngress `json:"srt"`
+
+	Whip WHIPIngress `json:"whip"`
 }
 
 // This event is sent when a call is started. Clients receiving this event should start the call.
@@ -2234,6 +2242,8 @@ type CallResponse struct {
 
 	Transcribing bool `json:"transcribing"`
 
+	Translating bool `json:"translating"`
+
 	// Date/time of the last update
 	UpdatedAt Timestamp `json:"updated_at"`
 
@@ -2428,6 +2438,9 @@ type CallSessionParticipantLeftEvent struct {
 
 	// The type of event: "call.session_participant_left" in this case
 	Type string `json:"type"`
+
+	// The reason why the participant left the session
+	Reason *string `json:"reason,omitempty"`
 }
 
 func (*CallSessionParticipantLeftEvent) GetEventType() string {
@@ -2979,6 +2992,8 @@ type Channel struct {
 
 	CreatedBy *User `json:"created_by,omitempty"`
 
+	MembersLookup map[string]*ChannelMemberLookup `json:"members_lookup,omitempty"`
+
 	TruncatedBy *User `json:"truncated_by,omitempty"`
 }
 
@@ -3307,6 +3322,22 @@ type ChannelMember struct {
 	DeletedMessages []string `json:"deleted_messages,omitempty"`
 
 	User *UserResponse `json:"user,omitempty"`
+}
+
+type ChannelMemberLookup struct {
+	Archived bool `json:"archived"`
+
+	Banned bool `json:"banned"`
+
+	Hidden bool `json:"hidden"`
+
+	Pinned bool `json:"pinned"`
+
+	ArchivedAt *Timestamp `json:"archived_at,omitempty"`
+
+	BanExpires *Timestamp `json:"ban_expires,omitempty"`
+
+	PinnedAt *Timestamp `json:"pinned_at,omitempty"`
 }
 
 type ChannelMemberResponse struct {
@@ -4545,6 +4576,10 @@ type DeleteCommentReactionResponse struct {
 
 type DeleteCommentResponse struct {
 	Duration string `json:"duration"`
+
+	Activity ActivityResponse `json:"activity"`
+
+	Comment CommentResponse `json:"comment"`
 }
 
 // Basic response information
@@ -4561,6 +4596,9 @@ type DeleteFeedGroupResponse struct {
 
 type DeleteFeedResponse struct {
 	Duration string `json:"duration"`
+
+	// The ID of the async task that will handle feed cleanup and hard deletion
+	TaskID string `json:"task_id"`
 }
 
 // Response for deleting feed user data
@@ -5516,30 +5554,30 @@ type FeedViewResponse struct {
 	Ranking *RankingConfig `json:"ranking,omitempty"`
 }
 
-type FeedsEventPreferences struct {
-	Comments *string `json:"comments,omitempty"`
-
-	Mentions *string `json:"mentions,omitempty"`
-
-	NewFollowers *string `json:"new_followers,omitempty"`
-
-	Reactions *string `json:"reactions,omitempty"`
-}
-
-type FeedsEventPreferencesInput struct {
-	Comments *string `json:"comments,omitempty"`
-
-	Mentions *string `json:"mentions,omitempty"`
-
-	NewFollowers *string `json:"new_followers,omitempty"`
-
-	Reactions *string `json:"reactions,omitempty"`
-}
-
 type FeedsModerationTemplateConfig struct {
 	ConfigKey string `json:"config_key"`
 
 	DataTypes map[string]string `json:"data_types"`
+}
+
+type FeedsPreferences struct {
+	// Push notification preference for comments on user's activities
+	Comment *string `json:"comment,omitempty"`
+
+	// Push notification preference for reactions on comments
+	CommentReaction *string `json:"comment_reaction,omitempty"`
+
+	// Push notification preference for new followers
+	Follow *string `json:"follow,omitempty"`
+
+	// Push notification preference for mentions in activities or comments
+	Mention *string `json:"mention,omitempty"`
+
+	// Push notification preference for reactions on user's activities or comments
+	Reaction *string `json:"reaction,omitempty"`
+
+	// Push notification preferences for custom activity types. Map of activity type to preference (all or none)
+	CustomActivityTypes map[string]string `json:"custom_activity_types,omitempty"`
 }
 
 type FeedsReactionResponse struct {
@@ -6010,6 +6048,8 @@ type GetCallReportResponse struct {
 	VideoReactions []VideoReactionsResponse `json:"video_reactions,omitempty"`
 
 	ChatActivity *ChatActivityStatsResponse `json:"chat_activity,omitempty"`
+
+	Session *CallSessionResponse `json:"session,omitempty"`
 }
 
 type GetCallResponse struct {
@@ -7422,6 +7462,8 @@ type MessageReadEvent struct {
 
 	Team *string `json:"team,omitempty"`
 
+	Channel *ChannelResponse `json:"channel,omitempty"`
+
 	Thread *ThreadResponse `json:"thread,omitempty"`
 
 	User *UserResponseCommonFields `json:"user,omitempty"`
@@ -7912,6 +7954,8 @@ func (*ModerationCustomActionEvent) GetEventType() string {
 }
 
 type ModerationDashboardPreferences struct {
+	DisableFlaggingReviewedEntity *bool `json:"disable_flagging_reviewed_entity,omitempty"`
+
 	FlagUserOnFlaggedContent *bool `json:"flag_user_on_flagged_content,omitempty"`
 
 	MediaQueueBlurEnabled *bool `json:"media_queue_blur_enabled,omitempty"`
@@ -7949,21 +7993,16 @@ type ModerationFlagResponse struct {
 	User *UserResponse `json:"user,omitempty"`
 }
 
-// This event is sent when content is flagged for moderation
 type ModerationFlaggedEvent struct {
-	// The type of content that was flagged
-	ContentType string `json:"content_type"`
-
 	CreatedAt Timestamp `json:"created_at"`
-
-	// The ID of the flagged content
-	ObjectID string `json:"object_id"`
-
-	Custom map[string]any `json:"custom"`
 
 	Type string `json:"type"`
 
-	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+	Item *string `json:"item,omitempty"`
+
+	ObjectID *string `json:"object_id,omitempty"`
+
+	User *User `json:"user,omitempty"`
 }
 
 func (*ModerationFlaggedEvent) GetEventType() string {
@@ -8106,6 +8145,12 @@ type NotificationConfig struct {
 	TrackSeen *bool `json:"track_seen,omitempty"`
 }
 
+type NotificationContext struct {
+	Target *NotificationTarget `json:"target,omitempty"`
+
+	Trigger *NotificationTrigger `json:"trigger,omitempty"`
+}
+
 // Emitted when notification feed is updated.
 type NotificationFeedUpdatedEvent struct {
 	// Date/time of creation
@@ -8207,6 +8252,34 @@ type NotificationStatusResponse struct {
 	ReadActivities []string `json:"read_activities,omitempty"`
 
 	SeenActivities []string `json:"seen_activities,omitempty"`
+}
+
+type NotificationTarget struct {
+	// The ID of the target (activity ID or user ID)
+	ID string `json:"id"`
+
+	// The name of the target user (for user targets like follows)
+	Name *string `json:"name,omitempty"`
+
+	// The text content of the target activity (for activity targets)
+	Text *string `json:"text,omitempty"`
+
+	// The ID of the user who created the target activity (for activity targets)
+	UserID *string `json:"user_id,omitempty"`
+
+	// The type of the target activity (for activity targets)
+	Type *string `json:"type,omitempty"`
+
+	// Attachments on the target activity (for activity targets)
+	Attachments []Attachment `json:"attachments,omitempty"`
+}
+
+type NotificationTrigger struct {
+	// Human-readable text describing the notification
+	Text string `json:"text"`
+
+	// The type of notification (mention, reaction, comment, follow, etc.)
+	Type string `json:"type"`
 }
 
 type OCRRule struct {
@@ -8856,9 +8929,11 @@ type PushConfig struct {
 }
 
 type PushNotificationConfig struct {
-	Enabled *bool `json:"enabled,omitempty"`
+	// Whether push notifications are enabled for this feed group
+	EnablePush *bool `json:"enable_push,omitempty"`
 
-	ActivityTypes []string `json:"activity_types,omitempty"`
+	// List of notification types that should trigger push notifications (e.g., follow, comment, reaction, comment_reaction, mention)
+	PushTypes []string `json:"push_types,omitempty"`
 }
 
 type PushNotificationFields struct {
@@ -8905,7 +8980,7 @@ type PushPreferenceInput struct {
 	// The user id for which to set the push preferences. Required when using server side auths, defaults to current user with client side auth.
 	UserID *string `json:"user_id,omitempty"`
 
-	FeedsEvents *FeedsEventPreferencesInput `json:"feeds_events,omitempty"`
+	FeedsPreferences *FeedsPreferences `json:"feeds_preferences,omitempty"`
 }
 
 type PushPreferences struct {
@@ -8917,7 +8992,7 @@ type PushPreferences struct {
 
 	FeedsLevel *string `json:"feeds_level,omitempty"`
 
-	FeedsEvents *FeedsEventPreferences `json:"feeds_events,omitempty"`
+	FeedsPreferences *FeedsPreferences `json:"feeds_preferences,omitempty"`
 }
 
 type PushProvider struct {
@@ -10309,6 +10384,10 @@ type SDKUsageReportResponse struct {
 	Daily []DailyAggregateSDKUsageReportResponse `json:"daily"`
 }
 
+type SRTIngress struct {
+	Address string `json:"address"`
+}
+
 type ScreensharingSettings struct {
 	AccessRequestEnabled bool `json:"access_request_enabled"`
 
@@ -11136,6 +11215,8 @@ type TranscriptionSettings struct {
 	Mode string `json:"mode"`
 
 	SpeechSegmentConfig *SpeechSegmentConfig `json:"speech_segment_config,omitempty"`
+
+	Translation *TranslationSettings `json:"translation,omitempty"`
 }
 
 type TranscriptionSettingsRequest struct {
@@ -11146,6 +11227,8 @@ type TranscriptionSettingsRequest struct {
 	Mode *string `json:"mode,omitempty"`
 
 	SpeechSegmentConfig *SpeechSegmentConfig `json:"speech_segment_config,omitempty"`
+
+	Translation *TranslationSettings `json:"translation,omitempty"`
 }
 
 type TranscriptionSettingsResponse struct {
@@ -11156,6 +11239,14 @@ type TranscriptionSettingsResponse struct {
 	Mode string `json:"mode"`
 
 	SpeechSegmentConfig *SpeechSegmentConfig `json:"speech_segment_config,omitempty"`
+
+	Translation *TranslationSettings `json:"translation,omitempty"`
+}
+
+type TranslationSettings struct {
+	Enabled bool `json:"enabled"`
+
+	Languages []string `json:"languages"`
 }
 
 type TruncateChannelResponse struct {
@@ -11632,6 +11723,38 @@ func (*UpdatedCallPermissionsEvent) GetEventType() string {
 	return "call.permissions_updated"
 }
 
+type UploadChannelFileResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	// URL to the uploaded asset. Should be used to put to `asset_url` attachment field
+	File *string `json:"file,omitempty"`
+
+	// URL of the file thumbnail for supported file formats. Should be put to `thumb_url` attachment field
+	ThumbUrl *string `json:"thumb_url,omitempty"`
+}
+
+type UploadChannelRequest struct {
+	File *string `json:"file,omitempty"`
+
+	// field with JSON-encoded array of image size configurations
+	UploadSizes []ImageSize `json:"upload_sizes,omitempty"`
+
+	User *OnlyUserID `json:"user,omitempty"`
+}
+
+type UploadChannelResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	File *string `json:"file,omitempty"`
+
+	ThumbUrl *string `json:"thumb_url,omitempty"`
+
+	// Array of image size configurations
+	UploadSizes []ImageSize `json:"upload_sizes,omitempty"`
+}
+
 type UpsertActivitiesResponse struct {
 	Duration string `json:"duration"`
 
@@ -11685,10 +11808,10 @@ type UpsertPushPreferencesResponse struct {
 	Duration string `json:"duration"`
 
 	// The channel specific push notification preferences, only returned for channels you've edited.
-	UserChannelPreferences map[string]map[string]ChannelPushPreferences `json:"user_channel_preferences"`
+	UserChannelPreferences map[string]map[string]*ChannelPushPreferences `json:"user_channel_preferences"`
 
 	// The user preferences, always returned regardless if you edited it
-	UserPreferences map[string]PushPreferences `json:"user_preferences"`
+	UserPreferences map[string]*PushPreferences `json:"user_preferences"`
 }
 
 // Basic response information
@@ -12339,6 +12462,11 @@ type VoteData struct {
 	AnswerText *string `json:"answer_text,omitempty"`
 
 	OptionID *string `json:"option_id,omitempty"`
+}
+
+type WHIPIngress struct {
+	// URL for a new whip input, every time a new link is created
+	Address string `json:"address"`
 }
 
 // Represents an BaseEvent that happened in Stream Chat

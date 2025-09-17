@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/GetStream/getstream-go/v3"
+	"github.com/GetStream/getstream-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -275,6 +275,13 @@ func TestCommonQueryPollVotes(t *testing.T) {
 	_, err = client.QueryPollVotes(context.Background(), "", &getstream.QueryPollVotesRequest{})
 	require.NoError(t, err)
 }
+func TestCommonUpdatePushNotificationPreferences(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.UpdatePushNotificationPreferences(context.Background(), &getstream.UpdatePushNotificationPreferencesRequest{})
+	require.NoError(t, err)
+}
 func TestCommonListPushProviders(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -294,6 +301,20 @@ func TestCommonDeletePushProvider(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.DeletePushProvider(context.Background(), "", "", &getstream.DeletePushProviderRequest{})
+	require.NoError(t, err)
+}
+func TestCommonGetPushTemplates(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.GetPushTemplates(context.Background(), &getstream.GetPushTemplatesRequest{})
+	require.NoError(t, err)
+}
+func TestCommonUpsertPushTemplate(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.UpsertPushTemplate(context.Background(), &getstream.UpsertPushTemplateRequest{})
 	require.NoError(t, err)
 }
 func TestCommonGetRateLimits(t *testing.T) {

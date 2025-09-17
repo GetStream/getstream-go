@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/GetStream/getstream-go/v3"
+	"github.com/GetStream/getstream-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -107,18 +107,18 @@ func TestChatSendEvent(t *testing.T) {
 	_, err = client.Chat().SendEvent(context.Background(), "", "", &getstream.SendEventRequest{})
 	require.NoError(t, err)
 }
-func TestChatDeleteFile(t *testing.T) {
+func TestChatDeleteChannelFile(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Chat().DeleteFile(context.Background(), "", "", &getstream.DeleteFileRequest{})
+	_, err = client.Chat().DeleteChannelFile(context.Background(), "", "", &getstream.DeleteChannelFileRequest{})
 	require.NoError(t, err)
 }
-func TestChatUploadFile(t *testing.T) {
+func TestChatUploadChannelFile(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Chat().UploadFile(context.Background(), "", "", &getstream.UploadFileRequest{})
+	_, err = client.Chat().UploadChannelFile(context.Background(), "", "", &getstream.UploadChannelFileRequest{})
 	require.NoError(t, err)
 }
 func TestChatHideChannel(t *testing.T) {
@@ -128,18 +128,18 @@ func TestChatHideChannel(t *testing.T) {
 	_, err = client.Chat().HideChannel(context.Background(), "", "", &getstream.HideChannelRequest{})
 	require.NoError(t, err)
 }
-func TestChatDeleteImage(t *testing.T) {
+func TestChatDeleteChannelImage(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Chat().DeleteImage(context.Background(), "", "", &getstream.DeleteImageRequest{})
+	_, err = client.Chat().DeleteChannelImage(context.Background(), "", "", &getstream.DeleteChannelImageRequest{})
 	require.NoError(t, err)
 }
-func TestChatUploadImage(t *testing.T) {
+func TestChatUploadChannelImage(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Chat().UploadImage(context.Background(), "", "", &getstream.UploadImageRequest{})
+	_, err = client.Chat().UploadChannelImage(context.Background(), "", "", &getstream.UploadChannelImageRequest{})
 	require.NoError(t, err)
 }
 func TestChatUpdateMemberPartial(t *testing.T) {
@@ -338,6 +338,13 @@ func TestChatCommitMessage(t *testing.T) {
 	_, err = client.Chat().CommitMessage(context.Background(), "", &getstream.CommitMessageRequest{})
 	require.NoError(t, err)
 }
+func TestChatEphemeralMessageUpdate(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().EphemeralMessageUpdate(context.Background(), "", &getstream.EphemeralMessageUpdateRequest{})
+	require.NoError(t, err)
+}
 func TestChatSendReaction(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -441,27 +448,6 @@ func TestChatUnmuteChannel(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Chat().UnmuteChannel(context.Background(), &getstream.UnmuteChannelRequest{})
-	require.NoError(t, err)
-}
-func TestChatUpdatePushNotificationPreferences(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UpdatePushNotificationPreferences(context.Background(), &getstream.UpdatePushNotificationPreferencesRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetPushTemplates(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetPushTemplates(context.Background(), &getstream.GetPushTemplatesRequest{})
-	require.NoError(t, err)
-}
-func TestChatUpsertPushTemplate(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UpsertPushTemplate(context.Background(), &getstream.UpsertPushTemplateRequest{})
 	require.NoError(t, err)
 }
 func TestChatQueryBannedUsers(t *testing.T) {
