@@ -279,7 +279,7 @@ func TestCommonUpdatePushNotificationPreferences(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.UpdatePushNotificationPreferences(context.Background(), &getstream.UpsertPushPreferencesRequest{})
+	_, err = client.UpdatePushNotificationPreferences(context.Background(), &getstream.UpdatePushNotificationPreferencesRequest{})
 	require.NoError(t, err)
 }
 func TestCommonListPushProviders(t *testing.T) {
@@ -363,7 +363,7 @@ func TestCommonUploadFile(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.UploadFile(context.Background(), &getstream.FileUploadRequest{})
+	_, err = client.UploadFile(context.Background(), &getstream.UploadFileRequest{})
 	require.NoError(t, err)
 }
 func TestCommonDeleteImage(t *testing.T) {
@@ -377,7 +377,7 @@ func TestCommonUploadImage(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.UploadImage(context.Background(), &getstream.ImageUploadRequest{})
+	_, err = client.UploadImage(context.Background(), &getstream.UploadImageRequest{})
 	require.NoError(t, err)
 }
 func TestCommonQueryUsers(t *testing.T) {

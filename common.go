@@ -359,9 +359,9 @@ func (c *Client) QueryPollVotes(ctx context.Context, pollID string, request *Que
 }
 
 // Upserts the push preferences for a user and or channel member. Set to all, mentions or none
-func (c *Client) UpdatePushNotificationPreferences(ctx context.Context, request *UpsertPushPreferencesRequest) (*StreamResponse[UpsertPushPreferencesResponse], error) {
+func (c *Client) UpdatePushNotificationPreferences(ctx context.Context, request *UpdatePushNotificationPreferencesRequest) (*StreamResponse[UpsertPushPreferencesResponse], error) {
 	var result UpsertPushPreferencesResponse
-	res, err := MakeRequest[UpsertPushPreferencesRequest, UpsertPushPreferencesResponse](c, ctx, "POST", "/api/v2/push_preferences", nil, request, &result, nil)
+	res, err := MakeRequest[UpdatePushNotificationPreferencesRequest, UpsertPushPreferencesResponse](c, ctx, "POST", "/api/v2/push_preferences", nil, request, &result, nil)
 	return res, err
 }
 
@@ -456,9 +456,9 @@ func (c *Client) DeleteFile(ctx context.Context, request *DeleteFileRequest) (*S
 }
 
 // Uploads file
-func (c *Client) UploadFile(ctx context.Context, request *FileUploadRequest) (*StreamResponse[FileUploadResponse], error) {
+func (c *Client) UploadFile(ctx context.Context, request *UploadFileRequest) (*StreamResponse[FileUploadResponse], error) {
 	var result FileUploadResponse
-	res, err := MakeRequest[FileUploadRequest, FileUploadResponse](c, ctx, "POST", "/api/v2/uploads/file", nil, request, &result, nil)
+	res, err := MakeRequest[UploadFileRequest, FileUploadResponse](c, ctx, "POST", "/api/v2/uploads/file", nil, request, &result, nil)
 	return res, err
 }
 
@@ -471,9 +471,9 @@ func (c *Client) DeleteImage(ctx context.Context, request *DeleteImageRequest) (
 }
 
 // Uploads image
-func (c *Client) UploadImage(ctx context.Context, request *ImageUploadRequest) (*StreamResponse[ImageUploadResponse], error) {
+func (c *Client) UploadImage(ctx context.Context, request *UploadImageRequest) (*StreamResponse[ImageUploadResponse], error) {
 	var result ImageUploadResponse
-	res, err := MakeRequest[ImageUploadRequest, ImageUploadResponse](c, ctx, "POST", "/api/v2/uploads/image", nil, request, &result, nil)
+	res, err := MakeRequest[UploadImageRequest, ImageUploadResponse](c, ctx, "POST", "/api/v2/uploads/image", nil, request, &result, nil)
 	return res, err
 }
 
