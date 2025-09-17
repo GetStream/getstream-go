@@ -2197,8 +2197,6 @@ type CallParticipant struct {
 
 	Role string `json:"role"`
 
-	Role string `json:"Role"`
-
 	UserSessionID string `json:"UserSessionID"`
 
 	Custom map[string]any `json:"custom"`
