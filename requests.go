@@ -423,6 +423,14 @@ type RunMessageActionRequest struct {
 type CommitMessageRequest struct {
 }
 
+type EphemeralMessageUpdateRequest struct {
+	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
+	UserID        *string        `json:"user_id"`
+	Unset         []string       `json:"unset"`
+	Set           map[string]any `json:"set"`
+	User          *UserRequest   `json:"user"`
+}
+
 type SendReactionRequest struct {
 	Reaction      ReactionRequest `json:"reaction"`
 	EnforceUnique *bool           `json:"enforce_unique"`
@@ -516,23 +524,6 @@ type UnmuteChannelRequest struct {
 	UserID      *string      `json:"user_id"`
 	ChannelCids []string     `json:"channel_cids"`
 	User        *UserRequest `json:"user"`
-}
-
-type UpdatePushNotificationPreferencesRequest struct {
-	Preferences []PushPreferenceInput `json:"preferences"`
-}
-
-type GetPushTemplatesRequest struct {
-	PushProviderType string  `json:"-" query:"push_provider_type"`
-	PushProviderName *string `json:"-" query:"push_provider_name"`
-}
-
-type UpsertPushTemplateRequest struct {
-	EventType        string  `json:"event_type"`
-	PushProviderType string  `json:"push_provider_type"`
-	EnablePush       *bool   `json:"enable_push"`
-	PushProviderName *string `json:"push_provider_name"`
-	Template         *string `json:"template"`
 }
 
 type QueryBannedUsersRequest struct {
@@ -765,6 +756,16 @@ type ActivityFeedbackRequest struct {
 	User     *UserRequest `json:"user"`
 }
 
+type CastPollVoteRequest struct {
+	UserID *string      `json:"user_id"`
+	User   *UserRequest `json:"user"`
+	Vote   *VoteData    `json:"vote"`
+}
+
+type DeletePollVoteRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
 type AddReactionRequest struct {
 	Type                       string         `json:"type"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
@@ -807,6 +808,7 @@ type UpdateActivityRequest struct {
 	UserID       *string           `json:"user_id"`
 	Visibility   *string           `json:"visibility"`
 	Attachments  []Attachment      `json:"attachments"`
+	Feeds        []string          `json:"feeds"`
 	FilterTags   []string          `json:"filter_tags"`
 	InterestTags []string          `json:"interest_tags"`
 	Custom       map[string]any    `json:"custom"`
@@ -1487,6 +1489,10 @@ type QueryPollVotesRequest struct {
 	Filter map[string]any     `json:"filter"`
 }
 
+type UpdatePushNotificationPreferencesRequest struct {
+	Preferences []PushPreferenceInput `json:"preferences"`
+}
+
 type ListPushProvidersRequest struct {
 }
 
@@ -1495,6 +1501,19 @@ type UpsertPushProviderRequest struct {
 }
 
 type DeletePushProviderRequest struct {
+}
+
+type GetPushTemplatesRequest struct {
+	PushProviderType string  `json:"-" query:"push_provider_type"`
+	PushProviderName *string `json:"-" query:"push_provider_name"`
+}
+
+type UpsertPushTemplateRequest struct {
+	EventType        string  `json:"event_type"`
+	PushProviderType string  `json:"push_provider_type"`
+	EnablePush       *bool   `json:"enable_push"`
+	PushProviderName *string `json:"push_provider_name"`
+	Template         *string `json:"template"`
 }
 
 type GetRateLimitsRequest struct {
@@ -1516,6 +1535,25 @@ type DeleteRoleRequest struct {
 }
 
 type GetTaskRequest struct {
+}
+
+type DeleteFileRequest struct {
+	Url *string `json:"-" query:"url"`
+}
+
+type UploadFileRequest struct {
+	File *string     `json:"file"`
+	User *OnlyUserID `json:"user"`
+}
+
+type DeleteImageRequest struct {
+	Url *string `json:"-" query:"url"`
+}
+
+type UploadImageRequest struct {
+	File        *string     `json:"file"`
+	UploadSizes []ImageSize `json:"upload_sizes"`
+	User        *OnlyUserID `json:"user"`
 }
 
 type QueryUsersRequest struct {

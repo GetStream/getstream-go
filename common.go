@@ -358,6 +358,13 @@ func (c *Client) QueryPollVotes(ctx context.Context, pollID string, request *Que
 	return res, err
 }
 
+// Upserts the push preferences for a user and or channel member. Set to all, mentions or none
+func (c *Client) UpdatePushNotificationPreferences(ctx context.Context, request *UpdatePushNotificationPreferencesRequest) (*StreamResponse[UpsertPushPreferencesResponse], error) {
+	var result UpsertPushPreferencesResponse
+	res, err := MakeRequest[UpsertPushPreferencesRequest, UpsertPushPreferencesResponse](c, ctx, "POST", "/api/v2/push_preferences", nil, request, &result, nil)
+	return res, err
+}
+
 // List details of all push providers.
 func (c *Client) ListPushProviders(ctx context.Context, request *ListPushProvidersRequest) (*StreamResponse[ListPushProvidersResponse], error) {
 	var result ListPushProvidersResponse
@@ -380,6 +387,21 @@ func (c *Client) DeletePushProvider(ctx context.Context, _type string, name stri
 		"name": name,
 	}
 	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/push_providers/{type}/{name}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Retrieve push notification templates for Chat.
+func (c *Client) GetPushTemplates(ctx context.Context, request *GetPushTemplatesRequest) (*StreamResponse[GetPushTemplatesResponse], error) {
+	var result GetPushTemplatesResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetPushTemplatesResponse](c, ctx, "GET", "/api/v2/push_templates", params, nil, &result, nil)
+	return res, err
+}
+
+// Create or update a push notification template for a specific event type and push provider
+func (c *Client) UpsertPushTemplate(ctx context.Context, request *UpsertPushTemplateRequest) (*StreamResponse[UpsertPushTemplateResponse], error) {
+	var result UpsertPushTemplateResponse
+	res, err := MakeRequest[UpsertPushTemplateRequest, UpsertPushTemplateResponse](c, ctx, "POST", "/api/v2/push_templates", nil, request, &result, nil)
 	return res, err
 }
 
@@ -436,7 +458,7 @@ func (c *Client) DeleteFile(ctx context.Context, request *DeleteFileRequest) (*S
 // Uploads file
 func (c *Client) UploadFile(ctx context.Context, request *UploadFileRequest) (*StreamResponse[FileUploadResponse], error) {
 	var result FileUploadResponse
-	res, err := MakeRequest[UploadFileRequest, FileUploadResponse](c, ctx, "POST", "/api/v2/uploads/file", nil, request, &result, nil)
+	res, err := MakeRequest[FileUploadRequest, FileUploadResponse](c, ctx, "POST", "/api/v2/uploads/file", nil, request, &result, nil)
 	return res, err
 }
 
@@ -451,7 +473,7 @@ func (c *Client) DeleteImage(ctx context.Context, request *DeleteImageRequest) (
 // Uploads image
 func (c *Client) UploadImage(ctx context.Context, request *UploadImageRequest) (*StreamResponse[ImageUploadResponse], error) {
 	var result ImageUploadResponse
-	res, err := MakeRequest[UploadImageRequest, ImageUploadResponse](c, ctx, "POST", "/api/v2/uploads/image", nil, request, &result, nil)
+	res, err := MakeRequest[ImageUploadRequest, ImageUploadResponse](c, ctx, "POST", "/api/v2/uploads/image", nil, request, &result, nil)
 	return res, err
 }
 
