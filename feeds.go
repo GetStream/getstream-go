@@ -5,60 +5,59 @@ import "context"
 
 type Feeds struct {
 	feedType string
-	feedD    string
+	feedID   string
 	client   *FeedsClient
 }
 
-func NewFeed(feedType string, feedD string, client *FeedsClient) *Feeds {
+func NewFeed(feedType string, feedID string, client *FeedsClient) *Feeds {
 	return &Feeds{
 		feedType: feedType,
-		feedD:    feedD,
+		feedID:   feedID,
 		client:   client,
 	}
 }
 
-//1//10 operations
-
+// 1
 func (c *Feeds) Delete(ctx context.Context, request *DeleteFeedRequest) (*StreamResponse[DeleteFeedResponse], error) {
-	return c.client.DeleteFeed(ctx, c.feedType, c.feedD, request)
+	return c.client.DeleteFeed(ctx, c.feedType, c.feedID, request)
 }
 
 func (c *Feeds) GetOrCreate(ctx context.Context, request *GetOrCreateFeedRequest) (*StreamResponse[GetOrCreateFeedResponse], error) {
-	return c.client.GetOrCreateFeed(ctx, c.feedType, c.feedD, request)
+	return c.client.GetOrCreateFeed(ctx, c.feedType, c.feedID, request)
 }
 
 func (c *Feeds) Update(ctx context.Context, request *UpdateFeedRequest) (*StreamResponse[UpdateFeedResponse], error) {
-	return c.client.UpdateFeed(ctx, c.feedType, c.feedD, request)
+	return c.client.UpdateFeed(ctx, c.feedType, c.feedID, request)
 }
 
 func (c *Feeds) MarkActivity(ctx context.Context, request *MarkActivityRequest) (*StreamResponse[Response], error) {
-	return c.client.MarkActivity(ctx, c.feedType, c.feedD, request)
+	return c.client.MarkActivity(ctx, c.feedType, c.feedID, request)
 }
 
-func (c *Feeds) UnpinActivity(ctx context.Context, request *UnpinActivityRequest) (*StreamResponse[UnpinActivityResponse], error) {
-	return c.client.UnpinActivity(ctx, c.feedType, c.feedD, request)
+func (c *Feeds) UnpinActivity(ctx context.Context, activityID string, request *UnpinActivityRequest) (*StreamResponse[UnpinActivityResponse], error) {
+	return c.client.UnpinActivity(ctx, c.feedType, c.feedID, activityID, request)
 }
 
-func (c *Feeds) PinActivity(ctx context.Context, request *PinActivityRequest) (*StreamResponse[PinActivityResponse], error) {
-	return c.client.PinActivity(ctx, c.feedType, c.feedD, request)
+func (c *Feeds) PinActivity(ctx context.Context, activityID string, request *PinActivityRequest) (*StreamResponse[PinActivityResponse], error) {
+	return c.client.PinActivity(ctx, c.feedType, c.feedID, activityID, request)
 }
 
 func (c *Feeds) UpdateFeedMembers(ctx context.Context, request *UpdateFeedMembersRequest) (*StreamResponse[UpdateFeedMembersResponse], error) {
-	return c.client.UpdateFeedMembers(ctx, c.feedType, c.feedD, request)
+	return c.client.UpdateFeedMembers(ctx, c.feedType, c.feedID, request)
 }
 
 func (c *Feeds) AcceptFeedMemberInvite(ctx context.Context, request *AcceptFeedMemberInviteRequest) (*StreamResponse[AcceptFeedMemberInviteResponse], error) {
-	return c.client.AcceptFeedMemberInvite(ctx, c.feedType, c.feedD, request)
+	return c.client.AcceptFeedMemberInvite(ctx, c.feedType, c.feedID, request)
 }
 
 func (c *Feeds) QueryFeedMembers(ctx context.Context, request *QueryFeedMembersRequest) (*StreamResponse[QueryFeedMembersResponse], error) {
-	return c.client.QueryFeedMembers(ctx, c.feedType, c.feedD, request)
+	return c.client.QueryFeedMembers(ctx, c.feedType, c.feedID, request)
 }
 
 func (c *Feeds) RejectFeedMemberInvite(ctx context.Context, request *RejectFeedMemberInviteRequest) (*StreamResponse[RejectFeedMemberInviteResponse], error) {
-	return c.client.RejectFeedMemberInvite(ctx, c.feedType, c.feedD, request)
+	return c.client.RejectFeedMemberInvite(ctx, c.feedType, c.feedID, request)
 }
 
-func (c *FeedsClient) Feed(feedType, feedD string) *Feeds {
-	return NewFeed(feedType, feedD, c)
+func (c *FeedsClient) Feed(feedType, feedID string) *Feeds {
+	return NewFeed(feedType, feedID, c)
 }
