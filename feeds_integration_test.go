@@ -1779,7 +1779,7 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	// snippet-start: GetOrCreateFeedViewExisting
 	getOrCreateResponse, err := feedsClient.GetOrCreateFeedView(ctx, feedViewID, &getstream.GetOrCreateFeedViewRequest{
 		ActivitySelectors: []getstream.ActivitySelectorConfig{
-			{Type: getstream.PtrTo("recent")},
+			{Type: getstream.PtrTo("popular")},
 		},
 	})
 	// snippet-end: GetOrCreateFeedViewExisting
