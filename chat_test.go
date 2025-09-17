@@ -338,6 +338,13 @@ func TestChatCommitMessage(t *testing.T) {
 	_, err = client.Chat().CommitMessage(context.Background(), "", &getstream.CommitMessageRequest{})
 	require.NoError(t, err)
 }
+func TestChatEphemeralMessageUpdate(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().EphemeralMessageUpdate(context.Background(), "", &getstream.EphemeralMessageUpdateRequest{})
+	require.NoError(t, err)
+}
 func TestChatSendReaction(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -441,27 +448,6 @@ func TestChatUnmuteChannel(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Chat().UnmuteChannel(context.Background(), &getstream.UnmuteChannelRequest{})
-	require.NoError(t, err)
-}
-func TestChatUpdatePushNotificationPreferences(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UpdatePushNotificationPreferences(context.Background(), &getstream.UpdatePushNotificationPreferencesRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetPushTemplates(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetPushTemplates(context.Background(), &getstream.GetPushTemplatesRequest{})
-	require.NoError(t, err)
-}
-func TestChatUpsertPushTemplate(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UpsertPushTemplate(context.Background(), &getstream.UpsertPushTemplateRequest{})
 	require.NoError(t, err)
 }
 func TestChatQueryBannedUsers(t *testing.T) {
