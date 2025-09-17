@@ -3,6 +3,7 @@ module github.com/GetStream/getstream-go/v3
 go 1.19
 
 require (
+	github.com/GetStream/getstream-go v1.2.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/joho/godotenv v1.5.1
 	github.com/stretchr/testify v1.9.0
