@@ -363,7 +363,7 @@ func TestCommonUploadFile(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.UploadFile(context.Background(), &getstream.UploadFileRequest{})
+	_, err = client.UploadFile(context.Background(), &getstream.FileUploadRequest{})
 	require.NoError(t, err)
 }
 func TestCommonDeleteImage(t *testing.T) {
@@ -377,7 +377,7 @@ func TestCommonUploadImage(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.UploadImage(context.Background(), &getstream.UploadImageRequest{})
+	_, err = client.UploadImage(context.Background(), &getstream.ImageUploadRequest{})
 	require.NoError(t, err)
 }
 func TestCommonQueryUsers(t *testing.T) {
