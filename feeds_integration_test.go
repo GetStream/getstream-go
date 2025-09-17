@@ -1719,7 +1719,7 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 		ID: feedViewID,
 		ActivitySelectors: []getstream.ActivitySelectorConfig{
 			{
-				Type: getstream.PtrTo("recent"),
+				Type: getstream.PtrTo("popular"),
 			},
 		},
 		ActivityProcessors: []getstream.ActivityProcessorConfig{
