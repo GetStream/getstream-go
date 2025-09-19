@@ -858,16 +858,26 @@ func test16UpsertActivities(t *testing.T, ctx context.Context, feedsClient *gets
 	fmt.Println("\n📝 Testing batch activity upsert...")
 
 	// snippet-start: UpsertActivities
+	feedIdentifier := fmt.Sprintf("%s:%s", userFeedType, testUserID)
+
+	// Use unique IDs to ensure we're creating new activities, not updating existing ones
+	activityID1 := "upsert-activity-1-" + uuid.New().String()
+	activityID2 := "upsert-activity-2-" + uuid.New().String()
+
 	activities := []getstream.ActivityRequest{
 		{
+			ID:     &activityID1,
 			Type:   "post",
 			Text:   getstream.PtrTo("Batch activity 1"),
 			UserID: &testUserID,
+			Feeds:  []string{feedIdentifier},
 		},
 		{
+			ID:     &activityID2,
 			Type:   "post",
 			Text:   getstream.PtrTo("Batch activity 2"),
 			UserID: &testUserID,
+			Feeds:  []string{feedIdentifier},
 		},
 	}
 
@@ -1719,7 +1729,7 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 		ID: feedViewID,
 		ActivitySelectors: []getstream.ActivitySelectorConfig{
 			{
-				Type: getstream.PtrTo("recent"),
+				Type: getstream.PtrTo("following"),
 			},
 		},
 		ActivityProcessors: []getstream.ActivityProcessorConfig{
@@ -1769,7 +1779,7 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	// snippet-start: GetOrCreateFeedViewExisting
 	getOrCreateResponse, err := feedsClient.GetOrCreateFeedView(ctx, feedViewID, &getstream.GetOrCreateFeedViewRequest{
 		ActivitySelectors: []getstream.ActivitySelectorConfig{
-			{Type: getstream.PtrTo("recent")},
+			{Type: getstream.PtrTo("following")},
 		},
 	})
 	// snippet-end: GetOrCreateFeedViewExisting

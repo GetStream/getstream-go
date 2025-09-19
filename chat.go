@@ -567,6 +567,20 @@ func (c *ChatClient) CommitMessage(ctx context.Context, id string, request *Comm
 	return res, err
 }
 
+// Updates message fields without storing in database, only sends update event
+//
+// Sends events:
+// - message.updated
+// - message.updated
+func (c *ChatClient) EphemeralMessageUpdate(ctx context.Context, id string, request *EphemeralMessageUpdateRequest) (*StreamResponse[UpdateMessagePartialResponse], error) {
+	var result UpdateMessagePartialResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[EphemeralMessageUpdateRequest, UpdateMessagePartialResponse](c.client, ctx, "PATCH", "/api/v2/chat/messages/{id}/ephemeral", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Sends reaction to specified message
 //
 // Sends events:
@@ -759,28 +773,6 @@ func (c *ChatClient) MuteChannel(ctx context.Context, request *MuteChannelReques
 func (c *ChatClient) UnmuteChannel(ctx context.Context, request *UnmuteChannelRequest) (*StreamResponse[UnmuteResponse], error) {
 	var result UnmuteResponse
 	res, err := MakeRequest[UnmuteChannelRequest, UnmuteResponse](c.client, ctx, "POST", "/api/v2/chat/moderation/unmute/channel", nil, request, &result, nil)
-	return res, err
-}
-
-// Update the push preferences for a user and or channel member. Set to all, mentions or none
-func (c *ChatClient) UpdatePushNotificationPreferences(ctx context.Context, request *UpdatePushNotificationPreferencesRequest) (*StreamResponse[UpsertPushPreferencesResponse], error) {
-	var result UpsertPushPreferencesResponse
-	res, err := MakeRequest[UpdatePushNotificationPreferencesRequest, UpsertPushPreferencesResponse](c.client, ctx, "POST", "/api/v2/chat/push_preferences", nil, request, &result, nil)
-	return res, err
-}
-
-// Retrieve push notification templates for Chat.
-func (c *ChatClient) GetPushTemplates(ctx context.Context, request *GetPushTemplatesRequest) (*StreamResponse[GetPushTemplatesResponse], error) {
-	var result GetPushTemplatesResponse
-	params := extractQueryParams(request)
-	res, err := MakeRequest[any, GetPushTemplatesResponse](c.client, ctx, "GET", "/api/v2/chat/push_templates", params, nil, &result, nil)
-	return res, err
-}
-
-// Create or update a push notification template for a specific event type and push provider
-func (c *ChatClient) UpsertPushTemplate(ctx context.Context, request *UpsertPushTemplateRequest) (*StreamResponse[UpsertPushTemplateResponse], error) {
-	var result UpsertPushTemplateResponse
-	res, err := MakeRequest[UpsertPushTemplateRequest, UpsertPushTemplateResponse](c.client, ctx, "POST", "/api/v2/chat/push_templates", nil, request, &result, nil)
 	return res, err
 }
 
