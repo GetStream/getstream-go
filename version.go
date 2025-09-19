@@ -1,7 +1,7 @@
 package getstream
 
 const (
-	versionName = "v3.1.1"
+	versionName = "v3.1.2"
 )
 
 // Version returns the version of the library.
