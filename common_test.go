@@ -360,6 +360,8 @@ func TestCommonDeleteFile(t *testing.T) {
 	require.NoError(t, err)
 }
 func TestCommonUploadFile(t *testing.T) {
+	t.Skip("skipping due to seperate integration test for upload")
+
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
@@ -374,6 +376,7 @@ func TestCommonDeleteImage(t *testing.T) {
 	require.NoError(t, err)
 }
 func TestCommonUploadImage(t *testing.T) {
+	t.Skip("skipping due to seperate integration test for upload")
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
