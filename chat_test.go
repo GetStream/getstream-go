@@ -115,6 +115,8 @@ func TestChatDeleteFile(t *testing.T) {
 	require.NoError(t, err)
 }
 func TestChatUploadFile(t *testing.T) {
+	t.Skip("skipping due to seperate integration test for upload")
+
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
@@ -136,6 +138,8 @@ func TestChatDeleteImage(t *testing.T) {
 	require.NoError(t, err)
 }
 func TestChatUploadImage(t *testing.T) {
+	t.Skip("skipping due to seperate integration test for upload")
+
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
