@@ -2,9 +2,10 @@ package getstream
 
 type Stream struct {
 	*Client
-	chat  *ChatClient
-	video *VideoClient
-	feeds *FeedsClient
+	chat       *ChatClient
+	video      *VideoClient
+	feeds      *FeedsClient
+	moderation *ModerationClient
 }
 
 func NewClientFromEnvVars(options ...ClientOption) (*Stream, error) {
@@ -66,4 +67,12 @@ func (s *Stream) Feeds() *FeedsClient {
 		s.feeds = NewFeedsClient(s.Client)
 	}
 	return s.feeds
+}
+
+// Moderation client
+func (s *Stream) Moderation() *ModerationClient {
+	if s.moderation == nil {
+		s.moderation = NewModerationClient(s.Client)
+	}
+	return s.moderation
 }
