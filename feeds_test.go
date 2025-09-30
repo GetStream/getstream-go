@@ -394,6 +394,20 @@ func TestFeedsUpdateFeedView(t *testing.T) {
 	_, err = client.Feeds().UpdateFeedView(context.Background(), "", &getstream.UpdateFeedViewRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsListFeedVisibilities(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().ListFeedVisibilities(context.Background(), &getstream.ListFeedVisibilitiesRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsGetFeedVisibility(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().GetFeedVisibility(context.Background(), "", &getstream.GetFeedVisibilityRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsCreateFeedsBatch(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

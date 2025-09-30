@@ -2,11 +2,13 @@
 package getstream
 
 import "context"
+import "reflect"
 
 type Call struct {
 	callType string
 	callID   string
 	client   *VideoClient
+	data     *CallResponse
 }
 
 func NewCall(callType string, callID string, client *VideoClient) *Call {
@@ -18,151 +20,387 @@ func NewCall(callType string, callID string, client *VideoClient) *Call {
 }
 
 func (c *Call) Get(ctx context.Context, request *GetCallRequest) (*StreamResponse[GetCallResponse], error) {
-	return c.client.GetCall(ctx, c.callType, c.callID, request)
+	response, err := c.client.GetCall(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) Update(ctx context.Context, request *UpdateCallRequest) (*StreamResponse[UpdateCallResponse], error) {
-	return c.client.UpdateCall(ctx, c.callType, c.callID, request)
+	response, err := c.client.UpdateCall(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) GetOrCreate(ctx context.Context, request *GetOrCreateCallRequest) (*StreamResponse[GetOrCreateCallResponse], error) {
-	return c.client.GetOrCreateCall(ctx, c.callType, c.callID, request)
+	response, err := c.client.GetOrCreateCall(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) BlockUser(ctx context.Context, request *BlockUserRequest) (*StreamResponse[BlockUserResponse], error) {
-	return c.client.BlockUser(ctx, c.callType, c.callID, request)
+	response, err := c.client.BlockUser(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) SendClosedCaption(ctx context.Context, request *SendClosedCaptionRequest) (*StreamResponse[SendClosedCaptionResponse], error) {
-	return c.client.SendClosedCaption(ctx, c.callType, c.callID, request)
+	response, err := c.client.SendClosedCaption(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) Delete(ctx context.Context, request *DeleteCallRequest) (*StreamResponse[DeleteCallResponse], error) {
-	return c.client.DeleteCall(ctx, c.callType, c.callID, request)
+	response, err := c.client.DeleteCall(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) SendCallEvent(ctx context.Context, request *SendCallEventRequest) (*StreamResponse[SendCallEventResponse], error) {
-	return c.client.SendCallEvent(ctx, c.callType, c.callID, request)
+	response, err := c.client.SendCallEvent(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) CollectUserFeedback(ctx context.Context, request *CollectUserFeedbackRequest) (*StreamResponse[CollectUserFeedbackResponse], error) {
-	return c.client.CollectUserFeedback(ctx, c.callType, c.callID, request)
+	response, err := c.client.CollectUserFeedback(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) GoLive(ctx context.Context, request *GoLiveRequest) (*StreamResponse[GoLiveResponse], error) {
-	return c.client.GoLive(ctx, c.callType, c.callID, request)
+	response, err := c.client.GoLive(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) KickUser(ctx context.Context, request *KickUserRequest) (*StreamResponse[KickUserResponse], error) {
-	return c.client.KickUser(ctx, c.callType, c.callID, request)
+	response, err := c.client.KickUser(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) End(ctx context.Context, request *EndCallRequest) (*StreamResponse[EndCallResponse], error) {
-	return c.client.EndCall(ctx, c.callType, c.callID, request)
+	response, err := c.client.EndCall(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) UpdateCallMembers(ctx context.Context, request *UpdateCallMembersRequest) (*StreamResponse[UpdateCallMembersResponse], error) {
-	return c.client.UpdateCallMembers(ctx, c.callType, c.callID, request)
+	response, err := c.client.UpdateCallMembers(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) MuteUsers(ctx context.Context, request *MuteUsersRequest) (*StreamResponse[MuteUsersResponse], error) {
-	return c.client.MuteUsers(ctx, c.callType, c.callID, request)
+	response, err := c.client.MuteUsers(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) QueryCallParticipants(ctx context.Context, request *QueryCallParticipantsRequest) (*StreamResponse[QueryCallParticipantsResponse], error) {
-	return c.client.QueryCallParticipants(ctx, c.callType, c.callID, request)
+	response, err := c.client.QueryCallParticipants(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) VideoPin(ctx context.Context, request *VideoPinRequest) (*StreamResponse[PinResponse], error) {
-	return c.client.VideoPin(ctx, c.callType, c.callID, request)
+	response, err := c.client.VideoPin(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) ListRecordings(ctx context.Context, request *ListRecordingsRequest) (*StreamResponse[ListRecordingsResponse], error) {
-	return c.client.ListRecordings(ctx, c.callType, c.callID, request)
+	response, err := c.client.ListRecordings(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) GetCallReport(ctx context.Context, request *GetCallReportRequest) (*StreamResponse[GetCallReportResponse], error) {
-	return c.client.GetCallReport(ctx, c.callType, c.callID, request)
+	response, err := c.client.GetCallReport(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) StartRTMPBroadcasts(ctx context.Context, request *StartRTMPBroadcastsRequest) (*StreamResponse[StartRTMPBroadcastsResponse], error) {
-	return c.client.StartRTMPBroadcasts(ctx, c.callType, c.callID, request)
+	response, err := c.client.StartRTMPBroadcasts(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) StopAllRTMPBroadcasts(ctx context.Context, request *StopAllRTMPBroadcastsRequest) (*StreamResponse[StopAllRTMPBroadcastsResponse], error) {
-	return c.client.StopAllRTMPBroadcasts(ctx, c.callType, c.callID, request)
+	response, err := c.client.StopAllRTMPBroadcasts(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) StopRTMPBroadcast(ctx context.Context, name string, request *StopRTMPBroadcastRequest) (*StreamResponse[StopRTMPBroadcastsResponse], error) {
-	return c.client.StopRTMPBroadcast(ctx, c.callType, c.callID, name, request)
+	response, err := c.client.StopRTMPBroadcast(ctx, c.callType, c.callID, name, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) StartHLSBroadcasting(ctx context.Context, request *StartHLSBroadcastingRequest) (*StreamResponse[StartHLSBroadcastingResponse], error) {
-	return c.client.StartHLSBroadcasting(ctx, c.callType, c.callID, request)
+	response, err := c.client.StartHLSBroadcasting(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) StartClosedCaptions(ctx context.Context, request *StartClosedCaptionsRequest) (*StreamResponse[StartClosedCaptionsResponse], error) {
-	return c.client.StartClosedCaptions(ctx, c.callType, c.callID, request)
+	response, err := c.client.StartClosedCaptions(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) StartFrameRecording(ctx context.Context, request *StartFrameRecordingRequest) (*StreamResponse[StartFrameRecordingResponse], error) {
-	return c.client.StartFrameRecording(ctx, c.callType, c.callID, request)
+	response, err := c.client.StartFrameRecording(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) StartRecording(ctx context.Context, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
-	return c.client.StartRecording(ctx, c.callType, c.callID, request)
+	response, err := c.client.StartRecording(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) StartTranscription(ctx context.Context, request *StartTranscriptionRequest) (*StreamResponse[StartTranscriptionResponse], error) {
-	return c.client.StartTranscription(ctx, c.callType, c.callID, request)
+	response, err := c.client.StartTranscription(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) StopHLSBroadcasting(ctx context.Context, request *StopHLSBroadcastingRequest) (*StreamResponse[StopHLSBroadcastingResponse], error) {
-	return c.client.StopHLSBroadcasting(ctx, c.callType, c.callID, request)
+	response, err := c.client.StopHLSBroadcasting(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) StopClosedCaptions(ctx context.Context, request *StopClosedCaptionsRequest) (*StreamResponse[StopClosedCaptionsResponse], error) {
-	return c.client.StopClosedCaptions(ctx, c.callType, c.callID, request)
+	response, err := c.client.StopClosedCaptions(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) StopFrameRecording(ctx context.Context, request *StopFrameRecordingRequest) (*StreamResponse[StopFrameRecordingResponse], error) {
-	return c.client.StopFrameRecording(ctx, c.callType, c.callID, request)
+	response, err := c.client.StopFrameRecording(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) StopLive(ctx context.Context, request *StopLiveRequest) (*StreamResponse[StopLiveResponse], error) {
-	return c.client.StopLive(ctx, c.callType, c.callID, request)
+	response, err := c.client.StopLive(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) StopRecording(ctx context.Context, request *StopRecordingRequest) (*StreamResponse[StopRecordingResponse], error) {
-	return c.client.StopRecording(ctx, c.callType, c.callID, request)
+	response, err := c.client.StopRecording(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) StopTranscription(ctx context.Context, request *StopTranscriptionRequest) (*StreamResponse[StopTranscriptionResponse], error) {
-	return c.client.StopTranscription(ctx, c.callType, c.callID, request)
+	response, err := c.client.StopTranscription(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) ListTranscriptions(ctx context.Context, request *ListTranscriptionsRequest) (*StreamResponse[ListTranscriptionsResponse], error) {
-	return c.client.ListTranscriptions(ctx, c.callType, c.callID, request)
+	response, err := c.client.ListTranscriptions(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) UnblockUser(ctx context.Context, request *UnblockUserRequest) (*StreamResponse[UnblockUserResponse], error) {
-	return c.client.UnblockUser(ctx, c.callType, c.callID, request)
+	response, err := c.client.UnblockUser(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) VideoUnpin(ctx context.Context, request *VideoUnpinRequest) (*StreamResponse[UnpinResponse], error) {
-	return c.client.VideoUnpin(ctx, c.callType, c.callID, request)
+	response, err := c.client.VideoUnpin(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) UpdateUserPermissions(ctx context.Context, request *UpdateUserPermissionsRequest) (*StreamResponse[UpdateUserPermissionsResponse], error) {
-	return c.client.UpdateUserPermissions(ctx, c.callType, c.callID, request)
+	response, err := c.client.UpdateUserPermissions(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) DeleteRecording(ctx context.Context, session string, filename string, request *DeleteRecordingRequest) (*StreamResponse[DeleteRecordingResponse], error) {
-	return c.client.DeleteRecording(ctx, c.callType, c.callID, session, filename, request)
+	response, err := c.client.DeleteRecording(ctx, c.callType, c.callID, session, filename, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
 }
 
 func (c *Call) DeleteTranscription(ctx context.Context, session string, filename string, request *DeleteTranscriptionRequest) (*StreamResponse[DeleteTranscriptionResponse], error) {
-	return c.client.DeleteTranscription(ctx, c.callType, c.callID, session, filename, request)
+	response, err := c.client.DeleteTranscription(ctx, c.callType, c.callID, session, filename, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
+}
+
+func (c *Call) syncFromResponse(data any) {
+	if data == nil || c == nil {
+		return
+	}
+
+	v := reflect.ValueOf(data)
+	// Unwrap interfaces/pointers
+	for v.Kind() == reflect.Interface || v.Kind() == reflect.Pointer {
+		if v.IsNil() {
+			return
+		}
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return
+	}
+
+	// Look for exported field named "Call"
+	f := v.FieldByName("Call")
+	if !f.IsValid() {
+		return
+	}
+
+	crPtrType := reflect.TypeOf((*CallResponse)(nil)) // *CallResponse
+	crValType := reflect.TypeOf(CallResponse{})       //  CallResponse
+
+	switch f.Kind() {
+	case reflect.Pointer:
+		// Expect *CallResponse
+		if f.Type() == crPtrType && !f.IsNil() {
+			if cr, ok := f.Interface().(*CallResponse); ok {
+				c.data = cr
+			}
+		}
+	case reflect.Struct:
+		// Expect CallResponse value
+		if f.Type() == crValType {
+			// Need addressable struct field to take &f
+			if f.CanAddr() {
+				if cr, ok := f.Addr().Interface().(*CallResponse); ok {
+					c.data = cr
+				}
+			} else {
+				// Fallback: copy to a new value
+				cr := f.Interface().(CallResponse)
+				c.data = &cr
+			}
+		}
+	}
 }
 
 func (c *VideoClient) Call(callType, callID string) *Call {
