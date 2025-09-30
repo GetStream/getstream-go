@@ -175,11 +175,11 @@ type SendEventRequest struct {
 	Event EventRequest `json:"event"`
 }
 
-type DeleteChannelFileRequest struct {
+type DeleteFileRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 
-type UploadChannelFileRequest struct {
+type UploadFileRequest struct {
 	File *string     `json:"file"`
 	User *OnlyUserID `json:"user"`
 }
@@ -190,11 +190,11 @@ type HideChannelRequest struct {
 	User         *UserRequest `json:"user"`
 }
 
-type DeleteChannelImageRequest struct {
+type DeleteImageRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 
-type UploadChannelImageRequest struct {
+type UploadImageRequest struct {
 	File        *string     `json:"file"`
 	UploadSizes []ImageSize `json:"upload_sizes"`
 	User        *OnlyUserID `json:"user"`
@@ -1112,6 +1112,9 @@ type ReactivateUserRequest struct {
 	RestoreMessages *bool   `json:"restore_messages"`
 }
 
+type GetActiveCallsStatusRequest struct {
+}
+
 type QueryUserFeedbackRequest struct {
 	Full             *bool              `json:"-" query:"full"`
 	Limit            *int               `json:"limit"`
@@ -1343,59 +1346,6 @@ type UpdateCallTypeRequest struct {
 }
 
 type GetEdgesRequest struct {
-}
-
-type ResolveSipInboundRequest struct {
-	SipCallerNumber string            `json:"sip_caller_number"`
-	SipTrunkNumber  string            `json:"sip_trunk_number"`
-	Challenge       SIPChallenge      `json:"challenge"`
-	SipHeaders      map[string]string `json:"sip_headers"`
-}
-
-type ListSIPInboundRoutingRuleRequest struct {
-}
-
-type CreateSIPInboundRoutingRuleRequest struct {
-	Name                 string                                  `json:"name"`
-	TrunkIds             []string                                `json:"trunk_ids"`
-	CallerConfigs        SIPCallerConfigsRequest                 `json:"caller_configs"`
-	CalledNumbers        []string                                `json:"called_numbers"`
-	CallerNumbers        []string                                `json:"caller_numbers"`
-	CallConfigs          *SIPCallConfigsRequest                  `json:"call_configs"`
-	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsRequest `json:"direct_routing_configs"`
-	PinProtectionConfigs *SIPPinProtectionConfigsRequest         `json:"pin_protection_configs"`
-	PinRoutingConfigs    *SIPInboundRoutingRulePinConfigsRequest `json:"pin_routing_configs"`
-}
-
-type DeleteSIPInboundRoutingRuleRequest struct {
-}
-
-type UpdateSIPInboundRoutingRuleRequest struct {
-	Name                 string                                  `json:"name"`
-	CalledNumbers        []string                                `json:"called_numbers"`
-	TrunkIds             []string                                `json:"trunk_ids"`
-	CallerConfigs        SIPCallerConfigsRequest                 `json:"caller_configs"`
-	CallerNumbers        []string                                `json:"caller_numbers"`
-	CallConfigs          *SIPCallConfigsRequest                  `json:"call_configs"`
-	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsRequest `json:"direct_routing_configs"`
-	PinProtectionConfigs *SIPPinProtectionConfigsRequest         `json:"pin_protection_configs"`
-	PinRoutingConfigs    *SIPInboundRoutingRulePinConfigsRequest `json:"pin_routing_configs"`
-}
-
-type ListSIPTrunksRequest struct {
-}
-
-type CreateSIPTrunkRequest struct {
-	Name    string   `json:"name"`
-	Numbers []string `json:"numbers"`
-}
-
-type DeleteSIPTrunkRequest struct {
-}
-
-type UpdateSIPTrunkRequest struct {
-	Name    string   `json:"name"`
-	Numbers []string `json:"numbers"`
 }
 
 type QueryAggregateCallStatsRequest struct {

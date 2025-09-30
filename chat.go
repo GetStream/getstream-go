@@ -192,7 +192,7 @@ func (c *ChatClient) SendEvent(ctx context.Context, _type string, id string, req
 }
 
 // Deletes previously uploaded file
-func (c *ChatClient) DeleteChannelFile(ctx context.Context, _type string, id string, request *DeleteChannelFileRequest) (*StreamResponse[Response], error) {
+func (c *ChatClient) DeleteFile(ctx context.Context, _type string, id string, request *DeleteFileRequest) (*StreamResponse[Response], error) {
 	var result Response
 	pathParams := map[string]string{
 		"type": _type,
@@ -204,13 +204,13 @@ func (c *ChatClient) DeleteChannelFile(ctx context.Context, _type string, id str
 }
 
 // Uploads file
-func (c *ChatClient) UploadChannelFile(ctx context.Context, _type string, id string, request *UploadChannelFileRequest) (*StreamResponse[UploadChannelFileResponse], error) {
-	var result UploadChannelFileResponse
+func (c *ChatClient) UploadFile(ctx context.Context, _type string, id string, request *UploadFileRequest) (*StreamResponse[FileUploadResponse], error) {
+	var result FileUploadResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	res, err := MakeRequest[UploadChannelFileRequest, UploadChannelFileResponse](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/file", nil, request, &result, pathParams)
+	res, err := MakeRequest[UploadFileRequest, FileUploadResponse](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/file", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -230,7 +230,7 @@ func (c *ChatClient) HideChannel(ctx context.Context, _type string, id string, r
 }
 
 // Deletes previously uploaded image
-func (c *ChatClient) DeleteChannelImage(ctx context.Context, _type string, id string, request *DeleteChannelImageRequest) (*StreamResponse[Response], error) {
+func (c *ChatClient) DeleteImage(ctx context.Context, _type string, id string, request *DeleteImageRequest) (*StreamResponse[Response], error) {
 	var result Response
 	pathParams := map[string]string{
 		"type": _type,
@@ -242,13 +242,13 @@ func (c *ChatClient) DeleteChannelImage(ctx context.Context, _type string, id st
 }
 
 // Uploads image
-func (c *ChatClient) UploadChannelImage(ctx context.Context, _type string, id string, request *UploadChannelImageRequest) (*StreamResponse[UploadChannelResponse], error) {
-	var result UploadChannelResponse
+func (c *ChatClient) UploadImage(ctx context.Context, _type string, id string, request *UploadImageRequest) (*StreamResponse[ImageUploadResponse], error) {
+	var result ImageUploadResponse
 	pathParams := map[string]string{
 		"type": _type,
 		"id":   id,
 	}
-	res, err := MakeRequest[UploadChannelImageRequest, UploadChannelResponse](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/image", nil, request, &result, pathParams)
+	res, err := MakeRequest[UploadImageRequest, ImageUploadResponse](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/image", nil, request, &result, pathParams)
 	return res, err
 }
 

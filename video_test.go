@@ -9,6 +9,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestVideoGetActiveCallsStatus(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().GetActiveCallsStatus(context.Background(), &getstream.GetActiveCallsStatusRequest{})
+	require.NoError(t, err)
+}
 func TestVideoQueryUserFeedback(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -322,69 +329,6 @@ func TestVideoGetEdges(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Video().GetEdges(context.Background(), &getstream.GetEdgesRequest{})
-	require.NoError(t, err)
-}
-func TestVideoResolveSipInbound(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Video().ResolveSipInbound(context.Background(), &getstream.ResolveSipInboundRequest{})
-	require.NoError(t, err)
-}
-func TestVideoListSIPInboundRoutingRule(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Video().ListSIPInboundRoutingRule(context.Background(), &getstream.ListSIPInboundRoutingRuleRequest{})
-	require.NoError(t, err)
-}
-func TestVideoCreateSIPInboundRoutingRule(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Video().CreateSIPInboundRoutingRule(context.Background(), &getstream.CreateSIPInboundRoutingRuleRequest{})
-	require.NoError(t, err)
-}
-func TestVideoDeleteSIPInboundRoutingRule(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Video().DeleteSIPInboundRoutingRule(context.Background(), "", &getstream.DeleteSIPInboundRoutingRuleRequest{})
-	require.NoError(t, err)
-}
-func TestVideoUpdateSIPInboundRoutingRule(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Video().UpdateSIPInboundRoutingRule(context.Background(), "", &getstream.UpdateSIPInboundRoutingRuleRequest{})
-	require.NoError(t, err)
-}
-func TestVideoListSIPTrunks(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Video().ListSIPTrunks(context.Background(), &getstream.ListSIPTrunksRequest{})
-	require.NoError(t, err)
-}
-func TestVideoCreateSIPTrunk(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Video().CreateSIPTrunk(context.Background(), &getstream.CreateSIPTrunkRequest{})
-	require.NoError(t, err)
-}
-func TestVideoDeleteSIPTrunk(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Video().DeleteSIPTrunk(context.Background(), "", &getstream.DeleteSIPTrunkRequest{})
-	require.NoError(t, err)
-}
-func TestVideoUpdateSIPTrunk(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Video().UpdateSIPTrunk(context.Background(), "", &getstream.UpdateSIPTrunkRequest{})
 	require.NoError(t, err)
 }
 func TestVideoQueryAggregateCallStats(t *testing.T) {

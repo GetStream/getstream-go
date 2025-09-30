@@ -299,7 +299,7 @@ func (c *Client) DeleteFile(ctx context.Context, request *DeleteFileRequest) (*S
 // Uploads file
 func (c *Client) UploadFile(ctx context.Context, request *UploadFileRequest) (*StreamResponse[FileUploadResponse], error) {
 	var result FileUploadResponse
-	res, err := MakeRequest[UploadFileRequest, FileUploadResponse](c, ctx, "POST", "/api/v2/uploads/file", nil, request, &result, nil)
+	res, err := MakeRequest[FileUploadRequest, FileUploadResponse](c, ctx, "POST", "/api/v2/uploads/file", nil, request, &result, nil)
 	return res, err
 }
 
@@ -314,7 +314,7 @@ func (c *Client) DeleteImage(ctx context.Context, request *DeleteImageRequest) (
 // Uploads image
 func (c *Client) UploadImage(ctx context.Context, request *UploadImageRequest) (*StreamResponse[ImageUploadResponse], error) {
 	var result ImageUploadResponse
-	res, err := MakeRequest[UploadImageRequest, ImageUploadResponse](c, ctx, "POST", "/api/v2/uploads/image", nil, request, &result, nil)
+	res, err := MakeRequest[ImageUploadRequest, ImageUploadResponse](c, ctx, "POST", "/api/v2/uploads/image", nil, request, &result, nil)
 	return res, err
 }
 
