@@ -570,6 +570,23 @@ func (c *FeedsClient) UpdateFeedView(ctx context.Context, id string, request *Up
 	return res, err
 }
 
+// Gets all available feed visibility configurations and their permissions
+func (c *FeedsClient) ListFeedVisibilities(ctx context.Context, request *ListFeedVisibilitiesRequest) (*StreamResponse[ListFeedVisibilitiesResponse], error) {
+	var result ListFeedVisibilitiesResponse
+	res, err := MakeRequest[any, ListFeedVisibilitiesResponse](c.client, ctx, "GET", "/api/v2/feeds/feed_visibilities", nil, nil, &result, nil)
+	return res, err
+}
+
+// Gets feed visibility configuration and permissions
+func (c *FeedsClient) GetFeedVisibility(ctx context.Context, name string, request *GetFeedVisibilityRequest) (*StreamResponse[GetFeedVisibilityResponse], error) {
+	var result GetFeedVisibilityResponse
+	pathParams := map[string]string{
+		"name": name,
+	}
+	res, err := MakeRequest[any, GetFeedVisibilityResponse](c.client, ctx, "GET", "/api/v2/feeds/feed_visibilities/{name}", nil, nil, &result, pathParams)
+	return res, err
+}
+
 // Create multiple feeds at once for a given feed group
 func (c *FeedsClient) CreateFeedsBatch(ctx context.Context, request *CreateFeedsBatchRequest) (*StreamResponse[CreateFeedsBatchResponse], error) {
 	var result CreateFeedsBatchResponse
@@ -584,7 +601,7 @@ func (c *FeedsClient) QueryFeeds(ctx context.Context, request *QueryFeedsRequest
 	return res, err
 }
 
-// Updates a follow's custom data, push preference, and follower role. Source owner can update custom data and push preference. Target owner can update follower role.
+// Updates a follow's custom data, push preference, and follower role. Source owner can update custom data and push preference. Follower role can only be updated via server-side requests.
 func (c *FeedsClient) UpdateFollow(ctx context.Context, request *UpdateFollowRequest) (*StreamResponse[UpdateFollowResponse], error) {
 	var result UpdateFollowResponse
 	res, err := MakeRequest[UpdateFollowRequest, UpdateFollowResponse](c.client, ctx, "PATCH", "/api/v2/feeds/follows", nil, request, &result, nil)
