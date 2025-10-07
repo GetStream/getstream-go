@@ -506,6 +506,20 @@ func (c *VideoClient) DeleteTranscription(ctx context.Context, _type string, id 
 	return res, err
 }
 
+func (c *VideoClient) GetCallSessionParticipantStatsDetails(ctx context.Context, callType string, callID string, session string, user string, userSession string, request *GetCallSessionParticipantStatsDetailsRequest) (*StreamResponse[GetCallSessionParticipantStatsDetailsResponse], error) {
+	var result GetCallSessionParticipantStatsDetailsResponse
+	pathParams := map[string]string{
+		"call_type":    callType,
+		"call_id":      callID,
+		"session":      session,
+		"user":         user,
+		"user_session": userSession,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetCallSessionParticipantStatsDetailsResponse](c.client, ctx, "GET", "/api/v2/video/call_stats/{call_type}/{call_id}/{session}/participant/{user}/{user_session}/details", params, nil, &result, pathParams)
+	return res, err
+}
+
 func (c *VideoClient) QueryCallSessionParticipantStats(ctx context.Context, callType string, callID string, session string, request *QueryCallSessionParticipantStatsRequest) (*StreamResponse[QueryCallSessionParticipantStatsResponse], error) {
 	var result QueryCallSessionParticipantStatsResponse
 	pathParams := map[string]string{
@@ -515,6 +529,20 @@ func (c *VideoClient) QueryCallSessionParticipantStats(ctx context.Context, call
 	}
 	params := extractQueryParams(request)
 	res, err := MakeRequest[any, QueryCallSessionParticipantStatsResponse](c.client, ctx, "GET", "/api/v2/video/call_stats/{call_type}/{call_id}/{session}/participants", params, nil, &result, pathParams)
+	return res, err
+}
+
+func (c *VideoClient) GetCallSessionParticipantStatsTimeline(ctx context.Context, callType string, callID string, session string, user string, userSession string, request *GetCallSessionParticipantStatsTimelineRequest) (*StreamResponse[QueryCallSessionParticipantStatsTimelineResponse], error) {
+	var result QueryCallSessionParticipantStatsTimelineResponse
+	pathParams := map[string]string{
+		"call_type":    callType,
+		"call_id":      callID,
+		"session":      session,
+		"user":         user,
+		"user_session": userSession,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, QueryCallSessionParticipantStatsTimelineResponse](c.client, ctx, "GET", "/api/v2/video/call_stats/{call_type}/{call_id}/{session}/participants/{user}/{user_session}/timeline", params, nil, &result, pathParams)
 	return res, err
 }
 

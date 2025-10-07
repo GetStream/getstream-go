@@ -546,7 +546,7 @@ func test06AddReaction(t *testing.T, ctx context.Context, feedsClient *getstream
 	*createdActivityIDs = append(*createdActivityIDs, activityID)
 
 	// snippet-start: AddReaction
-	response, err := feedsClient.AddReaction(ctx, activityID, &getstream.AddReactionRequest{
+	response, err := feedsClient.AddActivityReaction(ctx, activityID, &getstream.AddActivityReactionRequest{
 		Type:   "like",
 		UserID: &testUserID,
 	})
@@ -574,7 +574,7 @@ func test07QueryReactions(t *testing.T, ctx context.Context, feedsClient *getstr
 	*createdActivityIDs = append(*createdActivityIDs, activityID)
 
 	// Add a reaction first
-	reactionResponse, err := feedsClient.AddReaction(ctx, activityID, &getstream.AddReactionRequest{
+	reactionResponse, err := feedsClient.AddActivityReaction(ctx, activityID, &getstream.AddActivityReactionRequest{
 		Type:   "like",
 		UserID: &testUserID,
 	})
@@ -621,7 +621,7 @@ func test08AddComment(t *testing.T, ctx context.Context, feedsClient *getstream.
 
 	// snippet-start: AddComment
 	response, err := feedsClient.AddComment(ctx, &getstream.AddCommentRequest{
-		Comment:    "This is a test comment from Go SDK",
+		Comment:    getstream.PtrTo("This is a test comment from Go SDK"),
 		ObjectID:   activityID,
 		ObjectType: "activity",
 		UserID:     &testUserID,
@@ -658,7 +658,7 @@ func test09QueryComments(t *testing.T, ctx context.Context, feedsClient *getstre
 
 	// Add a comment first
 	commentResponse, err := feedsClient.AddComment(ctx, &getstream.AddCommentRequest{
-		Comment:    "Comment for query test",
+		Comment:    getstream.PtrTo("Comment for query test"),
 		ObjectID:   activityID,
 		ObjectType: "activity",
 		UserID:     &testUserID,
@@ -697,7 +697,7 @@ func test10UpdateComment(t *testing.T, ctx context.Context, feedsClient *getstre
 
 	// Add a comment to update
 	commentResponse, err := feedsClient.AddComment(ctx, &getstream.AddCommentRequest{
-		Comment:    "Comment to be updated",
+		Comment:    getstream.PtrTo("Comment to be updated"),
 		ObjectID:   activityID,
 		ObjectType: "activity",
 		UserID:     &testUserID,
@@ -1024,7 +1024,7 @@ func test20DeleteReaction(t *testing.T, ctx context.Context, feedsClient *getstr
 	*createdActivityIDs = append(*createdActivityIDs, activityID)
 
 	// Add a reaction first
-	reactionResponse, err := feedsClient.AddReaction(ctx, activityID, &getstream.AddReactionRequest{
+	reactionResponse, err := feedsClient.AddActivityReaction(ctx, activityID, &getstream.AddActivityReactionRequest{
 		Type:   "like",
 		UserID: &testUserID,
 	})
@@ -1059,7 +1059,7 @@ func test21DeleteComment(t *testing.T, ctx context.Context, feedsClient *getstre
 
 	// Add a comment first
 	commentResponse, err := feedsClient.AddComment(ctx, &getstream.AddCommentRequest{
-		Comment:    "Comment to be deleted",
+		Comment:    getstream.PtrTo("Comment to be deleted"),
 		ObjectID:   activityID,
 		ObjectType: "activity",
 		UserID:     &testUserID,
@@ -1559,7 +1559,7 @@ func test32RealWorldUsageDemo(t *testing.T, ctx context.Context, feedsClient *ge
 	// 2. Other users react to the post
 	reactionTypes := []string{"like", "love", "wow"}
 	for _, reactionType := range reactionTypes {
-		reactionResponse, err := feedsClient.AddReaction(ctx, postID, &getstream.AddReactionRequest{
+		reactionResponse, err := feedsClient.AddActivityReaction(ctx, postID, &getstream.AddActivityReactionRequest{
 			Type:   reactionType,
 			UserID: &testUserID2,
 		})
@@ -1575,7 +1575,7 @@ func test32RealWorldUsageDemo(t *testing.T, ctx context.Context, feedsClient *ge
 
 	for _, commentText := range comments {
 		commentResponse, err := feedsClient.AddComment(ctx, &getstream.AddCommentRequest{
-			Comment:    commentText,
+			Comment:    getstream.PtrTo(commentText),
 			ObjectID:   postID,
 			ObjectType: "activity",
 			UserID:     &testUserID2,
