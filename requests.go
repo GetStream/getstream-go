@@ -177,11 +177,11 @@ type SendEventRequest struct {
 	Event EventRequest `json:"event"`
 }
 
-type DeleteFileRequest struct {
+type DeleteChannelFileRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 
-type UploadFileRequest struct {
+type UploadChannelFileRequest struct {
 	File *string     `json:"file"`
 	User *OnlyUserID `json:"user"`
 }
@@ -192,11 +192,11 @@ type HideChannelRequest struct {
 	User         *UserRequest `json:"user"`
 }
 
-type DeleteImageRequest struct {
+type DeleteChannelImageRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 
-type UploadImageRequest struct {
+type UploadChannelImageRequest struct {
 	File        *string     `json:"file"`
 	UploadSizes []ImageSize `json:"upload_sizes"`
 	User        *OnlyUserID `json:"user"`
@@ -464,16 +464,6 @@ type UndeleteMessageRequest struct {
 	Message       MessageRequest `json:"message"`
 	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
 	SkipPush      *bool          `json:"skip_push"`
-}
-
-type CastPollVoteRequest struct {
-	UserID *string      `json:"user_id"`
-	User   *UserRequest `json:"user"`
-	Vote   *VoteData    `json:"vote"`
-}
-
-type DeletePollVoteRequest struct {
-	UserID *string `json:"-" query:"user_id"`
 }
 
 type DeleteReminderRequest struct {
@@ -756,9 +746,20 @@ type ActivityFeedbackRequest struct {
 	User     *UserRequest `json:"user"`
 }
 
+type CastPollVoteRequest struct {
+	UserID *string      `json:"user_id"`
+	User   *UserRequest `json:"user"`
+	Vote   *VoteData    `json:"vote"`
+}
+
+type DeletePollVoteRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
 type AddReactionRequest struct {
 	Type                       string         `json:"type"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
+	EnforceUnique              *bool          `json:"enforce_unique"`
 	SkipPush                   *bool          `json:"skip_push"`
 	UserID                     *string        `json:"user_id"`
 	Custom                     map[string]any `json:"custom"`
@@ -885,6 +886,7 @@ type UpdateCommentRequest struct {
 type AddCommentReactionRequest struct {
 	Type                       string         `json:"type"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
+	EnforceUnique              *bool          `json:"enforce_unique"`
 	SkipPush                   *bool          `json:"skip_push"`
 	UserID                     *string        `json:"user_id"`
 	Custom                     map[string]any `json:"custom"`
@@ -1061,6 +1063,12 @@ type UpdateFeedViewRequest struct {
 	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
 	Aggregation        *AggregationConfig        `json:"aggregation"`
 	Ranking            *RankingConfig            `json:"ranking"`
+}
+
+type ListFeedVisibilitiesRequest struct {
+}
+
+type GetFeedVisibilityRequest struct {
 }
 
 type CreateFeedsBatchRequest struct {
@@ -1527,6 +1535,25 @@ type DeleteRoleRequest struct {
 type GetTaskRequest struct {
 }
 
+type DeleteFileRequest struct {
+	Url *string `json:"-" query:"url"`
+}
+
+type UploadFileRequest struct {
+	File *string     `json:"file"`
+	User *OnlyUserID `json:"user"`
+}
+
+type DeleteImageRequest struct {
+	Url *string `json:"-" query:"url"`
+}
+
+type UploadImageRequest struct {
+	File        *string     `json:"file"`
+	UploadSizes []ImageSize `json:"upload_sizes"`
+	User        *OnlyUserID `json:"user"`
+}
+
 type QueryUsersRequest struct {
 	Payload *QueryUsersPayload `json:"-" query:"payload"`
 }
@@ -1829,6 +1856,11 @@ type DeleteRecordingRequest struct {
 }
 
 type DeleteTranscriptionRequest struct {
+}
+
+type QueryCallSessionParticipantStatsRequest struct {
+	Sort             []SortParamRequest `json:"-" query:"sort"`
+	FilterConditions map[string]any     `json:"-" query:"filter_conditions"`
 }
 
 type QueryCallsRequest struct {
