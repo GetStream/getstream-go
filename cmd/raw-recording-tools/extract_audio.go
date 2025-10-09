@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/GetStream/getstream-go/v3"
 )
 
 type ExtractAudioArgs struct {
@@ -32,13 +34,6 @@ func runExtractAudio(args []string, globalArgs *GlobalArgs) {
 
 	if err := fs.Parse(args); err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing flags: %v\n", err)
-		os.Exit(1)
-	}
-
-	// Validate global arguments
-	if err := validateGlobalArgs(globalArgs, "extract-audio"); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		printExtractAudioUsage()
 		os.Exit(1)
 	}
 
@@ -80,7 +75,7 @@ func runExtractAudio(args []string, globalArgs *GlobalArgs) {
 	fmt.Printf("  Fill gaps: %t\n", extractAudioArgs.FillGaps)
 
 	// Implement extract audio functionality
-	if err := extractTracks(globalArgs, extractAudioArgs.UserID, extractAudioArgs.SessionID, extractAudioArgs.TrackID, metadata, "audio", "both", extractAudioArgs.FillGaps, logger); err != nil {
+	if err := extractAudioTracks(globalArgs, extractAudioArgs, metadata, logger); err != nil {
 		logger.Error("Failed to extract audio: %v", err)
 	}
 
@@ -111,4 +106,20 @@ func printExtractAudioUsage() {
 	fmt.Fprintf(os.Stderr, "  # Extract audio for specific user/session, all tracks\n")
 	fmt.Fprintf(os.Stderr, "  raw-tools --inputFile recording.zip --output ./out extract-audio --userId user123 --sessionId session456 --trackId '*'\n\n")
 	fmt.Fprintf(os.Stderr, "Global Options: Use 'raw-tools --help' to see global options.\n")
+}
+
+func extractAudioTracks(globalArgs *GlobalArgs, extractAudioArgs *ExtractAudioArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
+	// Extract to temp directory if needed (unified approach)
+	workingDir, cleanup, err := extractToTempDir(globalArgs.InputFile, logger)
+	if err != nil {
+		return fmt.Errorf("failed to prepare working directory: %w", err)
+	}
+	defer cleanup()
+
+	// Create output directory if it doesn't exist
+	if e := os.MkdirAll(globalArgs.Output, 0755); e != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	return extractTracks(workingDir, globalArgs.Output, extractAudioArgs.UserID, extractAudioArgs.SessionID, extractAudioArgs.TrackID, metadata, "audio", "both", extractAudioArgs.FillGaps, logger)
 }

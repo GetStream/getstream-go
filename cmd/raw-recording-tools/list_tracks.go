@@ -36,13 +36,6 @@ func runListTracks(args []string, globalArgs *GlobalArgs) {
 		os.Exit(1)
 	}
 
-	// Validate global arguments
-	if err := validateGlobalArgs(globalArgs, "list-tracks"); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		printListTracksUsage()
-		os.Exit(1)
-	}
-
 	// Setup logger
 	logger := setupLogger(globalArgs.Verbose)
 

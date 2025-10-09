@@ -14,22 +14,7 @@ import (
 )
 
 // Generic track extraction function that works for both audio and video
-func extractTracks(globalArgs *GlobalArgs, userID, sessionID, trackID string, metadata *RecordingMetadata, trackType, mediaFilter string, fillGaps bool, logger *getstream.DefaultLogger) error {
-	var inputPath string
-	if globalArgs.InputFile != "" {
-		inputPath = globalArgs.InputFile
-	} else {
-		// TODO: Handle S3 input
-		return fmt.Errorf("S3 input not yet supported")
-	}
-
-	// Extract to temp directory if needed (unified approach)
-	workingDir, cleanup, err := extractToTempDir(inputPath, logger)
-	if err != nil {
-		return fmt.Errorf("failed to prepare working directory: %w", err)
-	}
-	defer cleanup()
-
+func extractTracks(workingDir, outputDir, userID, sessionID, trackID string, metadata *RecordingMetadata, trackType, mediaFilter string, fillGaps bool, logger *getstream.DefaultLogger) error {
 	// Filter tracks to specified type only and apply hierarchical filtering
 	filteredTracks := FilterTracks(metadata.Tracks, userID, sessionID, trackID, trackType, mediaFilter)
 	if len(filteredTracks) == 0 {
@@ -39,17 +24,11 @@ func extractTracks(globalArgs *GlobalArgs, userID, sessionID, trackID string, me
 
 	logger.Info("Found %d %s tracks to extract", len(filteredTracks), trackType)
 
-	// Create output directory if it doesn't exist
-	err = os.MkdirAll(globalArgs.Output, 0755)
-	if err != nil {
-		return fmt.Errorf("failed to create output directory: %w", err)
-	}
-
 	// Extract and convert each track
 	for i, track := range filteredTracks {
 		logger.Info("Processing %s track %d/%d: %s", trackType, i+1, len(filteredTracks), track.TrackID)
 
-		err = extractSingleTrackWithOptions(workingDir, track, globalArgs.Output, trackType, fillGaps, logger)
+		err := extractSingleTrackWithOptions(workingDir, track, outputDir, trackType, fillGaps, logger)
 		if err != nil {
 			logger.Error("Failed to extract %s track %s: %v", trackType, track.TrackID, err)
 			continue

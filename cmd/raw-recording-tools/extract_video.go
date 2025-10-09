@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/GetStream/getstream-go/v3"
 )
 
 type ExtractVideoArgs struct {
@@ -35,13 +37,6 @@ func runExtractVideo(args []string, globalArgs *GlobalArgs) {
 		os.Exit(1)
 	}
 
-	// Validate global arguments
-	if err := validateGlobalArgs(globalArgs, "extract-video"); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		printExtractVideoUsage()
-		os.Exit(1)
-	}
-
 	// Validate input arguments against actual recording data
 	metadata, err := validateInputArgs(globalArgs, extractVideoArgs.UserID, extractVideoArgs.SessionID, extractVideoArgs.TrackID)
 	if err != nil {
@@ -57,14 +52,6 @@ func runExtractVideo(args []string, globalArgs *GlobalArgs) {
 	logger := setupLogger(globalArgs.Verbose)
 
 	logger.Info("Starting extract-video command")
-
-	// TODO: Implement extract video functionality
-	// This should:
-	// 1. Read the input file (zip or S3)
-	// 2. Filter tracks based on userId, sessionId, trackId
-	// 3. Extract video tracks and convert to playable format (webm, mp4, etc.)
-	// 4. Apply gap filling with black frames if requested
-	// 5. Save to output directory
 
 	fmt.Printf("Extract video command with hierarchical filtering:\n")
 	if globalArgs.InputFile != "" {
@@ -88,7 +75,7 @@ func runExtractVideo(args []string, globalArgs *GlobalArgs) {
 	fmt.Printf("  Fill gaps: %t\n", extractVideoArgs.FillGaps)
 
 	// Extract video tracks
-	if err := extractTracks(globalArgs, extractVideoArgs.UserID, extractVideoArgs.SessionID, extractVideoArgs.TrackID, metadata, "video", "both", extractVideoArgs.FillGaps, logger); err != nil {
+	if err := extractVideoTracks(globalArgs, extractVideoArgs, metadata, logger); err != nil {
 		logger.Error("Failed to extract video tracks: %v", err)
 		os.Exit(1)
 	}
@@ -120,4 +107,20 @@ func printExtractVideoUsage() {
 	fmt.Fprintf(os.Stderr, "  # Extract video for specific user/session, all tracks\n")
 	fmt.Fprintf(os.Stderr, "  raw-tools --inputFile recording.zip --output ./out extract-video --userId user123 --sessionId session456 --trackId '*'\n\n")
 	fmt.Fprintf(os.Stderr, "Global Options: Use 'raw-tools --help' to see global options.\n")
+}
+
+func extractVideoTracks(globalArgs *GlobalArgs, extractVideoArgs *ExtractVideoArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
+	// Extract to temp directory if needed (unified approach)
+	workingDir, cleanup, err := extractToTempDir(globalArgs.InputFile, logger)
+	if err != nil {
+		return fmt.Errorf("failed to prepare working directory: %w", err)
+	}
+	defer cleanup()
+
+	// Create output directory if it doesn't exist
+	if e := os.MkdirAll(globalArgs.Output, 0755); e != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	return extractTracks(workingDir, globalArgs.Output, extractVideoArgs.UserID, extractVideoArgs.SessionID, extractVideoArgs.TrackID, metadata, "video", "both", extractVideoArgs.FillGaps, logger)
 }

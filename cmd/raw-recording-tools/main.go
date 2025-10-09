@@ -97,6 +97,13 @@ func parseGlobalFlags(args []string, globalArgs *GlobalArgs) (string, []string) 
 		os.Exit(1)
 	}
 
+	// Validate global arguments
+	if e := validateGlobalArgs(globalArgs, command); e != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", e)
+		printUsage()
+		os.Exit(1)
+	}
+
 	return command, remainingArgs
 }
 
@@ -169,15 +176,4 @@ func runCompletion(args []string) {
 
 	shell := args[0]
 	generateCompletion(shell)
-}
-
-// getInputPath returns the input path from global args
-func getInputPath(globalArgs *GlobalArgs) string {
-	if globalArgs.InputFile != "" {
-		return globalArgs.InputFile
-	}
-	if globalArgs.InputS3 != "" {
-		return globalArgs.InputS3
-	}
-	return ""
 }
