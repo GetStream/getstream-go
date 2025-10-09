@@ -119,7 +119,7 @@ func processAllTracks(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, me
 
 	// Step 3: Mux audio and video files (keeping originals)
 	logger.Info("Step 3/3: Muxing audio and video tracks...")
-	err = muxAudioVideoTracksKeepOriginals(globalArgs, processAllArgs, logger)
+	err = muxAudioVideoTracksKeepOriginals(globalArgs, processAllArgs, metadata, logger)
 	if err != nil {
 		return fmt.Errorf("failed to mux audio and video tracks: %w", err)
 	}
@@ -149,7 +149,7 @@ func processAllTracks(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, me
 }
 
 // muxAudioVideoTracksKeepOriginals is like muxAudioVideoTracks but keeps the original audio/video files
-func muxAudioVideoTracksKeepOriginals(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, logger *getstream.DefaultLogger) error {
+func muxAudioVideoTracksKeepOriginals(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	// Find the generated audio and video WebM files
 	audioFiles, err := filepath.Glob(filepath.Join(globalArgs.Output, "audio_*.webm"))
 	if err != nil {
@@ -178,7 +178,7 @@ func muxAudioVideoTracksKeepOriginals(globalArgs *GlobalArgs, processAllArgs *Pr
 		videoFile := videoFiles[i]
 
 		// Calculate sync offset using segment timing information
-		offset, err := calculateSyncOffsetFromFiles(globalArgs.InputFile, audioFile, videoFile, logger)
+		offset, err := calculateSyncOffsetFromFiles(globalArgs.InputFile, audioFile, videoFile, metadata, logger)
 		if err != nil {
 			logger.Warn("Failed to calculate sync offset, using 0: %v", err)
 			offset = 0
