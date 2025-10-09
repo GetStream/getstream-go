@@ -87,7 +87,7 @@ func runMixAudio(args []string, globalArgs *GlobalArgs) {
 	logger.Info("Starting mix-audio command")
 
 	// Execute the mix-audio operation
-	err := mixAllAudioTracks(globalArgs, mixAudioArgs, logger)
+	err := mixAllAudioTracks(globalArgs, mixAudioArgs, nil, logger)
 	if err != nil {
 		logger.Error("Mix-audio failed: %v", err)
 	}
@@ -96,10 +96,10 @@ func runMixAudio(args []string, globalArgs *GlobalArgs) {
 }
 
 // mixAllAudioTracks orchestrates the entire audio mixing workflow using existing extraction logic
-func mixAllAudioTracks(globalArgs *GlobalArgs, mixAudioArgs *MixAudioArgs, logger *getstream.DefaultLogger) error {
+func mixAllAudioTracks(globalArgs *GlobalArgs, mixAudioArgs *MixAudioArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	// Step 1: Extract all matching audio tracks using existing extractTracks function
 	logger.Info("Step 1/2: Extracting all matching audio tracks...")
-	err := extractTracks(globalArgs, mixAudioArgs.UserID, mixAudioArgs.SessionID, mixAudioArgs.TrackID, "audio", "user", mixAudioArgs.FillGaps, logger)
+	err := extractTracks(globalArgs, mixAudioArgs.UserID, mixAudioArgs.SessionID, mixAudioArgs.TrackID, metadata, "audio", "user", mixAudioArgs.FillGaps, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract audio tracks: %w", err)
 	}

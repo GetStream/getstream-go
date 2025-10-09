@@ -4,8 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-
-	"github.com/GetStream/getstream-go/v3"
 )
 
 type ExtractVideoArgs struct {
@@ -45,7 +43,8 @@ func runExtractVideo(args []string, globalArgs *GlobalArgs) {
 	}
 
 	// Validate input arguments against actual recording data
-	if err := validateInputArgs(globalArgs, extractVideoArgs.UserID, extractVideoArgs.SessionID, extractVideoArgs.TrackID); err != nil {
+	metadata, err := validateInputArgs(globalArgs, extractVideoArgs.UserID, extractVideoArgs.SessionID, extractVideoArgs.TrackID)
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "Validation error: %v\n", err)
 		if globalArgs.InputFile != "" {
 			fmt.Fprintf(os.Stderr, "\nTip: Use 'raw-tools --inputFile %s --output %s list-tracks --format users' to see available user IDs\n",
@@ -89,16 +88,12 @@ func runExtractVideo(args []string, globalArgs *GlobalArgs) {
 	fmt.Printf("  Fill gaps: %t\n", extractVideoArgs.FillGaps)
 
 	// Extract video tracks
-	if err := extractVideoTracks(globalArgs, extractVideoArgs, logger); err != nil {
+	if err := extractTracks(globalArgs, extractVideoArgs.UserID, extractVideoArgs.SessionID, extractVideoArgs.TrackID, metadata, "video", "both", extractVideoArgs.FillGaps, logger); err != nil {
 		logger.Error("Failed to extract video tracks: %v", err)
 		os.Exit(1)
 	}
 
 	logger.Info("Extract video command completed successfully")
-}
-
-func extractVideoTracks(globalArgs *GlobalArgs, extractVideoArgs *ExtractVideoArgs, logger *getstream.DefaultLogger) error {
-	return extractTracks(globalArgs, extractVideoArgs.UserID, extractVideoArgs.SessionID, extractVideoArgs.TrackID, "video", "both", extractVideoArgs.FillGaps, logger)
 }
 
 func printExtractVideoUsage() {

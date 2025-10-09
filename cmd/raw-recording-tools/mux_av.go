@@ -48,7 +48,8 @@ func runMuxAV(args []string, globalArgs *GlobalArgs) {
 	}
 
 	// Validate input arguments against actual recording data
-	if err := validateInputArgs(globalArgs, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID); err != nil {
+	metadata, err := validateInputArgs(globalArgs, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID)
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "Validation error: %v\n", err)
 		if globalArgs.InputFile != "" {
 			fmt.Fprintf(os.Stderr, "\nTip: Use 'raw-tools --inputFile %s --output %s list-tracks --format users' to see available user IDs\n",
@@ -81,7 +82,7 @@ func runMuxAV(args []string, globalArgs *GlobalArgs) {
 	}
 
 	// Extract and mux audio/video tracks
-	if err := muxAudioVideoTracks(globalArgs, muxAVArgs, logger); err != nil {
+	if err := muxAudioVideoTracks(globalArgs, muxAVArgs, metadata, logger); err != nil {
 		logger.Error("Failed to mux audio/video tracks: %v", err)
 		os.Exit(1)
 	}
@@ -103,7 +104,7 @@ func printMuxAVUsage() {
 	fmt.Printf("  --media both     Mux both types, but ensure consistent pairing (default)\n")
 }
 
-func muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, logger *getstream.DefaultLogger) error {
+func muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	// Create a temporary directory for intermediate files
 	tempDir, err := os.MkdirTemp("", "mux-av-*")
 	if err != nil {
@@ -113,14 +114,14 @@ func muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, logger *g
 
 	// Extract audio tracks with gap filling enabled
 	logger.Info("Extracting audio tracks with gap filling...")
-	err = extractTracks(globalArgs, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID, "audio", muxAVArgs.Media, true, logger)
+	err = extractTracks(globalArgs, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID, metadata, "audio", muxAVArgs.Media, true, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract audio tracks: %w", err)
 	}
 
 	// Extract video tracks with gap filling enabled
 	logger.Info("Extracting video tracks with gap filling...")
-	err = extractTracks(globalArgs, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID, "video", muxAVArgs.Media, true, logger)
+	err = extractTracks(globalArgs, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID, metadata, "video", muxAVArgs.Media, true, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract video tracks: %w", err)
 	}
@@ -134,7 +135,11 @@ func muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, logger *g
 		return fmt.Errorf("no audio files generated")
 	}
 
-	videoFiles, err := filepath.Glob(filepath.Join(globalArgs.Output, "video_*.webm"))
+	webmVideoFiles, err := filepath.Glob(filepath.Join(globalArgs.Output, "video_*.webm"))
+	mp4VideoFiles, err := filepath.Glob(filepath.Join(globalArgs.Output, "video_*.mp4"))
+
+	videoFiles := append(webmVideoFiles, mp4VideoFiles...)
+
 	if err != nil {
 		return fmt.Errorf("failed to find video files: %w", err)
 	}
@@ -216,10 +221,10 @@ func calculateSyncOffsetFromFiles(inputPath, audioFile, videoFile string, logger
 
 // extractTrackIDFromFilename extracts track ID from generated filename
 func extractTrackIDFromFilename(filename string) string {
-	// Filename format: {type}_{userId}_{sessionId}_{trackId}.webm
+	// Filename format: {type}_{userId}_{sessionId}_{trackId}.suffix
 	base := filepath.Base(filename)
-	base = strings.TrimSuffix(base, ".webm")
-	parts := strings.Split(base, "_")
+	split := strings.Split(base, ".")
+	parts := strings.Split(split[0], "_")
 	if len(parts) >= 4 {
 		return parts[3] // trackId is the 4th part
 	}
@@ -229,11 +234,11 @@ func extractTrackIDFromFilename(filename string) string {
 // generateMuxedFilename creates output filename for muxed file
 func generateMuxedFilename(audioFile, videoFile, outputDir string) string {
 	// Extract common parts from audio filename
-	audioBase := filepath.Base(audioFile)
-	audioBase = strings.TrimSuffix(audioBase, ".webm")
+	videoBase := filepath.Base(videoFile)
+	split := strings.Split(videoBase, ".")
 
 	// Replace "audio_" with "muxed_" to create output name
-	muxedName := strings.Replace(audioBase, "audio_", "muxed_", 1) + ".webm"
+	muxedName := strings.Replace(split[0], "audio_", "muxed_", 1) + "." + split[1]
 
 	return filepath.Join(outputDir, muxedName)
 }
@@ -374,21 +379,16 @@ func muxTrackPairs(inputPath string, audioFiles, videoFiles []string, outputDir,
 
 // generateMediaAwareMuxedFilename creates output filename that indicates media type
 func generateMediaAwareMuxedFilename(audioFile, videoFile, outputDir, mediaTypeName string) string {
-	suffix := ".webm"
-	if strings.HasSuffix(videoFile, ".mp4") {
-		suffix = ".mkv"
-	}
-
 	// Extract common parts from audio filename
-	audioBase := filepath.Base(audioFile)
-	audioBase = strings.TrimSuffix(audioBase, suffix)
+	videoBase := filepath.Base(videoFile)
+	split := strings.Split(videoBase, ".")
 
 	// Replace "audio_" with "muxed_{mediaType}_" to create output name
 	var muxedName string
 	if mediaTypeName == "display" {
-		muxedName = strings.Replace(audioBase, "audio_", "muxed_display_", 1) + ".webm"
+		muxedName = strings.Replace(split[0], "audio_", "muxed_display_", 1) + "." + split[1]
 	} else {
-		muxedName = strings.Replace(audioBase, "audio_", "muxed_", 1) + ".webm"
+		muxedName = strings.Replace(split[0], "audio_", "muxed_", 1) + "." + split[1]
 	}
 
 	return filepath.Join(outputDir, muxedName)

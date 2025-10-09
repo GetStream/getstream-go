@@ -45,7 +45,8 @@ func runProcessAll(args []string, globalArgs *GlobalArgs) {
 	}
 
 	// Validate input arguments against actual recording data
-	if err := validateInputArgs(globalArgs, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID); err != nil {
+	metadata, err := validateInputArgs(globalArgs, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID)
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "Validation error: %v\n", err)
 		if globalArgs.InputFile != "" {
 			fmt.Fprintf(os.Stderr, "\nTip: Use 'raw-tools --inputFile %s --output %s list-tracks --format users' to see available user IDs\n",
@@ -78,7 +79,7 @@ func runProcessAll(args []string, globalArgs *GlobalArgs) {
 	}
 
 	// Process all tracks and mux them
-	if err := processAllTracks(globalArgs, processAllArgs, logger); err != nil {
+	if err := processAllTracks(globalArgs, processAllArgs, metadata, logger); err != nil {
 		logger.Error("Failed to process and mux tracks: %v", err)
 		os.Exit(1)
 	}
@@ -101,17 +102,17 @@ func printProcessAllUsage() {
 	fmt.Printf("  muxed_{userId}_{sessionId}_{trackId}.webm    - Combined audio+video file\n")
 }
 
-func processAllTracks(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, logger *getstream.DefaultLogger) error {
+func processAllTracks(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	// Step 1: Extract audio tracks with gap filling
 	logger.Info("Step 1/3: Extracting audio tracks with gap filling...")
-	err := extractTracks(globalArgs, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, "audio", "both", true, logger)
+	err := extractTracks(globalArgs, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, metadata, "audio", "both", true, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract audio tracks: %w", err)
 	}
 
 	// Step 2: Extract video tracks with gap filling
 	logger.Info("Step 2/3: Extracting video tracks with gap filling...")
-	err = extractTracks(globalArgs, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, "video", "both", true, logger)
+	err = extractTracks(globalArgs, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, metadata, "video", "both", true, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract video tracks: %w", err)
 	}

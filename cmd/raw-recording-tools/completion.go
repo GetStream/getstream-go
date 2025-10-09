@@ -289,11 +289,7 @@ complete -c raw-tools -n '__fish_seen_subcommand_from mux-av' -l sessionId -d 'S
 }
 
 // validateInputArgs validates input arguments using mutually exclusive logic
-func validateInputArgs(globalArgs *GlobalArgs, userID, sessionID, trackID string) error {
-	if globalArgs.InputFile == "" && globalArgs.InputS3 == "" {
-		return nil // Skip validation if no input specified yet
-	}
-
+func validateInputArgs(globalArgs *GlobalArgs, userID, sessionID, trackID string) (*RecordingMetadata, error) {
 	// Count how many filters are specified
 	filtersCount := 0
 	if userID != "" {
@@ -308,29 +304,28 @@ func validateInputArgs(globalArgs *GlobalArgs, userID, sessionID, trackID string
 
 	// Ensure filters are mutually exclusive
 	if filtersCount > 1 {
-		return fmt.Errorf("only one filter can be specified at a time: --userId, --sessionId, and --trackId are mutually exclusive")
+		return nil, fmt.Errorf("only one filter can be specified at a time: --userId, --sessionId, and --trackId are mutually exclusive")
 	}
-
-	// If no filters specified, no validation needed
-	if filtersCount == 0 {
-		return nil
-	}
-
-	// Parse metadata to validate the single specified argument
-	logger := setupLogger(false) // Use non-verbose for validation
-	parser := NewMetadataParser(logger)
 
 	var inputPath string
 	if globalArgs.InputFile != "" {
 		inputPath = globalArgs.InputFile
 	} else {
 		// TODO: Handle S3 validation
-		return nil
+		return nil, fmt.Errorf("Not implemented for now")
 	}
 
+	// Parse metadata to validate the single specified argument
+	logger := setupLogger(false) // Use non-verbose for validation
+	parser := NewMetadataParser(logger)
 	metadata, err := parser.ParseMetadataOnly(inputPath)
 	if err != nil {
-		return fmt.Errorf("failed to parse recording for validation: %w", err)
+		return nil, fmt.Errorf("failed to parse recording for validation: %w", err)
+	}
+
+	// If no filters specified, no validation needed
+	if filtersCount == 0 {
+		return metadata, nil
 	}
 
 	// Validate the single specified filter
@@ -343,7 +338,7 @@ func validateInputArgs(globalArgs *GlobalArgs, userID, sessionID, trackID string
 			}
 		}
 		if !found {
-			return fmt.Errorf("trackID '%s' not found in recording. Use 'list-tracks --format tracks' to see available track IDs", trackID)
+			return nil, fmt.Errorf("trackID '%s' not found in recording. Use 'list-tracks --format tracks' to see available track IDs", trackID)
 		}
 	} else if sessionID != "" {
 		found := false
@@ -354,7 +349,7 @@ func validateInputArgs(globalArgs *GlobalArgs, userID, sessionID, trackID string
 			}
 		}
 		if !found {
-			return fmt.Errorf("sessionID '%s' not found in recording. Use 'list-tracks --format sessions' to see available session IDs", sessionID)
+			return nil, fmt.Errorf("sessionID '%s' not found in recording. Use 'list-tracks --format sessions' to see available session IDs", sessionID)
 		}
 	} else if userID != "" {
 		found := false
@@ -365,9 +360,9 @@ func validateInputArgs(globalArgs *GlobalArgs, userID, sessionID, trackID string
 			}
 		}
 		if !found {
-			return fmt.Errorf("userID '%s' not found in recording. Use 'list-tracks --format users' to see available user IDs", userID)
+			return nil, fmt.Errorf("userID '%s' not found in recording. Use 'list-tracks --format users' to see available user IDs", userID)
 		}
 	}
 
-	return nil
+	return metadata, nil
 }

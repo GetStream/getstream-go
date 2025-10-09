@@ -4,8 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-
-	"github.com/GetStream/getstream-go/v3"
 )
 
 type ExtractAudioArgs struct {
@@ -45,7 +43,8 @@ func runExtractAudio(args []string, globalArgs *GlobalArgs) {
 	}
 
 	// Validate input arguments against actual recording data
-	if err := validateInputArgs(globalArgs, extractAudioArgs.UserID, extractAudioArgs.SessionID, extractAudioArgs.TrackID); err != nil {
+	metadata, err := validateInputArgs(globalArgs, extractAudioArgs.UserID, extractAudioArgs.SessionID, extractAudioArgs.TrackID)
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "Validation error: %v\n", err)
 		if globalArgs.InputFile != "" {
 			fmt.Fprintf(os.Stderr, "\nTip: Use 'raw-tools --inputFile %s --output %s list-tracks --format users' to see available user IDs\n",
@@ -81,8 +80,7 @@ func runExtractAudio(args []string, globalArgs *GlobalArgs) {
 	fmt.Printf("  Fill gaps: %t\n", extractAudioArgs.FillGaps)
 
 	// Implement extract audio functionality
-	err := extractAudioTracks(globalArgs, extractAudioArgs, logger)
-	if err != nil {
+	if err := extractTracks(globalArgs, extractAudioArgs.UserID, extractAudioArgs.SessionID, extractAudioArgs.TrackID, metadata, "audio", "both", extractAudioArgs.FillGaps, logger); err != nil {
 		logger.Error("Failed to extract audio: %v", err)
 	}
 
@@ -113,8 +111,4 @@ func printExtractAudioUsage() {
 	fmt.Fprintf(os.Stderr, "  # Extract audio for specific user/session, all tracks\n")
 	fmt.Fprintf(os.Stderr, "  raw-tools --inputFile recording.zip --output ./out extract-audio --userId user123 --sessionId session456 --trackId '*'\n\n")
 	fmt.Fprintf(os.Stderr, "Global Options: Use 'raw-tools --help' to see global options.\n")
-}
-
-func extractAudioTracks(globalArgs *GlobalArgs, extractAudioArgs *ExtractAudioArgs, logger *getstream.DefaultLogger) error {
-	return extractTracks(globalArgs, extractAudioArgs.UserID, extractAudioArgs.SessionID, extractAudioArgs.TrackID, "audio", "both", extractAudioArgs.FillGaps, logger)
 }

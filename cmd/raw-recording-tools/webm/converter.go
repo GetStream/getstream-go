@@ -18,8 +18,8 @@ import (
 	"github.com/pion/webrtc/v4/pkg/media/samplebuilder"
 )
 
-const audioMaxLate = 100 // 2sec
-const videoMaxLate = 500 // 2sec
+const audioMaxLate = 200  // 4sec
+const videoMaxLate = 1000 // 4sec
 
 type RTPDump2WebMConverter struct {
 	logger        *getstream.DefaultLogger

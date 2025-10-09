@@ -46,12 +46,6 @@ func NewMetadataParser(logger *getstream.DefaultLogger) *MetadataParser {
 	}
 }
 
-// ParseRecording extracts metadata from a raw recording directory
-// NOTE: Now simplified to only handle directories since we always extract to tempdir first
-func (p *MetadataParser) ParseRecording(inputPath string) (*RecordingMetadata, error) {
-	return p.parseDirectory(inputPath)
-}
-
 // ParseMetadataOnly efficiently extracts only metadata from archives (optimized for list-tracks)
 // This is much faster than full extraction when you only need timing metadata
 func (p *MetadataParser) ParseMetadataOnly(inputPath string) (*RecordingMetadata, error) {
@@ -293,7 +287,7 @@ func (p *MetadataParser) extractUniqueSessions(tracks []*TrackInfo) []string {
 // Only one filter (userID, sessionID, or trackID) can be specified at a time
 // Empty values are ignored, specific values must match
 // If all are empty, all tracks are returned
-func (p *MetadataParser) FilterTracks(tracks []*TrackInfo, userID, sessionID, trackID string) []*TrackInfo {
+func FilterTracks(tracks []*TrackInfo, userID, sessionID, trackID string) []*TrackInfo {
 	filtered := make([]*TrackInfo, 0)
 
 	for _, track := range tracks {
