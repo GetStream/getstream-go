@@ -18,7 +18,7 @@ type MuxAVArgs struct {
 	Media     string // "user", "display", or "both" (default)
 }
 
-func runMuxAV(args []string, globalArgs *GlobalArgs) {
+func runMuxAV(args []string, globalArgs *GlobalArgs, logger *getstream.DefaultLogger) {
 	printHelpIfAsked(args, printMuxAVUsage)
 
 	// Parse command-specific flags
@@ -45,8 +45,6 @@ func runMuxAV(args []string, globalArgs *GlobalArgs) {
 		os.Exit(1)
 	}
 
-	// Set up logger
-	logger := setupLogger(globalArgs.Verbose)
 	logger.Info("Starting mux-av command")
 
 	// Display hierarchy information for user clarity
@@ -92,18 +90,6 @@ func printMuxAVUsage() {
 }
 
 func muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	// Extract to temp directory if needed (unified approach)
-	workingDir, cleanup, err := extractToTempDir(globalArgs.InputFile, logger)
-	if err != nil {
-		return fmt.Errorf("failed to prepare working directory: %w", err)
-	}
-	defer cleanup()
-
-	// Create output directory if it doesn't exist
-	if e := os.MkdirAll(globalArgs.Output, 0755); e != nil {
-		return fmt.Errorf("failed to create output directory: %w", err)
-	}
-
 	// Create a temporary directory for intermediate files
 	tempDir, err := os.MkdirTemp("", "mux-av-*")
 	if err != nil {
@@ -113,14 +99,14 @@ func muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata 
 
 	// Extract audio tracks with gap filling enabled
 	logger.Info("Extracting audio tracks with gap filling...")
-	err = extractTracks(workingDir, globalArgs.Output, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID, metadata, "audio", muxAVArgs.Media, true, logger)
+	err = extractTracks(globalArgs.WorkDir, globalArgs.Output, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID, metadata, "audio", muxAVArgs.Media, true, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract audio tracks: %w", err)
 	}
 
 	// Extract video tracks with gap filling enabled
 	logger.Info("Extracting video tracks with gap filling...")
-	err = extractTracks(workingDir, globalArgs.Output, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID, metadata, "video", muxAVArgs.Media, true, logger)
+	err = extractTracks(globalArgs.WorkDir, globalArgs.Output, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID, metadata, "video", muxAVArgs.Media, true, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract video tracks: %w", err)
 	}

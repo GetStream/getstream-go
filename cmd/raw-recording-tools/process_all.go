@@ -16,7 +16,7 @@ type ProcessAllArgs struct {
 	TrackID   string
 }
 
-func runProcessAll(args []string, globalArgs *GlobalArgs) {
+func runProcessAll(args []string, globalArgs *GlobalArgs, logger *getstream.DefaultLogger) {
 	printHelpIfAsked(args, printProcessAllUsage)
 
 	// Parse command-specific flags
@@ -42,8 +42,6 @@ func runProcessAll(args []string, globalArgs *GlobalArgs) {
 		os.Exit(1)
 	}
 
-	// Set up logger
-	logger := setupLogger(globalArgs.Verbose)
 	logger.Info("Starting process-all command")
 
 	// Display hierarchy information for user clarity
@@ -90,28 +88,16 @@ func printProcessAllUsage() {
 }
 
 func processAllTracks(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	// Extract to temp directory if needed (unified approach)
-	workingDir, cleanup, err := extractToTempDir(globalArgs.InputFile, logger)
-	if err != nil {
-		return fmt.Errorf("failed to prepare working directory: %w", err)
-	}
-	defer cleanup()
-
-	// Create output directory if it doesn't exist
-	if e := os.MkdirAll(globalArgs.Output, 0755); e != nil {
-		return fmt.Errorf("failed to create output directory: %w", err)
-	}
-
 	// Step 1: Extract audio tracks with gap filling
 	logger.Info("Step 1/3: Extracting audio tracks with gap filling...")
-	err = extractTracks(workingDir, globalArgs.Output, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, metadata, "audio", "both", true, logger)
+	err := extractTracks(globalArgs.WorkDir, globalArgs.Output, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, metadata, "audio", "both", true, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract audio tracks: %w", err)
 	}
 
 	// Step 2: Extract video tracks with gap filling
 	logger.Info("Step 2/3: Extracting video tracks with gap filling...")
-	err = extractTracks(workingDir, globalArgs.Output, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, metadata, "video", "both", true, logger)
+	err = extractTracks(globalArgs.WorkDir, globalArgs.Output, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, metadata, "video", "both", true, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract video tracks: %w", err)
 	}

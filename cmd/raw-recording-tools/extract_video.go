@@ -15,7 +15,7 @@ type ExtractVideoArgs struct {
 	FillGaps  bool
 }
 
-func runExtractVideo(args []string, globalArgs *GlobalArgs) {
+func runExtractVideo(args []string, globalArgs *GlobalArgs, logger *getstream.DefaultLogger) {
 	printHelpIfAsked(args, printExtractVideoUsage)
 
 	// Parse command-specific flags
@@ -41,9 +41,6 @@ func runExtractVideo(args []string, globalArgs *GlobalArgs) {
 		}
 		os.Exit(1)
 	}
-
-	// Setup logger
-	logger := setupLogger(globalArgs.Verbose)
 
 	logger.Info("Starting extract-video command")
 
@@ -104,17 +101,5 @@ func printExtractVideoUsage() {
 }
 
 func extractVideoTracks(globalArgs *GlobalArgs, extractVideoArgs *ExtractVideoArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	// Extract to temp directory if needed (unified approach)
-	workingDir, cleanup, err := extractToTempDir(globalArgs.InputFile, logger)
-	if err != nil {
-		return fmt.Errorf("failed to prepare working directory: %w", err)
-	}
-	defer cleanup()
-
-	// Create output directory if it doesn't exist
-	if e := os.MkdirAll(globalArgs.Output, 0755); e != nil {
-		return fmt.Errorf("failed to create output directory: %w", err)
-	}
-
-	return extractTracks(workingDir, globalArgs.Output, extractVideoArgs.UserID, extractVideoArgs.SessionID, extractVideoArgs.TrackID, metadata, "video", "both", extractVideoArgs.FillGaps, logger)
+	return extractTracks(globalArgs.WorkDir, globalArgs.Output, extractVideoArgs.UserID, extractVideoArgs.SessionID, extractVideoArgs.TrackID, metadata, "video", "both", extractVideoArgs.FillGaps, logger)
 }

@@ -32,7 +32,7 @@ type AudioFileWithTiming struct {
 }
 
 // runMixAudio handles the mix-audio command
-func runMixAudio(args []string, globalArgs *GlobalArgs) {
+func runMixAudio(args []string, globalArgs *GlobalArgs, logger *getstream.DefaultLogger) {
 	printHelpIfAsked(args, printMixAudioUsage)
 
 	mixAudioArgs := &MixAudioArgs{
@@ -53,8 +53,6 @@ func runMixAudio(args []string, globalArgs *GlobalArgs) {
 		os.Exit(1)
 	}
 
-	// Setup logger
-	logger := setupLogger(globalArgs.Verbose)
 	logger.Info("Starting mix-audio command")
 
 	// Execute the mix-audio operation
@@ -68,21 +66,9 @@ func runMixAudio(args []string, globalArgs *GlobalArgs) {
 
 // mixAllAudioTracks orchestrates the entire audio mixing workflow using existing extraction logic
 func mixAllAudioTracks(globalArgs *GlobalArgs, mixAudioArgs *MixAudioArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	// Extract to temp directory if needed (unified approach)
-	workingDir, cleanup, err := extractToTempDir(globalArgs.InputFile, logger)
-	if err != nil {
-		return fmt.Errorf("failed to prepare working directory: %w", err)
-	}
-	defer cleanup()
-
-	// Create output directory if it doesn't exist
-	if e := os.MkdirAll(globalArgs.Output, 0755); e != nil {
-		return fmt.Errorf("failed to create output directory: %w", err)
-	}
-
 	// Step 1: Extract all matching audio tracks using existing extractTracks function
 	logger.Info("Step 1/2: Extracting all matching audio tracks...")
-	err = extractTracks(workingDir, globalArgs.Output, mixAudioArgs.UserID, mixAudioArgs.SessionID, mixAudioArgs.TrackID, metadata, "audio", "user", mixAudioArgs.FillGaps, logger)
+	err := extractTracks(globalArgs.WorkDir, globalArgs.Output, mixAudioArgs.UserID, mixAudioArgs.SessionID, mixAudioArgs.TrackID, metadata, "audio", "user", mixAudioArgs.FillGaps, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract audio tracks: %w", err)
 	}

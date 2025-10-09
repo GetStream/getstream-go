@@ -15,7 +15,7 @@ type ExtractAudioArgs struct {
 	FillGaps  bool
 }
 
-func runExtractAudio(args []string, globalArgs *GlobalArgs) {
+func runExtractAudio(args []string, globalArgs *GlobalArgs, logger *getstream.DefaultLogger) {
 	printHelpIfAsked(args, printExtractAudioUsage)
 
 	// Parse command-specific flags
@@ -41,9 +41,6 @@ func runExtractAudio(args []string, globalArgs *GlobalArgs) {
 		}
 		os.Exit(1)
 	}
-
-	// Setup logger
-	logger := setupLogger(globalArgs.Verbose)
 
 	logger.Info("Starting extract-audio command")
 
@@ -103,17 +100,5 @@ func printExtractAudioUsage() {
 }
 
 func extractAudioTracks(globalArgs *GlobalArgs, extractAudioArgs *ExtractAudioArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	// Extract to temp directory if needed (unified approach)
-	workingDir, cleanup, err := extractToTempDir(globalArgs.InputFile, logger)
-	if err != nil {
-		return fmt.Errorf("failed to prepare working directory: %w", err)
-	}
-	defer cleanup()
-
-	// Create output directory if it doesn't exist
-	if e := os.MkdirAll(globalArgs.Output, 0755); e != nil {
-		return fmt.Errorf("failed to create output directory: %w", err)
-	}
-
-	return extractTracks(workingDir, globalArgs.Output, extractAudioArgs.UserID, extractAudioArgs.SessionID, extractAudioArgs.TrackID, metadata, "audio", "both", extractAudioArgs.FillGaps, logger)
+	return extractTracks(globalArgs.WorkDir, globalArgs.Output, extractAudioArgs.UserID, extractAudioArgs.SessionID, extractAudioArgs.TrackID, metadata, "audio", "both", extractAudioArgs.FillGaps, logger)
 }

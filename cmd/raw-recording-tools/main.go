@@ -14,6 +14,8 @@ type GlobalArgs struct {
 	InputS3   string
 	Output    string
 	Verbose   bool
+
+	WorkDir string
 }
 
 func main() {
@@ -31,28 +33,56 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Setup logger
+	logger := setupLogger(globalArgs.Verbose)
+
 	switch command {
 	case "list-tracks":
 		runListTracks(remainingArgs, globalArgs)
-	case "extract-audio":
-		runExtractAudio(remainingArgs, globalArgs)
-	case "extract-video":
-		runExtractVideo(remainingArgs, globalArgs)
-	case "mux-av":
-		runMuxAV(remainingArgs, globalArgs)
-	case "mix-audio":
-		runMixAudio(remainingArgs, globalArgs)
-	case "process-all":
-		runProcessAll(remainingArgs, globalArgs)
 	case "completion":
 		runCompletion(remainingArgs)
 	case "help", "-h", "--help":
 		printUsage()
 	default:
+		if e := processCommand(command, globalArgs, remainingArgs, logger); e != nil {
+			logger.Error("Error processing command %s - %v", command, e)
+			os.Exit(1)
+		}
+	}
+}
+
+func processCommand(command string, globalArgs *GlobalArgs, remainingArgs []string, logger *getstream.DefaultLogger) error {
+	// Extract to temp directory if needed (unified approach)
+	workingDir, cleanup, err := extractToTempDir(globalArgs.InputFile, logger)
+	if err != nil {
+		return fmt.Errorf("failed to prepare working directory: %w", err)
+	}
+	defer cleanup()
+	globalArgs.WorkDir = workingDir
+
+	// Create output directory if it doesn't exist
+	if e := os.MkdirAll(globalArgs.Output, 0755); e != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	switch command {
+	case "extract-audio":
+		runExtractAudio(remainingArgs, globalArgs, logger)
+	case "extract-video":
+		runExtractVideo(remainingArgs, globalArgs, logger)
+	case "mux-av":
+		runMuxAV(remainingArgs, globalArgs, logger)
+	case "mix-audio":
+		runMixAudio(remainingArgs, globalArgs, logger)
+	case "process-all":
+		runProcessAll(remainingArgs, globalArgs, logger)
+	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		printUsage()
 		os.Exit(1)
 	}
+
+	return nil
 }
 
 // parseGlobalFlags parses global flags and returns the command and remaining args
@@ -70,6 +100,8 @@ func parseGlobalFlags(args []string, globalArgs *GlobalArgs) (string, []string) 
 		"extract-audio": true,
 		"extract-video": true,
 		"mux-av":        true,
+		"mix-audio":     true,
+		"process-all":   true,
 		"completion":    true,
 		"help":          true,
 	}
