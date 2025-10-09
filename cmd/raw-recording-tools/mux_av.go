@@ -150,7 +150,7 @@ func muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata 
 	logger.Info("Found %d audio files and %d video files to mux", len(audioFiles), len(videoFiles))
 
 	// Group files by media type for proper pairing
-	audioGroups, videoGroups, err := groupFilesByMediaType(globalArgs.InputFile, audioFiles, videoFiles, muxAVArgs.Media, logger)
+	audioGroups, videoGroups, err := groupFilesByMediaType(globalArgs.InputFile, audioFiles, videoFiles, muxAVArgs.Media, metadata, logger)
 	if err != nil {
 		return fmt.Errorf("failed to group files by media type: %w", err)
 	}
@@ -158,7 +158,7 @@ func muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata 
 	// Mux user tracks
 	if userAudio, userVideo := audioGroups["user"], videoGroups["user"]; len(userAudio) > 0 && len(userVideo) > 0 {
 		logger.Info("Muxing %d user audio/video pairs", len(userAudio))
-		err = muxTrackPairs(globalArgs.InputFile, userAudio, userVideo, globalArgs.Output, "user", logger)
+		err = muxTrackPairs(globalArgs.InputFile, userAudio, userVideo, globalArgs.Output, "user", metadata, logger)
 		if err != nil {
 			logger.Error("Failed to mux user tracks: %v", err)
 		}
@@ -167,7 +167,7 @@ func muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata 
 	// Mux display tracks
 	if displayAudio, displayVideo := audioGroups["display"], videoGroups["display"]; len(displayAudio) > 0 && len(displayVideo) > 0 {
 		logger.Info("Muxing %d display audio/video pairs", len(displayAudio))
-		err = muxTrackPairs(globalArgs.InputFile, displayAudio, displayVideo, globalArgs.Output, "display", logger)
+		err = muxTrackPairs(globalArgs.InputFile, displayAudio, displayVideo, globalArgs.Output, "display", metadata, logger)
 		if err != nil {
 			logger.Error("Failed to mux display tracks: %v", err)
 		}
@@ -177,20 +177,13 @@ func muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata 
 }
 
 // calculateSyncOffsetFromFiles calculates sync offset between audio and video files using metadata
-func calculateSyncOffsetFromFiles(inputPath, audioFile, videoFile string, logger *getstream.DefaultLogger) (int64, error) {
+func calculateSyncOffsetFromFiles(inputPath, audioFile, videoFile string, metadata *RecordingMetadata, logger *getstream.DefaultLogger) (int64, error) {
 	// Extract track IDs from filenames
 	audioTrackID := extractTrackIDFromFilename(audioFile)
 	videoTrackID := extractTrackIDFromFilename(videoFile)
 
 	if audioTrackID == "" || videoTrackID == "" {
 		return 0, fmt.Errorf("could not extract track IDs from filenames")
-	}
-
-	// Parse metadata to get timing information
-	parser := NewMetadataParser(logger)
-	metadata, err := parser.ParseMetadataOnly(inputPath)
-	if err != nil {
-		return 0, fmt.Errorf("failed to parse recording metadata: %w", err)
 	}
 
 	// Find the audio and video tracks
@@ -244,14 +237,7 @@ func generateMuxedFilename(audioFile, videoFile, outputDir string) string {
 }
 
 // groupFilesByMediaType groups audio and video files by media type (user vs display)
-func groupFilesByMediaType(inputPath string, audioFiles, videoFiles []string, mediaFilter string, logger *getstream.DefaultLogger) (map[string][]string, map[string][]string, error) {
-	// Parse metadata to determine media types
-	parser := NewMetadataParser(logger)
-	metadata, err := parser.ParseMetadataOnly(inputPath)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to parse metadata: %w", err)
-	}
-
+func groupFilesByMediaType(inputPath string, audioFiles, videoFiles []string, mediaFilter string, metadata *RecordingMetadata, logger *getstream.DefaultLogger) (map[string][]string, map[string][]string, error) {
 	// Create track ID to screenshare type mapping
 	trackScreenshareMap := make(map[string]bool)
 	for _, track := range metadata.Tracks {
@@ -328,7 +314,7 @@ func groupFilesByMediaType(inputPath string, audioFiles, videoFiles []string, me
 }
 
 // muxTrackPairs muxes audio/video pairs of the same media type
-func muxTrackPairs(inputPath string, audioFiles, videoFiles []string, outputDir, mediaTypeName string, logger *getstream.DefaultLogger) error {
+func muxTrackPairs(inputPath string, audioFiles, videoFiles []string, outputDir, mediaTypeName string, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	minLen := len(audioFiles)
 	if len(videoFiles) < minLen {
 		minLen = len(videoFiles)
@@ -344,7 +330,7 @@ func muxTrackPairs(inputPath string, audioFiles, videoFiles []string, outputDir,
 		videoFile := videoFiles[i]
 
 		// Calculate sync offset using segment timing information
-		offset, err := calculateSyncOffsetFromFiles(inputPath, audioFile, videoFile, logger)
+		offset, err := calculateSyncOffsetFromFiles(inputPath, audioFile, videoFile, metadata, logger)
 		if err != nil {
 			logger.Warn("Failed to calculate sync offset, using 0: %v", err)
 			offset = 0
