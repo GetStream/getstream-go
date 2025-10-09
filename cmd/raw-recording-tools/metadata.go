@@ -287,10 +287,24 @@ func (p *MetadataParser) extractUniqueSessions(tracks []*TrackInfo) []string {
 // Only one filter (userID, sessionID, or trackID) can be specified at a time
 // Empty values are ignored, specific values must match
 // If all are empty, all tracks are returned
-func FilterTracks(tracks []*TrackInfo, userID, sessionID, trackID string) []*TrackInfo {
+func FilterTracks(tracks []*TrackInfo, userID, sessionID, trackID, trackType, mediaFilter string) []*TrackInfo {
 	filtered := make([]*TrackInfo, 0)
 
 	for _, track := range tracks {
+		if trackType != "" && track.TrackType != trackType {
+			continue // Skip tracks with wrong TrackType
+		}
+
+		// Apply media type filtering if specified
+		if mediaFilter != "" && mediaFilter != "both" {
+			if mediaFilter == "user" && track.IsScreenshare {
+				continue // Skip display tracks when only user requested
+			}
+			if mediaFilter == "display" && !track.IsScreenshare {
+				continue // Skip user tracks when only display requested
+			}
+		}
+
 		// Apply the single specified filter (mutually exclusive)
 		if trackID != "" {
 			// Filter by trackID - return only that specific track

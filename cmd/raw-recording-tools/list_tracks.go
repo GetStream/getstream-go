@@ -65,16 +65,7 @@ func runListTracks(args []string, globalArgs *GlobalArgs) {
 	}
 
 	// Filter tracks if track type is specified
-	tracks := metadata.Tracks
-	if listTracksArgs.TrackType != "" {
-		filteredTracks := make([]*TrackInfo, 0)
-		for _, track := range tracks {
-			if track.TrackType == listTracksArgs.TrackType {
-				filteredTracks = append(filteredTracks, track)
-			}
-		}
-		tracks = filteredTracks
-	}
+	tracks := FilterTracks(metadata.Tracks, "", "", "", listTracksArgs.TrackType, "")
 
 	// Output in requested format
 	switch listTracksArgs.Format {

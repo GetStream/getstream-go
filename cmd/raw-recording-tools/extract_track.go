@@ -31,29 +31,13 @@ func extractTracks(globalArgs *GlobalArgs, userID, sessionID, trackID string, me
 	defer cleanup()
 
 	// Filter tracks to specified type only and apply hierarchical filtering
-	filteredTracks := FilterTracks(metadata.Tracks, userID, sessionID, trackID)
-	typedTracks := make([]*TrackInfo, 0)
-	for _, track := range filteredTracks {
-		if track.TrackType == trackType {
-			// Apply media type filtering if specified
-			if mediaFilter != "" && mediaFilter != "both" {
-				if mediaFilter == "user" && track.IsScreenshare {
-					continue // Skip display tracks when only user requested
-				}
-				if mediaFilter == "display" && !track.IsScreenshare {
-					continue // Skip user tracks when only display requested
-				}
-			}
-			typedTracks = append(typedTracks, track)
-		}
-	}
-
-	if len(typedTracks) == 0 {
+	filteredTracks := FilterTracks(metadata.Tracks, userID, sessionID, trackID, trackType, mediaFilter)
+	if len(filteredTracks) == 0 {
 		logger.Warn("No %s tracks found matching the filter criteria", trackType)
 		return nil
 	}
 
-	logger.Info("Found %d %s tracks to extract", len(typedTracks), trackType)
+	logger.Info("Found %d %s tracks to extract", len(filteredTracks), trackType)
 
 	// Create output directory if it doesn't exist
 	err = os.MkdirAll(globalArgs.Output, 0755)
@@ -62,8 +46,8 @@ func extractTracks(globalArgs *GlobalArgs, userID, sessionID, trackID string, me
 	}
 
 	// Extract and convert each track
-	for i, track := range typedTracks {
-		logger.Info("Processing %s track %d/%d: %s", trackType, i+1, len(typedTracks), track.TrackID)
+	for i, track := range filteredTracks {
+		logger.Info("Processing %s track %d/%d: %s", trackType, i+1, len(filteredTracks), track.TrackID)
 
 		err = extractSingleTrackWithOptions(workingDir, track, globalArgs.Output, trackType, fillGaps, logger)
 		if err != nil {
