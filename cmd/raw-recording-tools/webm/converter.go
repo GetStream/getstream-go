@@ -175,7 +175,7 @@ func (c *RTPDump2WebMConverter) feedPackets(reader *rtpdump.Reader) error {
 func (c *RTPDump2WebMConverter) buildDefaultReleasePacketHandler() func(pkt *rtp.Packet) {
 	return func(pkt *rtp.Packet) {
 		if e := c.recorder.OnRTP(pkt); e != nil {
-			c.logger.Warn("Failed to record RTP packet %v: %v", pkt, e)
+			c.logger.Warn("Failed to record RTP packet SeqNum: %d RtpTs: %d: %v", pkt.SequenceNumber, pkt.Timestamp, e)
 		}
 	}
 }
@@ -211,7 +211,7 @@ func (c *RTPDump2WebMConverter) buildOpusReleasePacketHandler() func(pkt *rtp.Pa
 
 					c.logger.Debug("Writing inserted Packet %v", ins)
 					if e := c.recorder.OnRTP(ins); e != nil {
-						c.logger.Warn("Failed to record RTP packet %v: %v", pkt, e)
+						c.logger.Warn("Failed to record inserted RTP packet SeqNum: %d RtpTs: %d: %v", ins.SequenceNumber, ins.Timestamp, e)
 					}
 				}
 
@@ -224,7 +224,7 @@ func (c *RTPDump2WebMConverter) buildOpusReleasePacketHandler() func(pkt *rtp.Pa
 
 		c.logger.Debug("Writing real Packet Last SeqNum: %d RtpTs: %d", pkt.SequenceNumber, pkt.Timestamp)
 		if e := c.recorder.OnRTP(pkt); e != nil {
-			c.logger.Warn("Failed to record RTP packet %v: %v", pkt, e)
+			c.logger.Warn("Failed to record RTP packet SeqNum: %d RtpTs: %d: %v", pkt.SequenceNumber, pkt.Timestamp, e)
 		}
 	}
 }
