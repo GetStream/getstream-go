@@ -1,0 +1,247 @@
+package main
+
+import (
+	"encoding/json"
+	"flag"
+	"fmt"
+	"os"
+	"sort"
+	"strings"
+)
+
+type ListTracksArgs struct {
+	Format         string // "table", "json", "completion", "users", "sessions", "tracks"
+	TrackType      string // Filter by track type: "audio", "video", or "" for all
+	CompletionType string // For completion format: "users", "sessions", "tracks"
+}
+
+func runListTracks(args []string, globalArgs *GlobalArgs) {
+	// Parse command-specific flags
+	fs := flag.NewFlagSet("list-tracks", flag.ExitOnError)
+	listTracksArgs := &ListTracksArgs{}
+	fs.StringVar(&listTracksArgs.Format, "format", "table", "Output format: table, json, completion, users, sessions, tracks")
+	fs.StringVar(&listTracksArgs.TrackType, "trackType", "", "Filter by track type: audio, video")
+	fs.StringVar(&listTracksArgs.CompletionType, "completionType", "tracks", "For completion format: users, sessions, tracks")
+
+	// Check for help flag before parsing
+	for _, arg := range args {
+		if arg == "--help" || arg == "-h" {
+			printListTracksUsage()
+			return
+		}
+	}
+
+	if err := fs.Parse(args); err != nil {
+		fmt.Fprintf(os.Stderr, "Error parsing flags: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Validate global arguments
+	if err := validateGlobalArgs(globalArgs, "list-tracks"); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		printListTracksUsage()
+		os.Exit(1)
+	}
+
+	// Setup logger
+	logger := setupLogger(globalArgs.Verbose)
+
+	logger.Info("Starting list-tracks command")
+
+	// Parse the recording metadata using efficient metadata-only approach
+	var inputPath string
+	if globalArgs.InputFile != "" {
+		inputPath = globalArgs.InputFile
+	} else {
+		// TODO: Handle S3 input
+		return // For now, only support local files
+	}
+
+	// Use efficient metadata-only parsing (optimized for list-tracks)
+	parser := NewMetadataParser(logger)
+	metadata, err := parser.ParseMetadataOnly(inputPath)
+	if err != nil {
+		logger.Error("Failed to parse recording: %v", err)
+	}
+
+	// Filter tracks if track type is specified
+	tracks := metadata.Tracks
+	if listTracksArgs.TrackType != "" {
+		filteredTracks := make([]TrackInfo, 0)
+		for _, track := range tracks {
+			if track.TrackType == listTracksArgs.TrackType {
+				filteredTracks = append(filteredTracks, track)
+			}
+		}
+		tracks = filteredTracks
+	}
+
+	// Output in requested format
+	switch listTracksArgs.Format {
+	case "table":
+		printTracksTable(tracks)
+	case "json":
+		printTracksJSON(metadata)
+	case "completion":
+		printCompletion(metadata, listTracksArgs.CompletionType)
+	case "users":
+		printUsers(metadata.UserIDs)
+	case "sessions":
+		printSessions(metadata.Sessions)
+	case "tracks":
+		printTrackIDs(tracks)
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown format: %s\n", listTracksArgs.Format)
+		os.Exit(1)
+	}
+
+	logger.Info("List tracks command completed")
+}
+
+// printTracksTable prints tracks in a human-readable table format
+func printTracksTable(tracks []TrackInfo) {
+	if len(tracks) == 0 {
+		fmt.Println("No tracks found.")
+		return
+	}
+
+	// Print header
+	fmt.Printf("%-22s %-38s %-38s %-6s %-12s %-15s %-8s\n", "USER ID", "SESSION ID", "TRACK ID", "TYPE", "SCREENSHARE", "CODEC", "SEGMENTS")
+	fmt.Printf("%-22s %-38s %-38s %-6s %-12s %-15s %-8s\n",
+		strings.Repeat("-", 22),
+		strings.Repeat("-", 38),
+		strings.Repeat("-", 38),
+		strings.Repeat("-", 6),
+		strings.Repeat("-", 12),
+		strings.Repeat("-", 15),
+		strings.Repeat("-", 8))
+
+	// Print tracks
+	for _, track := range tracks {
+		screenshareStatus := "No"
+		if track.IsScreenshare {
+			screenshareStatus = "Yes"
+		}
+		fmt.Printf("%-22s %-38s %-38s %-6s %-12s %-15s %-8d\n",
+			truncateString(track.UserID, 22),
+			truncateString(track.SessionID, 38),
+			truncateString(track.TrackID, 38),
+			track.TrackType,
+			screenshareStatus,
+			track.Codec,
+			track.SegmentCount)
+	}
+}
+
+// truncateString truncates a string to a maximum length, adding "..." if needed
+func truncateString(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	return s[:maxLen-3] + "..."
+}
+
+// printTracksJSON prints the full metadata in JSON format
+func printTracksJSON(metadata *RecordingMetadata) {
+	data, err := json.MarshalIndent(metadata, "", "  ")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error marshaling JSON: %v\n", err)
+		return
+	}
+	fmt.Println(string(data))
+}
+
+// printCompletion prints completion-friendly output
+func printCompletion(metadata *RecordingMetadata, completionType string) {
+	switch completionType {
+	case "users":
+		printUsers(metadata.UserIDs)
+	case "sessions":
+		printSessions(metadata.Sessions)
+	case "tracks":
+		trackIDs := make([]string, 0)
+		for _, track := range metadata.Tracks {
+			trackIDs = append(trackIDs, track.TrackID)
+		}
+		// Remove duplicates and sort
+		uniqueTrackIDs := removeDuplicates(trackIDs)
+		sort.Strings(uniqueTrackIDs)
+		printTrackIDs(metadata.Tracks)
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown completion type: %s\n", completionType)
+	}
+}
+
+// printUsers prints user IDs, one per line
+func printUsers(userIDs []string) {
+	sort.Strings(userIDs)
+	for _, userID := range userIDs {
+		fmt.Println(userID)
+	}
+}
+
+// printSessions prints session IDs, one per line
+func printSessions(sessions []string) {
+	sort.Strings(sessions)
+	for _, session := range sessions {
+		fmt.Println(session)
+	}
+}
+
+// printTrackIDs prints unique track IDs, one per line
+func printTrackIDs(tracks []TrackInfo) {
+	trackIDs := make([]string, 0)
+	seen := make(map[string]bool)
+
+	for _, track := range tracks {
+		if !seen[track.TrackID] {
+			trackIDs = append(trackIDs, track.TrackID)
+			seen[track.TrackID] = true
+		}
+	}
+
+	sort.Strings(trackIDs)
+	for _, trackID := range trackIDs {
+		fmt.Println(trackID)
+	}
+}
+
+// removeDuplicates removes duplicate strings from a slice
+func removeDuplicates(input []string) []string {
+	keys := make(map[string]bool)
+	result := make([]string, 0)
+
+	for _, item := range input {
+		if !keys[item] {
+			keys[item] = true
+			result = append(result, item)
+		}
+	}
+
+	return result
+}
+
+func printListTracksUsage() {
+	fmt.Fprintf(os.Stderr, "Usage: raw-tools [global options] list-tracks [command options]\n\n")
+	fmt.Fprintf(os.Stderr, "List all tracks in the raw recording with their metadata.\n")
+	fmt.Fprintf(os.Stderr, "Note: --output is optional for this command (only displays information).\n\n")
+	fmt.Fprintf(os.Stderr, "Command Options:\n")
+	fmt.Fprintf(os.Stderr, "  --format <format>      Output format (default: table)\n")
+	fmt.Fprintf(os.Stderr, "                         table    - Human readable table\n")
+	fmt.Fprintf(os.Stderr, "                         json     - JSON format\n")
+	fmt.Fprintf(os.Stderr, "                         users    - List of user IDs only\n")
+	fmt.Fprintf(os.Stderr, "                         sessions - List of session IDs only\n")
+	fmt.Fprintf(os.Stderr, "                         tracks   - List of track IDs only\n")
+	fmt.Fprintf(os.Stderr, "                         completion - Shell completion format\n")
+	fmt.Fprintf(os.Stderr, "  --trackType <type>     Filter by track type: audio, video\n")
+	fmt.Fprintf(os.Stderr, "  --completionType <type> For completion format: users, sessions, tracks\n\n")
+	fmt.Fprintf(os.Stderr, "Examples:\n")
+	fmt.Fprintf(os.Stderr, "  # List all tracks in table format (no output directory needed)\n")
+	fmt.Fprintf(os.Stderr, "  raw-tools --inputFile recording.zip list-tracks\n\n")
+	fmt.Fprintf(os.Stderr, "  # Get JSON output for programmatic use\n")
+	fmt.Fprintf(os.Stderr, "  raw-tools --inputFile recording.zip list-tracks --format json\n\n")
+	fmt.Fprintf(os.Stderr, "  # Get user IDs for completion\n")
+	fmt.Fprintf(os.Stderr, "  raw-tools --inputFile recording.zip list-tracks --format users\n")
+	fmt.Fprintf(os.Stderr, "\nGlobal Options: Use 'raw-tools --help' to see global options.\n")
+
+}
