@@ -22,9 +22,9 @@ func runMuxAV(args []string, globalArgs *GlobalArgs) {
 	// Parse command-specific flags
 	fs := flag.NewFlagSet("mux-av", flag.ExitOnError)
 	muxAVArgs := &MuxAVArgs{}
-	fs.StringVar(&muxAVArgs.UserID, "userId", "*", "Specify a userId or * for all")
-	fs.StringVar(&muxAVArgs.SessionID, "sessionId", "*", "Specify a sessionId or * for all")
-	fs.StringVar(&muxAVArgs.TrackID, "trackId", "*", "Specify a trackId or * for all")
+	fs.StringVar(&muxAVArgs.UserID, "userId", "", "Specify a userId (empty for all)")
+	fs.StringVar(&muxAVArgs.SessionID, "sessionId", "", "Specify a sessionId (empty for all)")
+	fs.StringVar(&muxAVArgs.TrackID, "trackId", "", "Specify a trackId (empty for all)")
 	fs.StringVar(&muxAVArgs.Media, "media", "both", "Filter by media type: 'user', 'display', or 'both'")
 
 	// Check for help flag before parsing

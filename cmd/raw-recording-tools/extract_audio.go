@@ -19,9 +19,9 @@ func runExtractAudio(args []string, globalArgs *GlobalArgs) {
 	// Parse command-specific flags
 	fs := flag.NewFlagSet("extract-audio", flag.ExitOnError)
 	extractAudioArgs := &ExtractAudioArgs{}
-	fs.StringVar(&extractAudioArgs.UserID, "userId", "*", "Specify a userId or * for all")
-	fs.StringVar(&extractAudioArgs.SessionID, "sessionId", "*", "Specify a sessionId or * for all")
-	fs.StringVar(&extractAudioArgs.TrackID, "trackId", "*", "Specify a trackId or * for all")
+	fs.StringVar(&extractAudioArgs.UserID, "userId", "", "Specify a userId (empty for all)")
+	fs.StringVar(&extractAudioArgs.SessionID, "sessionId", "", "Specify a sessionId (empty for all)")
+	fs.StringVar(&extractAudioArgs.TrackID, "trackId", "", "Specify a trackId (empty for all)")
 	fs.BoolVar(&extractAudioArgs.FillGaps, "fill_gaps", false, "Fix DTX shrink audio, and fill with silence when track was muted")
 
 	// Check for help flag before parsing

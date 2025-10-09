@@ -20,9 +20,9 @@ func runProcessAll(args []string, globalArgs *GlobalArgs) {
 	// Parse command-specific flags
 	fs := flag.NewFlagSet("process-all", flag.ExitOnError)
 	processAllArgs := &ProcessAllArgs{}
-	fs.StringVar(&processAllArgs.UserID, "userId", "*", "Specify a userId or * for all")
-	fs.StringVar(&processAllArgs.SessionID, "sessionId", "*", "Specify a sessionId or * for all")
-	fs.StringVar(&processAllArgs.TrackID, "trackId", "*", "Specify a trackId or * for all")
+	fs.StringVar(&processAllArgs.UserID, "userId", "", "Specify a userId (empty for all)")
+	fs.StringVar(&processAllArgs.SessionID, "sessionId", "", "Specify a sessionId (empty for all)")
+	fs.StringVar(&processAllArgs.TrackID, "trackId", "", "Specify a trackId (empty for all)")
 
 	// Check for help flag before parsing
 	for _, arg := range args {

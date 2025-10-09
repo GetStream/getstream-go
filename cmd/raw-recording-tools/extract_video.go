@@ -19,9 +19,9 @@ func runExtractVideo(args []string, globalArgs *GlobalArgs) {
 	// Parse command-specific flags
 	fs := flag.NewFlagSet("extract-video", flag.ExitOnError)
 	extractVideoArgs := &ExtractVideoArgs{}
-	fs.StringVar(&extractVideoArgs.UserID, "userId", "*", "Specify a userId or * for all")
-	fs.StringVar(&extractVideoArgs.SessionID, "sessionId", "*", "Specify a sessionId or * for all")
-	fs.StringVar(&extractVideoArgs.TrackID, "trackId", "*", "Specify a trackId or * for all")
+	fs.StringVar(&extractVideoArgs.UserID, "userId", "", "Specify a userId (empty for all)")
+	fs.StringVar(&extractVideoArgs.SessionID, "sessionId", "", "Specify a sessionId (empty for all)")
+	fs.StringVar(&extractVideoArgs.TrackID, "trackId", "", "Specify a trackId (empty for all)")
 	fs.BoolVar(&extractVideoArgs.FillGaps, "fill_gaps", false, "Fill with black frame when track was muted")
 
 	// Check for help flag before parsing

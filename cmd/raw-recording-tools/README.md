@@ -49,7 +49,7 @@ Extract and convert individual audio tracks from raw recordings to WebM format.
 
 ```bash
 # Extract audio for all users
-raw-tools --inputFile recording.zip --output ./output extract-audio --userId "*"
+raw-tools --inputFile recording.zip --output ./output extract-audio
 
 # Extract audio for specific user with gap filling
 raw-tools --inputFile recording.zip --output ./output extract-audio --userId user123 --fill_gaps
@@ -62,16 +62,17 @@ raw-tools --inputFile recording.zip --output ./output extract-audio --trackId tr
 ```
 
 **Options:**
-- `--userId <id>` - Filter by user ID (`*` for all users, specific ID, or comma-separated list)
-- `--sessionId <id>` - Filter by session ID (`*` for all sessions, specific ID, or comma-separated list)
-- `--trackId <id>` - Filter by track ID (`*` for all tracks, specific ID, or comma-separated list)
+- `--userId <id>` - Filter by user ID (empty for all users, specific ID for that user only)
+- `--sessionId <id>` - Filter by session ID (empty for all sessions, specific ID for that session only)
+- `--trackId <id>` - Filter by track ID (empty for all tracks, specific ID for that track only)
 - `--fill_gaps` - Fill temporal gaps between segments with silence (recommended for playback)
 - `-h, --help` - Show help message
 
-**Hierarchical Filtering:**
-- If `--userId` is `*`, `--sessionId` and `--trackId` are ignored (processes all users)
-- If `--sessionId` is `*`, `--trackId` is ignored (processes all sessions for specified users)
-- Specific IDs can be combined for precise extraction
+**Priority-Based Filtering:**
+- `--trackId` has highest priority: if specified, only that track is processed
+- `--sessionId` has medium priority: if specified (without trackId), all tracks for that session are processed
+- `--userId` has lowest priority: if specified (without sessionId/trackId), all tracks for that user are processed
+- If all are empty, all tracks are processed
 
 ### `extract-video` - Extract Video Tracks
 
@@ -79,7 +80,7 @@ Extract and convert individual video tracks from raw recordings to WebM format.
 
 ```bash
 # Extract video for all users
-raw-tools --inputFile recording.zip --output ./output extract-video --userId "*"
+raw-tools --inputFile recording.zip --output ./output extract-video
 
 # Extract video for specific user with black frame filling
 raw-tools --inputFile recording.zip --output ./output extract-video --userId user123 --fill_gaps
@@ -89,9 +90,9 @@ raw-tools --inputFile recording.zip --output ./output extract-video --userId use
 ```
 
 **Options:**
-- `--userId <id>` - Filter by user ID (`*` for all users, specific ID, or comma-separated list)
-- `--sessionId <id>` - Filter by session ID (`*` for all sessions, specific ID, or comma-separated list)  
-- `--trackId <id>` - Filter by track ID (`*` for all tracks, specific ID, or comma-separated list)
+- `--userId <id>` - Filter by user ID (empty for all users, specific ID for that user only)  
+- `--sessionId <id>` - Filter by session ID (empty for all sessions, specific ID for that session only)
+- `--trackId <id>` - Filter by track ID (empty for all tracks, specific ID for that track only)
 - `--fill_gaps` - Fill temporal gaps between segments with black frames (recommended for playback)
 - `-h, --help` - Show help message
 
@@ -106,7 +107,7 @@ Combine individual audio and video tracks with proper synchronization and timing
 
 ```bash
 # Mux audio/video for all users
-raw-tools --inputFile recording.zip --output ./output mux-av --userId "*"
+raw-tools --inputFile recording.zip --output ./output mux-av
 
 # Mux for specific user with proper sync
 raw-tools --inputFile recording.zip --output ./output mux-av --userId user123
@@ -119,9 +120,9 @@ raw-tools --inputFile recording.zip --output ./output mux-av --userId user123 --
 ```
 
 **Options:**
-- `--userId <id>` - Filter by user ID (`*` for all users, specific ID for targeted muxing)
-- `--sessionId <id>` - Filter by session ID (`*` for all sessions, specific ID for session-based muxing)
-- `--trackId <id>` - Filter by track ID (rarely used, as muxing typically works with user/session pairs)
+- `--userId <id>` - Filter by user ID (empty for all users, specific ID for that user only)
+- `--sessionId <id>` - Filter by session ID (empty for all sessions, specific ID for that session only)
+- `--trackId <id>` - Filter by track ID (empty for all tracks, specific ID for that track only)
 - `--media <type>` - Filter by media type: `user` (camera/microphone), `display` (screen sharing), or `both` (default)
 - `-h, --help` - Show help message
 
@@ -164,9 +165,9 @@ raw-tools --inputFile recording.zip --output ./output mix-audio --userId user123
 ```
 
 **Options:**
-- `--userId <id>` - Filter by user ID (`*` for all users, specific ID, or comma-separated list)
-- `--sessionId <id>` - Filter by session ID (`*` for all sessions, specific ID, or comma-separated list)
-- `--trackId <id>` - Filter by track ID (`*` for all tracks, specific ID for precise control)
+- `--userId <id>` - Filter by user ID (empty for all users, specific ID for that user only)
+- `--sessionId <id>` - Filter by session ID (empty for all sessions, specific ID for that session only)
+- `--trackId <id>` - Filter by track ID (empty for all tracks, specific ID for that track only)
 - `--no-fill-gaps` - Disable gap filling (not recommended for mixing, gaps enabled by default)
 - `-h, --help` - Show help message
 
@@ -202,9 +203,9 @@ raw-tools --inputFile recording.zip --output ./output process-all --userId user1
 ```
 
 **Options:**
-- `--userId <id>` - Filter by user ID (`*` for all users, specific ID for targeted processing)
-- `--sessionId <id>` - Filter by session ID (`*` for all sessions, specific ID for session-based processing)
-- `--trackId <id>` - Filter by track ID (`*` for all tracks, specific ID for precise control)
+- `--userId <id>` - Filter by user ID (empty for all users, specific ID for that user only)
+- `--sessionId <id>` - Filter by session ID (empty for all sessions, specific ID for that session only)
+- `--trackId <id>` - Filter by track ID (empty for all tracks, specific ID for that track only)
 - `-h, --help` - Show help message
 
 **Workflow Steps:**
@@ -254,7 +255,7 @@ With completion enabled, the CLI will:
 ```bash
 # Tab completion will suggest actual user IDs from your recording
 raw-tools --inputFile recording.zip --output ./out extract-audio --userId <TAB>
-# Shows: user_abc123  user_def456  *
+# Shows: user_abc123  user_def456
 
 # Invalid inputs show helpful errors
 raw-tools --inputFile recording.zip --output ./out extract-audio --userId invalid_user
@@ -306,7 +307,7 @@ echo "Found $audio_tracks audio tracks and $video_tracks video tracks"
 
 # 3. Process only if we have both audio and video
 if [ "$audio_tracks" -gt 0 ] && [ "$video_tracks" -gt 0 ]; then
-    raw-tools --inputFile recording.zip --output ./output mux-av --userId "*"
+    raw-tools --inputFile recording.zip --output ./output mux-av
 fi
 ```
 

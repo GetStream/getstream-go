@@ -34,9 +34,9 @@ type AudioFileWithTiming struct {
 // runMixAudio handles the mix-audio command
 func runMixAudio(args []string, globalArgs *GlobalArgs) {
 	mixAudioArgs := &MixAudioArgs{
-		UserID:    "*",  // Default: all users
-		SessionID: "*",  // Default: all sessions
-		TrackID:   "*",  // Default: all tracks
+		UserID:    "",   // Default: all users (empty)
+		SessionID: "",   // Default: all sessions (empty)
+		TrackID:   "",   // Default: all tracks (empty)
 		FillGaps:  true, // Always fill gaps for proper mixing
 	}
 

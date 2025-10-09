@@ -289,31 +289,40 @@ func (p *MetadataParser) extractUniqueSessions(tracks []*TrackInfo) []string {
 	return sessions
 }
 
-// FilterTracks filters tracks based on hierarchical criteria
-// If userID="*", sessionID and trackID are ignored (all users, sessions, tracks)
-// If userID=specific, sessionID="*", trackID is ignored (specific user, all sessions/tracks)
-// If userID=specific, sessionID=specific, trackID="*", all tracks for that user/session
+// FilterTracks filters tracks based on priority-based criteria
+// Empty values are ignored, specific values must match
+// Priority: trackID (highest) > sessionID > userID (lowest)
+// If all are empty, all tracks are returned
 func (p *MetadataParser) FilterTracks(tracks []*TrackInfo, userID, sessionID, trackID string) []*TrackInfo {
 	filtered := make([]*TrackInfo, 0)
 
 	for _, track := range tracks {
-		// Hierarchical filtering logic
-		if userID == "*" {
-			// If userID is wildcard, include all tracks regardless of sessionID/trackID
-			filtered = append(filtered, track)
-		} else if track.UserID == userID {
-			// User matches, check session level
-			if sessionID == "*" {
-				// If sessionID is wildcard, include all tracks for this user
+		// If trackID is specified, it has highest priority - only return that specific track
+		if trackID != "" {
+			if track.TrackID == trackID {
 				filtered = append(filtered, track)
-			} else if track.SessionID == sessionID {
-				// Session matches, check track level
-				if trackID == "*" || track.TrackID == trackID {
-					// Include if trackID is wildcard or matches
-					filtered = append(filtered, track)
-				}
 			}
+			continue
 		}
+
+		// If sessionID is specified, return all tracks for that session
+		if sessionID != "" {
+			if track.SessionID == sessionID {
+				filtered = append(filtered, track)
+			}
+			continue
+		}
+
+		// If userID is specified, return all tracks for that user
+		if userID != "" {
+			if track.UserID == userID {
+				filtered = append(filtered, track)
+			}
+			continue
+		}
+
+		// If all are empty, return all tracks
+		filtered = append(filtered, track)
 	}
 
 	return filtered
