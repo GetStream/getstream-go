@@ -52,7 +52,7 @@ func ConvertDirectory(directory string, logger *getstream.DefaultLogger) error {
 			return err
 		}
 
-		if !info.IsDir() && strings.HasSuffix(strings.ToLower(info.Name()), ".rtpdump") {
+		if !info.IsDir() && strings.HasSuffix(strings.ToLower(info.Name()), SuffixRtpDump) {
 			rtpdumpFiles = append(rtpdumpFiles, path)
 		}
 
@@ -88,95 +88,35 @@ func (c *RTPDump2WebMConverter) ConvertFile(inputFile string) error {
 	reader, _, _ := rtpdump.NewReader(file)
 	c.reader = reader
 
-	sdpContent, _ := rawsdputil.ReadSDP(strings.Replace(inputFile, ".rtpdump", ".sdp", 1))
+	sdpContent, _ := rawsdputil.ReadSDP(strings.Replace(inputFile, SuffixRtpDump, SuffixSdp, 1))
 	mType, _ := rawsdputil.MimeType(sdpContent)
 
-	var recorder WebmRecorder
+	defaultReleasePacketHandler := samplebuilder.WithPacketReleaseHandler(c.buildDefaultReleasePacketHandler())
+
 	switch mType {
-	case webrtc.MimeTypeAV1, webrtc.MimeTypeVP9:
-		recorder, err = NewCursorGstreamerWebmRecorder(strings.Replace(inputFile, ".rtpdump", ".webm", 1), sdpContent, c.logger)
+	case webrtc.MimeTypeAV1:
+		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.AV1Depacketizer{}, 90000, defaultReleasePacketHandler)
+		c.recorder, err = NewCursorGstreamerWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
+	case webrtc.MimeTypeVP9:
+		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.VP9Packet{}, 90000, defaultReleasePacketHandler)
+		c.recorder, err = NewCursorGstreamerWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
 	case webrtc.MimeTypeH264:
-		recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, ".rtpdump", ".mp4", 1), sdpContent, c.logger)
+		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.H264Packet{}, 90000, defaultReleasePacketHandler)
+		c.recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixMp4, 1), sdpContent, c.logger)
+	case webrtc.MimeTypeVP8:
+		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.VP8Packet{}, 90000, defaultReleasePacketHandler)
+		c.recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
+	case webrtc.MimeTypeOpus:
+		options := samplebuilder.WithPacketReleaseHandler(c.buildOpusReleasePacketHandler())
+		c.sampleBuilder = samplebuilder.New(audioMaxLate, &codecs.OpusPacket{}, 48000, options)
+		c.recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
 	default:
-		recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, ".rtpdump", ".webm", 1), sdpContent, c.logger)
+		return fmt.Errorf("unsupported codec type: %s", mType)
 	}
 	if err != nil {
 		return fmt.Errorf("failed to create WebM recorder: %w", err)
 	}
-	defer recorder.Close()
-
-	c.recorder = recorder
-
-	options := samplebuilder.WithPacketReleaseHandler(func(pkt *rtp.Packet) {
-		pkt.SequenceNumber += c.inserted
-
-		if c.lastPkt != nil {
-			if pkt.SequenceNumber-c.lastPkt.SequenceNumber > 1 {
-				c.logger.Info("Missing Packet Detected, Previous SeqNum: %d RtpTs: %d   - Last SeqNum: %d RtpTs: %d", c.lastPkt.SequenceNumber, c.lastPkt.Timestamp, pkt.SequenceNumber, pkt.Timestamp)
-			}
-
-			if mType == webrtc.MimeTypeOpus {
-				tsDiff := pkt.Timestamp - c.lastPkt.Timestamp // TODO handle rollover
-				lastPktDuration := opusPacketDurationMs(c.lastPkt.Payload)
-				rtpDuration := uint32(lastPktDuration * 48)
-				if tsDiff > rtpDuration {
-
-					// Calculate how many packets we need to insert, taking care of packet losses
-					var toAdd uint16
-					if uint32(pkt.SequenceNumber-c.lastPkt.SequenceNumber)*rtpDuration != tsDiff { // TODO handle rollover
-						toAdd = uint16(tsDiff/rtpDuration) - (pkt.SequenceNumber - c.lastPkt.SequenceNumber)
-					}
-
-					c.logger.Info("Gap detected, inserting %d packets tsDiff %d, Previous SeqNum: %d RtpTs: %d   - Last SeqNum: %d RtpTs: %d",
-						toAdd, tsDiff, c.lastPkt.SequenceNumber, c.lastPkt.Timestamp, pkt.SequenceNumber, pkt.Timestamp)
-
-					for i := 1; i <= int(toAdd); i++ {
-						ins := c.lastPkt.Clone()
-						ins.Payload = ins.Payload[:1] // Keeping only TOC byte
-						ins.SequenceNumber += uint16(i)
-						ins.Timestamp += uint32(i) * rtpDuration
-
-						c.logger.Debug("Writing inserted Packet %v", ins)
-						e := c.recorder.OnRTP(ins)
-						if e != nil {
-							c.logger.Warn("Failed to record RTP packet %v: %v", pkt, err)
-						}
-
-						// Need to compute new packet
-					}
-					c.inserted += toAdd
-					pkt.SequenceNumber += toAdd
-					//				c.logger.Debugf("Inserted %d packets Previous inserting %s", toAdd, c.inserted)
-				}
-			}
-		}
-
-		c.lastPkt = pkt
-
-		c.logger.Debug("Writing real Packet Last SeqNum: %d RtpTs: %d", pkt.SequenceNumber, pkt.Timestamp)
-		e := c.recorder.OnRTP(pkt)
-		if e != nil {
-			c.logger.Warn("Failed to record RTP packet %v: %v", pkt, err)
-		}
-	})
-
-	// Initialize samplebuilder based on codec type
-	var sampleBuilder *samplebuilder.SampleBuilder
-	switch mType {
-	case webrtc.MimeTypeOpus:
-		sampleBuilder = samplebuilder.New(audioMaxLate, &codecs.OpusPacket{}, 48000, options)
-	case webrtc.MimeTypeVP8:
-		sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.VP8Packet{}, 90000, options)
-	case webrtc.MimeTypeVP9:
-		sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.VP9Packet{}, 90000, options)
-	case webrtc.MimeTypeH264:
-		sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.H264Packet{}, 90000, options)
-	case webrtc.MimeTypeAV1:
-		sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.AV1Depacketizer{}, 90000, options)
-	default:
-		return fmt.Errorf("unsupported codec type: %s", mType)
-	}
-	c.sampleBuilder = sampleBuilder
+	defer c.recorder.Close()
 
 	time.Sleep(1 * time.Second)
 
@@ -187,39 +127,34 @@ func (c *RTPDump2WebMConverter) ConvertFile(inputFile string) error {
 func (c *RTPDump2WebMConverter) feedPackets(reader *rtpdump.Reader) error {
 	startTime := time.Now()
 
-	for i := 0; ; i++ {
+	i := 0
+	for ; ; i++ {
 		packet, err := reader.Next()
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			} else {
-				return err
-			}
-		}
-
-		if packet.IsRTCP {
+		if errors.Is(err, io.EOF) {
+			break
+		} else if err != nil {
+			return err
+		} else if packet.IsRTCP {
 			continue
 		}
 
 		// Unmarshal the RTP packet from the raw payload
-
 		if c.sampleBuilder == nil {
 			_ = c.recorder.PushRtpBuf(packet.Payload)
-		} else
-		// Unmarshal the RTP packet from the raw payload
-		{
+		} else {
+			// Unmarshal the RTP packet from the raw payload
 			rtpPacket := &rtp.Packet{}
 			if err := rtpPacket.Unmarshal(packet.Payload); err != nil {
 				c.logger.Warn("Failed to unmarshal RTP packet %d: %v", i, err)
 				continue
 			}
 
+			// Push packet to samplebuilder for reordering
 			c.sampleBuilder.Push(rtpPacket)
 		}
-		// Push packet to samplebuilder for reordering
 
 		// Log progress
-		if i%100 == 0 && i > 0 {
+		if i%2000 == 0 && i > 0 {
 			c.logger.Info("Processed %d packets", i)
 		}
 	}
@@ -229,12 +164,69 @@ func (c *RTPDump2WebMConverter) feedPackets(reader *rtpdump.Reader) error {
 	}
 
 	duration := time.Since(startTime)
-	c.logger.Info("Finished feeding packets in %v", duration)
+	c.logger.Info("Finished feeding %d packets in %v", i, duration)
 
 	// Allow some time for the recorder to finalize
 	time.Sleep(2 * time.Second)
 
 	return nil
+}
+
+func (c *RTPDump2WebMConverter) buildDefaultReleasePacketHandler() func(pkt *rtp.Packet) {
+	return func(pkt *rtp.Packet) {
+		if e := c.recorder.OnRTP(pkt); e != nil {
+			c.logger.Warn("Failed to record RTP packet %v: %v", pkt, e)
+		}
+	}
+}
+
+func (c *RTPDump2WebMConverter) buildOpusReleasePacketHandler() func(pkt *rtp.Packet) {
+	return func(pkt *rtp.Packet) {
+		pkt.SequenceNumber += c.inserted
+
+		if c.lastPkt != nil {
+			if pkt.SequenceNumber-c.lastPkt.SequenceNumber > 1 {
+				c.logger.Info("Missing Packet Detected, Previous SeqNum: %d RtpTs: %d   - Last SeqNum: %d RtpTs: %d", c.lastPkt.SequenceNumber, c.lastPkt.Timestamp, pkt.SequenceNumber, pkt.Timestamp)
+			}
+
+			tsDiff := pkt.Timestamp - c.lastPkt.Timestamp // TODO handle rollover
+			lastPktDuration := opusPacketDurationMs(c.lastPkt.Payload)
+			rtpDuration := uint32(lastPktDuration * 48)
+			if tsDiff > rtpDuration {
+
+				// Calculate how many packets we need to insert, taking care of packet losses
+				var toAdd uint16
+				if uint32(pkt.SequenceNumber-c.lastPkt.SequenceNumber)*rtpDuration != tsDiff { // TODO handle rollover
+					toAdd = uint16(tsDiff/rtpDuration) - (pkt.SequenceNumber - c.lastPkt.SequenceNumber)
+				}
+
+				c.logger.Info("Gap detected, inserting %d packets tsDiff %d, Previous SeqNum: %d RtpTs: %d   - Last SeqNum: %d RtpTs: %d",
+					toAdd, tsDiff, c.lastPkt.SequenceNumber, c.lastPkt.Timestamp, pkt.SequenceNumber, pkt.Timestamp)
+
+				for i := 1; i <= int(toAdd); i++ {
+					ins := c.lastPkt.Clone()
+					ins.Payload = ins.Payload[:1] // Keeping only TOC byte
+					ins.SequenceNumber += uint16(i)
+					ins.Timestamp += uint32(i) * rtpDuration
+
+					c.logger.Debug("Writing inserted Packet %v", ins)
+					if e := c.recorder.OnRTP(ins); e != nil {
+						c.logger.Warn("Failed to record RTP packet %v: %v", pkt, e)
+					}
+				}
+
+				c.inserted += toAdd
+				pkt.SequenceNumber += toAdd
+			}
+		}
+
+		c.lastPkt = pkt
+
+		c.logger.Debug("Writing real Packet Last SeqNum: %d RtpTs: %d", pkt.SequenceNumber, pkt.Timestamp)
+		if e := c.recorder.OnRTP(pkt); e != nil {
+			c.logger.Warn("Failed to record RTP packet %v: %v", pkt, e)
+		}
+	}
 }
 
 func opusPacketDurationMs(packet []byte) int {
