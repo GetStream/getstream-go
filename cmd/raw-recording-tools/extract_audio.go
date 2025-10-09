@@ -69,20 +69,14 @@ func runExtractAudio(args []string, globalArgs *GlobalArgs) {
 	fmt.Printf("  Output directory: %s\n", globalArgs.Output)
 	fmt.Printf("  User ID filter: %s\n", extractAudioArgs.UserID)
 
-	if extractAudioArgs.UserID == "*" {
-		fmt.Printf("  → Processing ALL users (sessionId/trackId ignored)\n")
+	if extractAudioArgs.TrackID != "" {
+		fmt.Printf("  → Processing specific track '%s'\n", extractAudioArgs.TrackID)
+	} else if extractAudioArgs.SessionID != "" {
+		fmt.Printf("  → Processing all audio tracks for session '%s'\n", extractAudioArgs.SessionID)
+	} else if extractAudioArgs.UserID != "" {
+		fmt.Printf("  → Processing all audio tracks for user '%s'\n", extractAudioArgs.UserID)
 	} else {
-		fmt.Printf("  Session ID filter: %s\n", extractAudioArgs.SessionID)
-		if extractAudioArgs.SessionID == "*" {
-			fmt.Printf("  → Processing ALL sessions for user '%s' (trackId ignored)\n", extractAudioArgs.UserID)
-		} else {
-			fmt.Printf("  Track ID filter: %s\n", extractAudioArgs.TrackID)
-			if extractAudioArgs.TrackID == "*" {
-				fmt.Printf("  → Processing ALL tracks for user '%s', session '%s'\n", extractAudioArgs.UserID, extractAudioArgs.SessionID)
-			} else {
-				fmt.Printf("  → Processing specific track '%s' for user '%s', session '%s'\n", extractAudioArgs.TrackID, extractAudioArgs.UserID, extractAudioArgs.SessionID)
-			}
-		}
+		fmt.Printf("  → Processing all audio tracks (no filters)\n")
 	}
 	fmt.Printf("  Fill gaps: %t\n", extractAudioArgs.FillGaps)
 

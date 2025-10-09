@@ -67,14 +67,14 @@ func runProcessAll(args []string, globalArgs *GlobalArgs) {
 	fmt.Printf("  Track ID filter: %s\n", processAllArgs.TrackID)
 	fmt.Printf("  Gap filling: always enabled\n")
 
-	if processAllArgs.UserID == "*" {
-		fmt.Printf("  → Processing ALL users (sessionId/trackId ignored)\n")
-	} else if processAllArgs.SessionID == "*" {
-		fmt.Printf("  → Processing ALL sessions for user '%s' (trackId ignored)\n", processAllArgs.UserID)
-	} else if processAllArgs.TrackID == "*" {
-		fmt.Printf("  → Processing ALL tracks for user '%s', session '%s'\n", processAllArgs.UserID, processAllArgs.SessionID)
+	if processAllArgs.TrackID != "" {
+		fmt.Printf("  → Processing specific track '%s'\n", processAllArgs.TrackID)
+	} else if processAllArgs.SessionID != "" {
+		fmt.Printf("  → Processing all tracks for session '%s'\n", processAllArgs.SessionID)
+	} else if processAllArgs.UserID != "" {
+		fmt.Printf("  → Processing all tracks for user '%s'\n", processAllArgs.UserID)
 	} else {
-		fmt.Printf("  → Processing specific track for user '%s', session '%s', track '%s'\n", processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID)
+		fmt.Printf("  → Processing all tracks (no filters)\n")
 	}
 
 	// Process all tracks and mux them

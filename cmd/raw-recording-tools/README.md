@@ -62,17 +62,19 @@ raw-tools --inputFile recording.zip --output ./output extract-audio --trackId tr
 ```
 
 **Options:**
-- `--userId <id>` - Filter by user ID (empty for all users, specific ID for that user only)
-- `--sessionId <id>` - Filter by session ID (empty for all sessions, specific ID for that session only)
-- `--trackId <id>` - Filter by track ID (empty for all tracks, specific ID for that track only)
+- `--userId <id>` - Filter by user ID (returns all tracks for that user)
+- `--sessionId <id>` - Filter by session ID (returns all tracks for that session)
+- `--trackId <id>` - Filter by track ID (returns only that specific track)
+- **Note**: These filters are mutually exclusive - only one can be specified at a time
 - `--fill_gaps` - Fill temporal gaps between segments with silence (recommended for playback)
 - `-h, --help` - Show help message
 
-**Priority-Based Filtering:**
-- `--trackId` has highest priority: if specified, only that track is processed
-- `--sessionId` has medium priority: if specified (without trackId), all tracks for that session are processed
-- `--userId` has lowest priority: if specified (without sessionId/trackId), all tracks for that user are processed
-- If all are empty, all tracks are processed
+**Mutually Exclusive Filtering:**
+- Only one filter can be specified at a time: `--userId`, `--sessionId`, or `--trackId`
+- `--trackId` returns exactly one track (the specified track)
+- `--sessionId` returns all tracks for that session (multiple tracks possible)  
+- `--userId` returns all tracks for that user (multiple tracks possible)
+- If no filter is specified, all tracks are processed
 
 ### `extract-video` - Extract Video Tracks
 
@@ -90,9 +92,10 @@ raw-tools --inputFile recording.zip --output ./output extract-video --userId use
 ```
 
 **Options:**
-- `--userId <id>` - Filter by user ID (empty for all users, specific ID for that user only)  
-- `--sessionId <id>` - Filter by session ID (empty for all sessions, specific ID for that session only)
-- `--trackId <id>` - Filter by track ID (empty for all tracks, specific ID for that track only)
+- `--userId <id>` - Filter by user ID (returns all tracks for that user)  
+- `--sessionId <id>` - Filter by session ID (returns all tracks for that session)
+- `--trackId <id>` - Filter by track ID (returns only that specific track)
+- **Note**: These filters are mutually exclusive - only one can be specified at a time
 - `--fill_gaps` - Fill temporal gaps between segments with black frames (recommended for playback)
 - `-h, --help` - Show help message
 
@@ -120,9 +123,10 @@ raw-tools --inputFile recording.zip --output ./output mux-av --userId user123 --
 ```
 
 **Options:**
-- `--userId <id>` - Filter by user ID (empty for all users, specific ID for that user only)
-- `--sessionId <id>` - Filter by session ID (empty for all sessions, specific ID for that session only)
-- `--trackId <id>` - Filter by track ID (empty for all tracks, specific ID for that track only)
+- `--userId <id>` - Filter by user ID (returns all tracks for that user)
+- `--sessionId <id>` - Filter by session ID (returns all tracks for that session)
+- `--trackId <id>` - Filter by track ID (returns only that specific track)
+- **Note**: These filters are mutually exclusive - only one can be specified at a time
 - `--media <type>` - Filter by media type: `user` (camera/microphone), `display` (screen sharing), or `both` (default)
 - `-h, --help` - Show help message
 
@@ -165,9 +169,10 @@ raw-tools --inputFile recording.zip --output ./output mix-audio --userId user123
 ```
 
 **Options:**
-- `--userId <id>` - Filter by user ID (empty for all users, specific ID for that user only)
-- `--sessionId <id>` - Filter by session ID (empty for all sessions, specific ID for that session only)
-- `--trackId <id>` - Filter by track ID (empty for all tracks, specific ID for that track only)
+- `--userId <id>` - Filter by user ID (returns all tracks for that user)
+- `--sessionId <id>` - Filter by session ID (returns all tracks for that session)
+- `--trackId <id>` - Filter by track ID (returns only that specific track)
+- **Note**: These filters are mutually exclusive - only one can be specified at a time
 - `--no-fill-gaps` - Disable gap filling (not recommended for mixing, gaps enabled by default)
 - `-h, --help` - Show help message
 
@@ -203,9 +208,10 @@ raw-tools --inputFile recording.zip --output ./output process-all --userId user1
 ```
 
 **Options:**
-- `--userId <id>` - Filter by user ID (empty for all users, specific ID for that user only)
-- `--sessionId <id>` - Filter by session ID (empty for all sessions, specific ID for that session only)
-- `--trackId <id>` - Filter by track ID (empty for all tracks, specific ID for that track only)
+- `--userId <id>` - Filter by user ID (returns all tracks for that user)
+- `--sessionId <id>` - Filter by session ID (returns all tracks for that session)
+- `--trackId <id>` - Filter by track ID (returns only that specific track)
+- **Note**: These filters are mutually exclusive - only one can be specified at a time
 - `-h, --help` - Show help message
 
 **Workflow Steps:**

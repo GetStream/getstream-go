@@ -289,40 +289,34 @@ func (p *MetadataParser) extractUniqueSessions(tracks []*TrackInfo) []string {
 	return sessions
 }
 
-// FilterTracks filters tracks based on priority-based criteria
+// FilterTracks filters tracks based on mutually exclusive criteria
+// Only one filter (userID, sessionID, or trackID) can be specified at a time
 // Empty values are ignored, specific values must match
-// Priority: trackID (highest) > sessionID > userID (lowest)
 // If all are empty, all tracks are returned
 func (p *MetadataParser) FilterTracks(tracks []*TrackInfo, userID, sessionID, trackID string) []*TrackInfo {
 	filtered := make([]*TrackInfo, 0)
 
 	for _, track := range tracks {
-		// If trackID is specified, it has highest priority - only return that specific track
+		// Apply the single specified filter (mutually exclusive)
 		if trackID != "" {
+			// Filter by trackID - return only that specific track
 			if track.TrackID == trackID {
 				filtered = append(filtered, track)
 			}
-			continue
-		}
-
-		// If sessionID is specified, return all tracks for that session
-		if sessionID != "" {
+		} else if sessionID != "" {
+			// Filter by sessionID - return all tracks for that session
 			if track.SessionID == sessionID {
 				filtered = append(filtered, track)
 			}
-			continue
-		}
-
-		// If userID is specified, return all tracks for that user
-		if userID != "" {
+		} else if userID != "" {
+			// Filter by userID - return all tracks for that user
 			if track.UserID == userID {
 				filtered = append(filtered, track)
 			}
-			continue
+		} else {
+			// No filters specified - return all tracks
+			filtered = append(filtered, track)
 		}
-
-		// If all are empty, return all tracks
-		filtered = append(filtered, track)
 	}
 
 	return filtered

@@ -70,14 +70,14 @@ func runMuxAV(args []string, globalArgs *GlobalArgs) {
 	fmt.Printf("  Track ID filter: %s\n", muxAVArgs.TrackID)
 	fmt.Printf("  Media filter: %s\n", muxAVArgs.Media)
 
-	if muxAVArgs.UserID == "*" {
-		fmt.Printf("  → Processing ALL users (sessionId/trackId ignored)\n")
-	} else if muxAVArgs.SessionID == "*" {
-		fmt.Printf("  → Processing ALL sessions for user '%s' (trackId ignored)\n", muxAVArgs.UserID)
-	} else if muxAVArgs.TrackID == "*" {
-		fmt.Printf("  → Processing ALL tracks for user '%s', session '%s'\n", muxAVArgs.UserID, muxAVArgs.SessionID)
+	if muxAVArgs.TrackID != "" {
+		fmt.Printf("  → Processing specific track '%s'\n", muxAVArgs.TrackID)
+	} else if muxAVArgs.SessionID != "" {
+		fmt.Printf("  → Processing all tracks for session '%s'\n", muxAVArgs.SessionID)
+	} else if muxAVArgs.UserID != "" {
+		fmt.Printf("  → Processing all tracks for user '%s'\n", muxAVArgs.UserID)
 	} else {
-		fmt.Printf("  → Processing specific track for user '%s', session '%s', track '%s'\n", muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID)
+		fmt.Printf("  → Processing all tracks (no filters)\n")
 	}
 
 	// Extract and mux audio/video tracks

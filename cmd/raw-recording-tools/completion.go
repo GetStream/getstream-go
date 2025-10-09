@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 )
 
 // generateCompletion generates shell completion scripts
@@ -70,10 +69,10 @@ _raw_tools_completion() {
                 esac
                 if [[ -n "$completion_type" ]]; then
                     local values=$(raw-tools --inputFile "$_RAW_TOOLS_INPUT_FILE" --output /tmp list-tracks --format "$completion_type" 2>/dev/null)
-                    COMPREPLY=($(compgen -W "$values *" -- "$cur"))
+                    COMPREPLY=($(compgen -W "$values" -- "$cur"))
                 fi
             else
-                COMPREPLY=($(compgen -W "*" -- "$cur"))
+                COMPREPLY=()
             fi
             return
             ;;
@@ -208,9 +207,9 @@ _raw_tools_complete_users() {
     
     if [[ -n "$input_file" ]]; then
         local users=($(raw-tools --inputFile "$input_file" --output /tmp list-tracks --format users 2>/dev/null))
-        _wanted users expl 'user ID' compadd "$@" "*" $users
+        _wanted users expl 'user ID' compadd "$@" $users
     else
-        _wanted users expl 'user ID' compadd "$@" "*"
+        _wanted users expl 'user ID' compadd "$@"
     fi
 }
 
@@ -225,9 +224,9 @@ _raw_tools_complete_sessions() {
     
     if [[ -n "$input_file" ]]; then
         local sessions=($(raw-tools --inputFile "$input_file" --output /tmp list-tracks --format sessions 2>/dev/null))
-        _wanted sessions expl 'session ID' compadd "$@" "*" $sessions
+        _wanted sessions expl 'session ID' compadd "$@" $sessions
     else
-        _wanted sessions expl 'session ID' compadd "$@" "*"
+        _wanted sessions expl 'session ID' compadd "$@"
     fi
 }
 
@@ -242,9 +241,9 @@ _raw_tools_complete_tracks() {
     
     if [[ -n "$input_file" ]]; then
         local tracks=($(raw-tools --inputFile "$input_file" --output /tmp list-tracks --format tracks 2>/dev/null))
-        _wanted tracks expl 'track ID' compadd "$@" "*" $tracks
+        _wanted tracks expl 'track ID' compadd "$@" $tracks
     else
-        _wanted tracks expl 'track ID' compadd "$@" "*"
+        _wanted tracks expl 'track ID' compadd "$@"
     fi
 }
 
@@ -289,13 +288,35 @@ complete -c raw-tools -n '__fish_seen_subcommand_from mux-av' -l sessionId -d 'S
 	fmt.Println(script)
 }
 
-// validateInputArgs validates input arguments using hierarchical logic
+// validateInputArgs validates input arguments using mutually exclusive logic
 func validateInputArgs(globalArgs *GlobalArgs, userID, sessionID, trackID string) error {
 	if globalArgs.InputFile == "" && globalArgs.InputS3 == "" {
 		return nil // Skip validation if no input specified yet
 	}
 
-	// Parse metadata to validate arguments
+	// Count how many filters are specified
+	filtersCount := 0
+	if userID != "" {
+		filtersCount++
+	}
+	if sessionID != "" {
+		filtersCount++
+	}
+	if trackID != "" {
+		filtersCount++
+	}
+
+	// Ensure filters are mutually exclusive
+	if filtersCount > 1 {
+		return fmt.Errorf("only one filter can be specified at a time: --userId, --sessionId, and --trackId are mutually exclusive")
+	}
+
+	// If no filters specified, no validation needed
+	if filtersCount == 0 {
+		return nil
+	}
+
+	// Parse metadata to validate the single specified argument
 	logger := setupLogger(false) // Use non-verbose for validation
 	parser := NewMetadataParser(logger)
 
@@ -312,14 +333,30 @@ func validateInputArgs(globalArgs *GlobalArgs, userID, sessionID, trackID string
 		return fmt.Errorf("failed to parse recording for validation: %w", err)
 	}
 
-	// Hierarchical validation logic
-	if userID == "*" {
-		// If userID is wildcard, sessionID and trackID are ignored (no validation needed)
-		return nil
-	}
-
-	// Validate userID if not wildcard
-	if userID != "" {
+	// Validate the single specified filter
+	if trackID != "" {
+		found := false
+		for _, track := range metadata.Tracks {
+			if track.TrackID == trackID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return fmt.Errorf("trackID '%s' not found in recording. Use 'list-tracks --format tracks' to see available track IDs", trackID)
+		}
+	} else if sessionID != "" {
+		found := false
+		for _, track := range metadata.Tracks {
+			if track.SessionID == sessionID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return fmt.Errorf("sessionID '%s' not found in recording. Use 'list-tracks --format sessions' to see available session IDs", sessionID)
+		}
+	} else if userID != "" {
 		found := false
 		for _, uid := range metadata.UserIDs {
 			if uid == userID {
@@ -328,68 +365,7 @@ func validateInputArgs(globalArgs *GlobalArgs, userID, sessionID, trackID string
 			}
 		}
 		if !found {
-			return fmt.Errorf("userID '%s' not found in recording. Available users: %s",
-				userID, strings.Join(metadata.UserIDs, ", "))
-		}
-	}
-
-	// If sessionID is wildcard, trackID is ignored
-	if sessionID == "*" {
-		return nil
-	}
-
-	// Validate sessionID if not wildcard
-	if sessionID != "" {
-		// Check if this sessionID exists for the specified userID
-		found := false
-		for _, track := range metadata.Tracks {
-			if track.UserID == userID && track.SessionID == sessionID {
-				found = true
-				break
-			}
-		}
-		if !found {
-			// Get available sessions for this user
-			availableSessions := make([]string, 0)
-			seen := make(map[string]bool)
-			for _, track := range metadata.Tracks {
-				if track.UserID == userID && !seen[track.SessionID] {
-					availableSessions = append(availableSessions, track.SessionID)
-					seen[track.SessionID] = true
-				}
-			}
-			return fmt.Errorf("sessionID '%s' not found for userID '%s'. Available sessions for this user: %s",
-				sessionID, userID, strings.Join(availableSessions, ", "))
-		}
-	}
-
-	// If trackID is wildcard, no validation needed
-	if trackID == "*" {
-		return nil
-	}
-
-	// Validate trackID if not wildcard
-	if trackID != "" {
-		// Check if this trackID exists for the specified userID/sessionID
-		found := false
-		for _, track := range metadata.Tracks {
-			if track.UserID == userID && track.SessionID == sessionID && track.TrackID == trackID {
-				found = true
-				break
-			}
-		}
-		if !found {
-			// Get available tracks for this user/session combination
-			availableTracks := make([]string, 0)
-			seen := make(map[string]bool)
-			for _, track := range metadata.Tracks {
-				if track.UserID == userID && track.SessionID == sessionID && !seen[track.TrackID] {
-					availableTracks = append(availableTracks, track.TrackID)
-					seen[track.TrackID] = true
-				}
-			}
-			return fmt.Errorf("trackID '%s' not found for userID '%s' and sessionID '%s'. Available tracks for this user/session: %s",
-				trackID, userID, sessionID, strings.Join(availableTracks, ", "))
+			return fmt.Errorf("userID '%s' not found in recording. Use 'list-tracks --format users' to see available user IDs", userID)
 		}
 	}
 

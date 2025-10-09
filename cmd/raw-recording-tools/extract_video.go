@@ -77,20 +77,14 @@ func runExtractVideo(args []string, globalArgs *GlobalArgs) {
 	fmt.Printf("  Output directory: %s\n", globalArgs.Output)
 	fmt.Printf("  User ID filter: %s\n", extractVideoArgs.UserID)
 
-	if extractVideoArgs.UserID == "*" {
-		fmt.Printf("  → Processing ALL users (sessionId/trackId ignored)\n")
+	if extractVideoArgs.TrackID != "" {
+		fmt.Printf("  → Processing specific track '%s'\n", extractVideoArgs.TrackID)
+	} else if extractVideoArgs.SessionID != "" {
+		fmt.Printf("  → Processing all video tracks for session '%s'\n", extractVideoArgs.SessionID)
+	} else if extractVideoArgs.UserID != "" {
+		fmt.Printf("  → Processing all video tracks for user '%s'\n", extractVideoArgs.UserID)
 	} else {
-		fmt.Printf("  Session ID filter: %s\n", extractVideoArgs.SessionID)
-		if extractVideoArgs.SessionID == "*" {
-			fmt.Printf("  → Processing ALL sessions for user '%s' (trackId ignored)\n", extractVideoArgs.UserID)
-		} else {
-			fmt.Printf("  Track ID filter: %s\n", extractVideoArgs.TrackID)
-			if extractVideoArgs.TrackID == "*" {
-				fmt.Printf("  → Processing ALL tracks for user '%s', session '%s'\n", extractVideoArgs.UserID, extractVideoArgs.SessionID)
-			} else {
-				fmt.Printf("  → Processing specific track '%s' for user '%s', session '%s'\n", extractVideoArgs.TrackID, extractVideoArgs.UserID, extractVideoArgs.SessionID)
-			}
-		}
+		fmt.Printf("  → Processing all video tracks (no filters)\n")
 	}
 	fmt.Printf("  Fill gaps: %t\n", extractVideoArgs.FillGaps)
 
