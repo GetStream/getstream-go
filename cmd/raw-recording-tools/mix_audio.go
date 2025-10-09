@@ -46,19 +46,15 @@ func runMixAudio(args []string, globalArgs *GlobalArgs, logger *getstream.Defaul
 	metadata, err := validateInputArgs(globalArgs, mixAudioArgs.UserID, mixAudioArgs.SessionID, mixAudioArgs.TrackID)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Validation error: %v\n", err)
-		if globalArgs.InputFile != "" {
-			fmt.Fprintf(os.Stderr, "\nTip: Use 'raw-tools --inputFile %s --output %s list-tracks --format users' to see available user IDs\n",
-				globalArgs.InputFile, globalArgs.Output)
-		}
 		os.Exit(1)
 	}
 
 	logger.Info("Starting mix-audio command")
 
 	// Execute the mix-audio operation
-	err = mixAllAudioTracks(globalArgs, mixAudioArgs, metadata, logger)
-	if err != nil {
-		logger.Error("Mix-audio failed: %v", err)
+	if e := mixAllAudioTracks(globalArgs, mixAudioArgs, metadata, logger); e != nil {
+		logger.Error("Mix-audio failed: %v", e)
+		os.Exit(1)
 	}
 
 	logger.Info("Mix-audio command completed successfully")

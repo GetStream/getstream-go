@@ -38,10 +38,6 @@ func runMuxAV(args []string, globalArgs *GlobalArgs, logger *getstream.DefaultLo
 	metadata, err := validateInputArgs(globalArgs, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Validation error: %v\n", err)
-		if globalArgs.InputFile != "" {
-			fmt.Fprintf(os.Stderr, "\nTip: Use 'raw-tools --inputFile %s --output %s list-tracks --format users' to see available user IDs\n",
-				globalArgs.InputFile, globalArgs.Output)
-		}
 		os.Exit(1)
 	}
 

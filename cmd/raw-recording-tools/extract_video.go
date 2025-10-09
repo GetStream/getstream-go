@@ -35,10 +35,6 @@ func runExtractVideo(args []string, globalArgs *GlobalArgs, logger *getstream.De
 	metadata, err := validateInputArgs(globalArgs, extractVideoArgs.UserID, extractVideoArgs.SessionID, extractVideoArgs.TrackID)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Validation error: %v\n", err)
-		if globalArgs.InputFile != "" {
-			fmt.Fprintf(os.Stderr, "\nTip: Use 'raw-tools --inputFile %s --output %s list-tracks --format users' to see available user IDs\n",
-				globalArgs.InputFile, globalArgs.Output)
-		}
 		os.Exit(1)
 	}
 
@@ -66,8 +62,8 @@ func runExtractVideo(args []string, globalArgs *GlobalArgs, logger *getstream.De
 	fmt.Printf("  Fill gaps: %t\n", extractVideoArgs.FillGaps)
 
 	// Extract video tracks
-	if err := extractVideoTracks(globalArgs, extractVideoArgs, metadata, logger); err != nil {
-		logger.Error("Failed to extract video tracks: %v", err)
+	if e := extractVideoTracks(globalArgs, extractVideoArgs, metadata, logger); e != nil {
+		logger.Error("Failed to extract video tracks: %v", e)
 		os.Exit(1)
 	}
 

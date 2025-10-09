@@ -35,10 +35,6 @@ func runExtractAudio(args []string, globalArgs *GlobalArgs, logger *getstream.De
 	metadata, err := validateInputArgs(globalArgs, extractAudioArgs.UserID, extractAudioArgs.SessionID, extractAudioArgs.TrackID)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Validation error: %v\n", err)
-		if globalArgs.InputFile != "" {
-			fmt.Fprintf(os.Stderr, "\nTip: Use 'raw-tools --inputFile %s --output %s list-tracks --format users' to see available user IDs\n",
-				globalArgs.InputFile, globalArgs.Output)
-		}
 		os.Exit(1)
 	}
 
@@ -66,8 +62,8 @@ func runExtractAudio(args []string, globalArgs *GlobalArgs, logger *getstream.De
 	fmt.Printf("  Fill gaps: %t\n", extractAudioArgs.FillGaps)
 
 	// Implement extract audio functionality
-	if err := extractAudioTracks(globalArgs, extractAudioArgs, metadata, logger); err != nil {
-		logger.Error("Failed to extract audio: %v", err)
+	if e := extractAudioTracks(globalArgs, extractAudioArgs, metadata, logger); e != nil {
+		logger.Error("Failed to extract audio: %v", e)
 	}
 
 	logger.Info("Extract audio command completed")
