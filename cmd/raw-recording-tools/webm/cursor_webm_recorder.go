@@ -89,7 +89,7 @@ func (r *CursorWebmRecorder) startFFmpeg(outputFilePath, sdpContent string, port
 	// Build FFmpeg command with optimized settings for single track recording
 	args := []string{
 		"-threads", "1",
-		"-loglevel", "debug",
+		//		"-loglevel", "debug",
 		"-protocol_whitelist", "file,udp,rtp",
 		"-buffer_size", "10000000",
 		"-max_delay", "150000",

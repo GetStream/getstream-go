@@ -209,7 +209,7 @@ func calculateSyncOffsetFromFiles(inputPath, audioFile, videoFile string, logger
 	offset := audioTs - videoTs
 
 	logger.Info(fmt.Sprintf("Calculated sync offset: audio_start=%v, audio_ts=%v, video_start=%v, video_ts=%v, offset=%d",
-		audioTrack.Segments[0].StartTimestamp, audioTs, videoTrack.Segments[0].StartTimestamp, videoTs, offset))
+		audioTrack.Segments[0].FirstRtpUnixTimestamp, audioTs, videoTrack.Segments[0].FirstRtpUnixTimestamp, videoTs, offset))
 
 	return offset, nil
 }
@@ -374,9 +374,14 @@ func muxTrackPairs(inputPath string, audioFiles, videoFiles []string, outputDir,
 
 // generateMediaAwareMuxedFilename creates output filename that indicates media type
 func generateMediaAwareMuxedFilename(audioFile, videoFile, outputDir, mediaTypeName string) string {
+	suffix := ".webm"
+	if strings.HasSuffix(videoFile, ".mp4") {
+		suffix = ".mkv"
+	}
+
 	// Extract common parts from audio filename
 	audioBase := filepath.Base(audioFile)
-	audioBase = strings.TrimSuffix(audioBase, ".webm")
+	audioBase = strings.TrimSuffix(audioBase, suffix)
 
 	// Replace "audio_" with "muxed_{mediaType}_" to create output name
 	var muxedName string

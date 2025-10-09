@@ -95,6 +95,8 @@ func (c *RTPDump2WebMConverter) ConvertFile(inputFile string) error {
 	switch mType {
 	case webrtc.MimeTypeAV1, webrtc.MimeTypeVP9:
 		recorder, err = NewCursorGstreamerWebmRecorder(strings.Replace(inputFile, ".rtpdump", ".webm", 1), sdpContent, c.logger)
+	case webrtc.MimeTypeH264:
+		recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, ".rtpdump", ".mp4", 1), sdpContent, c.logger)
 	default:
 		recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, ".rtpdump", ".webm", 1), sdpContent, c.logger)
 	}

@@ -232,7 +232,7 @@ func (p *MetadataParser) parseTimingMetadataFile(data []byte) ([]*TrackInfo, err
 	tracks := make([]*TrackInfo, 0, len(trackMap))
 	for _, track := range trackMap {
 		sort.Slice(track.Segments, func(i, j int) bool {
-			return track.Segments[i].StartTimestamp < track.Segments[j].StartTimestamp
+			return track.Segments[i].FirstRtpUnixTimestamp < track.Segments[j].FirstRtpUnixTimestamp
 		})
 		tracks = append(tracks, track)
 	}
@@ -324,7 +324,7 @@ func FirstPacketNtpTimestamp(segment *rawrecorder.SegmentMetadata) int64 {
 		rtpNtpTs := (segment.FirstRtcpRtpTimestamp - segment.FirstRtpRtpTimestamp) / sampleRate(segment)
 		return segment.FirstRtcpNtpTimestamp - int64(rtpNtpTs)
 	} else {
-		return segment.StartTimestamp
+		return segment.FirstRtpUnixTimestamp
 	}
 }
 
@@ -333,7 +333,7 @@ func LastPacketNtpTimestamp(segment *rawrecorder.SegmentMetadata) int64 {
 		rtpNtpTs := (segment.LastRtpRtpTimestamp - segment.LastRtcpRtpTimestamp) / sampleRate(segment)
 		return segment.LastRtcpNtpTimestamp + int64(rtpNtpTs)
 	} else {
-		return segment.EndTimestamp
+		return segment.LastRtpUnixTimestamp
 	}
 }
 
