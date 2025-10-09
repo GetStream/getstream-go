@@ -167,6 +167,15 @@ func printUsage() {
 	fmt.Fprintf(os.Stderr, "  %s completion fish | source\n", os.Args[0])
 }
 
+func printHelpIfAsked(args []string, fn func()) {
+	// Check for help flag before parsing
+	for _, arg := range args {
+		if arg == "--help" || arg == "-h" {
+			fn()
+			os.Exit(0)
+		}
+	}
+}
 func runCompletion(args []string) {
 	if len(args) == 0 {
 		fmt.Fprintf(os.Stderr, "Usage: raw-tools completion <shell>\n")

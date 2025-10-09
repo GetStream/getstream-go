@@ -19,6 +19,8 @@ type MuxAVArgs struct {
 }
 
 func runMuxAV(args []string, globalArgs *GlobalArgs) {
+	printHelpIfAsked(args, printMuxAVUsage)
+
 	// Parse command-specific flags
 	fs := flag.NewFlagSet("mux-av", flag.ExitOnError)
 	muxAVArgs := &MuxAVArgs{}
@@ -26,14 +28,6 @@ func runMuxAV(args []string, globalArgs *GlobalArgs) {
 	fs.StringVar(&muxAVArgs.SessionID, "sessionId", "", "Specify a sessionId (empty for all)")
 	fs.StringVar(&muxAVArgs.TrackID, "trackId", "", "Specify a trackId (empty for all)")
 	fs.StringVar(&muxAVArgs.Media, "media", "both", "Filter by media type: 'user', 'display', or 'both'")
-
-	// Check for help flag before parsing
-	for _, arg := range args {
-		if arg == "--help" || arg == "-h" {
-			printMuxAVUsage()
-			return
-		}
-	}
 
 	if err := fs.Parse(args); err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing flags: %v\n", err)

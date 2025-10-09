@@ -17,20 +17,14 @@ type ProcessAllArgs struct {
 }
 
 func runProcessAll(args []string, globalArgs *GlobalArgs) {
+	printHelpIfAsked(args, printProcessAllUsage)
+
 	// Parse command-specific flags
 	fs := flag.NewFlagSet("process-all", flag.ExitOnError)
 	processAllArgs := &ProcessAllArgs{}
 	fs.StringVar(&processAllArgs.UserID, "userId", "", "Specify a userId (empty for all)")
 	fs.StringVar(&processAllArgs.SessionID, "sessionId", "", "Specify a sessionId (empty for all)")
 	fs.StringVar(&processAllArgs.TrackID, "trackId", "", "Specify a trackId (empty for all)")
-
-	// Check for help flag before parsing
-	for _, arg := range args {
-		if arg == "--help" || arg == "-h" {
-			printProcessAllUsage()
-			return
-		}
-	}
 
 	if err := fs.Parse(args); err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing flags: %v\n", err)

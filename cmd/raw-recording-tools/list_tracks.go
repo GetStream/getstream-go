@@ -16,20 +16,14 @@ type ListTracksArgs struct {
 }
 
 func runListTracks(args []string, globalArgs *GlobalArgs) {
+	printHelpIfAsked(args, printListTracksUsage)
+
 	// Parse command-specific flags
 	fs := flag.NewFlagSet("list-tracks", flag.ExitOnError)
 	listTracksArgs := &ListTracksArgs{}
 	fs.StringVar(&listTracksArgs.Format, "format", "table", "Output format: table, json, completion, users, sessions, tracks")
 	fs.StringVar(&listTracksArgs.TrackType, "trackType", "", "Filter by track type: audio, video")
 	fs.StringVar(&listTracksArgs.CompletionType, "completionType", "tracks", "For completion format: users, sessions, tracks")
-
-	// Check for help flag before parsing
-	for _, arg := range args {
-		if arg == "--help" || arg == "-h" {
-			printListTracksUsage()
-			return
-		}
-	}
 
 	if err := fs.Parse(args); err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing flags: %v\n", err)

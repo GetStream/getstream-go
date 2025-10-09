@@ -16,6 +16,8 @@ type ExtractAudioArgs struct {
 }
 
 func runExtractAudio(args []string, globalArgs *GlobalArgs) {
+	printHelpIfAsked(args, printExtractAudioUsage)
+
 	// Parse command-specific flags
 	fs := flag.NewFlagSet("extract-audio", flag.ExitOnError)
 	extractAudioArgs := &ExtractAudioArgs{}
@@ -23,14 +25,6 @@ func runExtractAudio(args []string, globalArgs *GlobalArgs) {
 	fs.StringVar(&extractAudioArgs.SessionID, "sessionId", "", "Specify a sessionId (empty for all)")
 	fs.StringVar(&extractAudioArgs.TrackID, "trackId", "", "Specify a trackId (empty for all)")
 	fs.BoolVar(&extractAudioArgs.FillGaps, "fill_gaps", false, "Fix DTX shrink audio, and fill with silence when track was muted")
-
-	// Check for help flag before parsing
-	for _, arg := range args {
-		if arg == "--help" || arg == "-h" {
-			printExtractAudioUsage()
-			return
-		}
-	}
 
 	if err := fs.Parse(args); err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing flags: %v\n", err)

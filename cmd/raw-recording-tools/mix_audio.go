@@ -33,6 +33,8 @@ type AudioFileWithTiming struct {
 
 // runMixAudio handles the mix-audio command
 func runMixAudio(args []string, globalArgs *GlobalArgs) {
+	printHelpIfAsked(args, printMixAudioUsage)
+
 	mixAudioArgs := &MixAudioArgs{
 		UserID:    "",   // Default: all users (empty)
 		SessionID: "",   // Default: all sessions (empty)

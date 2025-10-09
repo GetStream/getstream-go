@@ -16,6 +16,8 @@ type ExtractVideoArgs struct {
 }
 
 func runExtractVideo(args []string, globalArgs *GlobalArgs) {
+	printHelpIfAsked(args, printExtractVideoUsage)
+
 	// Parse command-specific flags
 	fs := flag.NewFlagSet("extract-video", flag.ExitOnError)
 	extractVideoArgs := &ExtractVideoArgs{}
@@ -23,14 +25,6 @@ func runExtractVideo(args []string, globalArgs *GlobalArgs) {
 	fs.StringVar(&extractVideoArgs.SessionID, "sessionId", "", "Specify a sessionId (empty for all)")
 	fs.StringVar(&extractVideoArgs.TrackID, "trackId", "", "Specify a trackId (empty for all)")
 	fs.BoolVar(&extractVideoArgs.FillGaps, "fill_gaps", false, "Fill with black frame when track was muted")
-
-	// Check for help flag before parsing
-	for _, arg := range args {
-		if arg == "--help" || arg == "-h" {
-			printExtractVideoUsage()
-			return
-		}
-	}
 
 	if err := fs.Parse(args); err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing flags: %v\n", err)
