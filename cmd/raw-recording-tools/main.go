@@ -20,7 +20,7 @@ type GlobalArgs struct {
 
 func main() {
 	if len(os.Args) < 2 {
-		printUsage()
+		printGlobalUsage()
 		os.Exit(1)
 	}
 
@@ -29,7 +29,7 @@ func main() {
 	command, remainingArgs := parseGlobalFlags(os.Args[1:], globalArgs)
 
 	if command == "" {
-		printUsage()
+		printGlobalUsage()
 		os.Exit(1)
 	}
 
@@ -38,11 +38,12 @@ func main() {
 
 	switch command {
 	case "list-tracks":
-		runListTracks(remainingArgs, globalArgs)
+		p := NewListTracksProcess(logger)
+		p.runListTracks(remainingArgs, globalArgs)
 	case "completion":
 		runCompletion(remainingArgs)
 	case "help", "-h", "--help":
-		printUsage()
+		printGlobalUsage()
 	default:
 		if e := processCommand(command, globalArgs, remainingArgs, logger); e != nil {
 			logger.Error("Error processing command %s - %v", command, e)
@@ -67,18 +68,23 @@ func processCommand(command string, globalArgs *GlobalArgs, remainingArgs []stri
 
 	switch command {
 	case "extract-audio":
-		runExtractAudio(remainingArgs, globalArgs, logger)
+		p := NewExtractAudioProcess(logger)
+		p.runExtractAudio(remainingArgs, globalArgs)
 	case "extract-video":
-		runExtractVideo(remainingArgs, globalArgs, logger)
+		p := NewExtractVideoProcess(logger)
+		p.runExtractVideo(remainingArgs, globalArgs)
 	case "mux-av":
-		runMuxAV(remainingArgs, globalArgs, logger)
+		p := NewMuxAudioVideoProcess(logger)
+		p.runMuxAV(remainingArgs, globalArgs)
 	case "mix-audio":
-		runMixAudio(remainingArgs, globalArgs, logger)
+		p := NewMixAudioProcess(logger)
+		p.runMixAudio(remainingArgs, globalArgs)
 	case "process-all":
-		runProcessAll(remainingArgs, globalArgs, logger)
+		p := NewProcessAllProcess(logger)
+		p.runProcessAll(remainingArgs, globalArgs)
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
-		printUsage()
+		printGlobalUsage()
 		os.Exit(1)
 	}
 
@@ -132,7 +138,7 @@ func parseGlobalFlags(args []string, globalArgs *GlobalArgs) (string, []string) 
 	// Validate global arguments
 	if e := validateGlobalArgs(globalArgs, command); e != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", e)
-		printUsage()
+		printGlobalUsage()
 		os.Exit(1)
 	}
 
@@ -167,7 +173,86 @@ func validateGlobalArgs(globalArgs *GlobalArgs, command string) error {
 	return nil
 }
 
-func printUsage() {
+// validateInputArgs validates input arguments using mutually exclusive logic
+func validateInputArgs(globalArgs *GlobalArgs, userID, sessionID, trackID string) (*RecordingMetadata, error) {
+	// Count how many filters are specified
+	filtersCount := 0
+	if userID != "" {
+		filtersCount++
+	}
+	if sessionID != "" {
+		filtersCount++
+	}
+	if trackID != "" {
+		filtersCount++
+	}
+
+	// Ensure filters are mutually exclusive
+	if filtersCount > 1 {
+		return nil, fmt.Errorf("only one filter can be specified at a time: --userId, --sessionId, and --trackId are mutually exclusive")
+	}
+
+	var inputPath string
+	if globalArgs.InputFile != "" {
+		inputPath = globalArgs.InputFile
+	} else {
+		// TODO: Handle S3 validation
+		return nil, fmt.Errorf("Not implemented for now")
+	}
+
+	// Parse metadata to validate the single specified argument
+	logger := setupLogger(false) // Use non-verbose for validation
+	parser := NewMetadataParser(logger)
+	metadata, err := parser.ParseMetadataOnly(inputPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse recording for validation: %w", err)
+	}
+
+	// If no filters specified, no validation needed
+	if filtersCount == 0 {
+		return metadata, nil
+	}
+
+	// Validate the single specified filter
+	if trackID != "" {
+		found := false
+		for _, track := range metadata.Tracks {
+			if track.TrackID == trackID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return nil, fmt.Errorf("trackID '%s' not found in recording. Use 'list-tracks --format tracks' to see available track IDs", trackID)
+		}
+	} else if sessionID != "" {
+		found := false
+		for _, track := range metadata.Tracks {
+			if track.SessionID == sessionID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return nil, fmt.Errorf("sessionID '%s' not found in recording. Use 'list-tracks --format sessions' to see available session IDs", sessionID)
+		}
+	} else if userID != "" {
+		found := false
+		for _, uid := range metadata.UserIDs {
+			if uid == userID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return nil, fmt.Errorf("userID '%s' not found in recording. Use 'list-tracks --format users' to see available user IDs", userID)
+		}
+	}
+
+	return metadata, nil
+}
+
+func printGlobalUsage() {
 	fmt.Fprintf(os.Stderr, "Raw Recording Post Processing Tools\n\n")
 	fmt.Fprintf(os.Stderr, "Usage: %s [global options] <command> [command options]\n\n", os.Args[0])
 	fmt.Fprintf(os.Stderr, "Global Options:\n")

@@ -15,8 +15,16 @@ type ExtractVideoArgs struct {
 	FillGaps  bool
 }
 
-func runExtractVideo(args []string, globalArgs *GlobalArgs, logger *getstream.DefaultLogger) {
-	printHelpIfAsked(args, printExtractVideoUsage)
+type ExtractVideoProcess struct {
+	logger *getstream.DefaultLogger
+}
+
+func NewExtractVideoProcess(logger *getstream.DefaultLogger) *ExtractVideoProcess {
+	return &ExtractVideoProcess{logger: logger}
+}
+
+func (p *ExtractVideoProcess) runExtractVideo(args []string, globalArgs *GlobalArgs) {
+	printHelpIfAsked(args, p.printUsage)
 
 	// Parse command-specific flags
 	fs := flag.NewFlagSet("extract-video", flag.ExitOnError)
@@ -38,8 +46,19 @@ func runExtractVideo(args []string, globalArgs *GlobalArgs, logger *getstream.De
 		os.Exit(1)
 	}
 
-	logger.Info("Starting extract-video command")
+	p.logger.Info("Starting extract-video command")
+	p.printBanner(globalArgs, extractVideoArgs)
 
+	// Extract video tracks
+	if e := extractVideoTracks(globalArgs, extractVideoArgs, metadata, p.logger); e != nil {
+		p.logger.Error("Failed to extract video tracks: %v", e)
+		os.Exit(1)
+	}
+
+	p.logger.Info("Extract video command completed successfully")
+}
+
+func (p *ExtractVideoProcess) printBanner(globalArgs *GlobalArgs, extractVideoArgs *ExtractVideoArgs) {
 	fmt.Printf("Extract video command with hierarchical filtering:\n")
 	if globalArgs.InputFile != "" {
 		fmt.Printf("  Input file: %s\n", globalArgs.InputFile)
@@ -60,17 +79,9 @@ func runExtractVideo(args []string, globalArgs *GlobalArgs, logger *getstream.De
 		fmt.Printf("  → Processing all video tracks (no filters)\n")
 	}
 	fmt.Printf("  Fill gaps: %t\n", extractVideoArgs.FillGaps)
-
-	// Extract video tracks
-	if e := extractVideoTracks(globalArgs, extractVideoArgs, metadata, logger); e != nil {
-		logger.Error("Failed to extract video tracks: %v", e)
-		os.Exit(1)
-	}
-
-	logger.Info("Extract video command completed successfully")
 }
 
-func printExtractVideoUsage() {
+func (p *ExtractVideoProcess) printUsage() {
 	fmt.Fprintf(os.Stderr, "Usage: raw-tools [global options] extract-video [command options]\n\n")
 	fmt.Fprintf(os.Stderr, "Generate playable video files from raw recording tracks.\n")
 	fmt.Fprintf(os.Stderr, "Supports formats: webm, mp4, and others.\n\n")

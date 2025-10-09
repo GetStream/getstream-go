@@ -7,6 +7,8 @@ import (
 	"os"
 	"sort"
 	"strings"
+
+	"github.com/GetStream/getstream-go/v3"
 )
 
 type ListTracksArgs struct {
@@ -15,8 +17,16 @@ type ListTracksArgs struct {
 	CompletionType string // For completion format: "users", "sessions", "tracks"
 }
 
-func runListTracks(args []string, globalArgs *GlobalArgs) {
-	printHelpIfAsked(args, printListTracksUsage)
+type ListTracksProcess struct {
+	logger *getstream.DefaultLogger
+}
+
+func NewListTracksProcess(logger *getstream.DefaultLogger) *ListTracksProcess {
+	return &ListTracksProcess{logger: logger}
+}
+
+func (p *ListTracksProcess) runListTracks(args []string, globalArgs *GlobalArgs) {
+	printHelpIfAsked(args, p.printUsage)
 
 	// Parse command-specific flags
 	fs := flag.NewFlagSet("list-tracks", flag.ExitOnError)
@@ -57,17 +67,17 @@ func runListTracks(args []string, globalArgs *GlobalArgs) {
 	// Output in requested format
 	switch listTracksArgs.Format {
 	case "table":
-		printTracksTable(tracks)
+		p.printTracksTable(tracks)
 	case "json":
-		printTracksJSON(metadata)
+		p.printTracksJSON(metadata)
 	case "completion":
-		printCompletion(metadata, listTracksArgs.CompletionType)
+		p.printCompletion(metadata, listTracksArgs.CompletionType)
 	case "users":
-		printUsers(metadata.UserIDs)
+		p.printUsers(metadata.UserIDs)
 	case "sessions":
-		printSessions(metadata.Sessions)
+		p.printSessions(metadata.Sessions)
 	case "tracks":
-		printTrackIDs(tracks)
+		p.printTrackIDs(tracks)
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown format: %s\n", listTracksArgs.Format)
 		os.Exit(1)
@@ -77,7 +87,7 @@ func runListTracks(args []string, globalArgs *GlobalArgs) {
 }
 
 // printTracksTable prints tracks in a human-readable table format
-func printTracksTable(tracks []*TrackInfo) {
+func (p *ListTracksProcess) printTracksTable(tracks []*TrackInfo) {
 	if len(tracks) == 0 {
 		fmt.Println("No tracks found.")
 		return
@@ -101,9 +111,9 @@ func printTracksTable(tracks []*TrackInfo) {
 			screenshareStatus = "Yes"
 		}
 		fmt.Printf("%-22s %-38s %-38s %-6s %-12s %-15s %-8d\n",
-			truncateString(track.UserID, 22),
-			truncateString(track.SessionID, 38),
-			truncateString(track.TrackID, 38),
+			p.truncateString(track.UserID, 22),
+			p.truncateString(track.SessionID, 38),
+			p.truncateString(track.TrackID, 38),
 			track.TrackType,
 			screenshareStatus,
 			track.Codec,
@@ -112,7 +122,7 @@ func printTracksTable(tracks []*TrackInfo) {
 }
 
 // truncateString truncates a string to a maximum length, adding "..." if needed
-func truncateString(s string, maxLen int) string {
+func (p *ListTracksProcess) truncateString(s string, maxLen int) string {
 	if len(s) <= maxLen {
 		return s
 	}
@@ -120,7 +130,7 @@ func truncateString(s string, maxLen int) string {
 }
 
 // printTracksJSON prints the full metadata in JSON format
-func printTracksJSON(metadata *RecordingMetadata) {
+func (p *ListTracksProcess) printTracksJSON(metadata *RecordingMetadata) {
 	data, err := json.MarshalIndent(metadata, "", "  ")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error marshaling JSON: %v\n", err)
@@ -130,28 +140,28 @@ func printTracksJSON(metadata *RecordingMetadata) {
 }
 
 // printCompletion prints completion-friendly output
-func printCompletion(metadata *RecordingMetadata, completionType string) {
+func (p *ListTracksProcess) printCompletion(metadata *RecordingMetadata, completionType string) {
 	switch completionType {
 	case "users":
-		printUsers(metadata.UserIDs)
+		p.printUsers(metadata.UserIDs)
 	case "sessions":
-		printSessions(metadata.Sessions)
+		p.printSessions(metadata.Sessions)
 	case "tracks":
 		trackIDs := make([]string, 0)
 		for _, track := range metadata.Tracks {
 			trackIDs = append(trackIDs, track.TrackID)
 		}
 		// Remove duplicates and sort
-		uniqueTrackIDs := removeDuplicates(trackIDs)
+		uniqueTrackIDs := p.removeDuplicates(trackIDs)
 		sort.Strings(uniqueTrackIDs)
-		printTrackIDs(metadata.Tracks)
+		p.printTrackIDs(metadata.Tracks)
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown completion type: %s\n", completionType)
 	}
 }
 
 // printUsers prints user IDs, one per line
-func printUsers(userIDs []string) {
+func (p *ListTracksProcess) printUsers(userIDs []string) {
 	sort.Strings(userIDs)
 	for _, userID := range userIDs {
 		fmt.Println(userID)
@@ -159,7 +169,7 @@ func printUsers(userIDs []string) {
 }
 
 // printSessions prints session IDs, one per line
-func printSessions(sessions []string) {
+func (p *ListTracksProcess) printSessions(sessions []string) {
 	sort.Strings(sessions)
 	for _, session := range sessions {
 		fmt.Println(session)
@@ -167,7 +177,7 @@ func printSessions(sessions []string) {
 }
 
 // printTrackIDs prints unique track IDs, one per line
-func printTrackIDs(tracks []*TrackInfo) {
+func (p *ListTracksProcess) printTrackIDs(tracks []*TrackInfo) {
 	trackIDs := make([]string, 0)
 	seen := make(map[string]bool)
 
@@ -185,7 +195,7 @@ func printTrackIDs(tracks []*TrackInfo) {
 }
 
 // removeDuplicates removes duplicate strings from a slice
-func removeDuplicates(input []string) []string {
+func (p *ListTracksProcess) removeDuplicates(input []string) []string {
 	keys := make(map[string]bool)
 	result := make([]string, 0)
 
@@ -199,7 +209,7 @@ func removeDuplicates(input []string) []string {
 	return result
 }
 
-func printListTracksUsage() {
+func (p *ListTracksProcess) printUsage() {
 	fmt.Fprintf(os.Stderr, "Usage: raw-tools [global options] list-tracks [command options]\n\n")
 	fmt.Fprintf(os.Stderr, "List all tracks in the raw recording with their metadata.\n")
 	fmt.Fprintf(os.Stderr, "Note: --output is optional for this command (only displays information).\n\n")
@@ -221,5 +231,4 @@ func printListTracksUsage() {
 	fmt.Fprintf(os.Stderr, "  # Get user IDs for completion\n")
 	fmt.Fprintf(os.Stderr, "  raw-tools --inputFile recording.zip list-tracks --format users\n")
 	fmt.Fprintf(os.Stderr, "\nGlobal Options: Use 'raw-tools --help' to see global options.\n")
-
 }

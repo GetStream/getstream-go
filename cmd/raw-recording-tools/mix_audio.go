@@ -31,9 +31,17 @@ type AudioFileWithTiming struct {
 	TrackInfo     *TrackInfo // Original track metadata
 }
 
+type MixAudioProcess struct {
+	logger *getstream.DefaultLogger
+}
+
+func NewMixAudioProcess(logger *getstream.DefaultLogger) *MixAudioProcess {
+	return &MixAudioProcess{logger: logger}
+}
+
 // runMixAudio handles the mix-audio command
-func runMixAudio(args []string, globalArgs *GlobalArgs, logger *getstream.DefaultLogger) {
-	printHelpIfAsked(args, printMixAudioUsage)
+func (p *MixAudioProcess) runMixAudio(args []string, globalArgs *GlobalArgs) {
+	printHelpIfAsked(args, p.printUsage)
 
 	mixAudioArgs := &MixAudioArgs{
 		UserID:    "",   // Default: all users (empty)
@@ -49,19 +57,19 @@ func runMixAudio(args []string, globalArgs *GlobalArgs, logger *getstream.Defaul
 		os.Exit(1)
 	}
 
-	logger.Info("Starting mix-audio command")
+	p.logger.Info("Starting mix-audio command")
 
 	// Execute the mix-audio operation
-	if e := mixAllAudioTracks(globalArgs, mixAudioArgs, metadata, logger); e != nil {
-		logger.Error("Mix-audio failed: %v", e)
+	if e := p.mixAllAudioTracks(globalArgs, mixAudioArgs, metadata, p.logger); e != nil {
+		p.logger.Error("Mix-audio failed: %v", e)
 		os.Exit(1)
 	}
 
-	logger.Info("Mix-audio command completed successfully")
+	p.logger.Info("Mix-audio command completed successfully")
 }
 
 // mixAllAudioTracks orchestrates the entire audio mixing workflow using existing extraction logic
-func mixAllAudioTracks(globalArgs *GlobalArgs, mixAudioArgs *MixAudioArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
+func (p *MixAudioProcess) mixAllAudioTracks(globalArgs *GlobalArgs, mixAudioArgs *MixAudioArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	// Step 1: Extract all matching audio tracks using existing extractTracks function
 	logger.Info("Step 1/2: Extracting all matching audio tracks...")
 	err := extractTracks(globalArgs.WorkDir, globalArgs.Output, mixAudioArgs.UserID, mixAudioArgs.SessionID, mixAudioArgs.TrackID, metadata, "audio", "user", mixAudioArgs.FillGaps, logger)
@@ -71,7 +79,7 @@ func mixAllAudioTracks(globalArgs *GlobalArgs, mixAudioArgs *MixAudioArgs, metad
 
 	// Step 2: Find all extracted audio files and prepare them for mixing
 	logger.Info("Step 2/2: Discovering extracted files and mixing...")
-	audioFiles, err := discoverExtractedAudioFiles(globalArgs.Output, logger)
+	audioFiles, err := p.discoverExtractedAudioFiles(globalArgs.Output, logger)
 	if err != nil {
 		return fmt.Errorf("failed to discover extracted audio files: %w", err)
 	}
@@ -110,7 +118,7 @@ func mixAllAudioTracks(globalArgs *GlobalArgs, mixAudioArgs *MixAudioArgs, metad
 }
 
 // discoverExtractedAudioFiles finds all audio files that were extracted and prepares them for mixing
-func discoverExtractedAudioFiles(outputDir string, logger *getstream.DefaultLogger) ([]AudioFileWithTiming, error) {
+func (p *MixAudioProcess) discoverExtractedAudioFiles(outputDir string, logger *getstream.DefaultLogger) ([]AudioFileWithTiming, error) {
 	var audioFiles []AudioFileWithTiming
 
 	// Find all .webm audio files in the output directory
@@ -164,7 +172,7 @@ func discoverExtractedAudioFiles(outputDir string, logger *getstream.DefaultLogg
 // Note: We removed mixAudioFilesUsingExistingLogic since we now use webm.MixAudioFiles directly
 
 // printMixAudioUsage prints the usage information for the mix-audio command
-func printMixAudioUsage() {
+func (p *MixAudioProcess) printUsage() {
 	fmt.Println("Usage: raw-tools [global-options] mix-audio [options]")
 	fmt.Println()
 	fmt.Println("Mix all audio tracks from multiple users/sessions into a single audio file")

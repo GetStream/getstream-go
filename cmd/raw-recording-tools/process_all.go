@@ -16,8 +16,16 @@ type ProcessAllArgs struct {
 	TrackID   string
 }
 
-func runProcessAll(args []string, globalArgs *GlobalArgs, logger *getstream.DefaultLogger) {
-	printHelpIfAsked(args, printProcessAllUsage)
+type ProcessAllProcess struct {
+	logger *getstream.DefaultLogger
+}
+
+func NewProcessAllProcess(logger *getstream.DefaultLogger) *ProcessAllProcess {
+	return &ProcessAllProcess{logger: logger}
+}
+
+func (p *ProcessAllProcess) runProcessAll(args []string, globalArgs *GlobalArgs) {
+	printHelpIfAsked(args, p.printUsage)
 
 	// Parse command-specific flags
 	fs := flag.NewFlagSet("process-all", flag.ExitOnError)
@@ -38,7 +46,7 @@ func runProcessAll(args []string, globalArgs *GlobalArgs, logger *getstream.Defa
 		os.Exit(1)
 	}
 
-	logger.Info("Starting process-all command")
+	p.logger.Info("Starting process-all command")
 
 	// Display hierarchy information for user clarity
 	fmt.Printf("Process-all command (audio + video + mux) with hierarchical filtering:\n")
@@ -60,15 +68,15 @@ func runProcessAll(args []string, globalArgs *GlobalArgs, logger *getstream.Defa
 	}
 
 	// Process all tracks and mux them
-	if err := processAllTracks(globalArgs, processAllArgs, metadata, logger); err != nil {
-		logger.Error("Failed to process and mux tracks: %v", err)
+	if err := p.processAllTracks(globalArgs, processAllArgs, metadata, p.logger); err != nil {
+		p.logger.Error("Failed to process and mux tracks: %v", err)
 		os.Exit(1)
 	}
 
-	logger.Info("Process-all command completed successfully")
+	p.logger.Info("Process-all command completed successfully")
 }
 
-func printProcessAllUsage() {
+func (p *ProcessAllProcess) printUsage() {
 	fmt.Printf("Usage: process-all [OPTIONS]\n")
 	fmt.Printf("\nProcess audio, video, and mux them into combined files (all-in-one workflow)\n")
 	fmt.Printf("Outputs 3 files per session: audio WebM, video WebM, and muxed WebM\n")
@@ -83,7 +91,7 @@ func printProcessAllUsage() {
 	fmt.Printf("  muxed_{userId}_{sessionId}_{trackId}.webm    - Combined audio+video file\n")
 }
 
-func processAllTracks(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
+func (p *ProcessAllProcess) processAllTracks(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	// Step 1: Extract audio tracks with gap filling
 	logger.Info("Step 1/3: Extracting audio tracks with gap filling...")
 	err := extractTracks(globalArgs.WorkDir, globalArgs.Output, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, metadata, "audio", "both", true, logger)
@@ -100,7 +108,7 @@ func processAllTracks(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, me
 
 	// Step 3: Mux audio and video files (keeping originals)
 	logger.Info("Step 3/3: Muxing audio and video tracks...")
-	err = muxAudioVideoTracksKeepOriginals(globalArgs, processAllArgs, metadata, logger)
+	err = p.muxAudioVideoTracksKeepOriginals(globalArgs, processAllArgs, metadata, logger)
 	if err != nil {
 		return fmt.Errorf("failed to mux audio and video tracks: %w", err)
 	}
@@ -130,7 +138,7 @@ func processAllTracks(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, me
 }
 
 // muxAudioVideoTracksKeepOriginals is like muxAudioVideoTracks but keeps the original audio/video files
-func muxAudioVideoTracksKeepOriginals(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
+func (p *ProcessAllProcess) muxAudioVideoTracksKeepOriginals(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	// Find the generated audio and video WebM files
 	audioFiles, err := filepath.Glob(filepath.Join(globalArgs.Output, "audio_*.webm"))
 	if err != nil {

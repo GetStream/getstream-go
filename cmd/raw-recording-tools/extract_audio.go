@@ -15,8 +15,16 @@ type ExtractAudioArgs struct {
 	FillGaps  bool
 }
 
-func runExtractAudio(args []string, globalArgs *GlobalArgs, logger *getstream.DefaultLogger) {
-	printHelpIfAsked(args, printExtractAudioUsage)
+type ExtractAudioProcess struct {
+	logger *getstream.DefaultLogger
+}
+
+func NewExtractAudioProcess(logger *getstream.DefaultLogger) *ExtractAudioProcess {
+	return &ExtractAudioProcess{logger: logger}
+}
+
+func (p *ExtractAudioProcess) runExtractAudio(args []string, globalArgs *GlobalArgs) {
+	printHelpIfAsked(args, p.printUsage)
 
 	// Parse command-specific flags
 	fs := flag.NewFlagSet("extract-audio", flag.ExitOnError)
@@ -38,8 +46,18 @@ func runExtractAudio(args []string, globalArgs *GlobalArgs, logger *getstream.De
 		os.Exit(1)
 	}
 
-	logger.Info("Starting extract-audio command")
+	p.logger.Info("Starting extract-audio command")
+	p.printBanner(globalArgs, extractAudioArgs)
 
+	// Implement extract audio functionality
+	if e := extractAudioTracks(globalArgs, extractAudioArgs, metadata, p.logger); e != nil {
+		p.logger.Error("Failed to extract audio: %v", e)
+	}
+
+	p.logger.Info("Extract audio command completed")
+}
+
+func (p *ExtractAudioProcess) printBanner(globalArgs *GlobalArgs, extractAudioArgs *ExtractAudioArgs) {
 	fmt.Printf("Extract audio command with hierarchical filtering:\n")
 	if globalArgs.InputFile != "" {
 		fmt.Printf("  Input file: %s\n", globalArgs.InputFile)
@@ -60,16 +78,9 @@ func runExtractAudio(args []string, globalArgs *GlobalArgs, logger *getstream.De
 		fmt.Printf("  → Processing all audio tracks (no filters)\n")
 	}
 	fmt.Printf("  Fill gaps: %t\n", extractAudioArgs.FillGaps)
-
-	// Implement extract audio functionality
-	if e := extractAudioTracks(globalArgs, extractAudioArgs, metadata, logger); e != nil {
-		logger.Error("Failed to extract audio: %v", e)
-	}
-
-	logger.Info("Extract audio command completed")
 }
 
-func printExtractAudioUsage() {
+func (p *ExtractAudioProcess) printUsage() {
 	fmt.Fprintf(os.Stderr, "Usage: raw-tools [global options] extract-audio [command options]\n\n")
 	fmt.Fprintf(os.Stderr, "Generate playable audio files from raw recording tracks.\n")
 	fmt.Fprintf(os.Stderr, "Supports formats: webm, mp3, and others.\n\n")

@@ -18,8 +18,16 @@ type MuxAVArgs struct {
 	Media     string // "user", "display", or "both" (default)
 }
 
-func runMuxAV(args []string, globalArgs *GlobalArgs, logger *getstream.DefaultLogger) {
-	printHelpIfAsked(args, printMuxAVUsage)
+type MuxAudioVideoProcess struct {
+	logger *getstream.DefaultLogger
+}
+
+func NewMuxAudioVideoProcess(logger *getstream.DefaultLogger) *MuxAudioVideoProcess {
+	return &MuxAudioVideoProcess{logger: logger}
+}
+
+func (p *MuxAudioVideoProcess) runMuxAV(args []string, globalArgs *GlobalArgs) {
+	printHelpIfAsked(args, p.printUsage)
 
 	// Parse command-specific flags
 	fs := flag.NewFlagSet("mux-av", flag.ExitOnError)
@@ -41,7 +49,7 @@ func runMuxAV(args []string, globalArgs *GlobalArgs, logger *getstream.DefaultLo
 		os.Exit(1)
 	}
 
-	logger.Info("Starting mux-av command")
+	p.logger.Info("Starting mux-av command")
 
 	// Display hierarchy information for user clarity
 	fmt.Printf("Mux audio and video command with hierarchical filtering:\n")
@@ -63,15 +71,15 @@ func runMuxAV(args []string, globalArgs *GlobalArgs, logger *getstream.DefaultLo
 	}
 
 	// Extract and mux audio/video tracks
-	if err := muxAudioVideoTracks(globalArgs, muxAVArgs, metadata, logger); err != nil {
-		logger.Error("Failed to mux audio/video tracks: %v", err)
+	if err := p.muxAudioVideoTracks(globalArgs, muxAVArgs, metadata, p.logger); err != nil {
+		p.logger.Error("Failed to mux audio/video tracks: %v", err)
 		os.Exit(1)
 	}
 
-	logger.Info("Mux audio and video command completed successfully")
+	p.logger.Info("Mux audio and video command completed successfully")
 }
 
-func printMuxAVUsage() {
+func (p *MuxAudioVideoProcess) printUsage() {
 	fmt.Printf("Usage: mux-av [OPTIONS]\n")
 	fmt.Printf("\nMux audio and video tracks into a single file\n")
 	fmt.Printf("\nOptions:\n")
@@ -85,7 +93,7 @@ func printMuxAVUsage() {
 	fmt.Printf("  --media both     Mux both types, but ensure consistent pairing (default)\n")
 }
 
-func muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
+func (p *MuxAudioVideoProcess) muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	// Create a temporary directory for intermediate files
 	tempDir, err := os.MkdirTemp("", "mux-av-*")
 	if err != nil {
@@ -131,7 +139,7 @@ func muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata 
 	logger.Info("Found %d audio files and %d video files to mux", len(audioFiles), len(videoFiles))
 
 	// Group files by media type for proper pairing
-	audioGroups, videoGroups, err := groupFilesByMediaType(globalArgs.InputFile, audioFiles, videoFiles, muxAVArgs.Media, metadata, logger)
+	audioGroups, videoGroups, err := p.groupFilesByMediaType(globalArgs.InputFile, audioFiles, videoFiles, muxAVArgs.Media, metadata, logger)
 	if err != nil {
 		return fmt.Errorf("failed to group files by media type: %w", err)
 	}
@@ -139,7 +147,7 @@ func muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata 
 	// Mux user tracks
 	if userAudio, userVideo := audioGroups["user"], videoGroups["user"]; len(userAudio) > 0 && len(userVideo) > 0 {
 		logger.Info("Muxing %d user audio/video pairs", len(userAudio))
-		err = muxTrackPairs(globalArgs.InputFile, userAudio, userVideo, globalArgs.Output, "user", metadata, logger)
+		err = p.muxTrackPairs(globalArgs.InputFile, userAudio, userVideo, globalArgs.Output, "user", metadata, logger)
 		if err != nil {
 			logger.Error("Failed to mux user tracks: %v", err)
 		}
@@ -148,7 +156,7 @@ func muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata 
 	// Mux display tracks
 	if displayAudio, displayVideo := audioGroups["display"], videoGroups["display"]; len(displayAudio) > 0 && len(displayVideo) > 0 {
 		logger.Info("Muxing %d display audio/video pairs", len(displayAudio))
-		err = muxTrackPairs(globalArgs.InputFile, displayAudio, displayVideo, globalArgs.Output, "display", metadata, logger)
+		err = p.muxTrackPairs(globalArgs.InputFile, displayAudio, displayVideo, globalArgs.Output, "display", metadata, logger)
 		if err != nil {
 			logger.Error("Failed to mux display tracks: %v", err)
 		}
@@ -218,7 +226,7 @@ func generateMuxedFilename(audioFile, videoFile, outputDir string) string {
 }
 
 // groupFilesByMediaType groups audio and video files by media type (user vs display)
-func groupFilesByMediaType(inputPath string, audioFiles, videoFiles []string, mediaFilter string, metadata *RecordingMetadata, logger *getstream.DefaultLogger) (map[string][]string, map[string][]string, error) {
+func (p *MuxAudioVideoProcess) groupFilesByMediaType(inputPath string, audioFiles, videoFiles []string, mediaFilter string, metadata *RecordingMetadata, logger *getstream.DefaultLogger) (map[string][]string, map[string][]string, error) {
 	// Create track ID to screenshare type mapping
 	trackScreenshareMap := make(map[string]bool)
 	for _, track := range metadata.Tracks {
@@ -295,7 +303,7 @@ func groupFilesByMediaType(inputPath string, audioFiles, videoFiles []string, me
 }
 
 // muxTrackPairs muxes audio/video pairs of the same media type
-func muxTrackPairs(inputPath string, audioFiles, videoFiles []string, outputDir, mediaTypeName string, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
+func (p *MuxAudioVideoProcess) muxTrackPairs(inputPath string, audioFiles, videoFiles []string, outputDir, mediaTypeName string, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	minLen := len(audioFiles)
 	if len(videoFiles) < minLen {
 		minLen = len(videoFiles)
@@ -318,7 +326,7 @@ func muxTrackPairs(inputPath string, audioFiles, videoFiles []string, outputDir,
 		}
 
 		// Generate output filename with media type indicator
-		outputFile := generateMediaAwareMuxedFilename(audioFile, videoFile, outputDir, mediaTypeName)
+		outputFile := p.generateMediaAwareMuxedFilename(audioFile, videoFile, outputDir, mediaTypeName)
 
 		// Mux the audio and video files
 		logger.Info("Muxing %s %s + %s → %s (offset: %dms)",
@@ -345,7 +353,7 @@ func muxTrackPairs(inputPath string, audioFiles, videoFiles []string, outputDir,
 }
 
 // generateMediaAwareMuxedFilename creates output filename that indicates media type
-func generateMediaAwareMuxedFilename(audioFile, videoFile, outputDir, mediaTypeName string) string {
+func (p *MuxAudioVideoProcess) generateMediaAwareMuxedFilename(audioFile, videoFile, outputDir, mediaTypeName string) string {
 	audioBase := filepath.Base(audioFile)
 	audioBase = strings.TrimSuffix(audioBase, ".webm")
 
