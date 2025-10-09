@@ -192,10 +192,10 @@ func calculateSyncOffsetFromFiles(inputPath, audioFile, videoFile string, logger
 	var audioTrack, videoTrack *TrackInfo
 	for _, track := range metadata.Tracks {
 		if track.TrackID == audioTrackID && track.TrackType == "audio" {
-			audioTrack = &track
+			audioTrack = track
 		}
 		if track.TrackID == videoTrackID && track.TrackType == "video" {
-			videoTrack = &track
+			videoTrack = track
 		}
 	}
 

@@ -39,7 +39,7 @@ func extractTracks(globalArgs *GlobalArgs, userID, sessionID, trackID, trackType
 
 	// Filter tracks to specified type only and apply hierarchical filtering
 	filteredTracks := parser.FilterTracks(metadata.Tracks, userID, sessionID, trackID)
-	typedTracks := make([]TrackInfo, 0)
+	typedTracks := make([]*TrackInfo, 0)
 	for _, track := range filteredTracks {
 		if track.TrackType == trackType {
 			// Apply media type filtering if specified
@@ -82,7 +82,7 @@ func extractTracks(globalArgs *GlobalArgs, userID, sessionID, trackID, trackType
 	return nil
 }
 
-func extractSingleTrackWithOptions(inputPath string, track TrackInfo, outputDir string, trackType string, fillGaps bool, logger *getstream.DefaultLogger) error {
+func extractSingleTrackWithOptions(inputPath string, track *TrackInfo, outputDir string, trackType string, fillGaps bool, logger *getstream.DefaultLogger) error {
 	// Create a temp directory for extraction and processing
 	tempDir, err := os.MkdirTemp("", fmt.Sprintf("%s-extract-*", trackType))
 	if err != nil {
@@ -123,7 +123,7 @@ func extractSingleTrackWithOptions(inputPath string, track TrackInfo, outputDir 
 // NOTE: extractTrackFiles removed - now always use copyTrackFiles since we always work with directories
 
 // copyTrackFiles copies the rtpdump and sdp files for a specific track to the destination directory
-func copyTrackFiles(inputPath string, track TrackInfo, destDir string, trackType string) error {
+func copyTrackFiles(inputPath string, track *TrackInfo, destDir string, trackType string) error {
 	// Walk through the input directory and copy files related to this track
 	return filepath.Walk(inputPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -168,7 +168,7 @@ func copyFile(src, dst string) error {
 }
 
 // processSegmentsWithGapFilling processes webm segments, fills gaps if requested, and concatenates into final file
-func processSegmentsWithGapFilling(webmFiles []string, track TrackInfo, trackType string, outputDir string, fillGaps bool, logger *getstream.DefaultLogger) (string, error) {
+func processSegmentsWithGapFilling(webmFiles []string, track *TrackInfo, trackType string, outputDir string, fillGaps bool, logger *getstream.DefaultLogger) (string, error) {
 	if len(webmFiles) == 1 {
 		// Single segment, just copy it with final name
 		finalName := fmt.Sprintf("%s_%s_%s_%s.webm", trackType, track.UserID, track.SessionID, track.TrackID)

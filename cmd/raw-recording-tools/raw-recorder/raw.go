@@ -10,8 +10,8 @@ type SessionTimingMetadata struct {
 	ParticipantID string    `json:"participant_id"`
 	UserSessionID string    `json:"user_session_id"`
 	Segments      struct {
-		Audio []SegmentMetadata `json:"audio"`
-		Video []SegmentMetadata `json:"video"`
+		Audio []*SegmentMetadata `json:"audio"`
+		Video []*SegmentMetadata `json:"video"`
 	} `json:"segments"`
 }
 

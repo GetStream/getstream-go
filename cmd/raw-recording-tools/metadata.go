@@ -17,21 +17,21 @@ import (
 
 // TrackInfo represents a single track with its metadata (deduplicated across segments)
 type TrackInfo struct {
-	UserID        string                        `json:"userId"`        // participant_id from timing metadata
-	SessionID     string                        `json:"sessionId"`     // user_session_id from timing metadata
-	TrackID       string                        `json:"trackId"`       // track_id from segment
-	TrackType     string                        `json:"trackType"`     // "audio" or "video" (cleaned from TRACK_TYPE_*)
-	IsScreenshare bool                          `json:"isScreenshare"` // true if this is a screenshare track
-	Codec         string                        `json:"codec"`         // codec info
-	SegmentCount  int                           `json:"segmentCount"`  // number of segments for this track
-	Segments      []rawrecorder.SegmentMetadata `json:"segments"`      // list of filenames (for JSON output only)
+	UserID        string                         `json:"userId"`        // participant_id from timing metadata
+	SessionID     string                         `json:"sessionId"`     // user_session_id from timing metadata
+	TrackID       string                         `json:"trackId"`       // track_id from segment
+	TrackType     string                         `json:"trackType"`     // "audio" or "video" (cleaned from TRACK_TYPE_*)
+	IsScreenshare bool                           `json:"isScreenshare"` // true if this is a screenshare track
+	Codec         string                         `json:"codec"`         // codec info
+	SegmentCount  int                            `json:"segmentCount"`  // number of segments for this track
+	Segments      []*rawrecorder.SegmentMetadata `json:"segments"`      // list of filenames (for JSON output only)
 }
 
 // RecordingMetadata contains all tracks and session information
 type RecordingMetadata struct {
-	Tracks   []TrackInfo `json:"tracks"`
-	UserIDs  []string    `json:"userIds"`
-	Sessions []string    `json:"sessions"`
+	Tracks   []*TrackInfo `json:"tracks"`
+	UserIDs  []string     `json:"userIds"`
+	Sessions []string     `json:"sessions"`
 }
 
 // MetadataParser handles parsing of raw recording files
@@ -71,7 +71,7 @@ func (p *MetadataParser) ParseMetadataOnly(inputPath string) (*RecordingMetadata
 // parseDirectory processes a directory containing recording files
 func (p *MetadataParser) parseDirectory(dirPath string) (*RecordingMetadata, error) {
 	metadata := &RecordingMetadata{
-		Tracks:   make([]TrackInfo, 0),
+		Tracks:   make([]*TrackInfo, 0),
 		UserIDs:  make([]string, 0),
 		Sessions: make([]string, 0),
 	}
@@ -134,7 +134,7 @@ func (p *MetadataParser) parseMetadataOnlyFromTarGz(tarGzPath string) (*Recordin
 	tarReader := tar.NewReader(gzReader)
 
 	metadata := &RecordingMetadata{
-		Tracks:   make([]TrackInfo, 0),
+		Tracks:   make([]*TrackInfo, 0),
 		UserIDs:  make([]string, 0),
 		Sessions: make([]string, 0),
 	}
@@ -182,7 +182,7 @@ func (p *MetadataParser) parseMetadataOnlyFromTarGz(tarGzPath string) (*Recordin
 }
 
 // parseTimingMetadataFile parses a timing metadata JSON file and extracts tracks
-func (p *MetadataParser) parseTimingMetadataFile(data []byte) ([]TrackInfo, error) {
+func (p *MetadataParser) parseTimingMetadataFile(data []byte) ([]*TrackInfo, error) {
 	var sessionMetadata rawrecorder.SessionTimingMetadata
 	err := json.Unmarshal(data, &sessionMetadata)
 	if err != nil {
@@ -192,7 +192,7 @@ func (p *MetadataParser) parseTimingMetadataFile(data []byte) ([]TrackInfo, erro
 	// Use a map to deduplicate tracks by unique key
 	trackMap := make(map[string]*TrackInfo)
 
-	processSegment := func(segment rawrecorder.SegmentMetadata, trackType string) {
+	processSegment := func(segment *rawrecorder.SegmentMetadata, trackType string) {
 		key := fmt.Sprintf("%s|%s|%s|%s",
 			sessionMetadata.ParticipantID,
 			sessionMetadata.UserSessionID,
@@ -212,7 +212,7 @@ func (p *MetadataParser) parseTimingMetadataFile(data []byte) ([]TrackInfo, erro
 				IsScreenshare: p.isScreenshareTrack(segment.TrackType),
 				Codec:         segment.Codec,
 				SegmentCount:  1,
-				Segments:      []rawrecorder.SegmentMetadata{segment},
+				Segments:      []*rawrecorder.SegmentMetadata{segment},
 			}
 			trackMap[key] = track
 		}
@@ -229,12 +229,12 @@ func (p *MetadataParser) parseTimingMetadataFile(data []byte) ([]TrackInfo, erro
 	}
 
 	// Convert map to slice
-	tracks := make([]TrackInfo, 0, len(trackMap))
+	tracks := make([]*TrackInfo, 0, len(trackMap))
 	for _, track := range trackMap {
 		sort.Slice(track.Segments, func(i, j int) bool {
 			return track.Segments[i].StartTimestamp < track.Segments[j].StartTimestamp
 		})
-		tracks = append(tracks, *track)
+		tracks = append(tracks, track)
 	}
 
 	return tracks, nil
@@ -258,7 +258,7 @@ func (p *MetadataParser) cleanTrackType(trackType string) string {
 }
 
 // extractUniqueUserIDs returns a sorted list of unique user IDs
-func (p *MetadataParser) extractUniqueUserIDs(tracks []TrackInfo) []string {
+func (p *MetadataParser) extractUniqueUserIDs(tracks []*TrackInfo) []string {
 	userIDMap := make(map[string]bool)
 	for _, track := range tracks {
 		userIDMap[track.UserID] = true
@@ -275,7 +275,7 @@ func (p *MetadataParser) extractUniqueUserIDs(tracks []TrackInfo) []string {
 // NOTE: ExtractTrackFiles and extractTrackFromTarGz removed - no longer needed since we always work with directories
 
 // extractUniqueSessions returns a sorted list of unique session IDs
-func (p *MetadataParser) extractUniqueSessions(tracks []TrackInfo) []string {
+func (p *MetadataParser) extractUniqueSessions(tracks []*TrackInfo) []string {
 	sessionMap := make(map[string]bool)
 	for _, track := range tracks {
 		sessionMap[track.SessionID] = true
@@ -293,8 +293,8 @@ func (p *MetadataParser) extractUniqueSessions(tracks []TrackInfo) []string {
 // If userID="*", sessionID and trackID are ignored (all users, sessions, tracks)
 // If userID=specific, sessionID="*", trackID is ignored (specific user, all sessions/tracks)
 // If userID=specific, sessionID=specific, trackID="*", all tracks for that user/session
-func (p *MetadataParser) FilterTracks(tracks []TrackInfo, userID, sessionID, trackID string) []TrackInfo {
-	filtered := make([]TrackInfo, 0)
+func (p *MetadataParser) FilterTracks(tracks []*TrackInfo, userID, sessionID, trackID string) []*TrackInfo {
+	filtered := make([]*TrackInfo, 0)
 
 	for _, track := range tracks {
 		// Hierarchical filtering logic
@@ -319,7 +319,7 @@ func (p *MetadataParser) FilterTracks(tracks []TrackInfo, userID, sessionID, tra
 	return filtered
 }
 
-func FirstPacketNtpTimestamp(segment rawrecorder.SegmentMetadata) int64 {
+func FirstPacketNtpTimestamp(segment *rawrecorder.SegmentMetadata) int64 {
 	if segment.FirstRtcpNtpTimestamp != 0 && segment.FirstRtcpRtpTimestamp != 0 {
 		rtpNtpTs := (segment.FirstRtcpRtpTimestamp - segment.FirstRtpRtpTimestamp) / sampleRate(segment)
 		return segment.FirstRtcpNtpTimestamp - int64(rtpNtpTs)
@@ -328,7 +328,7 @@ func FirstPacketNtpTimestamp(segment rawrecorder.SegmentMetadata) int64 {
 	}
 }
 
-func LastPacketNtpTimestamp(segment rawrecorder.SegmentMetadata) int64 {
+func LastPacketNtpTimestamp(segment *rawrecorder.SegmentMetadata) int64 {
 	if segment.LastRtcpNtpTimestamp != 0 && segment.LastRtcpRtpTimestamp != 0 {
 		rtpNtpTs := (segment.LastRtpRtpTimestamp - segment.LastRtcpRtpTimestamp) / sampleRate(segment)
 		return segment.LastRtcpNtpTimestamp + int64(rtpNtpTs)
@@ -337,7 +337,7 @@ func LastPacketNtpTimestamp(segment rawrecorder.SegmentMetadata) int64 {
 	}
 }
 
-func sampleRate(segment rawrecorder.SegmentMetadata) uint32 {
+func sampleRate(segment *rawrecorder.SegmentMetadata) uint32 {
 	switch segment.TrackType {
 	case "TRACK_TYPE_AUDIO",
 		"TRACK_TYPE_SCREEN_SHARE_AUDIO":

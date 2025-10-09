@@ -67,7 +67,7 @@ func runListTracks(args []string, globalArgs *GlobalArgs) {
 	// Filter tracks if track type is specified
 	tracks := metadata.Tracks
 	if listTracksArgs.TrackType != "" {
-		filteredTracks := make([]TrackInfo, 0)
+		filteredTracks := make([]*TrackInfo, 0)
 		for _, track := range tracks {
 			if track.TrackType == listTracksArgs.TrackType {
 				filteredTracks = append(filteredTracks, track)
@@ -99,7 +99,7 @@ func runListTracks(args []string, globalArgs *GlobalArgs) {
 }
 
 // printTracksTable prints tracks in a human-readable table format
-func printTracksTable(tracks []TrackInfo) {
+func printTracksTable(tracks []*TrackInfo) {
 	if len(tracks) == 0 {
 		fmt.Println("No tracks found.")
 		return
@@ -189,7 +189,7 @@ func printSessions(sessions []string) {
 }
 
 // printTrackIDs prints unique track IDs, one per line
-func printTrackIDs(tracks []TrackInfo) {
+func printTrackIDs(tracks []*TrackInfo) {
 	trackIDs := make([]string, 0)
 	seen := make(map[string]bool)
 
