@@ -365,6 +365,9 @@ func muxTrackPairs(inputPath string, audioFiles, videoFiles []string, outputDir,
 
 // generateMediaAwareMuxedFilename creates output filename that indicates media type
 func generateMediaAwareMuxedFilename(audioFile, videoFile, outputDir, mediaTypeName string) string {
+	audioBase := filepath.Base(audioFile)
+	audioBase = strings.TrimSuffix(audioBase, ".webm")
+
 	// Extract common parts from audio filename
 	videoBase := filepath.Base(videoFile)
 	split := strings.Split(videoBase, ".")
@@ -372,9 +375,9 @@ func generateMediaAwareMuxedFilename(audioFile, videoFile, outputDir, mediaTypeN
 	// Replace "audio_" with "muxed_{mediaType}_" to create output name
 	var muxedName string
 	if mediaTypeName == "display" {
-		muxedName = strings.Replace(split[0], "audio_", "muxed_display_", 1) + "." + split[1]
+		muxedName = strings.Replace(audioBase, "audio_", "muxed_display_", 1) + "." + split[1]
 	} else {
-		muxedName = strings.Replace(split[0], "audio_", "muxed_", 1) + "." + split[1]
+		muxedName = strings.Replace(audioBase, "audio_", "muxed_", 1) + "." + split[1]
 	}
 
 	return filepath.Join(outputDir, muxedName)

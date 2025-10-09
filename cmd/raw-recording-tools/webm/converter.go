@@ -111,26 +111,30 @@ func (c *RTPDump2WebMConverter) ConvertFile(inputFile string) error {
 		pkt.SequenceNumber += c.inserted
 
 		if c.lastPkt != nil {
+			if pkt.SequenceNumber-c.lastPkt.SequenceNumber > 1 {
+				c.logger.Info("Missing Packet Detected, Previous SeqNum: %d RtpTs: %d   - Last SeqNum: %d RtpTs: %d", c.lastPkt.SequenceNumber, c.lastPkt.Timestamp, pkt.SequenceNumber, pkt.Timestamp)
+			}
+
 			if mType == webrtc.MimeTypeOpus {
-				tsDiff := pkt.Timestamp - c.lastPkt.Timestamp
-				if tsDiff > 960 {
+				tsDiff := pkt.Timestamp - c.lastPkt.Timestamp // TODO handle rollover
+				lastPktDuration := opusPacketDurationMs(c.lastPkt.Payload)
+				rtpDuration := uint32(lastPktDuration * 48)
+				if tsDiff > rtpDuration {
 
-					c.logger.Debug("Gap detected %v: %v", pkt, err)
-
+					// Calculate how many packets we need to insert, taking care of packet losses
 					var toAdd uint16
-
-					// DTX detected, we need to insert packet
-					if uint32(pkt.SequenceNumber-c.lastPkt.SequenceNumber)*960 != tsDiff {
-						toAdd = uint16(tsDiff/960) - (pkt.SequenceNumber - c.lastPkt.SequenceNumber)
+					if uint32(pkt.SequenceNumber-c.lastPkt.SequenceNumber)*rtpDuration != tsDiff { // TODO handle rollover
+						toAdd = uint16(tsDiff/rtpDuration) - (pkt.SequenceNumber - c.lastPkt.SequenceNumber)
 					}
 
-					//				c.logger.Debugf("Inserting %d packets Previous inserting %s", toAdd, c.inserted)
+					c.logger.Info("Gap detected, inserting %d packets tsDiff %d, Previous SeqNum: %d RtpTs: %d   - Last SeqNum: %d RtpTs: %d",
+						toAdd, tsDiff, c.lastPkt.SequenceNumber, c.lastPkt.Timestamp, pkt.SequenceNumber, pkt.Timestamp)
 
 					for i := 1; i <= int(toAdd); i++ {
 						ins := c.lastPkt.Clone()
-						ins.Payload = ins.Payload[:1]
+						ins.Payload = ins.Payload[:1] // Keeping only TOC byte
 						ins.SequenceNumber += uint16(i)
-						ins.Timestamp += uint32(i) * 960
+						ins.Timestamp += uint32(i) * rtpDuration
 
 						c.logger.Debug("Writing inserted Packet %v", ins)
 						e := c.recorder.OnRTP(ins)
@@ -145,15 +149,11 @@ func (c *RTPDump2WebMConverter) ConvertFile(inputFile string) error {
 					//				c.logger.Debugf("Inserted %d packets Previous inserting %s", toAdd, c.inserted)
 				}
 			}
-
-			if pkt.SequenceNumber-c.lastPkt.SequenceNumber > 1 {
-				c.logger.Warn("Missing Detected Packet %v - %v", pkt, c.lastPkt)
-			}
 		}
 
 		c.lastPkt = pkt
 
-		c.logger.Debug("Writing real Packet %v", pkt)
+		c.logger.Debug("Writing real Packet Last SeqNum: %d RtpTs: %d", pkt.SequenceNumber, pkt.Timestamp)
 		e := c.recorder.OnRTP(pkt)
 		if e != nil {
 			c.logger.Warn("Failed to record RTP packet %v: %v", pkt, err)
@@ -235,4 +235,47 @@ func (c *RTPDump2WebMConverter) feedPackets(reader *rtpdump.Reader) error {
 	time.Sleep(2 * time.Second)
 
 	return nil
+}
+
+func opusPacketDurationMs(packet []byte) int {
+	if len(packet) < 1 {
+		return 0
+	}
+	toc := packet[0]
+	config := toc & 0x1F
+	c := (toc >> 6) & 0x03
+
+	frameDuration := 0
+	switch {
+	case config <= 3:
+		frameDuration = 10 << (config & 0x03) // 10,20,40,60
+	case config <= 7:
+		frameDuration = 10 << (config & 0x03)
+	case config <= 11:
+		frameDuration = 10 << (config & 0x03)
+	case config <= 13:
+		frameDuration = 10 << (config & 0x01)
+	case config <= 19:
+		frameDuration = 25 / 10 // 2.5ms
+	case config <= 23:
+		frameDuration = 5
+	case config <= 27:
+		frameDuration = 10
+	default:
+		frameDuration = 20
+	}
+
+	var frameCount int
+	switch c {
+	case 0:
+		frameCount = 1
+	case 1, 2:
+		frameCount = 2
+	case 3:
+		if len(packet) > 1 {
+			frameCount = int(packet[1] & 0x3F)
+		}
+	}
+
+	return frameDuration * frameCount
 }
