@@ -1,4 +1,4 @@
-package webm
+package processing
 
 import (
 	"context"
@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/GetStream/getstream-go/v3"
-	"github.com/GetStream/getstream-go/v3/cmd/raw-recording-tools/rawsdputil"
 	"github.com/pion/rtcp"
 	"github.com/pion/rtp"
 )
@@ -80,7 +79,7 @@ func (r *CursorWebmRecorder) startFFmpeg(outputFilePath, sdpContent string, port
 		return err
 	}
 
-	if _, err := sdpFile.WriteString(rawsdputil.ReplaceSDP(sdpContent, port)); err != nil {
+	if _, err := sdpFile.WriteString(ReplaceSDP(sdpContent, port)); err != nil {
 		sdpFile.Close()
 		return err
 	}

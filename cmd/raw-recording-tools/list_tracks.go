@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/GetStream/getstream-go/v3"
+	"github.com/GetStream/getstream-go/v3/processing"
 )
 
 type ListTracksArgs struct {
@@ -55,14 +56,14 @@ func (p *ListTracksProcess) runListTracks(args []string, globalArgs *GlobalArgs)
 	}
 
 	// Use efficient metadata-only parsing (optimized for list-tracks)
-	parser := NewMetadataParser(logger)
+	parser := processing.NewMetadataParser(logger)
 	metadata, err := parser.ParseMetadataOnly(inputPath)
 	if err != nil {
 		logger.Error("Failed to parse recording: %v", err)
 	}
 
 	// Filter tracks if track type is specified
-	tracks := FilterTracks(metadata.Tracks, "", "", "", listTracksArgs.TrackType, "")
+	tracks := processing.FilterTracks(metadata.Tracks, "", "", "", listTracksArgs.TrackType, "")
 
 	// Output in requested format
 	switch listTracksArgs.Format {
@@ -87,7 +88,7 @@ func (p *ListTracksProcess) runListTracks(args []string, globalArgs *GlobalArgs)
 }
 
 // printTracksTable prints tracks in a human-readable table format
-func (p *ListTracksProcess) printTracksTable(tracks []*TrackInfo) {
+func (p *ListTracksProcess) printTracksTable(tracks []*processing.TrackInfo) {
 	if len(tracks) == 0 {
 		fmt.Println("No tracks found.")
 		return
@@ -130,7 +131,7 @@ func (p *ListTracksProcess) truncateString(s string, maxLen int) string {
 }
 
 // printTracksJSON prints the full metadata in JSON format
-func (p *ListTracksProcess) printTracksJSON(metadata *RecordingMetadata) {
+func (p *ListTracksProcess) printTracksJSON(metadata *processing.RecordingMetadata) {
 	data, err := json.MarshalIndent(metadata, "", "  ")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error marshaling JSON: %v\n", err)
@@ -140,7 +141,7 @@ func (p *ListTracksProcess) printTracksJSON(metadata *RecordingMetadata) {
 }
 
 // printCompletion prints completion-friendly output
-func (p *ListTracksProcess) printCompletion(metadata *RecordingMetadata, completionType string) {
+func (p *ListTracksProcess) printCompletion(metadata *processing.RecordingMetadata, completionType string) {
 	switch completionType {
 	case "users":
 		p.printUsers(metadata.UserIDs)
@@ -177,7 +178,7 @@ func (p *ListTracksProcess) printSessions(sessions []string) {
 }
 
 // printTrackIDs prints unique track IDs, one per line
-func (p *ListTracksProcess) printTrackIDs(tracks []*TrackInfo) {
+func (p *ListTracksProcess) printTrackIDs(tracks []*processing.TrackInfo) {
 	trackIDs := make([]string, 0)
 	seen := make(map[string]bool)
 

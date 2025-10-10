@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/GetStream/getstream-go/v3"
+	"github.com/GetStream/getstream-go/v3/processing"
 )
 
 type ProcessAllArgs struct {
@@ -89,18 +90,18 @@ func (p *ProcessAllProcess) printUsage() {
 	fmt.Printf("  muxed_{userId}_{sessionId}_{trackId}.webm    - Combined audio+video file\n")
 }
 
-func (p *ProcessAllProcess) processAllTracks(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
+func (p *ProcessAllProcess) processAllTracks(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, metadata *processing.RecordingMetadata, logger *getstream.DefaultLogger) error {
 
-	if e := extractTracks(globalArgs.WorkDir, globalArgs.Output, "", "", "", metadata, "audio", "both", true, true, logger); e != nil {
+	if e := processing.ExtractTracks(globalArgs.WorkDir, globalArgs.Output, "", "", "", metadata, "audio", "both", true, true, logger); e != nil {
 		return e
 	}
 
-	if e := extractTracks(globalArgs.WorkDir, globalArgs.Output, "", "", "", metadata, "video", "both", true, true, logger); e != nil {
+	if e := processing.ExtractTracks(globalArgs.WorkDir, globalArgs.Output, "", "", "", metadata, "video", "both", true, true, logger); e != nil {
 		return e
 	}
 
-	mixer := NewAudioMixer(logger)
-	mixer.mixAllAudioTracks(&AudioMixerConfig{
+	mixer := processing.NewAudioMixer(logger)
+	mixer.MixAllAudioTracks(&processing.AudioMixerConfig{
 		WorkDir:         globalArgs.WorkDir,
 		OutputDir:       globalArgs.Output,
 		WithScreenshare: false,
@@ -108,8 +109,8 @@ func (p *ProcessAllProcess) processAllTracks(globalArgs *GlobalArgs, processAllA
 		WithCleanup:     false,
 	}, metadata, logger)
 
-	muxer := NewAudioVideoMuxer(p.logger)
-	if e := muxer.muxAudioVideoTracks(&AudioVideoMuxerConfig{
+	muxer := processing.NewAudioVideoMuxer(p.logger)
+	if e := muxer.MuxAudioVideoTracks(&processing.AudioVideoMuxerConfig{
 		WorkDir:     globalArgs.WorkDir,
 		OutputDir:   globalArgs.Output,
 		UserID:      "",

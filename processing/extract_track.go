@@ -1,4 +1,4 @@
-package main
+package processing
 
 import (
 	"fmt"
@@ -7,12 +7,11 @@ import (
 	"strings"
 
 	"github.com/GetStream/getstream-go/v3"
-	"github.com/GetStream/getstream-go/v3/cmd/raw-recording-tools/webm"
 	"github.com/pion/webrtc/v4"
 )
 
 // Generic track extraction function that works for both audio and video
-func extractTracks(workingDir, outputDir, userID, sessionID, trackID string, metadata *RecordingMetadata, trackType, mediaFilter string, fillGaps, fixDtx bool, logger *getstream.DefaultLogger) error {
+func ExtractTracks(workingDir, outputDir, userID, sessionID, trackID string, metadata *RecordingMetadata, trackType, mediaFilter string, fillGaps, fixDtx bool, logger *getstream.DefaultLogger) error {
 	// Filter tracks to specified type only and apply hierarchical filtering
 	filteredTracks := FilterTracks(metadata.Tracks, userID, sessionID, trackID, trackType, mediaFilter)
 	if len(filteredTracks) == 0 {
@@ -41,13 +40,13 @@ func extractSingleTrackWithOptions(inputPath string, track *TrackInfo, outputDir
 		for _, s := range track.Segments {
 			if strings.Contains(info.Name(), s.metadata.BaseFilename) {
 				if track.Codec == webrtc.MimeTypeH264 {
-					s.ContainerExt = webm.Mp4
+					s.ContainerExt = Mp4
 				} else {
-					s.ContainerExt = webm.Webm
+					s.ContainerExt = Webm
 				}
 				s.RtpDumpPath = path
-				s.SdpPath = strings.Replace(path, webm.SuffixRtpDump, webm.SuffixSdp, -1)
-				s.ContainerPath = strings.Replace(path, webm.SuffixRtpDump, "."+s.ContainerExt, -1)
+				s.SdpPath = strings.Replace(path, SuffixRtpDump, SuffixSdp, -1)
+				s.ContainerPath = strings.Replace(path, SuffixRtpDump, "."+s.ContainerExt, -1)
 				return true
 			}
 		}
@@ -55,7 +54,7 @@ func extractSingleTrackWithOptions(inputPath string, track *TrackInfo, outputDir
 	}
 
 	// Convert using the WebM converter
-	err := webm.ConvertDirectory(inputPath, accept, fixDtx, logger)
+	err := ConvertDirectory(inputPath, accept, fixDtx, logger)
 	if err != nil {
 		return fmt.Errorf("failed to convert %s track: %w", trackType, err)
 	}
@@ -92,14 +91,14 @@ func processSegmentsWithGapFilling(track *TrackInfo, trackType string, outputDir
 				gapFilePath := filepath.Join(outputDir, fmt.Sprintf("gap_%s_%d.%s", trackType, i, segment.ContainerExt))
 
 				if trackType == "audio" {
-					err := webm.GenerateSilence(gapFilePath, gapSeconds, logger)
+					err := GenerateSilence(gapFilePath, gapSeconds, logger)
 					if err != nil {
 						logger.Warn("Failed to generate silence, skipping gap: %v", err)
 						continue
 					}
 				} else if trackType == "video" {
 					// Use 720p quality as defaults
-					err := webm.GenerateBlackVideo(gapFilePath, track.Codec, gapSeconds, 1280, 720, 30, logger)
+					err := GenerateBlackVideo(gapFilePath, track.Codec, gapSeconds, 1280, 720, 30, logger)
 					if err != nil {
 						logger.Warn("Failed to generate black video, skipping gap: %v", err)
 						continue
@@ -118,7 +117,7 @@ func processSegmentsWithGapFilling(track *TrackInfo, trackType string, outputDir
 	finalPath := filepath.Join(outputDir, finalName)
 
 	// Concatenate all segments (with gap fillers if any)
-	err := webm.ConcatFile(finalPath, filesToConcat, logger)
+	err := ConcatFile(finalPath, filesToConcat, logger)
 	if err != nil {
 		return "", fmt.Errorf("failed to concatenate segments: %w", err)
 	}

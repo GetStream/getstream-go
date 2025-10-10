@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/GetStream/getstream-go/v3"
+	"github.com/GetStream/getstream-go/v3/processing"
 )
 
 type MuxAVArgs struct {
@@ -90,9 +91,9 @@ func (p *MuxAudioVideoProcess) printUsage() {
 	fmt.Printf("  --media both     Mux both types, but ensure consistent pairing (default)\n")
 }
 
-func (p *MuxAudioVideoProcess) muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	muxer := NewAudioVideoMuxer(p.logger)
-	if e := muxer.muxAudioVideoTracks(&AudioVideoMuxerConfig{
+func (p *MuxAudioVideoProcess) muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata *processing.RecordingMetadata, logger *getstream.DefaultLogger) error {
+	muxer := processing.NewAudioVideoMuxer(p.logger)
+	if e := muxer.MuxAudioVideoTracks(&processing.AudioVideoMuxerConfig{
 		WorkDir:     globalArgs.WorkDir,
 		OutputDir:   globalArgs.Output,
 		UserID:      muxAVArgs.UserID,

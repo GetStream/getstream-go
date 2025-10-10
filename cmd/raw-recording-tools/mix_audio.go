@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/GetStream/getstream-go/v3"
+	"github.com/GetStream/getstream-go/v3/processing"
 )
 
 // MixAudioArgs represents the arguments for the mix-audio command
@@ -47,9 +48,9 @@ func (p *MixAudioProcess) runMixAudio(args []string, globalArgs *GlobalArgs) {
 }
 
 // mixAllAudioTracks orchestrates the entire audio mixing workflow using existing extraction logic
-func (p *MixAudioProcess) mixAllAudioTracks(globalArgs *GlobalArgs, mixAudioArgs *MixAudioArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	mixer := NewAudioMixer(logger)
-	mixer.mixAllAudioTracks(&AudioMixerConfig{
+func (p *MixAudioProcess) mixAllAudioTracks(globalArgs *GlobalArgs, mixAudioArgs *MixAudioArgs, metadata *processing.RecordingMetadata, logger *getstream.DefaultLogger) error {
+	mixer := processing.NewAudioMixer(logger)
+	mixer.MixAllAudioTracks(&processing.AudioMixerConfig{
 		WorkDir:         globalArgs.WorkDir,
 		OutputDir:       globalArgs.Output,
 		WithScreenshare: false,

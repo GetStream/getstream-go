@@ -1,4 +1,4 @@
-package main
+package processing
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/GetStream/getstream-go/v3"
-	"github.com/GetStream/getstream-go/v3/cmd/raw-recording-tools/webm"
 )
 
 type AudioVideoMuxerConfig struct {
@@ -29,18 +28,18 @@ func NewAudioVideoMuxer(logger *getstream.DefaultLogger) *AudioVideoMuxer {
 	return &AudioVideoMuxer{logger: logger}
 }
 
-func (p *AudioVideoMuxer) muxAudioVideoTracks(config *AudioVideoMuxerConfig, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
+func (p *AudioVideoMuxer) MuxAudioVideoTracks(config *AudioVideoMuxerConfig, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	if config.WithExtract {
 		// Extract audio tracks with gap filling enabled
 		logger.Info("Extracting audio tracks with gap filling...")
-		err := extractTracks(config.WorkDir, config.OutputDir, config.UserID, config.SessionID, config.TrackID, metadata, "audio", config.Media, true, true, logger)
+		err := ExtractTracks(config.WorkDir, config.OutputDir, config.UserID, config.SessionID, config.TrackID, metadata, "audio", config.Media, true, true, logger)
 		if err != nil {
 			return fmt.Errorf("failed to extract audio tracks: %w", err)
 		}
 
 		// Extract video tracks with gap filling enabled
 		logger.Info("Extracting video tracks with gap filling...")
-		err = extractTracks(config.WorkDir, config.OutputDir, config.UserID, config.SessionID, config.TrackID, metadata, "video", config.Media, true, true, logger)
+		err = ExtractTracks(config.WorkDir, config.OutputDir, config.UserID, config.SessionID, config.TrackID, metadata, "video", config.Media, true, true, logger)
 		if err != nil {
 			return fmt.Errorf("failed to extract video tracks: %w", err)
 		}
@@ -115,7 +114,7 @@ func (p *AudioVideoMuxer) muxTrackPairs(audio, video *TrackInfo, outputDir strin
 	logger.Info("Muxing %s + %s → %s (offset: %dms)",
 		filepath.Base(audioFile), filepath.Base(videoFile), filepath.Base(outputFile), offset)
 
-	err = webm.MuxFiles(outputFile, audioFile, videoFile, float64(offset), logger)
+	err = MuxFiles(outputFile, audioFile, videoFile, float64(offset), logger)
 	if err != nil {
 		logger.Error("Failed to mux %s + %s: %v", audioFile, videoFile, err)
 		return err

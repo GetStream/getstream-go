@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/GetStream/getstream-go/v3"
+	"github.com/GetStream/getstream-go/v3/processing"
 )
 
 type GlobalArgs struct {
@@ -54,7 +55,7 @@ func main() {
 
 func processCommand(command string, globalArgs *GlobalArgs, remainingArgs []string, logger *getstream.DefaultLogger) error {
 	// Extract to temp directory if needed (unified approach)
-	workingDir, cleanup, err := extractToTempDir(globalArgs.InputFile, logger)
+	workingDir, cleanup, err := processing.ExtractToTempDir(globalArgs.InputFile, logger)
 	if err != nil {
 		return fmt.Errorf("failed to prepare working directory: %w", err)
 	}
@@ -174,7 +175,7 @@ func validateGlobalArgs(globalArgs *GlobalArgs, command string) error {
 }
 
 // validateInputArgs validates input arguments using mutually exclusive logic
-func validateInputArgs(globalArgs *GlobalArgs, userID, sessionID, trackID string) (*RecordingMetadata, error) {
+func validateInputArgs(globalArgs *GlobalArgs, userID, sessionID, trackID string) (*processing.RecordingMetadata, error) {
 	// Count how many filters are specified
 	filtersCount := 0
 	if userID != "" {
@@ -202,7 +203,7 @@ func validateInputArgs(globalArgs *GlobalArgs, userID, sessionID, trackID string
 
 	// Parse metadata to validate the single specified argument
 	logger := setupLogger(false) // Use non-verbose for validation
-	parser := NewMetadataParser(logger)
+	parser := processing.NewMetadataParser(logger)
 	metadata, err := parser.ParseMetadataOnly(inputPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse recording for validation: %w", err)

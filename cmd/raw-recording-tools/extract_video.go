@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/GetStream/getstream-go/v3"
+	"github.com/GetStream/getstream-go/v3/processing"
 )
 
 type ExtractVideoArgs struct {
@@ -107,6 +108,6 @@ func (p *ExtractVideoProcess) printUsage() {
 	fmt.Fprintf(os.Stderr, "Global Options: Use 'raw-tools --help' to see global options.\n")
 }
 
-func extractVideoTracks(globalArgs *GlobalArgs, extractVideoArgs *ExtractVideoArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	return extractTracks(globalArgs.WorkDir, globalArgs.Output, extractVideoArgs.UserID, extractVideoArgs.SessionID, extractVideoArgs.TrackID, metadata, "video", "both", extractVideoArgs.FillGaps, false, logger)
+func extractVideoTracks(globalArgs *GlobalArgs, extractVideoArgs *ExtractVideoArgs, metadata *processing.RecordingMetadata, logger *getstream.DefaultLogger) error {
+	return processing.ExtractTracks(globalArgs.WorkDir, globalArgs.Output, extractVideoArgs.UserID, extractVideoArgs.SessionID, extractVideoArgs.TrackID, metadata, "video", "both", extractVideoArgs.FillGaps, false, logger)
 }

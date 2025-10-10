@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/GetStream/getstream-go/v3"
+	"github.com/GetStream/getstream-go/v3/processing"
 )
 
 type ExtractAudioArgs struct {
@@ -109,6 +110,6 @@ func (p *ExtractAudioProcess) printUsage() {
 	fmt.Fprintf(os.Stderr, "Global Options: Use 'raw-tools --help' to see global options.\n")
 }
 
-func extractAudioTracks(globalArgs *GlobalArgs, extractAudioArgs *ExtractAudioArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	return extractTracks(globalArgs.WorkDir, globalArgs.Output, extractAudioArgs.UserID, extractAudioArgs.SessionID, extractAudioArgs.TrackID, metadata, "audio", "both", extractAudioArgs.FillGaps, extractAudioArgs.FixDtx, logger)
+func extractAudioTracks(globalArgs *GlobalArgs, extractAudioArgs *ExtractAudioArgs, metadata *processing.RecordingMetadata, logger *getstream.DefaultLogger) error {
+	return processing.ExtractTracks(globalArgs.WorkDir, globalArgs.Output, extractAudioArgs.UserID, extractAudioArgs.SessionID, extractAudioArgs.TrackID, metadata, "audio", "both", extractAudioArgs.FillGaps, extractAudioArgs.FixDtx, logger)
 }

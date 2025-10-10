@@ -1,4 +1,4 @@
-package main
+package processing
 
 import (
 	"archive/tar"
@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/GetStream/getstream-go/v3"
-	rawrecorder "github.com/GetStream/getstream-go/v3/cmd/raw-recording-tools/raw-recorder"
 )
 
 // TrackInfo represents a single track with its metadata (deduplicated across segments)
@@ -30,7 +29,7 @@ type TrackInfo struct {
 }
 
 type SegmentInfo struct {
-	metadata *rawrecorder.SegmentMetadata
+	metadata *SegmentMetadata
 
 	RtpDumpPath   string
 	SdpPath       string
@@ -188,7 +187,7 @@ func (p *MetadataParser) parseMetadataOnlyFromTarGz(tarGzPath string) (*Recordin
 
 // parseTimingMetadataFile parses a timing metadata JSON file and extracts tracks
 func (p *MetadataParser) parseTimingMetadataFile(data []byte) ([]*TrackInfo, error) {
-	var sessionMetadata rawrecorder.SessionTimingMetadata
+	var sessionMetadata SessionTimingMetadata
 	err := json.Unmarshal(data, &sessionMetadata)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal session metadata: %w", err)
@@ -197,7 +196,7 @@ func (p *MetadataParser) parseTimingMetadataFile(data []byte) ([]*TrackInfo, err
 	// Use a map to deduplicate tracks by unique key
 	trackMap := make(map[string]*TrackInfo)
 
-	processSegment := func(segment *rawrecorder.SegmentMetadata, trackType string) {
+	processSegment := func(segment *SegmentMetadata, trackType string) {
 		key := fmt.Sprintf("%s|%s|%s|%s",
 			sessionMetadata.ParticipantID,
 			sessionMetadata.UserSessionID,
@@ -341,7 +340,7 @@ func FilterTracks(tracks []*TrackInfo, userID, sessionID, trackID, trackType, me
 	return filtered
 }
 
-func FirstPacketNtpTimestamp(segment *rawrecorder.SegmentMetadata) int64 {
+func FirstPacketNtpTimestamp(segment *SegmentMetadata) int64 {
 	if segment.FirstRtcpNtpTimestamp != 0 && segment.FirstRtcpRtpTimestamp != 0 {
 		rtpNtpTs := (segment.FirstRtcpRtpTimestamp - segment.FirstRtpRtpTimestamp) / sampleRate(segment)
 		return segment.FirstRtcpNtpTimestamp - int64(rtpNtpTs)
@@ -350,7 +349,7 @@ func FirstPacketNtpTimestamp(segment *rawrecorder.SegmentMetadata) int64 {
 	}
 }
 
-func LastPacketNtpTimestamp(segment *rawrecorder.SegmentMetadata) int64 {
+func LastPacketNtpTimestamp(segment *SegmentMetadata) int64 {
 	if segment.LastRtcpNtpTimestamp != 0 && segment.LastRtcpRtpTimestamp != 0 {
 		rtpNtpTs := (segment.LastRtpRtpTimestamp - segment.LastRtcpRtpTimestamp) / sampleRate(segment)
 		return segment.LastRtcpNtpTimestamp + int64(rtpNtpTs)
@@ -359,7 +358,7 @@ func LastPacketNtpTimestamp(segment *rawrecorder.SegmentMetadata) int64 {
 	}
 }
 
-func sampleRate(segment *rawrecorder.SegmentMetadata) uint32 {
+func sampleRate(segment *SegmentMetadata) uint32 {
 	switch segment.TrackType {
 	case "TRACK_TYPE_AUDIO",
 		"TRACK_TYPE_SCREEN_SHARE_AUDIO":

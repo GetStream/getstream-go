@@ -1,4 +1,4 @@
-package rawrecorder
+package processing
 
 type SessionTimingMetadata struct {
 	ParticipantID string `json:"participant_id"`

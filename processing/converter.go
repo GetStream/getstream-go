@@ -1,4 +1,4 @@
-package webm
+package processing
 
 import (
 	"errors"
@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/GetStream/getstream-go/v3"
-	"github.com/GetStream/getstream-go/v3/cmd/raw-recording-tools/rawsdputil"
 	"github.com/pion/rtp"
 	"github.com/pion/rtp/codecs"
 	"github.com/pion/webrtc/v4"
@@ -89,8 +88,8 @@ func (c *RTPDump2WebMConverter) ConvertFile(inputFile string, fixDtx bool) error
 	reader, _, _ := rtpdump.NewReader(file)
 	c.reader = reader
 
-	sdpContent, _ := rawsdputil.ReadSDP(strings.Replace(inputFile, SuffixRtpDump, SuffixSdp, 1))
-	mType, _ := rawsdputil.MimeType(sdpContent)
+	sdpContent, _ := ReadSDP(strings.Replace(inputFile, SuffixRtpDump, SuffixSdp, 1))
+	mType, _ := MimeType(sdpContent)
 
 	releasePacketHandler := samplebuilder.WithPacketReleaseHandler(c.buildDefaultReleasePacketHandler())
 

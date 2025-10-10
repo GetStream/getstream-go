@@ -1,11 +1,10 @@
-package main
+package processing
 
 import (
 	"fmt"
 	"path/filepath"
 
 	"github.com/GetStream/getstream-go/v3"
-	"github.com/GetStream/getstream-go/v3/cmd/raw-recording-tools/webm"
 )
 
 type AudioMixerConfig struct {
@@ -24,9 +23,9 @@ func NewAudioMixer(logger *getstream.DefaultLogger) *AudioMixer {
 	return &AudioMixer{logger: logger}
 }
 
-// mixAllAudioTracks orchestrates the entire audio mixing workflow using existing extraction logic
-func (p *AudioMixer) mixAllAudioTracks(config *AudioMixerConfig, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	// Step 1: Extract all matching audio tracks using existing extractTracks function
+// MixAllAudioTracks orchestrates the entire audio mixing workflow using existing extraction logic
+func (p *AudioMixer) MixAllAudioTracks(config *AudioMixerConfig, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
+	// Step 1: Extract all matching audio tracks using existing ExtractTracks function
 	logger.Info("Step 1/2: Extracting all matching audio tracks...")
 
 	if config.WithExtract {
@@ -35,7 +34,7 @@ func (p *AudioMixer) mixAllAudioTracks(config *AudioMixerConfig, metadata *Recor
 			mediaFilter = "both"
 		}
 
-		if err := extractTracks(config.WorkDir, config.OutputDir, "", "", "", metadata, "audio", mediaFilter, true, true, logger); err != nil {
+		if err := ExtractTracks(config.WorkDir, config.OutputDir, "", "", "", metadata, "audio", mediaFilter, true, true, logger); err != nil {
 			return fmt.Errorf("failed to extract audio tracks: %w", err)
 		}
 	}
@@ -50,7 +49,7 @@ func (p *AudioMixer) mixAllAudioTracks(config *AudioMixerConfig, metadata *Recor
 	// Step 3: Mix all discovered audio files using existing webm.MixAudioFiles
 	outputFile := filepath.Join(config.OutputDir, "mixed_audio.webm")
 
-	err := webm.MixAudioFiles(outputFile, fileOffsetMap, logger)
+	err := MixAudioFiles(outputFile, fileOffsetMap, logger)
 	if err != nil {
 		return fmt.Errorf("failed to mix audio files: %w", err)
 	}
@@ -67,14 +66,14 @@ func (p *AudioMixer) mixAllAudioTracks(config *AudioMixerConfig, metadata *Recor
 	return nil
 }
 
-func (p *AudioMixer) offset(metadata *RecordingMetadata, withScreenshare bool, logger *getstream.DefaultLogger) []*webm.FileOffset {
-	var offsets []*webm.FileOffset
+func (p *AudioMixer) offset(metadata *RecordingMetadata, withScreenshare bool, logger *getstream.DefaultLogger) []*FileOffset {
+	var offsets []*FileOffset
 	var firstTrack *TrackInfo
 	for _, t := range metadata.Tracks {
 		if t.TrackType == "audio" && (!t.IsScreenshare || withScreenshare) {
 			if firstTrack == nil {
 				firstTrack = t
-				offsets = append(offsets, &webm.FileOffset{
+				offsets = append(offsets, &FileOffset{
 					Name:   t.ConcatenatedContainerPath,
 					Offset: 0, // Will be sorted later and rearranged
 				})
@@ -85,7 +84,7 @@ func (p *AudioMixer) offset(metadata *RecordingMetadata, withScreenshare bool, l
 					continue
 				}
 
-				offsets = append(offsets, &webm.FileOffset{
+				offsets = append(offsets, &FileOffset{
 					Name:   t.ConcatenatedContainerPath,
 					Offset: offset,
 				})

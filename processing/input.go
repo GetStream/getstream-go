@@ -1,4 +1,4 @@
-package main
+package processing
 
 import (
 	"archive/tar"
@@ -14,7 +14,7 @@ import (
 
 // extractToTempDir extracts archive to temp directory or returns the directory path
 // Returns: (workingDir, cleanupFunc, error)
-func extractToTempDir(inputPath string, logger *getstream.DefaultLogger) (string, func(), error) {
+func ExtractToTempDir(inputPath string, logger *getstream.DefaultLogger) (string, func(), error) {
 	// If it's already a directory, just return it
 	if stat, err := os.Stat(inputPath); err == nil && stat.IsDir() {
 		logger.Debug("Input is already a directory: %s", inputPath)
