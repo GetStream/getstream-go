@@ -3,6 +3,7 @@ package getstream_test
 import (
 	"context"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -215,6 +216,18 @@ func TestFeedIntegrationSuite(t *testing.T) {
 	// Feed View CRUD Operations
 	t.Run("Test34_FeedViewCRUD", func(t *testing.T) {
 		test34FeedViewCRUD(t, ctx, feedsClient)
+	})
+
+	t.Run("UploadFileFromPath", func(t *testing.T) {
+		testFileUploadIntegration(t, ctx, client, testUserID)
+	})
+
+	t.Run("UploadImageWithSizes", func(t *testing.T) {
+		testImageUploadIntegration(t, ctx, client, testUserID)
+	})
+
+	t.Run("UploadFileError", func(t *testing.T) {
+		testFileUploadErrorIntegration(t, ctx, client, testUserID)
 	})
 }
 
@@ -1887,6 +1900,91 @@ func test36BatchFeedOperations(t *testing.T, ctx context.Context, feedsClient *g
 	}
 
 	fmt.Println("✅ Completed Batch Feed operations")
+}
+
+func testFileUploadIntegration(t *testing.T, ctx context.Context, client *getstream.Stream, testUserID string) {
+	// Create a temporary test file
+	testContent := "This is a test file for multipart upload integration test\nContains multiple lines\nWith various content"
+	tmpFile, err := os.CreateTemp("", "integration-test-*.txt")
+	require.NoError(t, err, "Failed to create temp file")
+	defer os.Remove(tmpFile.Name())
+
+	_, err = tmpFile.WriteString(testContent)
+	require.NoError(t, err, "Failed to write test content")
+	tmpFile.Close()
+
+	// snippet-start: UploadFile
+	uploadReq := &getstream.UploadFileRequest{
+		File: getstream.PtrTo(tmpFile.Name()),
+		User: &getstream.OnlyUserID{
+			ID: testUserID,
+		},
+	}
+
+	response, err := client.UploadFile(ctx, uploadReq)
+	// snippet-stop: UploadFile
+
+	assertResponseSuccess(t, response, err, "upload file from path")
+
+	// Verify response contains file URL
+	assert.NotNil(t, response.Data.File, "File URL should not be nil")
+	assert.NotEmpty(t, *response.Data.File, "File URL should not be empty")
+	assert.Contains(t, *response.Data.File, "http", "File URL should be a valid HTTP URL")
+
+	fmt.Printf("✅ File uploaded successfully: %s\n", *response.Data.File)
+}
+
+func testImageUploadIntegration(t *testing.T, ctx context.Context, client *getstream.Stream, testUserID string) {
+	// Create a temporary test image file (fake image data)
+	testImageContent := "fake-png-image-data-for-testing"
+	tmpFile, err := os.CreateTemp("", "integration-test-*.png")
+	require.NoError(t, err, "Failed to create temp image file")
+	defer os.Remove(tmpFile.Name())
+
+	_, err = tmpFile.WriteString(testImageContent)
+	require.NoError(t, err, "Failed to write test image content")
+	tmpFile.Close()
+
+	// snippet-start: UploadImage
+	// Upload image with upload sizes
+	uploadReq := &getstream.UploadImageRequest{
+		File: getstream.PtrTo(tmpFile.Name()),
+		UploadSizes: []getstream.ImageSize{
+			{Width: getstream.PtrTo(100), Height: getstream.PtrTo(100)},
+			{Width: getstream.PtrTo(300), Height: getstream.PtrTo(200)},
+		},
+		User: &getstream.OnlyUserID{
+			ID: testUserID,
+		},
+	}
+
+	response, err := client.UploadImage(ctx, uploadReq)
+	// snippet-stop: UploadImage
+
+	assertResponseSuccess(t, response, err, "upload image with sizes")
+
+	// Verify response contains file URL
+	assert.NotNil(t, response.Data.File, "Image URL should not be nil")
+	assert.NotEmpty(t, *response.Data.File, "Image URL should not be empty")
+	assert.Contains(t, *response.Data.File, "http", "Image URL should be a valid HTTP URL")
+
+	fmt.Printf("✅ Image uploaded successfully: %s\n", *response.Data.File)
+}
+
+func testFileUploadErrorIntegration(t *testing.T, ctx context.Context, client *getstream.Stream, testUserID string) {
+	// Try to upload non-existent file
+	uploadReq := &getstream.UploadFileRequest{
+		File: getstream.PtrTo("/non/existent/file.txt"),
+		User: &getstream.OnlyUserID{
+			ID: testUserID,
+		},
+	}
+
+	_, err := client.UploadFile(ctx, uploadReq)
+	assert.Error(t, err, "Should fail when file doesn't exist")
+	assert.Contains(t, err.Error(), "failed to open file", "Error should mention file opening failure")
+
+	fmt.Printf("✅ Error handling works correctly: %s\n", err.Error())
 }
 
 // =================================================================
