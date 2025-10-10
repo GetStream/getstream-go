@@ -340,7 +340,7 @@ func FilterTracks(tracks []*TrackInfo, userID, sessionID, trackID, trackType, me
 	return filtered
 }
 
-func FirstPacketNtpTimestamp(segment *SegmentMetadata) int64 {
+func firstPacketNtpTimestamp(segment *SegmentMetadata) int64 {
 	if segment.FirstRtcpNtpTimestamp != 0 && segment.FirstRtcpRtpTimestamp != 0 {
 		rtpNtpTs := (segment.FirstRtcpRtpTimestamp - segment.FirstRtpRtpTimestamp) / sampleRate(segment)
 		return segment.FirstRtcpNtpTimestamp - int64(rtpNtpTs)
@@ -349,7 +349,7 @@ func FirstPacketNtpTimestamp(segment *SegmentMetadata) int64 {
 	}
 }
 
-func LastPacketNtpTimestamp(segment *SegmentMetadata) int64 {
+func lastPacketNtpTimestamp(segment *SegmentMetadata) int64 {
 	if segment.LastRtcpNtpTimestamp != 0 && segment.LastRtcpRtpTimestamp != 0 {
 		rtpNtpTs := (segment.LastRtpRtpTimestamp - segment.LastRtcpRtpTimestamp) / sampleRate(segment)
 		return segment.LastRtcpNtpTimestamp + int64(rtpNtpTs)

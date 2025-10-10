@@ -61,8 +61,8 @@ func (p *AudioVideoMuxer) MuxAudioVideoTracks(config *AudioVideoMuxerConfig, met
 // calculateSyncOffsetFromFiles calculates sync offset between audio and video files using metadata
 func calculateSyncOffsetFromFiles(audioTrack, videoTrack *TrackInfo, logger *getstream.DefaultLogger) (int64, error) {
 	// Calculate offset: positive means video starts before audio
-	audioTs := FirstPacketNtpTimestamp(audioTrack.Segments[0].metadata)
-	videoTs := FirstPacketNtpTimestamp(videoTrack.Segments[0].metadata)
+	audioTs := firstPacketNtpTimestamp(audioTrack.Segments[0].metadata)
+	videoTs := firstPacketNtpTimestamp(videoTrack.Segments[0].metadata)
 	offset := audioTs - videoTs
 
 	logger.Info(fmt.Sprintf("Calculated sync offset: audio_start=%v, audio_ts=%v, video_start=%v, video_ts=%v, offset=%d",
@@ -114,7 +114,7 @@ func (p *AudioVideoMuxer) muxTrackPairs(audio, video *TrackInfo, outputDir strin
 	logger.Info("Muxing %s + %s → %s (offset: %dms)",
 		filepath.Base(audioFile), filepath.Base(videoFile), filepath.Base(outputFile), offset)
 
-	err = MuxFiles(outputFile, audioFile, videoFile, float64(offset), logger)
+	err = muxFiles(outputFile, audioFile, videoFile, float64(offset), logger)
 	if err != nil {
 		logger.Error("Failed to mux %s + %s: %v", audioFile, videoFile, err)
 		return err

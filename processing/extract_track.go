@@ -81,7 +81,7 @@ func processSegmentsWithGapFilling(track *TrackInfo, trackType string, outputDir
 		// Add gap filler if requested and there's a gap before the next segment
 		if fillGaps && i < track.SegmentCount-1 {
 			nextSegment := track.Segments[i+1]
-			gapDuration := FirstPacketNtpTimestamp(nextSegment.metadata) - LastPacketNtpTimestamp(segment.metadata)
+			gapDuration := firstPacketNtpTimestamp(nextSegment.metadata) - lastPacketNtpTimestamp(segment.metadata)
 
 			if gapDuration > 0 { // There's a gap
 				gapSeconds := float64(gapDuration) / 1000.0
@@ -91,14 +91,14 @@ func processSegmentsWithGapFilling(track *TrackInfo, trackType string, outputDir
 				gapFilePath := filepath.Join(outputDir, fmt.Sprintf("gap_%s_%d.%s", trackType, i, segment.ContainerExt))
 
 				if trackType == "audio" {
-					err := GenerateSilence(gapFilePath, gapSeconds, logger)
+					err := generateSilence(gapFilePath, gapSeconds, logger)
 					if err != nil {
 						logger.Warn("Failed to generate silence, skipping gap: %v", err)
 						continue
 					}
 				} else if trackType == "video" {
 					// Use 720p quality as defaults
-					err := GenerateBlackVideo(gapFilePath, track.Codec, gapSeconds, 1280, 720, 30, logger)
+					err := generateBlackVideo(gapFilePath, track.Codec, gapSeconds, 1280, 720, 30, logger)
 					if err != nil {
 						logger.Warn("Failed to generate black video, skipping gap: %v", err)
 						continue
@@ -117,7 +117,7 @@ func processSegmentsWithGapFilling(track *TrackInfo, trackType string, outputDir
 	finalPath := filepath.Join(outputDir, finalName)
 
 	// Concatenate all segments (with gap fillers if any)
-	err := ConcatFile(finalPath, filesToConcat, logger)
+	err := concatFile(finalPath, filesToConcat, logger)
 	if err != nil {
 		return "", fmt.Errorf("failed to concatenate segments: %w", err)
 	}

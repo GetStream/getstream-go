@@ -46,10 +46,10 @@ func (p *AudioMixer) MixAllAudioTracks(config *AudioMixerConfig, metadata *Recor
 
 	logger.Info("Found %d extracted audio files to mix", len(fileOffsetMap))
 
-	// Step 3: Mix all discovered audio files using existing webm.MixAudioFiles
+	// Step 3: Mix all discovered audio files using existing webm.mixAudioFiles
 	outputFile := filepath.Join(config.OutputDir, "mixed_audio.webm")
 
-	err := MixAudioFiles(outputFile, fileOffsetMap, logger)
+	err := mixAudioFiles(outputFile, fileOffsetMap, logger)
 	if err != nil {
 		return fmt.Errorf("failed to mix audio files: %w", err)
 	}

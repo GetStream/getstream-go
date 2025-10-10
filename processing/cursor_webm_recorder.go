@@ -79,7 +79,7 @@ func (r *CursorWebmRecorder) startFFmpeg(outputFilePath, sdpContent string, port
 		return err
 	}
 
-	if _, err := sdpFile.WriteString(ReplaceSDP(sdpContent, port)); err != nil {
+	if _, err := sdpFile.WriteString(replaceSDP(sdpContent, port)); err != nil {
 		sdpFile.Close()
 		return err
 	}

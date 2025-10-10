@@ -8,7 +8,7 @@ import (
 	"github.com/pion/webrtc/v4"
 )
 
-func ReadSDP(sdpFilePath string) (string, error) {
+func readSDP(sdpFilePath string) (string, error) {
 	content, err := os.ReadFile(sdpFilePath)
 	if err != nil {
 		return "", fmt.Errorf("failed to read SDP file %s: %w", sdpFilePath, err)
@@ -16,7 +16,7 @@ func ReadSDP(sdpFilePath string) (string, error) {
 	return string(content), nil
 }
 
-func ReplaceSDP(sdpContent string, port int) string {
+func replaceSDP(sdpContent string, port int) string {
 	lines := strings.Split(sdpContent, "\n")
 	for i, line := range lines {
 		if strings.HasPrefix(line, "m=") {
@@ -33,7 +33,7 @@ func ReplaceSDP(sdpContent string, port int) string {
 	return strings.Join(lines, "\n")
 }
 
-func MimeType(sdp string) (string, error) {
+func mimeType(sdp string) (string, error) {
 	upper := strings.ToUpper(sdp)
 	if strings.Contains(upper, "VP9") {
 		return webrtc.MimeTypeVP9, nil
@@ -51,5 +51,5 @@ func MimeType(sdp string) (string, error) {
 		return webrtc.MimeTypeH264, nil
 	}
 
-	return "", fmt.Errorf("MimeType should be OPUS, VP8, VP9, AV1, H264")
+	return "", fmt.Errorf("mimeType should be OPUS, VP8, VP9, AV1, H264")
 }

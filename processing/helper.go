@@ -17,19 +17,19 @@ type FileOffset struct {
 	Offset int64
 }
 
-func ConcatFile(outputPath string, files []string, logger *getstream.DefaultLogger) error {
+func concatFile(outputPath string, files []string, logger *getstream.DefaultLogger) error {
 	// Write to a temporary file
-	concatFile, err := os.CreateTemp(TmpDir, "concat_*.txt")
+	tmpFile, err := os.CreateTemp(TmpDir, "concat_*.txt")
 	if err != nil {
 		return err
 	}
 	defer func() {
-		concatFile.Close()
+		tmpFile.Close()
 		//		_ = os.Remove(concatFile.Name())
 	}()
 
 	for _, file := range files {
-		if _, err := concatFile.WriteString(fmt.Sprintf("file '%s'\n", file)); err != nil {
+		if _, err := tmpFile.WriteString(fmt.Sprintf("file '%s'\n", file)); err != nil {
 			return err
 		}
 	}
@@ -37,13 +37,13 @@ func ConcatFile(outputPath string, files []string, logger *getstream.DefaultLogg
 	args := []string{}
 	args = append(args, "-f", "concat")
 	args = append(args, "-safe", "0")
-	args = append(args, "-i", concatFile.Name())
+	args = append(args, "-i", tmpFile.Name())
 	args = append(args, "-c", "copy")
 	args = append(args, outputPath)
 	return runFFMEPGCpmmand(args, logger)
 }
 
-func MuxFiles(fileName string, audioFile string, videoFile string, offsetMs float64, logger *getstream.DefaultLogger) error {
+func muxFiles(fileName string, audioFile string, videoFile string, offsetMs float64, logger *getstream.DefaultLogger) error {
 	args := []string{}
 
 	// Apply offset using itsoffset
@@ -75,7 +75,7 @@ func MuxFiles(fileName string, audioFile string, videoFile string, offsetMs floa
 	return runFFMEPGCpmmand(args, logger)
 }
 
-func MixAudioFiles(fileName string, files []*FileOffset, logger *getstream.DefaultLogger) error {
+func mixAudioFiles(fileName string, files []*FileOffset, logger *getstream.DefaultLogger) error {
 	var args []string
 
 	var filterParts []string
@@ -123,7 +123,7 @@ func MixAudioFiles(fileName string, files []*FileOffset, logger *getstream.Defau
 	return runFFMEPGCpmmand(args, logger)
 }
 
-func GenerateSilence(fileName string, duration float64, logger *getstream.DefaultLogger) error {
+func generateSilence(fileName string, duration float64, logger *getstream.DefaultLogger) error {
 	args := []string{}
 	args = append(args, "-f", "lavfi")
 	args = append(args, "-t", fmt.Sprintf("%.3f", duration))
@@ -135,7 +135,7 @@ func GenerateSilence(fileName string, duration float64, logger *getstream.Defaul
 	return runFFMEPGCpmmand(args, logger)
 }
 
-func GenerateBlackVideo(fileName, mimeType string, duration float64, width, height, frameRate int, logger *getstream.DefaultLogger) error {
+func generateBlackVideo(fileName, mimeType string, duration float64, width, height, frameRate int, logger *getstream.DefaultLogger) error {
 	var codecLib string
 	switch strings.ToLower(mimeType) {
 	case "video/vp8":

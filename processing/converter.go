@@ -88,8 +88,8 @@ func (c *RTPDump2WebMConverter) ConvertFile(inputFile string, fixDtx bool) error
 	reader, _, _ := rtpdump.NewReader(file)
 	c.reader = reader
 
-	sdpContent, _ := ReadSDP(strings.Replace(inputFile, SuffixRtpDump, SuffixSdp, 1))
-	mType, _ := MimeType(sdpContent)
+	sdpContent, _ := readSDP(strings.Replace(inputFile, SuffixRtpDump, SuffixSdp, 1))
+	mType, _ := mimeType(sdpContent)
 
 	releasePacketHandler := samplebuilder.WithPacketReleaseHandler(c.buildDefaultReleasePacketHandler())
 
