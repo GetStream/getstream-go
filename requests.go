@@ -59,10 +59,12 @@ type ListBlockListsRequest struct {
 }
 
 type CreateBlockListRequest struct {
-	Name  string   `json:"name"`
-	Words []string `json:"words"`
-	Team  *string  `json:"team"`
-	Type  *string  `json:"type"`
+	Name                 string   `json:"name"`
+	Words                []string `json:"words"`
+	IsLeetCheckEnabled   *bool    `json:"is_leet_check_enabled"`
+	IsPluralCheckEnabled *bool    `json:"is_plural_check_enabled"`
+	Team                 *string  `json:"team"`
+	Type                 *string  `json:"type"`
 }
 
 type DeleteBlockListRequest struct {
@@ -74,8 +76,10 @@ type GetBlockListRequest struct {
 }
 
 type UpdateBlockListRequest struct {
-	Team  *string  `json:"team"`
-	Words []string `json:"words"`
+	IsLeetCheckEnabled   *bool    `json:"is_leet_check_enabled"`
+	IsPluralCheckEnabled *bool    `json:"is_plural_check_enabled"`
+	Team                 *string  `json:"team"`
+	Words                []string `json:"words"`
 }
 
 type QueryCampaignsRequest struct {
@@ -466,6 +470,16 @@ type UndeleteMessageRequest struct {
 	SkipPush      *bool          `json:"skip_push"`
 }
 
+type CastPollVoteRequest struct {
+	UserID *string      `json:"user_id"`
+	User   *UserRequest `json:"user"`
+	Vote   *VoteData    `json:"vote"`
+}
+
+type DeletePollVoteRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+
 type DeleteReminderRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
@@ -746,17 +760,7 @@ type ActivityFeedbackRequest struct {
 	User     *UserRequest `json:"user"`
 }
 
-type CastPollVoteRequest struct {
-	UserID *string      `json:"user_id"`
-	User   *UserRequest `json:"user"`
-	Vote   *VoteData    `json:"vote"`
-}
-
-type DeletePollVoteRequest struct {
-	UserID *string `json:"-" query:"user_id"`
-}
-
-type AddReactionRequest struct {
+type AddActivityReactionRequest struct {
 	Type                       string         `json:"type"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
 	EnforceUnique              *bool          `json:"enforce_unique"`
@@ -845,9 +849,9 @@ type GetCommentsRequest struct {
 }
 
 type AddCommentRequest struct {
-	Comment                    string         `json:"comment"`
 	ObjectID                   string         `json:"object_id"`
 	ObjectType                 string         `json:"object_type"`
+	Comment                    *string        `json:"comment"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
 	ParentID                   *string        `json:"parent_id"`
 	SkipPush                   *bool          `json:"skip_push"`
@@ -927,6 +931,7 @@ type CreateFeedGroupRequest struct {
 	Notification       *NotificationConfig       `json:"notification"`
 	PushNotification   *PushNotificationConfig   `json:"push_notification"`
 	Ranking            *RankingConfig            `json:"ranking"`
+	Stories            *StoriesConfig            `json:"stories"`
 }
 
 type DeleteFeedRequest struct {
@@ -1022,6 +1027,7 @@ type GetOrCreateFeedGroupRequest struct {
 	Notification       *NotificationConfig       `json:"notification"`
 	PushNotification   *PushNotificationConfig   `json:"push_notification"`
 	Ranking            *RankingConfig            `json:"ranking"`
+	Stories            *StoriesConfig            `json:"stories"`
 }
 
 type UpdateFeedGroupRequest struct {
@@ -1032,6 +1038,7 @@ type UpdateFeedGroupRequest struct {
 	Notification       *NotificationConfig       `json:"notification"`
 	PushNotification   *PushNotificationConfig   `json:"push_notification"`
 	Ranking            *RankingConfig            `json:"ranking"`
+	Stories            *StoriesConfig            `json:"stories"`
 }
 
 type ListFeedViewsRequest struct {
@@ -1858,9 +1865,21 @@ type DeleteRecordingRequest struct {
 type DeleteTranscriptionRequest struct {
 }
 
+type GetCallSessionParticipantStatsDetailsRequest struct {
+	Since     *string `json:"-" query:"since"`
+	Until     *string `json:"-" query:"until"`
+	MaxPoints *int    `json:"-" query:"max_points"`
+}
+
 type QueryCallSessionParticipantStatsRequest struct {
 	Sort             []SortParamRequest `json:"-" query:"sort"`
 	FilterConditions map[string]any     `json:"-" query:"filter_conditions"`
+}
+
+type GetCallSessionParticipantStatsTimelineRequest struct {
+	StartTime *string  `json:"-" query:"start_time"`
+	EndTime   *string  `json:"-" query:"end_time"`
+	Severity  []string `json:"-" query:"severity"`
 }
 
 type QueryCallsRequest struct {

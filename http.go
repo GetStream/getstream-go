@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -150,6 +152,7 @@ func newRequest[T any](c *Client, ctx context.Context, method, path string, para
 
 	// Handle other methods with body
 	c.logger.Debug("Method: %s, Data: %#v (Type: %T)", method, data, data)
+
 	switch t := any(data).(type) {
 	case nil:
 		c.logger.Debug("Data is nil")
@@ -160,6 +163,8 @@ func newRequest[T any](c *Client, ctx context.Context, method, path string, para
 	case io.Reader:
 		c.logger.Debug("Data is io.Reader")
 		r.Body = io.NopCloser(t)
+	case *UploadFileRequest, *UploadImageRequest:
+		return c.createMultipartRequest(r, t)
 	default:
 		c.logger.Debug("Data is of type %T, attempting to marshal to JSON", t)
 		b, err := json.Marshal(data)
@@ -175,9 +180,119 @@ func newRequest[T any](c *Client, ctx context.Context, method, path string, para
 	return r, nil
 }
 
+func getFileContent(fileName string, fileContent io.Reader) (io.Reader, error) {
+	if fileContent != nil {
+		return fileContent, nil
+	}
+	if fileName != "" {
+		file, err := os.Open(fileName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open file: %w", err)
+		}
+		return file, nil
+	}
+	return nil, fmt.Errorf("either file name or file content must be provided")
+}
+
+// createMultipartRequest creates a multipart form request for file/image uploads
+func (c *Client) createMultipartRequest(r *http.Request, data any) (*http.Request, error) {
+	var buf bytes.Buffer
+	writer := multipart.NewWriter(&buf)
+
+	var fileContent io.Reader
+	var fileName string
+	var err error
+	// Handle both UploadFileRequest and UploadImageRequest
+	switch req := data.(type) {
+	case *UploadFileRequest:
+		if req.File == nil {
+			return nil, fmt.Errorf("file name must be provided")
+		}
+		fileName = *req.File
+		fileContent, err = getFileContent(*req.File, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open file: %w", err)
+		}
+
+		// Add user field if present
+		if req.User != nil {
+			userJSON, err := json.Marshal(req.User)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal user: %w", err)
+			}
+			err = writer.WriteField("user", string(userJSON))
+			if err != nil {
+				return nil, fmt.Errorf("failed to write user field: %w", err)
+			}
+		}
+
+	case *UploadImageRequest:
+		if req.File == nil {
+			return nil, fmt.Errorf("file name must be provided")
+		}
+		fileName = *req.File
+		fileContent, err = getFileContent(*req.File, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open file: %w", err)
+		}
+
+		// Add upload_sizes field if present
+		if req.UploadSizes != nil && len(req.UploadSizes) > 0 {
+			uploadSizesJSON, err := json.Marshal(req.UploadSizes)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal upload_sizes: %w", err)
+			}
+			err = writer.WriteField("upload_sizes", string(uploadSizesJSON))
+			if err != nil {
+				return nil, fmt.Errorf("failed to write upload_sizes field: %w", err)
+			}
+		}
+
+		// Add user field if present
+		if req.User != nil {
+			userJSON, err := json.Marshal(req.User)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal user: %w", err)
+			}
+			err = writer.WriteField("user", string(userJSON))
+			if err != nil {
+				return nil, fmt.Errorf("failed to write user field: %w", err)
+			}
+		}
+
+	default:
+		return nil, fmt.Errorf("unsupported request type for multipart: %T", data)
+	}
+
+	// Add file field
+	fileWriter, err := writer.CreateFormFile("file", fileName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create form file: %w", err)
+	}
+
+	_, err = io.Copy(fileWriter, fileContent)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy file content: %w", err)
+	}
+
+	err = writer.Close()
+	if err != nil {
+		return nil, fmt.Errorf("failed to close multipart writer: %w", err)
+	}
+
+	// Update request body and content type
+	r.Body = io.NopCloser(&buf)
+	r.Header.Set("Content-Type", writer.FormDataContentType())
+
+	c.logger.Debug("Created multipart request with file: %s", fileName)
+	return r, nil
+}
+
 // setHeaders sets necessary headers for the request
 func (c *Client) setHeaders(r *http.Request) {
-	r.Header.Set("Content-Type", "application/json")
+	if r.Header.Get("Content-Type") == "" {
+		r.Header.Set("Content-Type", "application/json")
+	}
 	r.Header.Set("X-Stream-Client", versionHeader())
 	r.Header.Set("Authorization", c.authToken)
 	r.Header.Set("Stream-Auth-Type", "jwt")

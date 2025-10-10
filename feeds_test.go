@@ -79,11 +79,11 @@ func TestFeedsDeletePollVote(t *testing.T) {
 	_, err = client.Feeds().DeletePollVote(context.Background(), "", "", "", &getstream.DeletePollVoteRequest{})
 	require.NoError(t, err)
 }
-func TestFeedsAddReaction(t *testing.T) {
+func TestFeedsAddActivityReaction(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Feeds().AddReaction(context.Background(), "", &getstream.AddReactionRequest{})
+	_, err = client.Feeds().AddActivityReaction(context.Background(), "", &getstream.AddActivityReactionRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsQueryActivityReactions(t *testing.T) {
