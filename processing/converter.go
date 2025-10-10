@@ -194,7 +194,15 @@ func (c *RTPDump2WebMConverter) buildOpusReleasePacketHandler() func(pkt *rtp.Pa
 			tsDiff := pkt.Timestamp - c.lastPkt.Timestamp // TODO handle rollover
 			lastPktDuration := opusPacketDurationMs(c.lastPkt.Payload)
 			rtpDuration := uint32(lastPktDuration * 48)
-			if tsDiff > rtpDuration {
+
+			if rtpDuration == 0 {
+				rtpDuration = c.lastPktDuration
+				c.logger.Info("LastPacket with no duration, Previous SeqNum: %d RtpTs: %d   - Last SeqNum: %d RtpTs: %d", c.lastPkt.SequenceNumber, c.lastPkt.Timestamp, pkt.SequenceNumber, pkt.Timestamp)
+			} else {
+				c.lastPktDuration = rtpDuration
+			}
+
+			if rtpDuration > 0 && tsDiff > rtpDuration {
 
 				// Calculate how many packets we need to insert, taking care of packet losses
 				var toAdd uint16
@@ -267,14 +275,7 @@ func opusPacketDurationMs(packet []byte) int {
 		frameCount = 2
 	case 3:
 		if len(packet) > 1 {
-			fc := packet[1] & 0x3F
-			if fc > 0 && fc <= 48 {
-				frameCount = int(fc)
-			} else {
-				frameCount = 1 // fallback if invalid
-			}
-		} else {
-			frameCount = 1 // fallback
+			frameCount = int(packet[1] & 0x3F)
 		}
 	}
 
