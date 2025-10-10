@@ -94,14 +94,14 @@ func (p *ProcessAllProcess) printUsage() {
 func (p *ProcessAllProcess) processAllTracks(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	// Step 1: Extract audio tracks with gap filling
 	logger.Info("Step 1/3: Extracting audio tracks with gap filling...")
-	err := extractTracks(globalArgs.WorkDir, globalArgs.Output, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, metadata, "audio", "both", true, logger)
+	err := extractTracks(globalArgs.WorkDir, globalArgs.Output, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, metadata, "audio", "both", true, true, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract audio tracks: %w", err)
 	}
 
 	// Step 2: Extract video tracks with gap filling
 	logger.Info("Step 2/3: Extracting video tracks with gap filling...")
-	err = extractTracks(globalArgs.WorkDir, globalArgs.Output, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, metadata, "video", "both", true, logger)
+	err = extractTracks(globalArgs.WorkDir, globalArgs.Output, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, metadata, "video", "both", true, true, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract video tracks: %w", err)
 	}

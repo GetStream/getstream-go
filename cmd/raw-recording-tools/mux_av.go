@@ -103,14 +103,14 @@ func (p *MuxAudioVideoProcess) muxAudioVideoTracks(globalArgs *GlobalArgs, muxAV
 
 	// Extract audio tracks with gap filling enabled
 	logger.Info("Extracting audio tracks with gap filling...")
-	err = extractTracks(globalArgs.WorkDir, globalArgs.Output, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID, metadata, "audio", muxAVArgs.Media, true, logger)
+	err = extractTracks(globalArgs.WorkDir, globalArgs.Output, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID, metadata, "audio", muxAVArgs.Media, true, true, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract audio tracks: %w", err)
 	}
 
 	// Extract video tracks with gap filling enabled
 	logger.Info("Extracting video tracks with gap filling...")
-	err = extractTracks(globalArgs.WorkDir, globalArgs.Output, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID, metadata, "video", muxAVArgs.Media, true, logger)
+	err = extractTracks(globalArgs.WorkDir, globalArgs.Output, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID, metadata, "video", muxAVArgs.Media, true, true, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract video tracks: %w", err)
 	}
@@ -191,12 +191,12 @@ func calculateSyncOffsetFromFiles(inputPath, audioFile, videoFile string, metada
 	}
 
 	// Calculate offset: positive means video starts before audio
-	audioTs := FirstPacketNtpTimestamp(audioTrack.Segments[0])
-	videoTs := FirstPacketNtpTimestamp(videoTrack.Segments[0])
+	audioTs := FirstPacketNtpTimestamp(audioTrack.Segments[0].metadata)
+	videoTs := FirstPacketNtpTimestamp(videoTrack.Segments[0].metadata)
 	offset := audioTs - videoTs
 
 	logger.Info(fmt.Sprintf("Calculated sync offset: audio_start=%v, audio_ts=%v, video_start=%v, video_ts=%v, offset=%d",
-		audioTrack.Segments[0].FirstRtpUnixTimestamp, audioTs, videoTrack.Segments[0].FirstRtpUnixTimestamp, videoTs, offset))
+		audioTrack.Segments[0].metadata.FirstRtpUnixTimestamp, audioTs, videoTrack.Segments[0].metadata.FirstRtpUnixTimestamp, videoTs, offset))
 
 	return offset, nil
 }

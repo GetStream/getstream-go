@@ -8,10 +8,11 @@ import (
 
 	"github.com/GetStream/getstream-go/v3"
 	"github.com/GetStream/getstream-go/v3/cmd/raw-recording-tools/webm"
+	"github.com/pion/webrtc/v4"
 )
 
 // Generic track extraction function that works for both audio and video
-func extractTracks(workingDir, outputDir, userID, sessionID, trackID string, metadata *RecordingMetadata, trackType, mediaFilter string, fillGaps bool, logger *getstream.DefaultLogger) error {
+func extractTracks(workingDir, outputDir, userID, sessionID, trackID string, metadata *RecordingMetadata, trackType, mediaFilter string, fillGaps, fixDtx bool, logger *getstream.DefaultLogger) error {
 	// Filter tracks to specified type only and apply hierarchical filtering
 	filteredTracks := FilterTracks(metadata.Tracks, userID, sessionID, trackID, trackType, mediaFilter)
 	if len(filteredTracks) == 0 {
@@ -25,7 +26,7 @@ func extractTracks(workingDir, outputDir, userID, sessionID, trackID string, met
 	for i, track := range filteredTracks {
 		logger.Info("Processing %s track %d/%d: %s", trackType, i+1, len(filteredTracks), track.TrackID)
 
-		err := extractSingleTrackWithOptions(workingDir, track, outputDir, trackType, fillGaps, logger)
+		err := extractSingleTrackWithOptions(workingDir, track, outputDir, trackType, fillGaps, fixDtx, logger)
 		if err != nil {
 			logger.Error("Failed to extract %s track %s: %v", trackType, track.TrackID, err)
 			continue
@@ -35,41 +36,32 @@ func extractTracks(workingDir, outputDir, userID, sessionID, trackID string, met
 	return nil
 }
 
-func extractSingleTrackWithOptions(inputPath string, track *TrackInfo, outputDir string, trackType string, fillGaps bool, logger *getstream.DefaultLogger) error {
-	// Create a temp directory for extraction and processing
-	tempDir, err := os.MkdirTemp("", fmt.Sprintf("%s-extract-*", trackType))
-	if err != nil {
-		return fmt.Errorf("failed to create temp directory: %w", err)
-	}
-	defer os.RemoveAll(tempDir)
-
-	// Copy track files from working directory (now always a directory)
-	err = copyTrackFiles(inputPath, track, tempDir, trackType)
-	if err != nil {
-		return fmt.Errorf("failed to copy track files: %w", err)
+func extractSingleTrackWithOptions(inputPath string, track *TrackInfo, outputDir string, trackType string, fillGaps, fixDtx bool, logger *getstream.DefaultLogger) error {
+	accept := func(path string, info os.FileInfo) bool {
+		for _, s := range track.Segments {
+			if strings.Contains(info.Name(), s.metadata.BaseFilename) {
+				if track.Codec == webrtc.MimeTypeH264 {
+					s.ContainerExt = webm.Mp4
+				} else {
+					s.ContainerExt = webm.Webm
+				}
+				s.RtpDumpPath = path
+				s.SdpPath = strings.Replace(path, webm.SuffixRtpDump, webm.SuffixSdp, -1)
+				s.ContainerPath = strings.Replace(path, webm.SuffixRtpDump, "."+s.ContainerExt, -1)
+				return true
+			}
+		}
+		return false
 	}
 
 	// Convert using the WebM converter
-	err = webm.ConvertDirectory(tempDir, logger)
+	err := webm.ConvertDirectory(inputPath, accept, fixDtx, logger)
 	if err != nil {
 		return fmt.Errorf("failed to convert %s track: %w", trackType, err)
 	}
 
-	// Find ALL generated .webm files
-	suffix := "webm"
-	files, _ := filepath.Glob(filepath.Join(tempDir, "*."+suffix))
-	if len(files) == 0 {
-		suffix = "mp4"
-		files, _ = filepath.Glob(filepath.Join(tempDir, "*."+suffix))
-	}
-	if len(files) == 0 {
-		return fmt.Errorf("no webm/mp4 output files found")
-	}
-
-	logger.Info("Found %d %s segment files for %s track %s", len(files), suffix, trackType, track.TrackID)
-
 	// Create segments with timing info and fill gaps
-	finalFile, err := processSegmentsWithGapFilling(files, suffix, track, trackType, outputDir, fillGaps, logger)
+	finalFile, err := processSegmentsWithGapFilling( /*files, suffix,*/ track, trackType, outputDir, fillGaps, logger)
 	if err != nil {
 		return fmt.Errorf("failed to process segments with gap filling: %w", err)
 	}
@@ -78,97 +70,25 @@ func extractSingleTrackWithOptions(inputPath string, track *TrackInfo, outputDir
 	return nil
 }
 
-// NOTE: extractTrackFiles removed - now always use copyTrackFiles since we always work with directories
-
-// copyTrackFiles copies the rtpdump and sdp files for a specific track to the destination directory
-func copyTrackFiles(inputPath string, track *TrackInfo, destDir string, trackType string) error {
-	// Walk through the input directory and copy files related to this track
-	return filepath.Walk(inputPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if !info.IsDir() {
-			fileName := info.Name()
-			// Check if this file belongs to our track (using trackType parameter)
-			if strings.Contains(fileName, track.TrackID) && strings.Contains(fileName, trackType) {
-				if strings.HasSuffix(fileName, ".rtpdump") || strings.HasSuffix(fileName, ".sdp") {
-					// Copy this file to destination
-					destPath := filepath.Join(destDir, fileName)
-
-					err = copyFile(path, destPath)
-					if err != nil {
-						return err
-					}
-				}
-			}
-		}
-		return nil
-	})
-}
-
-// Helper function to copy a file
-func copyFile(src, dst string) error {
-	srcFile, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer srcFile.Close()
-
-	dstFile, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer dstFile.Close()
-
-	_, err = srcFile.WriteTo(dstFile)
-	return err
-}
-
 // processSegmentsWithGapFilling processes webm segments, fills gaps if requested, and concatenates into final file
-func processSegmentsWithGapFilling(files []string, suffix string, track *TrackInfo, trackType string, outputDir string, fillGaps bool, logger *getstream.DefaultLogger) (string, error) {
-	if len(files) == 1 {
-		// Single segment, just copy it with final name
-		finalName := fmt.Sprintf("%s_%s_%s_%s.%s", trackType, track.UserID, track.SessionID, track.TrackID, suffix)
-		finalPath := filepath.Join(outputDir, finalName)
-		err := copyFile(files[0], finalPath)
-		return finalPath, err
-	}
-
-	// Multiple segments - sort, optionally fill gaps, and concatenate
-	if fillGaps {
-		logger.Info("Processing %d segments with gap filling for %s track %s", len(files), trackType, track.TrackID)
-	} else {
-		logger.Info("Processing %d segments (no gap filling) for %s track %s", len(files), trackType, track.TrackID)
-	}
-
-	// Map webm files to their original segment timing using filenames
-	segmentMap := make(map[string]string) // originalFilename -> webmFilePath
-	for _, webmFile := range files {
-		// Extract original filename from webm filename (remove .webm, add .rtpdump)
-		baseName := strings.TrimSuffix(filepath.Base(webmFile), "."+suffix)
-		originalName := baseName + ".rtpdump"
-		segmentMap[originalName] = webmFile
-	}
-
+func processSegmentsWithGapFilling( /*files []string, suffix string,*/ track *TrackInfo, trackType string, outputDir string, fillGaps bool, logger *getstream.DefaultLogger) (string, error) {
 	// Build list of files to concatenate (with optional gap fillers)
 	var filesToConcat []string
-
 	for i, segment := range track.Segments {
 		// Add the segment file
-		filesToConcat = append(filesToConcat, segmentMap[segment.BaseFilename])
+		filesToConcat = append(filesToConcat, segment.ContainerPath)
 
 		// Add gap filler if requested and there's a gap before the next segment
 		if fillGaps && i < track.SegmentCount-1 {
 			nextSegment := track.Segments[i+1]
-			gapDuration := FirstPacketNtpTimestamp(nextSegment) - LastPacketNtpTimestamp(segment)
+			gapDuration := FirstPacketNtpTimestamp(nextSegment.metadata) - LastPacketNtpTimestamp(segment.metadata)
 
 			if gapDuration > 0 { // There's a gap
 				gapSeconds := float64(gapDuration) / 1000.0
 				logger.Info("Detected %dms gap between segments, generating %s filler", gapDuration, trackType)
 
 				// Create gap filler file
-				gapFilePath := filepath.Join(outputDir, fmt.Sprintf("gap_%s_%d.%s", trackType, i, suffix))
+				gapFilePath := filepath.Join(outputDir, fmt.Sprintf("gap_%s_%d.%s", trackType, i, segment.ContainerExt))
 
 				if trackType == "audio" {
 					err := webm.GenerateSilence(gapFilePath, gapSeconds, logger)
@@ -185,13 +105,15 @@ func processSegmentsWithGapFilling(files []string, suffix string, track *TrackIn
 					}
 				}
 
+				defer os.Remove(gapFilePath)
+
 				filesToConcat = append(filesToConcat, gapFilePath)
 			}
 		}
 	}
 
 	// Create final output file
-	finalName := fmt.Sprintf("%s_%s_%s_%s.webm", trackType, track.UserID, track.SessionID, track.TrackID)
+	finalName := fmt.Sprintf("%s_%s_%s_%s.%s", trackType, track.UserID, track.SessionID, track.TrackID, track.Segments[0].ContainerExt)
 	finalPath := filepath.Join(outputDir, finalName)
 
 	// Concatenate all segments (with gap fillers if any)
@@ -200,19 +122,6 @@ func processSegmentsWithGapFilling(files []string, suffix string, track *TrackIn
 		return "", fmt.Errorf("failed to concatenate segments: %w", err)
 	}
 
-	// Clean up temporary gap filler files
-	if fillGaps {
-		for _, file := range filesToConcat {
-			if strings.Contains(file, "gap_") {
-				os.Remove(file)
-			}
-		}
-	}
-
-	if fillGaps {
-		logger.Info("Successfully concatenated %d segments with gap filling into %s", track.SegmentCount, finalPath)
-	} else {
-		logger.Info("Successfully concatenated %d segments into %s", track.SegmentCount, finalPath)
-	}
+	logger.Info("Successfully concatenated %d segments into %s (gap filled %t)", track.SegmentCount, finalPath, fillGaps)
 	return finalPath, nil
 }

@@ -13,10 +13,7 @@ import (
 
 // MixAudioArgs represents the arguments for the mix-audio command
 type MixAudioArgs struct {
-	UserID    string // Optional: filter by specific user, * for all users
-	SessionID string // Optional: filter by specific session, * for all sessions
-	TrackID   string // Optional: filter by specific track, * for all tracks
-	FillGaps  bool   // Whether to fill gaps with silence (always true for mixing)
+	IncludeScreenShare bool
 }
 
 // AudioFileWithTiming represents an audio file with its timing information
@@ -44,14 +41,11 @@ func (p *MixAudioProcess) runMixAudio(args []string, globalArgs *GlobalArgs) {
 	printHelpIfAsked(args, p.printUsage)
 
 	mixAudioArgs := &MixAudioArgs{
-		UserID:    "",   // Default: all users (empty)
-		SessionID: "",   // Default: all sessions (empty)
-		TrackID:   "",   // Default: all tracks (empty)
-		FillGaps:  true, // Always fill gaps for proper mixing
+		IncludeScreenShare: false,
 	}
 
 	// Validate input arguments against actual recording data
-	metadata, err := validateInputArgs(globalArgs, mixAudioArgs.UserID, mixAudioArgs.SessionID, mixAudioArgs.TrackID)
+	metadata, err := validateInputArgs(globalArgs, "", "", "")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Validation error: %v\n", err)
 		os.Exit(1)
@@ -72,7 +66,13 @@ func (p *MixAudioProcess) runMixAudio(args []string, globalArgs *GlobalArgs) {
 func (p *MixAudioProcess) mixAllAudioTracks(globalArgs *GlobalArgs, mixAudioArgs *MixAudioArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	// Step 1: Extract all matching audio tracks using existing extractTracks function
 	logger.Info("Step 1/2: Extracting all matching audio tracks...")
-	err := extractTracks(globalArgs.WorkDir, globalArgs.Output, mixAudioArgs.UserID, mixAudioArgs.SessionID, mixAudioArgs.TrackID, metadata, "audio", "user", mixAudioArgs.FillGaps, logger)
+
+	mediaFilter := "user"
+	if mixAudioArgs.IncludeScreenShare {
+		mediaFilter = "both"
+	}
+
+	err := extractTracks(globalArgs.WorkDir, globalArgs.Output, "", "", "", metadata, "audio", mediaFilter, true, true, logger)
 	if err != nil {
 		return fmt.Errorf("failed to extract audio tracks: %w", err)
 	}

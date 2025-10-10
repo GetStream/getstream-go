@@ -32,7 +32,7 @@ func (p *ExtractVideoProcess) runExtractVideo(args []string, globalArgs *GlobalA
 	fs.StringVar(&extractVideoArgs.UserID, "userId", "", "Specify a userId (empty for all)")
 	fs.StringVar(&extractVideoArgs.SessionID, "sessionId", "", "Specify a sessionId (empty for all)")
 	fs.StringVar(&extractVideoArgs.TrackID, "trackId", "", "Specify a trackId (empty for all)")
-	fs.BoolVar(&extractVideoArgs.FillGaps, "fill_gaps", false, "Fill with black frame when track was muted")
+	fs.BoolVar(&extractVideoArgs.FillGaps, "fill_gaps", true, "Fill with black frame when track was muted (default true)")
 
 	if err := fs.Parse(args); err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing flags: %v\n", err)
@@ -108,5 +108,5 @@ func (p *ExtractVideoProcess) printUsage() {
 }
 
 func extractVideoTracks(globalArgs *GlobalArgs, extractVideoArgs *ExtractVideoArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	return extractTracks(globalArgs.WorkDir, globalArgs.Output, extractVideoArgs.UserID, extractVideoArgs.SessionID, extractVideoArgs.TrackID, metadata, "video", "both", extractVideoArgs.FillGaps, logger)
+	return extractTracks(globalArgs.WorkDir, globalArgs.Output, extractVideoArgs.UserID, extractVideoArgs.SessionID, extractVideoArgs.TrackID, metadata, "video", "both", extractVideoArgs.FillGaps, false, logger)
 }

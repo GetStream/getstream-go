@@ -13,6 +13,7 @@ type ExtractAudioArgs struct {
 	SessionID string
 	TrackID   string
 	FillGaps  bool
+	FixDtx    bool
 }
 
 type ExtractAudioProcess struct {
@@ -32,7 +33,8 @@ func (p *ExtractAudioProcess) runExtractAudio(args []string, globalArgs *GlobalA
 	fs.StringVar(&extractAudioArgs.UserID, "userId", "", "Specify a userId (empty for all)")
 	fs.StringVar(&extractAudioArgs.SessionID, "sessionId", "", "Specify a sessionId (empty for all)")
 	fs.StringVar(&extractAudioArgs.TrackID, "trackId", "", "Specify a trackId (empty for all)")
-	fs.BoolVar(&extractAudioArgs.FillGaps, "fill_gaps", false, "Fix DTX shrink audio, and fill with silence when track was muted")
+	fs.BoolVar(&extractAudioArgs.FillGaps, "fill_gaps", true, "Fill with silence when track was muted (default true)")
+	fs.BoolVar(&extractAudioArgs.FixDtx, "fix_dtx", true, "Fix DTX shrink audio (default true)")
 
 	if err := fs.Parse(args); err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing flags: %v\n", err)
@@ -78,6 +80,7 @@ func (p *ExtractAudioProcess) printBanner(globalArgs *GlobalArgs, extractAudioAr
 		fmt.Printf("  → Processing all audio tracks (no filters)\n")
 	}
 	fmt.Printf("  Fill gaps: %t\n", extractAudioArgs.FillGaps)
+	fmt.Printf("  Fix DTX: %t\n", extractAudioArgs.FixDtx)
 }
 
 func (p *ExtractAudioProcess) printUsage() {
@@ -107,5 +110,5 @@ func (p *ExtractAudioProcess) printUsage() {
 }
 
 func extractAudioTracks(globalArgs *GlobalArgs, extractAudioArgs *ExtractAudioArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	return extractTracks(globalArgs.WorkDir, globalArgs.Output, extractAudioArgs.UserID, extractAudioArgs.SessionID, extractAudioArgs.TrackID, metadata, "audio", "both", extractAudioArgs.FillGaps, logger)
+	return extractTracks(globalArgs.WorkDir, globalArgs.Output, extractAudioArgs.UserID, extractAudioArgs.SessionID, extractAudioArgs.TrackID, metadata, "audio", "both", extractAudioArgs.FillGaps, extractAudioArgs.FixDtx, logger)
 }

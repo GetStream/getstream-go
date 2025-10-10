@@ -43,7 +43,7 @@ func newRTPDump2WebMConverter(logger *getstream.DefaultLogger) *RTPDump2WebMConv
 	}
 }
 
-func ConvertDirectory(directory string, logger *getstream.DefaultLogger) error {
+func ConvertDirectory(directory string, accept func(path string, info os.FileInfo) bool, fixDtx bool, logger *getstream.DefaultLogger) error {
 	var rtpdumpFiles []string
 
 	// Walk through directory to find .rtpdump files
@@ -52,7 +52,7 @@ func ConvertDirectory(directory string, logger *getstream.DefaultLogger) error {
 			return err
 		}
 
-		if !info.IsDir() && strings.HasSuffix(strings.ToLower(info.Name()), SuffixRtpDump) {
+		if !info.IsDir() && strings.HasSuffix(strings.ToLower(info.Name()), SuffixRtpDump) && accept(path, info) {
 			rtpdumpFiles = append(rtpdumpFiles, path)
 		}
 
@@ -64,7 +64,7 @@ func ConvertDirectory(directory string, logger *getstream.DefaultLogger) error {
 
 	for _, rtpdumpFile := range rtpdumpFiles {
 		c := newRTPDump2WebMConverter(logger)
-		if err := c.ConvertFile(rtpdumpFile); err != nil {
+		if err := c.ConvertFile(rtpdumpFile, fixDtx); err != nil {
 			c.logger.Error("Failed to convert %s: %v", rtpdumpFile, err)
 			continue
 		}
@@ -73,7 +73,7 @@ func ConvertDirectory(directory string, logger *getstream.DefaultLogger) error {
 	return nil
 }
 
-func (c *RTPDump2WebMConverter) ConvertFile(inputFile string) error {
+func (c *RTPDump2WebMConverter) ConvertFile(inputFile string, fixDtx bool) error {
 	c.logger.Info("Converting %s", inputFile)
 
 	// Parse the RTP dump file
@@ -91,24 +91,26 @@ func (c *RTPDump2WebMConverter) ConvertFile(inputFile string) error {
 	sdpContent, _ := rawsdputil.ReadSDP(strings.Replace(inputFile, SuffixRtpDump, SuffixSdp, 1))
 	mType, _ := rawsdputil.MimeType(sdpContent)
 
-	defaultReleasePacketHandler := samplebuilder.WithPacketReleaseHandler(c.buildDefaultReleasePacketHandler())
+	releasePacketHandler := samplebuilder.WithPacketReleaseHandler(c.buildDefaultReleasePacketHandler())
 
 	switch mType {
 	case webrtc.MimeTypeAV1:
-		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.AV1Depacketizer{}, 90000, defaultReleasePacketHandler)
+		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.AV1Depacketizer{}, 90000, releasePacketHandler)
 		c.recorder, err = NewCursorGstreamerWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
 	case webrtc.MimeTypeVP9:
-		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.VP9Packet{}, 90000, defaultReleasePacketHandler)
+		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.VP9Packet{}, 90000, releasePacketHandler)
 		c.recorder, err = NewCursorGstreamerWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
 	case webrtc.MimeTypeH264:
-		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.H264Packet{}, 90000, defaultReleasePacketHandler)
+		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.H264Packet{}, 90000, releasePacketHandler)
 		c.recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixMp4, 1), sdpContent, c.logger)
 	case webrtc.MimeTypeVP8:
-		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.VP8Packet{}, 90000, defaultReleasePacketHandler)
+		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.VP8Packet{}, 90000, releasePacketHandler)
 		c.recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
 	case webrtc.MimeTypeOpus:
-		options := samplebuilder.WithPacketReleaseHandler(c.buildOpusReleasePacketHandler())
-		c.sampleBuilder = samplebuilder.New(audioMaxLate, &codecs.OpusPacket{}, 48000, options)
+		if fixDtx {
+			releasePacketHandler = samplebuilder.WithPacketReleaseHandler(c.buildOpusReleasePacketHandler())
+		}
+		c.sampleBuilder = samplebuilder.New(audioMaxLate, &codecs.OpusPacket{}, 48000, releasePacketHandler)
 		c.recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
 	default:
 		return fmt.Errorf("unsupported codec type: %s", mType)

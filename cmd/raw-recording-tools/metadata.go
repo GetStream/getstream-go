@@ -17,14 +17,23 @@ import (
 
 // TrackInfo represents a single track with its metadata (deduplicated across segments)
 type TrackInfo struct {
-	UserID        string                         `json:"userId"`        // participant_id from timing metadata
-	SessionID     string                         `json:"sessionId"`     // user_session_id from timing metadata
-	TrackID       string                         `json:"trackId"`       // track_id from segment
-	TrackType     string                         `json:"trackType"`     // "audio" or "video" (cleaned from TRACK_TYPE_*)
-	IsScreenshare bool                           `json:"isScreenshare"` // true if this is a screenshare track
-	Codec         string                         `json:"codec"`         // codec info
-	SegmentCount  int                            `json:"segmentCount"`  // number of segments for this track
-	Segments      []*rawrecorder.SegmentMetadata `json:"segments"`      // list of filenames (for JSON output only)
+	UserID        string         `json:"userId"`        // participant_id from timing metadata
+	SessionID     string         `json:"sessionId"`     // user_session_id from timing metadata
+	TrackID       string         `json:"trackId"`       // track_id from segment
+	TrackType     string         `json:"trackType"`     // "audio" or "video" (cleaned from TRACK_TYPE_*)
+	IsScreenshare bool           `json:"isScreenshare"` // true if this is a screenshare track
+	Codec         string         `json:"codec"`         // codec info
+	SegmentCount  int            `json:"segmentCount"`  // number of segments for this track
+	Segments      []*SegmentInfo `json:"segments"`      // list of filenames (for JSON output only)
+}
+
+type SegmentInfo struct {
+	metadata *rawrecorder.SegmentMetadata
+
+	RtpDumpPath   string
+	SdpPath       string
+	ContainerPath string
+	ContainerExt  string
 }
 
 // RecordingMetadata contains all tracks and session information
@@ -194,7 +203,7 @@ func (p *MetadataParser) parseTimingMetadataFile(data []byte) ([]*TrackInfo, err
 			trackType)
 
 		if existingTrack, exists := trackMap[key]; exists {
-			existingTrack.Segments = append(existingTrack.Segments, segment)
+			existingTrack.Segments = append(existingTrack.Segments, &SegmentInfo{metadata: segment})
 			existingTrack.SegmentCount++
 		} else {
 			// Create new track
@@ -206,7 +215,7 @@ func (p *MetadataParser) parseTimingMetadataFile(data []byte) ([]*TrackInfo, err
 				IsScreenshare: p.isScreenshareTrack(segment.TrackType),
 				Codec:         segment.Codec,
 				SegmentCount:  1,
-				Segments:      []*rawrecorder.SegmentMetadata{segment},
+				Segments:      []*SegmentInfo{{metadata: segment}},
 			}
 			trackMap[key] = track
 		}
@@ -226,7 +235,7 @@ func (p *MetadataParser) parseTimingMetadataFile(data []byte) ([]*TrackInfo, err
 	tracks := make([]*TrackInfo, 0, len(trackMap))
 	for _, track := range trackMap {
 		sort.Slice(track.Segments, func(i, j int) bool {
-			return track.Segments[i].FirstRtpUnixTimestamp < track.Segments[j].FirstRtpUnixTimestamp
+			return track.Segments[i].metadata.FirstRtpUnixTimestamp < track.Segments[j].metadata.FirstRtpUnixTimestamp
 		})
 		tracks = append(tracks, track)
 	}
