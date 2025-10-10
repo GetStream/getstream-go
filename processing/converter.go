@@ -184,15 +184,17 @@ func (c *RTPDump2WebMConverter) buildDefaultReleasePacketHandler() func(pkt *rtp
 
 func (c *RTPDump2WebMConverter) buildOpusReleasePacketHandler() func(pkt *rtp.Packet) {
 	return func(pkt *rtp.Packet) {
+		c.opusPacketDurationMsCorrected(pkt)
+
 		pkt.SequenceNumber += c.inserted
 
-		if c.lastPkt != nil {
+		if false && c.lastPkt != nil {
 			if pkt.SequenceNumber-c.lastPkt.SequenceNumber > 1 {
 				c.logger.Info("Missing Packet Detected, Previous SeqNum: %d RtpTs: %d   - Last SeqNum: %d RtpTs: %d", c.lastPkt.SequenceNumber, c.lastPkt.Timestamp, pkt.SequenceNumber, pkt.Timestamp)
 			}
 
 			tsDiff := pkt.Timestamp - c.lastPkt.Timestamp // TODO handle rollover
-			lastPktDuration := opusPacketDurationMs(c.lastPkt.Payload)
+			lastPktDuration := c.opusPacketDurationMsCorrected(c.lastPkt)
 			rtpDuration := uint32(lastPktDuration * 48)
 
 			if rtpDuration == 0 {
@@ -280,4 +282,108 @@ func opusPacketDurationMs(packet []byte) int {
 	}
 
 	return frameDuration * frameCount
+}
+
+// opusPacketDurationMsCorrected implements the correct OPUS RFC 6716 specification
+// with comprehensive logging to debug duration calculation issues
+func (c *RTPDump2WebMConverter) opusPacketDurationMsCorrected(pkt *rtp.Packet) int {
+	payload := pkt.Payload
+	if len(payload) < 1 {
+		c.logger.Warn("OPUS packet too short: %d bytes", len(payload))
+		return 0
+	}
+
+	toc := payload[0]
+
+	// Skip special OPUS packets (DTX, padding, etc.)
+	// TOC=0xF8 is a special packet type that should be excluded entirely
+	if toc == 0xF8 {
+		c.logger.Info("OPUS: Skipping special packet TOC=0x%02X RTP=%d seq=%d", toc, pkt.Timestamp, pkt.SequenceNumber)
+		return 0
+	}
+
+	// Also skip the specific 3-byte sequence if it exists
+	if len(payload) >= 3 && payload[0] == 0xF8 && payload[1] == 0xFF && payload[2] == 0xFE {
+		c.logger.Info("OPUS: Skipping special packet payload=[0x%02X 0x%02X 0x%02X] RTP=%d seq=%d", payload[0], payload[1], payload[2], pkt.Timestamp, pkt.SequenceNumber)
+		return 0
+	}
+
+	config := toc & 0x1F
+	frameCountCode := (toc >> 6) & 0x03
+
+	// Calculate frame duration according to OPUS RFC 6716
+	// The frame duration depends on the config value, not a simple formula
+	var frameDuration int
+	switch {
+	case config <= 3:
+		// SILK mode: 10, 20, 40, 60 ms
+		frameDuration = 10 * (1 << config)
+	case config <= 7:
+		// SILK mode: 10, 20, 40, 60 ms
+		frameDuration = 10 * (1 << (config & 0x03))
+	case config <= 11:
+		// SILK mode: 10, 20, 40, 60 ms
+		frameDuration = 10 * (1 << (config & 0x03))
+	case config <= 13:
+		// SILK mode: 10, 20 ms
+		frameDuration = 10 * (1 << (config & 0x01))
+	case config <= 19:
+		// CELT mode: 2.5, 5, 10, 20 ms
+		frameDuration = 25 * (1 << (config & 0x03)) // 2.5ms * 10 for integer math
+	case config <= 23:
+		// CELT mode: 5, 10, 20, 40 ms
+		frameDuration = 50 * (1 << (config & 0x03)) // 5ms * 10 for integer math
+	case config <= 27:
+		// CELT mode: 10, 20, 40, 80 ms
+		frameDuration = 100 * (1 << (config & 0x03)) // 10ms * 10 for integer math
+	default:
+		// Default case
+		frameDuration = 200 // 20ms * 10 for integer math
+	}
+
+	var frameCount int
+	var secondByte uint8
+	var secondByteBinary string
+
+	switch frameCountCode {
+	case 0:
+		frameCount = 1
+	case 1:
+		frameCount = 2
+	case 2:
+		frameCount = 2
+	case 3:
+		if len(payload) > 1 {
+			secondByte = payload[1]
+			secondByteBinary = fmt.Sprintf("%08b", secondByte)
+			// Frame count is in lower 6 bits, 0-indexed
+			frameCount = int(secondByte&0x3F) + 1
+		} else {
+			c.logger.Warn("Frame count code 3 but no second byte available")
+			frameCount = 1
+		}
+	default:
+		c.logger.Warn("Invalid frame count code: %d", frameCountCode)
+		frameCount = 1
+	}
+
+	totalDuration := frameDuration * frameCount
+
+	// Convert back to actual milliseconds for logging
+	frameDurationMs := frameDuration / 10
+	totalDurationMs := totalDuration / 10
+
+	if totalDurationMs != 20 {
+		// Compact inline logging for debugging
+		if frameCountCode == 3 && len(payload) > 1 {
+			c.logger.Info("OPUS: TOC=0x%02X cfg=%d fcc=%d 2nd=0x%02X(%s) fc=%d fd=%dms td=%dms RTP=%d seq=%d",
+				toc, config, frameCountCode, secondByte, secondByteBinary, frameCount, frameDurationMs, totalDurationMs, pkt.Timestamp, pkt.SequenceNumber)
+		} else {
+			c.logger.Info("OPUS: TOC=0x%02X cfg=%d fcc=%d fc=%d fd=%dms td=%dms RTP=%d seq=%d",
+				toc, config, frameCountCode, frameCount, frameDurationMs, totalDurationMs, pkt.Timestamp, pkt.SequenceNumber)
+		}
+
+	}
+
+	return totalDuration
 }
