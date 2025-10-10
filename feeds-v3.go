@@ -121,12 +121,12 @@ func (c *FeedsClient) DeletePollVote(ctx context.Context, activityID string, pol
 }
 
 // Adds a reaction to an activity
-func (c *FeedsClient) AddReaction(ctx context.Context, activityID string, request *AddReactionRequest) (*StreamResponse[AddReactionResponse], error) {
+func (c *FeedsClient) AddActivityReaction(ctx context.Context, activityID string, request *AddActivityReactionRequest) (*StreamResponse[AddReactionResponse], error) {
 	var result AddReactionResponse
 	pathParams := map[string]string{
 		"activity_id": activityID,
 	}
-	res, err := MakeRequest[AddReactionRequest, AddReactionResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/{activity_id}/reactions", nil, request, &result, pathParams)
+	res, err := MakeRequest[AddActivityReactionRequest, AddReactionResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/{activity_id}/reactions", nil, request, &result, pathParams)
 	return res, err
 }
 

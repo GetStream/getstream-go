@@ -296,11 +296,25 @@ func TestVideoDeleteTranscription(t *testing.T) {
 	_, err = client.Video().DeleteTranscription(context.Background(), "", "", "", "", &getstream.DeleteTranscriptionRequest{})
 	require.NoError(t, err)
 }
+func TestVideoGetCallSessionParticipantStatsDetails(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().GetCallSessionParticipantStatsDetails(context.Background(), "", "", "", "", "", &getstream.GetCallSessionParticipantStatsDetailsRequest{})
+	require.NoError(t, err)
+}
 func TestVideoQueryCallSessionParticipantStats(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
 	_, err = client.Video().QueryCallSessionParticipantStats(context.Background(), "", "", "", &getstream.QueryCallSessionParticipantStatsRequest{})
+	require.NoError(t, err)
+}
+func TestVideoGetCallSessionParticipantStatsTimeline(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().GetCallSessionParticipantStatsTimeline(context.Background(), "", "", "", "", "", &getstream.GetCallSessionParticipantStatsTimelineRequest{})
 	require.NoError(t, err)
 }
 func TestVideoQueryCalls(t *testing.T) {
