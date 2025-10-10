@@ -166,6 +166,8 @@ type ActionLogResponse struct {
 	// Type of moderation action
 	Type string `json:"type"`
 
+	AiProviders []string `json:"ai_providers"`
+
 	// Additional metadata about the action
 	Custom map[string]any `json:"custom"`
 
@@ -991,7 +993,7 @@ type AsyncExportErrorEvent struct {
 }
 
 func (*AsyncExportErrorEvent) GetEventType() string {
-	return "export.channels.error"
+	return "export.users.error"
 }
 
 type AsyncExportModerationLogsEvent struct {
@@ -1287,10 +1289,6 @@ type BanResponse struct {
 	Channel *ChannelResponse `json:"channel,omitempty"`
 
 	User *UserResponse `json:"user,omitempty"`
-}
-
-type BlockContentOptions struct {
-	Reason *string `json:"reason,omitempty"`
 }
 
 type BlockListConfig struct {
@@ -2592,6 +2590,46 @@ type CallStateResponseFields struct {
 	Call CallResponse `json:"call"`
 }
 
+type CallStatsParticipant struct {
+	UserID string `json:"user_id"`
+
+	Sessions []CallStatsParticipantSession `json:"sessions"`
+
+	LatestActivityAt *Timestamp `json:"latest_activity_at,omitempty"`
+
+	Name *string `json:"name,omitempty"`
+
+	Roles []string `json:"roles,omitempty"`
+}
+
+type CallStatsParticipantCounts struct {
+	LiveSessions int `json:"live_sessions"`
+
+	Participants int `json:"participants"`
+
+	Publishers int `json:"publishers"`
+
+	Sessions int `json:"sessions"`
+}
+
+type CallStatsParticipantSession struct {
+	IsLive bool `json:"is_live"`
+
+	UserSessionID string `json:"user_session_id"`
+
+	PublishedTracks PublishedTrackFlags `json:"published_tracks"`
+
+	CqScore *int `json:"cq_score,omitempty"`
+
+	EndedAt *Timestamp `json:"ended_at,omitempty"`
+
+	PublisherType *string `json:"publisher_type,omitempty"`
+
+	StartedAt *Timestamp `json:"started_at,omitempty"`
+
+	UnifiedSessionID *string `json:"unified_session_id,omitempty"`
+}
+
 // This event is sent when the insights report is ready
 type CallStatsReportReadyEvent struct {
 	CallCid string `json:"call_cid"`
@@ -2809,6 +2847,8 @@ type CallUserMutedEvent struct {
 
 	FromUserID string `json:"from_user_id"`
 
+	Reason string `json:"reason"`
+
 	MutedUserIds []string `json:"muted_user_ids"`
 
 	// The type of event: "call.user_muted" in this case
@@ -2879,6 +2919,8 @@ type CampaignResponse struct {
 	SenderID string `json:"sender_id"`
 
 	SenderMode string `json:"sender_mode"`
+
+	SenderVisibility string `json:"sender_visibility"`
 
 	ShowChannels bool `json:"show_channels"`
 
@@ -3525,8 +3567,6 @@ type ChannelStateResponse struct {
 
 	ActiveLiveLocations []SharedLocationResponseData `json:"active_live_locations,omitempty"`
 
-	DeletedMessages []string `json:"deleted_messages,omitempty"`
-
 	PendingMessages []PendingMessageResponse `json:"pending_messages,omitempty"`
 
 	Read []ReadStateResponse `json:"read,omitempty"`
@@ -3565,8 +3605,6 @@ type ChannelStateResponseFields struct {
 
 	// Active live locations in the channel
 	ActiveLiveLocations []SharedLocationResponseData `json:"active_live_locations,omitempty"`
-
-	DeletedMessages []string `json:"deleted_messages,omitempty"`
 
 	// Pending messages that this user has sent
 	PendingMessages []PendingMessageResponse `json:"pending_messages,omitempty"`
@@ -4150,6 +4188,8 @@ type ConfigResponse struct {
 
 	// When the configuration was last updated
 	UpdatedAt Timestamp `json:"updated_at"`
+
+	SupportedVideoCallHarmTypes []string `json:"supported_video_call_harm_types"`
 
 	AiImageConfig *AIImageConfig `json:"ai_image_config,omitempty"`
 
@@ -5395,36 +5435,35 @@ func (*FeedMemberUpdatedEvent) GetEventType() string {
 type FeedOwnCapability string
 
 const (
-	ADD_ACTIVITY             FeedOwnCapability = "add-activity"
-	ADD_ACTIVITY_REACTION    FeedOwnCapability = "add-activity-reaction"
-	ADD_COMMENT              FeedOwnCapability = "add-comment"
-	ADD_COMMENT_REACTION     FeedOwnCapability = "add-comment-reaction"
-	BOOKMARK_ACTIVITY        FeedOwnCapability = "bookmark-activity"
-	CREATE_FEED              FeedOwnCapability = "create-feed"
-	DELETE_BOOKMARK          FeedOwnCapability = "delete-bookmark"
-	DELETE_COMMENT           FeedOwnCapability = "delete-comment"
-	DELETE_FEED              FeedOwnCapability = "delete-feed"
-	EDIT_BOOKMARK            FeedOwnCapability = "edit-bookmark"
-	FOLLOW                   FeedOwnCapability = "follow"
-	INVITE_FEED              FeedOwnCapability = "invite-feed"
-	JOIN_FEED                FeedOwnCapability = "join-feed"
-	LEAVE_FEED               FeedOwnCapability = "leave-feed"
-	MANAGE_FEED_GROUP        FeedOwnCapability = "manage-feed-group"
-	MARK_ACTIVITY            FeedOwnCapability = "mark-activity"
-	PIN_ACTIVITY             FeedOwnCapability = "pin-activity"
-	QUERY_FEED_MEMBERS       FeedOwnCapability = "query-feed-members"
-	QUERY_FOLLOWS            FeedOwnCapability = "query-follows"
-	READ_ACTIVITIES          FeedOwnCapability = "read-activities"
-	READ_FEED                FeedOwnCapability = "read-feed"
-	REMOVE_ACTIVITY          FeedOwnCapability = "remove-activity"
-	REMOVE_ACTIVITY_REACTION FeedOwnCapability = "remove-activity-reaction"
-	REMOVE_COMMENT_REACTION  FeedOwnCapability = "remove-comment-reaction"
-	UNFOLLOW                 FeedOwnCapability = "unfollow"
-	UPDATE_ACTIVITY          FeedOwnCapability = "update-activity"
-	UPDATE_COMMENT           FeedOwnCapability = "update-comment"
-	UPDATE_FEED              FeedOwnCapability = "update-feed"
-	UPDATE_FEED_FOLLOWERS    FeedOwnCapability = "update-feed-followers"
-	UPDATE_FEED_MEMBERS      FeedOwnCapability = "update-feed-members"
+	ADD_ACTIVITY                 FeedOwnCapability = "add-activity"
+	ADD_ACTIVITY_BOOKMARK        FeedOwnCapability = "add-activity-bookmark"
+	ADD_ACTIVITY_REACTION        FeedOwnCapability = "add-activity-reaction"
+	ADD_COMMENT                  FeedOwnCapability = "add-comment"
+	ADD_COMMENT_REACTION         FeedOwnCapability = "add-comment-reaction"
+	CREATE_FEED                  FeedOwnCapability = "create-feed"
+	DELETE_ANY_ACTIVITY          FeedOwnCapability = "delete-any-activity"
+	DELETE_ANY_COMMENT           FeedOwnCapability = "delete-any-comment"
+	DELETE_FEED                  FeedOwnCapability = "delete-feed"
+	DELETE_OWN_ACTIVITY          FeedOwnCapability = "delete-own-activity"
+	DELETE_OWN_ACTIVITY_BOOKMARK FeedOwnCapability = "delete-own-activity-bookmark"
+	DELETE_OWN_ACTIVITY_REACTION FeedOwnCapability = "delete-own-activity-reaction"
+	DELETE_OWN_COMMENT           FeedOwnCapability = "delete-own-comment"
+	DELETE_OWN_COMMENT_REACTION  FeedOwnCapability = "delete-own-comment-reaction"
+	FOLLOW                       FeedOwnCapability = "follow"
+	PIN_ACTIVITY                 FeedOwnCapability = "pin-activity"
+	QUERY_FEED_MEMBERS           FeedOwnCapability = "query-feed-members"
+	QUERY_FOLLOWS                FeedOwnCapability = "query-follows"
+	READ_ACTIVITIES              FeedOwnCapability = "read-activities"
+	READ_FEED                    FeedOwnCapability = "read-feed"
+	UNFOLLOW                     FeedOwnCapability = "unfollow"
+	UPDATE_ANY_ACTIVITY          FeedOwnCapability = "update-any-activity"
+	UPDATE_ANY_COMMENT           FeedOwnCapability = "update-any-comment"
+	UPDATE_FEED                  FeedOwnCapability = "update-feed"
+	UPDATE_FEED_FOLLOWERS        FeedOwnCapability = "update-feed-followers"
+	UPDATE_FEED_MEMBERS          FeedOwnCapability = "update-feed-members"
+	UPDATE_OWN_ACTIVITY          FeedOwnCapability = "update-own-activity"
+	UPDATE_OWN_ACTIVITY_BOOKMARK FeedOwnCapability = "update-own-activity-bookmark"
+	UPDATE_OWN_COMMENT           FeedOwnCapability = "update-own-comment"
 )
 
 func (c FeedOwnCapability) String() string {
@@ -5505,11 +5544,16 @@ type FeedResponse struct {
 	// Tags used for filtering feeds
 	FilterTags []string `json:"filter_tags,omitempty"`
 
+	// Capabilities the current user has for this feed
+	OwnCapabilities []FeedOwnCapability `json:"own_capabilities,omitempty"`
+
 	// Follow relationships where the current user's feeds are following this feed
 	OwnFollows []FollowResponse `json:"own_follows,omitempty"`
 
 	// Custom data for the feed
 	Custom map[string]any `json:"custom,omitempty"`
+
+	OwnMembership *FeedMemberResponse `json:"own_membership,omitempty"`
 }
 
 // Emitted when a feed is created.
@@ -5552,6 +5596,17 @@ type FeedViewResponse struct {
 	Aggregation *AggregationConfig `json:"aggregation,omitempty"`
 
 	Ranking *RankingConfig `json:"ranking,omitempty"`
+}
+
+type FeedVisibilityResponse struct {
+	// Description of the feed visibility level
+	Description string `json:"description"`
+
+	// Name of the feed visibility level
+	Name string `json:"name"`
+
+	// Permission grants for each role
+	Grants map[string][]string `json:"grants"`
 }
 
 type FeedsModerationTemplateConfig struct {
@@ -5703,10 +5758,6 @@ type Flag struct {
 	TargetUser *User `json:"target_user,omitempty"`
 
 	User *User `json:"user,omitempty"`
-}
-
-type FlagContentOptions struct {
-	Reason *string `json:"reason,omitempty"`
 }
 
 type FlagDetails struct {
@@ -6252,6 +6303,12 @@ type GetFeedViewResponse struct {
 	FeedView FeedViewResponse `json:"feed_view"`
 }
 
+type GetFeedVisibilityResponse struct {
+	Duration string `json:"duration"`
+
+	FeedVisibility FeedVisibilityResponse `json:"feed_visibility"`
+}
+
 type GetFollowSuggestionsResponse struct {
 	Duration string `json:"duration"`
 
@@ -6388,8 +6445,6 @@ type GetOrCreateFeedResponse struct {
 
 	Members []FeedMemberResponse `json:"members"`
 
-	OwnCapabilities []FeedOwnCapability `json:"own_capabilities"`
-
 	PinnedActivities []ActivityPinResponse `json:"pinned_activities"`
 
 	Feed FeedResponse `json:"feed"`
@@ -6398,8 +6453,6 @@ type GetOrCreateFeedResponse struct {
 
 	Prev *string `json:"prev,omitempty"`
 
-	OwnFollows []FollowResponse `json:"own_follows,omitempty"`
-
 	FollowersPagination *PagerResponse `json:"followers_pagination,omitempty"`
 
 	FollowingPagination *PagerResponse `json:"following_pagination,omitempty"`
@@ -6407,8 +6460,6 @@ type GetOrCreateFeedResponse struct {
 	MemberPagination *PagerResponse `json:"member_pagination,omitempty"`
 
 	NotificationStatus *NotificationStatusResponse `json:"notification_status,omitempty"`
-
-	OwnMembership *FeedMemberResponse `json:"own_membership,omitempty"`
 }
 
 type GetOrCreateFeedViewResponse struct {
@@ -6547,9 +6598,15 @@ type HLSSettingsResponse struct {
 }
 
 type HarmConfig struct {
+	CooldownPeriod *int `json:"cooldown_period,omitempty"`
+
 	Severity *int `json:"severity,omitempty"`
 
+	Threshold *int `json:"threshold,omitempty"`
+
 	ActionSequences []ActionSequence `json:"action_sequences,omitempty"`
+
+	HarmTypes []string `json:"harm_types,omitempty"`
 }
 
 // Basic response information
@@ -6976,6 +7033,13 @@ type ListFeedViewsResponse struct {
 
 	// Map of feed view ID to feed view
 	Views map[string]FeedViewResponse `json:"views"`
+}
+
+type ListFeedVisibilitiesResponse struct {
+	Duration string `json:"duration"`
+
+	// Map of feed visibility configurations by name
+	FeedVisibilities map[string]FeedVisibilityResponse `json:"feed_visibilities"`
 }
 
 // Basic response information
@@ -7436,7 +7500,7 @@ type MessageNewEvent struct {
 }
 
 func (*MessageNewEvent) GetEventType() string {
-	return "notification.thread_message_new"
+	return "message.new"
 }
 
 type MessageOptions struct {
@@ -7903,6 +7967,8 @@ type ModerationConfig struct {
 
 	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 
+	SupportedVideoCallHarmTypes []string `json:"supported_video_call_harm_types,omitempty"`
+
 	AiImageConfig *AIImageConfig `json:"ai_image_config,omitempty"`
 
 	AiImageLiteConfig *BodyguardImageAnalysisConfig `json:"ai_image_lite_config,omitempty"`
@@ -7993,21 +8059,16 @@ type ModerationFlagResponse struct {
 	User *UserResponse `json:"user,omitempty"`
 }
 
-// This event is sent when content is flagged for moderation
 type ModerationFlaggedEvent struct {
-	// The type of content that was flagged
-	ContentType string `json:"content_type"`
-
 	CreatedAt Timestamp `json:"created_at"`
-
-	// The ID of the flagged content
-	ObjectID string `json:"object_id"`
-
-	Custom map[string]any `json:"custom"`
 
 	Type string `json:"type"`
 
-	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+	Item *string `json:"item,omitempty"`
+
+	ObjectID *string `json:"object_id,omitempty"`
+
+	User *User `json:"user,omitempty"`
 }
 
 func (*ModerationFlaggedEvent) GetEventType() string {
@@ -8891,6 +8952,16 @@ type PrivacySettingsResponse struct {
 	TypingIndicators *TypingIndicatorsResponse `json:"typing_indicators,omitempty"`
 }
 
+type PublishedTrackFlags struct {
+	Audio bool `json:"audio"`
+
+	Screenshare bool `json:"screenshare"`
+
+	ScreenshareAudio bool `json:"screenshare_audio"`
+
+	Video bool `json:"video"`
+}
+
 type PublisherAllMetrics struct {
 	Audio *PublisherAudioMetrics `json:"audio,omitempty"`
 
@@ -9258,6 +9329,28 @@ type QueryCallParticipantsResponse struct {
 	Participants []CallParticipantResponse `json:"participants"`
 
 	Call CallResponse `json:"call"`
+}
+
+// Basic response information
+type QueryCallSessionParticipantStatsResponse struct {
+	CallID string `json:"call_id"`
+
+	CallSessionID string `json:"call_session_id"`
+
+	CallType string `json:"call_type"`
+
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Participants []CallStatsParticipant `json:"participants"`
+
+	Counts CallStatsParticipantCounts `json:"counts"`
+
+	Next *string `json:"next,omitempty"`
+
+	Prev *string `json:"prev,omitempty"`
+
+	TmpDataSource *string `json:"tmp_data_source,omitempty"`
 }
 
 // Basic response information
@@ -9704,11 +9797,11 @@ type RTMPSettingsResponse struct {
 }
 
 type RankingConfig struct {
-	// Scoring formula
-	Score *string `json:"score,omitempty"`
+	// Type of ranking algorithm. Required. Must be one of: recency, expression, interest
+	Type string `json:"type"`
 
-	// Type of ranking algorithm
-	Type *string `json:"type,omitempty"`
+	// Scoring formula. Required when type is 'expression' or 'interest'
+	Score *string `json:"score,omitempty"`
 
 	// Default values for ranking
 	Defaults map[string]any `json:"defaults,omitempty"`
@@ -10301,15 +10394,11 @@ type Role struct {
 }
 
 type RuleBuilderAction struct {
-	Type *string `json:"type,omitempty"`
+	Type string `json:"type"`
 
 	BanOptions *BanOptions `json:"ban_options,omitempty"`
 
-	FlagContentOptions *FlagContentOptions `json:"flag_content_options,omitempty"`
-
 	FlagUserOptions *FlagUserOptions `json:"flag_user_options,omitempty"`
-
-	RemoveContentOptions *BlockContentOptions `json:"remove_content_options,omitempty"`
 }
 
 type RuleBuilderCondition struct {
@@ -11728,6 +11817,42 @@ func (*UpdatedCallPermissionsEvent) GetEventType() string {
 	return "call.permissions_updated"
 }
 
+type UploadChannelFileResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	// URL to the uploaded asset. Should be used to put to `asset_url` attachment field
+	File *string `json:"file,omitempty"`
+
+	ModerationAction *string `json:"moderation_action,omitempty"`
+
+	// URL of the file thumbnail for supported file formats. Should be put to `thumb_url` attachment field
+	ThumbUrl *string `json:"thumb_url,omitempty"`
+}
+
+type UploadChannelRequest struct {
+	File *string `json:"file,omitempty"`
+
+	// field with JSON-encoded array of image size configurations
+	UploadSizes []ImageSize `json:"upload_sizes,omitempty"`
+
+	User *OnlyUserID `json:"user,omitempty"`
+}
+
+type UploadChannelResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	File *string `json:"file,omitempty"`
+
+	ModerationAction *string `json:"moderation_action,omitempty"`
+
+	ThumbUrl *string `json:"thumb_url,omitempty"`
+
+	// Array of image size configurations
+	UploadSizes []ImageSize `json:"upload_sizes,omitempty"`
+}
+
 type UpsertActivitiesResponse struct {
 	Duration string `json:"duration"`
 
@@ -12366,7 +12491,11 @@ type VelocityFilterConfigRule struct {
 }
 
 type VideoCallRuleConfig struct {
-	Rules map[string]HarmConfig `json:"rules,omitempty"`
+	FlagAllLabels *bool `json:"flag_all_labels,omitempty"`
+
+	FlaggedLabels []string `json:"flagged_labels,omitempty"`
+
+	Rules []HarmConfig `json:"rules,omitempty"`
 }
 
 type VideoContentParameters struct {
