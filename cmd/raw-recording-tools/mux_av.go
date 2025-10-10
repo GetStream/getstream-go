@@ -92,7 +92,16 @@ func (p *MuxAudioVideoProcess) printUsage() {
 
 func (p *MuxAudioVideoProcess) muxAudioVideoTracks(globalArgs *GlobalArgs, muxAVArgs *MuxAVArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	muxer := NewAudioVideoMuxer(p.logger)
-	if e := muxer.muxAudioVideoTracks(globalArgs, muxAVArgs.UserID, muxAVArgs.SessionID, muxAVArgs.TrackID, muxAVArgs.Media, metadata, logger); e != nil {
+	if e := muxer.muxAudioVideoTracks(&AudioVideoMuxerConfig{
+		WorkDir:     globalArgs.WorkDir,
+		OutputDir:   globalArgs.Output,
+		UserID:      muxAVArgs.UserID,
+		SessionID:   muxAVArgs.SessionID,
+		TrackID:     muxAVArgs.TrackID,
+		Media:       muxAVArgs.Media,
+		WithExtract: true,
+		WithCleanup: false,
+	}, metadata, logger); e != nil {
 		return e
 	}
 	return nil

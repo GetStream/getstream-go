@@ -9,6 +9,18 @@ import (
 	"github.com/GetStream/getstream-go/v3/cmd/raw-recording-tools/webm"
 )
 
+type AudioVideoMuxerConfig struct {
+	WorkDir   string
+	OutputDir string
+	UserID    string
+	SessionID string
+	TrackID   string
+	Media     string
+
+	WithExtract bool
+	WithCleanup bool
+}
+
 type AudioVideoMuxer struct {
 	logger *getstream.DefaultLogger
 }
@@ -17,26 +29,28 @@ func NewAudioVideoMuxer(logger *getstream.DefaultLogger) *AudioVideoMuxer {
 	return &AudioVideoMuxer{logger: logger}
 }
 
-func (p *AudioVideoMuxer) muxAudioVideoTracks(globalArgs *GlobalArgs, userID, sessionID, trackID, media string, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	// Extract audio tracks with gap filling enabled
-	logger.Info("Extracting audio tracks with gap filling...")
-	err := extractTracks(globalArgs.WorkDir, globalArgs.Output, userID, sessionID, trackID, metadata, "audio", media, true, true, logger)
-	if err != nil {
-		return fmt.Errorf("failed to extract audio tracks: %w", err)
-	}
+func (p *AudioVideoMuxer) muxAudioVideoTracks(config *AudioVideoMuxerConfig, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
+	if config.WithExtract {
+		// Extract audio tracks with gap filling enabled
+		logger.Info("Extracting audio tracks with gap filling...")
+		err := extractTracks(config.WorkDir, config.OutputDir, config.UserID, config.SessionID, config.TrackID, metadata, "audio", config.Media, true, true, logger)
+		if err != nil {
+			return fmt.Errorf("failed to extract audio tracks: %w", err)
+		}
 
-	// Extract video tracks with gap filling enabled
-	logger.Info("Extracting video tracks with gap filling...")
-	err = extractTracks(globalArgs.WorkDir, globalArgs.Output, userID, sessionID, trackID, metadata, "video", media, true, true, logger)
-	if err != nil {
-		return fmt.Errorf("failed to extract video tracks: %w", err)
+		// Extract video tracks with gap filling enabled
+		logger.Info("Extracting video tracks with gap filling...")
+		err = extractTracks(config.WorkDir, config.OutputDir, config.UserID, config.SessionID, config.TrackID, metadata, "video", config.Media, true, true, logger)
+		if err != nil {
+			return fmt.Errorf("failed to extract video tracks: %w", err)
+		}
 	}
 
 	// Group files by media type for proper pairing
 	pairedTracks := p.groupFilesByMediaType(metadata)
 	for audioTrack, videoTrack := range pairedTracks {
 		//logger.Info("Muxing %d user audio/video pairs", len(userAudio))
-		err = p.muxTrackPairs(audioTrack, videoTrack, globalArgs.Output, "user", logger)
+		err := p.muxTrackPairs(audioTrack, videoTrack, config.OutputDir, logger)
 		if err != nil {
 			logger.Error("Failed to mux user tracks: %v", err)
 		}
@@ -83,7 +97,7 @@ func (p *AudioVideoMuxer) groupFilesByMediaType(metadata *RecordingMetadata) map
 }
 
 // muxTrackPairs muxes audio/video pairs of the same media type
-func (p *AudioVideoMuxer) muxTrackPairs(audio, video *TrackInfo, outputDir, mediaTypeName string, logger *getstream.DefaultLogger) error {
+func (p *AudioVideoMuxer) muxTrackPairs(audio, video *TrackInfo, outputDir string, logger *getstream.DefaultLogger) error {
 	// Calculate sync offset using segment timing information
 	offset, err := calculateSyncOffsetFromFiles(audio, video, logger)
 	if err != nil {
@@ -98,8 +112,8 @@ func (p *AudioVideoMuxer) muxTrackPairs(audio, video *TrackInfo, outputDir, medi
 	videoFile := video.ConcatenatedContainerPath
 
 	// Mux the audio and video files
-	logger.Info("Muxing %s %s + %s → %s (offset: %dms)",
-		mediaTypeName, filepath.Base(audioFile), filepath.Base(videoFile), filepath.Base(outputFile), offset)
+	logger.Info("Muxing %s + %s → %s (offset: %dms)",
+		filepath.Base(audioFile), filepath.Base(videoFile), filepath.Base(outputFile), offset)
 
 	err = webm.MuxFiles(outputFile, audioFile, videoFile, float64(offset), logger)
 	if err != nil {
@@ -107,7 +121,7 @@ func (p *AudioVideoMuxer) muxTrackPairs(audio, video *TrackInfo, outputDir, medi
 		return err
 	}
 
-	logger.Info("Successfully created %s muxed file: %s", mediaTypeName, outputFile)
+	logger.Info("Successfully created muxed file: %s", outputFile)
 
 	// Clean up individual track files to avoid clutter
 	//os.Remove(audioFile)

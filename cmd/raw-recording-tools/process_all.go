@@ -90,8 +90,35 @@ func (p *ProcessAllProcess) printUsage() {
 }
 
 func (p *ProcessAllProcess) processAllTracks(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
+
+	if e := extractTracks(globalArgs.WorkDir, globalArgs.Output, "", "", "", metadata, "audio", "both", true, true, logger); e != nil {
+		return e
+	}
+
+	if e := extractTracks(globalArgs.WorkDir, globalArgs.Output, "", "", "", metadata, "video", "both", true, true, logger); e != nil {
+		return e
+	}
+
+	mixer := NewAudioMixer(logger)
+	mixer.mixAllAudioTracks(&AudioMixerConfig{
+		WorkDir:         globalArgs.WorkDir,
+		OutputDir:       globalArgs.Output,
+		WithScreenshare: false,
+		WithExtract:     false,
+		WithCleanup:     false,
+	}, metadata, logger)
+
 	muxer := NewAudioVideoMuxer(p.logger)
-	if e := muxer.muxAudioVideoTracks(globalArgs, "", "", "", "both", metadata, logger); e != nil {
+	if e := muxer.muxAudioVideoTracks(&AudioVideoMuxerConfig{
+		WorkDir:     globalArgs.WorkDir,
+		OutputDir:   globalArgs.Output,
+		UserID:      "",
+		SessionID:   "",
+		TrackID:     "",
+		Media:       "",
+		WithExtract: false,
+		WithCleanup: false,
+	}, metadata, logger); e != nil {
 		return e
 	}
 

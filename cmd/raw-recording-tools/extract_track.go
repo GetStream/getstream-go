@@ -72,7 +72,7 @@ func extractSingleTrackWithOptions(inputPath string, track *TrackInfo, outputDir
 }
 
 // processSegmentsWithGapFilling processes webm segments, fills gaps if requested, and concatenates into final file
-func processSegmentsWithGapFilling( /*files []string, suffix string,*/ track *TrackInfo, trackType string, outputDir string, fillGaps bool, logger *getstream.DefaultLogger) (string, error) {
+func processSegmentsWithGapFilling(track *TrackInfo, trackType string, outputDir string, fillGaps bool, logger *getstream.DefaultLogger) (string, error) {
 	// Build list of files to concatenate (with optional gap fillers)
 	var filesToConcat []string
 	for i, segment := range track.Segments {

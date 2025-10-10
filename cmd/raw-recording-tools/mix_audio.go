@@ -49,7 +49,13 @@ func (p *MixAudioProcess) runMixAudio(args []string, globalArgs *GlobalArgs) {
 // mixAllAudioTracks orchestrates the entire audio mixing workflow using existing extraction logic
 func (p *MixAudioProcess) mixAllAudioTracks(globalArgs *GlobalArgs, mixAudioArgs *MixAudioArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	mixer := NewAudioMixer(logger)
-	mixer.mixAllAudioTracks(globalArgs, mixAudioArgs, metadata, logger)
+	mixer.mixAllAudioTracks(&AudioMixerConfig{
+		WorkDir:         globalArgs.WorkDir,
+		OutputDir:       globalArgs.Output,
+		WithScreenshare: false,
+		WithExtract:     true,
+		WithCleanup:     false,
+	}, metadata, logger)
 	return nil
 }
 

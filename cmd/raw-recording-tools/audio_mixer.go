@@ -9,6 +9,14 @@ import (
 	"github.com/GetStream/getstream-go/v3/cmd/raw-recording-tools/webm"
 )
 
+type AudioMixerConfig struct {
+	WorkDir         string
+	OutputDir       string
+	WithScreenshare bool
+	WithExtract     bool
+	WithCleanup     bool
+}
+
 type AudioMixer struct {
 	logger *getstream.DefaultLogger
 }
@@ -18,18 +26,19 @@ func NewAudioMixer(logger *getstream.DefaultLogger) *AudioMixer {
 }
 
 // mixAllAudioTracks orchestrates the entire audio mixing workflow using existing extraction logic
-func (p *AudioMixer) mixAllAudioTracks(globalArgs *GlobalArgs, mixAudioArgs *MixAudioArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
+func (p *AudioMixer) mixAllAudioTracks(config *AudioMixerConfig, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
 	// Step 1: Extract all matching audio tracks using existing extractTracks function
 	logger.Info("Step 1/2: Extracting all matching audio tracks...")
 
-	mediaFilter := "user"
-	if mixAudioArgs.IncludeScreenShare {
-		mediaFilter = "both"
-	}
+	if config.WithExtract {
+		mediaFilter := "user"
+		if config.WithScreenshare {
+			mediaFilter = "both"
+		}
 
-	err := extractTracks(globalArgs.WorkDir, globalArgs.Output, "", "", "", metadata, "audio", mediaFilter, true, true, logger)
-	if err != nil {
-		return fmt.Errorf("failed to extract audio tracks: %w", err)
+		if err := extractTracks(config.WorkDir, config.OutputDir, "", "", "", metadata, "audio", mediaFilter, true, true, logger); err != nil {
+			return fmt.Errorf("failed to extract audio tracks: %w", err)
+		}
 	}
 
 	fileOffsetMap := p.offset(metadata, logger)
@@ -40,9 +49,9 @@ func (p *AudioMixer) mixAllAudioTracks(globalArgs *GlobalArgs, mixAudioArgs *Mix
 	logger.Info("Found %d extracted audio files to mix", len(fileOffsetMap))
 
 	// Step 3: Mix all discovered audio files using existing webm.MixAudioFiles
-	outputFile := filepath.Join(globalArgs.Output, "mixed_audio.webm")
+	outputFile := filepath.Join(config.OutputDir, "mixed_audio.webm")
 
-	err = webm.MixAudioFiles(outputFile, fileOffsetMap, logger)
+	err := webm.MixAudioFiles(outputFile, fileOffsetMap, logger)
 	if err != nil {
 		return fmt.Errorf("failed to mix audio files: %w", err)
 	}
