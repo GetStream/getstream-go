@@ -4,12 +4,18 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 
 	"github.com/GetStream/getstream-go/v3"
 )
 
 const TmpDir = "/tmp"
+
+type FileOffset struct {
+	Name   string
+	Offset int64
+}
 
 func ConcatFile(outputPath string, files []string, logger *getstream.DefaultLogger) error {
 	// Write to a temporary file
@@ -69,15 +75,24 @@ func MuxFiles(fileName string, audioFile string, videoFile string, offsetMs floa
 	return runFFMEPGCpmmand(args, logger)
 }
 
-func MixAudioFiles(fileName string, files map[string]int64, logger *getstream.DefaultLogger) error {
+func MixAudioFiles(fileName string, files []*FileOffset, logger *getstream.DefaultLogger) error {
 	var args []string
-	args = append(args, "ffmpeg")
 
-	i := 0
 	var filterParts []string
 	var mixParts []string
-	for file, offset := range files {
-		args = append(args, "-i", file)
+
+	sort.Slice(files, func(i, j int) bool {
+		return files[i].Offset < files[j].Offset
+	})
+
+	var offsetToAdd int64
+	for i, fo := range files {
+		args = append(args, "-i", fo.Name)
+
+		if i == 0 {
+			offsetToAdd = -fo.Offset
+		}
+		offset := fo.Offset + offsetToAdd
 
 		if offset > 0 {
 			// for stereo: offset|offset
@@ -98,7 +113,7 @@ func MixAudioFiles(fileName string, files map[string]int64, logger *getstream.De
 	filter += strings.Join(mixParts, "") +
 		fmt.Sprintf("amix=inputs=%d:normalize=0", len(files))
 
-	args = append(args, "-filter_complex", fmt.Sprintf("\"%s\"", filter))
+	args = append(args, "-filter_complex", filter)
 	args = append(args, "-c:a", "libopus")
 	args = append(args, "-b:a", "128k")
 	args = append(args, fileName)

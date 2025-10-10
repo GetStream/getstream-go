@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"path/filepath"
-	"sort"
 
 	"github.com/GetStream/getstream-go/v3"
 	"github.com/GetStream/getstream-go/v3/cmd/raw-recording-tools/webm"
@@ -41,7 +40,7 @@ func (p *AudioMixer) mixAllAudioTracks(config *AudioMixerConfig, metadata *Recor
 		}
 	}
 
-	fileOffsetMap := p.offset(metadata, logger)
+	fileOffsetMap := p.offset(metadata, config.WithScreenshare, logger)
 	if len(fileOffsetMap) == 0 {
 		return fmt.Errorf("no audio files were extracted - check your filter criteria")
 	}
@@ -68,29 +67,31 @@ func (p *AudioMixer) mixAllAudioTracks(config *AudioMixerConfig, metadata *Recor
 	return nil
 }
 
-func (p *AudioMixer) offset(metadata *RecordingMetadata, logger *getstream.DefaultLogger) map[string]int64 {
-	offsetMap := make(map[string]int64)
-
-	sort.Slice(metadata.Tracks, func(i, j int) bool {
-		return metadata.Tracks[i].Segments[0].metadata.FirstRtpUnixTimestamp < metadata.Tracks[j].Segments[0].metadata.FirstRtpUnixTimestamp
-	})
-
+func (p *AudioMixer) offset(metadata *RecordingMetadata, withScreenshare bool, logger *getstream.DefaultLogger) []*webm.FileOffset {
+	var offsets []*webm.FileOffset
 	var firstTrack *TrackInfo
 	for _, t := range metadata.Tracks {
-		if t.TrackType == "audio" && !t.IsScreenshare {
+		if t.TrackType == "audio" && (!t.IsScreenshare || withScreenshare) {
 			if firstTrack == nil {
 				firstTrack = t
-				offsetMap[t.ConcatenatedContainerPath] = 0
+				offsets = append(offsets, &webm.FileOffset{
+					Name:   t.ConcatenatedContainerPath,
+					Offset: 0, // Will be sorted later and rearranged
+				})
 			} else {
-				offset, err := calculateSyncOffsetFromFiles(firstTrack, t, logger)
+				offset, err := calculateSyncOffsetFromFiles(t, firstTrack, logger)
 				if err != nil {
 					logger.Warn("Failed to calculate sync offset for audio tracks: %v", err)
 					continue
 				}
-				offsetMap[t.ConcatenatedContainerPath] = offset
+
+				offsets = append(offsets, &webm.FileOffset{
+					Name:   t.ConcatenatedContainerPath,
+					Offset: offset,
+				})
 			}
 		}
 	}
 
-	return offsetMap
+	return offsets
 }

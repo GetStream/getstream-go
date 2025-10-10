@@ -27,8 +27,9 @@ type RTPDump2WebMConverter struct {
 	recorder      WebmRecorder
 	sampleBuilder *samplebuilder.SampleBuilder
 
-	lastPkt  *rtp.Packet
-	inserted uint16
+	lastPkt         *rtp.Packet
+	lastPktDuration uint32
+	inserted        uint16
 }
 
 type WebmRecorder interface {
@@ -194,7 +195,15 @@ func (c *RTPDump2WebMConverter) buildOpusReleasePacketHandler() func(pkt *rtp.Pa
 			tsDiff := pkt.Timestamp - c.lastPkt.Timestamp // TODO handle rollover
 			lastPktDuration := opusPacketDurationMs(c.lastPkt.Payload)
 			rtpDuration := uint32(lastPktDuration * 48)
-			if tsDiff > rtpDuration {
+
+			if rtpDuration == 0 {
+				rtpDuration = c.lastPktDuration
+				c.logger.Info("LastPacket with no duration, Previous SeqNum: %d RtpTs: %d   - Last SeqNum: %d RtpTs: %d", c.lastPkt.SequenceNumber, c.lastPkt.Timestamp, pkt.SequenceNumber, pkt.Timestamp)
+			} else {
+				c.lastPktDuration = rtpDuration
+			}
+
+			if rtpDuration > 0 && tsDiff > rtpDuration {
 
 				// Calculate how many packets we need to insert, taking care of packet losses
 				var toAdd uint16
