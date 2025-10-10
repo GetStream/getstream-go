@@ -25,6 +25,8 @@ type TrackInfo struct {
 	Codec         string         `json:"codec"`         // codec info
 	SegmentCount  int            `json:"segmentCount"`  // number of segments for this track
 	Segments      []*SegmentInfo `json:"segments"`      // list of filenames (for JSON output only)
+
+	ConcatenatedContainerPath string
 }
 
 type SegmentInfo struct {

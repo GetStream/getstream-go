@@ -61,11 +61,12 @@ func extractSingleTrackWithOptions(inputPath string, track *TrackInfo, outputDir
 	}
 
 	// Create segments with timing info and fill gaps
-	finalFile, err := processSegmentsWithGapFilling( /*files, suffix,*/ track, trackType, outputDir, fillGaps, logger)
+	finalFile, err := processSegmentsWithGapFilling(track, trackType, outputDir, fillGaps, logger)
 	if err != nil {
 		return fmt.Errorf("failed to process segments with gap filling: %w", err)
 	}
 
+	track.ConcatenatedContainerPath = finalFile
 	logger.Info("Successfully extracted %s track to: %s", trackType, finalFile)
 	return nil
 }

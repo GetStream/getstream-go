@@ -69,7 +69,7 @@ func MuxFiles(fileName string, audioFile string, videoFile string, offsetMs floa
 	return runFFMEPGCpmmand(args, logger)
 }
 
-func MixAudioFiles(fileName string, files map[string]int, logger *getstream.DefaultLogger) error {
+func MixAudioFiles(fileName string, files map[string]int64, logger *getstream.DefaultLogger) error {
 	var args []string
 	args = append(args, "ffmpeg")
 

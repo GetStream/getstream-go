@@ -4,10 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/GetStream/getstream-go/v3"
-	"github.com/GetStream/getstream-go/v3/cmd/raw-recording-tools/webm"
 )
 
 type ProcessAllArgs struct {
@@ -92,102 +90,9 @@ func (p *ProcessAllProcess) printUsage() {
 }
 
 func (p *ProcessAllProcess) processAllTracks(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	// Step 1: Extract audio tracks with gap filling
-	logger.Info("Step 1/3: Extracting audio tracks with gap filling...")
-	err := extractTracks(globalArgs.WorkDir, globalArgs.Output, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, metadata, "audio", "both", true, true, logger)
-	if err != nil {
-		return fmt.Errorf("failed to extract audio tracks: %w", err)
-	}
-
-	// Step 2: Extract video tracks with gap filling
-	logger.Info("Step 2/3: Extracting video tracks with gap filling...")
-	err = extractTracks(globalArgs.WorkDir, globalArgs.Output, processAllArgs.UserID, processAllArgs.SessionID, processAllArgs.TrackID, metadata, "video", "both", true, true, logger)
-	if err != nil {
-		return fmt.Errorf("failed to extract video tracks: %w", err)
-	}
-
-	// Step 3: Mux audio and video files (keeping originals)
-	logger.Info("Step 3/3: Muxing audio and video tracks...")
-	err = p.muxAudioVideoTracksKeepOriginals(globalArgs, processAllArgs, metadata, logger)
-	if err != nil {
-		return fmt.Errorf("failed to mux audio and video tracks: %w", err)
-	}
-
-	// Report final output
-	audioFiles, _ := filepath.Glob(filepath.Join(globalArgs.Output, "audio_*.webm"))
-	videoFiles, _ := filepath.Glob(filepath.Join(globalArgs.Output, "video_*.webm"))
-	muxedFiles, _ := filepath.Glob(filepath.Join(globalArgs.Output, "muxed_*.webm"))
-
-	logger.Info("Process-all completed successfully:")
-	logger.Info("  - %d audio files", len(audioFiles))
-	logger.Info("  - %d video files", len(videoFiles))
-	logger.Info("  - %d muxed files", len(muxedFiles))
-
-	fmt.Printf("\n✅ Generated files in %s:\n", globalArgs.Output)
-	for _, file := range audioFiles {
-		fmt.Printf("  🎵 %s\n", filepath.Base(file))
-	}
-	for _, file := range videoFiles {
-		fmt.Printf("  🎬 %s\n", filepath.Base(file))
-	}
-	for _, file := range muxedFiles {
-		fmt.Printf("  🎞️  %s\n", filepath.Base(file))
-	}
-
-	return nil
-}
-
-// muxAudioVideoTracksKeepOriginals is like muxAudioVideoTracks but keeps the original audio/video files
-func (p *ProcessAllProcess) muxAudioVideoTracksKeepOriginals(globalArgs *GlobalArgs, processAllArgs *ProcessAllArgs, metadata *RecordingMetadata, logger *getstream.DefaultLogger) error {
-	// Find the generated audio and video WebM files
-	audioFiles, err := filepath.Glob(filepath.Join(globalArgs.Output, "audio_*.webm"))
-	if err != nil {
-		return fmt.Errorf("failed to find audio files: %w", err)
-	}
-	if len(audioFiles) == 0 {
-		return fmt.Errorf("no audio files generated")
-	}
-
-	videoFiles, err := filepath.Glob(filepath.Join(globalArgs.Output, "video_*.webm"))
-	if err != nil {
-		return fmt.Errorf("failed to find video files: %w", err)
-	}
-	if len(videoFiles) == 0 {
-		return fmt.Errorf("no video files generated")
-	}
-
-	logger.Info("Found %d audio files and %d video files to mux", len(audioFiles), len(videoFiles))
-
-	// Mux each audio/video pair
-	for i, audioFile := range audioFiles {
-		if i >= len(videoFiles) {
-			logger.Warn("No matching video file for audio file %s", audioFile)
-			continue
-		}
-		videoFile := videoFiles[i]
-
-		// Calculate sync offset using segment timing information
-		offset, err := calculateSyncOffsetFromFiles(globalArgs.InputFile, audioFile, videoFile, metadata, logger)
-		if err != nil {
-			logger.Warn("Failed to calculate sync offset, using 0: %v", err)
-			offset = 0
-		}
-
-		// Generate output filename
-		outputFile := generateMuxedFilename(audioFile, videoFile, globalArgs.Output)
-
-		// Mux the audio and video files
-		logger.Info("Muxing %s + %s → %s (offset: %dms)",
-			filepath.Base(audioFile), filepath.Base(videoFile), filepath.Base(outputFile), offset)
-
-		err = webm.MuxFiles(outputFile, audioFile, videoFile, float64(offset), logger)
-		if err != nil {
-			logger.Error("Failed to mux %s + %s: %v", audioFile, videoFile, err)
-			continue
-		}
-
-		logger.Info("Successfully created muxed file: %s", outputFile)
-		// NOTE: Unlike muxAudioVideoTracks, we DON'T clean up the individual files here
+	muxer := NewAudioVideoMuxer(p.logger)
+	if e := muxer.muxAudioVideoTracks(globalArgs, "", "", "", "both", metadata, logger); e != nil {
+		return e
 	}
 
 	return nil
