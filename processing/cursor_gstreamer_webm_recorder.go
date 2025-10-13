@@ -147,7 +147,6 @@ func (r *CursorGstreamerWebmRecorder) startGStreamer(sdpContent, outputFilePath 
 	} else if false && isVP9 {
 		r.logger.Info("Detected VP9 codec, building VP9 pipeline with timestamp handling...")
 		args = append(args,
-			"application/x-rtp,media=video,encoding-name=VP9,clock-rate=90000", "!",
 			"rtpjitterbuffer",
 			"latency=0",
 			"mode=none",
@@ -168,16 +167,18 @@ func (r *CursorGstreamerWebmRecorder) startGStreamer(sdpContent, outputFilePath 
 	} else if isVP9 {
 		r.logger.Info("Detected VP9 codec, building VP9 pipeline with RTP timestamp handling...")
 		args = append(args,
-			// jitterbuffer for packet reordering and timestamp handling
+
+			//// jitterbuffer for packet reordering and timestamp handling
 			"rtpjitterbuffer",
 			"name=jitterbuffer",
-			"latency=0",               // No artificial latency - process immediately
-			"do-lost=false",           // Don't generate lost events for missing packets
-			"do-retransmission=false", // No retransmission for offline replay
-			"drop-on-latency=false",   // Keep all packets even if late
-			"rtx-delay=-1",            // Disable retransmission delay
+			"mode=none",
+			//"latency=0",               // No artificial latency - process immediately
+			//"do-lost=false",           // Don't generate lost events for missing packets
+			//"do-retransmission=false", // No retransmission for offline replay
+			//"drop-on-latency=false",   // Keep all packets even if late
+			//"rtx-delay=-1",            // Disable retransmission delay
 			"!",
-
+			//
 			// Depayload RTP to get VP9 frames
 			"rtpvp9depay",
 			"!",
@@ -191,9 +192,10 @@ func (r *CursorGstreamerWebmRecorder) startGStreamer(sdpContent, outputFilePath 
 			"!",
 
 			// Mux into Matroska/WebM container
-			"matroskamux",
-			"name=mux",
-			"streamable=false", // Allow seeking and proper duration
+			"webmmux",
+			"writing-app=GStreamer-VP9",
+			"streamable=false",
+			"min-index-interval=2000000000",
 			"!",
 
 			// Write to file
