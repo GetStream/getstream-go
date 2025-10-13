@@ -31,8 +31,8 @@ type CursorWebmRecorder struct {
 	cancel     context.CancelFunc
 
 	// Parsed from FFmpeg output: "Duration: N/A, start: <value>, bitrate: N/A"
-	startOffsetSeconds float64
-	hasStartOffset     bool
+	startOffsetMs  int64
+	hasStartOffset bool
 }
 
 func NewCursorWebmRecorder(outputPath, sdpContent string, logger *getstream.DefaultLogger) (*CursorWebmRecorder, error) {
@@ -196,7 +196,7 @@ func (r *CursorWebmRecorder) scanFFmpegOutput(reader io.Reader, isStderr bool) {
 				// Save only once
 				r.mu.Lock()
 				if !r.hasStartOffset {
-					r.startOffsetSeconds = v
+					r.startOffsetMs = int64(v * 1000)
 					r.hasStartOffset = true
 					r.logger.Info("Detected FFmpeg start offset: %.6f seconds", v)
 				}
@@ -208,10 +208,10 @@ func (r *CursorWebmRecorder) scanFFmpegOutput(reader io.Reader, isStderr bool) {
 }
 
 // StartOffset returns the parsed FFmpeg start offset in seconds and whether it was found.
-func (r *CursorWebmRecorder) StartOffset() (float64, bool) {
+func (r *CursorWebmRecorder) StartOffset() (int64, bool) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	return r.startOffsetSeconds, r.hasStartOffset
+	return r.startOffsetMs, r.hasStartOffset
 }
 
 func (r *CursorWebmRecorder) OnRTP(packet *rtp.Packet) error {

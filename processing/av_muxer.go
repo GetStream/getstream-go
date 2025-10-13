@@ -61,8 +61,8 @@ func (p *AudioVideoMuxer) MuxAudioVideoTracks(config *AudioVideoMuxerConfig, met
 // calculateSyncOffsetFromFiles calculates sync offset between audio and video files using metadata
 func calculateSyncOffsetFromFiles(audioTrack, videoTrack *TrackInfo, logger *getstream.DefaultLogger) (int64, error) {
 	// Calculate offset: positive means video starts before audio
-	audioTs := firstPacketNtpTimestamp(audioTrack.Segments[0].metadata)
-	videoTs := firstPacketNtpTimestamp(videoTrack.Segments[0].metadata)
+	audioTs := audioTrack.Segments[0].FFMpegOffset + firstPacketNtpTimestamp(audioTrack.Segments[0].metadata)
+	videoTs := videoTrack.Segments[0].FFMpegOffset + firstPacketNtpTimestamp(videoTrack.Segments[0].metadata)
 	offset := audioTs - videoTs
 
 	logger.Info(fmt.Sprintf("Calculated sync offset: audio_start=%v, audio_ts=%v, video_start=%v, video_ts=%v, offset=%d",

@@ -81,7 +81,7 @@ func processSegmentsWithGapFilling(track *TrackInfo, trackType string, outputDir
 		// Add gap filler if requested and there's a gap before the next segment
 		if fillGaps && i < track.SegmentCount-1 {
 			nextSegment := track.Segments[i+1]
-			gapDuration := firstPacketNtpTimestamp(nextSegment.metadata) - lastPacketNtpTimestamp(segment.metadata)
+			gapDuration := nextSegment.FFMpegOffset + firstPacketNtpTimestamp(nextSegment.metadata) - lastPacketNtpTimestamp(segment.metadata)
 
 			if gapDuration > 0 { // There's a gap
 				gapSeconds := float64(gapDuration) / 1000.0

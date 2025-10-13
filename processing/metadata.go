@@ -35,7 +35,7 @@ type SegmentInfo struct {
 	SdpPath       string
 	ContainerPath string
 	ContainerExt  string
-	FFMpegOffset  float64
+	FFMpegOffset  int64
 }
 
 // RecordingMetadata contains all tracks and session information
