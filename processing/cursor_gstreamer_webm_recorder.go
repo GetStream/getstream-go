@@ -97,7 +97,7 @@ func (r *CursorGstreamerWebmRecorder) startGStreamer(sdpContent, outputFilePath 
 	// Start with common GStreamer arguments optimized for RTP dump replay
 	args := []string{
 		"--gst-debug-level=3",
-		"--gst-debug=udpsrc:5,rtp*:5,webm*:5,identity:5,jitterbuffer:5",
+		"--gst-debug=udpsrc:5,rtp*:5,webm*:5,identity:5,jitterbuffer:5,vp9*:5",
 	}
 
 	// Add UDP source with timestamp handling for RTP dump replay
@@ -138,12 +138,20 @@ func (r *CursorGstreamerWebmRecorder) startGStreamer(sdpContent, outputFilePath 
 		args = append(args,
 			"application/x-rtp,media=video,encoding-name=VP9,clock-rate=90000", "!",
 			"rtpjitterbuffer",
-			"latency=200",
+			"latency=0",
 			"mode=none",
-			"do-retransmission=false", "!",
+			"do-retransmission=false",
+			"drop-on-latency=false",
+			"buffer-mode=slave",
+			"max-dropout-time=5000000000",
+			"max-reorder-delay=1000000000",
+			"!",
 			"rtpvp9depay", "!",
 			"vp9parse", "!",
-			"webmmux", "!",
+			"webmmux",
+			"writing-app=GStreamer-VP9",
+			"streamable=false",
+			"min-index-interval=2000000000", "!",
 			"filesink", fmt.Sprintf("location=%s", outputFilePath),
 		)
 	} else if isVP8 {
@@ -462,8 +470,8 @@ func (r *CursorGstreamerWebmRecorder) startGStreamerNoJitterBuffer(sdpContent, o
 
 	// Start with common GStreamer arguments
 	args := []string{
-		"--gst-debug-level=3",
-		"--gst-debug=udpsrc:5,rtp*:5,webm*:5",
+		//"--gst-debug-level=3",
+		//		"--gst-debug=udpsrc:5,rtp*:5,webm*:5",
 		"-e", // Enable EOS handling
 	}
 
