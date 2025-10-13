@@ -34,7 +34,6 @@ type RTPDump2WebMConverter struct {
 type WebmRecorder interface {
 	OnRTP(pkt *rtp.Packet) error
 	PushRtpBuf(payload []byte) error
-	PushRtcpBuf(payload []byte) error
 	Close() error
 }
 
@@ -44,8 +43,8 @@ func newRTPDump2WebMConverter(logger *getstream.DefaultLogger) *RTPDump2WebMConv
 	}
 }
 
-func ConvertDirectory(directory string, accept func(path string, info os.FileInfo) bool, fixDtx bool, logger *getstream.DefaultLogger) error {
-	var rtpdumpFiles []string
+func ConvertDirectory(directory string, accept func(path string, info os.FileInfo) (*SegmentInfo, bool), fixDtx bool, logger *getstream.DefaultLogger) error {
+	rtpdumpFiles := make(map[string]*SegmentInfo)
 
 	// Walk through directory to find .rtpdump files
 	err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
@@ -53,8 +52,11 @@ func ConvertDirectory(directory string, accept func(path string, info os.FileInf
 			return err
 		}
 
-		if !info.IsDir() && strings.HasSuffix(strings.ToLower(info.Name()), SuffixRtpDump) && accept(path, info) {
-			rtpdumpFiles = append(rtpdumpFiles, path)
+		if !info.IsDir() && strings.HasSuffix(strings.ToLower(info.Name()), SuffixRtpDump) {
+			segment, accepted := accept(path, info)
+			if accepted {
+				rtpdumpFiles[path] = segment
+			}
 		}
 
 		return nil
@@ -63,11 +65,19 @@ func ConvertDirectory(directory string, accept func(path string, info os.FileInf
 		return err
 	}
 
-	for _, rtpdumpFile := range rtpdumpFiles {
+	for rtpdumpFile, segment := range rtpdumpFiles {
 		c := newRTPDump2WebMConverter(logger)
 		if err := c.ConvertFile(rtpdumpFile, fixDtx); err != nil {
 			c.logger.Error("Failed to convert %s: %v", rtpdumpFile, err)
 			continue
+		}
+
+		switch c.recorder.(type) {
+		case *CursorWebmRecorder:
+			offset, exists := c.recorder.(*CursorWebmRecorder).StartOffset()
+			if exists {
+				segment.FFMpegOffset = offset
+			}
 		}
 	}
 
@@ -97,10 +107,12 @@ func (c *RTPDump2WebMConverter) ConvertFile(inputFile string, fixDtx bool) error
 	switch mType {
 	case webrtc.MimeTypeAV1:
 		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.AV1Depacketizer{}, 90000, releasePacketHandler)
-		c.recorder, err = NewCursorGstreamerWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
+		c.recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
 	case webrtc.MimeTypeVP9:
-		c.sampleBuilder = nil //samplebuilder.New(videoMaxLate, &codecs.VP9Packet{}, 90000, releasePacketHandler)
+		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.VP9Packet{}, 90000, releasePacketHandler)
 		c.recorder, err = NewCursorGstreamerWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
+		//		c.recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
+		//		c.recorder, err = NewIvfDumpRecorder(strings.Replace(inputFile, SuffixRtpDump, ".ivf", 1), webrtc.MimeTypeVP9)
 	case webrtc.MimeTypeH264:
 		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.H264Packet{}, 90000, releasePacketHandler)
 		c.recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixMp4, 1), sdpContent, c.logger)
@@ -138,7 +150,7 @@ func (c *RTPDump2WebMConverter) feedPackets(reader *rtpdump.Reader) error {
 		} else if err != nil {
 			return err
 		} else if packet.IsRTCP {
-			_ = c.recorder.PushRtcpBuf(packet.Payload)
+			//			_ = c.recorder.PushRtcpBuf(packet.Payload)
 			continue
 		}
 

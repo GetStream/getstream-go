@@ -36,7 +36,7 @@ func ExtractTracks(workingDir, outputDir, userID, sessionID, trackID string, met
 }
 
 func extractSingleTrackWithOptions(inputPath string, track *TrackInfo, outputDir string, trackType string, fillGaps, fixDtx bool, logger *getstream.DefaultLogger) error {
-	accept := func(path string, info os.FileInfo) bool {
+	accept := func(path string, info os.FileInfo) (*SegmentInfo, bool) {
 		for _, s := range track.Segments {
 			if strings.Contains(info.Name(), s.metadata.BaseFilename) {
 				if track.Codec == webrtc.MimeTypeH264 {
@@ -47,10 +47,10 @@ func extractSingleTrackWithOptions(inputPath string, track *TrackInfo, outputDir
 				s.RtpDumpPath = path
 				s.SdpPath = strings.Replace(path, SuffixRtpDump, SuffixSdp, -1)
 				s.ContainerPath = strings.Replace(path, SuffixRtpDump, "."+s.ContainerExt, -1)
-				return true
+				return s, true
 			}
 		}
-		return false
+		return nil, false
 	}
 
 	// Convert using the WebM converter

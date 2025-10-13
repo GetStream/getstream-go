@@ -1,6 +1,7 @@
 package processing
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -8,7 +9,9 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -26,6 +29,10 @@ type CursorWebmRecorder struct {
 	mu         sync.Mutex
 	ctx        context.Context
 	cancel     context.CancelFunc
+
+	// Parsed from FFmpeg output: "Duration: N/A, start: <value>, bitrate: N/A"
+	startOffsetSeconds float64
+	hasStartOffset     bool
 }
 
 func NewCursorWebmRecorder(outputPath, sdpContent string, logger *getstream.DefaultLogger) (*CursorWebmRecorder, error) {
@@ -139,9 +146,15 @@ func (r *CursorWebmRecorder) startFFmpeg(outputFilePath, sdpContent string, port
 
 	r.ffmpegCmd = exec.Command("ffmpeg", args...)
 
-	// Redirect output for debugging
-	r.ffmpegCmd.Stdout = os.Stdout
-	r.ffmpegCmd.Stderr = os.Stderr
+	// Capture stdout/stderr to parse FFmpeg logs while mirroring to console
+	stdoutPipe, err := r.ffmpegCmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	stderrPipe, err := r.ffmpegCmd.StderrPipe()
+	if err != nil {
+		return err
+	}
 
 	// Create stdin pipe to send commands to FFmpeg
 	//var err error
@@ -150,12 +163,55 @@ func (r *CursorWebmRecorder) startFFmpeg(outputFilePath, sdpContent string, port
 		fmt.Println("Error creating stdin pipe:", err)
 	}
 
+	// Begin scanning output streams after process has started
+	go r.scanFFmpegOutput(stdoutPipe, false)
+	go r.scanFFmpegOutput(stderrPipe, true)
+
 	// Start FFmpeg process
 	if err := r.ffmpegCmd.Start(); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// scanFFmpegOutput reads lines from FFmpeg output, mirrors to console, and extracts start offset.
+func (r *CursorWebmRecorder) scanFFmpegOutput(reader io.Reader, isStderr bool) {
+	scanner := bufio.NewScanner(reader)
+	re := regexp.MustCompile(`\bstart:\s*([0-9]+(?:\.[0-9]+)?)`)
+	for scanner.Scan() {
+		line := scanner.Text()
+		// Mirror output
+		if isStderr {
+			fmt.Fprintln(os.Stderr, line)
+		} else {
+			fmt.Fprintln(os.Stdout, line)
+		}
+
+		// Try to extract the start value from those lines  "Duration: N/A, start: 0.000000, bitrate: N/A"
+		if !strings.Contains(line, "Duration") || !strings.Contains(line, "bitrate") {
+			continue
+		} else if matches := re.FindStringSubmatch(line); len(matches) == 2 {
+			if v, parseErr := strconv.ParseFloat(matches[1], 64); parseErr == nil {
+				// Save only once
+				r.mu.Lock()
+				if !r.hasStartOffset {
+					r.startOffsetSeconds = v
+					r.hasStartOffset = true
+					r.logger.Info("Detected FFmpeg start offset: %.6f seconds", v)
+				}
+				r.mu.Unlock()
+			}
+		}
+	}
+	_ = scanner.Err()
+}
+
+// StartOffset returns the parsed FFmpeg start offset in seconds and whether it was found.
+func (r *CursorWebmRecorder) StartOffset() (float64, bool) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.startOffsetSeconds, r.hasStartOffset
 }
 
 func (r *CursorWebmRecorder) OnRTP(packet *rtp.Packet) error {
