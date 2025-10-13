@@ -106,8 +106,8 @@ func (r *CursorGstreamerWebmRecorder) startGStreamer(sdpContent, outputFilePath 
 
 	// Start with common GStreamer arguments optimized for RTP dump replay
 	args := []string{
-		"--gst-debug-level=3",
-		"--gst-debug=udpsrc:5,rtp*:5,webm*:5,identity:5,jitterbuffer:5,vp9*:5",
+		//"--gst-debug-level=3",
+		//"--gst-debug=udpsrc:5,rtp*:5,webm*:5,identity:5,jitterbuffer:5,vp9*:5",
 		"-e", // Send EOS on interrupt for clean shutdown
 	}
 
@@ -172,11 +172,10 @@ func (r *CursorGstreamerWebmRecorder) startGStreamer(sdpContent, outputFilePath 
 			"rtpjitterbuffer",
 			"name=jitterbuffer",
 			"mode=none",
-			//"latency=0",               // No artificial latency - process immediately
-			//"do-lost=false",           // Don't generate lost events for missing packets
-			//"do-retransmission=false", // No retransmission for offline replay
-			//"drop-on-latency=false",   // Keep all packets even if late
-			//"rtx-delay=-1",            // Disable retransmission delay
+			"latency=0",               // No artificial latency - process immediately
+			"do-lost=false",           // Don't generate lost events for missing packets
+			"do-retransmission=false", // No retransmission for offline replay
+			"drop-on-latency=false",   // Keep all packets even if late
 			"!",
 			//
 			// Depayload RTP to get VP9 frames

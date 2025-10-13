@@ -109,7 +109,7 @@ func (c *RTPDump2WebMConverter) ConvertFile(inputFile string, fixDtx bool) error
 		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.AV1Depacketizer{}, 90000, releasePacketHandler)
 		c.recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
 	case webrtc.MimeTypeVP9:
-		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.VP9Packet{}, 90000, releasePacketHandler)
+		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.VP9Packet{}, 90000, samplebuilder.WithPacketReleaseHandler(c.buildDetectLossReleasePacketHandler()))
 		c.recorder, err = NewCursorGstreamerWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
 		//		c.recorder, err = NewCursorWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
 		//		c.recorder, err = NewIvfDumpRecorder(strings.Replace(inputFile, SuffixRtpDump, ".ivf", 1), webrtc.MimeTypeVP9)
@@ -190,6 +190,25 @@ func (c *RTPDump2WebMConverter) feedPackets(reader *rtpdump.Reader) error {
 
 func (c *RTPDump2WebMConverter) buildDefaultReleasePacketHandler() func(pkt *rtp.Packet) {
 	return func(pkt *rtp.Packet) {
+		if e := c.recorder.OnRTP(pkt); e != nil {
+			c.logger.Warn("Failed to record RTP packet SeqNum: %d RtpTs: %d: %v", pkt.SequenceNumber, pkt.Timestamp, e)
+		}
+	}
+}
+
+func (c *RTPDump2WebMConverter) buildDetectLossReleasePacketHandler() func(pkt *rtp.Packet) {
+	return func(pkt *rtp.Packet) {
+		pkt.SequenceNumber += c.inserted
+
+		if c.lastPkt != nil {
+			if pkt.SequenceNumber-c.lastPkt.SequenceNumber > 1 {
+				c.logger.Info("Missing Packet Detected, Previous SeqNum: %d RtpTs: %d   - Last SeqNum: %d RtpTs: %d", c.lastPkt.SequenceNumber, c.lastPkt.Timestamp, pkt.SequenceNumber, pkt.Timestamp)
+			}
+		}
+
+		c.lastPkt = pkt
+
+		c.logger.Debug("Writing real Packet Last SeqNum: %d RtpTs: %d", pkt.SequenceNumber, pkt.Timestamp)
 		if e := c.recorder.OnRTP(pkt); e != nil {
 			c.logger.Warn("Failed to record RTP packet SeqNum: %d RtpTs: %d: %v", pkt.SequenceNumber, pkt.Timestamp, e)
 		}
