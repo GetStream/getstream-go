@@ -183,6 +183,10 @@ func (r *CursorWebmRecorder) PushRtpBuf(buf []byte) error {
 	return nil
 }
 
+func (r *CursorWebmRecorder) PushRtcpBuf(buf []byte) error {
+	return nil
+}
+
 func (r *CursorWebmRecorder) Close() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()

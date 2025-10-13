@@ -34,6 +34,7 @@ type RTPDump2WebMConverter struct {
 type WebmRecorder interface {
 	OnRTP(pkt *rtp.Packet) error
 	PushRtpBuf(payload []byte) error
+	PushRtcpBuf(payload []byte) error
 	Close() error
 }
 
@@ -98,7 +99,7 @@ func (c *RTPDump2WebMConverter) ConvertFile(inputFile string, fixDtx bool) error
 		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.AV1Depacketizer{}, 90000, releasePacketHandler)
 		c.recorder, err = NewCursorGstreamerWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
 	case webrtc.MimeTypeVP9:
-		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.VP9Packet{}, 90000, releasePacketHandler)
+		c.sampleBuilder = nil //samplebuilder.New(videoMaxLate, &codecs.VP9Packet{}, 90000, releasePacketHandler)
 		c.recorder, err = NewCursorGstreamerWebmRecorder(strings.Replace(inputFile, SuffixRtpDump, SuffixWebm, 1), sdpContent, c.logger)
 	case webrtc.MimeTypeH264:
 		c.sampleBuilder = samplebuilder.New(videoMaxLate, &codecs.H264Packet{}, 90000, releasePacketHandler)
@@ -137,6 +138,7 @@ func (c *RTPDump2WebMConverter) feedPackets(reader *rtpdump.Reader) error {
 		} else if err != nil {
 			return err
 		} else if packet.IsRTCP {
+			_ = c.recorder.PushRtcpBuf(packet.Payload)
 			continue
 		}
 
