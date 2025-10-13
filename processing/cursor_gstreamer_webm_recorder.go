@@ -111,28 +111,14 @@ func (r *CursorGstreamerWebmRecorder) startGStreamer(sdpContent, outputFilePath 
 		"-e", // Send EOS on interrupt for clean shutdown
 	}
 
-	// Build pipeline based on codec
-	// For VP9, we use direct UDP source without rtpbin for simpler RTP timestamp handling
-	if isVP9 {
-		r.logger.Info("Detected VP9 codec, building optimized pipeline for RTP dump replay...")
-		// Don't add the rtpbin/sdpsrc setup for VP9
-	} else {
-		// Add UDP source with timestamp handling for RTP dump replay
-		args = append(args,
-			"rtpbin",
-			"name=rtpbin",
-
-			"sdpsrc",
-			"location=sdp://"+sdpFile.Name(),
-			"name=sdp",
-			"sdp.stream_0",
-			"!",
-
-			"rtpbin.recv_rtp_sink_0",
-			"rtpbin.",
-			"!",
-		)
-	}
+	// Add SDP source - this handles UDP connection and RTP setup automatically
+	args = append(args,
+		"sdpsrc",
+		"location=sdp://"+sdpFile.Name(),
+		"name=sdp",
+		"sdp.stream_0",
+		"!",
+	)
 
 	// Build pipeline based on codec with simplified RTP timestamp handling for dump replay
 	//
@@ -182,22 +168,13 @@ func (r *CursorGstreamerWebmRecorder) startGStreamer(sdpContent, outputFilePath 
 	} else if isVP9 {
 		r.logger.Info("Detected VP9 codec, building VP9 pipeline with RTP timestamp handling...")
 		args = append(args,
-			// Start with UDP source receiving RTP packets
-			"udpsrc",
-			fmt.Sprintf("port=%d", r.port),
-			"caps=application/x-rtp,media=video,encoding-name=VP9,clock-rate=90000,payload=96",
-			"do-timestamp=false", // Don't apply udpsrc timestamps, use RTP timestamps
-			"!",
-
-			// Use rtpjitterbuffer in synced mode for RTP timestamp-based timing
-			// This is critical for proper duration calculation from RTP timestamps
+			// jitterbuffer for packet reordering and timestamp handling
 			"rtpjitterbuffer",
 			"name=jitterbuffer",
-			"latency=0",               // No artificial latency for fast replay
-			"mode=4",                  // mode=synced (4): use RTP timestamps for timing
-			"do-lost=false",           // Don't generate lost events
-			"do-retransmission=false", // No retransmission for dump replay
-			"drop-on-latency=false",   // Don't drop any packets
+			"latency=0",               // No artificial latency - process immediately
+			"do-lost=false",           // Don't generate lost events for missing packets
+			"do-retransmission=false", // No retransmission for offline replay
+			"drop-on-latency=false",   // Keep all packets even if late
 			"rtx-delay=-1",            // Disable retransmission delay
 			"!",
 
@@ -223,10 +200,6 @@ func (r *CursorGstreamerWebmRecorder) startGStreamer(sdpContent, outputFilePath 
 			"filesink",
 			fmt.Sprintf("location=%s", outputFilePath),
 		)
-
-		//gst-launch-1.0 -v \
-		//sdpsrc location=sdp:///chemin/vers/stream.sdp name=sdp \
-		//sdp.stream_0 ! rtpjitterbuffer latency=0 drop-on-latency=true ! rtpvp9depay ! vp9parse ! queue ! matroskamux name=mux ! filesink location=out.webm -e
 
 	} else if false && isVP8 {
 		r.logger.Info("Detected VP8 codec, building VP8 pipeline with timestamp handling...")
