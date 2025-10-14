@@ -45,8 +45,6 @@ func NewCursorWebmRecorder(outputPath, sdpContent string, logger *getstream.Defa
 		cancel:     cancel,
 	}
 
-	r.logger.Info("Sdp created \n%s\n", sdpContent)
-
 	// Set up UDP connections
 	port := rand.Intn(10000) + 10000
 	if err := r.setupConnections(port); err != nil {
@@ -86,7 +84,10 @@ func (r *CursorWebmRecorder) startFFmpeg(outputFilePath, sdpContent string, port
 		return err
 	}
 
-	if _, err := sdpFile.WriteString(replaceSDP(sdpContent, port)); err != nil {
+	updatedSdp := replaceSDP(sdpContent, port)
+	r.logger.Info("Using Sdp:\n%s\n", updatedSdp)
+
+	if _, err := sdpFile.WriteString(updatedSdp); err != nil {
 		sdpFile.Close()
 		return err
 	}
@@ -238,10 +239,6 @@ func (r *CursorWebmRecorder) PushRtpBuf(buf []byte) error {
 		//}
 		//		r.logger.Info("Wrote packet to %s - %v", r.conn.LocalAddr().String(), err)
 	}
-	return nil
-}
-
-func (r *CursorWebmRecorder) PushRtcpBuf(buf []byte) error {
 	return nil
 }
 

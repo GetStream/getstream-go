@@ -21,7 +21,6 @@ type CursorGstreamerWebmRecorder struct {
 	logger          *getstream.DefaultLogger
 	outputPath      string
 	rtpConn         net.Conn
-	rtcpConn        net.Conn
 	gstreamerCmd    *exec.Cmd
 	mu              sync.Mutex
 	ctx             context.Context
@@ -52,7 +51,7 @@ func NewCursorGstreamerWebmRecorder(outputPath, sdpContent string, logger *getst
 	}
 
 	// Establish TCP client connection to the local tcpserversrc
-	if err := r.setupConnections(r.port, true); err != nil {
+	if err := r.setupConnections(r.port); err != nil {
 		cancel()
 		return nil, err
 	}
@@ -60,7 +59,7 @@ func NewCursorGstreamerWebmRecorder(outputPath, sdpContent string, logger *getst
 	return r, nil
 }
 
-func (r *CursorGstreamerWebmRecorder) setupConnections(port int, rtp bool) error {
+func (r *CursorGstreamerWebmRecorder) setupConnections(port int) error {
 	// Setup TCP connection with retry to match GStreamer tcpserversrc readiness
 	address := "127.0.0.1:" + strconv.Itoa(port)
 	deadline := time.Now().Add(10 * time.Second)
@@ -76,11 +75,7 @@ func (r *CursorGstreamerWebmRecorder) setupConnections(port int, rtp bool) error
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
-	if rtp {
-		r.rtpConn = conn
-	} else {
-		r.rtcpConn = conn
-	}
+	r.rtpConn = conn
 	return nil
 }
 
@@ -367,38 +362,22 @@ func (r *CursorGstreamerWebmRecorder) OnRTP(packet *rtp.Packet) error {
 	return r.PushRtpBuf(buf)
 }
 
-func (r *CursorGstreamerWebmRecorder) OnRTCP(packet *rtp.Packet) error {
-	// Marshal RTP packet
-	buf, err := packet.Marshal()
-	if err != nil {
-		return err
-	}
-
-	return r.PushRtcpBuf(buf)
-}
-
-func (r *CursorGstreamerWebmRecorder) PushRtcpBuf(buf []byte) error { return nil }
-
 func (r *CursorGstreamerWebmRecorder) PushRtpBuf(buf []byte) error {
-	return r.pushBuf(r.rtpConn, buf)
-}
-
-func (r *CursorGstreamerWebmRecorder) pushBuf(conn net.Conn, buf []byte) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	// Send RTP packet over TCP using RFC4571 2-byte length prefix
-	if conn != nil {
+	if r.rtpConn != nil {
 		if len(buf) > 0xFFFF {
 			return fmt.Errorf("rtp packet too large for TCP framing: %d bytes", len(buf))
 		}
 		header := make([]byte, 2)
 		binary.BigEndian.PutUint16(header, uint16(len(buf)))
-		if _, err := conn.Write(header); err != nil {
+		if _, err := r.rtpConn.Write(header); err != nil {
 			r.logger.Warn("Failed to write RTP length header: %v", err)
 			return err
 		}
-		if _, err := conn.Write(buf); err != nil {
+		if _, err := r.rtpConn.Write(buf); err != nil {
 			r.logger.Warn("Failed to write RTP packet: %v", err)
 			return err
 		}
