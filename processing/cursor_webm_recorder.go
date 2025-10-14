@@ -144,6 +144,8 @@ func (r *CursorWebmRecorder) startFFmpeg(outputFilePath, sdpContent string, port
 		outputFilePath,
 	)
 
+	r.logger.Info("FFMpeg pipeline: %s", strings.Join(args, " ")) // Skip debug args for display
+
 	r.ffmpegCmd = exec.Command("ffmpeg", args...)
 
 	// Capture stdout/stderr to parse FFmpeg logs while mirroring to console

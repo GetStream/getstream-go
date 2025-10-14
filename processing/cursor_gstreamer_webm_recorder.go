@@ -47,7 +47,8 @@ func NewCursorGstreamerWebmRecorder(outputPath, sdpContent string, logger *getst
 		cancel()
 		return nil, err
 	}
-	if err := r.setupConnections(r.port, false); err != nil {
+	// Use rtcp on r.port+1 to match RTP/RTCP convention
+	if err := r.setupConnections(r.port+1, false); err != nil {
 		cancel()
 		return nil, err
 	}
@@ -71,6 +72,8 @@ func (r *CursorGstreamerWebmRecorder) setupConnections(port int, rtp bool) error
 	if err != nil {
 		return err
 	}
+	// Increase socket send buffer to reduce kernel-level drops
+	_ = conn.SetWriteBuffer(4 << 20) // 4 MiB
 	if rtp {
 		r.rtpConn = conn
 	} else {
@@ -106,17 +109,24 @@ func (r *CursorGstreamerWebmRecorder) startGStreamer(sdpContent, outputFilePath 
 
 	// Start with common GStreamer arguments optimized for RTP dump replay
 	args := []string{
-		//"--gst-debug-level=3",
+		"--gst-debug-level=2",
 		//"--gst-debug=udpsrc:5,rtp*:5,webm*:5,identity:5,jitterbuffer:5,vp9*:5",
+		//"--gst-debug-no-color",
 		"-e", // Send EOS on interrupt for clean shutdown
 	}
-
 	// Add SDP source - this handles UDP connection and RTP setup automatically
 	args = append(args,
 		"sdpsrc",
 		"location=sdp://"+sdpFile.Name(),
 		"name=sdp",
 		"sdp.stream_0",
+		"!",
+		// Add a large in-process queue to absorb bursts and decouple socket IO from depay
+		"queue",
+		"max-size-buffers=0",
+		"max-size-bytes=268435456", // 256 MiB
+		"max-size-time=0",
+		"leaky=0",
 		"!",
 	)
 
@@ -301,11 +311,11 @@ func (r *CursorGstreamerWebmRecorder) OnRTCP(packet *rtp.Packet) error {
 		return err
 	}
 
-	return r.PushRtpBuf(buf)
+	return r.PushRtcpBuf(buf)
 }
 
 func (r *CursorGstreamerWebmRecorder) PushRtcpBuf(buf []byte) error {
-	return nil // r.pushBuf(r.rtcpConn, buf)
+	return r.pushBuf(r.rtcpConn, buf)
 }
 
 func (r *CursorGstreamerWebmRecorder) PushRtpBuf(buf []byte) error {
@@ -321,7 +331,7 @@ func (r *CursorGstreamerWebmRecorder) pushBuf(conn *net.UDPConn, buf []byte) err
 		_, err := conn.Write(buf)
 		if err != nil {
 			// Log error but don't fail completely - some packet loss is acceptable
-			r.logger.Debug("Failed to write RTP packet: %v", err)
+			r.logger.Warn("Failed to write RTP packet: %v", err)
 		}
 	}
 	return nil
