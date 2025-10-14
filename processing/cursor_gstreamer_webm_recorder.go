@@ -2,6 +2,7 @@ package processing
 
 import (
 	"context"
+	"encoding/binary"
 	"fmt"
 	"math/rand"
 	"net"
@@ -19,8 +20,8 @@ import (
 type CursorGstreamerWebmRecorder struct {
 	logger          *getstream.DefaultLogger
 	outputPath      string
-	rtpConn         *net.UDPConn
-	rtcpConn        *net.UDPConn
+	rtpConn         net.Conn
+	rtcpConn        net.Conn
 	gstreamerCmd    *exec.Cmd
 	mu              sync.Mutex
 	ctx             context.Context
@@ -41,20 +42,17 @@ func NewCursorGstreamerWebmRecorder(outputPath, sdpContent string, logger *getst
 		cancel:     cancel,
 	}
 
-	// Set up UDP connections
+	// Choose TCP listen port for GStreamer tcpserversrc
 	r.port = rand.Intn(10000) + 10000
-	if err := r.setupConnections(r.port, true); err != nil {
-		cancel()
-		return nil, err
-	}
-	// Use rtcp on r.port+1 to match RTP/RTCP convention
-	if err := r.setupConnections(r.port+1, false); err != nil {
+
+	// Start GStreamer with codec detection
+	if err := r.startGStreamer(sdpContent, outputPath); err != nil {
 		cancel()
 		return nil, err
 	}
 
-	// Start GStreamer with codec detection
-	if err := r.startGStreamer(sdpContent, outputPath); err != nil {
+	// Establish TCP client connection to the local tcpserversrc
+	if err := r.setupConnections(r.port, true); err != nil {
 		cancel()
 		return nil, err
 	}
@@ -63,17 +61,21 @@ func NewCursorGstreamerWebmRecorder(outputPath, sdpContent string, logger *getst
 }
 
 func (r *CursorGstreamerWebmRecorder) setupConnections(port int, rtp bool) error {
-	// Setup UDP connection
-	addr, err := net.ResolveUDPAddr("udp", "127.0.0.1:"+strconv.Itoa(port))
-	if err != nil {
-		return err
+	// Setup TCP connection with retry to match GStreamer tcpserversrc readiness
+	address := "127.0.0.1:" + strconv.Itoa(port)
+	deadline := time.Now().Add(10 * time.Second)
+	var conn net.Conn
+	var err error
+	for {
+		conn, err = net.DialTimeout("tcp", address, 500*time.Millisecond)
+		if err == nil {
+			break
+		}
+		if time.Now().After(deadline) {
+			return fmt.Errorf("failed to connect to tcpserversrc at %s: %w", address, err)
+		}
+		time.Sleep(100 * time.Millisecond)
 	}
-	conn, err := net.DialUDP("udp", nil, addr)
-	if err != nil {
-		return err
-	}
-	// Increase socket send buffer to reduce kernel-level drops
-	_ = conn.SetWriteBuffer(4 << 20) // 4 MiB
 	if rtp {
 		r.rtpConn = conn
 	} else {
@@ -83,22 +85,9 @@ func (r *CursorGstreamerWebmRecorder) setupConnections(port int, rtp bool) error
 }
 
 func (r *CursorGstreamerWebmRecorder) startGStreamer(sdpContent, outputFilePath string) error {
-	// Write SDP to a temporary file
-	sdpFile, err := os.CreateTemp("", "cursor_gstreamer_webm_*.sdp")
-	if err != nil {
-		return err
-	}
-	r.sdpFile = sdpFile
-
-	updatedSdp := replaceSDP(sdpContent, r.port)
-
-	if _, err := sdpFile.WriteString(updatedSdp); err != nil {
-		sdpFile.Close()
-		return err
-	}
-	sdpFile.Close()
-
-	r.logger.Info("SDP created for GStreamer\n%s\n", updatedSdp)
+	// Parse SDP to determine RTP caps for rtpstreamdepay
+	media, encodingName, payloadType, clockRate := parseRtpCapsFromSDP(sdpContent)
+	r.logger.Info("Starting TCP-based GStreamer pipeline (media=%s, encoding=%s, payload=%d, clock-rate=%d)", media, encodingName, payloadType, clockRate)
 
 	// Determine codec from SDP content and build GStreamer arguments
 	isVP9 := strings.Contains(strings.ToUpper(sdpContent), "VP9")
@@ -109,24 +98,30 @@ func (r *CursorGstreamerWebmRecorder) startGStreamer(sdpContent, outputFilePath 
 
 	// Start with common GStreamer arguments optimized for RTP dump replay
 	args := []string{
-		"--gst-debug-level=2",
-		//"--gst-debug=udpsrc:5,rtp*:5,webm*:5,identity:5,jitterbuffer:5,vp9*:5",
+		"--gst-debug-level=3",
+		"--gst-debug=tcpserversrc:5,rtp*:5,webm*:5,identity:5,jitterbuffer:5,vp9*:5",
 		//"--gst-debug-no-color",
 		"-e", // Send EOS on interrupt for clean shutdown
 	}
-	// Add SDP source - this handles UDP connection and RTP setup automatically
+	// Source from TCP (RFC4571 framed) and depayload back to application/x-rtp
 	args = append(args,
-		"sdpsrc",
-		"location=sdp://"+sdpFile.Name(),
-		"name=sdp",
-		"sdp.stream_0",
+		"tcpserversrc",
+		"host=127.0.0.1",
+		fmt.Sprintf("port=%d", r.port),
+		"name=tcp_in",
 		"!",
-		// Add a large in-process queue to absorb bursts and decouple socket IO from depay
 		"queue",
 		"max-size-buffers=0",
-		"max-size-bytes=268435456", // 256 MiB
+		"max-size-bytes=268435456",
 		"max-size-time=0",
 		"leaky=0",
+		"!",
+		// Ensure rtpstreamdepay sink has caps
+		"application/x-rtp-stream",
+		"!",
+		"rtpstreamdepay",
+		"!",
+		fmt.Sprintf("application/x-rtp,media=%s,encoding-name=%s,clock-rate=%d,payload=%d", media, encodingName, clockRate, payloadType),
 		"!",
 	)
 
@@ -294,6 +289,74 @@ func (r *CursorGstreamerWebmRecorder) startGStreamer(sdpContent, outputFilePath 
 	return nil
 }
 
+// parseRtpCapsFromSDP extracts basic RTP caps from an SDP for use with application/x-rtp caps
+// Prioritizes video codecs (H264/VP9/VP8/AV1) over audio (OPUS) and parses payload/clock-rate
+func parseRtpCapsFromSDP(sdp string) (media string, encodingName string, payload int, clockRate int) {
+	upper := strings.ToUpper(sdp)
+
+	// Defaults
+	media = "video"
+	encodingName = "VP9"
+	payload = 96
+	clockRate = 90000
+
+	// Select target encoding with priority: H264 > VP9 > VP8 > AV1 > OPUS (audio)
+	if strings.Contains(upper, "H264") || strings.Contains(upper, "H.264") {
+		encodingName = "H264"
+		media = "video"
+		clockRate = 90000
+	} else if strings.Contains(upper, "VP9") {
+		encodingName = "VP9"
+		media = "video"
+		clockRate = 90000
+	} else if strings.Contains(upper, "VP8") {
+		encodingName = "VP8"
+		media = "video"
+		clockRate = 90000
+	} else if strings.Contains(upper, "AV1") {
+		encodingName = "AV1"
+		media = "video"
+		clockRate = 90000
+	} else if strings.Contains(upper, "OPUS") {
+		encodingName = "OPUS"
+		media = "audio"
+		clockRate = 48000
+	}
+
+	// Parse matching a=rtpmap for the chosen encoding to refine payload and clock
+	chosen := encodingName
+	for _, line := range strings.Split(sdp, "\n") {
+		line = strings.TrimSpace(line)
+		if !strings.HasPrefix(strings.ToLower(line), "a=rtpmap:") {
+			continue
+		}
+		// Example: a=rtpmap:96 VP9/90000
+		after := strings.TrimSpace(line[len("a=rtpmap:"):])
+		fields := strings.Fields(after)
+		if len(fields) < 2 {
+			continue
+		}
+		ptStr := fields[0]
+		codec := strings.ToUpper(fields[1])
+		parts := strings.Split(codec, "/")
+		name := parts[0]
+		if name != chosen {
+			continue
+		}
+		if v, err := strconv.Atoi(ptStr); err == nil {
+			payload = v
+		}
+		if len(parts) >= 2 {
+			if v, err := strconv.Atoi(parts[1]); err == nil {
+				clockRate = v
+			}
+		}
+		break
+	}
+
+	return
+}
+
 func (r *CursorGstreamerWebmRecorder) OnRTP(packet *rtp.Packet) error {
 	// Marshal RTP packet
 	buf, err := packet.Marshal()
@@ -314,24 +377,30 @@ func (r *CursorGstreamerWebmRecorder) OnRTCP(packet *rtp.Packet) error {
 	return r.PushRtcpBuf(buf)
 }
 
-func (r *CursorGstreamerWebmRecorder) PushRtcpBuf(buf []byte) error {
-	return r.pushBuf(r.rtcpConn, buf)
-}
+func (r *CursorGstreamerWebmRecorder) PushRtcpBuf(buf []byte) error { return nil }
 
 func (r *CursorGstreamerWebmRecorder) PushRtpBuf(buf []byte) error {
 	return r.pushBuf(r.rtpConn, buf)
 }
 
-func (r *CursorGstreamerWebmRecorder) pushBuf(conn *net.UDPConn, buf []byte) error {
+func (r *CursorGstreamerWebmRecorder) pushBuf(conn net.Conn, buf []byte) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	// Send RTP packet over UDP to GStreamer udpsrc
+	// Send RTP packet over TCP using RFC4571 2-byte length prefix
 	if conn != nil {
-		_, err := conn.Write(buf)
-		if err != nil {
-			// Log error but don't fail completely - some packet loss is acceptable
+		if len(buf) > 0xFFFF {
+			return fmt.Errorf("rtp packet too large for TCP framing: %d bytes", len(buf))
+		}
+		header := make([]byte, 2)
+		binary.BigEndian.PutUint16(header, uint16(len(buf)))
+		if _, err := conn.Write(header); err != nil {
+			r.logger.Warn("Failed to write RTP length header: %v", err)
+			return err
+		}
+		if _, err := conn.Write(buf); err != nil {
 			r.logger.Warn("Failed to write RTP packet: %v", err)
+			return err
 		}
 	}
 	return nil
@@ -350,25 +419,12 @@ func (r *CursorGstreamerWebmRecorder) Close() error {
 		r.cancel()
 	}
 
-	// Close UDP connection with goodbye message
+	// Close TCP connection
 	if r.rtpConn != nil {
-		r.logger.Info("Closing UDP connection...")
-
-		// Send RTCP Goodbye packet to signal end of stream
-		//buf, _ := rtcp.Goodbye{
-		//	Sources: []uint32{1}, // fixed SSRC is ok
-		//	Reason:  "bye",
-		//}.Marshal()
-		//_, _ = r.rtpConn.Write(buf)
-
-		r.logger.Info("Goodbye sent")
-
-		// Give some time for the goodbye packet to be processed
-		time.Sleep(1 * time.Second)
-
+		r.logger.Info("Closing TCP connection...")
 		_ = r.rtpConn.Close()
 		r.rtpConn = nil
-		r.logger.Info("UDP connection closed")
+		r.logger.Info("TCP connection closed")
 	}
 
 	// Gracefully stop GStreamer
