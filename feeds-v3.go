@@ -339,7 +339,8 @@ func (c *FeedsClient) GetCommentReplies(ctx context.Context, id string, request 
 // List all feed groups for the application
 func (c *FeedsClient) ListFeedGroups(ctx context.Context, request *ListFeedGroupsRequest) (*StreamResponse[ListFeedGroupsResponse], error) {
 	var result ListFeedGroupsResponse
-	res, err := MakeRequest[any, ListFeedGroupsResponse](c.client, ctx, "GET", "/api/v2/feeds/feed_groups", nil, nil, &result, nil)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, ListFeedGroupsResponse](c.client, ctx, "GET", "/api/v2/feeds/feed_groups", params, nil, &result, nil)
 	return res, err
 }
 
@@ -492,7 +493,8 @@ func (c *FeedsClient) GetFeedGroup(ctx context.Context, id string, request *GetF
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[any, GetFeedGroupResponse](c.client, ctx, "GET", "/api/v2/feeds/feed_groups/{id}", nil, nil, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetFeedGroupResponse](c.client, ctx, "GET", "/api/v2/feeds/feed_groups/{id}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -587,6 +589,16 @@ func (c *FeedsClient) GetFeedVisibility(ctx context.Context, name string, reques
 	return res, err
 }
 
+// Updates an existing predefined feed visibility configuration
+func (c *FeedsClient) UpdateFeedVisibility(ctx context.Context, name string, request *UpdateFeedVisibilityRequest) (*StreamResponse[UpdateFeedVisibilityResponse], error) {
+	var result UpdateFeedVisibilityResponse
+	pathParams := map[string]string{
+		"name": name,
+	}
+	res, err := MakeRequest[UpdateFeedVisibilityRequest, UpdateFeedVisibilityResponse](c.client, ctx, "PUT", "/api/v2/feeds/feed_visibilities/{name}", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Create multiple feeds at once for a given feed group
 func (c *FeedsClient) CreateFeedsBatch(ctx context.Context, request *CreateFeedsBatchRequest) (*StreamResponse[CreateFeedsBatchResponse], error) {
 	var result CreateFeedsBatchResponse
@@ -594,10 +606,26 @@ func (c *FeedsClient) CreateFeedsBatch(ctx context.Context, request *CreateFeeds
 	return res, err
 }
 
+// Retrieves capabilities for multiple feeds in a single request. Useful for batch processing when activities are added to feeds.
+func (c *FeedsClient) OwnCapabilitiesBatch(ctx context.Context, request *OwnCapabilitiesBatchRequest) (*StreamResponse[OwnCapabilitiesBatchResponse], error) {
+	var result OwnCapabilitiesBatchResponse
+	res, err := MakeRequest[OwnCapabilitiesBatchRequest, OwnCapabilitiesBatchResponse](c.client, ctx, "POST", "/api/v2/feeds/feeds/own_capabilities/batch", nil, request, &result, nil)
+	return res, err
+}
+
 // Query feeds with filter query
 func (c *FeedsClient) QueryFeeds(ctx context.Context, request *QueryFeedsRequest) (*StreamResponse[QueryFeedsResponse], error) {
 	var result QueryFeedsResponse
 	res, err := MakeRequest[QueryFeedsRequest, QueryFeedsResponse](c.client, ctx, "POST", "/api/v2/feeds/feeds/query", nil, request, &result, nil)
+	return res, err
+}
+
+// Retrieve current rate limit status for feeds operations.
+// Returns information about limits, usage, and remaining quota for various feed operations.
+func (c *FeedsClient) GetFeedsRateLimits(ctx context.Context, request *GetFeedsRateLimitsRequest) (*StreamResponse[GetFeedsRateLimitsResponse], error) {
+	var result GetFeedsRateLimitsResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetFeedsRateLimitsResponse](c.client, ctx, "GET", "/api/v2/feeds/feeds/rate_limits", params, nil, &result, nil)
 	return res, err
 }
 
@@ -685,6 +713,15 @@ func (c *FeedsClient) UpdateMembershipLevel(ctx context.Context, id string, requ
 		"id": id,
 	}
 	res, err := MakeRequest[UpdateMembershipLevelRequest, UpdateMembershipLevelResponse](c.client, ctx, "PATCH", "/api/v2/feeds/membership_levels/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Retrieve usage statistics for feeds including activity count, follow count, and API request count.
+// Returns data aggregated by day with pagination support via from/to date parameters.
+// This endpoint is server-side only.
+func (c *FeedsClient) QueryFeedsUsageStats(ctx context.Context, request *QueryFeedsUsageStatsRequest) (*StreamResponse[QueryFeedsUsageStatsResponse], error) {
+	var result QueryFeedsUsageStatsResponse
+	res, err := MakeRequest[QueryFeedsUsageStatsRequest, QueryFeedsUsageStatsResponse](c.client, ctx, "POST", "/api/v2/feeds/stats/usage", nil, request, &result, nil)
 	return res, err
 }
 
