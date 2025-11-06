@@ -408,6 +408,13 @@ func TestFeedsGetFeedVisibility(t *testing.T) {
 	_, err = client.Feeds().GetFeedVisibility(context.Background(), "", &getstream.GetFeedVisibilityRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsUpdateFeedVisibility(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().UpdateFeedVisibility(context.Background(), "", &getstream.UpdateFeedVisibilityRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsCreateFeedsBatch(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -415,11 +422,25 @@ func TestFeedsCreateFeedsBatch(t *testing.T) {
 	_, err = client.Feeds().CreateFeedsBatch(context.Background(), &getstream.CreateFeedsBatchRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsOwnCapabilitiesBatch(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().OwnCapabilitiesBatch(context.Background(), &getstream.OwnCapabilitiesBatchRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsQueryFeeds(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
 	_, err = client.Feeds().QueryFeeds(context.Background(), &getstream.QueryFeedsRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsGetFeedsRateLimits(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().GetFeedsRateLimits(context.Background(), &getstream.GetFeedsRateLimitsRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsUpdateFollow(t *testing.T) {
@@ -497,6 +518,13 @@ func TestFeedsUpdateMembershipLevel(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().UpdateMembershipLevel(context.Background(), "", &getstream.UpdateMembershipLevelRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsQueryFeedsUsageStats(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().QueryFeedsUsageStats(context.Background(), &getstream.QueryFeedsUsageStatsRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsUnfollowBatch(t *testing.T) {

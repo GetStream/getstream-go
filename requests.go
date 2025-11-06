@@ -150,21 +150,24 @@ type UpdateChannelPartialRequest struct {
 }
 
 type UpdateChannelRequest struct {
-	AcceptInvite     *bool           `json:"accept_invite"`
-	Cooldown         *int            `json:"cooldown"`
-	HideHistory      *bool           `json:"hide_history"`
-	RejectInvite     *bool           `json:"reject_invite"`
-	SkipPush         *bool           `json:"skip_push"`
-	UserID           *string         `json:"user_id"`
-	AddMembers       []ChannelMember `json:"add_members"`
-	AddModerators    []string        `json:"add_moderators"`
-	AssignRoles      []ChannelMember `json:"assign_roles"`
-	DemoteModerators []string        `json:"demote_moderators"`
-	Invites          []ChannelMember `json:"invites"`
-	RemoveMembers    []string        `json:"remove_members"`
-	Data             *ChannelInput   `json:"data"`
-	Message          *MessageRequest `json:"message"`
-	User             *UserRequest    `json:"user"`
+	AcceptInvite      *bool                  `json:"accept_invite"`
+	Cooldown          *int                   `json:"cooldown"`
+	HideHistory       *bool                  `json:"hide_history"`
+	HideHistoryBefore *Timestamp             `json:"hide_history_before"`
+	RejectInvite      *bool                  `json:"reject_invite"`
+	SkipPush          *bool                  `json:"skip_push"`
+	UserID            *string                `json:"user_id"`
+	AddFilterTags     []string               `json:"add_filter_tags"`
+	AddMembers        []ChannelMemberRequest `json:"add_members"`
+	AddModerators     []string               `json:"add_moderators"`
+	AssignRoles       []ChannelMemberRequest `json:"assign_roles"`
+	DemoteModerators  []string               `json:"demote_moderators"`
+	Invites           []ChannelMemberRequest `json:"invites"`
+	RemoveFilterTags  []string               `json:"remove_filter_tags"`
+	RemoveMembers     []string               `json:"remove_members"`
+	Data              *ChannelInput          `json:"data"`
+	Message           *MessageRequest        `json:"message"`
+	User              *UserRequest           `json:"user"`
 }
 
 type DeleteDraftRequest struct {
@@ -276,7 +279,9 @@ type CreateChannelTypeRequest struct {
 	Blocklist                      *string             `json:"blocklist"`
 	BlocklistBehavior              *string             `json:"blocklist_behavior"`
 	ConnectEvents                  *bool               `json:"connect_events"`
+	CountMessages                  *bool               `json:"count_messages"`
 	CustomEvents                   *bool               `json:"custom_events"`
+	DeliveryEvents                 *bool               `json:"delivery_events"`
 	MarkMessagesPending            *bool               `json:"mark_messages_pending"`
 	MessageRetention               *string             `json:"message_retention"`
 	Mutes                          *bool               `json:"mutes"`
@@ -315,6 +320,7 @@ type UpdateChannelTypeRequest struct {
 	ConnectEvents                  *bool               `json:"connect_events"`
 	CountMessages                  *bool               `json:"count_messages"`
 	CustomEvents                   *bool               `json:"custom_events"`
+	DeliveryEvents                 *bool               `json:"delivery_events"`
 	MarkMessagesPending            *bool               `json:"mark_messages_pending"`
 	Mutes                          *bool               `json:"mutes"`
 	PartitionSize                  *int                `json:"partition_size"`
@@ -497,19 +503,13 @@ type CreateReminderRequest struct {
 }
 
 type GetRepliesRequest struct {
-	Limit                  *int               `json:"-" query:"limit"`
-	Offset                 *int               `json:"-" query:"offset"`
-	IDGte                  *string            `json:"-" query:"id_gte"`
-	IDGt                   *string            `json:"-" query:"id_gt"`
-	IDLte                  *string            `json:"-" query:"id_lte"`
-	IDLt                   *string            `json:"-" query:"id_lt"`
-	CreatedAtAfterOrEqual  *Timestamp         `json:"-" query:"created_at_after_or_equal"`
-	CreatedAtAfter         *Timestamp         `json:"-" query:"created_at_after"`
-	CreatedAtBeforeOrEqual *Timestamp         `json:"-" query:"created_at_before_or_equal"`
-	CreatedAtBefore        *Timestamp         `json:"-" query:"created_at_before"`
-	IDAround               *string            `json:"-" query:"id_around"`
-	CreatedAtAround        *Timestamp         `json:"-" query:"created_at_around"`
-	Sort                   []SortParamRequest `json:"-" query:"sort"`
+	Limit    *int               `json:"-" query:"limit"`
+	IDGte    *string            `json:"-" query:"id_gte"`
+	IDGt     *string            `json:"-" query:"id_gt"`
+	IDLte    *string            `json:"-" query:"id_lte"`
+	IDLt     *string            `json:"-" query:"id_lt"`
+	IDAround *string            `json:"-" query:"id_around"`
+	Sort     []SortParamRequest `json:"-" query:"sort"`
 }
 
 type QueryMessageFlagsRequest struct {
@@ -752,10 +752,8 @@ type AddBookmarkRequest struct {
 
 type ActivityFeedbackRequest struct {
 	Hide     *bool        `json:"hide"`
-	MuteUser *bool        `json:"mute_user"`
-	Reason   *string      `json:"reason"`
-	Report   *bool        `json:"report"`
 	ShowLess *bool        `json:"show_less"`
+	ShowMore *bool        `json:"show_more"`
 	UserID   *string      `json:"user_id"`
 	User     *UserRequest `json:"user"`
 }
@@ -853,6 +851,7 @@ type AddCommentRequest struct {
 	ObjectType                 string         `json:"object_type"`
 	Comment                    *string        `json:"comment"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
+	ID                         *string        `json:"id"`
 	ParentID                   *string        `json:"parent_id"`
 	SkipPush                   *bool          `json:"skip_push"`
 	UserID                     *string        `json:"user_id"`
@@ -884,7 +883,9 @@ type GetCommentRequest struct {
 type UpdateCommentRequest struct {
 	Comment  *string        `json:"comment"`
 	SkipPush *bool          `json:"skip_push"`
+	UserID   *string        `json:"user_id"`
 	Custom   map[string]any `json:"custom"`
+	User     *UserRequest   `json:"user"`
 }
 
 type AddCommentReactionRequest struct {
@@ -919,6 +920,7 @@ type GetCommentRepliesRequest struct {
 }
 
 type ListFeedGroupsRequest struct {
+	IncludeSoftDeleted *bool `json:"-" query:"include_soft_deleted"`
 }
 
 type CreateFeedGroupRequest struct {
@@ -939,21 +941,20 @@ type DeleteFeedRequest struct {
 }
 
 type GetOrCreateFeedRequest struct {
-	Limit                   *int               `json:"limit"`
-	Next                    *string            `json:"next"`
-	Prev                    *string            `json:"prev"`
-	UserID                  *string            `json:"user_id"`
-	View                    *string            `json:"view"`
-	Watch                   *bool              `json:"watch"`
-	ActivitySelectorOptions map[string]any     `json:"activity_selector_options"`
-	Data                    *FeedInput         `json:"data"`
-	ExternalRanking         map[string]any     `json:"external_ranking"`
-	Filter                  map[string]any     `json:"filter"`
-	FollowersPagination     *PagerRequest      `json:"followers_pagination"`
-	FollowingPagination     *PagerRequest      `json:"following_pagination"`
-	InterestWeights         map[string]float64 `json:"interest_weights"`
-	MemberPagination        *PagerRequest      `json:"member_pagination"`
-	User                    *UserRequest       `json:"user"`
+	Limit               *int               `json:"limit"`
+	Next                *string            `json:"next"`
+	Prev                *string            `json:"prev"`
+	UserID              *string            `json:"user_id"`
+	View                *string            `json:"view"`
+	Watch               *bool              `json:"watch"`
+	Data                *FeedInput         `json:"data"`
+	ExternalRanking     map[string]any     `json:"external_ranking"`
+	Filter              map[string]any     `json:"filter"`
+	FollowersPagination *PagerRequest      `json:"followers_pagination"`
+	FollowingPagination *PagerRequest      `json:"following_pagination"`
+	InterestWeights     map[string]float64 `json:"interest_weights"`
+	MemberPagination    *PagerRequest      `json:"member_pagination"`
+	User                *UserRequest       `json:"user"`
 }
 
 type UpdateFeedRequest struct {
@@ -1016,6 +1017,7 @@ type DeleteFeedGroupRequest struct {
 }
 
 type GetFeedGroupRequest struct {
+	IncludeSoftDeleted *bool `json:"-" query:"include_soft_deleted"`
 }
 
 type GetOrCreateFeedGroupRequest struct {
@@ -1031,6 +1033,7 @@ type GetOrCreateFeedGroupRequest struct {
 }
 
 type UpdateFeedGroupRequest struct {
+	DefaultVisibility  *string                   `json:"default_visibility"`
 	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
 	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
 	Aggregation        *AggregationConfig        `json:"aggregation"`
@@ -1045,11 +1048,10 @@ type ListFeedViewsRequest struct {
 }
 
 type CreateFeedViewRequest struct {
-	ID                 string                    `json:"id"`
-	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
-	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
-	Aggregation        *AggregationConfig        `json:"aggregation"`
-	Ranking            *RankingConfig            `json:"ranking"`
+	ID                string                   `json:"id"`
+	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
+	Aggregation       *AggregationConfig       `json:"aggregation"`
+	Ranking           *RankingConfig           `json:"ranking"`
 }
 
 type DeleteFeedViewRequest struct {
@@ -1059,17 +1061,15 @@ type GetFeedViewRequest struct {
 }
 
 type GetOrCreateFeedViewRequest struct {
-	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
-	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
-	Aggregation        *AggregationConfig        `json:"aggregation"`
-	Ranking            *RankingConfig            `json:"ranking"`
+	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
+	Aggregation       *AggregationConfig       `json:"aggregation"`
+	Ranking           *RankingConfig           `json:"ranking"`
 }
 
 type UpdateFeedViewRequest struct {
-	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
-	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
-	Aggregation        *AggregationConfig        `json:"aggregation"`
-	Ranking            *RankingConfig            `json:"ranking"`
+	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
+	Aggregation       *AggregationConfig       `json:"aggregation"`
+	Ranking           *RankingConfig           `json:"ranking"`
 }
 
 type ListFeedVisibilitiesRequest struct {
@@ -1078,8 +1078,18 @@ type ListFeedVisibilitiesRequest struct {
 type GetFeedVisibilityRequest struct {
 }
 
+type UpdateFeedVisibilityRequest struct {
+	Grants map[string][]string `json:"grants"`
+}
+
 type CreateFeedsBatchRequest struct {
 	Feeds []FeedRequest `json:"feeds"`
+}
+
+type OwnCapabilitiesBatchRequest struct {
+	Feeds  []string     `json:"feeds"`
+	UserID *string      `json:"user_id"`
+	User   *UserRequest `json:"user"`
 }
 
 type QueryFeedsRequest struct {
@@ -1089,6 +1099,14 @@ type QueryFeedsRequest struct {
 	Watch  *bool              `json:"watch"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
+}
+
+type GetFeedsRateLimitsRequest struct {
+	Endpoints  *string `json:"-" query:"endpoints"`
+	Android    *bool   `json:"-" query:"android"`
+	Ios        *bool   `json:"-" query:"ios"`
+	Web        *bool   `json:"-" query:"web"`
+	ServerSide *bool   `json:"-" query:"server_side"`
 }
 
 type UpdateFollowRequest struct {
@@ -1162,6 +1180,11 @@ type UpdateMembershipLevelRequest struct {
 	Priority    *int           `json:"priority"`
 	Tags        []string       `json:"tags"`
 	Custom      map[string]any `json:"custom"`
+}
+
+type QueryFeedsUsageStatsRequest struct {
+	From *string `json:"from"`
+	To   *string `json:"to"`
 }
 
 type UnfollowBatchRequest struct {
@@ -1368,18 +1391,21 @@ type GetReviewQueueItemRequest struct {
 }
 
 type SubmitActionRequest struct {
-	ActionType     string                 `json:"action_type"`
-	ItemID         string                 `json:"item_id"`
-	UserID         *string                `json:"user_id"`
-	Ban            *BanActionRequest      `json:"ban"`
-	Custom         *CustomActionRequest   `json:"custom"`
-	DeleteActivity *DeleteActivityRequest `json:"delete_activity"`
-	DeleteMessage  *DeleteMessageRequest  `json:"delete_message"`
-	DeleteReaction *DeleteReactionRequest `json:"delete_reaction"`
-	DeleteUser     *DeleteUserRequest     `json:"delete_user"`
-	MarkReviewed   *MarkReviewedRequest   `json:"mark_reviewed"`
-	Unban          *UnbanActionRequest    `json:"unban"`
-	User           *UserRequest           `json:"user"`
+	ActionType     string                    `json:"action_type"`
+	ItemID         string                    `json:"item_id"`
+	UserID         *string                   `json:"user_id"`
+	Ban            *BanActionRequest         `json:"ban"`
+	Block          *BlockActionRequest       `json:"block"`
+	Custom         *CustomActionRequest      `json:"custom"`
+	DeleteActivity *DeleteActivityRequest    `json:"delete_activity"`
+	DeleteComment  *DeleteCommentRequest     `json:"delete_comment"`
+	DeleteMessage  *DeleteMessageRequest     `json:"delete_message"`
+	DeleteReaction *DeleteReactionRequest    `json:"delete_reaction"`
+	DeleteUser     *DeleteUserRequest        `json:"delete_user"`
+	MarkReviewed   *MarkReviewedRequest      `json:"mark_reviewed"`
+	ShadowBlock    *ShadowBlockActionRequest `json:"shadow_block"`
+	Unban          *UnbanActionRequest       `json:"unban"`
+	User           *UserRequest              `json:"user"`
 }
 
 type UnbanRequest struct {
@@ -1915,6 +1941,59 @@ type UpdateCallTypeRequest struct {
 }
 
 type GetEdgesRequest struct {
+}
+
+type ResolveSipInboundRequest struct {
+	SipCallerNumber string            `json:"sip_caller_number"`
+	SipTrunkNumber  string            `json:"sip_trunk_number"`
+	Challenge       SIPChallenge      `json:"challenge"`
+	SipHeaders      map[string]string `json:"sip_headers"`
+}
+
+type ListSIPInboundRoutingRuleRequest struct {
+}
+
+type CreateSIPInboundRoutingRuleRequest struct {
+	Name                 string                                  `json:"name"`
+	TrunkIds             []string                                `json:"trunk_ids"`
+	CallerConfigs        SIPCallerConfigsRequest                 `json:"caller_configs"`
+	CalledNumbers        []string                                `json:"called_numbers"`
+	CallerNumbers        []string                                `json:"caller_numbers"`
+	CallConfigs          *SIPCallConfigsRequest                  `json:"call_configs"`
+	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsRequest `json:"direct_routing_configs"`
+	PinProtectionConfigs *SIPPinProtectionConfigsRequest         `json:"pin_protection_configs"`
+	PinRoutingConfigs    *SIPInboundRoutingRulePinConfigsRequest `json:"pin_routing_configs"`
+}
+
+type DeleteSIPInboundRoutingRuleRequest struct {
+}
+
+type UpdateSIPInboundRoutingRuleRequest struct {
+	Name                 string                                  `json:"name"`
+	CalledNumbers        []string                                `json:"called_numbers"`
+	TrunkIds             []string                                `json:"trunk_ids"`
+	CallerConfigs        SIPCallerConfigsRequest                 `json:"caller_configs"`
+	CallerNumbers        []string                                `json:"caller_numbers"`
+	CallConfigs          *SIPCallConfigsRequest                  `json:"call_configs"`
+	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsRequest `json:"direct_routing_configs"`
+	PinProtectionConfigs *SIPPinProtectionConfigsRequest         `json:"pin_protection_configs"`
+	PinRoutingConfigs    *SIPInboundRoutingRulePinConfigsRequest `json:"pin_routing_configs"`
+}
+
+type ListSIPTrunksRequest struct {
+}
+
+type CreateSIPTrunkRequest struct {
+	Name    string   `json:"name"`
+	Numbers []string `json:"numbers"`
+}
+
+type DeleteSIPTrunkRequest struct {
+}
+
+type UpdateSIPTrunkRequest struct {
+	Name    string   `json:"name"`
+	Numbers []string `json:"numbers"`
 }
 
 type QueryAggregateCallStatsRequest struct {

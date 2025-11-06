@@ -209,8 +209,8 @@ func TestFeedIntegrationSuite(t *testing.T) {
 
 	// Feed Group CRUD Operations
 	t.Run("Test33_FeedGroupCRUD", func(t *testing.T) {
-		//Flaky test due to eventual consistency in feed creation
-		//test33FeedGroupCRUD(t, ctx, feedsClient)
+		// Flaky test due to eventual consistency in feed creation
+		// test33FeedGroupCRUD(t, ctx, feedsClient)
 	})
 
 	// Feed View CRUD Operations
@@ -1743,11 +1743,8 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 		ID: feedViewID,
 		ActivitySelectors: []getstream.ActivitySelectorConfig{
 			{
-				Type: getstream.PtrTo("following"),
+				Type: "following",
 			},
-		},
-		ActivityProcessors: []getstream.ActivityProcessorConfig{
-			{Type: "default"},
 		},
 		Aggregation: &getstream.AggregationConfig{
 			Format: getstream.PtrTo("time_based"),
@@ -1775,7 +1772,7 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	updateResponse, err := feedsClient.UpdateFeedView(ctx, "feedViewID", &getstream.UpdateFeedViewRequest{
 		ActivitySelectors: []getstream.ActivitySelectorConfig{
 			{
-				Type:          getstream.PtrTo("popular"),
+				Type:          "popular",
 				MinPopularity: getstream.PtrTo(10),
 			},
 		},
@@ -1793,7 +1790,7 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	// snippet-start: GetOrCreateFeedViewExisting
 	getOrCreateResponse, err := feedsClient.GetOrCreateFeedView(ctx, feedViewID, &getstream.GetOrCreateFeedViewRequest{
 		ActivitySelectors: []getstream.ActivitySelectorConfig{
-			{Type: getstream.PtrTo("following")},
+			{Type: "following"},
 		},
 	})
 	// snippet-end: GetOrCreateFeedViewExisting
