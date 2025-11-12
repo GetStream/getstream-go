@@ -892,7 +892,8 @@ func (c *ChatClient) UpdateThreadPartial(ctx context.Context, messageID string, 
 // Fetch unread counts for a single user
 func (c *ChatClient) UnreadCounts(ctx context.Context, request *UnreadCountsRequest) (*StreamResponse[WrappedUnreadCountsResponse], error) {
 	var result WrappedUnreadCountsResponse
-	res, err := MakeRequest[any, WrappedUnreadCountsResponse](c.client, ctx, "GET", "/api/v2/chat/unread", nil, nil, &result, nil)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, WrappedUnreadCountsResponse](c.client, ctx, "GET", "/api/v2/chat/unread", params, nil, &result, nil)
 	return res, err
 }
 

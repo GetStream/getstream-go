@@ -172,6 +172,15 @@ func (c *Call) GetCallReport(ctx context.Context, request *GetCallReportRequest)
 	return response, nil
 }
 
+func (c *Call) Ring(ctx context.Context, request *RingCallRequest) (*StreamResponse[RingCallResponse], error) {
+	response, err := c.client.RingCall(ctx, c.callType, c.callID, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
+}
+
 func (c *Call) StartRTMPBroadcasts(ctx context.Context, request *StartRTMPBroadcastsRequest) (*StreamResponse[StartRTMPBroadcastsResponse], error) {
 	response, err := c.client.StartRTMPBroadcasts(ctx, c.callType, c.callID, request)
 	if err != nil {

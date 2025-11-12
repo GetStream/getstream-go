@@ -156,6 +156,41 @@ func TestFeedsQueryBookmarks(t *testing.T) {
 	_, err = client.Feeds().QueryBookmarks(context.Background(), &getstream.QueryBookmarksRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsDeleteCollections(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().DeleteCollections(context.Background(), &getstream.DeleteCollectionsRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsReadCollections(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().ReadCollections(context.Background(), &getstream.ReadCollectionsRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsUpdateCollections(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().UpdateCollections(context.Background(), &getstream.UpdateCollectionsRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsCreateCollections(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().CreateCollections(context.Background(), &getstream.CreateCollectionsRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsUpsertCollections(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().UpsertCollections(context.Background(), &getstream.UpsertCollectionsRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsGetComments(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

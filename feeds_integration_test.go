@@ -1289,8 +1289,8 @@ func test26ModerateActivity(t *testing.T, ctx context.Context, feedsClient *gets
 
 	// snippet-start: ModerateActivity
 	moderationResponse, err := feedsClient.ActivityFeedback(ctx, activityID, &getstream.ActivityFeedbackRequest{
-		//Report: getstream.PtrTo(true),
-		//Reason: getstream.PtrTo("inappropriate_content"),
+		// Report: getstream.PtrTo(true),
+		// Reason: getstream.PtrTo("inappropriate_content"),
 		UserID: &testUserID2, // Different user reporting
 	})
 	// snippet-end: ModerateActivity
