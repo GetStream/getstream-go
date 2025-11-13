@@ -156,6 +156,13 @@ func TestVideoGetCallReport(t *testing.T) {
 	_, err = client.Video().GetCallReport(context.Background(), "", "", &getstream.GetCallReportRequest{})
 	require.NoError(t, err)
 }
+func TestVideoRingCall(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().RingCall(context.Background(), "", "", &getstream.RingCallRequest{})
+	require.NoError(t, err)
+}
 func TestVideoStartRTMPBroadcasts(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

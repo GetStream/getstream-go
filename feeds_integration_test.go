@@ -1289,8 +1289,8 @@ func test26ModerateActivity(t *testing.T, ctx context.Context, feedsClient *gets
 
 	// snippet-start: ModerateActivity
 	moderationResponse, err := feedsClient.ActivityFeedback(ctx, activityID, &getstream.ActivityFeedbackRequest{
-		//Report: getstream.PtrTo(true),
-		//Reason: getstream.PtrTo("inappropriate_content"),
+		// Report: getstream.PtrTo(true),
+		// Reason: getstream.PtrTo("inappropriate_content"),
 		UserID: &testUserID2, // Different user reporting
 	})
 	// snippet-end: ModerateActivity
@@ -1672,7 +1672,7 @@ func test33FeedGroupCRUD(t *testing.T, ctx context.Context, feedsClient *getstre
 			{Type: "dummy"},
 		},
 		Aggregation: &getstream.AggregationConfig{
-			Format: getstream.PtrTo("time_based"),
+			Format: "time_based",
 		},
 	})
 	// snippet-end: UpdateFeedGroup
@@ -1748,7 +1748,7 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 			},
 		},
 		Aggregation: &getstream.AggregationConfig{
-			Format: getstream.PtrTo("time_based"),
+			Format: "time_based",
 		},
 	})
 	// snippet-end: CreateFeedView
@@ -1778,7 +1778,7 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 			},
 		},
 		Aggregation: &getstream.AggregationConfig{
-			Format: getstream.PtrTo("popularity_based"),
+			Format: "popularity_based",
 		},
 	})
 	// snippet-end: UpdateFeedView
