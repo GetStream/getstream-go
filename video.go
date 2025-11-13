@@ -256,6 +256,20 @@ func (c *VideoClient) GetCallReport(ctx context.Context, _type string, id string
 	return res, err
 }
 
+// Sends a ring notification to the provided users who are not already in the call. All users should be members of the call
+//
+// Sends events:
+// - call.ring
+func (c *VideoClient) RingCall(ctx context.Context, _type string, id string, request *RingCallRequest) (*StreamResponse[RingCallResponse], error) {
+	var result RingCallResponse
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	res, err := MakeRequest[RingCallRequest, RingCallResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/ring", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Starts RTMP broadcasts for the provided RTMP destinations
 func (c *VideoClient) StartRTMPBroadcasts(ctx context.Context, _type string, id string, request *StartRTMPBroadcastsRequest) (*StreamResponse[StartRTMPBroadcastsResponse], error) {
 	var result StartRTMPBroadcastsResponse

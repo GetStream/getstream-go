@@ -262,10 +262,11 @@ type TruncateChannelRequest struct {
 }
 
 type MarkUnreadRequest struct {
-	MessageID *string      `json:"message_id"`
-	ThreadID  *string      `json:"thread_id"`
-	UserID    *string      `json:"user_id"`
-	User      *UserRequest `json:"user"`
+	MessageID        *string      `json:"message_id"`
+	MessageTimestamp *Timestamp   `json:"message_timestamp"`
+	ThreadID         *string      `json:"thread_id"`
+	UserID           *string      `json:"user_id"`
+	User             *UserRequest `json:"user"`
 }
 
 type ListChannelTypesRequest struct {
@@ -604,6 +605,7 @@ type UpdateThreadPartialRequest struct {
 }
 
 type UnreadCountsRequest struct {
+	UserID *string `json:"-" query:"user_id"`
 }
 
 type UnreadCountsBatchRequest struct {
@@ -696,11 +698,13 @@ type AddActivityRequest struct {
 	ID               *string           `json:"id"`
 	ParentID         *string           `json:"parent_id"`
 	PollID           *string           `json:"poll_id"`
+	RestrictReplies  *string           `json:"restrict_replies"`
 	Text             *string           `json:"text"`
 	UserID           *string           `json:"user_id"`
 	Visibility       *string           `json:"visibility"`
 	VisibilityTag    *string           `json:"visibility_tag"`
 	Attachments      []Attachment      `json:"attachments"`
+	CollectionRefs   []string          `json:"collection_refs"`
 	FilterTags       []string          `json:"filter_tags"`
 	InterestTags     []string          `json:"interest_tags"`
 	MentionedUserIds []string          `json:"mentioned_user_ids"`
@@ -721,11 +725,14 @@ type DeleteActivitiesRequest struct {
 }
 
 type QueryActivitiesRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
+	IncludePrivateActivities *bool              `json:"include_private_activities"`
+	Limit                    *int               `json:"limit"`
+	Next                     *string            `json:"next"`
+	Prev                     *string            `json:"prev"`
+	UserID                   *string            `json:"user_id"`
+	Sort                     []SortParamRequest `json:"sort"`
+	Filter                   map[string]any     `json:"filter"`
+	User                     *UserRequest       `json:"user"`
 }
 
 type DeleteBookmarkRequest struct {
@@ -795,18 +802,20 @@ type UpdateActivityPartialRequest struct {
 }
 
 type UpdateActivityRequest struct {
-	ExpiresAt    *Timestamp        `json:"expires_at"`
-	PollID       *string           `json:"poll_id"`
-	Text         *string           `json:"text"`
-	UserID       *string           `json:"user_id"`
-	Visibility   *string           `json:"visibility"`
-	Attachments  []Attachment      `json:"attachments"`
-	Feeds        []string          `json:"feeds"`
-	FilterTags   []string          `json:"filter_tags"`
-	InterestTags []string          `json:"interest_tags"`
-	Custom       map[string]any    `json:"custom"`
-	Location     *ActivityLocation `json:"location"`
-	User         *UserRequest      `json:"user"`
+	ExpiresAt       *Timestamp        `json:"expires_at"`
+	PollID          *string           `json:"poll_id"`
+	RestrictReplies *string           `json:"restrict_replies"`
+	Text            *string           `json:"text"`
+	UserID          *string           `json:"user_id"`
+	Visibility      *string           `json:"visibility"`
+	Attachments     []Attachment      `json:"attachments"`
+	CollectionRefs  []string          `json:"collection_refs"`
+	Feeds           []string          `json:"feeds"`
+	FilterTags      []string          `json:"filter_tags"`
+	InterestTags    []string          `json:"interest_tags"`
+	Custom          map[string]any    `json:"custom"`
+	Location        *ActivityLocation `json:"location"`
+	User            *UserRequest      `json:"user"`
 }
 
 type QueryBookmarkFoldersRequest struct {
@@ -833,6 +842,31 @@ type QueryBookmarksRequest struct {
 	Prev   *string            `json:"prev"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
+}
+
+type DeleteCollectionsRequest struct {
+	CollectionRefs []string `json:"-" query:"collection_refs"`
+}
+
+type ReadCollectionsRequest struct {
+	CollectionRefs []string `json:"-" query:"collection_refs"`
+	UserID         *string  `json:"-" query:"user_id"`
+}
+
+type UpdateCollectionsRequest struct {
+	Collections []UpdateCollectionRequest `json:"collections"`
+	UserID      *string                   `json:"user_id"`
+	User        *UserRequest              `json:"user"`
+}
+
+type CreateCollectionsRequest struct {
+	Collections []CollectionRequest `json:"collections"`
+	UserID      *string             `json:"user_id"`
+	User        *UserRequest        `json:"user"`
+}
+
+type UpsertCollectionsRequest struct {
+	Collections []CollectionRequest `json:"collections"`
 }
 
 type GetCommentsRequest struct {
@@ -1806,6 +1840,11 @@ type ListRecordingsRequest struct {
 
 type GetCallReportRequest struct {
 	SessionID *string `json:"-" query:"session_id"`
+}
+
+type RingCallRequest struct {
+	Video      *bool    `json:"video"`
+	MembersIds []string `json:"members_ids"`
 }
 
 type StartRTMPBroadcastsRequest struct {

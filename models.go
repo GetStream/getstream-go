@@ -577,6 +577,9 @@ type ActivityRequest struct {
 	// ID of a poll to attach to activity
 	PollID *string `json:"poll_id,omitempty"`
 
+	// Controls who can add comments/replies to this activity. Options: 'everyone' (default - anyone can reply), 'people_i_follow' (only people the activity creator follows can reply), 'nobody' (no one can reply)
+	RestrictReplies *string `json:"restrict_replies,omitempty"`
+
 	// Text content of the activity
 	Text *string `json:"text,omitempty"`
 
@@ -591,6 +594,9 @@ type ActivityRequest struct {
 
 	// List of attachments for the activity
 	Attachments []Attachment `json:"attachments,omitempty"`
+
+	// Collections that this activity references
+	CollectionRefs []string `json:"collection_refs,omitempty"`
 
 	// Tags for filtering activities
 	FilterTags []string `json:"filter_tags,omitempty"`
@@ -635,6 +641,9 @@ type ActivityResponse struct {
 	// Number of reactions to the activity
 	ReactionCount int `json:"reaction_count"`
 
+	// Controls who can reply to this activity. Values: everyone, people_i_follow, nobody
+	RestrictReplies string `json:"restrict_replies"`
+
 	// Ranking score for this activity
 	Score float64 `json:"score"`
 
@@ -676,6 +685,9 @@ type ActivityResponse struct {
 
 	// Current user's reactions to this activity
 	OwnReactions []FeedsReactionResponse `json:"own_reactions"`
+
+	// Enriched collection data referenced by this activity
+	Collections map[string]EnrichedCollectionResponse `json:"collections"`
 
 	// Custom data for the activity
 	Custom map[string]any `json:"custom"`
@@ -911,7 +923,7 @@ type AggregatedActivityResponse struct {
 
 type AggregationConfig struct {
 	// Format for activity aggregation
-	Format *string `json:"format,omitempty"`
+	Format string `json:"format"`
 }
 
 type AnyEvent struct {
@@ -2732,6 +2744,8 @@ type CallStatsLocation struct {
 
 	Country *string `json:"country,omitempty"`
 
+	CountryIsoCode *string `json:"country_iso_code,omitempty"`
+
 	Latitude *float64 `json:"latitude,omitempty"`
 
 	Longitude *float64 `json:"longitude,omitempty"`
@@ -2755,6 +2769,10 @@ type CallStatsParticipantCounts struct {
 	LiveSessions int `json:"live_sessions"`
 
 	Participants int `json:"participants"`
+
+	PeakConcurrentSessions int `json:"peak_concurrent_sessions"`
+
+	PeakConcurrentUsers int `json:"peak_concurrent_users"`
 
 	Publishers int `json:"publishers"`
 
@@ -2781,6 +2799,8 @@ type CallStatsParticipantSession struct {
 	DistanceToSfuKilometers *float64 `json:"distance_to_sfu_kilometers,omitempty"`
 
 	EndedAt *Timestamp `json:"ended_at,omitempty"`
+
+	Os *string `json:"os,omitempty"`
 
 	PublisherType *string `json:"publisher_type,omitempty"`
 
@@ -3485,6 +3505,8 @@ type ChannelInput struct {
 
 	TruncatedByID *string `json:"truncated_by_id,omitempty"`
 
+	FilterTags []string `json:"filter_tags,omitempty"`
+
 	Invites []ChannelMemberRequest `json:"invites,omitempty"`
 
 	Members []ChannelMemberRequest `json:"members,omitempty"`
@@ -4137,6 +4159,40 @@ type CollectUserFeedbackResponse struct {
 	Duration string `json:"duration"`
 }
 
+type CollectionRequest struct {
+	// Name/type of the collection
+	Name string `json:"name"`
+
+	// Custom data for the collection (required, must contain at least one key)
+	Custom map[string]any `json:"custom"`
+
+	// Unique identifier for the collection within its name (optional, will be auto-generated if not provided)
+	ID *string `json:"id,omitempty"`
+
+	// ID of the user who owns this collection
+	UserID *string `json:"user_id,omitempty"`
+}
+
+type CollectionResponse struct {
+	// When the collection was created
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Unique identifier for the collection within its name
+	ID string `json:"id"`
+
+	// Name/type of the collection
+	Name string `json:"name"`
+
+	// When the collection was last updated
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	// Custom data for the collection
+	Custom map[string]any `json:"custom"`
+
+	// ID of the user who owns this collection
+	UserID *string `json:"user_id,omitempty"`
+}
+
 // Represents custom chat command
 type Command struct {
 	// Arguments help text, shown in commands auto-completion
@@ -4578,6 +4634,13 @@ type CreateChannelTypeResponse struct {
 	AutomodThresholds *Thresholds `json:"automod_thresholds,omitempty"`
 }
 
+type CreateCollectionsResponse struct {
+	Duration string `json:"duration"`
+
+	// List of created collections
+	Collections []CollectionResponse `json:"collections"`
+}
+
 type CreateCommandResponse struct {
 	Duration string `json:"duration"`
 
@@ -4868,6 +4931,10 @@ type DeleteChannelsResultResponse struct {
 	Status string `json:"status"`
 
 	Error *string `json:"error,omitempty"`
+}
+
+type DeleteCollectionsResponse struct {
+	Duration string `json:"duration"`
 }
 
 type DeleteCommandResponse struct {
@@ -5226,6 +5293,29 @@ type EnrichedActivity struct {
 	ReactionCounts map[string]int `json:"reaction_counts,omitempty"`
 
 	Target *Data `json:"target,omitempty"`
+}
+
+type EnrichedCollectionResponse struct {
+	// When the collection was created
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Unique identifier for the collection within its name
+	ID string `json:"id"`
+
+	// Name/type of the collection
+	Name string `json:"name"`
+
+	// Enrichment status of the collection
+	Status string `json:"status"`
+
+	// When the collection was last updated
+	UpdatedAt Timestamp `json:"updated_at"`
+
+	// Custom data for the collection
+	Custom map[string]any `json:"custom"`
+
+	// ID of the user who owns this collection
+	UserID *string `json:"user_id,omitempty"`
 }
 
 type EnrichedReaction struct {
@@ -6920,7 +7010,7 @@ type GetReactionsResponse struct {
 	Duration string `json:"duration"`
 
 	// List of reactions
-	Reactions []Reaction `json:"reactions"`
+	Reactions []ReactionResponse `json:"reactions"`
 }
 
 // Basic response information
@@ -7967,7 +8057,7 @@ type MessageNewEvent struct {
 }
 
 func (*MessageNewEvent) GetEventType() string {
-	return "message.new"
+	return "notification.thread_message_new"
 }
 
 type MessageOptions struct {
@@ -10631,6 +10721,13 @@ type ReactivateUsersResponse struct {
 	TaskID string `json:"task_id"`
 }
 
+type ReadCollectionsResponse struct {
+	Duration string `json:"duration"`
+
+	// List of collections matching the query
+	Collections []CollectionResponse `json:"collections"`
+}
+
 type ReadReceipts struct {
 	Enabled bool `json:"enabled"`
 }
@@ -11021,6 +11118,13 @@ func (*ReviewQueueItemUpdatedEvent) GetEventType() string {
 	return "review_queue_item.updated"
 }
 
+type RingCallResponse struct {
+	Duration string `json:"duration"`
+
+	// List of members ringing notification was sent to
+	MembersIds []string `json:"members_ids"`
+}
+
 type RingSettings struct {
 	AutoCancelTimeoutMs int `json:"auto_cancel_timeout_ms"`
 
@@ -11295,6 +11399,9 @@ type SIPInboundRoutingRuleRequest struct {
 
 // SIP Inbound Routing Rule response
 type SIPInboundRoutingRuleResponse struct {
+	// Creation timestamp
+	CreatedAt Timestamp `json:"created_at"`
+
 	Duration string `json:"duration"`
 
 	// Unique identifier of the SIP Inbound Routing Rule
@@ -11303,15 +11410,14 @@ type SIPInboundRoutingRuleResponse struct {
 	// Name of the SIP Inbound Routing Rule
 	Name string `json:"name"`
 
+	// Last update timestamp
+	UpdatedAt Timestamp `json:"updated_at"`
+
 	// List of called numbers
 	CalledNumbers []string `json:"called_numbers"`
 
 	// List of SIP trunk IDs
 	TrunkIds []string `json:"trunk_ids"`
-
-	CreatedAt UnixTs `json:"created_at"`
-
-	UpdatedAt UnixTs `json:"updated_at"`
 
 	// List of caller numbers
 	CallerNumbers []string `json:"caller_numbers,omitempty"`
@@ -11359,6 +11465,9 @@ type SIPPinProtectionConfigsResponse struct {
 
 // SIP trunk information
 type SIPTrunkResponse struct {
+	// Creation timestamp
+	CreatedAt Timestamp `json:"created_at"`
+
 	// Unique identifier for the SIP trunk
 	ID string `json:"id"`
 
@@ -11368,6 +11477,9 @@ type SIPTrunkResponse struct {
 	// Password for SIP trunk authentication
 	Password string `json:"password"`
 
+	// Last update timestamp
+	UpdatedAt Timestamp `json:"updated_at"`
+
 	// The URI for the SIP trunk
 	Uri string `json:"uri"`
 
@@ -11376,8 +11488,6 @@ type SIPTrunkResponse struct {
 
 	// Phone numbers associated with this SIP trunk
 	Numbers []string `json:"numbers"`
-
-	UpdatedAt UnixTs `json:"updated_at"`
 }
 
 type SRTIngress struct {
@@ -12364,8 +12474,6 @@ type UnfollowResponse struct {
 	Follow FollowResponse `json:"follow"`
 }
 
-type UnixTs struct{}
-
 // Basic response information
 type UnmuteResponse struct {
 	// Duration of the request in milliseconds
@@ -12622,6 +12730,24 @@ type UpdateChannelTypeResponse struct {
 	AutomodThresholds *Thresholds `json:"automod_thresholds,omitempty"`
 }
 
+type UpdateCollectionRequest struct {
+	// Unique identifier for the collection within its name
+	ID string `json:"id"`
+
+	// Name/type of the collection
+	Name string `json:"name"`
+
+	// Custom data for the collection (required, must contain at least one key)
+	Custom map[string]any `json:"custom"`
+}
+
+type UpdateCollectionsResponse struct {
+	Duration string `json:"duration"`
+
+	// List of updated collections
+	Collections []CollectionResponse `json:"collections"`
+}
+
 type UpdateCommandResponse struct {
 	Duration string `json:"duration"`
 
@@ -12837,6 +12963,13 @@ type UpsertActivitiesResponse struct {
 
 	// List of created or updated activities
 	Activities []ActivityResponse `json:"activities"`
+}
+
+type UpsertCollectionsResponse struct {
+	Duration string `json:"duration"`
+
+	// List of upserted collections
+	Collections []CollectionResponse `json:"collections"`
 }
 
 type UpsertConfigResponse struct {

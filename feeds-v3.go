@@ -173,7 +173,7 @@ func (c *FeedsClient) GetActivity(ctx context.Context, id string, request *GetAc
 	return res, err
 }
 
-// Updates certain fields of the activity
+// Updates certain fields of the activity. Use 'set' to update specific fields and 'unset' to remove fields. This allows you to update only the fields you need without replacing the entire activity. Useful for updating reply restrictions ('restrict_replies'), mentioned users, or custom data.
 //
 // Sends events:
 // - feeds.activity.updated
@@ -186,7 +186,7 @@ func (c *FeedsClient) UpdateActivityPartial(ctx context.Context, id string, requ
 	return res, err
 }
 
-// Replaces an activity with the provided data
+// Replaces an activity with the provided data. Use this to update text, attachments, reply restrictions ('restrict_replies'), mentioned users, and other activity fields. Note: This is a full update - any fields not provided will be cleared.
 //
 // Sends events:
 // - feeds.activity.updated
@@ -230,6 +230,43 @@ func (c *FeedsClient) UpdateBookmarkFolder(ctx context.Context, folderID string,
 func (c *FeedsClient) QueryBookmarks(ctx context.Context, request *QueryBookmarksRequest) (*StreamResponse[QueryBookmarksResponse], error) {
 	var result QueryBookmarksResponse
 	res, err := MakeRequest[QueryBookmarksRequest, QueryBookmarksResponse](c.client, ctx, "POST", "/api/v2/feeds/bookmarks/query", nil, request, &result, nil)
+	return res, err
+}
+
+// Delete collections in a batch operation. Users can only delete their own collections.
+func (c *FeedsClient) DeleteCollections(ctx context.Context, request *DeleteCollectionsRequest) (*StreamResponse[DeleteCollectionsResponse], error) {
+	var result DeleteCollectionsResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, DeleteCollectionsResponse](c.client, ctx, "DELETE", "/api/v2/feeds/collections", params, nil, &result, nil)
+	return res, err
+}
+
+// Read collections with optional filtering by user ID and collection name. By default, users can only read their own collections.
+func (c *FeedsClient) ReadCollections(ctx context.Context, request *ReadCollectionsRequest) (*StreamResponse[ReadCollectionsResponse], error) {
+	var result ReadCollectionsResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, ReadCollectionsResponse](c.client, ctx, "GET", "/api/v2/feeds/collections", params, nil, &result, nil)
+	return res, err
+}
+
+// Update existing collections in a batch operation. Only the custom data field is updatable. Users can only update their own collections.
+func (c *FeedsClient) UpdateCollections(ctx context.Context, request *UpdateCollectionsRequest) (*StreamResponse[UpdateCollectionsResponse], error) {
+	var result UpdateCollectionsResponse
+	res, err := MakeRequest[UpdateCollectionsRequest, UpdateCollectionsResponse](c.client, ctx, "PATCH", "/api/v2/feeds/collections", nil, request, &result, nil)
+	return res, err
+}
+
+// Create new collections in a batch operation. Collections are data objects that can be attached to activities for managing shared data across multiple activities.
+func (c *FeedsClient) CreateCollections(ctx context.Context, request *CreateCollectionsRequest) (*StreamResponse[CreateCollectionsResponse], error) {
+	var result CreateCollectionsResponse
+	res, err := MakeRequest[CreateCollectionsRequest, CreateCollectionsResponse](c.client, ctx, "POST", "/api/v2/feeds/collections", nil, request, &result, nil)
+	return res, err
+}
+
+// Insert new collections or update existing ones in a batch operation. Only the custom data field is updatable for existing collections.
+func (c *FeedsClient) UpsertCollections(ctx context.Context, request *UpsertCollectionsRequest) (*StreamResponse[UpsertCollectionsResponse], error) {
+	var result UpsertCollectionsResponse
+	res, err := MakeRequest[UpsertCollectionsRequest, UpsertCollectionsResponse](c.client, ctx, "PUT", "/api/v2/feeds/collections", nil, request, &result, nil)
 	return res, err
 }
 
