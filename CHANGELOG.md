@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.6.0](https://github.com/GetStream/getstream-go/compare/v3.5.0...v3.6.0) (2025-11-18)
+
 ## [3.5.0](https://github.com/GetStream/getstream-go/compare/v3.4.0...v3.5.0) (2025-11-13)
 
 ## [3.4.0](https://github.com/GetStream/getstream-go/compare/v3.3.0...v3.4.0) (2025-11-12)
