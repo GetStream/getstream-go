@@ -1015,7 +1015,7 @@ type AppResponseFields struct {
 
 	CallTypes map[string]*CallType `json:"call_types"`
 
-	ChannelConfigs map[string]ChannelConfig `json:"channel_configs"`
+	ChannelConfigs map[string]*ChannelConfig `json:"channel_configs"`
 
 	FileUploadConfig FileUploadConfig `json:"file_upload_config"`
 
@@ -1610,6 +1610,8 @@ type BookmarkFolderResponse struct {
 	// When the folder was last updated
 	UpdatedAt Timestamp `json:"updated_at"`
 
+	User UserResponseCommonFields `json:"user"`
+
 	// Custom data for the folder
 	Custom map[string]any `json:"custom,omitempty"`
 }
@@ -1644,7 +1646,7 @@ type BookmarkResponse struct {
 
 	Activity ActivityResponse `json:"activity"`
 
-	User UserResponse `json:"user"`
+	User UserResponseCommonFields `json:"user"`
 
 	// Custom data for the bookmark
 	Custom map[string]any `json:"custom,omitempty"`
@@ -2240,6 +2242,8 @@ type CallRecording struct {
 	EndTime Timestamp `json:"end_time"`
 
 	Filename string `json:"filename"`
+
+	RecordingType string `json:"recording_type"`
 
 	SessionID string `json:"session_id"`
 
@@ -3095,6 +3099,8 @@ func (*CampaignCompletedEvent) GetEventType() string {
 type CampaignMessageTemplate struct {
 	PollID string `json:"poll_id"`
 
+	Searchable bool `json:"searchable"`
+
 	Text string `json:"text"`
 
 	Attachments []Attachment `json:"attachments"`
@@ -3291,6 +3297,7 @@ type ChannelConfig struct {
 
 	UserMessageReminders bool `json:"user_message_reminders"`
 
+	// List of commands that channel supports
 	Commands []string `json:"commands"`
 
 	Blocklist *string `json:"blocklist,omitempty"`
@@ -3299,7 +3306,7 @@ type ChannelConfig struct {
 
 	PartitionSize *int `json:"partition_size,omitempty"`
 
-	PartitionTtl *int `json:"partition_ttl,omitempty"`
+	PartitionTtl *string `json:"partition_ttl,omitempty"`
 
 	AllowedFlagReasons []string `json:"allowed_flag_reasons,omitempty"`
 
@@ -3518,28 +3525,40 @@ type ChannelInput struct {
 	Custom map[string]any `json:"custom,omitempty"`
 }
 
+type ChannelInputRequest struct {
+	AutoTranslationEnabled *bool `json:"auto_translation_enabled,omitempty"`
+
+	AutoTranslationLanguage *string `json:"auto_translation_language,omitempty"`
+
+	Disabled *bool `json:"disabled,omitempty"`
+
+	Frozen *bool `json:"frozen,omitempty"`
+
+	Team *string `json:"team,omitempty"`
+
+	Invites []ChannelMember `json:"invites,omitempty"`
+
+	Members []ChannelMember `json:"members,omitempty"`
+
+	ConfigOverrides *ConfigOverrides `json:"config_overrides,omitempty"`
+
+	CreatedBy *User `json:"created_by,omitempty"`
+
+	Custom map[string]any `json:"custom,omitempty"`
+}
+
 type ChannelMember struct {
-	Banned bool `json:"banned"`
-
-	ChannelRole string `json:"channel_role"`
-
-	CreatedAt Timestamp `json:"created_at"`
-
-	IsGlobalBanned bool `json:"is_global_banned"`
-
-	NotificationsMuted bool `json:"notifications_muted"`
-
-	ShadowBanned bool `json:"shadow_banned"`
-
-	UpdatedAt Timestamp `json:"updated_at"`
-
-	Custom map[string]any `json:"custom"`
-
 	ArchivedAt *Timestamp `json:"archived_at,omitempty"`
 
 	BanExpires *Timestamp `json:"ban_expires,omitempty"`
 
+	Banned *bool `json:"banned,omitempty"`
+
 	Blocked *bool `json:"blocked,omitempty"`
+
+	ChannelRole *string `json:"channel_role,omitempty"`
+
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
 
 	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 
@@ -3551,17 +3570,27 @@ type ChannelMember struct {
 
 	Invited *bool `json:"invited,omitempty"`
 
+	IsGlobalBanned *bool `json:"is_global_banned,omitempty"`
+
 	IsModerator *bool `json:"is_moderator,omitempty"`
+
+	NotificationsMuted *bool `json:"notifications_muted,omitempty"`
 
 	PinnedAt *Timestamp `json:"pinned_at,omitempty"`
 
+	ShadowBanned *bool `json:"shadow_banned,omitempty"`
+
 	Status *string `json:"status,omitempty"`
+
+	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 
 	UserID *string `json:"user_id,omitempty"`
 
 	DeletedMessages []string `json:"deleted_messages,omitempty"`
 
 	Channel *DenormalizedChannelFields `json:"channel,omitempty"`
+
+	Custom map[string]any `json:"custom,omitempty"`
 
 	User *User `json:"user,omitempty"`
 }
@@ -3731,6 +3760,12 @@ type ChannelPushPreferences struct {
 	DisabledUntil *Timestamp `json:"disabled_until,omitempty"`
 }
 
+type ChannelPushPreferencesResponse struct {
+	ChatLevel *string `json:"chat_level,omitempty"`
+
+	DisabledUntil *Timestamp `json:"disabled_until,omitempty"`
+}
+
 // Represents channel in chat
 type ChannelResponse struct {
 	// Channel CID (<type>:<id>)
@@ -3845,7 +3880,7 @@ type ChannelStateResponse struct {
 
 	Membership *ChannelMemberResponse `json:"membership,omitempty"`
 
-	PushPreferences *ChannelPushPreferences `json:"push_preferences,omitempty"`
+	PushPreferences *ChannelPushPreferencesResponse `json:"push_preferences,omitempty"`
 }
 
 type ChannelStateResponseFields struct {
@@ -3887,7 +3922,7 @@ type ChannelStateResponseFields struct {
 
 	Membership *ChannelMemberResponse `json:"membership,omitempty"`
 
-	PushPreferences *ChannelPushPreferences `json:"push_preferences,omitempty"`
+	PushPreferences *ChannelPushPreferencesResponse `json:"push_preferences,omitempty"`
 }
 
 type ChannelTruncatedEvent struct {
@@ -4174,23 +4209,23 @@ type CollectionRequest struct {
 }
 
 type CollectionResponse struct {
-	// When the collection was created
-	CreatedAt Timestamp `json:"created_at"`
-
 	// Unique identifier for the collection within its name
 	ID string `json:"id"`
 
 	// Name/type of the collection
 	Name string `json:"name"`
 
-	// When the collection was last updated
-	UpdatedAt Timestamp `json:"updated_at"`
+	// When the collection was created
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
 
-	// Custom data for the collection
-	Custom map[string]any `json:"custom"`
+	// When the collection was last updated
+	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 
 	// ID of the user who owns this collection
 	UserID *string `json:"user_id,omitempty"`
+
+	// Custom data for the collection
+	Custom map[string]any `json:"custom,omitempty"`
 }
 
 // Represents custom chat command
@@ -4446,10 +4481,6 @@ func (*CommentUpdatedEvent) GetEventType() string {
 }
 
 type ConfigOverrides struct {
-	Commands []string `json:"commands"`
-
-	Grants map[string][]string `json:"grants"`
-
 	Blocklist *string `json:"blocklist,omitempty"`
 
 	BlocklistBehavior *string `json:"blocklist_behavior,omitempty"`
@@ -4473,6 +4504,10 @@ type ConfigOverrides struct {
 	UrlEnrichment *bool `json:"url_enrichment,omitempty"`
 
 	UserMessageReminders *bool `json:"user_message_reminders,omitempty"`
+
+	Commands []string `json:"commands,omitempty"`
+
+	Grants map[string][]string `json:"grants,omitempty"`
 }
 
 type ConfigResponse struct {
@@ -5080,8 +5115,14 @@ type DeleteUsersResponse struct {
 	TaskID string `json:"task_id"`
 }
 
+type DeliveredMessagePayload struct {
+	Cid *string `json:"cid,omitempty"`
+
+	ID *string `json:"id,omitempty"`
+}
+
 type DeliveryReceipts struct {
-	Enabled bool `json:"enabled"`
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 type DeliveryReceiptsResponse struct {
@@ -5296,9 +5337,6 @@ type EnrichedActivity struct {
 }
 
 type EnrichedCollectionResponse struct {
-	// When the collection was created
-	CreatedAt Timestamp `json:"created_at"`
-
 	// Unique identifier for the collection within its name
 	ID string `json:"id"`
 
@@ -5308,14 +5346,17 @@ type EnrichedCollectionResponse struct {
 	// Enrichment status of the collection
 	Status string `json:"status"`
 
-	// When the collection was last updated
-	UpdatedAt Timestamp `json:"updated_at"`
+	// When the collection was created
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
 
-	// Custom data for the collection
-	Custom map[string]any `json:"custom"`
+	// When the collection was last updated
+	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 
 	// ID of the user who owns this collection
 	UserID *string `json:"user_id,omitempty"`
+
+	// Custom data for the collection
+	Custom map[string]any `json:"custom,omitempty"`
 }
 
 type EnrichedReaction struct {
@@ -5423,6 +5464,8 @@ type EventHook struct {
 	ID *string `json:"id,omitempty"`
 
 	Product *string `json:"product,omitempty"`
+
+	ShouldSendCustomEvents *bool `json:"should_send_custom_events,omitempty"`
 
 	SnsAuthType *string `json:"sns_auth_type,omitempty"`
 
@@ -6089,6 +6132,9 @@ type FeedsPreferences struct {
 	// Push notification preference for reactions on comments
 	CommentReaction *string `json:"comment_reaction,omitempty"`
 
+	// Push notification preference for replies to comments
+	CommentReply *string `json:"comment_reply,omitempty"`
+
 	// Push notification preference for new followers
 	Follow *string `json:"follow,omitempty"`
 
@@ -6099,6 +6145,20 @@ type FeedsPreferences struct {
 	Reaction *string `json:"reaction,omitempty"`
 
 	// Push notification preferences for custom activity types. Map of activity type to preference (all or none)
+	CustomActivityTypes map[string]string `json:"custom_activity_types,omitempty"`
+}
+
+type FeedsPreferencesResponse struct {
+	Comment *string `json:"comment,omitempty"`
+
+	CommentReaction *string `json:"comment_reaction,omitempty"`
+
+	Follow *string `json:"follow,omitempty"`
+
+	Mention *string `json:"mention,omitempty"`
+
+	Reaction *string `json:"reaction,omitempty"`
+
 	CustomActivityTypes map[string]string `json:"custom_activity_types,omitempty"`
 }
 
@@ -6160,6 +6220,12 @@ type FileUploadResponse struct {
 
 	// URL of the file thumbnail for supported file formats. Should be put to `thumb_url` attachment field
 	ThumbUrl *string `json:"thumb_url,omitempty"`
+}
+
+type FilterConfigResponse struct {
+	LlmLabels []string `json:"llm_labels"`
+
+	AiTextLabels []string `json:"ai_text_labels,omitempty"`
 }
 
 type FirebaseConfig struct {
@@ -7645,6 +7711,12 @@ type ListTranscriptionsResponse struct {
 	Transcriptions []CallTranscription `json:"transcriptions"`
 }
 
+// Basic response information
+type MarkDeliveredResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+}
+
 type MarkReadResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -8817,7 +8889,20 @@ type NoiseCancellationSettings struct {
 	Mode string `json:"mode"`
 }
 
+type NotificationComment struct {
+	Comment string `json:"comment"`
+
+	ID string `json:"id"`
+
+	UserID string `json:"user_id"`
+
+	Attachments []Attachment `json:"attachments,omitempty"`
+}
+
 type NotificationConfig struct {
+	// Time window for deduplicating notification activities (reactions and follows). Empty or '0' = always deduplicate (default). Examples: '1h', '24h', '7d', '1w'
+	DeduplicationWindow *string `json:"deduplication_window,omitempty"`
+
 	// Whether to track read status
 	TrackRead *bool `json:"track_read,omitempty"`
 
@@ -8952,6 +9037,8 @@ type NotificationTarget struct {
 
 	// Attachments on the target activity (for activity targets)
 	Attachments []Attachment `json:"attachments,omitempty"`
+
+	Comment *NotificationComment `json:"comment,omitempty"`
 }
 
 type NotificationTrigger struct {
@@ -9139,7 +9226,7 @@ type OwnUserResponse struct {
 
 	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
 
-	PushPreferences *PushPreferences `json:"push_preferences,omitempty"`
+	PushPreferences *PushPreferencesResponse `json:"push_preferences,omitempty"`
 
 	TeamsRole map[string]string `json:"teams_role,omitempty"`
 
@@ -9776,6 +9863,18 @@ type PushPreferences struct {
 	FeedsPreferences *FeedsPreferences `json:"feeds_preferences,omitempty"`
 }
 
+type PushPreferencesResponse struct {
+	CallLevel *string `json:"call_level,omitempty"`
+
+	ChatLevel *string `json:"chat_level,omitempty"`
+
+	DisabledUntil *Timestamp `json:"disabled_until,omitempty"`
+
+	FeedsLevel *string `json:"feeds_level,omitempty"`
+
+	FeedsPreferences *FeedsPreferencesResponse `json:"feeds_preferences,omitempty"`
+}
+
 type PushProvider struct {
 	CreatedAt Timestamp `json:"created_at"`
 
@@ -10403,6 +10502,8 @@ type QueryReviewQueueResponse struct {
 	Next *string `json:"next,omitempty"`
 
 	Prev *string `json:"prev,omitempty"`
+
+	FilterConfig *FilterConfigResponse `json:"filter_config,omitempty"`
 }
 
 type QuerySegmentTargetsResponse struct {
@@ -10729,7 +10830,7 @@ type ReadCollectionsResponse struct {
 }
 
 type ReadReceipts struct {
-	Enabled bool `json:"enabled"`
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 type ReadReceiptsResponse struct {
@@ -10900,9 +11001,9 @@ type ReminderResponseData struct {
 
 	Channel *ChannelResponse `json:"channel,omitempty"`
 
-	Message *Message `json:"message,omitempty"`
+	Message *MessageResponse `json:"message,omitempty"`
 
-	User *User `json:"user,omitempty"`
+	User *UserResponse `json:"user,omitempty"`
 }
 
 // Emitted when a reminder is updated.
@@ -11775,27 +11876,13 @@ type ShadowBlockActionRequest struct {
 }
 
 type SharedLocation struct {
-	ChannelCid string `json:"channel_cid"`
+	Latitude float64 `json:"latitude"`
 
-	CreatedAt Timestamp `json:"created_at"`
+	Longitude float64 `json:"longitude"`
 
-	CreatedByDeviceID string `json:"created_by_device_id"`
-
-	MessageID string `json:"message_id"`
-
-	UpdatedAt Timestamp `json:"updated_at"`
-
-	UserID string `json:"user_id"`
+	CreatedByDeviceID *string `json:"created_by_device_id,omitempty"`
 
 	EndAt *Timestamp `json:"end_at,omitempty"`
-
-	Latitude *float64 `json:"latitude,omitempty"`
-
-	Longitude *float64 `json:"longitude,omitempty"`
-
-	Channel *Channel `json:"channel,omitempty"`
-
-	Message *Message `json:"message,omitempty"`
 }
 
 type SharedLocationResponse struct {
@@ -12418,7 +12505,7 @@ type TruncateChannelResponse struct {
 }
 
 type TypingIndicators struct {
-	Enabled bool `json:"enabled"`
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 type TypingIndicatorsResponse struct {
@@ -13041,43 +13128,27 @@ type UpsertPushTemplateResponse struct {
 }
 
 type User struct {
-	Banned bool `json:"banned"`
-
 	ID string `json:"id"`
-
-	Online bool `json:"online"`
-
-	Role string `json:"role"`
-
-	Custom map[string]any `json:"custom"`
-
-	TeamsRole map[string]string `json:"teams_role"`
-
-	AvgResponseTime *int `json:"avg_response_time,omitempty"`
 
 	BanExpires *Timestamp `json:"ban_expires,omitempty"`
 
-	CreatedAt *Timestamp `json:"created_at,omitempty"`
-
-	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
-
-	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
+	Banned *bool `json:"banned,omitempty"`
 
 	Invisible *bool `json:"invisible,omitempty"`
 
 	Language *string `json:"language,omitempty"`
 
-	LastActive *Timestamp `json:"last_active,omitempty"`
-
-	LastEngagedAt *Timestamp `json:"last_engaged_at,omitempty"`
-
 	RevokeTokensIssuedBefore *Timestamp `json:"revoke_tokens_issued_before,omitempty"`
 
-	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
+	Role *string `json:"role,omitempty"`
 
 	Teams []string `json:"teams,omitempty"`
 
+	Custom map[string]any `json:"custom,omitempty"`
+
 	PrivacySettings *PrivacySettings `json:"privacy_settings,omitempty"`
+
+	TeamsRole map[string]string `json:"teams_role,omitempty"`
 }
 
 type UserBannedEvent struct {

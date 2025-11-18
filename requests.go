@@ -122,6 +122,11 @@ type DeleteChannelsRequest struct {
 	HardDelete *bool    `json:"hard_delete"`
 }
 
+type MarkDeliveredRequest struct {
+	UserID                  *string                   `json:"-" query:"user_id"`
+	LatestDeliveredMessages []DeliveredMessagePayload `json:"latest_delivered_messages"`
+}
+
 type MarkChannelsReadRequest struct {
 	UserID        *string           `json:"user_id"`
 	ReadByChannel map[string]string `json:"read_by_channel"`
@@ -165,7 +170,7 @@ type UpdateChannelRequest struct {
 	Invites           []ChannelMemberRequest `json:"invites"`
 	RemoveFilterTags  []string               `json:"remove_filter_tags"`
 	RemoveMembers     []string               `json:"remove_members"`
-	Data              *ChannelInput          `json:"data"`
+	Data              *ChannelInputRequest   `json:"data"`
 	Message           *MessageRequest        `json:"message"`
 	User              *UserRequest           `json:"user"`
 }
