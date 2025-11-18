@@ -71,6 +71,14 @@ func (c *ChatClient) DeleteChannels(ctx context.Context, request *DeleteChannels
 	return res, err
 }
 
+// Mark the status of a channel message delivered.
+func (c *ChatClient) MarkDelivered(ctx context.Context, request *MarkDeliveredRequest) (*StreamResponse[MarkDeliveredResponse], error) {
+	var result MarkDeliveredResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[MarkDeliveredRequest, MarkDeliveredResponse](c.client, ctx, "POST", "/api/v2/chat/channels/delivered", params, request, &result, nil)
+	return res, err
+}
+
 // Marks channels as read up to the specific message. If no channels is given, mark all channel as read
 //
 // Sends events:
