@@ -5465,6 +5465,8 @@ type EventHook struct {
 
 	Product *string `json:"product,omitempty"`
 
+	ShouldSendCustomEvents *bool `json:"should_send_custom_events,omitempty"`
+
 	SnsAuthType *string `json:"sns_auth_type,omitempty"`
 
 	SnsKey *string `json:"sns_key,omitempty"`
@@ -6129,6 +6131,9 @@ type FeedsPreferences struct {
 
 	// Push notification preference for reactions on comments
 	CommentReaction *string `json:"comment_reaction,omitempty"`
+
+	// Push notification preference for replies to comments
+	CommentReply *string `json:"comment_reply,omitempty"`
 
 	// Push notification preference for new followers
 	Follow *string `json:"follow,omitempty"`
@@ -8884,6 +8889,16 @@ type NoiseCancellationSettings struct {
 	Mode string `json:"mode"`
 }
 
+type NotificationComment struct {
+	Comment string `json:"comment"`
+
+	ID string `json:"id"`
+
+	UserID string `json:"user_id"`
+
+	Attachments []Attachment `json:"attachments,omitempty"`
+}
+
 type NotificationConfig struct {
 	// Time window for deduplicating notification activities (reactions and follows). Empty or '0' = always deduplicate (default). Examples: '1h', '24h', '7d', '1w'
 	DeduplicationWindow *string `json:"deduplication_window,omitempty"`
@@ -9022,6 +9037,8 @@ type NotificationTarget struct {
 
 	// Attachments on the target activity (for activity targets)
 	Attachments []Attachment `json:"attachments,omitempty"`
+
+	Comment *NotificationComment `json:"comment,omitempty"`
 }
 
 type NotificationTrigger struct {
