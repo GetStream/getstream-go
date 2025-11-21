@@ -779,7 +779,7 @@ func (c *FeedsClient) DeleteFeedUserData(ctx context.Context, userID string, req
 	return res, err
 }
 
-// Export all activities, reactions, comments, and bookmarks for a user
+// Export all feed data for a user including: user profile, feeds, activities, follows, comments, feed reactions, bookmark folders, bookmarks, and collections owned by the user
 func (c *FeedsClient) ExportFeedUserData(ctx context.Context, userID string, request *ExportFeedUserDataRequest) (*StreamResponse[ExportFeedUserDataResponse], error) {
 	var result ExportFeedUserDataResponse
 	pathParams := map[string]string{

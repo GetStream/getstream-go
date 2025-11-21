@@ -636,8 +636,8 @@ func test08AddComment(t *testing.T, ctx context.Context, feedsClient *getstream.
 	// snippet-start: AddComment
 	response, err := feedsClient.AddComment(ctx, &getstream.AddCommentRequest{
 		Comment:    getstream.PtrTo("This is a test comment from Go SDK"),
-		ObjectID:   activityID,
-		ObjectType: "activity",
+		ObjectID:   &activityID,
+		ObjectType: getstream.PtrTo("activity"),
 		UserID:     &testUserID,
 	})
 	// snippet-end: AddComment
@@ -673,8 +673,8 @@ func test09QueryComments(t *testing.T, ctx context.Context, feedsClient *getstre
 	// Add a comment first
 	commentResponse, err := feedsClient.AddComment(ctx, &getstream.AddCommentRequest{
 		Comment:    getstream.PtrTo("Comment for query test"),
-		ObjectID:   activityID,
-		ObjectType: "activity",
+		ObjectID:   &activityID,
+		ObjectType: getstream.PtrTo("activity"),
 		UserID:     &testUserID,
 	})
 	assertResponseSuccess(t, commentResponse, err, "add comment for query test")
@@ -712,8 +712,8 @@ func test10UpdateComment(t *testing.T, ctx context.Context, feedsClient *getstre
 	// Add a comment to update
 	commentResponse, err := feedsClient.AddComment(ctx, &getstream.AddCommentRequest{
 		Comment:    getstream.PtrTo("Comment to be updated"),
-		ObjectID:   activityID,
-		ObjectType: "activity",
+		ObjectID:   &activityID,
+		ObjectType: getstream.PtrTo("activity"),
 		UserID:     &testUserID,
 	})
 	assertResponseSuccess(t, commentResponse, err, "add comment for update test")
@@ -1075,8 +1075,8 @@ func test21DeleteComment(t *testing.T, ctx context.Context, feedsClient *getstre
 	// Add a comment first
 	commentResponse, err := feedsClient.AddComment(ctx, &getstream.AddCommentRequest{
 		Comment:    getstream.PtrTo("Comment to be deleted"),
-		ObjectID:   activityID,
-		ObjectType: "activity",
+		ObjectID:   &activityID,
+		ObjectType: getstream.PtrTo("activity"),
 		UserID:     &testUserID,
 	})
 	assertResponseSuccess(t, commentResponse, err, "add comment for delete test")
@@ -1591,8 +1591,8 @@ func test32RealWorldUsageDemo(t *testing.T, ctx context.Context, feedsClient *ge
 	for _, commentText := range comments {
 		commentResponse, err := feedsClient.AddComment(ctx, &getstream.AddCommentRequest{
 			Comment:    getstream.PtrTo(commentText),
-			ObjectID:   postID,
-			ObjectType: "activity",
+			ObjectID:   &postID,
+			ObjectType: getstream.PtrTo("activity"),
 			UserID:     &testUserID2,
 		})
 		assertResponseSuccess(t, commentResponse, err, "add comment to post")
