@@ -704,6 +704,7 @@ type AddActivityRequest struct {
 	ParentID         *string           `json:"parent_id"`
 	PollID           *string           `json:"poll_id"`
 	RestrictReplies  *string           `json:"restrict_replies"`
+	SkipEnrichUrl    *bool             `json:"skip_enrich_url"`
 	Text             *string           `json:"text"`
 	UserID           *string           `json:"user_id"`
 	Visibility       *string           `json:"visibility"`
@@ -810,6 +811,7 @@ type UpdateActivityRequest struct {
 	ExpiresAt       *Timestamp        `json:"expires_at"`
 	PollID          *string           `json:"poll_id"`
 	RestrictReplies *string           `json:"restrict_replies"`
+	SkipEnrichUrl   *bool             `json:"skip_enrich_url"`
 	Text            *string           `json:"text"`
 	UserID          *string           `json:"user_id"`
 	Visibility      *string           `json:"visibility"`
@@ -886,12 +888,13 @@ type GetCommentsRequest struct {
 }
 
 type AddCommentRequest struct {
-	ObjectID                   string         `json:"object_id"`
-	ObjectType                 string         `json:"object_type"`
 	Comment                    *string        `json:"comment"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
 	ID                         *string        `json:"id"`
+	ObjectID                   *string        `json:"object_id"`
+	ObjectType                 *string        `json:"object_type"`
 	ParentID                   *string        `json:"parent_id"`
+	SkipEnrichUrl              *bool          `json:"skip_enrich_url"`
 	SkipPush                   *bool          `json:"skip_push"`
 	UserID                     *string        `json:"user_id"`
 	Attachments                []Attachment   `json:"attachments"`
@@ -920,11 +923,12 @@ type GetCommentRequest struct {
 }
 
 type UpdateCommentRequest struct {
-	Comment  *string        `json:"comment"`
-	SkipPush *bool          `json:"skip_push"`
-	UserID   *string        `json:"user_id"`
-	Custom   map[string]any `json:"custom"`
-	User     *UserRequest   `json:"user"`
+	Comment       *string        `json:"comment"`
+	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
+	SkipPush      *bool          `json:"skip_push"`
+	UserID        *string        `json:"user_id"`
+	Custom        map[string]any `json:"custom"`
+	User          *UserRequest   `json:"user"`
 }
 
 type AddCommentReactionRequest struct {

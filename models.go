@@ -580,6 +580,9 @@ type ActivityRequest struct {
 	// Controls who can add comments/replies to this activity. Options: 'everyone' (default - anyone can reply), 'people_i_follow' (only people the activity creator follows can reply), 'nobody' (no one can reply)
 	RestrictReplies *string `json:"restrict_replies,omitempty"`
 
+	// Whether to skip URL enrichment for the activity
+	SkipEnrichUrl *bool `json:"skip_enrich_url,omitempty"`
+
 	// Text content of the activity
 	Text *string `json:"text,omitempty"`
 
@@ -3244,6 +3247,62 @@ type Channel struct {
 	TruncatedBy *User `json:"truncated_by,omitempty"`
 }
 
+type ChannelBatchUpdatedCompletedEvent struct {
+	BatchCreatedAt Timestamp `json:"batch_created_at"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	FinishedAt Timestamp `json:"finished_at"`
+
+	Operation string `json:"operation"`
+
+	Status string `json:"status"`
+
+	SuccessChannelsCount int `json:"success_channels_count"`
+
+	TaskID string `json:"task_id"`
+
+	FailedChannels []FailedChannelUpdates `json:"failed_channels"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*ChannelBatchUpdatedCompletedEvent) GetEventType() string {
+	return "channel_batch_update.completed"
+}
+
+type ChannelBatchUpdatedStartedEvent struct {
+	BatchCreatedAt Timestamp `json:"batch_created_at"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	FinishedAt Timestamp `json:"finished_at"`
+
+	Operation string `json:"operation"`
+
+	Status string `json:"status"`
+
+	SuccessChannelsCount int `json:"success_channels_count"`
+
+	TaskID string `json:"task_id"`
+
+	FailedChannels []FailedChannelUpdates `json:"failed_channels"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*ChannelBatchUpdatedStartedEvent) GetEventType() string {
+	return "channel_batch_update.started"
+}
+
 type ChannelConfig struct {
 	Automod string `json:"automod"`
 
@@ -5581,6 +5640,12 @@ type FCM struct {
 	Data map[string]any `json:"data,omitempty"`
 }
 
+type FailedChannelUpdates struct {
+	Reason string `json:"reason"`
+
+	Cids []string `json:"cids"`
+}
+
 // Emitted when a feed is created.
 type FeedCreatedEvent struct {
 	// Date/time of creation
@@ -6291,6 +6356,10 @@ type Flag struct {
 	TargetUser *User `json:"target_user,omitempty"`
 
 	User *User `json:"user,omitempty"`
+}
+
+type FlagCountRuleParameters struct {
+	Threshold *int `json:"threshold,omitempty"`
 }
 
 type FlagDetails struct {
@@ -8129,7 +8198,7 @@ type MessageNewEvent struct {
 }
 
 func (*MessageNewEvent) GetEventType() string {
-	return "notification.thread_message_new"
+	return "message.new"
 }
 
 type MessageOptions struct {
@@ -9047,6 +9116,8 @@ type NotificationTrigger struct {
 
 	// The type of notification (mention, reaction, comment, follow, etc.)
 	Type string `json:"type"`
+
+	Comment *NotificationComment `json:"comment,omitempty"`
 }
 
 type OCRRule struct {
@@ -11285,6 +11356,8 @@ type RuleBuilderCondition struct {
 
 	ContentCountRuleParams *ContentCountRuleParameters `json:"content_count_rule_params,omitempty"`
 
+	ContentFlagCountRuleParams *FlagCountRuleParameters `json:"content_flag_count_rule_params,omitempty"`
+
 	ImageContentParams *ImageContentParameters `json:"image_content_params,omitempty"`
 
 	ImageRuleParams *ImageRuleParameters `json:"image_rule_params,omitempty"`
@@ -11296,6 +11369,8 @@ type RuleBuilderCondition struct {
 	UserCreatedWithinParams *UserCreatedWithinParameters `json:"user_created_within_params,omitempty"`
 
 	UserCustomPropertyParams *UserCustomPropertyParameters `json:"user_custom_property_params,omitempty"`
+
+	UserFlagCountRuleParams *FlagCountRuleParameters `json:"user_flag_count_rule_params,omitempty"`
 
 	UserRuleParams *UserRuleParameters `json:"user_rule_params,omitempty"`
 
