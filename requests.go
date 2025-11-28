@@ -704,6 +704,7 @@ type AddActivityRequest struct {
 	ParentID         *string           `json:"parent_id"`
 	PollID           *string           `json:"poll_id"`
 	RestrictReplies  *string           `json:"restrict_replies"`
+	SkipEnrichUrl    *bool             `json:"skip_enrich_url"`
 	Text             *string           `json:"text"`
 	UserID           *string           `json:"user_id"`
 	Visibility       *string           `json:"visibility"`
@@ -810,6 +811,7 @@ type UpdateActivityRequest struct {
 	ExpiresAt       *Timestamp        `json:"expires_at"`
 	PollID          *string           `json:"poll_id"`
 	RestrictReplies *string           `json:"restrict_replies"`
+	SkipEnrichUrl   *bool             `json:"skip_enrich_url"`
 	Text            *string           `json:"text"`
 	UserID          *string           `json:"user_id"`
 	Visibility      *string           `json:"visibility"`
@@ -886,12 +888,13 @@ type GetCommentsRequest struct {
 }
 
 type AddCommentRequest struct {
-	ObjectID                   string         `json:"object_id"`
-	ObjectType                 string         `json:"object_type"`
 	Comment                    *string        `json:"comment"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
 	ID                         *string        `json:"id"`
+	ObjectID                   *string        `json:"object_id"`
+	ObjectType                 *string        `json:"object_type"`
 	ParentID                   *string        `json:"parent_id"`
+	SkipEnrichUrl              *bool          `json:"skip_enrich_url"`
 	SkipPush                   *bool          `json:"skip_push"`
 	UserID                     *string        `json:"user_id"`
 	Attachments                []Attachment   `json:"attachments"`
@@ -920,11 +923,12 @@ type GetCommentRequest struct {
 }
 
 type UpdateCommentRequest struct {
-	Comment  *string        `json:"comment"`
-	SkipPush *bool          `json:"skip_push"`
-	UserID   *string        `json:"user_id"`
-	Custom   map[string]any `json:"custom"`
-	User     *UserRequest   `json:"user"`
+	Comment       *string        `json:"comment"`
+	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
+	SkipPush      *bool          `json:"skip_push"`
+	UserID        *string        `json:"user_id"`
+	Custom        map[string]any `json:"custom"`
+	User          *UserRequest   `json:"user"`
 }
 
 type AddCommentReactionRequest struct {
@@ -980,6 +984,7 @@ type DeleteFeedRequest struct {
 }
 
 type GetOrCreateFeedRequest struct {
+	IDAround            *string            `json:"id_around"`
 	Limit               *int               `json:"limit"`
 	Next                *string            `json:"next"`
 	Prev                *string            `json:"prev"`
@@ -987,6 +992,7 @@ type GetOrCreateFeedRequest struct {
 	View                *string            `json:"view"`
 	Watch               *bool              `json:"watch"`
 	Data                *FeedInput         `json:"data"`
+	EnrichmentOptions   *EnrichmentOptions `json:"enrichment_options"`
 	ExternalRanking     map[string]any     `json:"external_ranking"`
 	Filter              map[string]any     `json:"filter"`
 	FollowersPagination *PagerRequest      `json:"followers_pagination"`
@@ -1177,6 +1183,10 @@ type FollowBatchRequest struct {
 	Follows []FollowRequest `json:"follows"`
 }
 
+type GetOrCreateFollowsRequest struct {
+	Follows []FollowRequest `json:"follows"`
+}
+
 type QueryFollowsRequest struct {
 	Limit  *int               `json:"limit"`
 	Next   *string            `json:"next"`
@@ -1227,6 +1237,10 @@ type QueryFeedsUsageStatsRequest struct {
 }
 
 type UnfollowBatchRequest struct {
+	Follows []FollowPair `json:"follows"`
+}
+
+type GetOrCreateUnfollowsRequest struct {
 	Follows []FollowPair `json:"follows"`
 }
 
@@ -1935,6 +1949,14 @@ type DeleteRecordingRequest struct {
 type DeleteTranscriptionRequest struct {
 }
 
+type GetCallStatsMapRequest struct {
+	StartTime          *Timestamp `json:"-" query:"start_time"`
+	EndTime            *Timestamp `json:"-" query:"end_time"`
+	ExcludePublishers  *bool      `json:"-" query:"exclude_publishers"`
+	ExcludeSubscribers *bool      `json:"-" query:"exclude_subscribers"`
+	ExcludeSfus        *bool      `json:"-" query:"exclude_sfus"`
+}
+
 type GetCallSessionParticipantStatsDetailsRequest struct {
 	Since     *string `json:"-" query:"since"`
 	Until     *string `json:"-" query:"until"`
@@ -1942,6 +1964,9 @@ type GetCallSessionParticipantStatsDetailsRequest struct {
 }
 
 type QueryCallSessionParticipantStatsRequest struct {
+	Limit            *int               `json:"-" query:"limit"`
+	Prev             *string            `json:"-" query:"prev"`
+	Next             *string            `json:"-" query:"next"`
 	Sort             []SortParamRequest `json:"-" query:"sort"`
 	FilterConditions map[string]any     `json:"-" query:"filter_conditions"`
 }

@@ -303,6 +303,13 @@ func TestVideoDeleteTranscription(t *testing.T) {
 	_, err = client.Video().DeleteTranscription(context.Background(), "", "", "", "", &getstream.DeleteTranscriptionRequest{})
 	require.NoError(t, err)
 }
+func TestVideoGetCallStatsMap(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().GetCallStatsMap(context.Background(), "", "", "", &getstream.GetCallStatsMapRequest{})
+	require.NoError(t, err)
+}
 func TestVideoGetCallSessionParticipantStatsDetails(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

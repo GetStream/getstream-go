@@ -694,6 +694,13 @@ func (c *FeedsClient) FollowBatch(ctx context.Context, request *FollowBatchReque
 	return res, err
 }
 
+// Creates or updates multiple follows at once. Does not return an error if follows already exist. Broadcasts FollowAddedEvent only for newly created follows.
+func (c *FeedsClient) GetOrCreateFollows(ctx context.Context, request *GetOrCreateFollowsRequest) (*StreamResponse[FollowBatchResponse], error) {
+	var result FollowBatchResponse
+	res, err := MakeRequest[GetOrCreateFollowsRequest, FollowBatchResponse](c.client, ctx, "POST", "/api/v2/feeds/follows/batch/upsert", nil, request, &result, nil)
+	return res, err
+}
+
 // Query follows based on filters with pagination and sorting options
 func (c *FeedsClient) QueryFollows(ctx context.Context, request *QueryFollowsRequest) (*StreamResponse[QueryFollowsResponse], error) {
 	var result QueryFollowsResponse
@@ -769,6 +776,13 @@ func (c *FeedsClient) UnfollowBatch(ctx context.Context, request *UnfollowBatchR
 	return res, err
 }
 
+// Removes multiple follows and broadcasts FollowRemovedEvent for each. Does not return an error if follows don't exist.
+func (c *FeedsClient) GetOrCreateUnfollows(ctx context.Context, request *GetOrCreateUnfollowsRequest) (*StreamResponse[UnfollowBatchResponse], error) {
+	var result UnfollowBatchResponse
+	res, err := MakeRequest[GetOrCreateUnfollowsRequest, UnfollowBatchResponse](c.client, ctx, "POST", "/api/v2/feeds/unfollow/batch/upsert", nil, request, &result, nil)
+	return res, err
+}
+
 // Delete all activities, reactions, comments, and bookmarks for a user
 func (c *FeedsClient) DeleteFeedUserData(ctx context.Context, userID string, request *DeleteFeedUserDataRequest) (*StreamResponse[DeleteFeedUserDataResponse], error) {
 	var result DeleteFeedUserDataResponse
@@ -779,7 +793,7 @@ func (c *FeedsClient) DeleteFeedUserData(ctx context.Context, userID string, req
 	return res, err
 }
 
-// Export all activities, reactions, comments, and bookmarks for a user
+// Export all feed data for a user including: user profile, feeds, activities, follows, comments, feed reactions, bookmark folders, bookmarks, and collections owned by the user
 func (c *FeedsClient) ExportFeedUserData(ctx context.Context, userID string, request *ExportFeedUserDataRequest) (*StreamResponse[ExportFeedUserDataResponse], error) {
 	var result ExportFeedUserDataResponse
 	pathParams := map[string]string{
