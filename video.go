@@ -520,6 +520,18 @@ func (c *VideoClient) DeleteTranscription(ctx context.Context, _type string, id 
 	return res, err
 }
 
+func (c *VideoClient) GetCallStatsMap(ctx context.Context, callType string, callID string, session string, request *GetCallStatsMapRequest) (*StreamResponse[QueryCallStatsMapResponse], error) {
+	var result QueryCallStatsMapResponse
+	pathParams := map[string]string{
+		"call_type": callType,
+		"call_id":   callID,
+		"session":   session,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, QueryCallStatsMapResponse](c.client, ctx, "GET", "/api/v2/video/call_stats/{call_type}/{call_id}/{session}/map", params, nil, &result, pathParams)
+	return res, err
+}
+
 func (c *VideoClient) GetCallSessionParticipantStatsDetails(ctx context.Context, callType string, callID string, session string, user string, userSession string, request *GetCallSessionParticipantStatsDetailsRequest) (*StreamResponse[GetCallSessionParticipantStatsDetailsResponse], error) {
 	var result GetCallSessionParticipantStatsDetailsResponse
 	pathParams := map[string]string{

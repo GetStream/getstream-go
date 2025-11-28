@@ -98,6 +98,8 @@ func (c *ChatClient) MarkChannelsRead(ctx context.Context, request *MarkChannels
 // - member.removed
 // - member.updated
 // - user.watching.start
+// - channel.created
+// - user.watching.start
 func (c *ChatClient) GetOrCreateDistinctChannel(ctx context.Context, _type string, request *GetOrCreateDistinctChannelRequest) (*StreamResponse[ChannelStateResponse], error) {
 	var result ChannelStateResponse
 	pathParams := map[string]string{
@@ -147,9 +149,6 @@ func (c *ChatClient) UpdateChannelPartial(ctx context.Context, _type string, id 
 // - member.updated
 // - message.new
 // - channel.updated
-// - member.added
-// - member.removed
-// - member.updated
 // - message.new
 func (c *ChatClient) UpdateChannel(ctx context.Context, _type string, id string, request *UpdateChannelRequest) (*StreamResponse[UpdateChannelResponse], error) {
 	var result UpdateChannelResponse
@@ -307,6 +306,8 @@ func (c *ChatClient) GetManyMessages(ctx context.Context, _type string, id strin
 // - member.added
 // - member.removed
 // - member.updated
+// - user.watching.start
+// - channel.created
 // - user.watching.start
 func (c *ChatClient) GetOrCreateChannel(ctx context.Context, _type string, id string, request *GetOrCreateChannelRequest) (*StreamResponse[ChannelStateResponse], error) {
 	var result ChannelStateResponse

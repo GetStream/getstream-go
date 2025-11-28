@@ -580,6 +580,9 @@ type ActivityRequest struct {
 	// Controls who can add comments/replies to this activity. Options: 'everyone' (default - anyone can reply), 'people_i_follow' (only people the activity creator follows can reply), 'nobody' (no one can reply)
 	RestrictReplies *string `json:"restrict_replies,omitempty"`
 
+	// Whether to skip URL enrichment for the activity
+	SkipEnrichUrl *bool `json:"skip_enrich_url,omitempty"`
+
 	// Text content of the activity
 	Text *string `json:"text,omitempty"`
 
@@ -923,7 +926,7 @@ type AggregatedActivityResponse struct {
 
 type AggregationConfig struct {
 	// Format for activity aggregation
-	Format string `json:"format"`
+	Format *string `json:"format,omitempty"`
 }
 
 type AnyEvent struct {
@@ -1610,7 +1613,7 @@ type BookmarkFolderResponse struct {
 	// When the folder was last updated
 	UpdatedAt Timestamp `json:"updated_at"`
 
-	User UserResponseCommonFields `json:"user"`
+	User UserResponse `json:"user"`
 
 	// Custom data for the folder
 	Custom map[string]any `json:"custom,omitempty"`
@@ -1646,7 +1649,7 @@ type BookmarkResponse struct {
 
 	Activity ActivityResponse `json:"activity"`
 
-	User UserResponseCommonFields `json:"user"`
+	User UserResponse `json:"user"`
 
 	// Custom data for the bookmark
 	Custom map[string]any `json:"custom,omitempty"`
@@ -2757,6 +2760,56 @@ type CallStatsLocation struct {
 	Subdivision *string `json:"subdivision,omitempty"`
 }
 
+type CallStatsMapLocation struct {
+	Count int `json:"count"`
+
+	LiveCount int `json:"live_count"`
+
+	Location *CallStatsLocation `json:"location,omitempty"`
+}
+
+type CallStatsMapPublisher struct {
+	IsLive bool `json:"is_live"`
+
+	UserID string `json:"user_id"`
+
+	UserSessionID string `json:"user_session_id"`
+
+	PublishedTracks PublishedTrackFlags `json:"published_tracks"`
+
+	Name *string `json:"name,omitempty"`
+
+	PublisherType *string `json:"publisher_type,omitempty"`
+
+	Location *CallStatsLocation `json:"location,omitempty"`
+}
+
+type CallStatsMapPublishers struct {
+	Publishers []CallStatsMapPublisher `json:"publishers"`
+}
+
+type CallStatsMapSFUs struct {
+	Locations []SFULocationResponse `json:"locations"`
+}
+
+type CallStatsMapSubscriber struct {
+	IsLive bool `json:"is_live"`
+
+	UserID string `json:"user_id"`
+
+	UserSessionID string `json:"user_session_id"`
+
+	Name *string `json:"name,omitempty"`
+
+	Location *CallStatsLocation `json:"location,omitempty"`
+}
+
+type CallStatsMapSubscribers struct {
+	Locations []CallStatsMapLocation `json:"locations"`
+
+	Participants []CallStatsMapSubscriber `json:"participants,omitempty"`
+}
+
 type CallStatsParticipant struct {
 	UserID string `json:"user_id"`
 
@@ -3242,6 +3295,62 @@ type Channel struct {
 	MembersLookup map[string]*ChannelMemberLookup `json:"members_lookup,omitempty"`
 
 	TruncatedBy *User `json:"truncated_by,omitempty"`
+}
+
+type ChannelBatchUpdatedCompletedEvent struct {
+	BatchCreatedAt Timestamp `json:"batch_created_at"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	FinishedAt Timestamp `json:"finished_at"`
+
+	Operation string `json:"operation"`
+
+	Status string `json:"status"`
+
+	SuccessChannelsCount int `json:"success_channels_count"`
+
+	TaskID string `json:"task_id"`
+
+	FailedChannels []FailedChannelUpdates `json:"failed_channels"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*ChannelBatchUpdatedCompletedEvent) GetEventType() string {
+	return "channel_batch_update.completed"
+}
+
+type ChannelBatchUpdatedStartedEvent struct {
+	BatchCreatedAt Timestamp `json:"batch_created_at"`
+
+	CreatedAt Timestamp `json:"created_at"`
+
+	FinishedAt Timestamp `json:"finished_at"`
+
+	Operation string `json:"operation"`
+
+	Status string `json:"status"`
+
+	SuccessChannelsCount int `json:"success_channels_count"`
+
+	TaskID string `json:"task_id"`
+
+	FailedChannels []FailedChannelUpdates `json:"failed_channels"`
+
+	Custom map[string]any `json:"custom"`
+
+	Type string `json:"type"`
+
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+}
+
+func (*ChannelBatchUpdatedStartedEvent) GetEventType() string {
+	return "channel_batch_update.started"
 }
 
 type ChannelConfig struct {
@@ -4555,6 +4664,12 @@ type ContentCountRuleParameters struct {
 	TimeWindow *string `json:"time_window,omitempty"`
 }
 
+type Coordinates struct {
+	Latitude float64 `json:"latitude"`
+
+	Longitude float64 `json:"longitude"`
+}
+
 type CountByMinuteResponse struct {
 	Count int `json:"count"`
 
@@ -5387,6 +5502,42 @@ type EnrichedReaction struct {
 	User *Data `json:"user,omitempty"`
 }
 
+type EnrichmentOptions struct {
+	SkipActivity *bool `json:"skip_activity,omitempty"`
+
+	SkipActivityCollections *bool `json:"skip_activity_collections,omitempty"`
+
+	SkipActivityComments *bool `json:"skip_activity_comments,omitempty"`
+
+	SkipActivityCurrentFeed *bool `json:"skip_activity_current_feed,omitempty"`
+
+	SkipActivityMentionedUsers *bool `json:"skip_activity_mentioned_users,omitempty"`
+
+	SkipActivityOwnBookmarks *bool `json:"skip_activity_own_bookmarks,omitempty"`
+
+	SkipActivityParents *bool `json:"skip_activity_parents,omitempty"`
+
+	SkipActivityPoll *bool `json:"skip_activity_poll,omitempty"`
+
+	SkipActivityReactions *bool `json:"skip_activity_reactions,omitempty"`
+
+	SkipActivityRefreshImageUrls *bool `json:"skip_activity_refresh_image_urls,omitempty"`
+
+	SkipAll *bool `json:"skip_all,omitempty"`
+
+	SkipFeedMemberUser *bool `json:"skip_feed_member_user,omitempty"`
+
+	SkipFollowers *bool `json:"skip_followers,omitempty"`
+
+	SkipFollowing *bool `json:"skip_following,omitempty"`
+
+	SkipOwnCapabilities *bool `json:"skip_own_capabilities,omitempty"`
+
+	SkipOwnFollows *bool `json:"skip_own_follows,omitempty"`
+
+	SkipPins *bool `json:"skip_pins,omitempty"`
+}
+
 type EntityCreatorResponse struct {
 	// Number of minor actions performed on the user
 	BanCount int `json:"ban_count"`
@@ -5579,6 +5730,12 @@ type ExternalStorageResponse struct {
 
 type FCM struct {
 	Data map[string]any `json:"data,omitempty"`
+}
+
+type FailedChannelUpdates struct {
+	Reason string `json:"reason"`
+
+	Cids []string `json:"cids"`
 }
 
 // Emitted when a feed is created.
@@ -6291,6 +6448,10 @@ type Flag struct {
 	TargetUser *User `json:"target_user,omitempty"`
 
 	User *User `json:"user,omitempty"`
+}
+
+type FlagCountRuleParameters struct {
+	Threshold *int `json:"threshold,omitempty"`
 }
 
 type FlagDetails struct {
@@ -7711,6 +7872,14 @@ type ListTranscriptionsResponse struct {
 	Transcriptions []CallTranscription `json:"transcriptions"`
 }
 
+type Location struct {
+	ContinentCode string `json:"continent_code"`
+
+	CountryIsoCode string `json:"country_iso_code"`
+
+	SubdivisionIsoCode string `json:"subdivision_iso_code"`
+}
+
 // Basic response information
 type MarkDeliveredResponse struct {
 	// Duration of the request in milliseconds
@@ -8129,7 +8298,7 @@ type MessageNewEvent struct {
 }
 
 func (*MessageNewEvent) GetEventType() string {
-	return "notification.thread_message_new"
+	return "message.new"
 }
 
 type MessageOptions struct {
@@ -9047,6 +9216,8 @@ type NotificationTrigger struct {
 
 	// The type of notification (mention, reaction, comment, follow, etc.)
 	Type string `json:"type"`
+
+	Comment *NotificationComment `json:"comment,omitempty"`
 }
 
 type OCRRule struct {
@@ -10182,6 +10353,38 @@ type QueryCallSessionParticipantStatsTimelineResponse struct {
 }
 
 // Basic response information
+type QueryCallStatsMapResponse struct {
+	CallID string `json:"call_id"`
+
+	CallSessionID string `json:"call_session_id"`
+
+	CallType string `json:"call_type"`
+
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+
+	Counts CallStatsParticipantCounts `json:"counts"`
+
+	CallEndedAt *Timestamp `json:"call_ended_at,omitempty"`
+
+	CallStartedAt *Timestamp `json:"call_started_at,omitempty"`
+
+	DataSource *string `json:"data_source,omitempty"`
+
+	EndTime *Timestamp `json:"end_time,omitempty"`
+
+	GeneratedAt *Timestamp `json:"generated_at,omitempty"`
+
+	StartTime *Timestamp `json:"start_time,omitempty"`
+
+	Publishers *CallStatsMapPublishers `json:"publishers,omitempty"`
+
+	Sfus *CallStatsMapSFUs `json:"sfus,omitempty"`
+
+	Subscribers *CallStatsMapSubscribers `json:"subscribers,omitempty"`
+}
+
+// Basic response information
 type QueryCallStatsResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -11285,6 +11488,8 @@ type RuleBuilderCondition struct {
 
 	ContentCountRuleParams *ContentCountRuleParameters `json:"content_count_rule_params,omitempty"`
 
+	ContentFlagCountRuleParams *FlagCountRuleParameters `json:"content_flag_count_rule_params,omitempty"`
+
 	ImageContentParams *ImageContentParameters `json:"image_content_params,omitempty"`
 
 	ImageRuleParams *ImageRuleParameters `json:"image_rule_params,omitempty"`
@@ -11296,6 +11501,8 @@ type RuleBuilderCondition struct {
 	UserCreatedWithinParams *UserCreatedWithinParameters `json:"user_created_within_params,omitempty"`
 
 	UserCustomPropertyParams *UserCustomPropertyParameters `json:"user_custom_property_params,omitempty"`
+
+	UserFlagCountRuleParams *FlagCountRuleParameters `json:"user_flag_count_rule_params,omitempty"`
 
 	UserRuleParams *UserRuleParameters `json:"user_rule_params,omitempty"`
 
@@ -11353,6 +11560,18 @@ type SDKUsageReport struct {
 
 type SDKUsageReportResponse struct {
 	Daily []DailyAggregateSDKUsageReportResponse `json:"daily"`
+}
+
+type SFULocationResponse struct {
+	Datacenter string `json:"datacenter"`
+
+	ID string `json:"id"`
+
+	Coordinates Coordinates `json:"coordinates"`
+
+	Location Location `json:"location"`
+
+	Count *int `json:"count,omitempty"`
 }
 
 // Configuration for SIP call settings
