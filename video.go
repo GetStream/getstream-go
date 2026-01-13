@@ -426,7 +426,7 @@ func (c *VideoClient) StopRecording(ctx context.Context, _type string, id string
 		"type": _type,
 		"id":   id,
 	}
-	res, err := MakeRequest[any, StopRecordingResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_recording", nil, nil, &result, pathParams)
+	res, err := MakeRequest[StopRecordingRequest, StopRecordingResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_recording", nil, request, &result, pathParams)
 	return res, err
 }
 

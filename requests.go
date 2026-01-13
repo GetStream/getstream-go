@@ -1812,7 +1812,10 @@ type CollectUserFeedbackRequest struct {
 type GoLiveRequest struct {
 	RecordingStorageName     *string `json:"recording_storage_name"`
 	StartClosedCaption       *bool   `json:"start_closed_caption"`
+	StartCompositeRecording  *bool   `json:"start_composite_recording"`
 	StartHLS                 *bool   `json:"start_hls"`
+	StartIndividualRecording *bool   `json:"start_individual_recording"`
+	StartRawRecording        *bool   `json:"start_raw_recording"`
 	StartRecording           *bool   `json:"start_recording"`
 	StartTranscription       *bool   `json:"start_transcription"`
 	TranscriptionStorageName *string `json:"transcription_storage_name"`
@@ -1911,11 +1914,14 @@ type StopFrameRecordingRequest struct {
 }
 
 type StopLiveRequest struct {
-	ContinueClosedCaption  *bool `json:"continue_closed_caption"`
-	ContinueHLS            *bool `json:"continue_hls"`
-	ContinueRTMPBroadcasts *bool `json:"continue_rtmp_broadcasts"`
-	ContinueRecording      *bool `json:"continue_recording"`
-	ContinueTranscription  *bool `json:"continue_transcription"`
+	ContinueClosedCaption       *bool `json:"continue_closed_caption"`
+	ContinueCompositeRecording  *bool `json:"continue_composite_recording"`
+	ContinueHLS                 *bool `json:"continue_hls"`
+	ContinueIndividualRecording *bool `json:"continue_individual_recording"`
+	ContinueRTMPBroadcasts      *bool `json:"continue_rtmp_broadcasts"`
+	ContinueRawRecording        *bool `json:"continue_raw_recording"`
+	ContinueRecording           *bool `json:"continue_recording"`
+	ContinueTranscription       *bool `json:"continue_transcription"`
 }
 
 type StopRecordingRequest struct {

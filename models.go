@@ -2263,6 +2263,9 @@ type CallRecordingFailedEvent struct {
 
 	EgressID string `json:"egress_id"`
 
+	// The type of recording
+	RecordingType string `json:"recording_type"`
+
 	// The type of event: "call.recording_failed" in this case
 	Type string `json:"type"`
 }
@@ -2278,6 +2281,9 @@ type CallRecordingReadyEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 
 	EgressID string `json:"egress_id"`
+
+	// The type of recording
+	RecordingType string `json:"recording_type"`
 
 	CallRecording CallRecording `json:"call_recording"`
 
@@ -2297,6 +2303,9 @@ type CallRecordingStartedEvent struct {
 
 	EgressID string `json:"egress_id"`
 
+	// The type of recording
+	RecordingType string `json:"recording_type"`
+
 	// The type of event: "call.recording_started" in this case
 	Type string `json:"type"`
 }
@@ -2312,6 +2321,9 @@ type CallRecordingStoppedEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
 
 	EgressID string `json:"egress_id"`
+
+	// The type of recording
+	RecordingType string `json:"recording_type"`
 
 	// The type of event: "call.recording_stopped" in this case
 	Type string `json:"type"`
@@ -2653,9 +2665,13 @@ type CallSettings struct {
 
 	Geofencing *GeofenceSettings `json:"geofencing,omitempty"`
 
+	IndividualRecording *IndividualRecordSettings `json:"individual_recording,omitempty"`
+
 	Ingress *IngressSettings `json:"ingress,omitempty"`
 
 	Limits *LimitsSettings `json:"limits,omitempty"`
+
+	RawRecording *RawRecordSettings `json:"raw_recording,omitempty"`
 
 	Recording *RecordSettings `json:"recording,omitempty"`
 
@@ -2683,9 +2699,13 @@ type CallSettingsRequest struct {
 
 	Geofencing *GeofenceSettingsRequest `json:"geofencing,omitempty"`
 
+	IndividualRecording *IndividualRecordingSettingsRequest `json:"individual_recording,omitempty"`
+
 	Ingress *IngressSettingsRequest `json:"ingress,omitempty"`
 
 	Limits *LimitsSettingsRequest `json:"limits,omitempty"`
+
+	RawRecording *RawRecordingSettingsRequest `json:"raw_recording,omitempty"`
 
 	Recording *RecordSettingsRequest `json:"recording,omitempty"`
 
@@ -2713,7 +2733,11 @@ type CallSettingsResponse struct {
 
 	Geofencing GeofenceSettingsResponse `json:"geofencing"`
 
+	IndividualRecording IndividualRecordingSettingsResponse `json:"individual_recording"`
+
 	Limits LimitsSettingsResponse `json:"limits"`
+
+	RawRecording RawRecordingSettingsResponse `json:"raw_recording"`
 
 	Recording RecordSettingsResponse `json:"recording"`
 
@@ -4589,6 +4613,10 @@ func (*CommentUpdatedEvent) GetEventType() string {
 	return "feeds.comment.updated"
 }
 
+type CompositeRecordingResponse struct {
+	Status string `json:"status"`
+}
+
 type ConfigOverrides struct {
 	Blocklist *string `json:"blocklist,omitempty"`
 
@@ -5414,9 +5442,15 @@ type EgressResponse struct {
 
 	Rtmps []EgressRTMPResponse `json:"rtmps"`
 
+	CompositeRecording *CompositeRecordingResponse `json:"composite_recording,omitempty"`
+
 	FrameRecording *FrameRecordingResponse `json:"frame_recording,omitempty"`
 
 	HLS *EgressHLSResponse `json:"hls,omitempty"`
+
+	IndividualRecording *IndividualRecordingResponse `json:"individual_recording,omitempty"`
+
+	RawRecording *RawRecordingResponse `json:"raw_recording,omitempty"`
 }
 
 // Response for ending a call
@@ -7470,6 +7504,22 @@ type ImportTaskHistory struct {
 	PrevState string `json:"prev_state"`
 }
 
+type IndividualRecordSettings struct {
+	Mode string `json:"mode"`
+}
+
+type IndividualRecordingResponse struct {
+	Status string `json:"status"`
+}
+
+type IndividualRecordingSettingsRequest struct {
+	Mode string `json:"mode"`
+}
+
+type IndividualRecordingSettingsResponse struct {
+	Mode string `json:"mode"`
+}
+
 type IngressAudioEncodingOptions struct {
 	Bitrate int `json:"bitrate"`
 
@@ -9246,38 +9296,42 @@ type OwnCapabilitiesBatchResponse struct {
 type OwnCapability string
 
 const (
-	BLOCK_USERS                OwnCapability = "block-users"
-	CHANGE_MAX_DURATION        OwnCapability = "change-max-duration"
-	CREATE_CALL                OwnCapability = "create-call"
-	CREATE_REACTION            OwnCapability = "create-reaction"
-	ENABLE_NOISE_CANCELLATION  OwnCapability = "enable-noise-cancellation"
-	END_CALL                   OwnCapability = "end-call"
-	JOIN_BACKSTAGE             OwnCapability = "join-backstage"
-	JOIN_CALL                  OwnCapability = "join-call"
-	JOIN_ENDED_CALL            OwnCapability = "join-ended-call"
-	KICK_USER                  OwnCapability = "kick-user"
-	MUTE_USERS                 OwnCapability = "mute-users"
-	PIN_FOR_EVERYONE           OwnCapability = "pin-for-everyone"
-	READ_CALL                  OwnCapability = "read-call"
-	REMOVE_CALL_MEMBER         OwnCapability = "remove-call-member"
-	SCREENSHARE                OwnCapability = "screenshare"
-	SEND_AUDIO                 OwnCapability = "send-audio"
-	SEND_CLOSED_CAPTIONS_CALL  OwnCapability = "send-closed-captions-call"
-	SEND_VIDEO                 OwnCapability = "send-video"
-	START_BROADCAST_CALL       OwnCapability = "start-broadcast-call"
-	START_CLOSED_CAPTIONS_CALL OwnCapability = "start-closed-captions-call"
-	START_FRAME_RECORD_CALL    OwnCapability = "start-frame-record-call"
-	START_RECORD_CALL          OwnCapability = "start-record-call"
-	START_TRANSCRIPTION_CALL   OwnCapability = "start-transcription-call"
-	STOP_BROADCAST_CALL        OwnCapability = "stop-broadcast-call"
-	STOP_CLOSED_CAPTIONS_CALL  OwnCapability = "stop-closed-captions-call"
-	STOP_FRAME_RECORD_CALL     OwnCapability = "stop-frame-record-call"
-	STOP_RECORD_CALL           OwnCapability = "stop-record-call"
-	STOP_TRANSCRIPTION_CALL    OwnCapability = "stop-transcription-call"
-	UPDATE_CALL                OwnCapability = "update-call"
-	UPDATE_CALL_MEMBER         OwnCapability = "update-call-member"
-	UPDATE_CALL_PERMISSIONS    OwnCapability = "update-call-permissions"
-	UPDATE_CALL_SETTINGS       OwnCapability = "update-call-settings"
+	BLOCK_USERS                  OwnCapability = "block-users"
+	CHANGE_MAX_DURATION          OwnCapability = "change-max-duration"
+	CREATE_CALL                  OwnCapability = "create-call"
+	CREATE_REACTION              OwnCapability = "create-reaction"
+	ENABLE_NOISE_CANCELLATION    OwnCapability = "enable-noise-cancellation"
+	END_CALL                     OwnCapability = "end-call"
+	JOIN_BACKSTAGE               OwnCapability = "join-backstage"
+	JOIN_CALL                    OwnCapability = "join-call"
+	JOIN_ENDED_CALL              OwnCapability = "join-ended-call"
+	KICK_USER                    OwnCapability = "kick-user"
+	MUTE_USERS                   OwnCapability = "mute-users"
+	PIN_FOR_EVERYONE             OwnCapability = "pin-for-everyone"
+	READ_CALL                    OwnCapability = "read-call"
+	REMOVE_CALL_MEMBER           OwnCapability = "remove-call-member"
+	SCREENSHARE                  OwnCapability = "screenshare"
+	SEND_AUDIO                   OwnCapability = "send-audio"
+	SEND_CLOSED_CAPTIONS_CALL    OwnCapability = "send-closed-captions-call"
+	SEND_VIDEO                   OwnCapability = "send-video"
+	START_BROADCAST_CALL         OwnCapability = "start-broadcast-call"
+	START_CLOSED_CAPTIONS_CALL   OwnCapability = "start-closed-captions-call"
+	START_FRAME_RECORD_CALL      OwnCapability = "start-frame-record-call"
+	START_INDIVIDUAL_RECORD_CALL OwnCapability = "start-individual-record-call"
+	START_RAW_RECORD_CALL        OwnCapability = "start-raw-record-call"
+	START_RECORD_CALL            OwnCapability = "start-record-call"
+	START_TRANSCRIPTION_CALL     OwnCapability = "start-transcription-call"
+	STOP_BROADCAST_CALL          OwnCapability = "stop-broadcast-call"
+	STOP_CLOSED_CAPTIONS_CALL    OwnCapability = "stop-closed-captions-call"
+	STOP_FRAME_RECORD_CALL       OwnCapability = "stop-frame-record-call"
+	STOP_INDIVIDUAL_RECORD_CALL  OwnCapability = "stop-individual-record-call"
+	STOP_RAW_RECORD_CALL         OwnCapability = "stop-raw-record-call"
+	STOP_RECORD_CALL             OwnCapability = "stop-record-call"
+	STOP_TRANSCRIPTION_CALL      OwnCapability = "stop-transcription-call"
+	UPDATE_CALL                  OwnCapability = "update-call"
+	UPDATE_CALL_MEMBER           OwnCapability = "update-call-member"
+	UPDATE_CALL_PERMISSIONS      OwnCapability = "update-call-permissions"
+	UPDATE_CALL_SETTINGS         OwnCapability = "update-call-settings"
 )
 
 func (c OwnCapability) String() string {
@@ -10853,6 +10907,22 @@ type RankingConfig struct {
 
 	// Decay functions configuration
 	Functions map[string]DecayFunctionConfig `json:"functions,omitempty"`
+}
+
+type RawRecordSettings struct {
+	Mode string `json:"mode"`
+}
+
+type RawRecordingResponse struct {
+	Status string `json:"status"`
+}
+
+type RawRecordingSettingsRequest struct {
+	Mode string `json:"mode"`
+}
+
+type RawRecordingSettingsResponse struct {
+	Mode string `json:"mode"`
 }
 
 type Reaction struct {
