@@ -184,6 +184,13 @@ func TestVideoStopRTMPBroadcast(t *testing.T) {
 	_, err = client.Video().StopRTMPBroadcast(context.Background(), "", "", "", &getstream.StopRTMPBroadcastRequest{})
 	require.NoError(t, err)
 }
+func TestVideoQueryCallParticipantSessions(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().QueryCallParticipantSessions(context.Background(), "", "", "", &getstream.QueryCallParticipantSessionsRequest{})
+	require.NoError(t, err)
+}
 func TestVideoStartHLSBroadcasting(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -380,13 +387,6 @@ func TestVideoGetEdges(t *testing.T) {
 	_, err = client.Video().GetEdges(context.Background(), &getstream.GetEdgesRequest{})
 	require.NoError(t, err)
 }
-func TestVideoResolveSipInbound(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Video().ResolveSipInbound(context.Background(), &getstream.ResolveSipInboundRequest{})
-	require.NoError(t, err)
-}
 func TestVideoListSIPInboundRoutingRule(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -441,6 +441,13 @@ func TestVideoUpdateSIPTrunk(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Video().UpdateSIPTrunk(context.Background(), "", &getstream.UpdateSIPTrunkRequest{})
+	require.NoError(t, err)
+}
+func TestVideoResolveSipInbound(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().ResolveSipInbound(context.Background(), &getstream.ResolveSipInboundRequest{})
 	require.NoError(t, err)
 }
 func TestVideoQueryAggregateCallStats(t *testing.T) {

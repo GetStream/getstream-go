@@ -208,6 +208,15 @@ func (c *Call) StopRTMPBroadcast(ctx context.Context, name string, request *Stop
 	return response, nil
 }
 
+func (c *Call) QueryCallParticipantSessions(ctx context.Context, session string, request *QueryCallParticipantSessionsRequest) (*StreamResponse[QueryCallParticipantSessionsResponse], error) {
+	response, err := c.client.QueryCallParticipantSessions(ctx, c.callType, c.callID, session, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
+}
+
 func (c *Call) StartHLSBroadcasting(ctx context.Context, request *StartHLSBroadcastingRequest) (*StreamResponse[StartHLSBroadcastingResponse], error) {
 	response, err := c.client.StartHLSBroadcasting(ctx, c.callType, c.callID, request)
 	if err != nil {

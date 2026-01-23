@@ -110,10 +110,13 @@ type QueryChannelsRequest struct {
 	MemberLimit      *int               `json:"member_limit"`
 	MessageLimit     *int               `json:"message_limit"`
 	Offset           *int               `json:"offset"`
+	PredefinedFilter *string            `json:"predefined_filter"`
 	State            *bool              `json:"state"`
 	UserID           *string            `json:"user_id"`
 	Sort             []SortParamRequest `json:"sort"`
 	FilterConditions map[string]any     `json:"filter_conditions"`
+	FilterValues     map[string]any     `json:"filter_values"`
+	SortValues       map[string]any     `json:"sort_values"`
 	User             *UserRequest       `json:"user"`
 }
 
@@ -540,6 +543,10 @@ type QueryBannedUsersRequest struct {
 	Payload *QueryBannedUsersPayload `json:"-" query:"payload"`
 }
 
+type QueryFutureChannelBansRequest struct {
+	Payload *QueryFutureChannelBansPayload `json:"-" query:"payload"`
+}
+
 type QueryRemindersRequest struct {
 	Limit  *int               `json:"limit"`
 	Next   *string            `json:"next"`
@@ -697,26 +704,28 @@ type CheckExternalStorageRequest struct {
 }
 
 type AddActivityRequest struct {
-	Type             string            `json:"type"`
-	Feeds            []string          `json:"feeds"`
-	ExpiresAt        *string           `json:"expires_at"`
-	ID               *string           `json:"id"`
-	ParentID         *string           `json:"parent_id"`
-	PollID           *string           `json:"poll_id"`
-	RestrictReplies  *string           `json:"restrict_replies"`
-	SkipEnrichUrl    *bool             `json:"skip_enrich_url"`
-	Text             *string           `json:"text"`
-	UserID           *string           `json:"user_id"`
-	Visibility       *string           `json:"visibility"`
-	VisibilityTag    *string           `json:"visibility_tag"`
-	Attachments      []Attachment      `json:"attachments"`
-	CollectionRefs   []string          `json:"collection_refs"`
-	FilterTags       []string          `json:"filter_tags"`
-	InterestTags     []string          `json:"interest_tags"`
-	MentionedUserIds []string          `json:"mentioned_user_ids"`
-	Custom           map[string]any    `json:"custom"`
-	Location         *ActivityLocation `json:"location"`
-	SearchData       map[string]any    `json:"search_data"`
+	Type                       string            `json:"type"`
+	Feeds                      []string          `json:"feeds"`
+	CreateNotificationActivity *bool             `json:"create_notification_activity"`
+	ExpiresAt                  *string           `json:"expires_at"`
+	ID                         *string           `json:"id"`
+	ParentID                   *string           `json:"parent_id"`
+	PollID                     *string           `json:"poll_id"`
+	RestrictReplies            *string           `json:"restrict_replies"`
+	SkipEnrichUrl              *bool             `json:"skip_enrich_url"`
+	SkipPush                   *bool             `json:"skip_push"`
+	Text                       *string           `json:"text"`
+	UserID                     *string           `json:"user_id"`
+	Visibility                 *string           `json:"visibility"`
+	VisibilityTag              *string           `json:"visibility_tag"`
+	Attachments                []Attachment      `json:"attachments"`
+	CollectionRefs             []string          `json:"collection_refs"`
+	FilterTags                 []string          `json:"filter_tags"`
+	InterestTags               []string          `json:"interest_tags"`
+	MentionedUserIds           []string          `json:"mentioned_user_ids"`
+	Custom                     map[string]any    `json:"custom"`
+	Location                   *ActivityLocation `json:"location"`
+	SearchData                 map[string]any    `json:"search_data"`
 }
 
 type UpsertActivitiesRequest struct {
@@ -808,21 +817,23 @@ type UpdateActivityPartialRequest struct {
 }
 
 type UpdateActivityRequest struct {
-	ExpiresAt       *Timestamp        `json:"expires_at"`
-	PollID          *string           `json:"poll_id"`
-	RestrictReplies *string           `json:"restrict_replies"`
-	SkipEnrichUrl   *bool             `json:"skip_enrich_url"`
-	Text            *string           `json:"text"`
-	UserID          *string           `json:"user_id"`
-	Visibility      *string           `json:"visibility"`
-	Attachments     []Attachment      `json:"attachments"`
-	CollectionRefs  []string          `json:"collection_refs"`
-	Feeds           []string          `json:"feeds"`
-	FilterTags      []string          `json:"filter_tags"`
-	InterestTags    []string          `json:"interest_tags"`
-	Custom          map[string]any    `json:"custom"`
-	Location        *ActivityLocation `json:"location"`
-	User            *UserRequest      `json:"user"`
+	ExpiresAt        *Timestamp        `json:"expires_at"`
+	PollID           *string           `json:"poll_id"`
+	RestrictReplies  *string           `json:"restrict_replies"`
+	SkipEnrichUrl    *bool             `json:"skip_enrich_url"`
+	Text             *string           `json:"text"`
+	UserID           *string           `json:"user_id"`
+	Visibility       *string           `json:"visibility"`
+	VisibilityTag    *string           `json:"visibility_tag"`
+	Attachments      []Attachment      `json:"attachments"`
+	CollectionRefs   []string          `json:"collection_refs"`
+	Feeds            []string          `json:"feeds"`
+	FilterTags       []string          `json:"filter_tags"`
+	InterestTags     []string          `json:"interest_tags"`
+	MentionedUserIds []string          `json:"mentioned_user_ids"`
+	Custom           map[string]any    `json:"custom"`
+	Location         *ActivityLocation `json:"location"`
+	User             *UserRequest      `json:"user"`
 }
 
 type QueryBookmarkFoldersRequest struct {
@@ -882,6 +893,7 @@ type GetCommentsRequest struct {
 	Depth        *int    `json:"-" query:"depth"`
 	Sort         *string `json:"-" query:"sort"`
 	RepliesLimit *int    `json:"-" query:"replies_limit"`
+	UserID       *string `json:"-" query:"user_id"`
 	Limit        *int    `json:"-" query:"limit"`
 	Prev         *string `json:"-" query:"prev"`
 	Next         *string `json:"-" query:"next"`
@@ -927,6 +939,7 @@ type UpdateCommentRequest struct {
 	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
 	SkipPush      *bool          `json:"skip_push"`
 	UserID        *string        `json:"user_id"`
+	Attachments   []Attachment   `json:"attachments"`
 	Custom        map[string]any `json:"custom"`
 	User          *UserRequest   `json:"user"`
 }
@@ -957,6 +970,7 @@ type GetCommentRepliesRequest struct {
 	Depth        *int    `json:"-" query:"depth"`
 	Sort         *string `json:"-" query:"sort"`
 	RepliesLimit *int    `json:"-" query:"replies_limit"`
+	UserID       *string `json:"-" query:"user_id"`
 	Limit        *int    `json:"-" query:"limit"`
 	Prev         *string `json:"-" query:"prev"`
 	Next         *string `json:"-" query:"next"`
@@ -1004,6 +1018,9 @@ type GetOrCreateFeedRequest struct {
 
 type UpdateFeedRequest struct {
 	CreatedByID *string        `json:"created_by_id"`
+	Description *string        `json:"description"`
+	Name        *string        `json:"name"`
+	FilterTags  []string       `json:"filter_tags"`
 	Custom      map[string]any `json:"custom"`
 }
 
@@ -1131,9 +1148,15 @@ type CreateFeedsBatchRequest struct {
 	Feeds []FeedRequest `json:"feeds"`
 }
 
-type OwnCapabilitiesBatchRequest struct {
+type DeleteFeedsBatchRequest struct {
+	Feeds      []string `json:"feeds"`
+	HardDelete *bool    `json:"hard_delete"`
+}
+
+type OwnBatchRequest struct {
 	Feeds  []string     `json:"feeds"`
 	UserID *string      `json:"user_id"`
+	Fields []string     `json:"fields"`
 	User   *UserRequest `json:"user"`
 }
 
@@ -1245,6 +1268,7 @@ type GetOrCreateUnfollowsRequest struct {
 }
 
 type DeleteFeedUserDataRequest struct {
+	HardDelete *bool `json:"hard_delete"`
 }
 
 type ExportFeedUserDataRequest struct {
@@ -1266,7 +1290,46 @@ type CreateImportRequest struct {
 	Path string `json:"path"`
 }
 
+type ListImportV2TasksRequest struct {
+	State *int `json:"-" query:"state"`
+}
+
+type CreateImportV2TaskRequest struct {
+	Product  string               `json:"product"`
+	Settings ImportV2TaskSettings `json:"settings"`
+	UserID   *string              `json:"user_id"`
+	User     *UserRequest         `json:"user"`
+}
+
+type DeleteImportV2TaskRequest struct {
+}
+
+type GetImportV2TaskRequest struct {
+}
+
 type GetImportRequest struct {
+}
+
+type AppealRequest struct {
+	AppealReason string       `json:"appeal_reason"`
+	EntityID     string       `json:"entity_id"`
+	EntityType   string       `json:"entity_type"`
+	UserID       *string      `json:"user_id"`
+	Attachments  []string     `json:"attachments"`
+	User         *UserRequest `json:"user"`
+}
+
+type GetAppealRequest struct {
+}
+
+type QueryAppealsRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	UserID *string            `json:"user_id"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+	User   *UserRequest       `json:"user"`
 }
 
 type BanRequest struct {
@@ -1445,7 +1508,8 @@ type GetReviewQueueItemRequest struct {
 
 type SubmitActionRequest struct {
 	ActionType     string                    `json:"action_type"`
-	ItemID         string                    `json:"item_id"`
+	AppealID       *string                   `json:"appeal_id"`
+	ItemID         *string                   `json:"item_id"`
 	UserID         *string                   `json:"user_id"`
 	Ban            *BanActionRequest         `json:"ban"`
 	Block          *BlockActionRequest       `json:"block"`
@@ -1456,8 +1520,11 @@ type SubmitActionRequest struct {
 	DeleteReaction *DeleteReactionRequest    `json:"delete_reaction"`
 	DeleteUser     *DeleteUserRequest        `json:"delete_user"`
 	MarkReviewed   *MarkReviewedRequest      `json:"mark_reviewed"`
+	RejectAppeal   *RejectAppealRequest      `json:"reject_appeal"`
+	Restore        *RestoreActionRequest     `json:"restore"`
 	ShadowBlock    *ShadowBlockActionRequest `json:"shadow_block"`
 	Unban          *UnbanActionRequest       `json:"unban"`
+	Unblock        *UnblockActionRequest     `json:"unblock"`
 	User           *UserRequest              `json:"user"`
 }
 
@@ -1812,7 +1879,10 @@ type CollectUserFeedbackRequest struct {
 type GoLiveRequest struct {
 	RecordingStorageName     *string `json:"recording_storage_name"`
 	StartClosedCaption       *bool   `json:"start_closed_caption"`
+	StartCompositeRecording  *bool   `json:"start_composite_recording"`
 	StartHLS                 *bool   `json:"start_hls"`
+	StartIndividualRecording *bool   `json:"start_individual_recording"`
+	StartRawRecording        *bool   `json:"start_raw_recording"`
 	StartRecording           *bool   `json:"start_recording"`
 	StartTranscription       *bool   `json:"start_transcription"`
 	TranscriptionStorageName *string `json:"transcription_storage_name"`
@@ -1876,6 +1946,13 @@ type StopAllRTMPBroadcastsRequest struct {
 type StopRTMPBroadcastRequest struct {
 }
 
+type QueryCallParticipantSessionsRequest struct {
+	Limit            *int           `json:"-" query:"limit"`
+	Prev             *string        `json:"-" query:"prev"`
+	Next             *string        `json:"-" query:"next"`
+	FilterConditions map[string]any `json:"-" query:"filter_conditions"`
+}
+
 type StartHLSBroadcastingRequest struct {
 }
 
@@ -1911,11 +1988,14 @@ type StopFrameRecordingRequest struct {
 }
 
 type StopLiveRequest struct {
-	ContinueClosedCaption  *bool `json:"continue_closed_caption"`
-	ContinueHLS            *bool `json:"continue_hls"`
-	ContinueRTMPBroadcasts *bool `json:"continue_rtmp_broadcasts"`
-	ContinueRecording      *bool `json:"continue_recording"`
-	ContinueTranscription  *bool `json:"continue_transcription"`
+	ContinueClosedCaption       *bool `json:"continue_closed_caption"`
+	ContinueCompositeRecording  *bool `json:"continue_composite_recording"`
+	ContinueHLS                 *bool `json:"continue_hls"`
+	ContinueIndividualRecording *bool `json:"continue_individual_recording"`
+	ContinueRTMPBroadcasts      *bool `json:"continue_rtmp_broadcasts"`
+	ContinueRawRecording        *bool `json:"continue_raw_recording"`
+	ContinueRecording           *bool `json:"continue_recording"`
+	ContinueTranscription       *bool `json:"continue_transcription"`
 }
 
 type StopRecordingRequest struct {
@@ -2012,13 +2092,6 @@ type UpdateCallTypeRequest struct {
 type GetEdgesRequest struct {
 }
 
-type ResolveSipInboundRequest struct {
-	SipCallerNumber string            `json:"sip_caller_number"`
-	SipTrunkNumber  string            `json:"sip_trunk_number"`
-	Challenge       SIPChallenge      `json:"challenge"`
-	SipHeaders      map[string]string `json:"sip_headers"`
-}
-
 type ListSIPInboundRoutingRuleRequest struct {
 }
 
@@ -2063,6 +2136,14 @@ type DeleteSIPTrunkRequest struct {
 type UpdateSIPTrunkRequest struct {
 	Name    string   `json:"name"`
 	Numbers []string `json:"numbers"`
+}
+
+type ResolveSipInboundRequest struct {
+	SipCallerNumber string            `json:"sip_caller_number"`
+	SipTrunkNumber  string            `json:"sip_trunk_number"`
+	Challenge       SIPChallenge      `json:"challenge"`
+	RoutingNumber   *string           `json:"routing_number"`
+	SipHeaders      map[string]string `json:"sip_headers"`
 }
 
 type QueryAggregateCallStatsRequest struct {
