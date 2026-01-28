@@ -15,6 +15,30 @@ func NewModerationClient(client *Client) *ModerationClient {
 	}
 }
 
+// Appeal against the moderation decision
+func (c *ModerationClient) Appeal(ctx context.Context, request *AppealRequest) (*StreamResponse[AppealResponse], error) {
+	var result AppealResponse
+	res, err := MakeRequest[AppealRequest, AppealResponse](c.client, ctx, "POST", "/api/v2/moderation/appeal", nil, request, &result, nil)
+	return res, err
+}
+
+// Retrieve a specific appeal item by its ID
+func (c *ModerationClient) GetAppeal(ctx context.Context, id string, request *GetAppealRequest) (*StreamResponse[GetAppealResponse], error) {
+	var result GetAppealResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, GetAppealResponse](c.client, ctx, "GET", "/api/v2/moderation/appeal/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Query Appeals
+func (c *ModerationClient) QueryAppeals(ctx context.Context, request *QueryAppealsRequest) (*StreamResponse[QueryAppealsResponse], error) {
+	var result QueryAppealsResponse
+	res, err := MakeRequest[QueryAppealsRequest, QueryAppealsResponse](c.client, ctx, "POST", "/api/v2/moderation/appeals", nil, request, &result, nil)
+	return res, err
+}
+
 // Ban a user from a channel or the entire app
 func (c *ModerationClient) Ban(ctx context.Context, request *BanRequest) (*StreamResponse[BanResponse], error) {
 	var result BanResponse

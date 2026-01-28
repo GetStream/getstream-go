@@ -120,7 +120,7 @@ func TestModerationSubmitModerationAction(t *testing.T) {
 
 	// snippet-start: SubmitModerationAction
 	request := &getstream.SubmitActionRequest{
-		ItemID:     "review_item_123",
+		ItemID:     getstream.PtrTo("review_item_123"),
 		ActionType: "mark_reviewed",
 		UserID:     getstream.PtrTo("moderator456"),
 	}
