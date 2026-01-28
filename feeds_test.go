@@ -457,11 +457,18 @@ func TestFeedsCreateFeedsBatch(t *testing.T) {
 	_, err = client.Feeds().CreateFeedsBatch(context.Background(), &getstream.CreateFeedsBatchRequest{})
 	require.NoError(t, err)
 }
-func TestFeedsOwnCapabilitiesBatch(t *testing.T) {
+func TestFeedsDeleteFeedsBatch(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Feeds().OwnCapabilitiesBatch(context.Background(), &getstream.OwnCapabilitiesBatchRequest{})
+	_, err = client.Feeds().DeleteFeedsBatch(context.Background(), &getstream.DeleteFeedsBatchRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsOwnBatch(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().OwnBatch(context.Background(), &getstream.OwnBatchRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsQueryFeeds(t *testing.T) {

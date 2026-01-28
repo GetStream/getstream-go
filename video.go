@@ -245,6 +245,36 @@ func (c *VideoClient) ListRecordings(ctx context.Context, _type string, id strin
 	return res, err
 }
 
+// Starts recording
+//
+// Sends events:
+// - call.recording_started
+func (c *VideoClient) StartRecording(ctx context.Context, _type string, id string, recordingType string, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
+	var result StartRecordingResponse
+	pathParams := map[string]string{
+		"type":           _type,
+		"id":             id,
+		"recording_type": recordingType,
+	}
+	res, err := MakeRequest[StartRecordingRequest, StartRecordingResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/recordings/{recording_type}/start", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Stops recording
+//
+// Sends events:
+// - call.recording_stopped
+func (c *VideoClient) StopRecording(ctx context.Context, _type string, id string, recordingType string, request *StopRecordingRequest) (*StreamResponse[StopRecordingResponse], error) {
+	var result StopRecordingResponse
+	pathParams := map[string]string{
+		"type":           _type,
+		"id":             id,
+		"recording_type": recordingType,
+	}
+	res, err := MakeRequest[StopRecordingRequest, StopRecordingResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/recordings/{recording_type}/stop", nil, request, &result, pathParams)
+	return res, err
+}
+
 func (c *VideoClient) GetCallReport(ctx context.Context, _type string, id string, request *GetCallReportRequest) (*StreamResponse[GetCallReportResponse], error) {
 	var result GetCallReportResponse
 	pathParams := map[string]string{
@@ -304,6 +334,18 @@ func (c *VideoClient) StopRTMPBroadcast(ctx context.Context, _type string, id st
 	return res, err
 }
 
+func (c *VideoClient) QueryCallParticipantSessions(ctx context.Context, _type string, id string, session string, request *QueryCallParticipantSessionsRequest) (*StreamResponse[QueryCallParticipantSessionsResponse], error) {
+	var result QueryCallParticipantSessionsResponse
+	pathParams := map[string]string{
+		"type":    _type,
+		"id":      id,
+		"session": session,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, QueryCallParticipantSessionsResponse](c.client, ctx, "GET", "/api/v2/video/call/{type}/{id}/session/{session}/participant_sessions", params, nil, &result, pathParams)
+	return res, err
+}
+
 // Starts HLS broadcasting
 func (c *VideoClient) StartHLSBroadcasting(ctx context.Context, _type string, id string, request *StartHLSBroadcastingRequest) (*StreamResponse[StartHLSBroadcastingResponse], error) {
 	var result StartHLSBroadcastingResponse
@@ -337,20 +379,6 @@ func (c *VideoClient) StartFrameRecording(ctx context.Context, _type string, id 
 		"id":   id,
 	}
 	res, err := MakeRequest[StartFrameRecordingRequest, StartFrameRecordingResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_frame_recording", nil, request, &result, pathParams)
-	return res, err
-}
-
-// Starts recording
-//
-// Sends events:
-// - call.recording_started
-func (c *VideoClient) StartRecording(ctx context.Context, _type string, id string, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
-	var result StartRecordingResponse
-	pathParams := map[string]string{
-		"type": _type,
-		"id":   id,
-	}
-	res, err := MakeRequest[StartRecordingRequest, StartRecordingResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_recording", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -413,20 +441,6 @@ func (c *VideoClient) StopLive(ctx context.Context, _type string, id string, req
 		"id":   id,
 	}
 	res, err := MakeRequest[StopLiveRequest, StopLiveResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_live", nil, request, &result, pathParams)
-	return res, err
-}
-
-// Stops recording
-//
-// Sends events:
-// - call.recording_stopped
-func (c *VideoClient) StopRecording(ctx context.Context, _type string, id string, request *StopRecordingRequest) (*StreamResponse[StopRecordingResponse], error) {
-	var result StopRecordingResponse
-	pathParams := map[string]string{
-		"type": _type,
-		"id":   id,
-	}
-	res, err := MakeRequest[any, StopRecordingResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_recording", nil, nil, &result, pathParams)
 	return res, err
 }
 
@@ -625,24 +639,17 @@ func (c *VideoClient) GetEdges(ctx context.Context, request *GetEdgesRequest) (*
 	return res, err
 }
 
-// Resolve SIP inbound routing based on trunk number, caller number, and challenge authentication
-func (c *VideoClient) ResolveSipInbound(ctx context.Context, request *ResolveSipInboundRequest) (*StreamResponse[ResolveSipInboundResponse], error) {
-	var result ResolveSipInboundResponse
-	res, err := MakeRequest[ResolveSipInboundRequest, ResolveSipInboundResponse](c.client, ctx, "POST", "/api/v2/video/sip/resolve", nil, request, &result, nil)
-	return res, err
-}
-
 // List all SIP Inbound Routing Rules for the application
 func (c *VideoClient) ListSIPInboundRoutingRule(ctx context.Context, request *ListSIPInboundRoutingRuleRequest) (*StreamResponse[ListSIPInboundRoutingRuleResponse], error) {
 	var result ListSIPInboundRoutingRuleResponse
-	res, err := MakeRequest[any, ListSIPInboundRoutingRuleResponse](c.client, ctx, "GET", "/api/v2/video/sip/routing_rules", nil, nil, &result, nil)
+	res, err := MakeRequest[any, ListSIPInboundRoutingRuleResponse](c.client, ctx, "GET", "/api/v2/video/sip/inbound_routing_rules", nil, nil, &result, nil)
 	return res, err
 }
 
 // Create a new SIP Inbound Routing Rule with either direct routing or PIN routing configuration
 func (c *VideoClient) CreateSIPInboundRoutingRule(ctx context.Context, request *CreateSIPInboundRoutingRuleRequest) (*StreamResponse[SIPInboundRoutingRuleResponse], error) {
 	var result SIPInboundRoutingRuleResponse
-	res, err := MakeRequest[CreateSIPInboundRoutingRuleRequest, SIPInboundRoutingRuleResponse](c.client, ctx, "POST", "/api/v2/video/sip/routing_rules", nil, request, &result, nil)
+	res, err := MakeRequest[CreateSIPInboundRoutingRuleRequest, SIPInboundRoutingRuleResponse](c.client, ctx, "POST", "/api/v2/video/sip/inbound_routing_rules", nil, request, &result, nil)
 	return res, err
 }
 
@@ -652,7 +659,7 @@ func (c *VideoClient) DeleteSIPInboundRoutingRule(ctx context.Context, id string
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[any, DeleteSIPInboundRoutingRuleResponse](c.client, ctx, "DELETE", "/api/v2/video/sip/routing_rules/{id}", nil, nil, &result, pathParams)
+	res, err := MakeRequest[any, DeleteSIPInboundRoutingRuleResponse](c.client, ctx, "DELETE", "/api/v2/video/sip/inbound_routing_rules/{id}", nil, nil, &result, pathParams)
 	return res, err
 }
 
@@ -662,21 +669,21 @@ func (c *VideoClient) UpdateSIPInboundRoutingRule(ctx context.Context, id string
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[UpdateSIPInboundRoutingRuleRequest, UpdateSIPInboundRoutingRuleResponse](c.client, ctx, "PUT", "/api/v2/video/sip/routing_rules/{id}", nil, request, &result, pathParams)
+	res, err := MakeRequest[UpdateSIPInboundRoutingRuleRequest, UpdateSIPInboundRoutingRuleResponse](c.client, ctx, "PUT", "/api/v2/video/sip/inbound_routing_rules/{id}", nil, request, &result, pathParams)
 	return res, err
 }
 
 // List all SIP trunks for the application
 func (c *VideoClient) ListSIPTrunks(ctx context.Context, request *ListSIPTrunksRequest) (*StreamResponse[ListSIPTrunksResponse], error) {
 	var result ListSIPTrunksResponse
-	res, err := MakeRequest[any, ListSIPTrunksResponse](c.client, ctx, "GET", "/api/v2/video/sip/trunks", nil, nil, &result, nil)
+	res, err := MakeRequest[any, ListSIPTrunksResponse](c.client, ctx, "GET", "/api/v2/video/sip/inbound_trunks", nil, nil, &result, nil)
 	return res, err
 }
 
 // Create a new SIP trunk for the application
 func (c *VideoClient) CreateSIPTrunk(ctx context.Context, request *CreateSIPTrunkRequest) (*StreamResponse[CreateSIPTrunkResponse], error) {
 	var result CreateSIPTrunkResponse
-	res, err := MakeRequest[CreateSIPTrunkRequest, CreateSIPTrunkResponse](c.client, ctx, "POST", "/api/v2/video/sip/trunks", nil, request, &result, nil)
+	res, err := MakeRequest[CreateSIPTrunkRequest, CreateSIPTrunkResponse](c.client, ctx, "POST", "/api/v2/video/sip/inbound_trunks", nil, request, &result, nil)
 	return res, err
 }
 
@@ -686,7 +693,7 @@ func (c *VideoClient) DeleteSIPTrunk(ctx context.Context, id string, request *De
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[any, DeleteSIPTrunkResponse](c.client, ctx, "DELETE", "/api/v2/video/sip/trunks/{id}", nil, nil, &result, pathParams)
+	res, err := MakeRequest[any, DeleteSIPTrunkResponse](c.client, ctx, "DELETE", "/api/v2/video/sip/inbound_trunks/{id}", nil, nil, &result, pathParams)
 	return res, err
 }
 
@@ -696,7 +703,14 @@ func (c *VideoClient) UpdateSIPTrunk(ctx context.Context, id string, request *Up
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[UpdateSIPTrunkRequest, UpdateSIPTrunkResponse](c.client, ctx, "PUT", "/api/v2/video/sip/trunks/{id}", nil, request, &result, pathParams)
+	res, err := MakeRequest[UpdateSIPTrunkRequest, UpdateSIPTrunkResponse](c.client, ctx, "PUT", "/api/v2/video/sip/inbound_trunks/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Resolve SIP inbound routing based on trunk number, caller number, and challenge authentication
+func (c *VideoClient) ResolveSipInbound(ctx context.Context, request *ResolveSipInboundRequest) (*StreamResponse[ResolveSipInboundResponse], error) {
+	var result ResolveSipInboundResponse
+	res, err := MakeRequest[ResolveSipInboundRequest, ResolveSipInboundResponse](c.client, ctx, "POST", "/api/v2/video/sip/resolve", nil, request, &result, nil)
 	return res, err
 }
 

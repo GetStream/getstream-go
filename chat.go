@@ -793,6 +793,14 @@ func (c *ChatClient) QueryBannedUsers(ctx context.Context, request *QueryBannedU
 	return res, err
 }
 
+// Find and filter future channel bans created by the authenticated user
+func (c *ChatClient) QueryFutureChannelBans(ctx context.Context, request *QueryFutureChannelBansRequest) (*StreamResponse[QueryFutureChannelBansResponse], error) {
+	var result QueryFutureChannelBansResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, QueryFutureChannelBansResponse](c.client, ctx, "GET", "/api/v2/chat/query_future_channel_bans", params, nil, &result, nil)
+	return res, err
+}
+
 // Queries reminders
 func (c *ChatClient) QueryReminders(ctx context.Context, request *QueryRemindersRequest) (*StreamResponse[QueryRemindersResponse], error) {
 	var result QueryRemindersResponse

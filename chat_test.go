@@ -466,6 +466,13 @@ func TestChatQueryBannedUsers(t *testing.T) {
 	_, err = client.Chat().QueryBannedUsers(context.Background(), &getstream.QueryBannedUsersRequest{})
 	require.NoError(t, err)
 }
+func TestChatQueryFutureChannelBans(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().QueryFutureChannelBans(context.Background(), &getstream.QueryFutureChannelBansRequest{})
+	require.NoError(t, err)
+}
 func TestChatQueryReminders(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

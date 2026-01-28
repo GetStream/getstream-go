@@ -186,6 +186,41 @@ func (c *Client) CreateImport(ctx context.Context, request *CreateImportRequest)
 	return res, err
 }
 
+// Lists all import v2 tasks for the app
+func (c *Client) ListImportV2Tasks(ctx context.Context, request *ListImportV2TasksRequest) (*StreamResponse[ListImportV2TasksResponse], error) {
+	var result ListImportV2TasksResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, ListImportV2TasksResponse](c, ctx, "GET", "/api/v2/imports/v2", params, nil, &result, nil)
+	return res, err
+}
+
+// Creates a new import v2 task
+func (c *Client) CreateImportV2Task(ctx context.Context, request *CreateImportV2TaskRequest) (*StreamResponse[CreateImportV2TaskResponse], error) {
+	var result CreateImportV2TaskResponse
+	res, err := MakeRequest[CreateImportV2TaskRequest, CreateImportV2TaskResponse](c, ctx, "POST", "/api/v2/imports/v2", nil, request, &result, nil)
+	return res, err
+}
+
+// Deletes an import v2 task. Can only delete tasks in queued state.
+func (c *Client) DeleteImportV2Task(ctx context.Context, id string, request *DeleteImportV2TaskRequest) (*StreamResponse[DeleteImportV2TaskResponse], error) {
+	var result DeleteImportV2TaskResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, DeleteImportV2TaskResponse](c, ctx, "DELETE", "/api/v2/imports/v2/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Gets a single import v2 task by ID
+func (c *Client) GetImportV2Task(ctx context.Context, id string, request *GetImportV2TaskRequest) (*StreamResponse[GetImportV2TaskResponse], error) {
+	var result GetImportV2TaskResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, GetImportV2TaskResponse](c, ctx, "GET", "/api/v2/imports/v2/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
 // Gets an import
 func (c *Client) GetImport(ctx context.Context, id string, request *GetImportRequest) (*StreamResponse[GetImportResponse], error) {
 	var result GetImportResponse
