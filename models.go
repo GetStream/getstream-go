@@ -8710,7 +8710,7 @@ type MessageNewEvent struct {
 }
 
 func (*MessageNewEvent) GetEventType() string {
-	return "message.new"
+	return "notification.thread_message_new"
 }
 
 type MessageOptions struct {

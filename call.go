@@ -163,6 +163,24 @@ func (c *Call) ListRecordings(ctx context.Context, request *ListRecordingsReques
 	return response, nil
 }
 
+func (c *Call) StartRecording(ctx context.Context, recordingType string, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
+	response, err := c.client.StartRecording(ctx, c.callType, c.callID, recordingType, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
+}
+
+func (c *Call) StopRecording(ctx context.Context, recordingType string, request *StopRecordingRequest) (*StreamResponse[StopRecordingResponse], error) {
+	response, err := c.client.StopRecording(ctx, c.callType, c.callID, recordingType, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
+}
+
 func (c *Call) GetCallReport(ctx context.Context, request *GetCallReportRequest) (*StreamResponse[GetCallReportResponse], error) {
 	response, err := c.client.GetCallReport(ctx, c.callType, c.callID, request)
 	if err != nil {
@@ -244,15 +262,6 @@ func (c *Call) StartFrameRecording(ctx context.Context, request *StartFrameRecor
 	return response, nil
 }
 
-func (c *Call) StartRecording(ctx context.Context, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
-	response, err := c.client.StartRecording(ctx, c.callType, c.callID, request)
-	if err != nil {
-		return nil, err
-	}
-	c.syncFromResponse(response.Data)
-	return response, nil
-}
-
 func (c *Call) StartTranscription(ctx context.Context, request *StartTranscriptionRequest) (*StreamResponse[StartTranscriptionResponse], error) {
 	response, err := c.client.StartTranscription(ctx, c.callType, c.callID, request)
 	if err != nil {
@@ -291,15 +300,6 @@ func (c *Call) StopFrameRecording(ctx context.Context, request *StopFrameRecordi
 
 func (c *Call) StopLive(ctx context.Context, request *StopLiveRequest) (*StreamResponse[StopLiveResponse], error) {
 	response, err := c.client.StopLive(ctx, c.callType, c.callID, request)
-	if err != nil {
-		return nil, err
-	}
-	c.syncFromResponse(response.Data)
-	return response, nil
-}
-
-func (c *Call) StopRecording(ctx context.Context, request *StopRecordingRequest) (*StreamResponse[StopRecordingResponse], error) {
-	response, err := c.client.StopRecording(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}

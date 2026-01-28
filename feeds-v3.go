@@ -729,7 +729,8 @@ func (c *FeedsClient) Unfollow(ctx context.Context, source string, target string
 		"source": source,
 		"target": target,
 	}
-	res, err := MakeRequest[any, UnfollowResponse](c.client, ctx, "DELETE", "/api/v2/feeds/follows/{source}/{target}", nil, nil, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, UnfollowResponse](c.client, ctx, "DELETE", "/api/v2/feeds/follows/{source}/{target}", params, nil, &result, pathParams)
 	return res, err
 }
 

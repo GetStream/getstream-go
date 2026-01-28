@@ -245,6 +245,36 @@ func (c *VideoClient) ListRecordings(ctx context.Context, _type string, id strin
 	return res, err
 }
 
+// Starts recording
+//
+// Sends events:
+// - call.recording_started
+func (c *VideoClient) StartRecording(ctx context.Context, _type string, id string, recordingType string, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
+	var result StartRecordingResponse
+	pathParams := map[string]string{
+		"type":           _type,
+		"id":             id,
+		"recording_type": recordingType,
+	}
+	res, err := MakeRequest[StartRecordingRequest, StartRecordingResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/recordings/{recording_type}/start", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Stops recording
+//
+// Sends events:
+// - call.recording_stopped
+func (c *VideoClient) StopRecording(ctx context.Context, _type string, id string, recordingType string, request *StopRecordingRequest) (*StreamResponse[StopRecordingResponse], error) {
+	var result StopRecordingResponse
+	pathParams := map[string]string{
+		"type":           _type,
+		"id":             id,
+		"recording_type": recordingType,
+	}
+	res, err := MakeRequest[StopRecordingRequest, StopRecordingResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/recordings/{recording_type}/stop", nil, request, &result, pathParams)
+	return res, err
+}
+
 func (c *VideoClient) GetCallReport(ctx context.Context, _type string, id string, request *GetCallReportRequest) (*StreamResponse[GetCallReportResponse], error) {
 	var result GetCallReportResponse
 	pathParams := map[string]string{
@@ -352,20 +382,6 @@ func (c *VideoClient) StartFrameRecording(ctx context.Context, _type string, id 
 	return res, err
 }
 
-// Starts recording
-//
-// Sends events:
-// - call.recording_started
-func (c *VideoClient) StartRecording(ctx context.Context, _type string, id string, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
-	var result StartRecordingResponse
-	pathParams := map[string]string{
-		"type": _type,
-		"id":   id,
-	}
-	res, err := MakeRequest[StartRecordingRequest, StartRecordingResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/start_recording", nil, request, &result, pathParams)
-	return res, err
-}
-
 // Starts transcription
 func (c *VideoClient) StartTranscription(ctx context.Context, _type string, id string, request *StartTranscriptionRequest) (*StreamResponse[StartTranscriptionResponse], error) {
 	var result StartTranscriptionResponse
@@ -425,20 +441,6 @@ func (c *VideoClient) StopLive(ctx context.Context, _type string, id string, req
 		"id":   id,
 	}
 	res, err := MakeRequest[StopLiveRequest, StopLiveResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_live", nil, request, &result, pathParams)
-	return res, err
-}
-
-// Stops recording
-//
-// Sends events:
-// - call.recording_stopped
-func (c *VideoClient) StopRecording(ctx context.Context, _type string, id string, request *StopRecordingRequest) (*StreamResponse[StopRecordingResponse], error) {
-	var result StopRecordingResponse
-	pathParams := map[string]string{
-		"type": _type,
-		"id":   id,
-	}
-	res, err := MakeRequest[StopRecordingRequest, StopRecordingResponse](c.client, ctx, "POST", "/api/v2/video/call/{type}/{id}/stop_recording", nil, request, &result, pathParams)
 	return res, err
 }
 

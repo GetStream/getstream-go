@@ -733,10 +733,11 @@ type UpsertActivitiesRequest struct {
 }
 
 type DeleteActivitiesRequest struct {
-	Ids        []string     `json:"ids"`
-	HardDelete *bool        `json:"hard_delete"`
-	UserID     *string      `json:"user_id"`
-	User       *UserRequest `json:"user"`
+	Ids                        []string     `json:"ids"`
+	DeleteNotificationActivity *bool        `json:"delete_notification_activity"`
+	HardDelete                 *bool        `json:"hard_delete"`
+	UserID                     *string      `json:"user_id"`
+	User                       *UserRequest `json:"user"`
 }
 
 type QueryActivitiesRequest struct {
@@ -799,41 +800,45 @@ type QueryActivityReactionsRequest struct {
 }
 
 type DeleteActivityReactionRequest struct {
-	UserID *string `json:"-" query:"user_id"`
+	DeleteNotificationActivity *bool   `json:"-" query:"delete_notification_activity"`
+	UserID                     *string `json:"-" query:"user_id"`
 }
 
 type DeleteActivityRequest struct {
-	HardDelete *bool `json:"-" query:"hard_delete"`
+	HardDelete                 *bool `json:"-" query:"hard_delete"`
+	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
 }
 
 type GetActivityRequest struct {
 }
 
 type UpdateActivityPartialRequest struct {
-	UserID *string        `json:"user_id"`
-	Unset  []string       `json:"unset"`
-	Set    map[string]any `json:"set"`
-	User   *UserRequest   `json:"user"`
+	HandleMentionNotifications *bool          `json:"handle_mention_notifications"`
+	UserID                     *string        `json:"user_id"`
+	Unset                      []string       `json:"unset"`
+	Set                        map[string]any `json:"set"`
+	User                       *UserRequest   `json:"user"`
 }
 
 type UpdateActivityRequest struct {
-	ExpiresAt        *Timestamp        `json:"expires_at"`
-	PollID           *string           `json:"poll_id"`
-	RestrictReplies  *string           `json:"restrict_replies"`
-	SkipEnrichUrl    *bool             `json:"skip_enrich_url"`
-	Text             *string           `json:"text"`
-	UserID           *string           `json:"user_id"`
-	Visibility       *string           `json:"visibility"`
-	VisibilityTag    *string           `json:"visibility_tag"`
-	Attachments      []Attachment      `json:"attachments"`
-	CollectionRefs   []string          `json:"collection_refs"`
-	Feeds            []string          `json:"feeds"`
-	FilterTags       []string          `json:"filter_tags"`
-	InterestTags     []string          `json:"interest_tags"`
-	MentionedUserIds []string          `json:"mentioned_user_ids"`
-	Custom           map[string]any    `json:"custom"`
-	Location         *ActivityLocation `json:"location"`
-	User             *UserRequest      `json:"user"`
+	ExpiresAt                  *Timestamp        `json:"expires_at"`
+	HandleMentionNotifications *bool             `json:"handle_mention_notifications"`
+	PollID                     *string           `json:"poll_id"`
+	RestrictReplies            *string           `json:"restrict_replies"`
+	SkipEnrichUrl              *bool             `json:"skip_enrich_url"`
+	Text                       *string           `json:"text"`
+	UserID                     *string           `json:"user_id"`
+	Visibility                 *string           `json:"visibility"`
+	VisibilityTag              *string           `json:"visibility_tag"`
+	Attachments                []Attachment      `json:"attachments"`
+	CollectionRefs             []string          `json:"collection_refs"`
+	Feeds                      []string          `json:"feeds"`
+	FilterTags                 []string          `json:"filter_tags"`
+	InterestTags               []string          `json:"interest_tags"`
+	MentionedUserIds           []string          `json:"mentioned_user_ids"`
+	Custom                     map[string]any    `json:"custom"`
+	Location                   *ActivityLocation `json:"location"`
+	User                       *UserRequest      `json:"user"`
 }
 
 type QueryBookmarkFoldersRequest struct {
@@ -928,20 +933,23 @@ type QueryCommentsRequest struct {
 }
 
 type DeleteCommentRequest struct {
-	HardDelete *bool `json:"-" query:"hard_delete"`
+	HardDelete                 *bool `json:"-" query:"hard_delete"`
+	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
 }
 
 type GetCommentRequest struct {
 }
 
 type UpdateCommentRequest struct {
-	Comment       *string        `json:"comment"`
-	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
-	SkipPush      *bool          `json:"skip_push"`
-	UserID        *string        `json:"user_id"`
-	Attachments   []Attachment   `json:"attachments"`
-	Custom        map[string]any `json:"custom"`
-	User          *UserRequest   `json:"user"`
+	Comment                    *string        `json:"comment"`
+	HandleMentionNotifications *bool          `json:"handle_mention_notifications"`
+	SkipEnrichUrl              *bool          `json:"skip_enrich_url"`
+	SkipPush                   *bool          `json:"skip_push"`
+	UserID                     *string        `json:"user_id"`
+	Attachments                []Attachment   `json:"attachments"`
+	MentionedUserIds           []string       `json:"mentioned_user_ids"`
+	Custom                     map[string]any `json:"custom"`
+	User                       *UserRequest   `json:"user"`
 }
 
 type AddCommentReactionRequest struct {
@@ -963,7 +971,8 @@ type QueryCommentReactionsRequest struct {
 }
 
 type DeleteCommentReactionRequest struct {
-	UserID *string `json:"-" query:"user_id"`
+	DeleteNotificationActivity *bool   `json:"-" query:"delete_notification_activity"`
+	UserID                     *string `json:"-" query:"user_id"`
 }
 
 type GetCommentRepliesRequest struct {
@@ -1184,6 +1193,7 @@ type UpdateFollowRequest struct {
 	FollowerRole               *string        `json:"follower_role"`
 	PushPreference             *string        `json:"push_preference"`
 	SkipPush                   *bool          `json:"skip_push"`
+	Status                     *string        `json:"status"`
 	Custom                     map[string]any `json:"custom"`
 }
 
@@ -1193,6 +1203,7 @@ type FollowRequest struct {
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
 	PushPreference             *string        `json:"push_preference"`
 	SkipPush                   *bool          `json:"skip_push"`
+	Status                     *string        `json:"status"`
 	Custom                     map[string]any `json:"custom"`
 }
 
@@ -1224,6 +1235,7 @@ type RejectFollowRequest struct {
 }
 
 type UnfollowRequest struct {
+	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
 }
 
 type CreateMembershipLevelRequest struct {
@@ -1260,11 +1272,13 @@ type QueryFeedsUsageStatsRequest struct {
 }
 
 type UnfollowBatchRequest struct {
-	Follows []FollowPair `json:"follows"`
+	Follows                    []FollowPair `json:"follows"`
+	DeleteNotificationActivity *bool        `json:"delete_notification_activity"`
 }
 
 type GetOrCreateUnfollowsRequest struct {
-	Follows []FollowPair `json:"follows"`
+	Follows                    []FollowPair `json:"follows"`
+	DeleteNotificationActivity *bool        `json:"delete_notification_activity"`
 }
 
 type DeleteFeedUserDataRequest struct {
@@ -1927,6 +1941,13 @@ type VideoPinRequest struct {
 type ListRecordingsRequest struct {
 }
 
+type StartRecordingRequest struct {
+	RecordingExternalStorage *string `json:"recording_external_storage"`
+}
+
+type StopRecordingRequest struct {
+}
+
 type GetCallReportRequest struct {
 	SessionID *string `json:"-" query:"session_id"`
 }
@@ -1967,10 +1988,6 @@ type StartFrameRecordingRequest struct {
 	RecordingExternalStorage *string `json:"recording_external_storage"`
 }
 
-type StartRecordingRequest struct {
-	RecordingExternalStorage *string `json:"recording_external_storage"`
-}
-
 type StartTranscriptionRequest struct {
 	EnableClosedCaptions         *bool   `json:"enable_closed_captions"`
 	Language                     *string `json:"language"`
@@ -1996,9 +2013,6 @@ type StopLiveRequest struct {
 	ContinueRawRecording        *bool `json:"continue_raw_recording"`
 	ContinueRecording           *bool `json:"continue_recording"`
 	ContinueTranscription       *bool `json:"continue_transcription"`
-}
-
-type StopRecordingRequest struct {
 }
 
 type StopTranscriptionRequest struct {
