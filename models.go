@@ -8791,7 +8791,7 @@ type MessageNewEvent struct {
 }
 
 func (*MessageNewEvent) GetEventType() string {
-	return "notification.thread_message_new"
+	return "message.new"
 }
 
 type MessageOptions struct {
