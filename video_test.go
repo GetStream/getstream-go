@@ -149,6 +149,20 @@ func TestVideoListRecordings(t *testing.T) {
 	_, err = client.Video().ListRecordings(context.Background(), "", "", &getstream.ListRecordingsRequest{})
 	require.NoError(t, err)
 }
+func TestVideoStartRecording(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().StartRecording(context.Background(), "", "", "", &getstream.StartRecordingRequest{})
+	require.NoError(t, err)
+}
+func TestVideoStopRecording(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().StopRecording(context.Background(), "", "", "", &getstream.StopRecordingRequest{})
+	require.NoError(t, err)
+}
 func TestVideoGetCallReport(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -184,6 +198,20 @@ func TestVideoStopRTMPBroadcast(t *testing.T) {
 	_, err = client.Video().StopRTMPBroadcast(context.Background(), "", "", "", &getstream.StopRTMPBroadcastRequest{})
 	require.NoError(t, err)
 }
+func TestVideoGetCallParticipantSessionMetrics(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().GetCallParticipantSessionMetrics(context.Background(), "", "", "", &getstream.GetCallParticipantSessionMetricsRequest{})
+	require.NoError(t, err)
+}
+func TestVideoQueryCallParticipantSessions(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().QueryCallParticipantSessions(context.Background(), "", "", "", &getstream.QueryCallParticipantSessionsRequest{})
+	require.NoError(t, err)
+}
 func TestVideoStartHLSBroadcasting(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -203,13 +231,6 @@ func TestVideoStartFrameRecording(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Video().StartFrameRecording(context.Background(), "", "", &getstream.StartFrameRecordingRequest{})
-	require.NoError(t, err)
-}
-func TestVideoStartRecording(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Video().StartRecording(context.Background(), "", "", &getstream.StartRecordingRequest{})
 	require.NoError(t, err)
 }
 func TestVideoStartTranscription(t *testing.T) {
@@ -245,13 +266,6 @@ func TestVideoStopLive(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Video().StopLive(context.Background(), "", "", &getstream.StopLiveRequest{})
-	require.NoError(t, err)
-}
-func TestVideoStopRecording(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Video().StopRecording(context.Background(), "", "", &getstream.StopRecordingRequest{})
 	require.NoError(t, err)
 }
 func TestVideoStopTranscription(t *testing.T) {
@@ -380,13 +394,6 @@ func TestVideoGetEdges(t *testing.T) {
 	_, err = client.Video().GetEdges(context.Background(), &getstream.GetEdgesRequest{})
 	require.NoError(t, err)
 }
-func TestVideoResolveSipInbound(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Video().ResolveSipInbound(context.Background(), &getstream.ResolveSipInboundRequest{})
-	require.NoError(t, err)
-}
 func TestVideoListSIPInboundRoutingRule(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -441,6 +448,13 @@ func TestVideoUpdateSIPTrunk(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Video().UpdateSIPTrunk(context.Background(), "", &getstream.UpdateSIPTrunkRequest{})
+	require.NoError(t, err)
+}
+func TestVideoResolveSipInbound(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().ResolveSipInbound(context.Background(), &getstream.ResolveSipInboundRequest{})
 	require.NoError(t, err)
 }
 func TestVideoQueryAggregateCallStats(t *testing.T) {

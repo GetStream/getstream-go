@@ -170,6 +170,34 @@ func TestCommonCreateImport(t *testing.T) {
 	_, err = client.CreateImport(context.Background(), &getstream.CreateImportRequest{})
 	require.NoError(t, err)
 }
+func TestCommonListImportV2Tasks(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.ListImportV2Tasks(context.Background(), &getstream.ListImportV2TasksRequest{})
+	require.NoError(t, err)
+}
+func TestCommonCreateImportV2Task(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.CreateImportV2Task(context.Background(), &getstream.CreateImportV2TaskRequest{})
+	require.NoError(t, err)
+}
+func TestCommonDeleteImportV2Task(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.DeleteImportV2Task(context.Background(), "", &getstream.DeleteImportV2TaskRequest{})
+	require.NoError(t, err)
+}
+func TestCommonGetImportV2Task(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.GetImportV2Task(context.Background(), "", &getstream.GetImportV2TaskRequest{})
+	require.NoError(t, err)
+}
 func TestCommonGetImport(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

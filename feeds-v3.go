@@ -199,6 +199,16 @@ func (c *FeedsClient) UpdateActivity(ctx context.Context, id string, request *Up
 	return res, err
 }
 
+// Restores a soft-deleted activity by its ID. Only the activity owner can restore their own activities.
+func (c *FeedsClient) RestoreActivity(ctx context.Context, id string, request *RestoreActivityRequest) (*StreamResponse[RestoreActivityResponse], error) {
+	var result RestoreActivityResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[RestoreActivityRequest, RestoreActivityResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/{id}/restore", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Query bookmark folders with filter query
 func (c *FeedsClient) QueryBookmarkFolders(ctx context.Context, request *QueryBookmarkFoldersRequest) (*StreamResponse[QueryBookmarkFoldersResponse], error) {
 	var result QueryBookmarkFoldersResponse
@@ -643,10 +653,17 @@ func (c *FeedsClient) CreateFeedsBatch(ctx context.Context, request *CreateFeeds
 	return res, err
 }
 
-// Retrieves capabilities for multiple feeds in a single request. Useful for batch processing when activities are added to feeds.
-func (c *FeedsClient) OwnCapabilitiesBatch(ctx context.Context, request *OwnCapabilitiesBatchRequest) (*StreamResponse[OwnCapabilitiesBatchResponse], error) {
-	var result OwnCapabilitiesBatchResponse
-	res, err := MakeRequest[OwnCapabilitiesBatchRequest, OwnCapabilitiesBatchResponse](c.client, ctx, "POST", "/api/v2/feeds/feeds/own_capabilities/batch", nil, request, &result, nil)
+// Delete multiple feeds by their IDs. All feeds must exist. This endpoint is server-side only.
+func (c *FeedsClient) DeleteFeedsBatch(ctx context.Context, request *DeleteFeedsBatchRequest) (*StreamResponse[DeleteFeedsBatchResponse], error) {
+	var result DeleteFeedsBatchResponse
+	res, err := MakeRequest[DeleteFeedsBatchRequest, DeleteFeedsBatchResponse](c.client, ctx, "POST", "/api/v2/feeds/feeds/delete", nil, request, &result, nil)
+	return res, err
+}
+
+// Retrieves own_follows, own_capabilities, and/or own_membership for multiple feeds in a single request. If fields are not specified, all three fields are returned.
+func (c *FeedsClient) OwnBatch(ctx context.Context, request *OwnBatchRequest) (*StreamResponse[OwnBatchResponse], error) {
+	var result OwnBatchResponse
+	res, err := MakeRequest[OwnBatchRequest, OwnBatchResponse](c.client, ctx, "POST", "/api/v2/feeds/feeds/own/batch", nil, request, &result, nil)
 	return res, err
 }
 
@@ -722,7 +739,8 @@ func (c *FeedsClient) Unfollow(ctx context.Context, source string, target string
 		"source": source,
 		"target": target,
 	}
-	res, err := MakeRequest[any, UnfollowResponse](c.client, ctx, "DELETE", "/api/v2/feeds/follows/{source}/{target}", nil, nil, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, UnfollowResponse](c.client, ctx, "DELETE", "/api/v2/feeds/follows/{source}/{target}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -783,13 +801,13 @@ func (c *FeedsClient) GetOrCreateUnfollows(ctx context.Context, request *GetOrCr
 	return res, err
 }
 
-// Delete all activities, reactions, comments, and bookmarks for a user
+// Delete all feed data for a user including: feeds, activities, follows, comments, feed reactions, bookmark folders, bookmarks, and collections owned by the user
 func (c *FeedsClient) DeleteFeedUserData(ctx context.Context, userID string, request *DeleteFeedUserDataRequest) (*StreamResponse[DeleteFeedUserDataResponse], error) {
 	var result DeleteFeedUserDataResponse
 	pathParams := map[string]string{
 		"user_id": userID,
 	}
-	res, err := MakeRequest[any, DeleteFeedUserDataResponse](c.client, ctx, "DELETE", "/api/v2/feeds/users/{user_id}/delete", nil, nil, &result, pathParams)
+	res, err := MakeRequest[DeleteFeedUserDataRequest, DeleteFeedUserDataResponse](c.client, ctx, "POST", "/api/v2/feeds/users/{user_id}/delete", nil, request, &result, pathParams)
 	return res, err
 }
 

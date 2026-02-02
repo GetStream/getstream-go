@@ -163,6 +163,24 @@ func (c *Call) ListRecordings(ctx context.Context, request *ListRecordingsReques
 	return response, nil
 }
 
+func (c *Call) StartRecording(ctx context.Context, recordingType string, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
+	response, err := c.client.StartRecording(ctx, c.callType, c.callID, recordingType, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
+}
+
+func (c *Call) StopRecording(ctx context.Context, recordingType string, request *StopRecordingRequest) (*StreamResponse[StopRecordingResponse], error) {
+	response, err := c.client.StopRecording(ctx, c.callType, c.callID, recordingType, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
+}
+
 func (c *Call) GetCallReport(ctx context.Context, request *GetCallReportRequest) (*StreamResponse[GetCallReportResponse], error) {
 	response, err := c.client.GetCallReport(ctx, c.callType, c.callID, request)
 	if err != nil {
@@ -208,6 +226,24 @@ func (c *Call) StopRTMPBroadcast(ctx context.Context, name string, request *Stop
 	return response, nil
 }
 
+func (c *Call) GetCallParticipantSessionMetrics(ctx context.Context, session string, user string, userSession string, request *GetCallParticipantSessionMetricsRequest) (*StreamResponse[GetCallParticipantSessionMetricsResponse], error) {
+	response, err := c.client.GetCallParticipantSessionMetrics(ctx, session, user, userSession, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
+}
+
+func (c *Call) QueryCallParticipantSessions(ctx context.Context, session string, request *QueryCallParticipantSessionsRequest) (*StreamResponse[QueryCallParticipantSessionsResponse], error) {
+	response, err := c.client.QueryCallParticipantSessions(ctx, c.callType, c.callID, session, request)
+	if err != nil {
+		return nil, err
+	}
+	c.syncFromResponse(response.Data)
+	return response, nil
+}
+
 func (c *Call) StartHLSBroadcasting(ctx context.Context, request *StartHLSBroadcastingRequest) (*StreamResponse[StartHLSBroadcastingResponse], error) {
 	response, err := c.client.StartHLSBroadcasting(ctx, c.callType, c.callID, request)
 	if err != nil {
@@ -228,15 +264,6 @@ func (c *Call) StartClosedCaptions(ctx context.Context, request *StartClosedCapt
 
 func (c *Call) StartFrameRecording(ctx context.Context, request *StartFrameRecordingRequest) (*StreamResponse[StartFrameRecordingResponse], error) {
 	response, err := c.client.StartFrameRecording(ctx, c.callType, c.callID, request)
-	if err != nil {
-		return nil, err
-	}
-	c.syncFromResponse(response.Data)
-	return response, nil
-}
-
-func (c *Call) StartRecording(ctx context.Context, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
-	response, err := c.client.StartRecording(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -282,15 +309,6 @@ func (c *Call) StopFrameRecording(ctx context.Context, request *StopFrameRecordi
 
 func (c *Call) StopLive(ctx context.Context, request *StopLiveRequest) (*StreamResponse[StopLiveResponse], error) {
 	response, err := c.client.StopLive(ctx, c.callType, c.callID, request)
-	if err != nil {
-		return nil, err
-	}
-	c.syncFromResponse(response.Data)
-	return response, nil
-}
-
-func (c *Call) StopRecording(ctx context.Context, request *StopRecordingRequest) (*StreamResponse[StopRecordingResponse], error) {
-	response, err := c.client.StopRecording(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
