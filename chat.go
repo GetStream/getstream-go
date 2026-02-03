@@ -60,6 +60,23 @@ func (c *ChatClient) QueryChannels(ctx context.Context, request *QueryChannelsRe
 	return res, err
 }
 
+// Update channels in batch
+//
+// Sends events:
+// - channel.frozen
+// - channel.hidden
+// - channel.unfrozen
+// - channel.updated
+// - channel.visible
+// - member.added
+// - member.removed
+// - member.updated
+func (c *ChatClient) ChannelBatchUpdate(ctx context.Context, request *ChannelBatchUpdateRequest) (*StreamResponse[ChannelBatchUpdateResponse], error) {
+	var result ChannelBatchUpdateResponse
+	res, err := MakeRequest[ChannelBatchUpdateRequest, ChannelBatchUpdateResponse](c.client, ctx, "PUT", "/api/v2/chat/channels/batch", nil, request, &result, nil)
+	return res, err
+}
+
 // Allows to delete several channels at once asynchronously
 //
 // Sends events:
@@ -790,6 +807,14 @@ func (c *ChatClient) QueryBannedUsers(ctx context.Context, request *QueryBannedU
 	var result QueryBannedUsersResponse
 	params := extractQueryParams(request)
 	res, err := MakeRequest[any, QueryBannedUsersResponse](c.client, ctx, "GET", "/api/v2/chat/query_banned_users", params, nil, &result, nil)
+	return res, err
+}
+
+// Find and filter future channel bans created by the authenticated user
+func (c *ChatClient) QueryFutureChannelBans(ctx context.Context, request *QueryFutureChannelBansRequest) (*StreamResponse[QueryFutureChannelBansResponse], error) {
+	var result QueryFutureChannelBansResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, QueryFutureChannelBansResponse](c.client, ctx, "GET", "/api/v2/chat/query_future_channel_bans", params, nil, &result, nil)
 	return res, err
 }
 
