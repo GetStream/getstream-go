@@ -1244,7 +1244,7 @@ type AsyncExportErrorEvent struct {
 }
 
 func (*AsyncExportErrorEvent) GetEventType() string {
-	return "export.channels.error"
+	return "export.moderation_logs.error"
 }
 
 type AsyncExportModerationLogsEvent struct {
