@@ -17,6 +17,7 @@ func NewFeed(feedType string, feedID string, client *FeedsClient) *Feeds {
 	}
 }
 
+// 1
 func (c *Feeds) Delete(ctx context.Context, request *DeleteFeedRequest) (*StreamResponse[DeleteFeedResponse], error) {
 	return c.client.DeleteFeed(ctx, c.feedType, c.feedID, request)
 }

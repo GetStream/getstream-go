@@ -60,23 +60,6 @@ func (c *ChatClient) QueryChannels(ctx context.Context, request *QueryChannelsRe
 	return res, err
 }
 
-// Update channels in batch
-//
-// Sends events:
-// - channel.frozen
-// - channel.hidden
-// - channel.unfrozen
-// - channel.updated
-// - channel.visible
-// - member.added
-// - member.removed
-// - member.updated
-func (c *ChatClient) ChannelBatchUpdate(ctx context.Context, request *ChannelBatchUpdateRequest) (*StreamResponse[ChannelBatchUpdateResponse], error) {
-	var result ChannelBatchUpdateResponse
-	res, err := MakeRequest[ChannelBatchUpdateRequest, ChannelBatchUpdateResponse](c.client, ctx, "PUT", "/api/v2/chat/channels/batch", nil, request, &result, nil)
-	return res, err
-}
-
 // Allows to delete several channels at once asynchronously
 //
 // Sends events:
@@ -568,12 +551,12 @@ func (c *ChatClient) UpdateMessagePartial(ctx context.Context, id string, reques
 // Sends events:
 // - message.new
 // - message.new
-func (c *ChatClient) RunMessageAction(ctx context.Context, id string, request *RunMessageActionRequest) (*StreamResponse[MessageResponse], error) {
-	var result MessageResponse
+func (c *ChatClient) RunMessageAction(ctx context.Context, id string, request *RunMessageActionRequest) (*StreamResponse[MessageActionResponse], error) {
+	var result MessageActionResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[RunMessageActionRequest, MessageResponse](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/action", nil, request, &result, pathParams)
+	res, err := MakeRequest[RunMessageActionRequest, MessageActionResponse](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/action", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -584,12 +567,12 @@ func (c *ChatClient) RunMessageAction(ctx context.Context, id string, request *R
 // - message.updated
 // - message.new
 // - message.updated
-func (c *ChatClient) CommitMessage(ctx context.Context, id string, request *CommitMessageRequest) (*StreamResponse[MessageResponse], error) {
-	var result MessageResponse
+func (c *ChatClient) CommitMessage(ctx context.Context, id string, request *CommitMessageRequest) (*StreamResponse[MessageActionResponse], error) {
+	var result MessageActionResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[CommitMessageRequest, MessageResponse](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/commit", nil, request, &result, pathParams)
+	res, err := MakeRequest[CommitMessageRequest, MessageActionResponse](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/commit", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -662,12 +645,12 @@ func (c *ChatClient) QueryReactions(ctx context.Context, id string, request *Que
 // Sends events:
 // - message.updated
 // - message.updated
-func (c *ChatClient) TranslateMessage(ctx context.Context, id string, request *TranslateMessageRequest) (*StreamResponse[MessageResponse], error) {
-	var result MessageResponse
+func (c *ChatClient) TranslateMessage(ctx context.Context, id string, request *TranslateMessageRequest) (*StreamResponse[MessageActionResponse], error) {
+	var result MessageActionResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[TranslateMessageRequest, MessageResponse](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/translate", nil, request, &result, pathParams)
+	res, err := MakeRequest[TranslateMessageRequest, MessageActionResponse](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/translate", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -941,6 +924,7 @@ func (c *ChatClient) UnreadCountsBatch(ctx context.Context, request *UnreadCount
 // Sends a custom event to a user
 //
 // Sends events:
+// - *
 // - *
 func (c *ChatClient) SendUserCustomEvent(ctx context.Context, userID string, request *SendUserCustomEventRequest) (*StreamResponse[Response], error) {
 	var result Response
