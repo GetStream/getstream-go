@@ -120,14 +120,6 @@ type QueryChannelsRequest struct {
 	User             *UserRequest       `json:"user"`
 }
 
-type ChannelBatchUpdateRequest struct {
-	Operation        string                      `json:"operation"`
-	Filter           map[string]any              `json:"filter"`
-	FilterTagsUpdate []string                    `json:"filter_tags_update"`
-	Members          []ChannelBatchMemberRequest `json:"members"`
-	Data             *ChannelDataUpdate          `json:"data"`
-}
-
 type DeleteChannelsRequest struct {
 	Cids       []string `json:"cids"`
 	HardDelete *bool    `json:"hard_delete"`
@@ -305,6 +297,7 @@ type CreateChannelTypeRequest struct {
 	PartitionSize                  *int                `json:"partition_size"`
 	PartitionTtl                   *string             `json:"partition_ttl"`
 	Polls                          *bool               `json:"polls"`
+	PushLevel                      *string             `json:"push_level"`
 	PushNotifications              *bool               `json:"push_notifications"`
 	Reactions                      *bool               `json:"reactions"`
 	ReadEvents                     *bool               `json:"read_events"`
@@ -343,6 +336,7 @@ type UpdateChannelTypeRequest struct {
 	PartitionSize                  *int                `json:"partition_size"`
 	PartitionTtl                   *string             `json:"partition_ttl"`
 	Polls                          *bool               `json:"polls"`
+	PushLevel                      *string             `json:"push_level"`
 	PushNotifications              *bool               `json:"push_notifications"`
 	Quotes                         *bool               `json:"quotes"`
 	Reactions                      *bool               `json:"reactions"`
@@ -435,6 +429,7 @@ type UpdateMessageRequest struct {
 
 type UpdateMessagePartialRequest struct {
 	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
+	SkipPush      *bool          `json:"skip_push"`
 	UserID        *string        `json:"user_id"`
 	Unset         []string       `json:"unset"`
 	Set           map[string]any `json:"set"`
@@ -452,6 +447,7 @@ type CommitMessageRequest struct {
 
 type EphemeralMessageUpdateRequest struct {
 	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
+	SkipPush      *bool          `json:"skip_push"`
 	UserID        *string        `json:"user_id"`
 	Unset         []string       `json:"unset"`
 	Set           map[string]any `json:"set"`
@@ -714,6 +710,7 @@ type CheckExternalStorageRequest struct {
 type AddActivityRequest struct {
 	Type                       string            `json:"type"`
 	Feeds                      []string          `json:"feeds"`
+	CopyCustomToNotification   *bool             `json:"copy_custom_to_notification"`
 	CreateNotificationActivity *bool             `json:"create_notification_activity"`
 	ExpiresAt                  *string           `json:"expires_at"`
 	ID                         *string           `json:"id"`
@@ -738,6 +735,10 @@ type AddActivityRequest struct {
 
 type UpsertActivitiesRequest struct {
 	Activities []ActivityRequest `json:"activities"`
+}
+
+type UpdateActivitiesPartialBatchRequest struct {
+	Changes []UpdateActivityPartialChangeRequest `json:"changes"`
 }
 
 type DeleteActivitiesRequest struct {
@@ -791,6 +792,7 @@ type ActivityFeedbackRequest struct {
 
 type AddActivityReactionRequest struct {
 	Type                       string         `json:"type"`
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
 	EnforceUnique              *bool          `json:"enforce_unique"`
 	SkipPush                   *bool          `json:"skip_push"`
@@ -821,7 +823,9 @@ type GetActivityRequest struct {
 }
 
 type UpdateActivityPartialRequest struct {
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
 	HandleMentionNotifications *bool          `json:"handle_mention_notifications"`
+	RunActivityProcessors      *bool          `json:"run_activity_processors"`
 	UserID                     *string        `json:"user_id"`
 	Unset                      []string       `json:"unset"`
 	Set                        map[string]any `json:"set"`
@@ -829,10 +833,12 @@ type UpdateActivityPartialRequest struct {
 }
 
 type UpdateActivityRequest struct {
+	CopyCustomToNotification   *bool             `json:"copy_custom_to_notification"`
 	ExpiresAt                  *Timestamp        `json:"expires_at"`
 	HandleMentionNotifications *bool             `json:"handle_mention_notifications"`
 	PollID                     *string           `json:"poll_id"`
 	RestrictReplies            *string           `json:"restrict_replies"`
+	RunActivityProcessors      *bool             `json:"run_activity_processors"`
 	SkipEnrichUrl              *bool             `json:"skip_enrich_url"`
 	Text                       *string           `json:"text"`
 	UserID                     *string           `json:"user_id"`
@@ -846,6 +852,7 @@ type UpdateActivityRequest struct {
 	MentionedUserIds           []string          `json:"mentioned_user_ids"`
 	Custom                     map[string]any    `json:"custom"`
 	Location                   *ActivityLocation `json:"location"`
+	SearchData                 map[string]any    `json:"search_data"`
 	User                       *UserRequest      `json:"user"`
 }
 
@@ -919,6 +926,7 @@ type GetCommentsRequest struct {
 
 type AddCommentRequest struct {
 	Comment                    *string        `json:"comment"`
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
 	ID                         *string        `json:"id"`
 	ObjectID                   *string        `json:"object_id"`
@@ -955,6 +963,7 @@ type GetCommentRequest struct {
 
 type UpdateCommentRequest struct {
 	Comment                    *string        `json:"comment"`
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
 	HandleMentionNotifications *bool          `json:"handle_mention_notifications"`
 	SkipEnrichUrl              *bool          `json:"skip_enrich_url"`
 	SkipPush                   *bool          `json:"skip_push"`
@@ -967,6 +976,7 @@ type UpdateCommentRequest struct {
 
 type AddCommentReactionRequest struct {
 	Type                       string         `json:"type"`
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
 	EnforceUnique              *bool          `json:"enforce_unique"`
 	SkipPush                   *bool          `json:"skip_push"`
@@ -1020,22 +1030,23 @@ type DeleteFeedRequest struct {
 }
 
 type GetOrCreateFeedRequest struct {
-	IDAround            *string            `json:"id_around"`
-	Limit               *int               `json:"limit"`
-	Next                *string            `json:"next"`
-	Prev                *string            `json:"prev"`
-	UserID              *string            `json:"user_id"`
-	View                *string            `json:"view"`
-	Watch               *bool              `json:"watch"`
-	Data                *FeedInput         `json:"data"`
-	EnrichmentOptions   *EnrichmentOptions `json:"enrichment_options"`
-	ExternalRanking     map[string]any     `json:"external_ranking"`
-	Filter              map[string]any     `json:"filter"`
-	FollowersPagination *PagerRequest      `json:"followers_pagination"`
-	FollowingPagination *PagerRequest      `json:"following_pagination"`
-	InterestWeights     map[string]float64 `json:"interest_weights"`
-	MemberPagination    *PagerRequest      `json:"member_pagination"`
-	User                *UserRequest       `json:"user"`
+	IDAround               *string                 `json:"id_around"`
+	Limit                  *int                    `json:"limit"`
+	Next                   *string                 `json:"next"`
+	Prev                   *string                 `json:"prev"`
+	UserID                 *string                 `json:"user_id"`
+	View                   *string                 `json:"view"`
+	Watch                  *bool                   `json:"watch"`
+	Data                   *FeedInput              `json:"data"`
+	EnrichmentOptions      *EnrichmentOptions      `json:"enrichment_options"`
+	ExternalRanking        map[string]any          `json:"external_ranking"`
+	Filter                 map[string]any          `json:"filter"`
+	FollowersPagination    *PagerRequest           `json:"followers_pagination"`
+	FollowingPagination    *PagerRequest           `json:"following_pagination"`
+	FriendReactionsOptions *FriendReactionsOptions `json:"friend_reactions_options"`
+	InterestWeights        map[string]float64      `json:"interest_weights"`
+	MemberPagination       *PagerRequest           `json:"member_pagination"`
+	User                   *UserRequest            `json:"user"`
 }
 
 type UpdateFeedRequest struct {
@@ -1202,6 +1213,7 @@ type GetFeedsRateLimitsRequest struct {
 type UpdateFollowRequest struct {
 	Source                     string         `json:"source"`
 	Target                     string         `json:"target"`
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
 	FollowerRole               *string        `json:"follower_role"`
 	PushPreference             *string        `json:"push_preference"`
@@ -1213,6 +1225,7 @@ type UpdateFollowRequest struct {
 type FollowRequest struct {
 	Source                     string         `json:"source"`
 	Target                     string         `json:"target"`
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
 	PushPreference             *string        `json:"push_preference"`
 	SkipPush                   *bool          `json:"skip_push"`
@@ -1430,13 +1443,13 @@ type QueryModerationConfigsRequest struct {
 }
 
 type CustomCheckRequest struct {
-	EntityID          string             `json:"entity_id"`
-	EntityType        string             `json:"entity_type"`
-	Flags             []CustomCheckFlag  `json:"flags"`
-	EntityCreatorID   *string            `json:"entity_creator_id"`
-	UserID            *string            `json:"user_id"`
-	ModerationPayload *ModerationPayload `json:"moderation_payload"`
-	User              *UserRequest       `json:"user"`
+	EntityID          string                    `json:"entity_id"`
+	EntityType        string                    `json:"entity_type"`
+	Flags             []CustomCheckFlag         `json:"flags"`
+	EntityCreatorID   *string                   `json:"entity_creator_id"`
+	UserID            *string                   `json:"user_id"`
+	ModerationPayload *ModerationPayloadRequest `json:"moderation_payload"`
+	User              *UserRequest              `json:"user"`
 }
 
 type V2DeleteTemplateRequest struct {
@@ -1446,8 +1459,8 @@ type V2QueryTemplatesRequest struct {
 }
 
 type V2UpsertTemplateRequest struct {
-	Name   string                        `json:"name"`
-	Config FeedsModerationTemplateConfig `json:"config"`
+	Name   string                               `json:"name"`
+	Config FeedsModerationTemplateConfigPayload `json:"config"`
 }
 
 type FlagRequest struct {
@@ -1462,11 +1475,11 @@ type FlagRequest struct {
 }
 
 type QueryModerationFlagsRequest struct {
-	Limit  *int           `json:"limit"`
-	Next   *string        `json:"next"`
-	Prev   *string        `json:"prev"`
-	Sort   []SortParam    `json:"sort"`
-	Filter map[string]any `json:"filter"`
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
 }
 
 type QueryModerationLogsRequest struct {
@@ -1534,25 +1547,26 @@ type GetReviewQueueItemRequest struct {
 }
 
 type SubmitActionRequest struct {
-	ActionType     string                    `json:"action_type"`
-	AppealID       *string                   `json:"appeal_id"`
-	ItemID         *string                   `json:"item_id"`
-	UserID         *string                   `json:"user_id"`
-	Ban            *BanActionRequest         `json:"ban"`
-	Block          *BlockActionRequest       `json:"block"`
-	Custom         *CustomActionRequest      `json:"custom"`
-	DeleteActivity *DeleteActivityRequest    `json:"delete_activity"`
-	DeleteComment  *DeleteCommentRequest     `json:"delete_comment"`
-	DeleteMessage  *DeleteMessageRequest     `json:"delete_message"`
-	DeleteReaction *DeleteReactionRequest    `json:"delete_reaction"`
-	DeleteUser     *DeleteUserRequest        `json:"delete_user"`
-	MarkReviewed   *MarkReviewedRequest      `json:"mark_reviewed"`
-	RejectAppeal   *RejectAppealRequest      `json:"reject_appeal"`
-	Restore        *RestoreActionRequest     `json:"restore"`
-	ShadowBlock    *ShadowBlockActionRequest `json:"shadow_block"`
-	Unban          *UnbanActionRequest       `json:"unban"`
-	Unblock        *UnblockActionRequest     `json:"unblock"`
-	User           *UserRequest              `json:"user"`
+	ActionType     string                           `json:"action_type"`
+	AppealID       *string                          `json:"appeal_id"`
+	ItemID         *string                          `json:"item_id"`
+	UserID         *string                          `json:"user_id"`
+	Ban            *BanActionRequestPayload         `json:"ban"`
+	Block          *BlockActionRequestPayload       `json:"block"`
+	Custom         *CustomActionRequestPayload      `json:"custom"`
+	DeleteActivity *DeleteActivityRequestPayload    `json:"delete_activity"`
+	DeleteComment  *DeleteCommentRequestPayload     `json:"delete_comment"`
+	DeleteMessage  *DeleteMessageRequestPayload     `json:"delete_message"`
+	DeleteReaction *DeleteReactionRequestPayload    `json:"delete_reaction"`
+	DeleteUser     *DeleteUserRequestPayload        `json:"delete_user"`
+	Flag           *FlagRequest                     `json:"flag"`
+	MarkReviewed   *MarkReviewedRequestPayload      `json:"mark_reviewed"`
+	RejectAppeal   *RejectAppealRequestPayload      `json:"reject_appeal"`
+	Restore        *RestoreActionRequestPayload     `json:"restore"`
+	ShadowBlock    *ShadowBlockActionRequestPayload `json:"shadow_block"`
+	Unban          *UnbanActionRequestPayload       `json:"unban"`
+	Unblock        *UnblockActionRequestPayload     `json:"unblock"`
+	User           *UserRequest                     `json:"user"`
 }
 
 type UnbanRequest struct {
@@ -1675,7 +1689,7 @@ type ListPushProvidersRequest struct {
 }
 
 type UpsertPushProviderRequest struct {
-	PushProvider *PushProvider `json:"push_provider"`
+	PushProvider *PushProviderRequest `json:"push_provider"`
 }
 
 type DeletePushProviderRequest struct {
@@ -2101,11 +2115,11 @@ type ListCallTypesRequest struct {
 }
 
 type CreateCallTypeRequest struct {
-	Name                 string                `json:"name"`
-	ExternalStorage      *string               `json:"external_storage"`
-	Grants               map[string][]string   `json:"grants"`
-	NotificationSettings *NotificationSettings `json:"notification_settings"`
-	Settings             *CallSettingsRequest  `json:"settings"`
+	Name                 string                       `json:"name"`
+	ExternalStorage      *string                      `json:"external_storage"`
+	Grants               map[string][]string          `json:"grants"`
+	NotificationSettings *NotificationSettingsRequest `json:"notification_settings"`
+	Settings             *CallSettingsRequest         `json:"settings"`
 }
 
 type DeleteCallTypeRequest struct {
@@ -2115,10 +2129,10 @@ type GetCallTypeRequest struct {
 }
 
 type UpdateCallTypeRequest struct {
-	ExternalStorage      *string               `json:"external_storage"`
-	Grants               map[string][]string   `json:"grants"`
-	NotificationSettings *NotificationSettings `json:"notification_settings"`
-	Settings             *CallSettingsRequest  `json:"settings"`
+	ExternalStorage      *string                      `json:"external_storage"`
+	Grants               map[string][]string          `json:"grants"`
+	NotificationSettings *NotificationSettingsRequest `json:"notification_settings"`
+	Settings             *CallSettingsRequest         `json:"settings"`
 }
 
 type GetEdgesRequest struct {
@@ -2171,11 +2185,11 @@ type UpdateSIPTrunkRequest struct {
 }
 
 type ResolveSipInboundRequest struct {
-	SipCallerNumber string            `json:"sip_caller_number"`
-	SipTrunkNumber  string            `json:"sip_trunk_number"`
-	Challenge       SIPChallenge      `json:"challenge"`
-	RoutingNumber   *string           `json:"routing_number"`
-	SipHeaders      map[string]string `json:"sip_headers"`
+	SipCallerNumber string              `json:"sip_caller_number"`
+	SipTrunkNumber  string              `json:"sip_trunk_number"`
+	Challenge       SIPChallengeRequest `json:"challenge"`
+	RoutingNumber   *string             `json:"routing_number"`
+	SipHeaders      map[string]string   `json:"sip_headers"`
 }
 
 type QueryAggregateCallStatsRequest struct {

@@ -69,35 +69,35 @@ func setup(t *testing.T, rm *ResourceManager, createCallType bool) (*Stream, *Ca
 			},
 		}
 
-		notificationSettings := &NotificationSettings{
-			Enabled: true,
-			CallNotification: EventNotificationSettings{
-				APNS: APNS{
-					Title: "{{ user.display_name }} invites you to a call",
-					Body:  "",
+		notificationSettings := &NotificationSettingsRequest{
+			Enabled: PtrTo(true),
+			CallNotification: &EventNotificationSettingsRequest{
+				APNS: &APNSPayload{
+					Title: PtrTo("{{ user.display_name }} invites you to a call"),
+					Body:  PtrTo(""),
 				},
-				Enabled: true,
+				Enabled: PtrTo(true),
 			},
-			SessionStarted: EventNotificationSettings{
-				APNS: APNS{
-					Body:  "",
-					Title: "{{ user.display_name }} invites you to a call",
+			SessionStarted: &EventNotificationSettingsRequest{
+				APNS: &APNSPayload{
+					Body:  PtrTo(""),
+					Title: PtrTo("{{ user.display_name }} invites you to a call"),
 				},
-				Enabled: false,
+				Enabled: PtrTo(false),
 			},
-			CallLiveStarted: EventNotificationSettings{
-				APNS: APNS{
-					Body:  "",
-					Title: "{{ user.display_name }} invites you to a call",
+			CallLiveStarted: &EventNotificationSettingsRequest{
+				APNS: &APNSPayload{
+					Body:  PtrTo(""),
+					Title: PtrTo("{{ user.display_name }} invites you to a call"),
 				},
-				Enabled: false,
+				Enabled: PtrTo(false),
 			},
-			CallRing: EventNotificationSettings{
-				APNS: APNS{
-					Body:  "",
-					Title: "{{ user.display_name }} invites you to a call",
+			CallRing: &EventNotificationSettingsRequest{
+				APNS: &APNSPayload{
+					Body:  PtrTo(""),
+					Title: PtrTo("{{ user.display_name }} invites you to a call"),
 				},
-				Enabled: false,
+				Enabled: PtrTo(false),
 			},
 		}
 

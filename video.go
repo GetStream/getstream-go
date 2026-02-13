@@ -334,9 +334,11 @@ func (c *VideoClient) StopRTMPBroadcast(ctx context.Context, _type string, id st
 	return res, err
 }
 
-func (c *VideoClient) GetCallParticipantSessionMetrics(ctx context.Context, session string, user string, userSession string, request *GetCallParticipantSessionMetricsRequest) (*StreamResponse[GetCallParticipantSessionMetricsResponse], error) {
+func (c *VideoClient) GetCallParticipantSessionMetrics(ctx context.Context, _type string, id string, session string, user string, userSession string, request *GetCallParticipantSessionMetricsRequest) (*StreamResponse[GetCallParticipantSessionMetricsResponse], error) {
 	var result GetCallParticipantSessionMetricsResponse
 	pathParams := map[string]string{
+		"type":         _type,
+		"id":           id,
 		"session":      session,
 		"user":         user,
 		"user_session": userSession,
