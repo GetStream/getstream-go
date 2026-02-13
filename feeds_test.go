@@ -23,6 +23,13 @@ func TestFeedsUpsertActivities(t *testing.T) {
 	_, err = client.Feeds().UpsertActivities(context.Background(), &getstream.UpsertActivitiesRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsUpdateActivitiesPartialBatch(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().UpdateActivitiesPartialBatch(context.Background(), &getstream.UpdateActivitiesPartialBatchRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsDeleteActivities(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

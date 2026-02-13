@@ -29,6 +29,16 @@ func (c *FeedsClient) UpsertActivities(ctx context.Context, request *UpsertActiv
 	return res, err
 }
 
+// Updates certain fields of multiple activities in a batch. Use 'set' to update specific fields and 'unset' to remove fields. Activities that fail due to not found, permission denied, or no changes detected are silently skipped and not included in the response. However, validation errors (e.g., updating reserved fields, invalid field values) will fail the entire batch request.
+//
+// Sends events:
+// - feeds.activity.updated
+func (c *FeedsClient) UpdateActivitiesPartialBatch(ctx context.Context, request *UpdateActivitiesPartialBatchRequest) (*StreamResponse[UpdateActivitiesPartialBatchResponse], error) {
+	var result UpdateActivitiesPartialBatchResponse
+	res, err := MakeRequest[UpdateActivitiesPartialBatchRequest, UpdateActivitiesPartialBatchResponse](c.client, ctx, "PATCH", "/api/v2/feeds/activities/batch/partial", nil, request, &result, nil)
+	return res, err
+}
+
 // Delete one or more activities by their IDs
 func (c *FeedsClient) DeleteActivities(ctx context.Context, request *DeleteActivitiesRequest) (*StreamResponse[DeleteActivitiesResponse], error) {
 	var result DeleteActivitiesResponse
