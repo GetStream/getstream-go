@@ -366,6 +366,13 @@ func TestFeedsRejectFeedMemberInvite(t *testing.T) {
 	_, err = client.Feeds().RejectFeedMemberInvite(context.Background(), "", "", &getstream.RejectFeedMemberInviteRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsQueryPinnedActivities(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().QueryPinnedActivities(context.Background(), "", "", &getstream.QueryPinnedActivitiesRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsGetFollowSuggestions(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

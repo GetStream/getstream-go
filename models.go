@@ -5316,6 +5316,8 @@ type GetCommandResponse struct {
 
 type GetCommentRepliesResponse struct {
 	Duration string `json:"duration"`
+	// Sort order used for the replies (first, last, top, best, controversial)
+	Sort string `json:"sort"`
 	// Threaded listing of replies to the comment
 	Comments []ThreadedCommentResponse `json:"comments"`
 	Next     *string                   `json:"next,omitempty"`
@@ -5329,6 +5331,8 @@ type GetCommentResponse struct {
 
 type GetCommentsResponse struct {
 	Duration string `json:"duration"`
+	// Sort order used for the comments (first, last, top, best, controversial)
+	Sort string `json:"sort"`
 	// Threaded listing for the activity
 	Comments []ThreadedCommentResponse `json:"comments"`
 	Next     *string                   `json:"next,omitempty"`
@@ -6595,6 +6599,7 @@ type MessageRequest struct {
 	// Message ID is unique string identifier of the message
 	ID               *string `json:"id,omitempty"`
 	MentionedChannel *bool   `json:"mentioned_channel,omitempty"`
+	MentionedHere    *bool   `json:"mentioned_here,omitempty"`
 	// Should be empty if `text` is provided. Can only be set when using server-side API
 	Mml *string `json:"mml,omitempty"`
 	// ID of parent message (thread)
@@ -6641,6 +6646,8 @@ type MessageResponse struct {
 	ID string `json:"id"`
 	// Whether the message mentioned the channel tag
 	MentionedChannel bool `json:"mentioned_channel"`
+	// Whether the message mentioned online users with @here tag
+	MentionedHere bool `json:"mentioned_here"`
 	// Whether message is pinned or not
 	Pinned bool `json:"pinned"`
 	// Number of replies to this message
@@ -6808,6 +6815,8 @@ type MessageWithChannelResponse struct {
 	ID string `json:"id"`
 	// Whether the message mentioned the channel tag
 	MentionedChannel bool `json:"mentioned_channel"`
+	// Whether the message mentioned online users with @here tag
+	MentionedHere bool `json:"mentioned_here"`
 	// Whether message is pinned or not
 	Pinned bool `json:"pinned"`
 	// Number of replies to this message
@@ -8383,6 +8392,16 @@ type QueryModerationRulesResponse struct {
 	Prev             *string           `json:"prev,omitempty"`
 }
 
+type QueryPinnedActivitiesResponse struct {
+	Duration string `json:"duration"`
+	// List of pinned activities matching the query
+	PinnedActivities []ActivityPinResponse `json:"pinned_activities"`
+	// Cursor for next page
+	Next *string `json:"next,omitempty"`
+	// Cursor for previous page
+	Prev *string `json:"prev,omitempty"`
+}
+
 type QueryPollsResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -9412,6 +9431,7 @@ type SearchResultMessage struct {
 	Html                 string                            `json:"html"`
 	ID                   string                            `json:"id"`
 	MentionedChannel     bool                              `json:"mentioned_channel"`
+	MentionedHere        bool                              `json:"mentioned_here"`
 	Pinned               bool                              `json:"pinned"`
 	ReplyCount           int                               `json:"reply_count"`
 	Shadowed             bool                              `json:"shadowed"`
@@ -9698,9 +9718,6 @@ type StartTranscriptionResponse struct {
 type StopAllRTMPBroadcastsResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
-}
-
-type StopCampaignRequest struct {
 }
 
 // Basic response information

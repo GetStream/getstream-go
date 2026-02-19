@@ -92,7 +92,7 @@ type StartCampaignRequest struct {
 	ScheduledFor *Timestamp `json:"scheduled_for"`
 	StopAt       *Timestamp `json:"stop_at"`
 }
-type ScheduleCampaignRequest struct {
+type StopCampaignRequest struct {
 }
 type QueryChannelsRequest struct {
 	Limit            *int               `json:"limit"`
@@ -954,6 +954,13 @@ type QueryFeedMembersRequest struct {
 type RejectFeedMemberInviteRequest struct {
 	UserID *string      `json:"user_id"`
 	User   *UserRequest `json:"user"`
+}
+type QueryPinnedActivitiesRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
 }
 type GetFollowSuggestionsRequest struct {
 	Limit  *int    `json:"-" query:"limit"`
