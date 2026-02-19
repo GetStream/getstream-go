@@ -49,6 +49,9 @@ func TestChatMessageIntegration(t *testing.T) {
 		id2 := sendTestMessage(t, ch, userID, "Msg 2")
 		id3 := sendTestMessage(t, ch, userID, "Msg 3")
 
+		// Allow time for messages to be indexed
+		time.Sleep(time.Second)
+
 		resp, err := ch.GetManyMessages(ctx, &GetManyMessagesRequest{
 			Ids: []string{id1, id2, id3},
 		})
