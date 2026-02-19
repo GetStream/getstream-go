@@ -338,6 +338,82 @@ func TestChatChannelIntegration(t *testing.T) {
 		require.NoError(t, err)
 	})
 
+	t.Run("MuteUnmuteChannel", func(t *testing.T) {
+		_, channelID := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, memberID1})
+		cid := "messaging:" + channelID
+
+		// Mute the channel for memberID1
+		muteResp, err := client.Chat().MuteChannel(ctx, &MuteChannelRequest{
+			ChannelCids: []string{cid},
+			UserID:      PtrTo(memberID1),
+		})
+		require.NoError(t, err)
+		require.NotNil(t, muteResp.Data)
+
+		// Verify mute response details (like stream-chat-go does)
+		require.NotNil(t, muteResp.Data.ChannelMute, "Mute response should contain ChannelMute")
+		require.NotNil(t, muteResp.Data.ChannelMute.Channel, "ChannelMute should have Channel")
+		require.NotNil(t, muteResp.Data.ChannelMute.User, "ChannelMute should have User")
+		assert.Equal(t, cid, muteResp.Data.ChannelMute.Channel.Cid)
+		assert.Equal(t, memberID1, muteResp.Data.ChannelMute.User.ID)
+
+		// Verify via QueryChannels with muted=true and cid filter
+		qResp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
+			FilterConditions: map[string]any{
+				"muted": true,
+				"cid":   cid,
+			},
+			UserID: PtrTo(memberID1),
+		})
+		require.NoError(t, err)
+		require.Len(t, qResp.Data.Channels, 1, "Should find exactly 1 muted channel")
+		assert.Equal(t, cid, qResp.Data.Channels[0].Channel.Cid)
+
+		// Unmute the channel
+		_, err = client.Chat().UnmuteChannel(ctx, &UnmuteChannelRequest{
+			ChannelCids: []string{cid},
+			UserID:      PtrTo(memberID1),
+		})
+		require.NoError(t, err)
+
+		// Verify unmute via query with muted=false (like stream-chat-go does)
+		qResp, err = client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
+			FilterConditions: map[string]any{
+				"muted": false,
+				"cid":   cid,
+			},
+			UserID: PtrTo(memberID1),
+		})
+		require.NoError(t, err)
+		require.Len(t, qResp.Data.Channels, 1, "Unmuted channel should appear in muted=false query")
+	})
+
+	t.Run("MemberPartialUpdate", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, memberID1})
+
+		// Set custom fields on member
+		resp, err := ch.UpdateMemberPartial(ctx, &UpdateMemberPartialRequest{
+			UserID: PtrTo(memberID1),
+			Set: map[string]any{
+				"role_label": "moderator",
+				"score":      42,
+			},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.ChannelMember)
+		assert.Equal(t, "moderator", resp.Data.ChannelMember.Custom["role_label"])
+
+		// Unset a custom field
+		resp, err = ch.UpdateMemberPartial(ctx, &UpdateMemberPartialRequest{
+			UserID: PtrTo(memberID1),
+			Unset:  []string{"score"},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.ChannelMember)
+		_, hasScore := resp.Data.ChannelMember.Custom["score"]
+		assert.False(t, hasScore, "score should be unset")
+	})
+
 	t.Run("SendChannelEvent", func(t *testing.T) {
 		ch, _ := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, memberID1})
 

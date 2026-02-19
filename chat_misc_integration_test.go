@@ -418,3 +418,363 @@ func TestChatUnreadCountsIntegration(t *testing.T) {
 		assert.Contains(t, resp.Data.CountsByUser, userID2)
 	})
 }
+
+func TestChatBanIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	userIDs := createTestUsers(t, client, 3)
+	adminID := userIDs[0]
+	targetID := userIDs[1]
+	targetID2 := userIDs[2]
+
+	t.Run("BanAndQueryBannedUsers", func(t *testing.T) {
+		// Ban a user with reason and timeout
+		_, err := client.Moderation().Ban(ctx, &BanRequest{
+			TargetUserID: targetID,
+			BannedByID:   PtrTo(adminID),
+			Reason:       PtrTo("test ban reason"),
+			Timeout:      PtrTo(60), // 60 minutes
+		})
+		require.NoError(t, err)
+
+		// Query banned users (use $eq operator like stream-chat-go)
+		qResp, err := client.Chat().QueryBannedUsers(ctx, &QueryBannedUsersRequest{
+			Payload: &QueryBannedUsersPayload{
+				FilterConditions: map[string]any{
+					"user_id": map[string]string{"$eq": targetID},
+				},
+			},
+		})
+		require.NoError(t, err)
+		require.NotEmpty(t, qResp.Data.Bans, "Should find the banned user")
+
+		ban := qResp.Data.Bans[0]
+		require.NotNil(t, ban.Reason)
+		assert.Equal(t, "test ban reason", *ban.Reason)
+		// When timeout is set, Expires should be populated
+		assert.NotNil(t, ban.Expires, "Ban with timeout should have Expires set")
+
+		// Unban the user
+		_, err = client.Moderation().Unban(ctx, &UnbanRequest{
+			TargetUserID: targetID,
+		})
+		require.NoError(t, err)
+
+		// Verify ban is gone after unban
+		qResp, err = client.Chat().QueryBannedUsers(ctx, &QueryBannedUsersRequest{
+			Payload: &QueryBannedUsersPayload{
+				FilterConditions: map[string]any{
+					"user_id": map[string]string{"$eq": targetID},
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Empty(t, qResp.Data.Bans, "Bans should be empty after unban")
+	})
+
+	t.Run("ChannelBan", func(t *testing.T) {
+		_, channelID := createTestChannelWithMembers(t, client, adminID, []string{adminID, targetID2})
+		cid := "messaging:" + channelID
+
+		// Ban user in the specific channel
+		_, err := client.Moderation().Ban(ctx, &BanRequest{
+			TargetUserID: targetID2,
+			BannedByID:   PtrTo(adminID),
+			ChannelCid:   PtrTo(cid),
+			Reason:       PtrTo("channel-specific ban"),
+		})
+		require.NoError(t, err)
+
+		// Unban from channel
+		_, err = client.Moderation().Unban(ctx, &UnbanRequest{
+			TargetUserID: targetID2,
+			ChannelCid:   PtrTo(cid),
+		})
+		require.NoError(t, err)
+
+		// Verify ban is gone after unban (same pattern as stream-chat-go)
+		qResp, err := client.Chat().QueryBannedUsers(ctx, &QueryBannedUsersRequest{
+			Payload: &QueryBannedUsersPayload{
+				FilterConditions: map[string]any{
+					"channel_cid": map[string]string{"$eq": cid},
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Empty(t, qResp.Data.Bans, "Channel bans should be empty after unban")
+	})
+}
+
+func TestChatMuteIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	userIDs := createTestUsers(t, client, 4)
+	muterID := userIDs[0]
+	targetID := userIDs[1]
+	targetID2 := userIDs[2]
+	targetID3 := userIDs[3]
+
+	t.Run("MuteUnmuteUser", func(t *testing.T) {
+		// Mute a user (without timeout)
+		muteResp, err := client.Moderation().Mute(ctx, &MuteRequest{
+			TargetIds: []string{targetID},
+			UserID:    PtrTo(muterID),
+		})
+		require.NoError(t, err)
+		require.NotEmpty(t, muteResp.Data.Mutes, "Mute response should contain mutes")
+
+		mute := muteResp.Data.Mutes[0]
+		assert.NotNil(t, mute.User, "Mute should have a User")
+		assert.NotNil(t, mute.Target, "Mute should have a Target")
+		assert.Nil(t, mute.Expires, "Mute without timeout should have no Expires")
+
+		// Verify mute appears in QueryUsers (like stream-chat-go does)
+		qResp, err := client.QueryUsers(ctx, &QueryUsersRequest{
+			Payload: &QueryUsersPayload{
+				FilterConditions: map[string]any{
+					"id": map[string]string{"$eq": muterID},
+				},
+			},
+		})
+		require.NoError(t, err)
+		require.NotEmpty(t, qResp.Data.Users)
+		require.NotEmpty(t, qResp.Data.Users[0].Mutes, "User should have Mutes after muting")
+
+		// Unmute the user
+		_, err = client.Moderation().Unmute(ctx, &UnmuteRequest{
+			TargetIds: []string{targetID},
+			UserID:    PtrTo(muterID),
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("MuteWithTimeout", func(t *testing.T) {
+		// Mute two users with timeout — expiration should be set
+		muteResp, err := client.Moderation().Mute(ctx, &MuteRequest{
+			TargetIds: []string{targetID2, targetID3},
+			UserID:    PtrTo(muterID),
+			Timeout:   PtrTo(60),
+		})
+		require.NoError(t, err)
+		require.GreaterOrEqual(t, len(muteResp.Data.Mutes), 2, "Should have at least 2 mute entries")
+
+		// When timeout is set, Expires should be populated
+		for _, m := range muteResp.Data.Mutes {
+			assert.NotNil(t, m.Expires, "Mute with timeout should have Expires")
+			assert.NotNil(t, m.User, "Mute should have User")
+			assert.NotNil(t, m.Target, "Mute should have Target")
+		}
+
+		// Cleanup: unmute both
+		_, err = client.Moderation().Unmute(ctx, &UnmuteRequest{
+			TargetIds: []string{targetID2, targetID3},
+			UserID:    PtrTo(muterID),
+		})
+		require.NoError(t, err)
+	})
+}
+
+func TestChatFlagIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	userIDs := createTestUsers(t, client, 2)
+	userID := userIDs[0]
+	flaggerID := userIDs[1]
+
+	t.Run("FlagMessageAndQuery", func(t *testing.T) {
+		ch, channelID := createTestChannelWithMembers(t, client, userID, []string{userID, flaggerID})
+		msgID := sendTestMessage(t, ch, userID, "Message to be flagged")
+
+		// Flag the message using the moderation v2 API (entity_id + entity_type format).
+		// Note: stream-chat-go uses the v1 FlagMessage (target_message_id format) which
+		// populates the v1 chat flags store. Our SDK exposes the v2 moderation API,
+		// so QueryMessageFlags (v1) may not see flags created via Moderation().Flag() (v2).
+		flagResp, err := client.Moderation().Flag(ctx, &FlagRequest{
+			EntityID:        msgID,
+			EntityType:      "stream:chat:v1:message",
+			EntityCreatorID: PtrTo(userID),
+			UserID:          PtrTo(flaggerID),
+			Reason:          PtrTo("inappropriate content"),
+		})
+		require.NoError(t, err)
+		assert.NotEmpty(t, flagResp.Data.ItemID, "Flag should return an item ID")
+
+		// Verify QueryMessageFlags endpoint works with channel_cid filter
+		cid := "messaging:" + channelID
+		qResp, err := client.Chat().QueryMessageFlags(ctx, &QueryMessageFlagsRequest{
+			Payload: &QueryMessageFlagsPayload{
+				FilterConditions: map[string]any{
+					"channel_cid": cid,
+				},
+			},
+		})
+		require.NoError(t, err)
+		_ = qResp // flags may be empty since v2 flags don't populate v1 store
+
+		// Also verify QueryMessageFlags works with user_id filter
+		qResp2, err := client.Chat().QueryMessageFlags(ctx, &QueryMessageFlagsRequest{
+			Payload: &QueryMessageFlagsPayload{
+				FilterConditions: map[string]any{
+					"user_id": flaggerID,
+				},
+			},
+		})
+		require.NoError(t, err)
+		_ = qResp2
+	})
+}
+
+func TestChatPermissionsIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	t.Run("CreateListDeleteRole", func(t *testing.T) {
+		roleName := "testrole" + randomString(6)
+
+		// Create role
+		_, err := client.CreateRole(ctx, &CreateRoleRequest{
+			Name: roleName,
+		})
+		require.NoError(t, err)
+
+		// List roles and verify
+		listResp, err := client.ListRoles(ctx, &ListRolesRequest{})
+		require.NoError(t, err)
+
+		found := false
+		for _, role := range listResp.Data.Roles {
+			if role.Name == roleName {
+				found = true
+				assert.True(t, role.Custom, "Created role should be custom")
+			}
+		}
+		assert.True(t, found, "Created role should appear in list")
+
+		// Delete role (may need retry due to propagation delay)
+		time.Sleep(2 * time.Second)
+		var deleteErr error
+		for i := 0; i < 5; i++ {
+			_, deleteErr = client.DeleteRole(ctx, roleName, &DeleteRoleRequest{})
+			if deleteErr == nil {
+				break
+			}
+			time.Sleep(time.Second)
+		}
+		require.NoError(t, deleteErr)
+	})
+
+	t.Run("ListAndGetPermission", func(t *testing.T) {
+		// List all permissions
+		listResp, err := client.ListPermissions(ctx, &ListPermissionsRequest{})
+		require.NoError(t, err)
+		assert.NotEmpty(t, listResp.Data.Permissions, "Should have at least one permission")
+
+		// Get a specific well-known permission
+		getResp, err := client.GetPermission(ctx, "create-channel", &GetPermissionRequest{})
+		require.NoError(t, err)
+		assert.Equal(t, "create-channel", getResp.Data.Permission.ID)
+		assert.NotEmpty(t, getResp.Data.Permission.Action)
+	})
+}
+
+func TestChatExportChannelsIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	userIDs := createTestUsers(t, client, 1)
+	userID := userIDs[0]
+
+	ch, channelID := createTestChannelWithMembers(t, client, userID, []string{userID})
+	sendTestMessage(t, ch, userID, "Message for export test")
+
+	cid := "messaging:" + channelID
+
+	// Export channels
+	exportResp, err := client.Chat().ExportChannels(ctx, &ExportChannelsRequest{
+		Channels: []ChannelExport{
+			{Cid: PtrTo(cid)},
+		},
+	})
+	require.NoError(t, err)
+	assert.NotEmpty(t, exportResp.Data.TaskID)
+
+	// Wait for the export task to complete
+	taskCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
+
+	taskResult, err := WaitForTask(taskCtx, client, exportResp.Data.TaskID)
+	require.NoError(t, err)
+	assert.Equal(t, "completed", taskResult.Data.Status)
+}
+
+func TestChatCustomEventIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	userIDs := createTestUsers(t, client, 1)
+	userID := userIDs[0]
+
+	// Send a custom event to a user (dots not allowed in event type)
+	_, err := client.Chat().SendUserCustomEvent(ctx, userID, &SendUserCustomEventRequest{
+		Event: UserCustomEventRequest{
+			Type: "friendship_request",
+			Custom: map[string]any{
+				"message": "Let's be friends!",
+			},
+		},
+	})
+	require.NoError(t, err)
+}
+
+func TestChatRestoreUsersIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	// Create a dedicated user for this test
+	userIDs := createTestUsers(t, client, 1)
+	userID := userIDs[0]
+
+	// Delete the user (soft delete)
+	delResp, err := client.DeleteUsers(ctx, &DeleteUsersRequest{
+		UserIds: []string{userID},
+		User:    PtrTo("soft"),
+	})
+	require.NoError(t, err)
+	assert.NotEmpty(t, delResp.Data.TaskID)
+
+	// Wait for deletion to complete
+	taskCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
+	taskResult, err := WaitForTask(taskCtx, client, delResp.Data.TaskID)
+	require.NoError(t, err)
+	assert.Equal(t, "completed", taskResult.Data.Status)
+
+	// Restore the user
+	_, err = client.RestoreUsers(ctx, &RestoreUsersRequest{
+		UserIds: []string{userID},
+	})
+	require.NoError(t, err)
+
+	// Verify user exists after restore
+	qResp, err := client.QueryUsers(ctx, &QueryUsersRequest{
+		Payload: &QueryUsersPayload{
+			FilterConditions: map[string]any{
+				"id": userID,
+			},
+		},
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, qResp.Data.Users, "Restored user should be queryable")
+	assert.Equal(t, userID, qResp.Data.Users[0].ID)
+}

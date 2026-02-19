@@ -2,6 +2,7 @@ package getstream_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -213,6 +214,79 @@ func TestChatMessageIntegration(t *testing.T) {
 		})
 		require.NoError(t, err)
 		assert.True(t, resp.Data.Message.Silent)
+	})
+
+	t.Run("PendingMessage", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
+
+		// Send a pending message (requires pending messages feature flag)
+		sendResp, err := ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("Pending message text"),
+				UserID: PtrTo(userID),
+			},
+			Pending:  PtrTo(true),
+			SkipPush: PtrTo(true),
+		})
+		if err != nil {
+			errStr := err.Error()
+			if strings.Contains(errStr, "pending messages not enabled") || strings.Contains(errStr, "feature flag") {
+				t.Skip("Pending messages feature not enabled for this app")
+			}
+			require.NoError(t, err)
+		}
+		msgID := sendResp.Data.Message.ID
+		assert.NotEmpty(t, msgID)
+
+		// Commit the pending message
+		commitResp, err := client.Chat().CommitMessage(ctx, msgID, &CommitMessageRequest{})
+		require.NoError(t, err)
+		require.NotNil(t, commitResp.Data.Message)
+		assert.Equal(t, msgID, commitResp.Data.Message.ID)
+	})
+
+	t.Run("QueryMessageHistory", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
+		msgID := sendTestMessage(t, ch, userID, "Original history text")
+
+		// Update the message twice to create history entries
+		_, err := client.Chat().UpdateMessage(ctx, msgID, &UpdateMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("Updated history text v1"),
+				UserID: PtrTo(userID),
+			},
+		})
+		require.NoError(t, err)
+
+		_, err = client.Chat().UpdateMessage(ctx, msgID, &UpdateMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("Updated history text v2"),
+				UserID: PtrTo(userID),
+			},
+		})
+		require.NoError(t, err)
+
+		// Query message history (requires feature flag)
+		histResp, err := client.Chat().QueryMessageHistory(ctx, &QueryMessageHistoryRequest{
+			Filter: map[string]any{
+				"message_id": msgID,
+			},
+			Sort: []SortParamRequest{},
+		})
+		if err != nil {
+			errStr := err.Error()
+			if strings.Contains(errStr, "feature flag") || strings.Contains(errStr, "not enabled") {
+				t.Skip("QueryMessageHistory feature not enabled for this app")
+			}
+			require.NoError(t, err)
+		}
+		assert.GreaterOrEqual(t, len(histResp.Data.MessageHistory), 2, "Should have at least 2 history entries")
+
+		// Verify that history entries reference the correct message and updater
+		for _, entry := range histResp.Data.MessageHistory {
+			assert.Equal(t, msgID, entry.MessageID)
+			assert.Equal(t, userID, entry.MessageUpdatedByID)
+		}
 	})
 
 	t.Run("SystemMessage", func(t *testing.T) {
