@@ -2,6 +2,7 @@ package getstream_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -777,4 +778,231 @@ func TestChatRestoreUsersIntegration(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, qResp.Data.Users, "Restored user should be queryable")
 	assert.Equal(t, userID, qResp.Data.Users[0].ID)
+}
+
+func TestChatShadowBanIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	userIDs := createTestUsers(t, client, 3)
+	adminID := userIDs[0]
+	targetID := userIDs[1]
+	targetID2 := userIDs[2]
+
+	t.Run("GlobalShadowBan", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, adminID, []string{adminID, targetID})
+
+		// Shadow ban user globally
+		_, err := client.Moderation().Ban(ctx, &BanRequest{
+			TargetUserID: targetID,
+			BannedByID:   PtrTo(adminID),
+			Shadow:       PtrTo(true),
+		})
+		require.NoError(t, err)
+
+		// Send a message from the shadow-banned user
+		sendResp, err := ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("shadow banned message"),
+				UserID: PtrTo(targetID),
+			},
+		})
+		require.NoError(t, err)
+		assert.True(t, sendResp.Data.Message.Shadowed, "Message from shadow-banned user should be shadowed")
+
+		// Verify via GetMessage
+		getResp, err := client.Chat().GetMessage(ctx, sendResp.Data.Message.ID, &GetMessageRequest{})
+		require.NoError(t, err)
+		assert.True(t, getResp.Data.Message.Shadowed, "GetMessage should also show Shadowed=true")
+
+		// Unban
+		_, err = client.Moderation().Unban(ctx, &UnbanRequest{
+			TargetUserID: targetID,
+		})
+		require.NoError(t, err)
+
+		// Send a message after unban — should not be shadowed
+		sendResp2, err := ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("normal message after unban"),
+				UserID: PtrTo(targetID),
+			},
+		})
+		require.NoError(t, err)
+		assert.False(t, sendResp2.Data.Message.Shadowed, "Message after unban should not be shadowed")
+	})
+
+	t.Run("ChannelShadowBan", func(t *testing.T) {
+		ch, channelID := createTestChannelWithMembers(t, client, adminID, []string{adminID, targetID2})
+		cid := "messaging:" + channelID
+
+		// Shadow ban user in the channel
+		_, err := client.Moderation().Ban(ctx, &BanRequest{
+			TargetUserID: targetID2,
+			BannedByID:   PtrTo(adminID),
+			ChannelCid:   PtrTo(cid),
+			Shadow:       PtrTo(true),
+		})
+		require.NoError(t, err)
+
+		// Send a message from the shadow-banned user
+		sendResp, err := ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("channel shadow banned message"),
+				UserID: PtrTo(targetID2),
+			},
+		})
+		require.NoError(t, err)
+		assert.True(t, sendResp.Data.Message.Shadowed, "Channel shadow-banned message should be shadowed")
+
+		// Unban from channel
+		_, err = client.Moderation().Unban(ctx, &UnbanRequest{
+			TargetUserID: targetID2,
+			ChannelCid:   PtrTo(cid),
+		})
+		require.NoError(t, err)
+
+		// Send a message after unban — should not be shadowed
+		sendResp2, err := ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("normal message after channel unban"),
+				UserID: PtrTo(targetID2),
+			},
+		})
+		require.NoError(t, err)
+		assert.False(t, sendResp2.Data.Message.Shadowed, "Message after channel unban should not be shadowed")
+	})
+}
+
+func TestChatReminderIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	userIDs := createTestUsers(t, client, 1)
+	userID := userIDs[0]
+
+	ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
+
+	t.Run("CreateAndDeleteReminder", func(t *testing.T) {
+		msgID := sendTestMessage(t, ch, userID, "Message for reminder test")
+
+		// Create a reminder with a remind_at time
+		remindAt := time.Now().Add(24 * time.Hour)
+		createResp, err := client.Chat().CreateReminder(ctx, msgID, &CreateReminderRequest{
+			UserID:   PtrTo(userID),
+			RemindAt: &Timestamp{Time: &remindAt},
+		})
+		if err != nil {
+			if strings.Contains(err.Error(), "not enabled") {
+				t.Skip("Reminders are not enabled for this channel")
+			}
+			require.NoError(t, err)
+		}
+		assert.Equal(t, msgID, createResp.Data.MessageID)
+		assert.Equal(t, userID, createResp.Data.UserID)
+		assert.NotNil(t, createResp.Data.RemindAt, "RemindAt should be set")
+
+		// Delete the reminder
+		_, err = client.Chat().DeleteReminder(ctx, msgID, &DeleteReminderRequest{
+			UserID: PtrTo(userID),
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("CreateUpdateReminder", func(t *testing.T) {
+		msgID := sendTestMessage(t, ch, userID, "Message for reminder update test")
+
+		// Create reminder
+		remindAt := time.Now().Add(24 * time.Hour)
+		_, err := client.Chat().CreateReminder(ctx, msgID, &CreateReminderRequest{
+			UserID:   PtrTo(userID),
+			RemindAt: &Timestamp{Time: &remindAt},
+		})
+		if err != nil {
+			if strings.Contains(err.Error(), "not enabled") {
+				t.Skip("Reminders are not enabled for this channel")
+			}
+			require.NoError(t, err)
+		}
+
+		// Update reminder with new time
+		newRemindAt := time.Now().Add(48 * time.Hour)
+		updateResp, err := client.Chat().UpdateReminder(ctx, msgID, &UpdateReminderRequest{
+			UserID:   PtrTo(userID),
+			RemindAt: &Timestamp{Time: &newRemindAt},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, msgID, updateResp.Data.Reminder.MessageID)
+		assert.Equal(t, userID, updateResp.Data.Reminder.UserID)
+
+		// Cleanup
+		_, _ = client.Chat().DeleteReminder(ctx, msgID, &DeleteReminderRequest{
+			UserID: PtrTo(userID),
+		})
+	})
+
+	t.Run("QueryReminders", func(t *testing.T) {
+		msgID := sendTestMessage(t, ch, userID, "Message for query reminders test")
+
+		// Create reminder
+		remindAt := time.Now().Add(24 * time.Hour)
+		_, err := client.Chat().CreateReminder(ctx, msgID, &CreateReminderRequest{
+			UserID:   PtrTo(userID),
+			RemindAt: &Timestamp{Time: &remindAt},
+		})
+		if err != nil {
+			if strings.Contains(err.Error(), "not enabled") {
+				t.Skip("Reminders are not enabled for this channel")
+			}
+			require.NoError(t, err)
+		}
+
+		t.Cleanup(func() {
+			_, _ = client.Chat().DeleteReminder(context.Background(), msgID, &DeleteReminderRequest{
+				UserID: PtrTo(userID),
+			})
+		})
+
+		// Query reminders for the user
+		qResp, err := client.Chat().QueryReminders(ctx, &QueryRemindersRequest{
+			UserID: PtrTo(userID),
+			Filter: map[string]any{
+				"message_id": msgID,
+			},
+			Sort: []SortParamRequest{},
+		})
+		require.NoError(t, err)
+		require.NotEmpty(t, qResp.Data.Reminders, "Should find the reminder")
+		assert.Equal(t, msgID, qResp.Data.Reminders[0].MessageID)
+		assert.Equal(t, userID, qResp.Data.Reminders[0].UserID)
+	})
+}
+
+func TestChatDeliveryReceiptsIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	userIDs := createTestUsers(t, client, 2)
+	userID := userIDs[0]
+	userID2 := userIDs[1]
+
+	ch, channelID := createTestChannelWithMembers(t, client, userID, []string{userID, userID2})
+	cid := "messaging:" + channelID
+
+	msgID := sendTestMessage(t, ch, userID, "Message for delivery receipt")
+
+	// Mark delivered for userID2
+	_, err := client.Chat().MarkDelivered(ctx, &MarkDeliveredRequest{
+		UserID: PtrTo(userID2),
+		LatestDeliveredMessages: []DeliveredMessagePayload{
+			{
+				Cid: PtrTo(cid),
+				ID:  PtrTo(msgID),
+			},
+		},
+	})
+	require.NoError(t, err)
 }

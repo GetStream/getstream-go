@@ -414,6 +414,32 @@ func TestChatChannelIntegration(t *testing.T) {
 		assert.False(t, hasScore, "score should be unset")
 	})
 
+	t.Run("AssignRoles", func(t *testing.T) {
+		ch, channelID := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, memberID1})
+
+		// Assign channel_moderator role to memberID1
+		_, err := ch.Update(ctx, &UpdateChannelRequest{
+			AssignRoles: []ChannelMemberRequest{
+				{UserID: memberID1, ChannelRole: PtrTo("channel_moderator")},
+			},
+		})
+		require.NoError(t, err)
+
+		// Verify via QueryMembers that the role is set
+		qResp, err := client.Chat().QueryMembers(ctx, &QueryMembersRequest{
+			Payload: &QueryMembersPayload{
+				Type: "messaging",
+				ID:   PtrTo(channelID),
+				FilterConditions: map[string]any{
+					"id": memberID1,
+				},
+			},
+		})
+		require.NoError(t, err)
+		require.NotEmpty(t, qResp.Data.Members)
+		assert.Equal(t, "channel_moderator", qResp.Data.Members[0].ChannelRole)
+	})
+
 	t.Run("SendChannelEvent", func(t *testing.T) {
 		ch, _ := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, memberID1})
 

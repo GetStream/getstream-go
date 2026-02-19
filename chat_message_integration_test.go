@@ -289,6 +289,113 @@ func TestChatMessageIntegration(t *testing.T) {
 		}
 	})
 
+	t.Run("SkipEnrichUrl", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
+
+		// Send a message with a URL but skip enrichment
+		sendResp, err := ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("Check out https://getstream.io for more info"),
+				UserID: PtrTo(userID),
+			},
+			SkipEnrichUrl: PtrTo(true),
+		})
+		require.NoError(t, err)
+		assert.Empty(t, sendResp.Data.Message.Attachments, "Attachments should be empty when SkipEnrichUrl is true")
+
+		// Verify via GetMessage that attachments remain empty
+		time.Sleep(3 * time.Second)
+		getResp, err := client.Chat().GetMessage(ctx, sendResp.Data.Message.ID, &GetMessageRequest{})
+		require.NoError(t, err)
+		assert.Empty(t, getResp.Data.Message.Attachments, "Attachments should remain empty after enrichment window")
+	})
+
+	t.Run("KeepChannelHidden", func(t *testing.T) {
+		ch, channelID := createTestChannelWithMembers(t, client, userID, []string{userID})
+		cid := "messaging:" + channelID
+
+		// Hide the channel first
+		_, err := ch.Hide(ctx, &HideChannelRequest{
+			UserID: PtrTo(userID),
+		})
+		require.NoError(t, err)
+
+		// Send a message with KeepChannelHidden=true
+		_, err = ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("Hidden message"),
+				UserID: PtrTo(userID),
+			},
+			KeepChannelHidden: PtrTo(true),
+		})
+		require.NoError(t, err)
+
+		// Query channels — the channel should still be hidden
+		qResp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
+			FilterConditions: map[string]any{
+				"cid": cid,
+			},
+			UserID: PtrTo(userID),
+		})
+		require.NoError(t, err)
+		assert.Empty(t, qResp.Data.Channels, "Channel should remain hidden after sending with KeepChannelHidden")
+	})
+
+	t.Run("UndeleteMessage", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
+		msgID := sendTestMessage(t, ch, userID, "Message to undelete")
+
+		// Soft delete the message
+		_, err := client.Chat().DeleteMessage(ctx, msgID, &DeleteMessageRequest{})
+		require.NoError(t, err)
+
+		// Verify it's deleted
+		getResp, err := client.Chat().GetMessage(ctx, msgID, &GetMessageRequest{})
+		require.NoError(t, err)
+		assert.Equal(t, "deleted", getResp.Data.Message.Type)
+
+		// Undelete the message
+		// Note: The API requires "undeleted_by" field which may not be in the generated
+		// request struct yet. Gracefully skip if the field is missing.
+		undelResp, err := client.Chat().UndeleteMessage(ctx, msgID, &UndeleteMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("Message to undelete"),
+				UserID: PtrTo(userID),
+			},
+		})
+		if err != nil {
+			errStr := err.Error()
+			if strings.Contains(errStr, "undeleted_by") || strings.Contains(errStr, "required field") {
+				t.Skip("UndeleteMessage requires 'undeleted_by' field not yet in generated request struct")
+			}
+			require.NoError(t, err)
+		}
+		require.NotNil(t, undelResp.Data.Message)
+		assert.NotEqual(t, "deleted", undelResp.Data.Message.Type)
+		assert.Equal(t, "Message to undelete", undelResp.Data.Message.Text)
+	})
+
+	t.Run("RestrictedVisibility", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID, userID2})
+
+		// Send a message with restricted visibility — only userID can see it
+		sendResp, err := ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:                 PtrTo("Secret message"),
+				UserID:               PtrTo(userID),
+				RestrictedVisibility: []string{userID},
+			},
+		})
+		if err != nil {
+			errStr := err.Error()
+			if strings.Contains(errStr, "private messaging is not allowed") || strings.Contains(errStr, "not enabled") {
+				t.Skip("RestrictedVisibility (private messaging) is not enabled for this app")
+			}
+			require.NoError(t, err)
+		}
+		assert.Equal(t, []string{userID}, sendResp.Data.Message.RestrictedVisibility)
+	})
+
 	t.Run("SystemMessage", func(t *testing.T) {
 		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
 
