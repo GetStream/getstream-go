@@ -172,8 +172,10 @@ func TestChatMessageIntegration(t *testing.T) {
 		require.NoError(t, err)
 		assert.NotEmpty(t, replyResp.Data.Message.ID)
 
-		// Get replies
-		repliesResp, err := client.Chat().GetReplies(ctx, parentID, &GetRepliesRequest{})
+		// Get replies — provide empty Sort slice to avoid nil being serialized as "null"
+		repliesResp, err := client.Chat().GetReplies(ctx, parentID, &GetRepliesRequest{
+			Sort: []SortParamRequest{},
+		})
 		require.NoError(t, err)
 		assert.GreaterOrEqual(t, len(repliesResp.Data.Messages), 1)
 	})

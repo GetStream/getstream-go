@@ -260,11 +260,18 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		// Need a small delay before deleting a channel type
-		time.Sleep(2 * time.Second)
+		// stream-chat-go sleeps 6s after create and retries delete up to 5 times
+		time.Sleep(6 * time.Second)
 
-		_, err = client.Chat().DeleteChannelType(ctx, delName, &DeleteChannelTypeRequest{})
-		require.NoError(t, err)
+		var deleteErr error
+		for i := 0; i < 5; i++ {
+			_, deleteErr = client.Chat().DeleteChannelType(ctx, delName, &DeleteChannelTypeRequest{})
+			if deleteErr == nil {
+				break
+			}
+			time.Sleep(time.Second)
+		}
+		require.NoError(t, deleteErr)
 	})
 }
 
@@ -277,7 +284,8 @@ func TestChatThreadIntegration(t *testing.T) {
 	userID := userIDs[0]
 	userID2 := userIDs[1]
 
-	ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID, userID2})
+	ch, channelID := createTestChannelWithMembers(t, client, userID, []string{userID, userID2})
+	channelCID := "messaging:" + channelID
 
 	// Create a thread by sending a parent + reply
 	parentID := sendTestMessage(t, ch, userID, "Thread parent message")
@@ -301,8 +309,15 @@ func TestChatThreadIntegration(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("QueryThreads", func(t *testing.T) {
+		// Filter by channel_cid to only get threads from our test channel
+		// (same approach as stream-chat-go)
 		resp, err := client.Chat().QueryThreads(ctx, &QueryThreadsRequest{
 			UserID: PtrTo(userID),
+			Filter: map[string]any{
+				"channel_cid": map[string]any{
+					"$eq": channelCID,
+				},
+			},
 		})
 		require.NoError(t, err)
 		require.NotEmpty(t, resp.Data.Threads, "Should have at least one thread")
@@ -311,14 +326,17 @@ func TestChatThreadIntegration(t *testing.T) {
 		for _, thread := range resp.Data.Threads {
 			if thread.ParentMessageID == parentID {
 				found = true
-				assert.Equal(t, userID, thread.CreatedByUserID)
+				// CreatedByUserID is the first reply sender, not the parent sender
+				assert.Equal(t, userID2, thread.CreatedByUserID)
 			}
 		}
-		assert.True(t, found, "Created thread should appear in query results")
+		assert.True(t, found, "Thread should appear in query results for channel %s", channelCID)
 	})
 
 	t.Run("GetThread", func(t *testing.T) {
-		resp, err := client.Chat().GetThread(ctx, parentID, &GetThreadRequest{})
+		resp, err := client.Chat().GetThread(ctx, parentID, &GetThreadRequest{
+			ReplyLimit: PtrTo(10),
+		})
 		require.NoError(t, err)
 		assert.Equal(t, parentID, resp.Data.Thread.ParentMessageID)
 		assert.GreaterOrEqual(t, len(resp.Data.Thread.LatestReplies), 2)
@@ -339,27 +357,29 @@ func TestChatAppSettingsIntegration(t *testing.T) {
 	})
 
 	t.Run("UpdateAndVerifyApp", func(t *testing.T) {
-		// Get current settings first
+		// Get current settings to restore later
 		getResp, err := client.GetApp(ctx, &GetAppRequest{})
 		require.NoError(t, err)
+		originalValue := getResp.Data.App.EnforceUniqueUsernames
 
-		originalWebhookURL := getResp.Data.App.WebhookUrl
-
-		// Update a setting
-		testURL := "https://example.com/webhook-integration-test"
+		// Toggle enforce_unique_usernames — safe to change on any app
+		newValue := "no"
+		if originalValue == "no" {
+			newValue = "app"
+		}
 		_, err = client.UpdateApp(ctx, &UpdateAppRequest{
-			WebhookUrl: PtrTo(testURL),
+			EnforceUniqueUsernames: PtrTo(newValue),
 		})
 		require.NoError(t, err)
 
 		// Verify update
 		getResp, err = client.GetApp(ctx, &GetAppRequest{})
 		require.NoError(t, err)
-		assert.Equal(t, testURL, getResp.Data.App.WebhookUrl)
+		assert.Equal(t, newValue, getResp.Data.App.EnforceUniqueUsernames)
 
 		// Restore original
 		_, err = client.UpdateApp(ctx, &UpdateAppRequest{
-			WebhookUrl: PtrTo(originalWebhookURL),
+			EnforceUniqueUsernames: PtrTo(originalValue),
 		})
 		require.NoError(t, err)
 	})
