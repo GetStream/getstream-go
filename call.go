@@ -7,22 +7,22 @@ import (
 )
 
 type Call struct {
-	callType    string
-	callID      string
-	client      *VideoClient
-	data        *CallResponse
+	callType string
+	callID   string
+	client   *VideoClient
+	data     *CallResponse
 }
 
 func NewCall(callType string, callID string, client *VideoClient) *Call {
 	return &Call{
-		callType:    callType,
-		callID:      callID,
-		client:      client,
+		callType: callType,
+		callID:   callID,
+		client:   client,
 	}
 }
 
-func (c *Call) Get(ctx context.Context, request *GetCallRequest) (*StreamResponse[GetCallResponse],error){
-	response, err := c.client.GetCall(ctx,c.callType, c.callID, request)
+func (c *Call) Get(ctx context.Context, request *GetCallRequest) (*StreamResponse[GetCallResponse], error) {
+	response, err := c.client.GetCall(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -30,8 +30,8 @@ func (c *Call) Get(ctx context.Context, request *GetCallRequest) (*StreamRespons
 	return response, nil
 }
 
-func (c *Call) Update(ctx context.Context, request *UpdateCallRequest) (*StreamResponse[UpdateCallResponse],error){
-	response, err := c.client.UpdateCall(ctx,c.callType, c.callID, request)
+func (c *Call) Update(ctx context.Context, request *UpdateCallRequest) (*StreamResponse[UpdateCallResponse], error) {
+	response, err := c.client.UpdateCall(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -39,8 +39,8 @@ func (c *Call) Update(ctx context.Context, request *UpdateCallRequest) (*StreamR
 	return response, nil
 }
 
-func (c *Call) GetOrCreate(ctx context.Context, request *GetOrCreateCallRequest) (*StreamResponse[GetOrCreateCallResponse],error){
-	response, err := c.client.GetOrCreateCall(ctx,c.callType, c.callID, request)
+func (c *Call) GetOrCreate(ctx context.Context, request *GetOrCreateCallRequest) (*StreamResponse[GetOrCreateCallResponse], error) {
+	response, err := c.client.GetOrCreateCall(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -48,8 +48,8 @@ func (c *Call) GetOrCreate(ctx context.Context, request *GetOrCreateCallRequest)
 	return response, nil
 }
 
-func (c *Call) BlockUser(ctx context.Context, request *BlockUserRequest) (*StreamResponse[BlockUserResponse],error){
-	response, err := c.client.BlockUser(ctx,c.callType, c.callID, request)
+func (c *Call) BlockUser(ctx context.Context, request *BlockUserRequest) (*StreamResponse[BlockUserResponse], error) {
+	response, err := c.client.BlockUser(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +57,8 @@ func (c *Call) BlockUser(ctx context.Context, request *BlockUserRequest) (*Strea
 	return response, nil
 }
 
-func (c *Call) SendClosedCaption(ctx context.Context, request *SendClosedCaptionRequest) (*StreamResponse[SendClosedCaptionResponse],error){
-	response, err := c.client.SendClosedCaption(ctx,c.callType, c.callID, request)
+func (c *Call) SendClosedCaption(ctx context.Context, request *SendClosedCaptionRequest) (*StreamResponse[SendClosedCaptionResponse], error) {
+	response, err := c.client.SendClosedCaption(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +66,8 @@ func (c *Call) SendClosedCaption(ctx context.Context, request *SendClosedCaption
 	return response, nil
 }
 
-func (c *Call) Delete(ctx context.Context, request *DeleteCallRequest) (*StreamResponse[DeleteCallResponse],error){
-	response, err := c.client.DeleteCall(ctx,c.callType, c.callID, request)
+func (c *Call) Delete(ctx context.Context, request *DeleteCallRequest) (*StreamResponse[DeleteCallResponse], error) {
+	response, err := c.client.DeleteCall(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -75,8 +75,8 @@ func (c *Call) Delete(ctx context.Context, request *DeleteCallRequest) (*StreamR
 	return response, nil
 }
 
-func (c *Call) SendCallEvent(ctx context.Context, request *SendCallEventRequest) (*StreamResponse[SendCallEventResponse],error){
-	response, err := c.client.SendCallEvent(ctx,c.callType, c.callID, request)
+func (c *Call) SendCallEvent(ctx context.Context, request *SendCallEventRequest) (*StreamResponse[SendCallEventResponse], error) {
+	response, err := c.client.SendCallEvent(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -84,8 +84,8 @@ func (c *Call) SendCallEvent(ctx context.Context, request *SendCallEventRequest)
 	return response, nil
 }
 
-func (c *Call) CollectUserFeedback(ctx context.Context, request *CollectUserFeedbackRequest) (*StreamResponse[CollectUserFeedbackResponse],error){
-	response, err := c.client.CollectUserFeedback(ctx,c.callType, c.callID, request)
+func (c *Call) CollectUserFeedback(ctx context.Context, request *CollectUserFeedbackRequest) (*StreamResponse[CollectUserFeedbackResponse], error) {
+	response, err := c.client.CollectUserFeedback(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -93,8 +93,8 @@ func (c *Call) CollectUserFeedback(ctx context.Context, request *CollectUserFeed
 	return response, nil
 }
 
-func (c *Call) GoLive(ctx context.Context, request *GoLiveRequest) (*StreamResponse[GoLiveResponse],error){
-	response, err := c.client.GoLive(ctx,c.callType, c.callID, request)
+func (c *Call) GoLive(ctx context.Context, request *GoLiveRequest) (*StreamResponse[GoLiveResponse], error) {
+	response, err := c.client.GoLive(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -102,8 +102,8 @@ func (c *Call) GoLive(ctx context.Context, request *GoLiveRequest) (*StreamRespo
 	return response, nil
 }
 
-func (c *Call) KickUser(ctx context.Context, request *KickUserRequest) (*StreamResponse[KickUserResponse],error){
-	response, err := c.client.KickUser(ctx,c.callType, c.callID, request)
+func (c *Call) KickUser(ctx context.Context, request *KickUserRequest) (*StreamResponse[KickUserResponse], error) {
+	response, err := c.client.KickUser(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -111,8 +111,8 @@ func (c *Call) KickUser(ctx context.Context, request *KickUserRequest) (*StreamR
 	return response, nil
 }
 
-func (c *Call) End(ctx context.Context, request *EndCallRequest) (*StreamResponse[EndCallResponse],error){
-	response, err := c.client.EndCall(ctx,c.callType, c.callID, request)
+func (c *Call) End(ctx context.Context, request *EndCallRequest) (*StreamResponse[EndCallResponse], error) {
+	response, err := c.client.EndCall(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -120,8 +120,8 @@ func (c *Call) End(ctx context.Context, request *EndCallRequest) (*StreamRespons
 	return response, nil
 }
 
-func (c *Call) UpdateCallMembers(ctx context.Context, request *UpdateCallMembersRequest) (*StreamResponse[UpdateCallMembersResponse],error){
-	response, err := c.client.UpdateCallMembers(ctx,c.callType, c.callID, request)
+func (c *Call) UpdateCallMembers(ctx context.Context, request *UpdateCallMembersRequest) (*StreamResponse[UpdateCallMembersResponse], error) {
+	response, err := c.client.UpdateCallMembers(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -129,8 +129,8 @@ func (c *Call) UpdateCallMembers(ctx context.Context, request *UpdateCallMembers
 	return response, nil
 }
 
-func (c *Call) MuteUsers(ctx context.Context, request *MuteUsersRequest) (*StreamResponse[MuteUsersResponse],error){
-	response, err := c.client.MuteUsers(ctx,c.callType, c.callID, request)
+func (c *Call) MuteUsers(ctx context.Context, request *MuteUsersRequest) (*StreamResponse[MuteUsersResponse], error) {
+	response, err := c.client.MuteUsers(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -138,8 +138,8 @@ func (c *Call) MuteUsers(ctx context.Context, request *MuteUsersRequest) (*Strea
 	return response, nil
 }
 
-func (c *Call) QueryCallParticipants(ctx context.Context, request *QueryCallParticipantsRequest) (*StreamResponse[QueryCallParticipantsResponse],error){
-	response, err := c.client.QueryCallParticipants(ctx,c.callType, c.callID, request)
+func (c *Call) QueryCallParticipants(ctx context.Context, request *QueryCallParticipantsRequest) (*StreamResponse[QueryCallParticipantsResponse], error) {
+	response, err := c.client.QueryCallParticipants(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -147,8 +147,8 @@ func (c *Call) QueryCallParticipants(ctx context.Context, request *QueryCallPart
 	return response, nil
 }
 
-func (c *Call) VideoPin(ctx context.Context, request *VideoPinRequest) (*StreamResponse[PinResponse],error){
-	response, err := c.client.VideoPin(ctx,c.callType, c.callID, request)
+func (c *Call) VideoPin(ctx context.Context, request *VideoPinRequest) (*StreamResponse[PinResponse], error) {
+	response, err := c.client.VideoPin(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -156,8 +156,8 @@ func (c *Call) VideoPin(ctx context.Context, request *VideoPinRequest) (*StreamR
 	return response, nil
 }
 
-func (c *Call) ListRecordings(ctx context.Context, request *ListRecordingsRequest) (*StreamResponse[ListRecordingsResponse],error){
-	response, err := c.client.ListRecordings(ctx,c.callType, c.callID, request)
+func (c *Call) ListRecordings(ctx context.Context, request *ListRecordingsRequest) (*StreamResponse[ListRecordingsResponse], error) {
+	response, err := c.client.ListRecordings(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -165,8 +165,8 @@ func (c *Call) ListRecordings(ctx context.Context, request *ListRecordingsReques
 	return response, nil
 }
 
-func (c *Call) StartRecording(ctx context.Context,recordingType string, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse],error){
-	response, err := c.client.StartRecording(ctx,c.callType, c.callID,recordingType,  request)
+func (c *Call) StartRecording(ctx context.Context, recordingType string, request *StartRecordingRequest) (*StreamResponse[StartRecordingResponse], error) {
+	response, err := c.client.StartRecording(ctx, c.callType, c.callID, recordingType, request)
 	if err != nil {
 		return nil, err
 	}
@@ -174,8 +174,8 @@ func (c *Call) StartRecording(ctx context.Context,recordingType string, request 
 	return response, nil
 }
 
-func (c *Call) StopRecording(ctx context.Context,recordingType string, request *StopRecordingRequest) (*StreamResponse[StopRecordingResponse],error){
-	response, err := c.client.StopRecording(ctx,c.callType, c.callID,recordingType,  request)
+func (c *Call) StopRecording(ctx context.Context, recordingType string, request *StopRecordingRequest) (*StreamResponse[StopRecordingResponse], error) {
+	response, err := c.client.StopRecording(ctx, c.callType, c.callID, recordingType, request)
 	if err != nil {
 		return nil, err
 	}
@@ -183,8 +183,8 @@ func (c *Call) StopRecording(ctx context.Context,recordingType string, request *
 	return response, nil
 }
 
-func (c *Call) GetCallReport(ctx context.Context, request *GetCallReportRequest) (*StreamResponse[GetCallReportResponse],error){
-	response, err := c.client.GetCallReport(ctx,c.callType, c.callID, request)
+func (c *Call) GetCallReport(ctx context.Context, request *GetCallReportRequest) (*StreamResponse[GetCallReportResponse], error) {
+	response, err := c.client.GetCallReport(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -192,8 +192,8 @@ func (c *Call) GetCallReport(ctx context.Context, request *GetCallReportRequest)
 	return response, nil
 }
 
-func (c *Call) Ring(ctx context.Context, request *RingCallRequest) (*StreamResponse[RingCallResponse],error){
-	response, err := c.client.RingCall(ctx,c.callType, c.callID, request)
+func (c *Call) Ring(ctx context.Context, request *RingCallRequest) (*StreamResponse[RingCallResponse], error) {
+	response, err := c.client.RingCall(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -201,8 +201,8 @@ func (c *Call) Ring(ctx context.Context, request *RingCallRequest) (*StreamRespo
 	return response, nil
 }
 
-func (c *Call) StartRTMPBroadcasts(ctx context.Context, request *StartRTMPBroadcastsRequest) (*StreamResponse[StartRTMPBroadcastsResponse],error){
-	response, err := c.client.StartRTMPBroadcasts(ctx,c.callType, c.callID, request)
+func (c *Call) StartRTMPBroadcasts(ctx context.Context, request *StartRTMPBroadcastsRequest) (*StreamResponse[StartRTMPBroadcastsResponse], error) {
+	response, err := c.client.StartRTMPBroadcasts(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -210,8 +210,8 @@ func (c *Call) StartRTMPBroadcasts(ctx context.Context, request *StartRTMPBroadc
 	return response, nil
 }
 
-func (c *Call) StopAllRTMPBroadcasts(ctx context.Context, request *StopAllRTMPBroadcastsRequest) (*StreamResponse[StopAllRTMPBroadcastsResponse],error){
-	response, err := c.client.StopAllRTMPBroadcasts(ctx,c.callType, c.callID, request)
+func (c *Call) StopAllRTMPBroadcasts(ctx context.Context, request *StopAllRTMPBroadcastsRequest) (*StreamResponse[StopAllRTMPBroadcastsResponse], error) {
+	response, err := c.client.StopAllRTMPBroadcasts(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -219,8 +219,8 @@ func (c *Call) StopAllRTMPBroadcasts(ctx context.Context, request *StopAllRTMPBr
 	return response, nil
 }
 
-func (c *Call) StopRTMPBroadcast(ctx context.Context,name string, request *StopRTMPBroadcastRequest) (*StreamResponse[StopRTMPBroadcastsResponse],error){
-	response, err := c.client.StopRTMPBroadcast(ctx,c.callType, c.callID,name,  request)
+func (c *Call) StopRTMPBroadcast(ctx context.Context, name string, request *StopRTMPBroadcastRequest) (*StreamResponse[StopRTMPBroadcastsResponse], error) {
+	response, err := c.client.StopRTMPBroadcast(ctx, c.callType, c.callID, name, request)
 	if err != nil {
 		return nil, err
 	}
@@ -228,8 +228,8 @@ func (c *Call) StopRTMPBroadcast(ctx context.Context,name string, request *StopR
 	return response, nil
 }
 
-func (c *Call) GetCallParticipantSessionMetrics(ctx context.Context,session string, user string, userSession string, request *GetCallParticipantSessionMetricsRequest) (*StreamResponse[GetCallParticipantSessionMetricsResponse],error){
-	response, err := c.client.GetCallParticipantSessionMetrics(ctx,c.callType, c.callID,session, user, userSession,  request)
+func (c *Call) GetCallParticipantSessionMetrics(ctx context.Context, session string, user string, userSession string, request *GetCallParticipantSessionMetricsRequest) (*StreamResponse[GetCallParticipantSessionMetricsResponse], error) {
+	response, err := c.client.GetCallParticipantSessionMetrics(ctx, c.callType, c.callID, session, user, userSession, request)
 	if err != nil {
 		return nil, err
 	}
@@ -237,8 +237,8 @@ func (c *Call) GetCallParticipantSessionMetrics(ctx context.Context,session stri
 	return response, nil
 }
 
-func (c *Call) QueryCallParticipantSessions(ctx context.Context,session string, request *QueryCallParticipantSessionsRequest) (*StreamResponse[QueryCallParticipantSessionsResponse],error){
-	response, err := c.client.QueryCallParticipantSessions(ctx,c.callType, c.callID,session,  request)
+func (c *Call) QueryCallParticipantSessions(ctx context.Context, session string, request *QueryCallParticipantSessionsRequest) (*StreamResponse[QueryCallParticipantSessionsResponse], error) {
+	response, err := c.client.QueryCallParticipantSessions(ctx, c.callType, c.callID, session, request)
 	if err != nil {
 		return nil, err
 	}
@@ -246,8 +246,8 @@ func (c *Call) QueryCallParticipantSessions(ctx context.Context,session string, 
 	return response, nil
 }
 
-func (c *Call) StartHLSBroadcasting(ctx context.Context, request *StartHLSBroadcastingRequest) (*StreamResponse[StartHLSBroadcastingResponse],error){
-	response, err := c.client.StartHLSBroadcasting(ctx,c.callType, c.callID, request)
+func (c *Call) StartHLSBroadcasting(ctx context.Context, request *StartHLSBroadcastingRequest) (*StreamResponse[StartHLSBroadcastingResponse], error) {
+	response, err := c.client.StartHLSBroadcasting(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -255,8 +255,8 @@ func (c *Call) StartHLSBroadcasting(ctx context.Context, request *StartHLSBroadc
 	return response, nil
 }
 
-func (c *Call) StartClosedCaptions(ctx context.Context, request *StartClosedCaptionsRequest) (*StreamResponse[StartClosedCaptionsResponse],error){
-	response, err := c.client.StartClosedCaptions(ctx,c.callType, c.callID, request)
+func (c *Call) StartClosedCaptions(ctx context.Context, request *StartClosedCaptionsRequest) (*StreamResponse[StartClosedCaptionsResponse], error) {
+	response, err := c.client.StartClosedCaptions(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -264,8 +264,8 @@ func (c *Call) StartClosedCaptions(ctx context.Context, request *StartClosedCapt
 	return response, nil
 }
 
-func (c *Call) StartFrameRecording(ctx context.Context, request *StartFrameRecordingRequest) (*StreamResponse[StartFrameRecordingResponse],error){
-	response, err := c.client.StartFrameRecording(ctx,c.callType, c.callID, request)
+func (c *Call) StartFrameRecording(ctx context.Context, request *StartFrameRecordingRequest) (*StreamResponse[StartFrameRecordingResponse], error) {
+	response, err := c.client.StartFrameRecording(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -273,8 +273,8 @@ func (c *Call) StartFrameRecording(ctx context.Context, request *StartFrameRecor
 	return response, nil
 }
 
-func (c *Call) StartTranscription(ctx context.Context, request *StartTranscriptionRequest) (*StreamResponse[StartTranscriptionResponse],error){
-	response, err := c.client.StartTranscription(ctx,c.callType, c.callID, request)
+func (c *Call) StartTranscription(ctx context.Context, request *StartTranscriptionRequest) (*StreamResponse[StartTranscriptionResponse], error) {
+	response, err := c.client.StartTranscription(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -282,8 +282,8 @@ func (c *Call) StartTranscription(ctx context.Context, request *StartTranscripti
 	return response, nil
 }
 
-func (c *Call) StopHLSBroadcasting(ctx context.Context, request *StopHLSBroadcastingRequest) (*StreamResponse[StopHLSBroadcastingResponse],error){
-	response, err := c.client.StopHLSBroadcasting(ctx,c.callType, c.callID, request)
+func (c *Call) StopHLSBroadcasting(ctx context.Context, request *StopHLSBroadcastingRequest) (*StreamResponse[StopHLSBroadcastingResponse], error) {
+	response, err := c.client.StopHLSBroadcasting(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -291,8 +291,8 @@ func (c *Call) StopHLSBroadcasting(ctx context.Context, request *StopHLSBroadcas
 	return response, nil
 }
 
-func (c *Call) StopClosedCaptions(ctx context.Context, request *StopClosedCaptionsRequest) (*StreamResponse[StopClosedCaptionsResponse],error){
-	response, err := c.client.StopClosedCaptions(ctx,c.callType, c.callID, request)
+func (c *Call) StopClosedCaptions(ctx context.Context, request *StopClosedCaptionsRequest) (*StreamResponse[StopClosedCaptionsResponse], error) {
+	response, err := c.client.StopClosedCaptions(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -300,8 +300,8 @@ func (c *Call) StopClosedCaptions(ctx context.Context, request *StopClosedCaptio
 	return response, nil
 }
 
-func (c *Call) StopFrameRecording(ctx context.Context, request *StopFrameRecordingRequest) (*StreamResponse[StopFrameRecordingResponse],error){
-	response, err := c.client.StopFrameRecording(ctx,c.callType, c.callID, request)
+func (c *Call) StopFrameRecording(ctx context.Context, request *StopFrameRecordingRequest) (*StreamResponse[StopFrameRecordingResponse], error) {
+	response, err := c.client.StopFrameRecording(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -309,8 +309,8 @@ func (c *Call) StopFrameRecording(ctx context.Context, request *StopFrameRecordi
 	return response, nil
 }
 
-func (c *Call) StopLive(ctx context.Context, request *StopLiveRequest) (*StreamResponse[StopLiveResponse],error){
-	response, err := c.client.StopLive(ctx,c.callType, c.callID, request)
+func (c *Call) StopLive(ctx context.Context, request *StopLiveRequest) (*StreamResponse[StopLiveResponse], error) {
+	response, err := c.client.StopLive(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -318,8 +318,8 @@ func (c *Call) StopLive(ctx context.Context, request *StopLiveRequest) (*StreamR
 	return response, nil
 }
 
-func (c *Call) StopTranscription(ctx context.Context, request *StopTranscriptionRequest) (*StreamResponse[StopTranscriptionResponse],error){
-	response, err := c.client.StopTranscription(ctx,c.callType, c.callID, request)
+func (c *Call) StopTranscription(ctx context.Context, request *StopTranscriptionRequest) (*StreamResponse[StopTranscriptionResponse], error) {
+	response, err := c.client.StopTranscription(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -327,8 +327,8 @@ func (c *Call) StopTranscription(ctx context.Context, request *StopTranscription
 	return response, nil
 }
 
-func (c *Call) ListTranscriptions(ctx context.Context, request *ListTranscriptionsRequest) (*StreamResponse[ListTranscriptionsResponse],error){
-	response, err := c.client.ListTranscriptions(ctx,c.callType, c.callID, request)
+func (c *Call) ListTranscriptions(ctx context.Context, request *ListTranscriptionsRequest) (*StreamResponse[ListTranscriptionsResponse], error) {
+	response, err := c.client.ListTranscriptions(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -336,8 +336,8 @@ func (c *Call) ListTranscriptions(ctx context.Context, request *ListTranscriptio
 	return response, nil
 }
 
-func (c *Call) UnblockUser(ctx context.Context, request *UnblockUserRequest) (*StreamResponse[UnblockUserResponse],error){
-	response, err := c.client.UnblockUser(ctx,c.callType, c.callID, request)
+func (c *Call) UnblockUser(ctx context.Context, request *UnblockUserRequest) (*StreamResponse[UnblockUserResponse], error) {
+	response, err := c.client.UnblockUser(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -345,8 +345,8 @@ func (c *Call) UnblockUser(ctx context.Context, request *UnblockUserRequest) (*S
 	return response, nil
 }
 
-func (c *Call) VideoUnpin(ctx context.Context, request *VideoUnpinRequest) (*StreamResponse[UnpinResponse],error){
-	response, err := c.client.VideoUnpin(ctx,c.callType, c.callID, request)
+func (c *Call) VideoUnpin(ctx context.Context, request *VideoUnpinRequest) (*StreamResponse[UnpinResponse], error) {
+	response, err := c.client.VideoUnpin(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -354,8 +354,8 @@ func (c *Call) VideoUnpin(ctx context.Context, request *VideoUnpinRequest) (*Str
 	return response, nil
 }
 
-func (c *Call) UpdateUserPermissions(ctx context.Context, request *UpdateUserPermissionsRequest) (*StreamResponse[UpdateUserPermissionsResponse],error){
-	response, err := c.client.UpdateUserPermissions(ctx,c.callType, c.callID, request)
+func (c *Call) UpdateUserPermissions(ctx context.Context, request *UpdateUserPermissionsRequest) (*StreamResponse[UpdateUserPermissionsResponse], error) {
+	response, err := c.client.UpdateUserPermissions(ctx, c.callType, c.callID, request)
 	if err != nil {
 		return nil, err
 	}
@@ -363,8 +363,8 @@ func (c *Call) UpdateUserPermissions(ctx context.Context, request *UpdateUserPer
 	return response, nil
 }
 
-func (c *Call) DeleteRecording(ctx context.Context,session string, filename string, request *DeleteRecordingRequest) (*StreamResponse[DeleteRecordingResponse],error){
-	response, err := c.client.DeleteRecording(ctx,c.callType, c.callID,session, filename,  request)
+func (c *Call) DeleteRecording(ctx context.Context, session string, filename string, request *DeleteRecordingRequest) (*StreamResponse[DeleteRecordingResponse], error) {
+	response, err := c.client.DeleteRecording(ctx, c.callType, c.callID, session, filename, request)
 	if err != nil {
 		return nil, err
 	}
@@ -372,8 +372,8 @@ func (c *Call) DeleteRecording(ctx context.Context,session string, filename stri
 	return response, nil
 }
 
-func (c *Call) DeleteTranscription(ctx context.Context,session string, filename string, request *DeleteTranscriptionRequest) (*StreamResponse[DeleteTranscriptionResponse],error){
-	response, err := c.client.DeleteTranscription(ctx,c.callType, c.callID,session, filename,  request)
+func (c *Call) DeleteTranscription(ctx context.Context, session string, filename string, request *DeleteTranscriptionRequest) (*StreamResponse[DeleteTranscriptionResponse], error) {
+	response, err := c.client.DeleteTranscription(ctx, c.callType, c.callID, session, filename, request)
 	if err != nil {
 		return nil, err
 	}
@@ -382,54 +382,54 @@ func (c *Call) DeleteTranscription(ctx context.Context,session string, filename 
 }
 
 func (c *Call) syncFromResponse(data any) {
-    if data == nil || c == nil {
-        return
-    }
+	if data == nil || c == nil {
+		return
+	}
 
-    v := reflect.ValueOf(data)
-    // Unwrap interfaces/pointers
-    for v.Kind() == reflect.Interface || v.Kind() == reflect.Pointer {
-        if v.IsNil() {
-            return
-        }
-        v = v.Elem()
-    }
-    if v.Kind() != reflect.Struct {
-        return
-    }
+	v := reflect.ValueOf(data)
+	// Unwrap interfaces/pointers
+	for v.Kind() == reflect.Interface || v.Kind() == reflect.Pointer {
+		if v.IsNil() {
+			return
+		}
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return
+	}
 
-    // Look for exported field named "Call"
-    f := v.FieldByName("Call")
-    if !f.IsValid() {
-        return
-    }
+	// Look for exported field named "Call"
+	f := v.FieldByName("Call")
+	if !f.IsValid() {
+		return
+	}
 
-    crPtrType := reflect.TypeOf((*CallResponse)(nil))     // *CallResponse
-    crValType := reflect.TypeOf(CallResponse{})           //  CallResponse
+	crPtrType := reflect.TypeOf((*CallResponse)(nil)) // *CallResponse
+	crValType := reflect.TypeOf(CallResponse{})       //  CallResponse
 
-    switch f.Kind() {
-    case reflect.Pointer:
-        // Expect *CallResponse
-        if f.Type() == crPtrType && !f.IsNil() {
-            if cr, ok := f.Interface().(*CallResponse); ok {
-                c.data = cr
-            }
-        }
-    case reflect.Struct:
-        // Expect CallResponse value
-        if f.Type() == crValType {
-            // Need addressable struct field to take &f
-            if f.CanAddr() {
-                if cr, ok := f.Addr().Interface().(*CallResponse); ok {
-                    c.data = cr
-                }
-            } else {
-                // Fallback: copy to a new value
-                cr := f.Interface().(CallResponse)
-                c.data = &cr
-            }
-        }
-    }
+	switch f.Kind() {
+	case reflect.Pointer:
+		// Expect *CallResponse
+		if f.Type() == crPtrType && !f.IsNil() {
+			if cr, ok := f.Interface().(*CallResponse); ok {
+				c.data = cr
+			}
+		}
+	case reflect.Struct:
+		// Expect CallResponse value
+		if f.Type() == crValType {
+			// Need addressable struct field to take &f
+			if f.CanAddr() {
+				if cr, ok := f.Addr().Interface().(*CallResponse); ok {
+					c.data = cr
+				}
+			} else {
+				// Fallback: copy to a new value
+				cr := f.Interface().(CallResponse)
+				c.data = &cr
+			}
+		}
+	}
 }
 
 func (c *VideoClient) Call(callType, callID string) *Call {

@@ -4,16 +4,16 @@ package getstream
 import "context"
 
 type Feeds struct {
-	feedType    string
-	feedID      string
-	client *FeedsClient
+	feedType string
+	feedID   string
+	client   *FeedsClient
 }
 
 func NewFeed(feedType string, feedID string, client *FeedsClient) *Feeds {
 	return &Feeds{
 		feedType: feedType,
-		feedID: feedID,
-		client: client,
+		feedID:   feedID,
+		client:   client,
 	}
 }
 

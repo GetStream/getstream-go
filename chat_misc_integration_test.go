@@ -214,9 +214,9 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 
 	t.Run("CreateChannelType", func(t *testing.T) {
 		resp, err := client.Chat().CreateChannelType(ctx, &CreateChannelTypeRequest{
-			Name:            typeName,
-			Automod:         "disabled",
-			AutomodBehavior: "flag",
+			Name:             typeName,
+			Automod:          "disabled",
+			AutomodBehavior:  "flag",
 			MaxMessageLength: 5000,
 		})
 		require.NoError(t, err)
@@ -724,6 +724,53 @@ func TestChatFlagIntegration(t *testing.T) {
 		require.NoError(t, err)
 		_ = qResp2
 	})
+}
+
+// Matches stream-chat-go TestClient_QueryFlagReportsAndReview
+//
+// Note: stream-chat-go uses the v1 FlagMessage endpoint (target_message_id)
+// which populates the v1 chat flag reports store. Our SDK uses the v2
+// Moderation().Flag() (entity_id + entity_type). The QueryFlagReports and
+// FlagReportReview endpoints work with the v1 flag reports store.
+func TestChatQueryFlagReportsAndReviewIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	userIDs := createTestUsers(t, client, 2)
+	user1 := userIDs[0]
+	user2 := userIDs[1]
+
+	ch, _ := createTestChannelWithMembers(t, client, user1, []string{user1, user2})
+	msgID := sendTestMessage(t, ch, user1, "Message to flag for report review")
+
+	// Flag the message using v2 moderation API
+	_, err := client.Moderation().Flag(ctx, &FlagRequest{
+		EntityID:        msgID,
+		EntityType:      "stream:chat:v1:message",
+		EntityCreatorID: PtrTo(user1),
+		UserID:          PtrTo(user1),
+		Reason:          PtrTo("test flag for report review"),
+	})
+	require.NoError(t, err)
+
+	// Query flag reports for this message
+	resp, err := client.Chat().QueryFlagReports(ctx, &QueryFlagReportsRequest{
+		FilterConditions: map[string]any{
+			"message_id": msgID,
+		},
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, resp.Data.FlagReports, "Should have at least one flag report")
+
+	// Review the flag report (matches stream-chat-go ReviewFlagReport call)
+	reportID := resp.Data.FlagReports[0].ID
+	flagResp, err := client.Chat().FlagReportReview(ctx, reportID, &FlagReportReviewRequest{
+		ReviewResult: PtrTo("reviewed"),
+		UserID:       PtrTo(user2),
+	})
+	require.NoError(t, err)
+	require.NotNil(t, flagResp.Data.FlagReport)
 }
 
 func TestChatPermissionsIntegration(t *testing.T) {
@@ -1986,17 +2033,13 @@ func TestChatCreatePermissionIntegration(t *testing.T) {
 	client := initClient(t)
 	ctx := context.Background()
 
-	t.Run("CreateAndListPermission", func(t *testing.T) {
-		// Note: CreatePermissionRequest is missing the "id" field due to a codegen issue
-		// (the backend struct has `path:"id"` which causes the spec generator to drop it).
-		// stream-chat-go sends "id" in the JSON body. Skipping CreatePermission call until
-		// the codegen issue is fixed.
-		t.Skip("CreatePermissionRequest missing 'id' field — codegen issue with path tag")
-
+	t.Run("PermissionEndpoints", func(t *testing.T) {
+		// Matches stream-chat-go TestPermissions_PermissionEndpoints
 		permName := "test-perm-" + randomString(8)
 
-		// Create a custom permission (matches stream-chat-go TestPermissions_PermissionEndpoints)
+		// Create a custom permission
 		_, err := client.CreatePermission(ctx, &CreatePermissionRequest{
+			ID:          permName,
 			Action:      "DeleteChannel",
 			Name:        permName,
 			Description: PtrTo("integration test"),
@@ -2016,20 +2059,20 @@ func TestChatCreatePermissionIntegration(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, "create-channel", getResp.Data.Permission.ID)
 		assert.False(t, getResp.Data.Permission.Custom)
-	})
-
-	t.Run("ListAndGetPermission", func(t *testing.T) {
-		// List permissions
-		listResp, err := client.ListPermissions(ctx, &ListPermissionsRequest{})
-		require.NoError(t, err)
-		assert.NotEmpty(t, listResp.Data.Permissions)
-
-		// Get a built-in permission
-		getResp, err := client.GetPermission(ctx, "create-channel", &GetPermissionRequest{})
-		require.NoError(t, err)
-		assert.Equal(t, "create-channel", getResp.Data.Permission.ID)
-		assert.False(t, getResp.Data.Permission.Custom)
 		assert.Empty(t, getResp.Data.Permission.Condition)
+
+		// Cleanup: delete all custom permissions created by integration tests
+		t.Cleanup(func() {
+			resp, _ := client.ListPermissions(ctx, &ListPermissionsRequest{})
+			if resp != nil {
+				for _, perm := range resp.Data.Permissions {
+					if perm.Description == "integration test" {
+						// DeletePermission not in generated SDK spec; skip cleanup
+						_ = perm
+					}
+				}
+			}
+		})
 	})
 }
 

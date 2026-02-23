@@ -4,97 +4,97 @@ package getstream
 import "context"
 
 type Channels struct {
-	channelType    string
-	channelD      string
-	client *ChatClient
+	channelType string
+	channelD    string
+	client      *ChatClient
 }
 
 func NewChannel(channelType string, channelD string, client *ChatClient) *Channels {
 	return &Channels{
 		channelType: channelType,
-		channelD: channelD,
-		client: client,
+		channelD:    channelD,
+		client:      client,
 	}
 }
 
-func (c *Channels) Delete(ctx context.Context, request *DeleteChannelRequest) (*StreamResponse[DeleteChannelResponse],error){
-	return c.client.DeleteChannel(ctx,c.channelType, c.channelD, request)
+func (c *Channels) Delete(ctx context.Context, request *DeleteChannelRequest) (*StreamResponse[DeleteChannelResponse], error) {
+	return c.client.DeleteChannel(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) UpdateChannelPartial(ctx context.Context, request *UpdateChannelPartialRequest) (*StreamResponse[UpdateChannelPartialResponse],error){
-	return c.client.UpdateChannelPartial(ctx,c.channelType, c.channelD, request)
+func (c *Channels) UpdateChannelPartial(ctx context.Context, request *UpdateChannelPartialRequest) (*StreamResponse[UpdateChannelPartialResponse], error) {
+	return c.client.UpdateChannelPartial(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) Update(ctx context.Context, request *UpdateChannelRequest) (*StreamResponse[UpdateChannelResponse],error){
-	return c.client.UpdateChannel(ctx,c.channelType, c.channelD, request)
+func (c *Channels) Update(ctx context.Context, request *UpdateChannelRequest) (*StreamResponse[UpdateChannelResponse], error) {
+	return c.client.UpdateChannel(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) DeleteDraft(ctx context.Context, request *DeleteDraftRequest) (*StreamResponse[Response],error){
-	return c.client.DeleteDraft(ctx,c.channelType, c.channelD, request)
+func (c *Channels) DeleteDraft(ctx context.Context, request *DeleteDraftRequest) (*StreamResponse[Response], error) {
+	return c.client.DeleteDraft(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) GetDraft(ctx context.Context, request *GetDraftRequest) (*StreamResponse[GetDraftResponse],error){
-	return c.client.GetDraft(ctx,c.channelType, c.channelD, request)
+func (c *Channels) GetDraft(ctx context.Context, request *GetDraftRequest) (*StreamResponse[GetDraftResponse], error) {
+	return c.client.GetDraft(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) CreateDraft(ctx context.Context, request *CreateDraftRequest) (*StreamResponse[CreateDraftResponse],error){
-	return c.client.CreateDraft(ctx,c.channelType, c.channelD, request)
+func (c *Channels) CreateDraft(ctx context.Context, request *CreateDraftRequest) (*StreamResponse[CreateDraftResponse], error) {
+	return c.client.CreateDraft(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) SendEvent(ctx context.Context, request *SendEventRequest) (*StreamResponse[EventResponse],error){
-	return c.client.SendEvent(ctx,c.channelType, c.channelD, request)
+func (c *Channels) SendEvent(ctx context.Context, request *SendEventRequest) (*StreamResponse[EventResponse], error) {
+	return c.client.SendEvent(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) DeleteChannelFile(ctx context.Context, request *DeleteChannelFileRequest) (*StreamResponse[Response],error){
-	return c.client.DeleteChannelFile(ctx,c.channelType, c.channelD, request)
+func (c *Channels) DeleteChannelFile(ctx context.Context, request *DeleteChannelFileRequest) (*StreamResponse[Response], error) {
+	return c.client.DeleteChannelFile(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) UploadChannelFile(ctx context.Context, request *UploadChannelFileRequest) (*StreamResponse[UploadChannelFileResponse],error){
-	return c.client.UploadChannelFile(ctx,c.channelType, c.channelD, request)
+func (c *Channels) UploadChannelFile(ctx context.Context, request *UploadChannelFileRequest) (*StreamResponse[UploadChannelFileResponse], error) {
+	return c.client.UploadChannelFile(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) Hide(ctx context.Context, request *HideChannelRequest) (*StreamResponse[HideChannelResponse],error){
-	return c.client.HideChannel(ctx,c.channelType, c.channelD, request)
+func (c *Channels) Hide(ctx context.Context, request *HideChannelRequest) (*StreamResponse[HideChannelResponse], error) {
+	return c.client.HideChannel(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) DeleteChannelImage(ctx context.Context, request *DeleteChannelImageRequest) (*StreamResponse[Response],error){
-	return c.client.DeleteChannelImage(ctx,c.channelType, c.channelD, request)
+func (c *Channels) DeleteChannelImage(ctx context.Context, request *DeleteChannelImageRequest) (*StreamResponse[Response], error) {
+	return c.client.DeleteChannelImage(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) UploadChannelImage(ctx context.Context, request *UploadChannelImageRequest) (*StreamResponse[UploadChannelResponse],error){
-	return c.client.UploadChannelImage(ctx,c.channelType, c.channelD, request)
+func (c *Channels) UploadChannelImage(ctx context.Context, request *UploadChannelImageRequest) (*StreamResponse[UploadChannelResponse], error) {
+	return c.client.UploadChannelImage(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) UpdateMemberPartial(ctx context.Context, request *UpdateMemberPartialRequest) (*StreamResponse[UpdateMemberPartialResponse],error){
-	return c.client.UpdateMemberPartial(ctx,c.channelType, c.channelD, request)
+func (c *Channels) UpdateMemberPartial(ctx context.Context, request *UpdateMemberPartialRequest) (*StreamResponse[UpdateMemberPartialResponse], error) {
+	return c.client.UpdateMemberPartial(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) SendMessage(ctx context.Context, request *SendMessageRequest) (*StreamResponse[SendMessageResponse],error){
-	return c.client.SendMessage(ctx,c.channelType, c.channelD, request)
+func (c *Channels) SendMessage(ctx context.Context, request *SendMessageRequest) (*StreamResponse[SendMessageResponse], error) {
+	return c.client.SendMessage(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) GetManyMessages(ctx context.Context, request *GetManyMessagesRequest) (*StreamResponse[GetManyMessagesResponse],error){
-	return c.client.GetManyMessages(ctx,c.channelType, c.channelD, request)
+func (c *Channels) GetManyMessages(ctx context.Context, request *GetManyMessagesRequest) (*StreamResponse[GetManyMessagesResponse], error) {
+	return c.client.GetManyMessages(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) GetOrCreate(ctx context.Context, request *GetOrCreateChannelRequest) (*StreamResponse[ChannelStateResponse],error){
-	return c.client.GetOrCreateChannel(ctx,c.channelType, c.channelD, request)
+func (c *Channels) GetOrCreate(ctx context.Context, request *GetOrCreateChannelRequest) (*StreamResponse[ChannelStateResponse], error) {
+	return c.client.GetOrCreateChannel(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) MarkRead(ctx context.Context, request *MarkReadRequest) (*StreamResponse[MarkReadResponse],error){
-	return c.client.MarkRead(ctx,c.channelType, c.channelD, request)
+func (c *Channels) MarkRead(ctx context.Context, request *MarkReadRequest) (*StreamResponse[MarkReadResponse], error) {
+	return c.client.MarkRead(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) Show(ctx context.Context, request *ShowChannelRequest) (*StreamResponse[ShowChannelResponse],error){
-	return c.client.ShowChannel(ctx,c.channelType, c.channelD, request)
+func (c *Channels) Show(ctx context.Context, request *ShowChannelRequest) (*StreamResponse[ShowChannelResponse], error) {
+	return c.client.ShowChannel(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) Truncate(ctx context.Context, request *TruncateChannelRequest) (*StreamResponse[TruncateChannelResponse],error){
-	return c.client.TruncateChannel(ctx,c.channelType, c.channelD, request)
+func (c *Channels) Truncate(ctx context.Context, request *TruncateChannelRequest) (*StreamResponse[TruncateChannelResponse], error) {
+	return c.client.TruncateChannel(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) MarkUnread(ctx context.Context, request *MarkUnreadRequest) (*StreamResponse[Response],error){
-	return c.client.MarkUnread(ctx,c.channelType, c.channelD, request)
+func (c *Channels) MarkUnread(ctx context.Context, request *MarkUnreadRequest) (*StreamResponse[Response], error) {
+	return c.client.MarkUnread(ctx, c.channelType, c.channelD, request)
 }
 
 func (c *ChatClient) Channel(channelType, channelD string) *Channels {
