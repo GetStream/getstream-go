@@ -246,13 +246,6 @@ func (c *Client) ListPermissions(ctx context.Context, request *ListPermissionsRe
 	return res, err
 }
 
-// Creates permission
-func (c *Client) CreatePermission(ctx context.Context, request *CreatePermissionRequest) (*StreamResponse[Response], error) {
-	var result Response
-	res, err := MakeRequest[CreatePermissionRequest, Response](c, ctx, "POST", "/api/v2/permissions", nil, request, &result, nil)
-	return res, err
-}
-
 // Gets custom permission
 func (c *Client) GetPermission(ctx context.Context, id string, request *GetPermissionRequest) (*StreamResponse[GetCustomPermissionResponse], error) {
 	var result GetCustomPermissionResponse

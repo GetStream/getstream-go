@@ -219,13 +219,6 @@ func TestCommonListPermissions(t *testing.T) {
 	_, err = client.ListPermissions(context.Background(), &getstream.ListPermissionsRequest{})
 	require.NoError(t, err)
 }
-func TestCommonCreatePermission(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.CreatePermission(context.Background(), &getstream.CreatePermissionRequest{})
-	require.NoError(t, err)
-}
 func TestCommonGetPermission(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

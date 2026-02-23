@@ -4975,11 +4975,6 @@ type FlagCountRuleParameters struct {
 	Threshold *int `json:"threshold,omitempty"`
 }
 
-type FlagDetails struct {
-	OriginalText string                  `json:"original_text"`
-	Automod      *AutomodDetailsResponse `json:"automod,omitempty"`
-}
-
 type FlagDetailsResponse struct {
 	OriginalText string                  `json:"original_text"`
 	Automod      *AutomodDetailsResponse `json:"automod,omitempty"`
@@ -4997,29 +4992,6 @@ type FlagMessageDetailsResponse struct {
 	ShouldEnrich *bool   `json:"should_enrich,omitempty"`
 	SkipPush     *bool   `json:"skip_push,omitempty"`
 	UpdatedByID  *string `json:"updated_by_id,omitempty"`
-}
-
-type FlagReportResponse struct {
-	CreatedAt     Timestamp        `json:"created_at"`
-	FlagsCount    int              `json:"flags_count"`
-	ID            string           `json:"id"`
-	UpdatedAt     Timestamp        `json:"updated_at"`
-	ChannelCid    *string          `json:"channel_cid,omitempty"`
-	ChannelTeam   *string          `json:"channel_team,omitempty"`
-	MessageUserID *string          `json:"message_user_id,omitempty"`
-	ReviewResult  *string          `json:"review_result,omitempty"`
-	ReviewedAt    *Timestamp       `json:"reviewed_at,omitempty"`
-	Details       *FlagDetails     `json:"details,omitempty"`
-	FirstReporter *UserResponse    `json:"first_reporter,omitempty"`
-	Message       *MessageResponse `json:"message,omitempty"`
-	ReviewDetails map[string]any   `json:"review_details,omitempty"`
-	ReviewedBy    *UserResponse    `json:"reviewed_by,omitempty"`
-	User          *UserResponse    `json:"user,omitempty"`
-}
-
-type FlagReportReviewResponse struct {
-	Duration   string             `json:"duration"`
-	FlagReport FlagReportResponse `json:"flag_report"`
 }
 
 type FlagResponse struct {
@@ -7712,21 +7684,6 @@ type Permission struct {
 	Condition map[string]any `json:"condition,omitempty"`
 }
 
-type PermissionRequest struct {
-	// Action name this permission is for (e.g. SendMessage)
-	Action string `json:"action"`
-	// Name of the permission
-	Name string `json:"name"`
-	// Description of the permission
-	Description *string `json:"description,omitempty"`
-	// Whether this permission applies to resource owner or not
-	Owner *bool `json:"owner,omitempty"`
-	// Whether this permission applies to teammates (multi-tenancy mode only)
-	SameTeam *bool `json:"same_team,omitempty"`
-	// MongoDB style condition which decides whether or not the permission is granted
-	Condition map[string]any `json:"condition,omitempty"`
-}
-
 // This event is sent when a user requests access to a feature on a call,
 // clients receiving this event should display a permission request to the user
 type PermissionRequestEvent struct {
@@ -8371,12 +8328,6 @@ type QueryFeedsUsageStatsResponse struct {
 	Activities     DailyMetricStatsResponse `json:"activities"`
 	Follows        DailyMetricStatsResponse `json:"follows"`
 	OpenaiRequests DailyMetricStatsResponse `json:"openai_requests"`
-}
-
-type QueryFlagReportsResponse struct {
-	Duration string `json:"duration"`
-	// Flag report query results
-	FlagReports []FlagReportResponse `json:"flag_reports"`
 }
 
 type QueryFollowsResponse struct {

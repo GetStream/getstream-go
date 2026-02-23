@@ -726,53 +726,6 @@ func TestChatFlagIntegration(t *testing.T) {
 	})
 }
 
-// Matches stream-chat-go TestClient_QueryFlagReportsAndReview
-//
-// Note: stream-chat-go uses the v1 FlagMessage endpoint (target_message_id)
-// which populates the v1 chat flag reports store. Our SDK uses the v2
-// Moderation().Flag() (entity_id + entity_type). The QueryFlagReports and
-// FlagReportReview endpoints work with the v1 flag reports store.
-func TestChatQueryFlagReportsAndReviewIntegration(t *testing.T) {
-	skipIfShort(t)
-	client := initClient(t)
-	ctx := context.Background()
-
-	userIDs := createTestUsers(t, client, 2)
-	user1 := userIDs[0]
-	user2 := userIDs[1]
-
-	ch, _ := createTestChannelWithMembers(t, client, user1, []string{user1, user2})
-	msgID := sendTestMessage(t, ch, user1, "Message to flag for report review")
-
-	// Flag the message using v2 moderation API
-	_, err := client.Moderation().Flag(ctx, &FlagRequest{
-		EntityID:        msgID,
-		EntityType:      "stream:chat:v1:message",
-		EntityCreatorID: PtrTo(user1),
-		UserID:          PtrTo(user1),
-		Reason:          PtrTo("test flag for report review"),
-	})
-	require.NoError(t, err)
-
-	// Query flag reports for this message
-	resp, err := client.Moderation().QueryFlagReports(ctx, &QueryFlagReportsRequest{
-		FilterConditions: map[string]any{
-			"message_id": msgID,
-		},
-	})
-	require.NoError(t, err)
-	require.NotEmpty(t, resp.Data.FlagReports, "Should have at least one flag report")
-
-	// Review the flag report (matches stream-chat-go ReviewFlagReport call)
-	reportID := resp.Data.FlagReports[0].ID
-	flagResp, err := client.Moderation().FlagReportReview(ctx, reportID, &FlagReportReviewRequest{
-		ReviewResult: PtrTo("reviewed"),
-		UserID:       PtrTo(user2),
-	})
-	require.NoError(t, err)
-	require.NotNil(t, flagResp.Data.FlagReport)
-}
-
 func TestChatPermissionsIntegration(t *testing.T) {
 	skipIfShort(t)
 	client := initClient(t)
@@ -2028,57 +1981,9 @@ func TestChatChannelBatchUpdateIntegration(t *testing.T) {
 	})
 }
 
-func TestChatCreatePermissionIntegration(t *testing.T) {
-	skipIfShort(t)
-	client := initClient(t)
-	ctx := context.Background()
-
-	t.Run("CreateAndListPermission", func(t *testing.T) {
-		// CreatePermissionRequest is missing the "id" field — the backend struct has
-		// `path:"id"` which causes the spec generator to drop it from the body.
-		// stream-chat-go sends "id" in the JSON body. Skipping until CreatePermission
-		// is exposed in the spec.
-		t.Skip("CreatePermissionRequest missing 'id' field — hidden from spec")
-
-		permName := "test-perm-" + randomString(8)
-
-		// Create a custom permission (matches stream-chat-go TestPermissions_PermissionEndpoints)
-		_, err := client.CreatePermission(ctx, &CreatePermissionRequest{
-			Action:      "DeleteChannel",
-			Name:        permName,
-			Description: PtrTo("integration test"),
-			Condition: map[string]any{
-				"$subject.magic_custom_field": map[string]any{"$eq": "true"},
-			},
-		})
-		require.NoError(t, err)
-
-		// List permissions — should contain our new one
-		listResp, err := client.ListPermissions(ctx, &ListPermissionsRequest{})
-		require.NoError(t, err)
-		assert.NotEmpty(t, listResp.Data.Permissions)
-
-		// Get a built-in permission
-		getResp, err := client.GetPermission(ctx, "create-channel", &GetPermissionRequest{})
-		require.NoError(t, err)
-		assert.Equal(t, "create-channel", getResp.Data.Permission.ID)
-		assert.False(t, getResp.Data.Permission.Custom)
-	})
-
-	t.Run("ListAndGetPermission", func(t *testing.T) {
-		// List permissions
-		listResp, err := client.ListPermissions(ctx, &ListPermissionsRequest{})
-		require.NoError(t, err)
-		assert.NotEmpty(t, listResp.Data.Permissions)
-
-		// Get a built-in permission
-		getResp, err := client.GetPermission(ctx, "create-channel", &GetPermissionRequest{})
-		require.NoError(t, err)
-		assert.Equal(t, "create-channel", getResp.Data.Permission.ID)
-		assert.False(t, getResp.Data.Permission.Custom)
-		assert.Empty(t, getResp.Data.Permission.Condition)
-	})
-}
+// Note: stream-chat-go TestPermissions_PermissionEndpoints also tests CreatePermission,
+// but CreatePermission is hidden from the generated spec (Ignore: true in backend).
+// ListPermissions and GetPermission are tested in TestChatPermissionsIntegration above.
 
 func TestChatContextExceededIntegration(t *testing.T) {
 	skipIfShort(t)
