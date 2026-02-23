@@ -2,11 +2,11 @@
 package getstream_test
 
 import (
-    "context"
-    "testing"
+	"context"
+	"testing"
 
-    "github.com/GetStream/getstream-go/v3"
-    "github.com/stretchr/testify/require"
+	"github.com/GetStream/getstream-go/v3"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFeedsAddActivity(t *testing.T) {
