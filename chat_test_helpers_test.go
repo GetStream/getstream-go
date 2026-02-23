@@ -114,14 +114,6 @@ func createTestChannelWithMembers(t *testing.T, client *Stream, creatorID string
 	return ch, channelID
 }
 
-// waitForTask polls a task until it completes.
-func waitForTask(t *testing.T, client *Stream, ctx context.Context, taskID string) {
-	t.Helper()
-	taskResult, err := WaitForTask(ctx, client, taskID)
-	require.NoError(t, err, "Task polling failed")
-	require.Equal(t, "completed", taskResult.Data.Status, "Task did not complete successfully")
-}
-
 // sendTestMessage sends a message to a channel and returns the message ID.
 func sendTestMessage(t *testing.T, ch *Channels, userID string, text string) string {
 	t.Helper()
