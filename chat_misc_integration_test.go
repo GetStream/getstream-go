@@ -28,6 +28,9 @@ func TestChatDeviceIntegration(t *testing.T) {
 			PushProvider: "firebase",
 			UserID:       PtrTo(userID),
 		})
+		if err != nil && strings.Contains(err.Error(), "no push providers configured") {
+			t.Skip("Push providers not configured for this app")
+		}
 		require.NoError(t, err)
 
 		// List devices
@@ -840,11 +843,19 @@ func TestChatRestoreUsersIntegration(t *testing.T) {
 	userIDs := createTestUsers(t, client, 1)
 	userID := userIDs[0]
 
-	// Delete the user (soft delete)
-	delResp, err := client.DeleteUsers(ctx, &DeleteUsersRequest{
-		UserIds: []string{userID},
-		User:    PtrTo("soft"),
-	})
+	// Delete the user (soft delete) — retry on rate limit
+	var delResp *StreamResponse[DeleteUsersResponse]
+	var err error
+	for i := 0; i < 5; i++ {
+		delResp, err = client.DeleteUsers(ctx, &DeleteUsersRequest{
+			UserIds: []string{userID},
+			User:    PtrTo("soft"),
+		})
+		if err == nil || !strings.Contains(err.Error(), "Too many requests") {
+			break
+		}
+		time.Sleep(time.Duration(i+1) * 2 * time.Second)
+	}
 	require.NoError(t, err)
 	assert.NotEmpty(t, delResp.Data.TaskID)
 
@@ -1556,6 +1567,15 @@ func TestChatChannelBatchUpdateIntegration(t *testing.T) {
 	client := initClient(t)
 	ctx := context.Background()
 
+	// skipIfBatchUpdateDisabled skips the test if the error indicates the
+	// ChannelBatchUpdate feature is not enabled (returns empty error message).
+	skipIfBatchUpdateDisabled := func(t *testing.T, err error) {
+		t.Helper()
+		if err != nil && strings.Contains(err.Error(), `failed with error: ""`) {
+			t.Skip("ChannelBatchUpdate feature not enabled for this app")
+		}
+	}
+
 	// pollBatchTask polls a batch update task until completion, matching
 	// stream-chat-go's 120-iteration polling loop with rate-limit retry.
 	pollBatchTask := func(t *testing.T, taskID string) {
@@ -1636,6 +1656,7 @@ func TestChatChannelBatchUpdateIntegration(t *testing.T) {
 			},
 			Members: members,
 		})
+		skipIfBatchUpdateDisabled(t, err)
 		require.NoError(t, err)
 		require.NotNil(t, resp.Data.TaskID)
 		taskID := *resp.Data.TaskID
@@ -1706,6 +1727,7 @@ func TestChatChannelBatchUpdateIntegration(t *testing.T) {
 			},
 			Members: []ChannelBatchMemberRequest{{UserID: memberToRemove}},
 		})
+		skipIfBatchUpdateDisabled(t, err)
 		require.NoError(t, err)
 		require.NotNil(t, resp.Data.TaskID)
 		taskID := *resp.Data.TaskID
@@ -1752,6 +1774,7 @@ func TestChatChannelBatchUpdateIntegration(t *testing.T) {
 			},
 			Members: []ChannelBatchMemberRequest{{UserID: userIDs[1]}},
 		})
+		skipIfBatchUpdateDisabled(t, err)
 		require.NoError(t, err)
 		require.NotNil(t, resp.Data.TaskID)
 		taskID := *resp.Data.TaskID

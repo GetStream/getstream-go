@@ -2,6 +2,7 @@ package getstream_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -208,9 +209,17 @@ func TestChatUserIntegration(t *testing.T) {
 	t.Run("DeleteUsers", func(t *testing.T) {
 		userIDs := createTestUsers(t, client, 2)
 
-		resp, err := client.DeleteUsers(ctx, &DeleteUsersRequest{
-			UserIds: userIDs,
-		})
+		var resp *StreamResponse[DeleteUsersResponse]
+		var err error
+		for i := 0; i < 5; i++ {
+			resp, err = client.DeleteUsers(ctx, &DeleteUsersRequest{
+				UserIds: userIDs,
+			})
+			if err == nil || !strings.Contains(err.Error(), "Too many requests") {
+				break
+			}
+			time.Sleep(time.Duration(i+1) * 2 * time.Second)
+		}
 		require.NoError(t, err)
 
 		taskID := resp.Data.TaskID
