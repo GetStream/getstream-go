@@ -966,6 +966,13 @@ type QueryPinnedActivitiesRequest struct {
 	Sort []SortParamRequest `json:"sort"`
 	Filter map[string]any `json:"filter"`
 }
+type QueryPinnedActivitiesRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+}
 type GetFollowSuggestionsRequest struct {
 	Limit *int `json:"-" query:"limit"`
 	UserID *string `json:"-" query:"user_id"`

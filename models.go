@@ -6610,9 +6610,9 @@ type MessageRequest struct {
 	// Contains HTML markup of the message. Can only be set when using server-side API
 	Html *string `json:"html,omitempty"`
 	// Message ID is unique string identifier of the message
-	ID *string `json:"id,omitempty"`
-	MentionedChannel *bool `json:"mentioned_channel,omitempty"`
-	MentionedHere *bool `json:"mentioned_here,omitempty"`
+	ID               *string `json:"id,omitempty"`
+	MentionedChannel *bool   `json:"mentioned_channel,omitempty"`
+	MentionedHere    *bool   `json:"mentioned_here,omitempty"`
 	// Should be empty if `text` is provided. Can only be set when using server-side API
 	Mml *string `json:"mml,omitempty"`
 	// ID of parent message (thread)
@@ -8428,6 +8428,16 @@ type QueryPinnedActivitiesResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
+type QueryPinnedActivitiesResponse struct {
+	Duration string `json:"duration"`
+	// List of pinned activities matching the query
+	PinnedActivities []ActivityPinResponse `json:"pinned_activities"`
+	// Cursor for next page
+	Next *string `json:"next,omitempty"`
+	// Cursor for previous page
+	Prev *string `json:"prev,omitempty"`
+}
+
 type QueryPollsResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -9462,54 +9472,53 @@ type SearchResult struct {
 }
 
 type SearchResultMessage struct {
-	Cid string `json:"cid"`
-	CreatedAt Timestamp `json:"created_at"`
-	DeletedReplyCount int `json:"deleted_reply_count"`
-	Html string `json:"html"`
-	ID string `json:"id"`
-	MentionedChannel bool `json:"mentioned_channel"`
-	MentionedHere bool `json:"mentioned_here"`
-	Pinned bool `json:"pinned"`
-	ReplyCount int `json:"reply_count"`
-	Shadowed bool `json:"shadowed"`
-	Silent bool `json:"silent"`
-	Text string `json:"text"`
-	UpdatedAt Timestamp `json:"updated_at"`
-	Type string `json:"type"`
-	Attachments []Attachment `json:"attachments"`
-	LatestReactions []ReactionResponse `json:"latest_reactions"`
-	MentionedUsers []UserResponse `json:"mentioned_users"`
-	OwnReactions []ReactionResponse `json:"own_reactions"`
-	RestrictedVisibility []string `json:"restricted_visibility"`
-	Custom map[string]any `json:"custom"`
-	ReactionCounts map[string]int `json:"reaction_counts"`
-	ReactionScores map[string]int `json:"reaction_scores"`
-	User UserResponse `json:"user"`
-	Command *string `json:"command,omitempty"`
-	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
-	DeletedForMe *bool `json:"deleted_for_me,omitempty"`
-	MessageTextUpdatedAt *Timestamp `json:"message_text_updated_at,omitempty"`
-	Mml *string `json:"mml,omitempty"`
-	ParentID *string `json:"parent_id,omitempty"`
-	PinExpires *Timestamp `json:"pin_expires,omitempty"`
-	PinnedAt *Timestamp `json:"pinned_at,omitempty"`
-	PollID *string `json:"poll_id,omitempty"`
-	QuotedMessageID *string `json:"quoted_message_id,omitempty"`
-	ShowInChannel *bool `json:"show_in_channel,omitempty"`
-	MentionedRoles []string `json:"mentioned_roles,omitempty"`
-	ThreadParticipants []UserResponse `json:"thread_participants,omitempty"`
-	Channel *ChannelResponse `json:"channel,omitempty"`
-	Draft *DraftResponse `json:"draft,omitempty"`
-	I18n map[string]string `json:"i18n,omitempty"`
-	ImageLabels map[string][]string `json:"image_labels,omitempty"`
-	Member *ChannelMemberResponse `json:"member,omitempty"`
-	Moderation *ModerationV2Response `json:"moderation,omitempty"`
-	PinnedBy *UserResponse `json:"pinned_by,omitempty"`
-	Poll *PollResponseData `json:"poll,omitempty"`
-	QuotedMessage *MessageResponse `json:"quoted_message,omitempty"`
-	ReactionGroups map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
-	Reminder *ReminderResponseData `json:"reminder,omitempty"`
-	SharedLocation *SharedLocationResponseData `json:"shared_location,omitempty"`
+	Cid                  string                            `json:"cid"`
+	CreatedAt            Timestamp                         `json:"created_at"`
+	DeletedReplyCount    int                               `json:"deleted_reply_count"`
+	Html                 string                            `json:"html"`
+	ID                   string                            `json:"id"`
+	MentionedChannel     bool                              `json:"mentioned_channel"`
+	MentionedHere        bool                              `json:"mentioned_here"`
+	Pinned               bool                              `json:"pinned"`
+	ReplyCount           int                               `json:"reply_count"`
+	Shadowed             bool                              `json:"shadowed"`
+	Silent               bool                              `json:"silent"`
+	Text                 string                            `json:"text"`
+	UpdatedAt            Timestamp                         `json:"updated_at"`
+	Type                 string                            `json:"type"`
+	Attachments          []Attachment                      `json:"attachments"`
+	LatestReactions      []ReactionResponse                `json:"latest_reactions"`
+	MentionedUsers       []UserResponse                    `json:"mentioned_users"`
+	OwnReactions         []ReactionResponse                `json:"own_reactions"`
+	RestrictedVisibility []string                          `json:"restricted_visibility"`
+	Custom               map[string]any                    `json:"custom"`
+	ReactionCounts       map[string]int                    `json:"reaction_counts"`
+	ReactionScores       map[string]int                    `json:"reaction_scores"`
+	User                 UserResponse                      `json:"user"`
+	Command              *string                           `json:"command,omitempty"`
+	DeletedAt            *Timestamp                        `json:"deleted_at,omitempty"`
+	DeletedForMe         *bool                             `json:"deleted_for_me,omitempty"`
+	MessageTextUpdatedAt *Timestamp                        `json:"message_text_updated_at,omitempty"`
+	Mml                  *string                           `json:"mml,omitempty"`
+	ParentID             *string                           `json:"parent_id,omitempty"`
+	PinExpires           *Timestamp                        `json:"pin_expires,omitempty"`
+	PinnedAt             *Timestamp                        `json:"pinned_at,omitempty"`
+	PollID               *string                           `json:"poll_id,omitempty"`
+	QuotedMessageID      *string                           `json:"quoted_message_id,omitempty"`
+	ShowInChannel        *bool                             `json:"show_in_channel,omitempty"`
+	ThreadParticipants   []UserResponse                    `json:"thread_participants,omitempty"`
+	Channel              *ChannelResponse                  `json:"channel,omitempty"`
+	Draft                *DraftResponse                    `json:"draft,omitempty"`
+	I18n                 map[string]string                 `json:"i18n,omitempty"`
+	ImageLabels          map[string][]string               `json:"image_labels,omitempty"`
+	Member               *ChannelMemberResponse            `json:"member,omitempty"`
+	Moderation           *ModerationV2Response             `json:"moderation,omitempty"`
+	PinnedBy             *UserResponse                     `json:"pinned_by,omitempty"`
+	Poll                 *PollResponseData                 `json:"poll,omitempty"`
+	QuotedMessage        *MessageResponse                  `json:"quoted_message,omitempty"`
+	ReactionGroups       map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
+	Reminder             *ReminderResponseData             `json:"reminder,omitempty"`
+	SharedLocation       *SharedLocationResponseData       `json:"shared_location,omitempty"`
 }
 
 type SearchWarning struct {

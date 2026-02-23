@@ -47,13 +47,12 @@ func (c *ChatClient) StartCampaign(ctx context.Context,id string, request *Start
 }
 
 // Stops a campaign
-// 
-func (c *ChatClient) StopCampaign(ctx context.Context,id string, request *StopCampaignRequest) (*StreamResponse[CampaignResponse], error) {
+func (c *ChatClient) StopCampaign(ctx context.Context, id string, request *StopCampaignRequest) (*StreamResponse[CampaignResponse], error) {
 	var result CampaignResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[StopCampaignRequest, CampaignResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns/{id}/stop",nil,request, &result,pathParams)
+	res, err := MakeRequest[StopCampaignRequest, CampaignResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns/{id}/stop", nil, request, &result, pathParams)
 	return res, err
 }
 
