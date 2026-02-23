@@ -22,12 +22,7 @@ func TestChatUserIntegration(t *testing.T) {
 		userID2 := "upsert-" + uuid.New().String()
 
 		t.Cleanup(func() {
-			_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
-				UserIds:       []string{userID1, userID2},
-				User:          PtrTo("hard"),
-				Messages:      PtrTo("hard"),
-				Conversations: PtrTo("hard"),
-			})
+			deleteUsersWithRetry(client, []string{userID1, userID2})
 		})
 
 		resp, err := client.UpdateUsers(ctx, &UpdateUsersRequest{
@@ -244,13 +239,7 @@ func TestChatUserIntegration(t *testing.T) {
 		guestID := "guest-" + uuid.New().String()
 
 		t.Cleanup(func() {
-			// Guest user may have a server-assigned ID prefix, but we try both
-			_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
-				UserIds:       []string{guestID},
-				User:          PtrTo("hard"),
-				Messages:      PtrTo("hard"),
-				Conversations: PtrTo("hard"),
-			})
+			deleteUsersWithRetry(client, []string{guestID})
 		})
 
 		resp, err := client.CreateGuest(ctx, &CreateGuestRequest{
@@ -272,12 +261,7 @@ func TestChatUserIntegration(t *testing.T) {
 
 		// Also clean up the actual server-assigned ID
 		t.Cleanup(func() {
-			_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
-				UserIds:       []string{resp.Data.User.ID},
-				User:          PtrTo("hard"),
-				Messages:      PtrTo("hard"),
-				Conversations: PtrTo("hard"),
-			})
+			deleteUsersWithRetry(client, []string{resp.Data.User.ID})
 		})
 	})
 
@@ -285,12 +269,7 @@ func TestChatUserIntegration(t *testing.T) {
 		userID := "teams-" + uuid.New().String()
 
 		t.Cleanup(func() {
-			_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
-				UserIds:       []string{userID},
-				User:          PtrTo("hard"),
-				Messages:      PtrTo("hard"),
-				Conversations: PtrTo("hard"),
-			})
+			deleteUsersWithRetry(client, []string{userID})
 		})
 
 		resp, err := client.UpdateUsers(ctx, &UpdateUsersRequest{
@@ -342,12 +321,7 @@ func TestChatUserIntegration(t *testing.T) {
 		userID := "privacy-" + uuid.New().String()
 
 		t.Cleanup(func() {
-			_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
-				UserIds:       []string{userID},
-				User:          PtrTo("hard"),
-				Messages:      PtrTo("hard"),
-				Conversations: PtrTo("hard"),
-			})
+			deleteUsersWithRetry(client, []string{userID})
 		})
 
 		// Create user without privacy settings
@@ -415,12 +389,7 @@ func TestChatUserIntegration(t *testing.T) {
 		userID := "privacy-partial-" + uuid.New().String()
 
 		t.Cleanup(func() {
-			_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
-				UserIds:       []string{userID},
-				User:          PtrTo("hard"),
-				Messages:      PtrTo("hard"),
-				Conversations: PtrTo("hard"),
-			})
+			deleteUsersWithRetry(client, []string{userID})
 		})
 
 		// Create user
@@ -545,12 +514,7 @@ func TestChatUserIntegration(t *testing.T) {
 		userID := "custom-" + uuid.New().String()
 
 		t.Cleanup(func() {
-			_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
-				UserIds:       []string{userID},
-				User:          PtrTo("hard"),
-				Messages:      PtrTo("hard"),
-				Conversations: PtrTo("hard"),
-			})
+			deleteUsersWithRetry(client, []string{userID})
 		})
 
 		custom := map[string]any{

@@ -2,12 +2,31 @@ package getstream_test
 
 import (
 	"context"
+	"strings"
 	"testing"
+	"time"
 
 	. "github.com/GetStream/getstream-go/v3"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
+
+// deleteUsersWithRetry calls DeleteUsers with retry logic to handle rate limiting.
+// Used in t.Cleanup to avoid "Too many requests" failures.
+func deleteUsersWithRetry(client *Stream, userIDs []string) {
+	for i := 0; i < 10; i++ {
+		_, err := client.DeleteUsers(context.Background(), &DeleteUsersRequest{
+			UserIds:       userIDs,
+			User:          PtrTo("hard"),
+			Messages:      PtrTo("hard"),
+			Conversations: PtrTo("hard"),
+		})
+		if err == nil || !strings.Contains(err.Error(), "Too many requests") {
+			return
+		}
+		time.Sleep(time.Duration(i+1) * 3 * time.Second)
+	}
+}
 
 // skipIfShort skips integration tests when running with -short flag.
 func skipIfShort(t *testing.T) {
@@ -37,12 +56,7 @@ func createTestUsers(t *testing.T, client *Stream, n int) []string {
 	require.NoError(t, err, "Failed to create test users")
 
 	t.Cleanup(func() {
-		_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
-			UserIds:       ids,
-			User:          PtrTo("hard"),
-			Messages:      PtrTo("hard"),
-			Conversations: PtrTo("hard"),
-		})
+		deleteUsersWithRetry(client, ids)
 	})
 
 	return ids
