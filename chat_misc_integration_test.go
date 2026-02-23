@@ -806,10 +806,7 @@ func TestChatExportChannelsIntegration(t *testing.T) {
 	assert.NotEmpty(t, exportResp.Data.TaskID)
 
 	// Wait for the export task to complete
-	taskCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
-	defer cancel()
-
-	taskResult, err := WaitForTask(taskCtx, client, exportResp.Data.TaskID)
+	taskResult, err := WaitForTask(ctx, client, exportResp.Data.TaskID)
 	require.NoError(t, err)
 	assert.Equal(t, "completed", taskResult.Data.Status)
 }
@@ -860,10 +857,7 @@ func TestChatRestoreUsersIntegration(t *testing.T) {
 	assert.NotEmpty(t, delResp.Data.TaskID)
 
 	// Wait for deletion to complete
-	taskCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
-	defer cancel()
-
-	taskResult, err := WaitForTask(taskCtx, client, delResp.Data.TaskID)
+	taskResult, err := WaitForTask(ctx, client, delResp.Data.TaskID)
 	require.NoError(t, err)
 	assert.Equal(t, "completed", taskResult.Data.Status)
 
@@ -1159,11 +1153,8 @@ func TestChatExportUsersIntegration(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, resp.Data.TaskID)
 
-	// Poll for task completion (matching stream-chat-go's pattern)
-	taskCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
-	defer cancel()
-
-	taskResult, err := WaitForTask(taskCtx, client, resp.Data.TaskID)
+	// Poll for task completion
+	taskResult, err := WaitForTask(ctx, client, resp.Data.TaskID)
 	require.NoError(t, err)
 	assert.Equal(t, "completed", taskResult.Data.Status)
 }

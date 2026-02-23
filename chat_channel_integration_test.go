@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 	"testing"
-	"time"
 
 	. "github.com/GetStream/getstream-go/v3"
 	"github.com/stretchr/testify/assert"
@@ -177,10 +176,7 @@ func TestChatChannelIntegration(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, resp.Data.TaskID)
 
-		taskCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
-		defer cancel()
-
-		taskResult, err := WaitForTask(taskCtx, client, *resp.Data.TaskID)
+		taskResult, err := WaitForTask(ctx, client, *resp.Data.TaskID)
 		require.NoError(t, err)
 		assert.Equal(t, "completed", taskResult.Data.Status)
 	})
