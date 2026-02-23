@@ -2,6 +2,7 @@ package getstream_test
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -804,5 +805,63 @@ func TestChatChannelIntegration(t *testing.T) {
 		})
 		require.NoError(t, err)
 		assert.Empty(t, qResp.Data.Channels, "Channel should be hidden for creator")
+	})
+
+	t.Run("UploadAndDeleteFile", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, creatorID, []string{creatorID})
+
+		// Create a temp file to upload
+		tmpFile, err := os.CreateTemp("", "chat-test-*.txt")
+		require.NoError(t, err)
+		defer os.Remove(tmpFile.Name())
+		_, err = tmpFile.WriteString("hello world test file content")
+		require.NoError(t, err)
+		tmpFile.Close()
+
+		// Upload file
+		uploadResp, err := ch.UploadChannelFile(ctx, &UploadChannelFileRequest{
+			File: PtrTo(tmpFile.Name()),
+			User: &OnlyUserID{ID: creatorID},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, uploadResp.Data.File)
+		fileURL := *uploadResp.Data.File
+		assert.NotEmpty(t, fileURL)
+		assert.Contains(t, fileURL, "http")
+
+		// Delete file
+		_, err = ch.DeleteChannelFile(ctx, &DeleteChannelFileRequest{
+			Url: PtrTo(fileURL),
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("UploadAndDeleteImage", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, creatorID, []string{creatorID})
+
+		// Create a temp image file to upload (minimal valid JPEG)
+		tmpFile, err := os.CreateTemp("", "chat-test-*.jpg")
+		require.NoError(t, err)
+		defer os.Remove(tmpFile.Name())
+		_, err = tmpFile.WriteString("fake-jpg-image-data-for-testing")
+		require.NoError(t, err)
+		tmpFile.Close()
+
+		// Upload image
+		uploadResp, err := ch.UploadChannelImage(ctx, &UploadChannelImageRequest{
+			File: PtrTo(tmpFile.Name()),
+			User: &OnlyUserID{ID: creatorID},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, uploadResp.Data.File)
+		imageURL := *uploadResp.Data.File
+		assert.NotEmpty(t, imageURL)
+		assert.Contains(t, imageURL, "http")
+
+		// Delete image
+		_, err = ch.DeleteChannelImage(ctx, &DeleteChannelImageRequest{
+			Url: PtrTo(imageURL),
+		})
+		require.NoError(t, err)
 	})
 }

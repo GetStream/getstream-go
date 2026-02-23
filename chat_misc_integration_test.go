@@ -1492,6 +1492,547 @@ func TestChatEventHooksIntegration(t *testing.T) {
 	})
 }
 
+func TestChatQueryFutureChannelBansIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	userIDs := createTestUsers(t, client, 2)
+	creatorID := userIDs[0]
+	targetID := userIDs[1]
+
+	// Create a channel for the ban context
+	_, channelID := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, targetID})
+
+	// Ban the target from the channel (note: BanFromFutureChannels is not
+	// available in the generated SDK, so we use a regular channel ban with
+	// the channel CID to at least exercise the QueryFutureChannelBans endpoint)
+	channelCid := "messaging:" + channelID
+	_, err := client.Moderation().Ban(ctx, &BanRequest{
+		TargetUserID: targetID,
+		BannedByID:   PtrTo(creatorID),
+		ChannelCid:   PtrTo(channelCid),
+		Reason:       PtrTo("test future ban query"),
+	})
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		_, _ = client.Moderation().Unban(ctx, &UnbanRequest{
+			TargetUserID: targetID,
+			CreatedBy:    PtrTo(creatorID),
+			ChannelCid:   PtrTo(channelCid),
+		})
+	})
+
+	// Query future channel bans — should return without error
+	// (may be empty since we can't set ban_from_future_channels via the generated SDK)
+	resp, err := client.Chat().QueryFutureChannelBans(ctx, &QueryFutureChannelBansRequest{
+		Payload: &QueryFutureChannelBansPayload{
+			UserID: PtrTo(creatorID),
+		},
+	})
+	require.NoError(t, err)
+	assert.NotNil(t, resp.Data.Bans)
+
+	// Query with target user filter
+	resp2, err := client.Chat().QueryFutureChannelBans(ctx, &QueryFutureChannelBansRequest{
+		Payload: &QueryFutureChannelBansPayload{
+			UserID:       PtrTo(creatorID),
+			TargetUserID: PtrTo(targetID),
+		},
+	})
+	require.NoError(t, err)
+	assert.NotNil(t, resp2.Data.Bans)
+}
+
+func TestChatDraftsIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	userIDs := createTestUsers(t, client, 1)
+	userID := userIDs[0]
+
+	t.Run("CreateAndGetDraft", func(t *testing.T) {
+		ch, channelID := createTestChannelWithMembers(t, client, userID, []string{userID})
+		channelCid := "messaging:" + channelID
+
+		// Create a draft message
+		createResp, err := ch.CreateDraft(ctx, &CreateDraftRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("This is a draft message"),
+				UserID: PtrTo(userID),
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, "This is a draft message", createResp.Data.Draft.Message.Text)
+		assert.Equal(t, channelCid, createResp.Data.Draft.ChannelCid)
+
+		// Get the draft
+		getResp, err := ch.GetDraft(ctx, &GetDraftRequest{
+			UserID: PtrTo(userID),
+		})
+		require.NoError(t, err)
+		assert.Equal(t, createResp.Data.Draft.Message.ID, getResp.Data.Draft.Message.ID)
+		assert.Equal(t, "This is a draft message", getResp.Data.Draft.Message.Text)
+	})
+
+	t.Run("DeleteDraft", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
+
+		// Create a draft
+		_, err := ch.CreateDraft(ctx, &CreateDraftRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("Draft to delete"),
+				UserID: PtrTo(userID),
+			},
+		})
+		require.NoError(t, err)
+
+		// Delete it
+		_, err = ch.DeleteDraft(ctx, &DeleteDraftRequest{
+			UserID: PtrTo(userID),
+		})
+		require.NoError(t, err)
+
+		// Verify deletion
+		_, err = ch.GetDraft(ctx, &GetDraftRequest{
+			UserID: PtrTo(userID),
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("CreateDraftInThread", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
+
+		// Send parent message
+		parentMsgID := sendTestMessage(t, ch, userID, "Parent message")
+
+		// Create draft in thread
+		resp, err := ch.CreateDraft(ctx, &CreateDraftRequest{
+			Message: MessageRequest{
+				Text:     PtrTo("This is a draft reply"),
+				UserID:   PtrTo(userID),
+				ParentID: PtrTo(parentMsgID),
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, "This is a draft reply", resp.Data.Draft.Message.Text)
+		require.NotNil(t, resp.Data.Draft.Message.ParentID)
+		assert.Equal(t, parentMsgID, *resp.Data.Draft.Message.ParentID)
+
+		// Get draft in thread
+		getResp, err := ch.GetDraft(ctx, &GetDraftRequest{
+			UserID:   PtrTo(userID),
+			ParentID: PtrTo(parentMsgID),
+		})
+		require.NoError(t, err)
+		assert.Equal(t, resp.Data.Draft.Message.ID, getResp.Data.Draft.Message.ID)
+		require.NotNil(t, getResp.Data.Draft.Message.ParentID)
+		assert.Equal(t, parentMsgID, *getResp.Data.Draft.Message.ParentID)
+	})
+
+	t.Run("QueryDrafts", func(t *testing.T) {
+		ch1, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
+		ch2, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
+
+		// Create drafts in two channels
+		_, err := ch1.CreateDraft(ctx, &CreateDraftRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("Draft 1"),
+				UserID: PtrTo(userID),
+			},
+		})
+		require.NoError(t, err)
+
+		_, err = ch2.CreateDraft(ctx, &CreateDraftRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("Draft 2"),
+				UserID: PtrTo(userID),
+			},
+		})
+		require.NoError(t, err)
+
+		// Query all drafts
+		resp, err := client.Chat().QueryDrafts(ctx, &QueryDraftsRequest{
+			UserID: PtrTo(userID),
+			Limit:  PtrTo(10),
+		})
+		require.NoError(t, err)
+		assert.GreaterOrEqual(t, len(resp.Data.Drafts), 2)
+
+		foundDraft1 := false
+		foundDraft2 := false
+		for _, draft := range resp.Data.Drafts {
+			if draft.Message.Text == "Draft 1" {
+				foundDraft1 = true
+			} else if draft.Message.Text == "Draft 2" {
+				foundDraft2 = true
+			}
+		}
+		assert.True(t, foundDraft1, "Draft 1 not found")
+		assert.True(t, foundDraft2, "Draft 2 not found")
+	})
+
+	t.Run("QueryDraftsWithFilters", func(t *testing.T) {
+		ch1, channelID1 := createTestChannelWithMembers(t, client, userID, []string{userID})
+		ch2, channelID2 := createTestChannelWithMembers(t, client, userID, []string{userID})
+		cid1 := "messaging:" + channelID1
+		cid2 := "messaging:" + channelID2
+
+		_, err := ch1.CreateDraft(ctx, &CreateDraftRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("Draft in channel 1"),
+				UserID: PtrTo(userID),
+			},
+		})
+		require.NoError(t, err)
+
+		_, err = ch2.CreateDraft(ctx, &CreateDraftRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("Draft in channel 2"),
+				UserID: PtrTo(userID),
+			},
+		})
+		require.NoError(t, err)
+
+		// Filter by specific channel
+		resp, err := client.Chat().QueryDrafts(ctx, &QueryDraftsRequest{
+			UserID: PtrTo(userID),
+			Filter: map[string]any{
+				"channel_cid": cid2,
+			},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, 1, len(resp.Data.Drafts))
+		assert.Equal(t, cid2, resp.Data.Drafts[0].ChannelCid)
+		assert.Equal(t, "Draft in channel 2", resp.Data.Drafts[0].Message.Text)
+
+		// Sort by created_at ascending
+		resp, err = client.Chat().QueryDrafts(ctx, &QueryDraftsRequest{
+			UserID: PtrTo(userID),
+			Filter: map[string]any{
+				"channel_cid": map[string]any{
+					"$in": []string{cid1, cid2},
+				},
+			},
+			Sort: []SortParamRequest{{Field: PtrTo("created_at"), Direction: PtrTo(1)}},
+		})
+		require.NoError(t, err)
+		assert.Equal(t, 2, len(resp.Data.Drafts))
+		assert.Equal(t, cid1, resp.Data.Drafts[0].ChannelCid)
+		assert.Equal(t, cid2, resp.Data.Drafts[1].ChannelCid)
+
+		// Pagination
+		resp, err = client.Chat().QueryDrafts(ctx, &QueryDraftsRequest{
+			UserID: PtrTo(userID),
+			Filter: map[string]any{
+				"channel_cid": map[string]any{
+					"$in": []string{cid1, cid2},
+				},
+			},
+			Limit: PtrTo(1),
+		})
+		require.NoError(t, err)
+		assert.Equal(t, 1, len(resp.Data.Drafts))
+		require.NotNil(t, resp.Data.Next)
+
+		// Next page
+		resp, err = client.Chat().QueryDrafts(ctx, &QueryDraftsRequest{
+			UserID: PtrTo(userID),
+			Filter: map[string]any{
+				"channel_cid": map[string]any{
+					"$in": []string{cid1, cid2},
+				},
+			},
+			Limit: PtrTo(1),
+			Next:  resp.Data.Next,
+		})
+		require.NoError(t, err)
+		assert.Equal(t, 1, len(resp.Data.Drafts))
+	})
+}
+
+// TestChatChannelBatchUpdateIntegration matches stream-chat-go's
+// TestChannelBatchUpdater_AddMembers, TestChannelBatchUpdater_RemoveMembers,
+// and TestChannelBatchUpdater_Archive tests.
+func TestChatChannelBatchUpdateIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	// pollBatchTask polls a batch update task until completion, matching
+	// stream-chat-go's 120-iteration polling loop with rate-limit retry.
+	pollBatchTask := func(t *testing.T, taskID string) {
+		t.Helper()
+		time.Sleep(2 * time.Second)
+		for i := 0; i < 120; i++ {
+			taskResp, err := client.GetTask(ctx, taskID, &GetTaskRequest{})
+			if err != nil {
+				if i < 10 {
+					time.Sleep(time.Second)
+					continue
+				}
+				require.NoError(t, err, "failed to get task status")
+			}
+			require.Equal(t, taskID, taskResp.Data.TaskID)
+			status := taskResp.Data.Status
+			if status == "waiting" || status == "pending" || status == "running" {
+				time.Sleep(time.Second)
+				continue
+			}
+			if status == "completed" {
+				return
+			}
+			if status == "failed" {
+				if len(taskResp.Data.Result) == 0 {
+					time.Sleep(2 * time.Second)
+					continue
+				}
+				if desc, ok := taskResp.Data.Result["description"]; ok {
+					if descStr, ok := desc.(string); ok && strings.Contains(strings.ToLower(descStr), "rate limit") {
+						time.Sleep(2 * time.Second)
+						continue
+					}
+				}
+				t.Fatalf("task failed with result: %v", taskResp.Data.Result)
+			}
+			time.Sleep(time.Second)
+		}
+		t.Fatal("task did not complete in 2 minutes")
+	}
+
+	// queryChannelMembers is a helper to query members of a specific channel.
+	queryChannelMembers := func(channelID string, filter map[string]any) ([]ChannelMemberResponse, error) {
+		qResp, err := client.Chat().QueryMembers(ctx, &QueryMembersRequest{
+			Payload: &QueryMembersPayload{
+				Type:             "messaging",
+				ID:               PtrTo(channelID),
+				FilterConditions: filter,
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+		return qResp.Data.Members, nil
+	}
+
+	t.Run("BatchAddMembers", func(t *testing.T) {
+		userIDs := createTestUsers(t, client, 3)
+		creatorID := userIDs[0]
+		_, channelID1 := createTestChannelWithMembers(t, client, creatorID, []string{creatorID})
+		_, channelID2 := createTestChannelWithMembers(t, client, creatorID, []string{creatorID})
+		cid1 := "messaging:" + channelID1
+		cid2 := "messaging:" + channelID2
+
+		usersToAdd := userIDs[1:]
+
+		members := make([]ChannelBatchMemberRequest, len(usersToAdd))
+		for i, uid := range usersToAdd {
+			members[i] = ChannelBatchMemberRequest{UserID: uid}
+		}
+
+		resp, err := client.Chat().ChannelBatchUpdate(ctx, &ChannelBatchUpdateRequest{
+			Operation: "addMembers",
+			Filter: map[string]any{
+				"cids": map[string]any{
+					"$in": []string{cid1, cid2},
+				},
+			},
+			Members: members,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.TaskID)
+		taskID := *resp.Data.TaskID
+		require.NotEmpty(t, taskID)
+
+		pollBatchTask(t, taskID)
+
+		// Verify members were added (matching stream-chat-go's post-task verification)
+		for j := 0; j < 120; j++ {
+			time.Sleep(time.Second)
+			ch1Members, err := queryChannelMembers(channelID1, map[string]any{})
+			if err != nil {
+				continue
+			}
+			ch1MemberIDs := make([]string, 0, len(ch1Members))
+			for _, m := range ch1Members {
+				if m.UserID != nil {
+					ch1MemberIDs = append(ch1MemberIDs, *m.UserID)
+				}
+			}
+			allFound := true
+			for _, uid := range usersToAdd {
+				found := false
+				for _, mid := range ch1MemberIDs {
+					if mid == uid {
+						found = true
+						break
+					}
+				}
+				if !found {
+					allFound = false
+					break
+				}
+			}
+			if allFound {
+				return
+			}
+		}
+		t.Fatal("changes not visible after 2 minutes")
+	})
+
+	t.Run("BatchRemoveMembers", func(t *testing.T) {
+		userIDs := createTestUsers(t, client, 3)
+		creatorID := userIDs[0]
+		membersToCreate := []string{creatorID, userIDs[1], userIDs[2]}
+		_, channelID1 := createTestChannelWithMembers(t, client, creatorID, membersToCreate)
+		_, channelID2 := createTestChannelWithMembers(t, client, creatorID, membersToCreate)
+		cid1 := "messaging:" + channelID1
+		cid2 := "messaging:" + channelID2
+
+		// Verify initial member count (matching stream-chat-go)
+		ch1Members, err := queryChannelMembers(channelID1, map[string]any{})
+		require.NoError(t, err)
+		require.Len(t, ch1Members, 3, "channel 1 should have 3 members before removal")
+
+		ch2Members, err := queryChannelMembers(channelID2, map[string]any{})
+		require.NoError(t, err)
+		require.Len(t, ch2Members, 3, "channel 2 should have 3 members before removal")
+
+		memberToRemove := userIDs[1]
+
+		resp, err := client.Chat().ChannelBatchUpdate(ctx, &ChannelBatchUpdateRequest{
+			Operation: "removeMembers",
+			Filter: map[string]any{
+				"cids": map[string]any{
+					"$in": []string{cid1, cid2},
+				},
+			},
+			Members: []ChannelBatchMemberRequest{{UserID: memberToRemove}},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.TaskID)
+		taskID := *resp.Data.TaskID
+		require.NotEmpty(t, taskID)
+
+		pollBatchTask(t, taskID)
+
+		// Verify member was removed (matching stream-chat-go's post-task verification)
+		for j := 0; j < 120; j++ {
+			time.Sleep(time.Second)
+			ch1Members, err := queryChannelMembers(channelID1, map[string]any{})
+			if err != nil {
+				continue
+			}
+			found := false
+			for _, m := range ch1Members {
+				if m.UserID != nil && *m.UserID == memberToRemove {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return
+			}
+		}
+		t.Fatal("changes not visible after 2 minutes")
+	})
+
+	t.Run("BatchArchive", func(t *testing.T) {
+		userIDs := createTestUsers(t, client, 3)
+		creatorID := userIDs[0]
+		membersToCreate := []string{creatorID, userIDs[1], userIDs[2]}
+		_, channelID1 := createTestChannelWithMembers(t, client, creatorID, membersToCreate)
+		_, channelID2 := createTestChannelWithMembers(t, client, creatorID, membersToCreate)
+		cid1 := "messaging:" + channelID1
+		cid2 := "messaging:" + channelID2
+
+		resp, err := client.Chat().ChannelBatchUpdate(ctx, &ChannelBatchUpdateRequest{
+			Operation: "archive",
+			Filter: map[string]any{
+				"cids": map[string]any{
+					"$in": []string{cid1, cid2},
+				},
+			},
+			Members: []ChannelBatchMemberRequest{{UserID: userIDs[1]}},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.TaskID)
+		taskID := *resp.Data.TaskID
+		require.NotEmpty(t, taskID)
+
+		pollBatchTask(t, taskID)
+
+		// Verify archive (matching stream-chat-go — check ArchivedAt on member)
+		for j := 0; j < 120; j++ {
+			time.Sleep(time.Second)
+			members, err := queryChannelMembers(channelID1, map[string]any{
+				"user_id": userIDs[1],
+			})
+			if err != nil {
+				continue
+			}
+			if len(members) > 0 && members[0].ArchivedAt != nil {
+				return
+			}
+		}
+		t.Fatal("changes not visible after 2 minutes")
+	})
+}
+
+func TestChatCreatePermissionIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	t.Run("CreateAndListPermission", func(t *testing.T) {
+		// Note: CreatePermissionRequest is missing the "id" field due to a codegen issue
+		// (the backend struct has `path:"id"` which causes the spec generator to drop it).
+		// stream-chat-go sends "id" in the JSON body. Skipping CreatePermission call until
+		// the codegen issue is fixed.
+		t.Skip("CreatePermissionRequest missing 'id' field — codegen issue with path tag")
+
+		permName := "test-perm-" + randomString(8)
+
+		// Create a custom permission (matches stream-chat-go TestPermissions_PermissionEndpoints)
+		_, err := client.CreatePermission(ctx, &CreatePermissionRequest{
+			Action:      "DeleteChannel",
+			Name:        permName,
+			Description: PtrTo("integration test"),
+			Condition: map[string]any{
+				"$subject.magic_custom_field": map[string]any{"$eq": "true"},
+			},
+		})
+		require.NoError(t, err)
+
+		// List permissions — should contain our new one
+		listResp, err := client.ListPermissions(ctx, &ListPermissionsRequest{})
+		require.NoError(t, err)
+		assert.NotEmpty(t, listResp.Data.Permissions)
+
+		// Get a built-in permission
+		getResp, err := client.GetPermission(ctx, "create-channel", &GetPermissionRequest{})
+		require.NoError(t, err)
+		assert.Equal(t, "create-channel", getResp.Data.Permission.ID)
+		assert.False(t, getResp.Data.Permission.Custom)
+	})
+
+	t.Run("ListAndGetPermission", func(t *testing.T) {
+		// List permissions
+		listResp, err := client.ListPermissions(ctx, &ListPermissionsRequest{})
+		require.NoError(t, err)
+		assert.NotEmpty(t, listResp.Data.Permissions)
+
+		// Get a built-in permission
+		getResp, err := client.GetPermission(ctx, "create-channel", &GetPermissionRequest{})
+		require.NoError(t, err)
+		assert.Equal(t, "create-channel", getResp.Data.Permission.ID)
+		assert.False(t, getResp.Data.Permission.Custom)
+		assert.Empty(t, getResp.Data.Permission.Condition)
+	})
+}
+
 func TestChatContextExceededIntegration(t *testing.T) {
 	skipIfShort(t)
 	client := initClient(t)

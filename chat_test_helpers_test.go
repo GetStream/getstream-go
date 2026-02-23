@@ -3,6 +3,7 @@ package getstream_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	. "github.com/GetStream/getstream-go/v3"
 	"github.com/google/uuid"
@@ -98,6 +99,16 @@ func createTestChannelWithMembers(t *testing.T, client *Stream, creatorID string
 	})
 
 	return ch, channelID
+}
+
+// waitForTask polls a task until it completes or the timeout is reached.
+func waitForTask(t *testing.T, client *Stream, ctx context.Context, taskID string) {
+	t.Helper()
+	taskCtx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	defer cancel()
+	taskResult, err := WaitForTask(taskCtx, client, taskID)
+	require.NoError(t, err, "Task polling failed")
+	require.Equal(t, "completed", taskResult.Data.Status, "Task did not complete successfully")
 }
 
 // sendTestMessage sends a message to a channel and returns the message ID.

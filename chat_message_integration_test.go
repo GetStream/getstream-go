@@ -428,10 +428,7 @@ func TestChatMessageIntegration(t *testing.T) {
 		// Note: The API requires "undeleted_by" field which may not be in the generated
 		// request struct yet. Gracefully skip if the field is missing.
 		undelResp, err := client.Chat().UndeleteMessage(ctx, msgID, &UndeleteMessageRequest{
-			Message: MessageRequest{
-				Text:   PtrTo("Message to undelete"),
-				UserID: PtrTo(userID),
-			},
+			UndeletedBy: userID,
 		})
 		if err != nil {
 			errStr := err.Error()

@@ -2,556 +2,590 @@
 package getstream_test
 
 import (
-	"context"
-	"testing"
+    "context"
+    "testing"
 
-	"github.com/GetStream/getstream-go/v3"
-	"github.com/stretchr/testify/require"
+    "github.com/GetStream/getstream-go/v3"
+    "github.com/stretchr/testify/require"
 )
-
-func TestChatQueryCampaigns(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().QueryCampaigns(context.Background(), &getstream.QueryCampaignsRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetCampaign(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetCampaign(context.Background(), "", &getstream.GetCampaignRequest{})
-	require.NoError(t, err)
-}
-func TestChatStartCampaign(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().StartCampaign(context.Background(), "", &getstream.StartCampaignRequest{})
-	require.NoError(t, err)
-}
-func TestChatScheduleCampaign(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().ScheduleCampaign(context.Background(), "", &getstream.ScheduleCampaignRequest{})
-	require.NoError(t, err)
-}
-func TestChatQueryChannels(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().QueryChannels(context.Background(), &getstream.QueryChannelsRequest{})
-	require.NoError(t, err)
-}
-func TestChatDeleteChannels(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().DeleteChannels(context.Background(), &getstream.DeleteChannelsRequest{})
-	require.NoError(t, err)
-}
-func TestChatMarkDelivered(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().MarkDelivered(context.Background(), &getstream.MarkDeliveredRequest{})
-	require.NoError(t, err)
-}
-func TestChatMarkChannelsRead(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().MarkChannelsRead(context.Background(), &getstream.MarkChannelsReadRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetOrCreateDistinctChannel(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetOrCreateDistinctChannel(context.Background(), "", &getstream.GetOrCreateDistinctChannelRequest{})
-	require.NoError(t, err)
-}
-func TestChatDeleteChannel(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().DeleteChannel(context.Background(), "", "", &getstream.DeleteChannelRequest{})
-	require.NoError(t, err)
-}
-func TestChatUpdateChannelPartial(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UpdateChannelPartial(context.Background(), "", "", &getstream.UpdateChannelPartialRequest{})
-	require.NoError(t, err)
-}
-func TestChatUpdateChannel(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UpdateChannel(context.Background(), "", "", &getstream.UpdateChannelRequest{})
-	require.NoError(t, err)
-}
-func TestChatDeleteDraft(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().DeleteDraft(context.Background(), "", "", &getstream.DeleteDraftRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetDraft(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetDraft(context.Background(), "", "", &getstream.GetDraftRequest{})
-	require.NoError(t, err)
-}
-func TestChatSendEvent(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().SendEvent(context.Background(), "", "", &getstream.SendEventRequest{})
-	require.NoError(t, err)
-}
-func TestChatDeleteChannelFile(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().DeleteChannelFile(context.Background(), "", "", &getstream.DeleteChannelFileRequest{})
-	require.NoError(t, err)
-}
-func TestChatHideChannel(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().HideChannel(context.Background(), "", "", &getstream.HideChannelRequest{})
-	require.NoError(t, err)
-}
-func TestChatDeleteChannelImage(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().DeleteChannelImage(context.Background(), "", "", &getstream.DeleteChannelImageRequest{})
-	require.NoError(t, err)
-}
-func TestChatUpdateMemberPartial(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UpdateMemberPartial(context.Background(), "", "", &getstream.UpdateMemberPartialRequest{})
-	require.NoError(t, err)
-}
-func TestChatSendMessage(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().SendMessage(context.Background(), "", "", &getstream.SendMessageRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetManyMessages(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetManyMessages(context.Background(), "", "", &getstream.GetManyMessagesRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetOrCreateChannel(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetOrCreateChannel(context.Background(), "", "", &getstream.GetOrCreateChannelRequest{})
-	require.NoError(t, err)
-}
-func TestChatMarkRead(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().MarkRead(context.Background(), "", "", &getstream.MarkReadRequest{})
-	require.NoError(t, err)
-}
-func TestChatShowChannel(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().ShowChannel(context.Background(), "", "", &getstream.ShowChannelRequest{})
-	require.NoError(t, err)
-}
-func TestChatTruncateChannel(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().TruncateChannel(context.Background(), "", "", &getstream.TruncateChannelRequest{})
-	require.NoError(t, err)
-}
-func TestChatMarkUnread(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().MarkUnread(context.Background(), "", "", &getstream.MarkUnreadRequest{})
-	require.NoError(t, err)
-}
-func TestChatListChannelTypes(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().ListChannelTypes(context.Background(), &getstream.ListChannelTypesRequest{})
-	require.NoError(t, err)
-}
-func TestChatCreateChannelType(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().CreateChannelType(context.Background(), &getstream.CreateChannelTypeRequest{})
-	require.NoError(t, err)
-}
-func TestChatDeleteChannelType(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().DeleteChannelType(context.Background(), "", &getstream.DeleteChannelTypeRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetChannelType(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetChannelType(context.Background(), "", &getstream.GetChannelTypeRequest{})
-	require.NoError(t, err)
-}
-func TestChatUpdateChannelType(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UpdateChannelType(context.Background(), "", &getstream.UpdateChannelTypeRequest{})
-	require.NoError(t, err)
-}
-func TestChatListCommands(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().ListCommands(context.Background(), &getstream.ListCommandsRequest{})
-	require.NoError(t, err)
-}
-func TestChatCreateCommand(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().CreateCommand(context.Background(), &getstream.CreateCommandRequest{})
-	require.NoError(t, err)
-}
-func TestChatDeleteCommand(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().DeleteCommand(context.Background(), "", &getstream.DeleteCommandRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetCommand(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetCommand(context.Background(), "", &getstream.GetCommandRequest{})
-	require.NoError(t, err)
-}
-func TestChatUpdateCommand(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UpdateCommand(context.Background(), "", &getstream.UpdateCommandRequest{})
-	require.NoError(t, err)
-}
-func TestChatQueryDrafts(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().QueryDrafts(context.Background(), &getstream.QueryDraftsRequest{})
-	require.NoError(t, err)
-}
-func TestChatExportChannels(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().ExportChannels(context.Background(), &getstream.ExportChannelsRequest{})
-	require.NoError(t, err)
-}
-func TestChatQueryMembers(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().QueryMembers(context.Background(), &getstream.QueryMembersRequest{})
-	require.NoError(t, err)
-}
-func TestChatQueryMessageHistory(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().QueryMessageHistory(context.Background(), &getstream.QueryMessageHistoryRequest{})
-	require.NoError(t, err)
-}
-func TestChatDeleteMessage(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().DeleteMessage(context.Background(), "", &getstream.DeleteMessageRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetMessage(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetMessage(context.Background(), "", &getstream.GetMessageRequest{})
-	require.NoError(t, err)
-}
-func TestChatUpdateMessage(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UpdateMessage(context.Background(), "", &getstream.UpdateMessageRequest{})
-	require.NoError(t, err)
-}
-func TestChatUpdateMessagePartial(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UpdateMessagePartial(context.Background(), "", &getstream.UpdateMessagePartialRequest{})
-	require.NoError(t, err)
-}
-func TestChatRunMessageAction(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().RunMessageAction(context.Background(), "", &getstream.RunMessageActionRequest{})
-	require.NoError(t, err)
-}
-func TestChatCommitMessage(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().CommitMessage(context.Background(), "", &getstream.CommitMessageRequest{})
-	require.NoError(t, err)
-}
-func TestChatEphemeralMessageUpdate(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().EphemeralMessageUpdate(context.Background(), "", &getstream.EphemeralMessageUpdateRequest{})
-	require.NoError(t, err)
-}
-func TestChatSendReaction(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().SendReaction(context.Background(), "", &getstream.SendReactionRequest{})
-	require.NoError(t, err)
-}
-func TestChatDeleteReaction(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().DeleteReaction(context.Background(), "", "", &getstream.DeleteReactionRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetReactions(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetReactions(context.Background(), "", &getstream.GetReactionsRequest{})
-	require.NoError(t, err)
-}
-func TestChatQueryReactions(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().QueryReactions(context.Background(), "", &getstream.QueryReactionsRequest{})
-	require.NoError(t, err)
-}
-func TestChatTranslateMessage(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().TranslateMessage(context.Background(), "", &getstream.TranslateMessageRequest{})
-	require.NoError(t, err)
-}
-func TestChatUndeleteMessage(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UndeleteMessage(context.Background(), "", &getstream.UndeleteMessageRequest{})
-	require.NoError(t, err)
-}
-func TestChatCastPollVote(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().CastPollVote(context.Background(), "", "", &getstream.CastPollVoteRequest{})
-	require.NoError(t, err)
-}
-func TestChatDeletePollVote(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().DeletePollVote(context.Background(), "", "", "", &getstream.DeletePollVoteRequest{})
-	require.NoError(t, err)
-}
-func TestChatDeleteReminder(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().DeleteReminder(context.Background(), "", &getstream.DeleteReminderRequest{})
-	require.NoError(t, err)
-}
-func TestChatUpdateReminder(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UpdateReminder(context.Background(), "", &getstream.UpdateReminderRequest{})
-	require.NoError(t, err)
-}
-func TestChatCreateReminder(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().CreateReminder(context.Background(), "", &getstream.CreateReminderRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetReplies(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetReplies(context.Background(), "", &getstream.GetRepliesRequest{})
-	require.NoError(t, err)
-}
-func TestChatQueryMessageFlags(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().QueryMessageFlags(context.Background(), &getstream.QueryMessageFlagsRequest{})
-	require.NoError(t, err)
-}
-func TestChatMuteChannel(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().MuteChannel(context.Background(), &getstream.MuteChannelRequest{})
-	require.NoError(t, err)
-}
-func TestChatUnmuteChannel(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UnmuteChannel(context.Background(), &getstream.UnmuteChannelRequest{})
-	require.NoError(t, err)
-}
-func TestChatQueryBannedUsers(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().QueryBannedUsers(context.Background(), &getstream.QueryBannedUsersRequest{})
-	require.NoError(t, err)
-}
-func TestChatQueryFutureChannelBans(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().QueryFutureChannelBans(context.Background(), &getstream.QueryFutureChannelBansRequest{})
-	require.NoError(t, err)
-}
-func TestChatQueryReminders(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().QueryReminders(context.Background(), &getstream.QueryRemindersRequest{})
-	require.NoError(t, err)
-}
-func TestChatSearch(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().Search(context.Background(), &getstream.SearchRequest{})
-	require.NoError(t, err)
-}
-func TestChatQuerySegments(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().QuerySegments(context.Background(), &getstream.QuerySegmentsRequest{})
-	require.NoError(t, err)
-}
-func TestChatDeleteSegment(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().DeleteSegment(context.Background(), "", &getstream.DeleteSegmentRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetSegment(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetSegment(context.Background(), "", &getstream.GetSegmentRequest{})
-	require.NoError(t, err)
-}
-func TestChatDeleteSegmentTargets(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().DeleteSegmentTargets(context.Background(), "", &getstream.DeleteSegmentTargetsRequest{})
-	require.NoError(t, err)
-}
-func TestChatSegmentTargetExists(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().SegmentTargetExists(context.Background(), "", "", &getstream.SegmentTargetExistsRequest{})
-	require.NoError(t, err)
-}
-func TestChatQuerySegmentTargets(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().QuerySegmentTargets(context.Background(), "", &getstream.QuerySegmentTargetsRequest{})
-	require.NoError(t, err)
-}
-func TestChatQueryThreads(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().QueryThreads(context.Background(), &getstream.QueryThreadsRequest{})
-	require.NoError(t, err)
-}
-func TestChatGetThread(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().GetThread(context.Background(), "", &getstream.GetThreadRequest{})
-	require.NoError(t, err)
-}
-func TestChatUpdateThreadPartial(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UpdateThreadPartial(context.Background(), "", &getstream.UpdateThreadPartialRequest{})
-	require.NoError(t, err)
-}
-func TestChatUnreadCounts(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UnreadCounts(context.Background(), &getstream.UnreadCountsRequest{})
-	require.NoError(t, err)
-}
-func TestChatUnreadCountsBatch(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UnreadCountsBatch(context.Background(), &getstream.UnreadCountsBatchRequest{})
-	require.NoError(t, err)
-}
-func TestChatSendUserCustomEvent(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().SendUserCustomEvent(context.Background(), "", &getstream.SendUserCustomEventRequest{})
-	require.NoError(t, err)
-}
+    func TestChatQueryCampaigns(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QueryCampaigns(context.Background(),&getstream.QueryCampaignsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatGetCampaign(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().GetCampaign(context.Background(),"", &getstream.GetCampaignRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatStartCampaign(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().StartCampaign(context.Background(),"", &getstream.StartCampaignRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatStopCampaign(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().StopCampaign(context.Background(),"", &getstream.StopCampaignRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatQueryChannels(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QueryChannels(context.Background(),&getstream.QueryChannelsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatChannelBatchUpdate(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().ChannelBatchUpdate(context.Background(),&getstream.ChannelBatchUpdateRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatDeleteChannels(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().DeleteChannels(context.Background(),&getstream.DeleteChannelsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatMarkDelivered(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().MarkDelivered(context.Background(),&getstream.MarkDeliveredRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatMarkChannelsRead(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().MarkChannelsRead(context.Background(),&getstream.MarkChannelsReadRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatGetOrCreateDistinctChannel(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().GetOrCreateDistinctChannel(context.Background(),"", &getstream.GetOrCreateDistinctChannelRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatDeleteChannel(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().DeleteChannel(context.Background(),"", "", &getstream.DeleteChannelRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatUpdateChannelPartial(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().UpdateChannelPartial(context.Background(),"", "", &getstream.UpdateChannelPartialRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatUpdateChannel(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().UpdateChannel(context.Background(),"", "", &getstream.UpdateChannelRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatDeleteDraft(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().DeleteDraft(context.Background(),"", "", &getstream.DeleteDraftRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatGetDraft(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().GetDraft(context.Background(),"", "", &getstream.GetDraftRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatCreateDraft(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().CreateDraft(context.Background(),"", "", &getstream.CreateDraftRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatSendEvent(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().SendEvent(context.Background(),"", "", &getstream.SendEventRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatDeleteChannelFile(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().DeleteChannelFile(context.Background(),"", "", &getstream.DeleteChannelFileRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatHideChannel(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().HideChannel(context.Background(),"", "", &getstream.HideChannelRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatDeleteChannelImage(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().DeleteChannelImage(context.Background(),"", "", &getstream.DeleteChannelImageRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatUpdateMemberPartial(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().UpdateMemberPartial(context.Background(),"", "", &getstream.UpdateMemberPartialRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatSendMessage(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().SendMessage(context.Background(),"", "", &getstream.SendMessageRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatGetManyMessages(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().GetManyMessages(context.Background(),"", "", &getstream.GetManyMessagesRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatGetOrCreateChannel(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().GetOrCreateChannel(context.Background(),"", "", &getstream.GetOrCreateChannelRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatMarkRead(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().MarkRead(context.Background(),"", "", &getstream.MarkReadRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatShowChannel(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().ShowChannel(context.Background(),"", "", &getstream.ShowChannelRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatTruncateChannel(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().TruncateChannel(context.Background(),"", "", &getstream.TruncateChannelRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatMarkUnread(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().MarkUnread(context.Background(),"", "", &getstream.MarkUnreadRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatListChannelTypes(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().ListChannelTypes(context.Background(),&getstream.ListChannelTypesRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatCreateChannelType(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().CreateChannelType(context.Background(),&getstream.CreateChannelTypeRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatDeleteChannelType(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().DeleteChannelType(context.Background(),"", &getstream.DeleteChannelTypeRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatGetChannelType(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().GetChannelType(context.Background(),"", &getstream.GetChannelTypeRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatUpdateChannelType(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().UpdateChannelType(context.Background(),"", &getstream.UpdateChannelTypeRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatListCommands(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().ListCommands(context.Background(),&getstream.ListCommandsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatCreateCommand(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().CreateCommand(context.Background(),&getstream.CreateCommandRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatDeleteCommand(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().DeleteCommand(context.Background(),"", &getstream.DeleteCommandRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatGetCommand(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().GetCommand(context.Background(),"", &getstream.GetCommandRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatUpdateCommand(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().UpdateCommand(context.Background(),"", &getstream.UpdateCommandRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatQueryDrafts(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QueryDrafts(context.Background(),&getstream.QueryDraftsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatExportChannels(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().ExportChannels(context.Background(),&getstream.ExportChannelsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatQueryMembers(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QueryMembers(context.Background(),&getstream.QueryMembersRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatQueryMessageHistory(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QueryMessageHistory(context.Background(),&getstream.QueryMessageHistoryRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatDeleteMessage(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().DeleteMessage(context.Background(),"", &getstream.DeleteMessageRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatGetMessage(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().GetMessage(context.Background(),"", &getstream.GetMessageRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatUpdateMessage(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().UpdateMessage(context.Background(),"", &getstream.UpdateMessageRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatUpdateMessagePartial(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().UpdateMessagePartial(context.Background(),"", &getstream.UpdateMessagePartialRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatRunMessageAction(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().RunMessageAction(context.Background(),"", &getstream.RunMessageActionRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatCommitMessage(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().CommitMessage(context.Background(),"", &getstream.CommitMessageRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatEphemeralMessageUpdate(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().EphemeralMessageUpdate(context.Background(),"", &getstream.EphemeralMessageUpdateRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatSendReaction(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().SendReaction(context.Background(),"", &getstream.SendReactionRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatDeleteReaction(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().DeleteReaction(context.Background(),"", "", &getstream.DeleteReactionRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatGetReactions(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().GetReactions(context.Background(),"", &getstream.GetReactionsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatQueryReactions(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QueryReactions(context.Background(),"", &getstream.QueryReactionsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatTranslateMessage(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().TranslateMessage(context.Background(),"", &getstream.TranslateMessageRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatUndeleteMessage(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().UndeleteMessage(context.Background(),"", &getstream.UndeleteMessageRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatCastPollVote(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().CastPollVote(context.Background(),"", "", &getstream.CastPollVoteRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatDeletePollVote(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().DeletePollVote(context.Background(),"", "", "", &getstream.DeletePollVoteRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatDeleteReminder(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().DeleteReminder(context.Background(),"", &getstream.DeleteReminderRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatUpdateReminder(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().UpdateReminder(context.Background(),"", &getstream.UpdateReminderRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatCreateReminder(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().CreateReminder(context.Background(),"", &getstream.CreateReminderRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatGetReplies(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().GetReplies(context.Background(),"", &getstream.GetRepliesRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatQueryMessageFlags(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QueryMessageFlags(context.Background(),&getstream.QueryMessageFlagsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatMuteChannel(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().MuteChannel(context.Background(),&getstream.MuteChannelRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatQueryFlagReports(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QueryFlagReports(context.Background(),&getstream.QueryFlagReportsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatFlagReportReview(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().FlagReportReview(context.Background(),&getstream.FlagReportReviewRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatUnmuteChannel(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().UnmuteChannel(context.Background(),&getstream.UnmuteChannelRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatQueryBannedUsers(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QueryBannedUsers(context.Background(),&getstream.QueryBannedUsersRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatQueryFutureChannelBans(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QueryFutureChannelBans(context.Background(),&getstream.QueryFutureChannelBansRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatQueryReminders(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QueryReminders(context.Background(),&getstream.QueryRemindersRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatSearch(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().Search(context.Background(),&getstream.SearchRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatQuerySegments(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QuerySegments(context.Background(),&getstream.QuerySegmentsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatDeleteSegment(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().DeleteSegment(context.Background(),"", &getstream.DeleteSegmentRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatGetSegment(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().GetSegment(context.Background(),"", &getstream.GetSegmentRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatDeleteSegmentTargets(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().DeleteSegmentTargets(context.Background(),"", &getstream.DeleteSegmentTargetsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatSegmentTargetExists(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().SegmentTargetExists(context.Background(),"", "", &getstream.SegmentTargetExistsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatQuerySegmentTargets(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QuerySegmentTargets(context.Background(),"", &getstream.QuerySegmentTargetsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatQueryTeamUsageStats(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QueryTeamUsageStats(context.Background(),&getstream.QueryTeamUsageStatsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatQueryThreads(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().QueryThreads(context.Background(),&getstream.QueryThreadsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatGetThread(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().GetThread(context.Background(),"", &getstream.GetThreadRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatUpdateThreadPartial(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().UpdateThreadPartial(context.Background(),"", &getstream.UpdateThreadPartialRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatUnreadCounts(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().UnreadCounts(context.Background(),&getstream.UnreadCountsRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatUnreadCountsBatch(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().UnreadCountsBatch(context.Background(),&getstream.UnreadCountsBatchRequest{})
+        require.NoError(t, err)
+    }
+    func TestChatSendUserCustomEvent(t *testing.T) {
+        client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+        require.NoError(t, err)
+
+        _, err = client.Chat().SendUserCustomEvent(context.Background(),"", &getstream.SendUserCustomEventRequest{})
+        require.NoError(t, err)
+    }
