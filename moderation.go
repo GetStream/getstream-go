@@ -180,6 +180,23 @@ func (c *ModerationClient) Mute(ctx context.Context, request *MuteRequest) (*Str
 	return res, err
 }
 
+// Find and filter flag reports
+func (c *ModerationClient) QueryFlagReports(ctx context.Context, request *QueryFlagReportsRequest) (*StreamResponse[QueryFlagReportsResponse], error) {
+	var result QueryFlagReportsResponse
+	res, err := MakeRequest[QueryFlagReportsRequest, QueryFlagReportsResponse](c.client, ctx, "POST", "/api/v2/moderation/reports", nil, request, &result, nil)
+	return res, err
+}
+
+// Update review status of flag report
+func (c *ModerationClient) FlagReportReview(ctx context.Context, id string, request *FlagReportReviewRequest) (*StreamResponse[FlagReportReviewResponse], error) {
+	var result FlagReportReviewResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[FlagReportReviewRequest, FlagReportReviewResponse](c.client, ctx, "PATCH", "/api/v2/moderation/reports/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Query review queue items allows you to filter the review queue items. This is used for building a moderation dashboard.
 func (c *ModerationClient) QueryReviewQueue(ctx context.Context, request *QueryReviewQueueRequest) (*StreamResponse[QueryReviewQueueResponse], error) {
 	var result QueryReviewQueueResponse

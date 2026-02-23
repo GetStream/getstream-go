@@ -805,23 +805,6 @@ func (c *ChatClient) MuteChannel(ctx context.Context, request *MuteChannelReques
 	return res, err
 }
 
-// Find and filter flag reports
-func (c *ChatClient) QueryFlagReports(ctx context.Context, request *QueryFlagReportsRequest) (*StreamResponse[QueryFlagReportsResponse], error) {
-	var result QueryFlagReportsResponse
-	res, err := MakeRequest[QueryFlagReportsRequest, QueryFlagReportsResponse](c.client, ctx, "POST", "/api/v2/chat/moderation/reports", nil, request, &result, nil)
-	return res, err
-}
-
-// Update review status of flag report
-func (c *ChatClient) FlagReportReview(ctx context.Context, id string, request *FlagReportReviewRequest) (*StreamResponse[FlagReportReviewResponse], error) {
-	var result FlagReportReviewResponse
-	pathParams := map[string]string{
-		"id": id,
-	}
-	res, err := MakeRequest[FlagReportReviewRequest, FlagReportReviewResponse](c.client, ctx, "PATCH", "/api/v2/chat/moderation/reports/{id}", nil, request, &result, pathParams)
-	return res, err
-}
-
 // Unmutes channel for user
 //
 // Sends events:

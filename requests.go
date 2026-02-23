@@ -473,16 +473,6 @@ type MuteChannelRequest struct {
 	ChannelCids []string     `json:"channel_cids"`
 	User        *UserRequest `json:"user"`
 }
-type QueryFlagReportsRequest struct {
-	Limit            *int           `json:"limit"`
-	Offset           *int           `json:"offset"`
-	FilterConditions map[string]any `json:"filter_conditions"`
-}
-type FlagReportReviewRequest struct {
-	ReviewResult *string      `json:"review_result"`
-	UserID       *string      `json:"user_id"`
-	User         *UserRequest `json:"user"`
-}
 type UnmuteChannelRequest struct {
 	Expiration  *int         `json:"expiration"`
 	UserID      *string      `json:"user_id"`
@@ -1347,6 +1337,16 @@ type MuteRequest struct {
 	UserID    *string      `json:"user_id"`
 	User      *UserRequest `json:"user"`
 }
+type QueryFlagReportsRequest struct {
+	Limit            *int           `json:"limit"`
+	Offset           *int           `json:"offset"`
+	FilterConditions map[string]any `json:"filter_conditions"`
+}
+type FlagReportReviewRequest struct {
+	ReviewResult *string      `json:"review_result"`
+	UserID       *string      `json:"user_id"`
+	User         *UserRequest `json:"user"`
+}
 type QueryReviewQueueRequest struct {
 	Limit        *int               `json:"limit"`
 	LockCount    *int               `json:"lock_count"`
@@ -1403,7 +1403,6 @@ type ListPermissionsRequest struct {
 }
 type CreatePermissionRequest struct {
 	Action      string         `json:"action"`
-	ID          string         `json:"id"`
 	Name        string         `json:"name"`
 	Description *string        `json:"description"`
 	Owner       *bool          `json:"owner"`

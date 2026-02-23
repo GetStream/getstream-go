@@ -450,20 +450,6 @@ func TestChatMuteChannel(t *testing.T) {
 	_, err = client.Chat().MuteChannel(context.Background(), &getstream.MuteChannelRequest{})
 	require.NoError(t, err)
 }
-func TestChatQueryFlagReports(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().QueryFlagReports(context.Background(), &getstream.QueryFlagReportsRequest{})
-	require.NoError(t, err)
-}
-func TestChatFlagReportReview(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().FlagReportReview(context.Background(), "", &getstream.FlagReportReviewRequest{})
-	require.NoError(t, err)
-}
 func TestChatUnmuteChannel(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

@@ -716,9 +716,11 @@ type AppResponseFields struct {
 	ID                                    int                             `json:"id"`
 	ImageModerationEnabled                bool                            `json:"image_moderation_enabled"`
 	MaxAggregatedActivitiesLength         int                             `json:"max_aggregated_activities_length"`
+	ModerationAudioCallModerationEnabled  bool                            `json:"moderation_audio_call_moderation_enabled"`
 	ModerationEnabled                     bool                            `json:"moderation_enabled"`
 	ModerationLlmConfigurabilityEnabled   bool                            `json:"moderation_llm_configurability_enabled"`
 	ModerationMultitenantBlocklistEnabled bool                            `json:"moderation_multitenant_blocklist_enabled"`
+	ModerationVideoCallModerationEnabled  bool                            `json:"moderation_video_call_moderation_enabled"`
 	ModerationWebhookUrl                  string                          `json:"moderation_webhook_url"`
 	MultiTenantEnabled                    bool                            `json:"multi_tenant_enabled"`
 	Name                                  string                          `json:"name"`
@@ -7713,8 +7715,6 @@ type Permission struct {
 type PermissionRequest struct {
 	// Action name this permission is for (e.g. SendMessage)
 	Action string `json:"action"`
-	// Unique permission ID
-	ID string `json:"id"`
 	// Name of the permission
 	Name string `json:"name"`
 	// Description of the permission
