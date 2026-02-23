@@ -1558,6 +1558,97 @@ func TestChatQueryFutureChannelBansIntegration(t *testing.T) {
 // but CreatePermission is hidden from the generated spec (Ignore: true in backend).
 // ListPermissions and GetPermission are tested in TestChatPermissionsIntegration above.
 
+func TestChatTeamUsageStatsIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	// Probe whether the endpoint is available on this app.
+	// It may not be deployed for all test apps yet.
+	_, probeErr := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{})
+	if probeErr != nil && strings.Contains(probeErr.Error(), "Token signature is invalid") {
+		t.Skip("QueryTeamUsageStats not available on this app (token signature invalid)")
+	}
+
+	t.Run("NoParametersReturnsValidResponse", func(t *testing.T) {
+		resp, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, resp.Data.Teams)
+	})
+
+	t.Run("MonthParameter", func(t *testing.T) {
+		resp, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			Month: PtrTo("2026-02"),
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.Teams)
+	})
+
+	t.Run("DateRange", func(t *testing.T) {
+		resp, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			StartDate: PtrTo("2026-02-01"),
+			EndDate:   PtrTo("2026-02-17"),
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.Teams)
+	})
+
+	t.Run("PaginationLimit", func(t *testing.T) {
+		resp, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			Limit: PtrTo(10),
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.Teams)
+		assert.LessOrEqual(t, len(resp.Data.Teams), 10)
+	})
+
+	t.Run("InvalidMonthReturnsError", func(t *testing.T) {
+		_, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			Month: PtrTo("invalid"),
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("WrongLengthMonthReturnsError", func(t *testing.T) {
+		_, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			Month: PtrTo("2026"),
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("InvalidStartDateReturnsError", func(t *testing.T) {
+		_, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			StartDate: PtrTo("bad"),
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("EndBeforeStartReturnsError", func(t *testing.T) {
+		_, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			StartDate: PtrTo("2026-02-20"),
+			EndDate:   PtrTo("2026-02-10"),
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("OverMaxLimitReturnsError", func(t *testing.T) {
+		_, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			Limit: PtrTo(31),
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("PastMonthReturnsEmpty", func(t *testing.T) {
+		resp, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			Month: PtrTo("2025-01"),
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.Teams)
+		assert.Empty(t, resp.Data.Teams)
+	})
+}
+
 func TestChatContextExceededIntegration(t *testing.T) {
 	skipIfShort(t)
 	client := initClient(t)
