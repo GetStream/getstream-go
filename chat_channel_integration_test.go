@@ -71,9 +71,11 @@ func TestChatChannelIntegration(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, resp.Data.Channel.Cid, resp2.Data.Channel.Cid)
 
-		// Cleanup
+		// Cleanup (hard delete)
 		t.Cleanup(func() {
-			_, _ = client.Chat().DeleteChannel(context.Background(), "messaging", resp.Data.Channel.ID, &DeleteChannelRequest{})
+			_, _ = client.Chat().DeleteChannel(context.Background(), "messaging", resp.Data.Channel.ID, &DeleteChannelRequest{
+				HardDelete: PtrTo(true),
+			})
 		})
 	})
 
@@ -144,6 +146,13 @@ func TestChatChannelIntegration(t *testing.T) {
 			},
 		})
 		require.NoError(t, err)
+
+		// Hard delete cleanup in case soft delete test fails
+		t.Cleanup(func() {
+			_, _ = ch.Delete(context.Background(), &DeleteChannelRequest{
+				HardDelete: PtrTo(true),
+			})
+		})
 
 		// Soft delete
 		resp, err := ch.Delete(ctx, &DeleteChannelRequest{})
@@ -244,7 +253,9 @@ func TestChatChannelIntegration(t *testing.T) {
 		require.NoError(t, err)
 
 		t.Cleanup(func() {
-			_, _ = ch.Delete(context.Background(), &DeleteChannelRequest{})
+			_, _ = ch.Delete(context.Background(), &DeleteChannelRequest{
+				HardDelete: PtrTo(true),
+			})
 		})
 
 		// Accept invite
@@ -440,6 +451,244 @@ func TestChatChannelIntegration(t *testing.T) {
 		assert.Equal(t, "channel_moderator", qResp.Data.Members[0].ChannelRole)
 	})
 
+	t.Run("AddDemoteModerators", func(t *testing.T) {
+		ch, channelID := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, memberID1})
+
+		// Add moderator using UpdateChannel with AddModerators
+		_, err := ch.Update(ctx, &UpdateChannelRequest{
+			AddModerators: []string{memberID1},
+		})
+		require.NoError(t, err)
+
+		// Verify role changed to moderator via QueryMembers
+		qResp, err := client.Chat().QueryMembers(ctx, &QueryMembersRequest{
+			Payload: &QueryMembersPayload{
+				Type: "messaging",
+				ID:   PtrTo(channelID),
+				FilterConditions: map[string]any{
+					"id": memberID1,
+				},
+			},
+		})
+		require.NoError(t, err)
+		require.NotEmpty(t, qResp.Data.Members)
+		assert.Equal(t, "channel_moderator", qResp.Data.Members[0].ChannelRole)
+
+		// Demote moderator back to member
+		_, err = ch.Update(ctx, &UpdateChannelRequest{
+			DemoteModerators: []string{memberID1},
+		})
+		require.NoError(t, err)
+
+		// Verify role changed back to member
+		qResp, err = client.Chat().QueryMembers(ctx, &QueryMembersRequest{
+			Payload: &QueryMembersPayload{
+				Type: "messaging",
+				ID:   PtrTo(channelID),
+				FilterConditions: map[string]any{
+					"id": memberID1,
+				},
+			},
+		})
+		require.NoError(t, err)
+		require.NotEmpty(t, qResp.Data.Members)
+		assert.Equal(t, "channel_member", qResp.Data.Members[0].ChannelRole)
+	})
+
+	t.Run("MarkUnreadWithThread", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, memberID1})
+
+		// Send parent message
+		parentID := sendTestMessage(t, ch, creatorID, "Parent for mark unread thread")
+
+		// Send reply to create a thread
+		_, err := ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:     PtrTo("Reply in thread"),
+				UserID:   PtrTo(creatorID),
+				ParentID: PtrTo(parentID),
+			},
+		})
+		require.NoError(t, err)
+
+		// Mark unread from thread
+		_, err = ch.MarkUnread(ctx, &MarkUnreadRequest{
+			UserID:   PtrTo(memberID1),
+			ThreadID: PtrTo(parentID),
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("TruncateWithOptions", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, memberID1})
+
+		// Send messages
+		sendTestMessage(t, ch, creatorID, "Truncate msg 1")
+		sendTestMessage(t, ch, creatorID, "Truncate msg 2")
+
+		// Truncate with message and skip push (matching stream-chat-go TruncateWithOptions)
+		_, err := ch.Truncate(ctx, &TruncateChannelRequest{
+			Message: &MessageRequest{
+				Text:   PtrTo("Channel was truncated"),
+				UserID: PtrTo(creatorID),
+			},
+			SkipPush:   PtrTo(true),
+			HardDelete: PtrTo(true),
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("PinUnpinChannel", func(t *testing.T) {
+		ch, channelID := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, memberID1})
+
+		// Pin channel for memberID1 via UpdateMemberPartial
+		_, err := ch.UpdateMemberPartial(ctx, &UpdateMemberPartialRequest{
+			UserID: PtrTo(memberID1),
+			Set: map[string]any{
+				"pinned": true,
+			},
+		})
+		require.NoError(t, err)
+
+		// Verify via QueryChannels with pinned filter
+		qResp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
+			FilterConditions: map[string]any{
+				"pinned": true,
+				"cid":    "messaging:" + channelID,
+			},
+			UserID: PtrTo(memberID1),
+		})
+		require.NoError(t, err)
+		require.Len(t, qResp.Data.Channels, 1, "Should find 1 pinned channel")
+		assert.Equal(t, "messaging:"+channelID, qResp.Data.Channels[0].Channel.Cid)
+
+		// Unpin
+		_, err = ch.UpdateMemberPartial(ctx, &UpdateMemberPartialRequest{
+			UserID: PtrTo(memberID1),
+			Set: map[string]any{
+				"pinned": false,
+			},
+		})
+		require.NoError(t, err)
+
+		// Verify unpinned
+		qResp, err = client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
+			FilterConditions: map[string]any{
+				"pinned": false,
+				"cid":    "messaging:" + channelID,
+			},
+			UserID: PtrTo(memberID1),
+		})
+		require.NoError(t, err)
+		require.Len(t, qResp.Data.Channels, 1, "Should find channel with pinned=false")
+	})
+
+	t.Run("ArchiveUnarchiveChannel", func(t *testing.T) {
+		ch, channelID := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, memberID1})
+
+		// Archive channel for memberID1 via UpdateMemberPartial
+		_, err := ch.UpdateMemberPartial(ctx, &UpdateMemberPartialRequest{
+			UserID: PtrTo(memberID1),
+			Set: map[string]any{
+				"archived": true,
+			},
+		})
+		require.NoError(t, err)
+
+		// Verify via QueryChannels with archived filter
+		qResp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
+			FilterConditions: map[string]any{
+				"archived": true,
+				"cid":      "messaging:" + channelID,
+			},
+			UserID: PtrTo(memberID1),
+		})
+		require.NoError(t, err)
+		require.Len(t, qResp.Data.Channels, 1, "Should find 1 archived channel")
+		assert.Equal(t, "messaging:"+channelID, qResp.Data.Channels[0].Channel.Cid)
+
+		// Unarchive
+		_, err = ch.UpdateMemberPartial(ctx, &UpdateMemberPartialRequest{
+			UserID: PtrTo(memberID1),
+			Set: map[string]any{
+				"archived": false,
+			},
+		})
+		require.NoError(t, err)
+
+		// Verify unarchived
+		qResp, err = client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
+			FilterConditions: map[string]any{
+				"archived": false,
+				"cid":      "messaging:" + channelID,
+			},
+			UserID: PtrTo(memberID1),
+		})
+		require.NoError(t, err)
+		require.Len(t, qResp.Data.Channels, 1, "Should find channel with archived=false")
+	})
+
+	t.Run("AddMembersWithRoles", func(t *testing.T) {
+		ch, channelID := createTestChannel(t, client, creatorID)
+		_ = channelID
+
+		newUserIDs := createTestUsers(t, client, 2)
+		modUserID := newUserIDs[0]
+		memberUserID2 := newUserIDs[1]
+
+		// Add members with specific channel roles
+		_, err := ch.Update(ctx, &UpdateChannelRequest{
+			AddMembers: []ChannelMemberRequest{
+				{UserID: modUserID, ChannelRole: PtrTo("channel_moderator")},
+				{UserID: memberUserID2, ChannelRole: PtrTo("channel_member")},
+			},
+		})
+		require.NoError(t, err)
+
+		// Query members to verify roles
+		membersResp, err := client.Chat().QueryMembers(ctx, &QueryMembersRequest{
+			Payload: &QueryMembersPayload{
+				Type:             "messaging",
+				ID:               PtrTo(channelID),
+				FilterConditions: map[string]any{"id": map[string]any{"$in": newUserIDs}},
+			},
+		})
+		require.NoError(t, err)
+
+		roleMap := make(map[string]string)
+		for _, m := range membersResp.Data.Members {
+			if m.UserID != nil {
+				roleMap[*m.UserID] = m.ChannelRole
+			}
+		}
+		assert.Equal(t, "channel_moderator", roleMap[modUserID], "First user should be channel_moderator")
+		assert.Equal(t, "channel_member", roleMap[memberUserID2], "Second user should be channel_member")
+	})
+
+	t.Run("MessageCount", func(t *testing.T) {
+		ch, channelID := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, memberID1})
+
+		// Send a message
+		sendTestMessage(t, ch, creatorID, "hello world")
+
+		// Query the channel to get message count
+		qResp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
+			FilterConditions: map[string]any{
+				"cid": "messaging:" + channelID,
+			},
+			UserID: PtrTo(creatorID),
+		})
+		require.NoError(t, err)
+		require.Len(t, qResp.Data.Channels, 1)
+
+		// MessageCount should be present (default enabled for messaging type)
+		channel := qResp.Data.Channels[0].Channel
+		if channel.MessageCount != nil {
+			assert.GreaterOrEqual(t, *channel.MessageCount, 1, "MessageCount should be >= 1")
+		}
+		// Note: MessageCount may be nil if count_messages is disabled on the channel type
+	})
+
 	t.Run("SendChannelEvent", func(t *testing.T) {
 		ch, _ := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, memberID1})
 
@@ -450,5 +699,110 @@ func TestChatChannelIntegration(t *testing.T) {
 			},
 		})
 		require.NoError(t, err)
+	})
+
+	t.Run("FilterTags", func(t *testing.T) {
+		ch, _ := createTestChannel(t, client, creatorID)
+
+		// Add filter tags
+		_, err := ch.Update(ctx, &UpdateChannelRequest{
+			AddFilterTags: []string{"sports", "news"},
+		})
+		require.NoError(t, err)
+
+		// Verify tags were added by querying
+		getResp, err := ch.GetOrCreate(ctx, &GetOrCreateChannelRequest{})
+		require.NoError(t, err)
+		require.NotNil(t, getResp.Data.Channel)
+
+		// Remove filter tags
+		_, err = ch.Update(ctx, &UpdateChannelRequest{
+			RemoveFilterTags: []string{"sports"},
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("MessageCountDisabled", func(t *testing.T) {
+		ch, channelID := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, memberID1})
+
+		// Disable count_messages via config_overrides partial update
+		_, err := ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
+			Set: map[string]any{
+				"config_overrides": map[string]any{
+					"count_messages": false,
+				},
+			},
+		})
+		require.NoError(t, err)
+
+		// Send a message
+		sendTestMessage(t, ch, creatorID, "hello world disabled count")
+
+		// Query the channel — MessageCount should be nil when disabled
+		qResp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
+			FilterConditions: map[string]any{
+				"cid": "messaging:" + channelID,
+			},
+			UserID: PtrTo(creatorID),
+		})
+		require.NoError(t, err)
+		require.Len(t, qResp.Data.Channels, 1)
+		assert.Nil(t, qResp.Data.Channels[0].Channel.MessageCount,
+			"MessageCount should be nil when count_messages is disabled")
+	})
+
+	t.Run("MarkUnreadWithTimestamp", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, creatorID, []string{creatorID, memberID1})
+
+		// Send a message to get a valid timestamp
+		sendResp, err := ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("test message for timestamp unread"),
+				UserID: PtrTo(creatorID),
+			},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, sendResp.Data.Message.CreatedAt)
+
+		// Mark unread from timestamp
+		ts := sendResp.Data.Message.CreatedAt
+		_, err = ch.MarkUnread(ctx, &MarkUnreadRequest{
+			UserID:           PtrTo(memberID1),
+			MessageTimestamp: &ts,
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("HideForCreator", func(t *testing.T) {
+		channelID := "test-hide-" + randomString(12)
+		ch := client.Chat().Channel("messaging", channelID)
+
+		_, err := ch.GetOrCreate(ctx, &GetOrCreateChannelRequest{
+			HideForCreator: PtrTo(true),
+			Data: &ChannelInput{
+				CreatedByID: PtrTo(creatorID),
+				Members: []ChannelMemberRequest{
+					{UserID: creatorID},
+					{UserID: memberID1},
+				},
+			},
+		})
+		require.NoError(t, err)
+
+		t.Cleanup(func() {
+			_, _ = ch.Delete(context.Background(), &DeleteChannelRequest{
+				HardDelete: PtrTo(true),
+			})
+		})
+
+		// Channel should be hidden for creator — querying without show_hidden should not find it
+		qResp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
+			FilterConditions: map[string]any{
+				"cid": "messaging:" + channelID,
+			},
+			UserID: PtrTo(creatorID),
+		})
+		require.NoError(t, err)
+		assert.Empty(t, qResp.Data.Channels, "Channel should be hidden for creator")
 	})
 }

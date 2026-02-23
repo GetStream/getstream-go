@@ -49,14 +49,11 @@ func TestChatMessageIntegration(t *testing.T) {
 		id2 := sendTestMessage(t, ch, userID, "Msg 2")
 		id3 := sendTestMessage(t, ch, userID, "Msg 3")
 
-		// Allow time for messages to be indexed
-		time.Sleep(time.Second)
-
 		resp, err := ch.GetManyMessages(ctx, &GetManyMessagesRequest{
 			Ids: []string{id1, id2, id3},
 		})
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Messages, 3)
+		require.Len(t, resp.Data.Messages, 3)
 	})
 
 	t.Run("UpdateMessage", func(t *testing.T) {
@@ -249,22 +246,34 @@ func TestChatMessageIntegration(t *testing.T) {
 	})
 
 	t.Run("QueryMessageHistory", func(t *testing.T) {
-		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
-		msgID := sendTestMessage(t, ch, userID, "Original history text")
+		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID, userID2})
 
-		// Update the message twice to create history entries
-		_, err := client.Chat().UpdateMessage(ctx, msgID, &UpdateMessageRequest{
+		// Send initial message with custom data (matching stream-chat-go TestMessageHistory)
+		sendResp, err := ch.SendMessage(ctx, &SendMessageRequest{
 			Message: MessageRequest{
-				Text:   PtrTo("Updated history text v1"),
+				Text:   PtrTo("initial text"),
 				UserID: PtrTo(userID),
+				Custom: map[string]any{"custom_field": "custom value"},
+			},
+		})
+		require.NoError(t, err)
+		msgID := sendResp.Data.Message.ID
+
+		// Update by user1 with new text and custom value
+		_, err = client.Chat().UpdateMessage(ctx, msgID, &UpdateMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("updated text"),
+				UserID: PtrTo(userID),
+				Custom: map[string]any{"custom_field": "updated custom value"},
 			},
 		})
 		require.NoError(t, err)
 
+		// Update by user2 with new text
 		_, err = client.Chat().UpdateMessage(ctx, msgID, &UpdateMessageRequest{
 			Message: MessageRequest{
-				Text:   PtrTo("Updated history text v2"),
-				UserID: PtrTo(userID),
+				Text:   PtrTo("updated text 2"),
+				UserID: PtrTo(userID2),
 			},
 		})
 		require.NoError(t, err)
@@ -283,13 +292,71 @@ func TestChatMessageIntegration(t *testing.T) {
 			}
 			require.NoError(t, err)
 		}
-		assert.GreaterOrEqual(t, len(histResp.Data.MessageHistory), 2, "Should have at least 2 history entries")
+		require.GreaterOrEqual(t, len(histResp.Data.MessageHistory), 2, "Should have at least 2 history entries")
 
-		// Verify that history entries reference the correct message and updater
+		// Verify history entries reference the correct message and updaters
 		for _, entry := range histResp.Data.MessageHistory {
 			assert.Equal(t, msgID, entry.MessageID)
-			assert.Equal(t, userID, entry.MessageUpdatedByID)
 		}
+
+		// Verify text values in history (descending order by default)
+		// history[0] = most recent prior version = "updated text"
+		// history[1] = original = "initial text"
+		assert.Equal(t, "updated text", histResp.Data.MessageHistory[0].Text)
+		assert.Equal(t, userID, histResp.Data.MessageHistory[0].MessageUpdatedByID)
+		assert.Equal(t, "initial text", histResp.Data.MessageHistory[1].Text)
+		assert.Equal(t, userID, histResp.Data.MessageHistory[1].MessageUpdatedByID)
+	})
+
+	t.Run("QueryMessageHistorySort", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID, userID2})
+
+		sendResp, err := ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("sort initial"),
+				UserID: PtrTo(userID),
+			},
+		})
+		require.NoError(t, err)
+		msgID := sendResp.Data.Message.ID
+
+		_, err = client.Chat().UpdateMessage(ctx, msgID, &UpdateMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("sort updated 1"),
+				UserID: PtrTo(userID),
+			},
+		})
+		require.NoError(t, err)
+
+		_, err = client.Chat().UpdateMessage(ctx, msgID, &UpdateMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("sort updated 2"),
+				UserID: PtrTo(userID),
+			},
+		})
+		require.NoError(t, err)
+
+		// Query with ascending sort by message_updated_at
+		histResp, err := client.Chat().QueryMessageHistory(ctx, &QueryMessageHistoryRequest{
+			Filter: map[string]any{
+				"message_id": msgID,
+			},
+			Sort: []SortParamRequest{
+				{Field: PtrTo("message_updated_at"), Direction: PtrTo(1)},
+			},
+		})
+		if err != nil {
+			errStr := err.Error()
+			if strings.Contains(errStr, "feature flag") || strings.Contains(errStr, "not enabled") {
+				t.Skip("QueryMessageHistory feature not enabled for this app")
+			}
+			require.NoError(t, err)
+		}
+		require.GreaterOrEqual(t, len(histResp.Data.MessageHistory), 2)
+
+		// Ascending: oldest first
+		assert.Equal(t, "sort initial", histResp.Data.MessageHistory[0].Text)
+		assert.Equal(t, userID, histResp.Data.MessageHistory[0].MessageUpdatedByID)
 	})
 
 	t.Run("SkipEnrichUrl", func(t *testing.T) {
@@ -399,6 +466,46 @@ func TestChatMessageIntegration(t *testing.T) {
 		assert.Equal(t, []string{userID}, sendResp.Data.Message.RestrictedVisibility)
 	})
 
+	t.Run("DeleteMessageForMe", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
+		msgID := sendTestMessage(t, ch, userID, "test message to delete for me")
+
+		// Delete the message only for the sender (not for everyone)
+		_, err := client.Chat().DeleteMessage(ctx, msgID, &DeleteMessageRequest{
+			DeleteForMe: PtrTo(true),
+			DeletedBy:   PtrTo(userID),
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("PinExpiration", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID, userID2})
+
+		// Send message by user2
+		msgID := sendTestMessage(t, ch, userID2, "Message to pin with expiry")
+
+		// Pin with 3 second expiration
+		now := time.Now()
+		expiry := now.Add(3 * time.Second)
+		pinResp, err := client.Chat().UpdateMessagePartial(ctx, msgID, &UpdateMessagePartialRequest{
+			Set: map[string]any{
+				"pinned":      true,
+				"pin_expires": expiry.Format(time.RFC3339),
+			},
+			UserID: PtrTo(userID),
+		})
+		require.NoError(t, err)
+		assert.True(t, pinResp.Data.Message.Pinned)
+
+		// Wait for pin to expire
+		time.Sleep(4 * time.Second)
+
+		// Verify pin expired
+		getResp, err := client.Chat().GetMessage(ctx, msgID, &GetMessageRequest{})
+		require.NoError(t, err)
+		assert.False(t, getResp.Data.Message.Pinned, "Pin should have expired")
+	})
+
 	t.Run("SystemMessage", func(t *testing.T) {
 		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
 
@@ -411,5 +518,144 @@ func TestChatMessageIntegration(t *testing.T) {
 		})
 		require.NoError(t, err)
 		assert.Equal(t, "system", resp.Data.Message.Type)
+	})
+
+	t.Run("PendingFalse", func(t *testing.T) {
+		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
+
+		// Send message with Pending explicitly set to false (non-pending)
+		sendResp, err := ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("Non-pending message"),
+				UserID: PtrTo(userID),
+			},
+			Pending: PtrTo(false),
+		})
+		require.NoError(t, err)
+
+		// Get the message to verify it's immediately available (no commit needed)
+		getResp, err := client.Chat().GetMessage(ctx, sendResp.Data.Message.ID, &GetMessageRequest{})
+		require.NoError(t, err)
+		assert.Equal(t, "Non-pending message", getResp.Data.Message.Text)
+	})
+
+	t.Run("SearchWithMessageFilters", func(t *testing.T) {
+		ch, channelID := createTestChannelWithMembers(t, client, userID, []string{userID})
+
+		searchTerm := "filterable" + randomString(8)
+		sendTestMessage(t, ch, userID, "This has "+searchTerm+" text")
+		sendTestMessage(t, ch, userID, "This also has "+searchTerm+" text")
+
+		// Wait briefly for indexing
+		time.Sleep(2 * time.Second)
+
+		// Search using message_filter_conditions (instead of query)
+		resp, err := client.Chat().Search(ctx, &SearchRequest{
+			Payload: &SearchPayload{
+				FilterConditions: map[string]any{
+					"cid": "messaging:" + channelID,
+				},
+				MessageFilterConditions: map[string]any{
+					"text": map[string]any{"$q": searchTerm},
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.GreaterOrEqual(t, len(resp.Data.Results), 2, "Should find at least 2 messages with MessageFilterConditions")
+	})
+
+	t.Run("SearchQueryAndMessageFiltersError", func(t *testing.T) {
+		// Using both Query and MessageFilterConditions together should error
+		_, err := client.Chat().Search(ctx, &SearchRequest{
+			Payload: &SearchPayload{
+				FilterConditions: map[string]any{
+					"members": map[string]any{"$in": []string{userID}},
+				},
+				Query: PtrTo("test"),
+				MessageFilterConditions: map[string]any{
+					"text": map[string]any{"$q": "test"},
+				},
+			},
+		})
+		require.Error(t, err, "Using both Query and MessageFilterConditions should error")
+	})
+
+	t.Run("SearchOffsetAndSortError", func(t *testing.T) {
+		// Using Offset with Sort should error
+		_, err := client.Chat().Search(ctx, &SearchRequest{
+			Payload: &SearchPayload{
+				FilterConditions: map[string]any{
+					"members": map[string]any{"$in": []string{userID}},
+				},
+				Query:  PtrTo("test"),
+				Offset: PtrTo(1),
+				Sort: []SortParamRequest{
+					{Field: PtrTo("created_at"), Direction: PtrTo(-1)},
+				},
+			},
+		})
+		require.Error(t, err, "Using Offset with Sort should error")
+	})
+
+	t.Run("SearchOffsetAndNextError", func(t *testing.T) {
+		// Using Offset with Next should error
+		_, err := client.Chat().Search(ctx, &SearchRequest{
+			Payload: &SearchPayload{
+				FilterConditions: map[string]any{
+					"members": map[string]any{"$in": []string{userID}},
+				},
+				Query:  PtrTo("test"),
+				Offset: PtrTo(1),
+				Next:   PtrTo(randomString(5)),
+			},
+		})
+		require.Error(t, err, "Using Offset with Next should error")
+	})
+
+	t.Run("ChannelRoleInMember", func(t *testing.T) {
+		userIDs := createTestUsers(t, client, 2)
+		memberUserID := userIDs[0]
+		customRoleUserID := userIDs[1]
+
+		// Create channel with members assigned specific roles
+		channelID := "test-ch-" + randomString(12)
+		ch := client.Chat().Channel("messaging", channelID)
+
+		_, err := ch.GetOrCreate(ctx, &GetOrCreateChannelRequest{
+			Data: &ChannelInput{
+				CreatedByID: PtrTo(memberUserID),
+				Members: []ChannelMemberRequest{
+					{UserID: memberUserID, ChannelRole: PtrTo("channel_member")},
+					{UserID: customRoleUserID, ChannelRole: PtrTo("channel_moderator")},
+				},
+			},
+		})
+		require.NoError(t, err)
+
+		t.Cleanup(func() {
+			_, _ = ch.Delete(context.Background(), &DeleteChannelRequest{HardDelete: PtrTo(true)})
+		})
+
+		// Send message from channel_member
+		respMember, err := ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("message from channel_member"),
+				UserID: PtrTo(memberUserID),
+			},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, respMember.Data.Message.Member, "Member should be present in message response")
+		assert.Equal(t, "channel_member", respMember.Data.Message.Member.ChannelRole)
+
+		// Send message from channel_moderator
+		respMod, err := ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:   PtrTo("message from channel_moderator"),
+				UserID: PtrTo(customRoleUserID),
+			},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, respMod.Data.Message.Member, "Member should be present in message response")
+		assert.Equal(t, "channel_moderator", respMod.Data.Message.Member.ChannelRole)
 	})
 }

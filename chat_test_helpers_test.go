@@ -18,6 +18,7 @@ func skipIfShort(t *testing.T) {
 }
 
 // createTestUsers creates n test users and returns their IDs.
+// Registers t.Cleanup to hard-delete users (matching stream-chat-go's randomUser pattern).
 func createTestUsers(t *testing.T, client *Stream, n int) []string {
 	t.Helper()
 	ctx := context.Background()
@@ -34,10 +35,20 @@ func createTestUsers(t *testing.T, client *Stream, n int) []string {
 	}
 	_, err := client.UpdateUsers(ctx, &UpdateUsersRequest{Users: users})
 	require.NoError(t, err, "Failed to create test users")
+
+	t.Cleanup(func() {
+		_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
+			UserIds:       ids,
+			User:          PtrTo("hard"),
+			Messages:      PtrTo("hard"),
+			Conversations: PtrTo("hard"),
+		})
+	})
+
 	return ids
 }
 
-// createTestChannel creates a messaging channel and registers cleanup to delete it.
+// createTestChannel creates a messaging channel and registers cleanup to hard-delete it.
 func createTestChannel(t *testing.T, client *Stream, creatorID string) (*Channels, string) {
 	t.Helper()
 	ctx := context.Background()
@@ -52,13 +63,15 @@ func createTestChannel(t *testing.T, client *Stream, creatorID string) (*Channel
 	require.NoError(t, err, "Failed to create test channel")
 
 	t.Cleanup(func() {
-		_, _ = ch.Delete(context.Background(), &DeleteChannelRequest{})
+		_, _ = ch.Delete(context.Background(), &DeleteChannelRequest{
+			HardDelete: PtrTo(true),
+		})
 	})
 
 	return ch, channelID
 }
 
-// createTestChannelWithMembers creates a messaging channel with members and registers cleanup.
+// createTestChannelWithMembers creates a messaging channel with members and registers cleanup to hard-delete it.
 func createTestChannelWithMembers(t *testing.T, client *Stream, creatorID string, memberIDs []string) (*Channels, string) {
 	t.Helper()
 	ctx := context.Background()
@@ -79,7 +92,9 @@ func createTestChannelWithMembers(t *testing.T, client *Stream, creatorID string
 	require.NoError(t, err, "Failed to create test channel with members")
 
 	t.Cleanup(func() {
-		_, _ = ch.Delete(context.Background(), &DeleteChannelRequest{})
+		_, _ = ch.Delete(context.Background(), &DeleteChannelRequest{
+			HardDelete: PtrTo(true),
+		})
 	})
 
 	return ch, channelID

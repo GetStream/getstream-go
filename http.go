@@ -363,7 +363,14 @@ func EncodeValueToQueryParam(value any) string {
 		return strconv.FormatFloat(val.Float(), 'f', -1, 64)
 	case reflect.Bool:
 		return strconv.FormatBool(val.Bool())
-	case reflect.Map, reflect.Struct, reflect.Slice:
+	case reflect.Slice:
+		// For query params, slices of primitives should be comma-separated (e.g. ids=a,b,c)
+		parts := make([]string, val.Len())
+		for i := 0; i < val.Len(); i++ {
+			parts[i] = EncodeValueToQueryParam(val.Index(i).Interface())
+		}
+		return strings.Join(parts, ",")
+	case reflect.Map, reflect.Struct:
 		b, err := json.Marshal(value)
 		if err != nil {
 			panic(err)

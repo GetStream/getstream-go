@@ -222,6 +222,9 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, typeName, resp.Data.Name)
 		assert.Equal(t, 5000, resp.Data.MaxMessageLength)
+
+		// Channel types are eventually consistent; stream-chat-go sleeps 6s after create
+		time.Sleep(6 * time.Second)
 	})
 
 	t.Run("GetChannelType", func(t *testing.T) {
@@ -240,6 +243,38 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, 10000, resp.Data.MaxMessageLength)
 		assert.False(t, resp.Data.TypingEvents)
+	})
+
+	t.Run("UpdateChannelTypeMarkMessagesPending", func(t *testing.T) {
+		resp, err := client.Chat().UpdateChannelType(ctx, typeName, &UpdateChannelTypeRequest{
+			Automod:             "disabled",
+			AutomodBehavior:     "flag",
+			MaxMessageLength:    10000,
+			MarkMessagesPending: PtrTo(true),
+		})
+		require.NoError(t, err)
+		assert.True(t, resp.Data.MarkMessagesPending)
+
+		// Verify via get
+		getResp, err := client.Chat().GetChannelType(ctx, typeName, &GetChannelTypeRequest{})
+		require.NoError(t, err)
+		assert.True(t, getResp.Data.MarkMessagesPending)
+	})
+
+	t.Run("UpdateChannelTypePushNotifications", func(t *testing.T) {
+		resp, err := client.Chat().UpdateChannelType(ctx, typeName, &UpdateChannelTypeRequest{
+			Automod:           "disabled",
+			AutomodBehavior:   "flag",
+			MaxMessageLength:  10000,
+			PushNotifications: PtrTo(false),
+		})
+		require.NoError(t, err)
+		assert.False(t, resp.Data.PushNotifications)
+
+		// Verify via get
+		getResp, err := client.Chat().GetChannelType(ctx, typeName, &GetChannelTypeRequest{})
+		require.NoError(t, err)
+		assert.False(t, getResp.Data.PushNotifications)
 	})
 
 	t.Run("ListChannelTypes", func(t *testing.T) {
@@ -342,6 +377,59 @@ func TestChatThreadIntegration(t *testing.T) {
 		assert.Equal(t, parentID, resp.Data.Thread.ParentMessageID)
 		assert.GreaterOrEqual(t, len(resp.Data.Thread.LatestReplies), 2)
 	})
+
+	t.Run("QueryThreadsWithPagination", func(t *testing.T) {
+		// Create a second thread in the same channel
+		parentID2 := sendTestMessage(t, ch, userID, "Parent message for thread 2")
+		_, err := ch.SendMessage(ctx, &SendMessageRequest{
+			Message: MessageRequest{
+				Text:     PtrTo("Reply in thread 2"),
+				UserID:   PtrTo(userID),
+				ParentID: PtrTo(parentID2),
+			},
+		})
+		require.NoError(t, err)
+
+		// First page: limit=1, ascending sort
+		resp, err := client.Chat().QueryThreads(ctx, &QueryThreadsRequest{
+			UserID: PtrTo(userID),
+			Filter: map[string]any{
+				"channel_cid": map[string]any{
+					"$eq": channelCID,
+				},
+			},
+			Sort: []SortParamRequest{
+				{Field: PtrTo("created_at"), Direction: PtrTo(1)},
+			},
+			Limit: PtrTo(1),
+		})
+		require.NoError(t, err)
+		require.Len(t, resp.Data.Threads, 1, "Should return exactly 1 thread per page")
+		firstThreadParent := resp.Data.Threads[0].ParentMessageID
+
+		// Second page using Next cursor
+		require.NotNil(t, resp.Data.Next, "Should have a Next cursor for pagination")
+
+		resp2, err := client.Chat().QueryThreads(ctx, &QueryThreadsRequest{
+			UserID: PtrTo(userID),
+			Filter: map[string]any{
+				"channel_cid": map[string]any{
+					"$eq": channelCID,
+				},
+			},
+			Sort: []SortParamRequest{
+				{Field: PtrTo("created_at"), Direction: PtrTo(1)},
+			},
+			Limit: PtrTo(1),
+			Next:  resp.Data.Next,
+		})
+		require.NoError(t, err)
+		require.NotEmpty(t, resp2.Data.Threads, "Second page should have threads")
+		secondThreadParent := resp2.Data.Threads[0].ParentMessageID
+
+		// Verify different threads on each page
+		assert.NotEqual(t, firstThreadParent, secondThreadParent, "Pages should return different threads")
+	})
 }
 
 func TestChatAppSettingsIntegration(t *testing.T) {
@@ -362,6 +450,13 @@ func TestChatAppSettingsIntegration(t *testing.T) {
 		getResp, err := client.GetApp(ctx, &GetAppRequest{})
 		require.NoError(t, err)
 		originalValue := getResp.Data.App.EnforceUniqueUsernames
+
+		// Guarantee restore even if test fails mid-way
+		t.Cleanup(func() {
+			_, _ = client.UpdateApp(context.Background(), &UpdateAppRequest{
+				EnforceUniqueUsernames: PtrTo(originalValue),
+			})
+		})
 
 		// Toggle enforce_unique_usernames — safe to change on any app
 		newValue := "no"
@@ -985,24 +1080,428 @@ func TestChatDeliveryReceiptsIntegration(t *testing.T) {
 	client := initClient(t)
 	ctx := context.Background()
 
-	userIDs := createTestUsers(t, client, 2)
-	userID := userIDs[0]
+	// Matching stream-chat-go TestChannel_MarkDelivered_Integration:
+	// Create channel with 3 members, send 2 messages, mark different messages
+	// as delivered for different users
+	userIDs := createTestUsers(t, client, 3)
+	userID1 := userIDs[0]
 	userID2 := userIDs[1]
+	userID3 := userIDs[2]
 
-	ch, channelID := createTestChannelWithMembers(t, client, userID, []string{userID, userID2})
+	ch, channelID := createTestChannelWithMembers(t, client, userID1, []string{userID1, userID2, userID3})
 	cid := "messaging:" + channelID
 
-	msgID := sendTestMessage(t, ch, userID, "Message for delivery receipt")
+	msgID1 := sendTestMessage(t, ch, userID1, "Message 1 for delivery receipt")
+	msgID2 := sendTestMessage(t, ch, userID1, "Message 2 for delivery receipt")
 
-	// Mark delivered for userID2
-	_, err := client.Chat().MarkDelivered(ctx, &MarkDeliveredRequest{
+	// Mark message 1 as delivered for user 2
+	resp1, err := client.Chat().MarkDelivered(ctx, &MarkDeliveredRequest{
 		UserID: PtrTo(userID2),
 		LatestDeliveredMessages: []DeliveredMessagePayload{
-			{
-				Cid: PtrTo(cid),
-				ID:  PtrTo(msgID),
-			},
+			{Cid: PtrTo(cid), ID: PtrTo(msgID1)},
 		},
 	})
 	require.NoError(t, err)
+	require.NotNil(t, resp1)
+
+	// Mark message 2 as delivered for user 2
+	resp2, err := client.Chat().MarkDelivered(ctx, &MarkDeliveredRequest{
+		UserID: PtrTo(userID2),
+		LatestDeliveredMessages: []DeliveredMessagePayload{
+			{Cid: PtrTo(cid), ID: PtrTo(msgID2)},
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp2)
+
+	// Mark message 1 as delivered for user 3
+	resp3, err := client.Chat().MarkDelivered(ctx, &MarkDeliveredRequest{
+		UserID: PtrTo(userID3),
+		LatestDeliveredMessages: []DeliveredMessagePayload{
+			{Cid: PtrTo(cid), ID: PtrTo(msgID1)},
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp3)
+
+	// Mark message 2 as delivered for user 3
+	resp4, err := client.Chat().MarkDelivered(ctx, &MarkDeliveredRequest{
+		UserID: PtrTo(userID3),
+		LatestDeliveredMessages: []DeliveredMessagePayload{
+			{Cid: PtrTo(cid), ID: PtrTo(msgID2)},
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp4)
+}
+
+func TestChatExportUsersIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	userIDs := createTestUsers(t, client, 2)
+
+	resp, err := client.ExportUsers(ctx, &ExportUsersRequest{
+		UserIds: userIDs,
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, resp.Data.TaskID)
+
+	// Poll for task completion (matching stream-chat-go's pattern)
+	taskCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
+	taskResult, err := WaitForTask(taskCtx, client, resp.Data.TaskID)
+	require.NoError(t, err)
+	assert.Equal(t, "completed", taskResult.Data.Status)
+}
+
+func TestChatLiveLocationIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	userIDs := createTestUsers(t, client, 1)
+	userID := userIDs[0]
+
+	// Create a channel with shared_locations enabled via config override
+	channelID := "test-ch-" + randomString(12)
+	ch := client.Chat().Channel("messaging", channelID)
+
+	_, err := ch.GetOrCreate(ctx, &GetOrCreateChannelRequest{
+		Data: &ChannelInput{
+			CreatedByID: PtrTo(userID),
+		},
+	})
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		_, _ = ch.Delete(context.Background(), &DeleteChannelRequest{
+			HardDelete: PtrTo(true),
+		})
+	})
+
+	// Enable shared_locations on the channel via partial update config override
+	_, err = ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
+		Set: map[string]any{
+			"config_overrides": map[string]any{
+				"shared_locations": true,
+			},
+		},
+	})
+	if err != nil {
+		if strings.Contains(err.Error(), "shared_locations") || strings.Contains(err.Error(), "not supported") || strings.Contains(err.Error(), "not enabled") {
+			t.Skip("Shared locations not supported for this app")
+		}
+	}
+	require.NoError(t, err)
+
+	// Send a message with a shared location (EndAt is required for updateable live locations)
+	endAt := time.Now().Add(1 * time.Hour)
+	msgResp, err := ch.SendMessage(ctx, &SendMessageRequest{
+		Message: MessageRequest{
+			Text:   PtrTo("Live location message"),
+			UserID: PtrTo(userID),
+			SharedLocation: &SharedLocation{
+				Longitude:         -122.4194,
+				Latitude:          38.999,
+				CreatedByDeviceID: PtrTo("test-device"),
+				EndAt:             &Timestamp{Time: &endAt},
+			},
+		},
+	})
+	if err != nil {
+		if strings.Contains(err.Error(), "shared_locations") || strings.Contains(err.Error(), "not enabled") {
+			t.Skip("Shared locations not enabled for this channel")
+		}
+	}
+	require.NoError(t, err)
+	msgID := msgResp.Data.Message.ID
+
+	// Update the live location
+	updateResp, err := client.UpdateLiveLocation(ctx, &UpdateLiveLocationRequest{
+		UserID:    PtrTo(userID),
+		MessageID: msgID,
+		Latitude:  PtrTo(39.0),
+		Longitude: PtrTo(-122.5),
+	})
+	require.NoError(t, err)
+	require.NotNil(t, updateResp.Data)
+	assert.InDelta(t, 39.0, updateResp.Data.Latitude, 0.01)
+	assert.InDelta(t, -122.5, updateResp.Data.Longitude, 0.01)
+
+	// Get active live locations
+	getResp, err := client.GetUserLiveLocations(ctx, &GetUserLiveLocationsRequest{
+		UserID: PtrTo(userID),
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, getResp.Data.ActiveLiveLocations, "Should have active live locations")
+
+	found := false
+	for _, loc := range getResp.Data.ActiveLiveLocations {
+		if loc.MessageID == msgID {
+			found = true
+			break
+		}
+	}
+	assert.True(t, found, "Should find the updated location")
+}
+
+func TestChatCreateTokenIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+
+	t.Run("BasicToken", func(t *testing.T) {
+		token, err := client.CreateToken("test-user-123")
+		require.NoError(t, err)
+		assert.NotEmpty(t, token, "Token should not be empty")
+	})
+
+	t.Run("TokenWithExpiration", func(t *testing.T) {
+		token, err := client.CreateToken("test-user-456", WithExpiration(time.Hour))
+		require.NoError(t, err)
+		assert.NotEmpty(t, token, "Token should not be empty")
+	})
+}
+
+func TestChatGetRateLimitsIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	t.Run("GetAllLimits", func(t *testing.T) {
+		resp, err := client.GetRateLimits(ctx, &GetRateLimitsRequest{})
+		require.NoError(t, err)
+		assert.NotEmpty(t, resp.Data.ServerSide, "ServerSide limits should be populated")
+	})
+
+	t.Run("GetSinglePlatform", func(t *testing.T) {
+		resp, err := client.GetRateLimits(ctx, &GetRateLimitsRequest{
+			ServerSide: PtrTo(true),
+		})
+		require.NoError(t, err)
+		assert.NotEmpty(t, resp.Data.ServerSide)
+		assert.Empty(t, resp.Data.Android)
+		assert.Empty(t, resp.Data.Ios)
+		assert.Empty(t, resp.Data.Web)
+	})
+
+	t.Run("GetSpecificEndpoints", func(t *testing.T) {
+		resp, err := client.GetRateLimits(ctx, &GetRateLimitsRequest{
+			ServerSide: PtrTo(true),
+			Android:    PtrTo(true),
+			Endpoints:  PtrTo("GetRateLimits,SendMessage"),
+		})
+		require.NoError(t, err)
+		assert.Len(t, resp.Data.Android, 2)
+		assert.Len(t, resp.Data.ServerSide, 2)
+
+		for _, info := range resp.Data.ServerSide {
+			assert.Greater(t, info.Limit, 0)
+			assert.GreaterOrEqual(t, info.Remaining, 0)
+		}
+	})
+}
+
+func TestChatCheckSQSSNSPushIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	t.Run("CheckSQS", func(t *testing.T) {
+		resp, err := client.CheckSQS(ctx, &CheckSQSRequest{
+			SqsUrl:    PtrTo("https://sqs.us-east-1.amazonaws.com/123456789012/test-queue"),
+			SqsKey:    PtrTo("key"),
+			SqsSecret: PtrTo("secret"),
+		})
+		require.NoError(t, err)
+		assert.Equal(t, "error", resp.Data.Status)
+		require.NotNil(t, resp.Data.Error)
+		assert.NotEmpty(t, *resp.Data.Error)
+	})
+
+	t.Run("CheckSNS", func(t *testing.T) {
+		resp, err := client.CheckSNS(ctx, &CheckSNSRequest{
+			SnsTopicArn: PtrTo("arn:aws:sns:us-east-1:123456789012:test-topic"),
+			SnsKey:      PtrTo("key"),
+			SnsSecret:   PtrTo("secret"),
+		})
+		require.NoError(t, err)
+		assert.Equal(t, "error", resp.Data.Status)
+		require.NotNil(t, resp.Data.Error)
+		assert.NotEmpty(t, *resp.Data.Error)
+	})
+
+	t.Run("CheckPush", func(t *testing.T) {
+		userIDs := createTestUsers(t, client, 1)
+		userID := userIDs[0]
+
+		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
+		msgID := sendTestMessage(t, ch, userID, "Push check test message")
+
+		resp, err := client.CheckPush(ctx, &CheckPushRequest{
+			MessageID:   PtrTo(msgID),
+			SkipDevices: PtrTo(true),
+			UserID:      PtrTo(userID),
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.RenderedMessage)
+		assert.Equal(t, msgID, resp.Data.RenderedMessage["message_id"])
+	})
+}
+
+func TestChatAppFileUploadConfigIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	// Get current settings to restore later
+	getResp, err := client.GetApp(ctx, &GetAppRequest{})
+	require.NoError(t, err)
+	originalFileConfig := getResp.Data.App.FileUploadConfig
+
+	t.Cleanup(func() {
+		_, _ = client.UpdateApp(context.Background(), &UpdateAppRequest{
+			FileUploadConfig: &originalFileConfig,
+		})
+	})
+
+	t.Run("SetAndVerifyFileUploadConfig", func(t *testing.T) {
+		_, err := client.UpdateApp(ctx, &UpdateAppRequest{
+			FileUploadConfig: &FileUploadConfig{
+				SizeLimit:             10 * 1024 * 1024,
+				AllowedFileExtensions: []string{".pdf", ".doc", ".txt"},
+				AllowedMimeTypes:      []string{"application/pdf", "text/plain"},
+			},
+		})
+		require.NoError(t, err)
+
+		// Verify via GetApp
+		verifyResp, err := client.GetApp(ctx, &GetAppRequest{})
+		require.NoError(t, err)
+		cfg := verifyResp.Data.App.FileUploadConfig
+		assert.Equal(t, 10*1024*1024, cfg.SizeLimit)
+		assert.Equal(t, []string{".pdf", ".doc", ".txt"}, cfg.AllowedFileExtensions)
+		assert.Equal(t, []string{"application/pdf", "text/plain"}, cfg.AllowedMimeTypes)
+	})
+}
+
+func TestChatEventHooksIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	// Get current hooks to restore later
+	getResp, err := client.GetApp(ctx, &GetAppRequest{})
+	require.NoError(t, err)
+	originalHooks := getResp.Data.App.EventHooks
+
+	t.Cleanup(func() {
+		_, _ = client.UpdateApp(context.Background(), &UpdateAppRequest{
+			EventHooks: originalHooks,
+		})
+	})
+
+	t.Run("SetWebhookEventHooks", func(t *testing.T) {
+		hooks := []EventHook{
+			{
+				HookType:   PtrTo("webhook"),
+				Enabled:    PtrTo(true),
+				EventTypes: []string{"message.new"},
+				WebhookUrl: PtrTo("https://example.com/webhook"),
+			},
+		}
+		_, err := client.UpdateApp(ctx, &UpdateAppRequest{
+			EventHooks: hooks,
+		})
+		require.NoError(t, err)
+
+		// Verify hooks were set
+		verifyResp, err := client.GetApp(ctx, &GetAppRequest{})
+		require.NoError(t, err)
+		require.NotEmpty(t, verifyResp.Data.App.EventHooks)
+	})
+
+	t.Run("PendingMessageAsyncModerationConfig", func(t *testing.T) {
+		hooks := []EventHook{
+			{
+				HookType:   PtrTo("pending_message"),
+				Enabled:    PtrTo(true),
+				WebhookUrl: PtrTo("https://example.com/pending"),
+				TimeoutMs:  PtrTo(10000),
+				Callback: &AsyncModerationCallbackConfig{
+					Mode: PtrTo("CALLBACK_MODE_REST"),
+				},
+			},
+		}
+		_, err := client.UpdateApp(ctx, &UpdateAppRequest{
+			EventHooks: hooks,
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("SQSEventHooks", func(t *testing.T) {
+		hooks := []EventHook{
+			{
+				HookType:    PtrTo("sqs"),
+				Enabled:     PtrTo(true),
+				EventTypes:  []string{"message.new"},
+				SqsQueueUrl: PtrTo("https://sqs.us-east-1.amazonaws.com/123456789012/my-queue"),
+				SqsRegion:   PtrTo("us-east-1"),
+				SqsAuthType: PtrTo("keys"),
+				SqsKey:      PtrTo("some key"),
+				SqsSecret:   PtrTo("some secret"),
+			},
+		}
+		_, err := client.UpdateApp(ctx, &UpdateAppRequest{
+			EventHooks: hooks,
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("SNSEventHooks", func(t *testing.T) {
+		hooks := []EventHook{
+			{
+				HookType:    PtrTo("sns"),
+				Enabled:     PtrTo(true),
+				EventTypes:  []string{"message.new"},
+				SnsTopicArn: PtrTo("arn:aws:sns:us-east-1:123456789012:my-topic"),
+				SnsRegion:   PtrTo("us-east-1"),
+				SnsAuthType: PtrTo("keys"),
+				SnsKey:      PtrTo("some key"),
+				SnsSecret:   PtrTo("some secret"),
+			},
+		}
+		_, err := client.UpdateApp(ctx, &UpdateAppRequest{
+			EventHooks: hooks,
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("ClearEventHooks", func(t *testing.T) {
+		// Clear all hooks
+		_, err := client.UpdateApp(ctx, &UpdateAppRequest{
+			EventHooks: []EventHook{},
+		})
+		require.NoError(t, err)
+
+		verifyResp, err := client.GetApp(ctx, &GetAppRequest{})
+		require.NoError(t, err)
+		assert.Empty(t, verifyResp.Data.App.EventHooks)
+	})
+}
+
+func TestChatContextExceededIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initClient(t)
+
+	// Create a context that's already past deadline
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond)
+	defer cancel()
+	time.Sleep(2 * time.Millisecond)
+
+	_, err := client.GetApp(ctx, &GetAppRequest{})
+	require.Error(t, err)
+	assert.ErrorIs(t, err, context.DeadlineExceeded)
 }

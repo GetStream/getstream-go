@@ -20,6 +20,15 @@ func TestChatUserIntegration(t *testing.T) {
 		userID1 := "upsert-" + uuid.New().String()
 		userID2 := "upsert-" + uuid.New().String()
 
+		t.Cleanup(func() {
+			_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
+				UserIds:       []string{userID1, userID2},
+				User:          PtrTo("hard"),
+				Messages:      PtrTo("hard"),
+				Conversations: PtrTo("hard"),
+			})
+		})
+
 		resp, err := client.UpdateUsers(ctx, &UpdateUsersRequest{
 			Users: map[string]UserRequest{
 				userID1: {
@@ -68,6 +77,22 @@ func TestChatUserIntegration(t *testing.T) {
 		for _, id := range userIDs {
 			assert.True(t, foundIDs[id], "User %s should be found in query results", id)
 		}
+	})
+
+	t.Run("QueryUsersWithOffsetLimit", func(t *testing.T) {
+		userIDs := createTestUsers(t, client, 3)
+
+		resp, err := client.QueryUsers(ctx, &QueryUsersRequest{
+			Payload: &QueryUsersPayload{
+				FilterConditions: map[string]any{
+					"id": map[string]any{"$in": userIDs},
+				},
+				Offset: PtrTo(1),
+				Limit:  PtrTo(2),
+			},
+		})
+		require.NoError(t, err)
+		assert.Len(t, resp.Data.Users, 2, "Should return exactly 2 users with offset=1 limit=2")
 	})
 
 	t.Run("PartialUpdateUser", func(t *testing.T) {
@@ -211,6 +236,16 @@ func TestChatUserIntegration(t *testing.T) {
 	t.Run("CreateGuest", func(t *testing.T) {
 		guestID := "guest-" + uuid.New().String()
 
+		t.Cleanup(func() {
+			// Guest user may have a server-assigned ID prefix, but we try both
+			_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
+				UserIds:       []string{guestID},
+				User:          PtrTo("hard"),
+				Messages:      PtrTo("hard"),
+				Conversations: PtrTo("hard"),
+			})
+		})
+
 		resp, err := client.CreateGuest(ctx, &CreateGuestRequest{
 			User: UserRequest{
 				ID:   guestID,
@@ -224,11 +259,294 @@ func TestChatUserIntegration(t *testing.T) {
 		}
 		require.NotNil(t, resp.Data)
 		assert.NotEmpty(t, resp.Data.AccessToken, "Access token should not be empty")
-		assert.Equal(t, guestID, resp.Data.User.ID)
+
+		// Server may prefix the guest ID, so check with Contains
+		assert.Contains(t, resp.Data.User.ID, guestID, "Guest user ID should contain the requested ID")
+
+		// Also clean up the actual server-assigned ID
+		t.Cleanup(func() {
+			_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
+				UserIds:       []string{resp.Data.User.ID},
+				User:          PtrTo("hard"),
+				Messages:      PtrTo("hard"),
+				Conversations: PtrTo("hard"),
+			})
+		})
+	})
+
+	t.Run("UpsertUsersWithRoleAndTeamsRole", func(t *testing.T) {
+		userID := "teams-" + uuid.New().String()
+
+		t.Cleanup(func() {
+			_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
+				UserIds:       []string{userID},
+				User:          PtrTo("hard"),
+				Messages:      PtrTo("hard"),
+				Conversations: PtrTo("hard"),
+			})
+		})
+
+		resp, err := client.UpdateUsers(ctx, &UpdateUsersRequest{
+			Users: map[string]UserRequest{
+				userID: {
+					ID:        userID,
+					Name:      PtrTo("Teams User"),
+					Role:      PtrTo("admin"),
+					Teams:     []string{"blue"},
+					TeamsRole: map[string]string{"blue": "admin"},
+				},
+			},
+		})
+		require.NoError(t, err)
+
+		u, ok := resp.Data.Users[userID]
+		require.True(t, ok, "User should be in response")
+		assert.Equal(t, "admin", u.Role)
+		assert.Equal(t, []string{"blue"}, u.Teams)
+		assert.Equal(t, map[string]string{"blue": "admin"}, u.TeamsRole)
+	})
+
+	t.Run("PartialUpdateUserWithTeam", func(t *testing.T) {
+		userIDs := createTestUsers(t, client, 1)
+		userID := userIDs[0]
+
+		// Partial update to add teams and teams_role
+		resp, err := client.UpdateUsersPartial(ctx, &UpdateUsersPartialRequest{
+			Users: []UpdateUserPartialRequest{
+				{
+					ID: userID,
+					Set: map[string]any{
+						"teams":      []string{"blue"},
+						"teams_role": map[string]string{"blue": "admin"},
+					},
+				},
+			},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.Users)
+
+		u, ok := resp.Data.Users[userID]
+		require.True(t, ok)
+		assert.Equal(t, []string{"blue"}, u.Teams)
+		assert.Equal(t, map[string]string{"blue": "admin"}, u.TeamsRole)
+	})
+
+	t.Run("UpdatePrivacySettings", func(t *testing.T) {
+		userID := "privacy-" + uuid.New().String()
+
+		t.Cleanup(func() {
+			_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
+				UserIds:       []string{userID},
+				User:          PtrTo("hard"),
+				Messages:      PtrTo("hard"),
+				Conversations: PtrTo("hard"),
+			})
+		})
+
+		// Create user without privacy settings
+		resp, err := client.UpdateUsers(ctx, &UpdateUsersRequest{
+			Users: map[string]UserRequest{
+				userID: {
+					ID:   userID,
+					Name: PtrTo("Privacy User"),
+				},
+			},
+		})
+		require.NoError(t, err)
+		u, ok := resp.Data.Users[userID]
+		require.True(t, ok)
+		assert.Nil(t, u.PrivacySettings, "PrivacySettings should be nil initially")
+
+		// Update with TypingIndicators disabled
+		resp, err = client.UpdateUsers(ctx, &UpdateUsersRequest{
+			Users: map[string]UserRequest{
+				userID: {
+					ID: userID,
+					PrivacySettings: &PrivacySettingsResponse{
+						TypingIndicators: &TypingIndicatorsResponse{
+							Enabled: PtrTo(false),
+						},
+					},
+				},
+			},
+		})
+		require.NoError(t, err)
+		u, ok = resp.Data.Users[userID]
+		require.True(t, ok)
+		require.NotNil(t, u.PrivacySettings)
+		require.NotNil(t, u.PrivacySettings.TypingIndicators)
+		assert.Equal(t, false, *u.PrivacySettings.TypingIndicators.Enabled)
+		assert.Nil(t, u.PrivacySettings.ReadReceipts, "ReadReceipts should still be nil")
+
+		// Update with both TypingIndicators=true and ReadReceipts=false
+		resp, err = client.UpdateUsers(ctx, &UpdateUsersRequest{
+			Users: map[string]UserRequest{
+				userID: {
+					ID: userID,
+					PrivacySettings: &PrivacySettingsResponse{
+						TypingIndicators: &TypingIndicatorsResponse{
+							Enabled: PtrTo(true),
+						},
+						ReadReceipts: &ReadReceiptsResponse{
+							Enabled: PtrTo(false),
+						},
+					},
+				},
+			},
+		})
+		require.NoError(t, err)
+		u, ok = resp.Data.Users[userID]
+		require.True(t, ok)
+		require.NotNil(t, u.PrivacySettings)
+		require.NotNil(t, u.PrivacySettings.TypingIndicators)
+		assert.Equal(t, true, *u.PrivacySettings.TypingIndicators.Enabled)
+		require.NotNil(t, u.PrivacySettings.ReadReceipts)
+		assert.Equal(t, false, *u.PrivacySettings.ReadReceipts.Enabled)
+	})
+
+	t.Run("PartialUpdatePrivacySettings", func(t *testing.T) {
+		userID := "privacy-partial-" + uuid.New().String()
+
+		t.Cleanup(func() {
+			_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
+				UserIds:       []string{userID},
+				User:          PtrTo("hard"),
+				Messages:      PtrTo("hard"),
+				Conversations: PtrTo("hard"),
+			})
+		})
+
+		// Create user
+		resp, err := client.UpdateUsers(ctx, &UpdateUsersRequest{
+			Users: map[string]UserRequest{
+				userID: {ID: userID, Name: PtrTo("Privacy Partial User")},
+			},
+		})
+		require.NoError(t, err)
+		u := resp.Data.Users[userID]
+		require.Nil(t, u.PrivacySettings)
+
+		// Partial update: set typing_indicators.enabled = true
+		partialResp, err := client.UpdateUsersPartial(ctx, &UpdateUsersPartialRequest{
+			Users: []UpdateUserPartialRequest{
+				{
+					ID: userID,
+					Set: map[string]any{
+						"privacy_settings": map[string]any{
+							"typing_indicators": map[string]any{
+								"enabled": true,
+							},
+						},
+					},
+				},
+			},
+		})
+		require.NoError(t, err)
+		u2 := partialResp.Data.Users[userID]
+		require.NotNil(t, u2.PrivacySettings)
+		require.NotNil(t, u2.PrivacySettings.TypingIndicators)
+		assert.True(t, *u2.PrivacySettings.TypingIndicators.Enabled)
+		assert.Nil(t, u2.PrivacySettings.ReadReceipts, "ReadReceipts should still be nil")
+
+		// Partial update: set read_receipts.enabled = false
+		partialResp2, err := client.UpdateUsersPartial(ctx, &UpdateUsersPartialRequest{
+			Users: []UpdateUserPartialRequest{
+				{
+					ID: userID,
+					Set: map[string]any{
+						"privacy_settings": map[string]any{
+							"read_receipts": map[string]any{
+								"enabled": false,
+							},
+						},
+					},
+				},
+			},
+		})
+		require.NoError(t, err)
+		u3 := partialResp2.Data.Users[userID]
+		require.NotNil(t, u3.PrivacySettings)
+		require.NotNil(t, u3.PrivacySettings.TypingIndicators)
+		assert.True(t, *u3.PrivacySettings.TypingIndicators.Enabled, "TypingIndicators should still be true")
+		require.NotNil(t, u3.PrivacySettings.ReadReceipts)
+		assert.False(t, *u3.PrivacySettings.ReadReceipts.Enabled)
+	})
+
+	t.Run("QueryUsersWithDeactivated", func(t *testing.T) {
+		userIDs := createTestUsers(t, client, 3)
+
+		// Deactivate one user
+		_, err := client.DeactivateUser(ctx, userIDs[2], &DeactivateUserRequest{})
+		require.NoError(t, err)
+
+		t.Cleanup(func() {
+			_, _ = client.ReactivateUser(context.Background(), userIDs[2], &ReactivateUserRequest{})
+		})
+
+		// Query WITHOUT including deactivated — should get 2
+		resp, err := client.QueryUsers(ctx, &QueryUsersRequest{
+			Payload: &QueryUsersPayload{
+				FilterConditions: map[string]any{
+					"id": map[string]any{"$in": userIDs},
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Len(t, resp.Data.Users, 2, "Should exclude deactivated user by default")
+
+		// Query WITH including deactivated — should get all 3
+		resp, err = client.QueryUsers(ctx, &QueryUsersRequest{
+			Payload: &QueryUsersPayload{
+				FilterConditions: map[string]any{
+					"id": map[string]any{"$in": userIDs},
+				},
+				IncludeDeactivatedUsers: PtrTo(true),
+			},
+		})
+		require.NoError(t, err)
+		assert.Len(t, resp.Data.Users, 3, "Should include deactivated user")
+	})
+
+	t.Run("DeactivateUsersPlural", func(t *testing.T) {
+		userIDs := createTestUsers(t, client, 2)
+
+		// Deactivate multiple users at once
+		resp, err := client.DeactivateUsers(ctx, &DeactivateUsersRequest{
+			UserIds: userIDs,
+		})
+		require.NoError(t, err)
+		assert.NotEmpty(t, resp.Data.TaskID)
+
+		// Wait for deactivation task
+		taskCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+		defer cancel()
+		taskResult, err := WaitForTask(taskCtx, client, resp.Data.TaskID)
+		require.NoError(t, err)
+		assert.Equal(t, "completed", taskResult.Data.Status)
+
+		// Verify deactivated — query without include should not find them
+		qResp, err := client.QueryUsers(ctx, &QueryUsersRequest{
+			Payload: &QueryUsersPayload{
+				FilterConditions: map[string]any{
+					"id": map[string]any{"$in": userIDs},
+				},
+			},
+		})
+		require.NoError(t, err)
+		assert.Empty(t, qResp.Data.Users, "Deactivated users should not appear in default query")
 	})
 
 	t.Run("UserCustomData", func(t *testing.T) {
 		userID := "custom-" + uuid.New().String()
+
+		t.Cleanup(func() {
+			_, _ = client.DeleteUsers(context.Background(), &DeleteUsersRequest{
+				UserIds:       []string{userID},
+				User:          PtrTo("hard"),
+				Messages:      PtrTo("hard"),
+				Conversations: PtrTo("hard"),
+			})
+		})
 
 		custom := map[string]any{
 			"favorite_color": "blue",

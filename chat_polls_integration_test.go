@@ -2,6 +2,7 @@ package getstream_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	. "github.com/GetStream/getstream-go/v3"
@@ -120,6 +121,11 @@ func TestChatPollsIntegration(t *testing.T) {
 				PollID: PtrTo(pollID),
 			},
 		})
+		if err != nil {
+			if strings.Contains(err.Error(), "polls not enabled") {
+				t.Skip("Polls not enabled for this channel")
+			}
+		}
 		require.NoError(t, err)
 		msgID := sendResp.Data.Message.ID
 
