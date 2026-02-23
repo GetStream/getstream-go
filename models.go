@@ -9498,6 +9498,7 @@ type SearchResultMessage struct {
 	PollID               *string                           `json:"poll_id,omitempty"`
 	QuotedMessageID      *string                           `json:"quoted_message_id,omitempty"`
 	ShowInChannel        *bool                             `json:"show_in_channel,omitempty"`
+	MentionedRoles       []string                          `json:"mentioned_roles,omitempty"`
 	ThreadParticipants   []UserResponse                    `json:"thread_participants,omitempty"`
 	Channel              *ChannelResponse                  `json:"channel,omitempty"`
 	Draft                *DraftResponse                    `json:"draft,omitempty"`
