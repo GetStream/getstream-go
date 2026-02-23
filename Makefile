@@ -23,6 +23,11 @@ fmt: install-gofumpt
 test:
 	@go test -v ./...
 
+.PHONY: setup-hooks
+setup-hooks:
+	git config core.hooksPath .githooks
+	@echo "Git hooks configured to use .githooks/"
+
 .PHONY: generate
 generate:
 	./generate.sh
