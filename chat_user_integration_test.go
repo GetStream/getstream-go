@@ -211,14 +211,15 @@ func TestChatUserIntegration(t *testing.T) {
 
 		var resp *StreamResponse[DeleteUsersResponse]
 		var err error
-		for i := 0; i < 5; i++ {
+		for i := 0; i < 10; i++ {
 			resp, err = client.DeleteUsers(ctx, &DeleteUsersRequest{
 				UserIds: userIDs,
 			})
 			if err == nil || !strings.Contains(err.Error(), "Too many requests") {
 				break
 			}
-			time.Sleep(time.Duration(i+1) * 2 * time.Second)
+			t.Logf("DeleteUsers rate limited, attempt %d/10, waiting %ds", i+1, (i+1)*3)
+			time.Sleep(time.Duration(i+1) * 3 * time.Second)
 		}
 		require.NoError(t, err)
 
