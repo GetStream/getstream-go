@@ -2,6 +2,7 @@ package getstream_test
 
 import (
 	"context"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -1646,6 +1647,135 @@ func TestChatTeamUsageStatsIntegration(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, resp.Data.Teams)
 		assert.Empty(t, resp.Data.Teams)
+	})
+}
+
+func initMultiTenantClient(t *testing.T) *Stream {
+	t.Helper()
+	apiKey := os.Getenv("STREAM_MULTI_TENANT_KEY")
+	apiSecret := os.Getenv("STREAM_MULTI_TENANT_SECRET")
+	if apiKey == "" || apiSecret == "" {
+		return nil
+	}
+	c, err := NewClient(apiKey, apiSecret)
+	require.NoError(t, err)
+	return c
+}
+
+func TestChatTeamUsageStatsMultiTenantIntegration(t *testing.T) {
+	skipIfShort(t)
+	client := initMultiTenantClient(t)
+	if client == nil {
+		t.Skip("Multi-tenant credentials not set (STREAM_MULTI_TENANT_KEY / STREAM_MULTI_TENANT_SECRET)")
+	}
+	ctx := context.Background()
+
+	t.Run("NoParametersReturnsTeams", func(t *testing.T) {
+		resp, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.Teams)
+		assert.Greater(t, len(resp.Data.Teams), 0)
+	})
+
+	t.Run("MonthParameterReturnsTeams", func(t *testing.T) {
+		resp, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			Month: PtrTo("2026-02"),
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.Teams)
+		assert.Greater(t, len(resp.Data.Teams), 0)
+	})
+
+	t.Run("DateRangeReturnsTeams", func(t *testing.T) {
+		resp, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			StartDate: PtrTo("2026-02-01"),
+			EndDate:   PtrTo("2026-02-18"),
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.Teams)
+		assert.Greater(t, len(resp.Data.Teams), 0)
+	})
+
+	t.Run("LimitReturnsCorrectCount", func(t *testing.T) {
+		resp, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			Limit: PtrTo(3),
+		})
+		require.NoError(t, err)
+		assert.Equal(t, 3, len(resp.Data.Teams))
+	})
+
+	t.Run("LimitReturnsNextCursor", func(t *testing.T) {
+		resp, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			Limit: PtrTo(2),
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp.Data.Next)
+		assert.NotEmpty(t, *resp.Data.Next)
+	})
+
+	t.Run("PaginationReturnsDifferentTeams", func(t *testing.T) {
+		page1, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			Limit: PtrTo(2),
+		})
+		require.NoError(t, err)
+		require.NotNil(t, page1.Data.Next)
+
+		page2, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{
+			Limit: PtrTo(2),
+			Next:  page1.Data.Next,
+		})
+		require.NoError(t, err)
+
+		// Verify no overlap between pages
+		for _, t1 := range page1.Data.Teams {
+			for _, t2 := range page2.Data.Teams {
+				assert.NotEqual(t, t1.Team, t2.Team, "Pages should not have overlapping teams")
+			}
+		}
+	})
+
+	t.Run("TeamsHaveTeamField", func(t *testing.T) {
+		resp, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{})
+		require.NoError(t, err)
+		require.Greater(t, len(resp.Data.Teams), 0)
+		// Team field exists (may be empty string for default team)
+		_ = resp.Data.Teams[0].Team
+	})
+
+	t.Run("AllMetricsPresent", func(t *testing.T) {
+		resp, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{})
+		require.NoError(t, err)
+		require.Greater(t, len(resp.Data.Teams), 0)
+
+		team := resp.Data.Teams[0]
+		// Verify all metric fields are accessible
+		_ = team.UsersDaily.Total
+		_ = team.MessagesDaily.Total
+		_ = team.TranslationsDaily.Total
+		_ = team.ImageModerationsDaily.Total
+		_ = team.ConcurrentUsers.Total
+		_ = team.ConcurrentConnections.Total
+		_ = team.UsersTotal.Total
+		_ = team.UsersLast24Hours.Total
+		_ = team.UsersLast30Days.Total
+		_ = team.UsersMonthToDate.Total
+		_ = team.UsersEngagedLast30Days.Total
+		_ = team.UsersEngagedMonthToDate.Total
+		_ = team.MessagesTotal.Total
+		_ = team.MessagesLast24Hours.Total
+		_ = team.MessagesLast30Days.Total
+		_ = team.MessagesMonthToDate.Total
+	})
+
+	t.Run("MetricTotalsNonNegative", func(t *testing.T) {
+		resp, err := client.Chat().QueryTeamUsageStats(ctx, &QueryTeamUsageStatsRequest{})
+		require.NoError(t, err)
+
+		for _, team := range resp.Data.Teams {
+			assert.GreaterOrEqual(t, team.MessagesTotal.Total, 0)
+			assert.GreaterOrEqual(t, team.UsersDaily.Total, 0)
+			assert.GreaterOrEqual(t, team.ConcurrentUsers.Total, 0)
+		}
 	})
 }
 
