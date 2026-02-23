@@ -37,10 +37,6 @@ func (c *Channels) GetDraft(ctx context.Context, request *GetDraftRequest) (*Str
 	return c.client.GetDraft(ctx, c.channelType, c.channelD, request)
 }
 
-func (c *Channels) CreateDraft(ctx context.Context, request *CreateDraftRequest) (*StreamResponse[CreateDraftResponse], error) {
-	return c.client.CreateDraft(ctx, c.channelType, c.channelD, request)
-}
-
 func (c *Channels) SendEvent(ctx context.Context, request *SendEventRequest) (*StreamResponse[EventResponse], error) {
 	return c.client.SendEvent(ctx, c.channelType, c.channelD, request)
 }

@@ -114,13 +114,6 @@ func TestChatGetDraft(t *testing.T) {
 	_, err = client.Chat().GetDraft(context.Background(), "", "", &getstream.GetDraftRequest{})
 	require.NoError(t, err)
 }
-func TestChatCreateDraft(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().CreateDraft(context.Background(), "", "", &getstream.CreateDraftRequest{})
-	require.NoError(t, err)
-}
 func TestChatSendEvent(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

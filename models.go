@@ -3649,13 +3649,6 @@ type CreateCommandResponse struct {
 }
 
 // Basic response information
-type CreateDraftResponse struct {
-	// Duration of the request in milliseconds
-	Duration string        `json:"duration"`
-	Draft    DraftResponse `json:"draft"`
-}
-
-// Basic response information
 type CreateExternalStorageResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`

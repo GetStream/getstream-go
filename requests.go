@@ -173,9 +173,6 @@ type GetDraftRequest struct {
 	ParentID *string `json:"-" query:"parent_id"`
 	UserID   *string `json:"-" query:"user_id"`
 }
-type CreateDraftRequest struct {
-	Message MessageRequest `json:"message"`
-}
 type SendEventRequest struct {
 	Event EventRequest `json:"event"`
 }
