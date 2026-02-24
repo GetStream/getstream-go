@@ -19,6 +19,7 @@ type UpdateAppRequest struct {
 	ImageModerationEnabled         *bool                           `json:"image_moderation_enabled"`
 	MaxAggregatedActivitiesLength  *int                            `json:"max_aggregated_activities_length"`
 	MigratePermissionsToV2         *bool                           `json:"migrate_permissions_to_v2"`
+	ModerationAnalyticsEnabled     *bool                           `json:"moderation_analytics_enabled"`
 	ModerationEnabled              *bool                           `json:"moderation_enabled"`
 	ModerationWebhookUrl           *string                         `json:"moderation_webhook_url"`
 	MultiTenantEnabled             *bool                           `json:"multi_tenant_enabled"`

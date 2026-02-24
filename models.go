@@ -86,9 +86,10 @@ type APNSPayload struct {
 }
 
 type AWSRekognitionRule struct {
-	Action        string  `json:"action"`
-	Label         string  `json:"label"`
-	MinConfidence float64 `json:"min_confidence"`
+	Action             string          `json:"action"`
+	Label              string          `json:"label"`
+	MinConfidence      float64         `json:"min_confidence"`
+	Subclassifications map[string]bool `json:"subclassifications,omitempty"`
 }
 
 type AcceptFeedMemberInviteResponse struct {
@@ -3518,9 +3519,11 @@ type ConfigResponse struct {
 	// Team associated with the configuration
 	Team string `json:"team"`
 	// When the configuration was last updated
-	UpdatedAt                          Timestamp                           `json:"updated_at"`
-	SupportedVideoCallHarmTypes        []string                            `json:"supported_video_call_harm_types"`
-	AiImageConfig                      *AIImageConfig                      `json:"ai_image_config,omitempty"`
+	UpdatedAt                   Timestamp      `json:"updated_at"`
+	SupportedVideoCallHarmTypes []string       `json:"supported_video_call_harm_types"`
+	AiImageConfig               *AIImageConfig `json:"ai_image_config,omitempty"`
+	// Available L2 subclassifications per L1 image moderation label, based on the active provider
+	AiImageSubclassifications          map[string][]string                 `json:"ai_image_subclassifications,omitempty"`
 	AiTextConfig                       *AITextConfig                       `json:"ai_text_config,omitempty"`
 	AiVideoConfig                      *AIVideoConfig                      `json:"ai_video_config,omitempty"`
 	AutomodPlatformCircumventionConfig *AutomodPlatformCircumventionConfig `json:"automod_platform_circumvention_config,omitempty"`
@@ -5757,7 +5760,8 @@ type ImportV2TaskSettingsS3 struct {
 }
 
 type IndividualRecordSettings struct {
-	Mode string `json:"mode"`
+	Mode        string   `json:"mode"`
+	OutputTypes []string `json:"output_types,omitempty"`
 }
 
 type IndividualRecordingResponse struct {
@@ -5767,10 +5771,13 @@ type IndividualRecordingResponse struct {
 type IndividualRecordingSettingsRequest struct {
 	// Recording mode. One of: available, disabled, auto-on
 	Mode string `json:"mode"`
+	// Output types to include: audio_only, video_only, audio_video, screenshare_audio_only, screenshare_video_only, screenshare_audio_video
+	OutputTypes []string `json:"output_types,omitempty"`
 }
 
 type IndividualRecordingSettingsResponse struct {
-	Mode string `json:"mode"`
+	Mode        string   `json:"mode"`
+	OutputTypes []string `json:"output_types,omitempty"`
 }
 
 type IngressAudioEncodingOptions struct {
