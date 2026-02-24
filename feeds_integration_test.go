@@ -1760,17 +1760,17 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	// Test 3: Get Feed View
 	fmt.Println("\n🔍 Testing get feed view...")
 	// snippet-start: GetFeedView
-	getResponse, err := feedsClient.GetFeedView(ctx, "feedViewID", &getstream.GetFeedViewRequest{})
+	getResponse, err := feedsClient.GetFeedView(ctx, feedViewID, &getstream.GetFeedViewRequest{})
 	// snippet-end: GetFeedView
 
 	assertResponseSuccess(t, getResponse, err, "get feed view")
-	assert.Equal(t, "feedViewID", getResponse.Data.FeedView.ID)
+	assert.Equal(t, feedViewID, getResponse.Data.FeedView.ID)
 	fmt.Printf("✅ Retrieved feed view: %s\n", feedViewID)
 
 	// Test 4: Update Feed View
 	fmt.Println("\n✏️ Testing update feed view...")
 	// snippet-start: UpdateFeedView
-	updateResponse, err := feedsClient.UpdateFeedView(ctx, "feedViewID", &getstream.UpdateFeedViewRequest{
+	updateResponse, err := feedsClient.UpdateFeedView(ctx, feedViewID, &getstream.UpdateFeedViewRequest{
 		ActivitySelectors: []getstream.ActivitySelectorConfig{
 			{
 				Type:          "popular",
@@ -1799,10 +1799,14 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	assertResponseSuccess(t, getOrCreateResponse, err, "get or create existing feed view")
 	fmt.Printf("✅ Got existing feed view: %s\n", feedViewID)
 
-	// Test 6: Delete Feed Views (cleanup)
+	// Test 6: Delete Feed View (cleanup)
+	fmt.Println("\n🗑️ Testing delete feed view...")
 	// snippet-start: DeleteFeedView
-	_, err = feedsClient.DeleteFeedView(ctx, "viewID-123", &getstream.DeleteFeedViewRequest{})
+	_, err = feedsClient.DeleteFeedView(ctx, feedViewID, &getstream.DeleteFeedViewRequest{})
 	// snippet-end: DeleteFeedView
+
+	require.NoError(t, err, "Failed to delete feed view for cleanup")
+	fmt.Printf("✅ Deleted feed view: %s\n", feedViewID)
 }
 
 // =================================================================
