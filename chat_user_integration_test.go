@@ -231,10 +231,10 @@ func TestChatUserIntegration(t *testing.T) {
 	t.Run("DeleteUsers", func(t *testing.T) {
 		userIDs := newUsers(t, 2)
 
-		// Retry to handle rate limiting
+		// Retry to handle rate limiting with longer backoff
 		var resp *StreamResponse[DeleteUsersResponse]
 		var deleteErr error
-		for i := 0; i < 5; i++ {
+		for i := 0; i < 10; i++ {
 			resp, deleteErr = client.DeleteUsers(ctx, &DeleteUsersRequest{
 				UserIds: userIDs,
 			})
@@ -242,7 +242,7 @@ func TestChatUserIntegration(t *testing.T) {
 				break
 			}
 			if strings.Contains(deleteErr.Error(), "Too many requests") {
-				time.Sleep(time.Duration(i+1) * 3 * time.Second)
+				time.Sleep(time.Duration(i+1) * 5 * time.Second)
 				continue
 			}
 			break

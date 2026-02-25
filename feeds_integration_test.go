@@ -1766,10 +1766,21 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	assert.Equal(t, feedViewID, createResponse.Data.FeedView.ID)
 	fmt.Printf("✅ Created feed view: %s\n", feedViewID)
 
-	// Test 3: Get Feed View
+	// Test 3: Get Feed View (retry for eventual consistency)
 	fmt.Println("\n🔍 Testing get feed view...")
 	// snippet-start: GetFeedView
-	getResponse, err := feedsClient.GetFeedView(ctx, feedViewID, &getstream.GetFeedViewRequest{})
+	var getResponse *getstream.StreamResponse[getstream.GetFeedViewResponse]
+	for i := 0; i < 10; i++ {
+		getResponse, err = feedsClient.GetFeedView(ctx, feedViewID, &getstream.GetFeedViewRequest{})
+		if err == nil {
+			break
+		}
+		if strings.Contains(err.Error(), "not found") {
+			time.Sleep(time.Duration(i+1) * 2 * time.Second)
+			continue
+		}
+		break
+	}
 	// snippet-end: GetFeedView
 
 	assertResponseSuccess(t, getResponse, err, "get feed view")
