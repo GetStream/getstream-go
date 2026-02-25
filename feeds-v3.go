@@ -522,6 +522,17 @@ func (c *FeedsClient) RejectFeedMemberInvite(ctx context.Context, feedGroupID st
 	return res, err
 }
 
+// Query pinned activities for a feed with filter query
+func (c *FeedsClient) QueryPinnedActivities(ctx context.Context, feedGroupID string, feedID string, request *QueryPinnedActivitiesRequest) (*StreamResponse[QueryPinnedActivitiesResponse], error) {
+	var result QueryPinnedActivitiesResponse
+	pathParams := map[string]string{
+		"feed_group_id": feedGroupID,
+		"feed_id":       feedID,
+	}
+	res, err := MakeRequest[QueryPinnedActivitiesRequest, QueryPinnedActivitiesResponse](c.client, ctx, "POST", "/api/v2/feeds/feed_groups/{feed_group_id}/feeds/{feed_id}/pinned_activities/query", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Get follow suggestions for a feed group
 func (c *FeedsClient) GetFollowSuggestions(ctx context.Context, feedGroupID string, request *GetFollowSuggestionsRequest) (*StreamResponse[GetFollowSuggestionsResponse], error) {
 	var result GetFollowSuggestionsResponse

@@ -44,12 +44,12 @@ func (c *ChatClient) StartCampaign(ctx context.Context, id string, request *Star
 }
 
 // Stops a campaign
-func (c *ChatClient) ScheduleCampaign(ctx context.Context, id string, request *ScheduleCampaignRequest) (*StreamResponse[CampaignResponse], error) {
+func (c *ChatClient) StopCampaign(ctx context.Context, id string, request *StopCampaignRequest) (*StreamResponse[CampaignResponse], error) {
 	var result CampaignResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[ScheduleCampaignRequest, CampaignResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns/{id}/stop", nil, request, &result, pathParams)
+	res, err := MakeRequest[StopCampaignRequest, CampaignResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns/{id}/stop", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -659,12 +659,12 @@ func (c *ChatClient) TranslateMessage(ctx context.Context, id string, request *T
 // Sends events:
 // - message.undeleted
 // - message.undeleted
-func (c *ChatClient) UndeleteMessage(ctx context.Context, id string, request *UndeleteMessageRequest) (*StreamResponse[UpdateMessageResponse], error) {
-	var result UpdateMessageResponse
+func (c *ChatClient) UndeleteMessage(ctx context.Context, id string, request *UndeleteMessageRequest) (*StreamResponse[UndeleteMessageResponse], error) {
+	var result UndeleteMessageResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[UndeleteMessageRequest, UpdateMessageResponse](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/undelete", nil, request, &result, pathParams)
+	res, err := MakeRequest[UndeleteMessageRequest, UndeleteMessageResponse](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/undelete", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -871,6 +871,21 @@ func (c *ChatClient) QuerySegmentTargets(ctx context.Context, id string, request
 		"id": id,
 	}
 	res, err := MakeRequest[QuerySegmentTargetsRequest, QuerySegmentTargetsResponse](c.client, ctx, "POST", "/api/v2/chat/segments/{id}/targets/query", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Retrieve team-level usage statistics from the warehouse database.
+// Returns all 16 metrics grouped by team with cursor-based pagination.
+//
+// **Date Range Options (mutually exclusive):**
+// - Use 'month' parameter (YYYY-MM format) for monthly aggregated values
+// - Use 'start_date'/'end_date' parameters (YYYY-MM-DD format) for daily breakdown
+// - If neither provided, defaults to current month (monthly mode)
+//
+// This endpoint is server-side only.
+func (c *ChatClient) QueryTeamUsageStats(ctx context.Context, request *QueryTeamUsageStatsRequest) (*StreamResponse[QueryTeamUsageStatsResponse], error) {
+	var result QueryTeamUsageStatsResponse
+	res, err := MakeRequest[QueryTeamUsageStatsRequest, QueryTeamUsageStatsResponse](c.client, ctx, "POST", "/api/v2/chat/stats/team_usage", nil, request, &result, nil)
 	return res, err
 }
 

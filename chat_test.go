@@ -30,11 +30,11 @@ func TestChatStartCampaign(t *testing.T) {
 	_, err = client.Chat().StartCampaign(context.Background(), "", &getstream.StartCampaignRequest{})
 	require.NoError(t, err)
 }
-func TestChatScheduleCampaign(t *testing.T) {
+func TestChatStopCampaign(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Chat().ScheduleCampaign(context.Background(), "", &getstream.ScheduleCampaignRequest{})
+	_, err = client.Chat().StopCampaign(context.Background(), "", &getstream.StopCampaignRequest{})
 	require.NoError(t, err)
 }
 func TestChatQueryChannels(t *testing.T) {
@@ -511,6 +511,13 @@ func TestChatQuerySegmentTargets(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Chat().QuerySegmentTargets(context.Background(), "", &getstream.QuerySegmentTargetsRequest{})
+	require.NoError(t, err)
+}
+func TestChatQueryTeamUsageStats(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().QueryTeamUsageStats(context.Background(), &getstream.QueryTeamUsageStatsRequest{})
 	require.NoError(t, err)
 }
 func TestChatQueryThreads(t *testing.T) {
