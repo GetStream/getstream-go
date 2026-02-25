@@ -47,7 +47,9 @@ func (c *rateLimitClient) Do(r *http.Request) (*http.Response, error) {
 			return resp, nil
 		}
 		// Drain and close the 429 response body before retrying
-		io.Copy(io.Discard, resp.Body)
+		if _, err := io.Copy(io.Discard, resp.Body); err != nil {
+			return resp, err
+		}
 		resp.Body.Close()
 
 		// Use the reset header if available, otherwise exponential backoff + jitter
