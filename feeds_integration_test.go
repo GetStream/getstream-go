@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -1736,6 +1737,14 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 
 	assertResponseSuccess(t, listResponse, err, "list feed views")
 	fmt.Printf("✅ Listed %d existing feed views\n", len(listResponse.Data.Views))
+
+	// Cleanup stale test feed views from previous runs to avoid hitting the limit
+	for id := range listResponse.Data.Views {
+		if strings.HasPrefix(id, "test-feed-view-") {
+			_, _ = feedsClient.DeleteFeedView(ctx, id, &getstream.DeleteFeedViewRequest{})
+			fmt.Printf("🧹 Cleaned up stale feed view: %s\n", id)
+		}
+	}
 
 	// Test 2: Create Feed View
 	fmt.Println("\n➕ Testing create feed view...")
