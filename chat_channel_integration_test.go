@@ -11,6 +11,7 @@ import (
 )
 
 func TestChatChannelIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()

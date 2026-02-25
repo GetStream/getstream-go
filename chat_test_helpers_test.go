@@ -13,10 +13,11 @@ import (
 
 // deleteUsersWithRetry calls DeleteUsers with retry logic to handle rate limiting.
 // Used in t.Cleanup to avoid "Too many requests" failures.
+// Cleanup failures are acceptable — leftover test users are harmless.
 func deleteUsersWithRetry(client *Stream, userIDs []string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 3; i++ {
 		_, err := client.DeleteUsers(ctx, &DeleteUsersRequest{
 			UserIds:       userIDs,
 			User:          PtrTo("hard"),
@@ -29,7 +30,7 @@ func deleteUsersWithRetry(client *Stream, userIDs []string) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(time.Duration(i+1) * 3 * time.Second):
+		case <-time.After(time.Duration(i+1) * time.Second):
 		}
 	}
 }

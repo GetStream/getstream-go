@@ -12,6 +12,7 @@ import (
 )
 
 func TestChatMessageIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -188,7 +189,7 @@ func TestChatMessageIntegration(t *testing.T) {
 		sendTestMessage(t, ch, userID, "This message contains "+searchTerm+" for testing")
 
 		// Wait briefly for indexing
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 
 		resp, err := client.Chat().Search(ctx, &SearchRequest{
 			Payload: &SearchPayload{
@@ -374,7 +375,7 @@ func TestChatMessageIntegration(t *testing.T) {
 		assert.Empty(t, sendResp.Data.Message.Attachments, "Attachments should be empty when SkipEnrichUrl is true")
 
 		// Verify via GetMessage that attachments remain empty
-		time.Sleep(3 * time.Second)
+		time.Sleep(time.Second)
 		getResp, err := client.Chat().GetMessage(ctx, sendResp.Data.Message.ID, &GetMessageRequest{})
 		require.NoError(t, err)
 		assert.Empty(t, getResp.Data.Message.Attachments, "Attachments should remain empty after enrichment window")
@@ -544,7 +545,7 @@ func TestChatMessageIntegration(t *testing.T) {
 		sendTestMessage(t, ch, userID, "This also has "+searchTerm+" text")
 
 		// Wait briefly for indexing
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 
 		// Search using message_filter_conditions (instead of query)
 		resp, err := client.Chat().Search(ctx, &SearchRequest{

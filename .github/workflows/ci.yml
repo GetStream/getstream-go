@@ -36,7 +36,7 @@ jobs:
           STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
           STREAM_API_SECRET: ${{ secrets.STREAM_API_SECRET }}
         run: |
-          go test -coverprofile cover.out -v -race -timeout 20m ./...
+          go test -coverprofile cover.out -v -race -parallel 16 -timeout 20m ./...
           go tool cover -func=cover.out
 
       - name: Upload coverage to Codecov

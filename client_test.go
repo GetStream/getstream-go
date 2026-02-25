@@ -213,6 +213,7 @@ func TestClientGetters(t *testing.T) {
 
 // TestCRUDCallTypeOperations tests Create, Read, Update, and Delete operations for call types.
 func TestCRUDCallTypeOperations(t *testing.T) {
+	t.Parallel()
 	if skipSlowTests {
 		t.Skip("skipping slow tests")
 	}
@@ -395,6 +396,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 
 // TestVideoExamples tests various video-related functionalities without creating call types.
 func TestVideoExamples(t *testing.T) {
+	t.Parallel()
 	rm := NewResourceManager(t)
 	client, _, _ := setup(t, rm, false)
 
@@ -472,6 +474,7 @@ func TestVideoExamples(t *testing.T) {
 
 // TestSendCustomEvent tests sending custom events within a call.
 func TestSendCustomEvent(t *testing.T) {
+	t.Parallel()
 	rm := NewResourceManager(t)
 	client, call, _ := setup(t, rm, false)
 
@@ -500,6 +503,7 @@ func TestSendCustomEvent(t *testing.T) {
 
 // TestMuteAll tests muting all users in a call.
 func TestMuteAll(t *testing.T) {
+	t.Parallel()
 	rm := NewResourceManager(t)
 	_, call, _ := setup(t, rm, false)
 
@@ -525,6 +529,7 @@ func TestMuteAll(t *testing.T) {
 
 // TestVideoExamplesAdditional tests additional video-related functionalities.
 func TestVideoExamplesAdditional(t *testing.T) {
+	t.Parallel()
 	rm := NewResourceManager(t)
 	client, call, _ := setup(t, rm, false)
 
@@ -714,6 +719,7 @@ func TestVideoExamplesAdditional(t *testing.T) {
 
 // TestDeleteCall tests the soft deletion of a call.
 func TestDeleteCall(t *testing.T) {
+	t.Parallel()
 	client := initClient(t)
 	ctx := context.Background()
 	call := client.Video().Call("default", randomString(10))
@@ -739,6 +745,7 @@ func TestDeleteCall(t *testing.T) {
 
 // TestTeams tests functionalities related to teams.
 func TestTeams(t *testing.T) {
+	t.Parallel()
 	client := initClient(t)
 	ctx := context.Background()
 
@@ -800,6 +807,7 @@ func TestTeams(t *testing.T) {
 }
 
 func TestExternalStorageOperations(t *testing.T) {
+	t.Parallel()
 	if skipSlowTests {
 		t.Skip("skipping slow tests")
 	}
@@ -861,6 +869,7 @@ func TestExternalStorageOperations(t *testing.T) {
 }
 
 func TestEnableCallRecordingAndBackstageMode(t *testing.T) {
+	t.Parallel()
 	rm := NewResourceManager(t)
 	_, call, _ := setup(t, rm, false)
 	ctx := context.Background()
@@ -898,6 +907,7 @@ func TestEnableCallRecordingAndBackstageMode(t *testing.T) {
 }
 
 func TestDeleteRecordingsAndTranscriptions(t *testing.T) {
+	t.Parallel()
 	rm := NewResourceManager(t)
 	_, call, _ := setup(t, rm, false)
 	ctx := context.Background()
@@ -914,6 +924,7 @@ func TestDeleteRecordingsAndTranscriptions(t *testing.T) {
 }
 
 func TestHardDeleteCall(t *testing.T) {
+	t.Parallel()
 	rm := NewResourceManager(t)
 	client, call, _ := setup(t, rm, false)
 	ctx := context.Background()

@@ -38,6 +38,7 @@ const (
 
 // TestFeedIntegrationSuite runs comprehensive integration tests for the Feeds API
 func TestFeedIntegrationSuite(t *testing.T) {
+	t.Parallel()
 	if testing.Short() {
 		t.Skip("Skipping integration tests in short mode")
 	}
@@ -1770,13 +1771,13 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	fmt.Println("\n🔍 Testing get feed view...")
 	// snippet-start: GetFeedView
 	var getResponse *getstream.StreamResponse[getstream.GetFeedViewResponse]
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 5; i++ {
 		getResponse, err = feedsClient.GetFeedView(ctx, feedViewID, &getstream.GetFeedViewRequest{})
 		if err == nil {
 			break
 		}
 		if strings.Contains(err.Error(), "not found") {
-			time.Sleep(time.Duration(i+1) * 2 * time.Second)
+			time.Sleep(time.Duration(i+1) * time.Second)
 			continue
 		}
 		break
@@ -1807,7 +1808,7 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 			break
 		}
 		if strings.Contains(err.Error(), "not found") {
-			time.Sleep(time.Duration(i+1) * 2 * time.Second)
+			time.Sleep(time.Duration(i+1) * time.Second)
 			continue
 		}
 		break

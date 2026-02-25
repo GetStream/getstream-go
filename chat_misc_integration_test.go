@@ -13,6 +13,7 @@ import (
 )
 
 func TestChatDeviceIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -70,6 +71,7 @@ func TestChatDeviceIntegration(t *testing.T) {
 }
 
 func TestChatBlocklistIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -89,7 +91,7 @@ func TestChatBlocklistIntegration(t *testing.T) {
 		require.NotNil(t, resp.Data)
 
 		// Wait for eventual consistency
-		time.Sleep(2 * time.Second)
+		time.Sleep(500 * time.Millisecond)
 	})
 
 	t.Run("GetBlockList", func(t *testing.T) {
@@ -141,6 +143,7 @@ func TestChatBlocklistIntegration(t *testing.T) {
 }
 
 func TestChatCommandIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -162,7 +165,7 @@ func TestChatCommandIntegration(t *testing.T) {
 		assert.Equal(t, "A test command", resp.Data.Command.Description)
 
 		// Wait for eventual consistency
-		time.Sleep(2 * time.Second)
+		time.Sleep(500 * time.Millisecond)
 	})
 
 	t.Run("GetCommand", func(t *testing.T) {
@@ -206,7 +209,7 @@ func TestChatCommandIntegration(t *testing.T) {
 		require.NoError(t, err)
 
 		// Wait for eventual consistency then retry
-		time.Sleep(2 * time.Second)
+		time.Sleep(500 * time.Millisecond)
 		var deleteErr error
 		var resp *StreamResponse[DeleteCommandResponse]
 		for i := 0; i < 5; i++ {
@@ -222,6 +225,7 @@ func TestChatCommandIntegration(t *testing.T) {
 }
 
 func TestChatChannelTypeIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -243,19 +247,19 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 		assert.Equal(t, typeName, resp.Data.Name)
 		assert.Equal(t, 5000, resp.Data.MaxMessageLength)
 
-		// Channel types are eventually consistent; stream-chat-go sleeps 6s after create
-		time.Sleep(6 * time.Second)
+		// Channel types are eventually consistent
+		time.Sleep(3 * time.Second)
 	})
 
 	t.Run("GetChannelType", func(t *testing.T) {
 		var resp *StreamResponse[GetChannelTypeResponse]
 		var getErr error
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 5; i++ {
 			resp, getErr = client.Chat().GetChannelType(ctx, typeName, &GetChannelTypeRequest{})
 			if getErr == nil {
 				break
 			}
-			time.Sleep(2 * time.Second)
+			time.Sleep(time.Second)
 		}
 		require.NoError(t, getErr)
 		assert.Equal(t, typeName, resp.Data.Name)
@@ -286,7 +290,7 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 			if updateErr == nil {
 				break
 			}
-			time.Sleep(2 * time.Second)
+			time.Sleep(time.Second)
 		}
 		require.NoError(t, updateErr)
 		assert.True(t, resp.Data.MarkMessagesPending)
@@ -315,7 +319,7 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 
 	t.Run("ListChannelTypes", func(t *testing.T) {
 		var found bool
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 5; i++ {
 			resp, err := client.Chat().ListChannelTypes(ctx, &ListChannelTypesRequest{})
 			require.NoError(t, err)
 			require.NotNil(t, resp.Data.ChannelTypes)
@@ -324,7 +328,7 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 			if found {
 				break
 			}
-			time.Sleep(2 * time.Second)
+			time.Sleep(time.Second)
 		}
 		assert.True(t, found, "Created channel type should appear in list")
 	})
@@ -339,8 +343,8 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		// stream-chat-go sleeps 6s after create and retries delete up to 5 times
-		time.Sleep(6 * time.Second)
+		// Channel types are eventually consistent
+		time.Sleep(3 * time.Second)
 
 		var deleteErr error
 		for i := 0; i < 5; i++ {
@@ -355,6 +359,7 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 }
 
 func TestChatThreadIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -476,6 +481,7 @@ func TestChatThreadIntegration(t *testing.T) {
 }
 
 func TestChatAppSettingsIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -525,6 +531,7 @@ func TestChatAppSettingsIntegration(t *testing.T) {
 }
 
 func TestChatUnreadCountsIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -559,6 +566,7 @@ func TestChatUnreadCountsIntegration(t *testing.T) {
 }
 
 func TestChatBanIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -647,6 +655,7 @@ func TestChatBanIntegration(t *testing.T) {
 }
 
 func TestChatMuteIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -718,6 +727,7 @@ func TestChatMuteIntegration(t *testing.T) {
 }
 
 func TestChatFlagIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -770,6 +780,7 @@ func TestChatFlagIntegration(t *testing.T) {
 }
 
 func TestChatPermissionsIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -785,7 +796,7 @@ func TestChatPermissionsIntegration(t *testing.T) {
 
 		// List roles and verify (retry for eventual consistency)
 		var found bool
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 5; i++ {
 			listResp, err := client.ListRoles(ctx, &ListRolesRequest{})
 			require.NoError(t, err)
 
@@ -798,12 +809,12 @@ func TestChatPermissionsIntegration(t *testing.T) {
 			if found {
 				break
 			}
-			time.Sleep(2 * time.Second)
+			time.Sleep(time.Second)
 		}
 		assert.True(t, found, "Created role should appear in list")
 
 		// Delete role (may need retry due to propagation delay)
-		time.Sleep(2 * time.Second)
+		time.Sleep(500 * time.Millisecond)
 		var deleteErr error
 		for i := 0; i < 5; i++ {
 			_, deleteErr = client.DeleteRole(ctx, roleName, &DeleteRoleRequest{})
@@ -830,6 +841,7 @@ func TestChatPermissionsIntegration(t *testing.T) {
 }
 
 func TestChatExportChannelsIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -858,6 +870,7 @@ func TestChatExportChannelsIntegration(t *testing.T) {
 }
 
 func TestChatCustomEventIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -878,6 +891,7 @@ func TestChatCustomEventIntegration(t *testing.T) {
 }
 
 func TestChatRestoreUsersIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -889,7 +903,7 @@ func TestChatRestoreUsersIntegration(t *testing.T) {
 	// Delete the user (soft delete) — retry on rate limit
 	var delResp *StreamResponse[DeleteUsersResponse]
 	var err error
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 3; i++ {
 		delResp, err = client.DeleteUsers(ctx, &DeleteUsersRequest{
 			UserIds: []string{userID},
 			User:    PtrTo("soft"),
@@ -897,8 +911,8 @@ func TestChatRestoreUsersIntegration(t *testing.T) {
 		if err == nil || !strings.Contains(err.Error(), "Too many requests") {
 			break
 		}
-		t.Logf("DeleteUsers rate limited, attempt %d/10, waiting %ds", i+1, (i+1)*3)
-		time.Sleep(time.Duration(i+1) * 3 * time.Second)
+		t.Logf("DeleteUsers rate limited, attempt %d/3, waiting %ds", i+1, (i+1)*2)
+		time.Sleep(time.Duration(i+1) * 2 * time.Second)
 	}
 	require.NoError(t, err)
 	assert.NotEmpty(t, delResp.Data.TaskID)
@@ -928,6 +942,7 @@ func TestChatRestoreUsersIntegration(t *testing.T) {
 }
 
 func TestChatShadowBanIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -1023,6 +1038,7 @@ func TestChatShadowBanIntegration(t *testing.T) {
 }
 
 func TestChatReminderIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -1128,6 +1144,7 @@ func TestChatReminderIntegration(t *testing.T) {
 }
 
 func TestChatDeliveryReceiptsIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -1188,6 +1205,7 @@ func TestChatDeliveryReceiptsIntegration(t *testing.T) {
 }
 
 func TestChatExportUsersIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -1207,6 +1225,7 @@ func TestChatExportUsersIntegration(t *testing.T) {
 }
 
 func TestChatLiveLocationIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -1298,6 +1317,7 @@ func TestChatLiveLocationIntegration(t *testing.T) {
 }
 
 func TestChatCreateTokenIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 
@@ -1315,6 +1335,7 @@ func TestChatCreateTokenIntegration(t *testing.T) {
 }
 
 func TestChatGetRateLimitsIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -1354,6 +1375,7 @@ func TestChatGetRateLimitsIntegration(t *testing.T) {
 }
 
 func TestChatCheckSQSSNSPushIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -1401,6 +1423,7 @@ func TestChatCheckSQSSNSPushIntegration(t *testing.T) {
 }
 
 func TestChatAppFileUploadConfigIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -1428,7 +1451,7 @@ func TestChatAppFileUploadConfigIntegration(t *testing.T) {
 
 		// Verify via GetApp (retry for eventual consistency)
 		var matched bool
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 5; i++ {
 			verifyResp, err := client.GetApp(ctx, &GetAppRequest{})
 			require.NoError(t, err)
 			cfg := verifyResp.Data.App.FileUploadConfig
@@ -1438,13 +1461,14 @@ func TestChatAppFileUploadConfigIntegration(t *testing.T) {
 				assert.Equal(t, []string{"application/pdf", "text/plain"}, cfg.AllowedMimeTypes)
 				break
 			}
-			time.Sleep(2 * time.Second)
+			time.Sleep(time.Second)
 		}
 		assert.True(t, matched, "File upload config should be updated")
 	})
 }
 
 func TestChatEventHooksIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -1476,14 +1500,14 @@ func TestChatEventHooksIntegration(t *testing.T) {
 
 		// Verify hooks were set (retry for eventual consistency)
 		var found bool
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 5; i++ {
 			verifyResp, err := client.GetApp(ctx, &GetAppRequest{})
 			require.NoError(t, err)
 			if len(verifyResp.Data.App.EventHooks) > 0 {
 				found = true
 				break
 			}
-			time.Sleep(2 * time.Second)
+			time.Sleep(time.Second)
 		}
 		require.True(t, found, "Event hooks should be set")
 	})
@@ -1553,20 +1577,21 @@ func TestChatEventHooksIntegration(t *testing.T) {
 
 		// Verify hooks were cleared (retry for eventual consistency)
 		var cleared bool
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 5; i++ {
 			verifyResp, err := client.GetApp(ctx, &GetAppRequest{})
 			require.NoError(t, err)
 			if len(verifyResp.Data.App.EventHooks) == 0 {
 				cleared = true
 				break
 			}
-			time.Sleep(2 * time.Second)
+			time.Sleep(time.Second)
 		}
 		assert.True(t, cleared, "Event hooks should be cleared")
 	})
 }
 
 func TestChatQueryFutureChannelBansIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -1630,6 +1655,7 @@ func TestChatQueryFutureChannelBansIntegration(t *testing.T) {
 // ListPermissions and GetPermission are tested in TestChatPermissionsIntegration above.
 
 func TestChatTeamUsageStatsIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 	ctx := context.Background()
@@ -1733,6 +1759,7 @@ func initMultiTenantClient(t *testing.T) *Stream {
 }
 
 func TestChatTeamUsageStatsMultiTenantIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initMultiTenantClient(t)
 	if client == nil {
@@ -1850,6 +1877,7 @@ func TestChatTeamUsageStatsMultiTenantIntegration(t *testing.T) {
 }
 
 func TestChatContextExceededIntegration(t *testing.T) {
+	t.Parallel()
 	skipIfShort(t)
 	client := initClient(t)
 
