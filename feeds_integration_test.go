@@ -1776,20 +1776,31 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	assert.Equal(t, feedViewID, getResponse.Data.FeedView.ID)
 	fmt.Printf("✅ Retrieved feed view: %s\n", feedViewID)
 
-	// Test 4: Update Feed View
+	// Test 4: Update Feed View (retry to handle eventual consistency)
 	fmt.Println("\n✏️ Testing update feed view...")
 	// snippet-start: UpdateFeedView
-	updateResponse, err := feedsClient.UpdateFeedView(ctx, feedViewID, &getstream.UpdateFeedViewRequest{
-		ActivitySelectors: []getstream.ActivitySelectorConfig{
-			{
-				Type:          "popular",
-				MinPopularity: getstream.PtrTo(10),
+	var updateResponse *getstream.StreamResponse[getstream.UpdateFeedViewResponse]
+	for i := 0; i < 5; i++ {
+		updateResponse, err = feedsClient.UpdateFeedView(ctx, feedViewID, &getstream.UpdateFeedViewRequest{
+			ActivitySelectors: []getstream.ActivitySelectorConfig{
+				{
+					Type:          "popular",
+					MinPopularity: getstream.PtrTo(10),
+				},
 			},
-		},
-		Aggregation: &getstream.AggregationConfig{
-			Format: getstream.PtrTo("popularity_based"),
-		},
-	})
+			Aggregation: &getstream.AggregationConfig{
+				Format: getstream.PtrTo("popularity_based"),
+			},
+		})
+		if err == nil {
+			break
+		}
+		if strings.Contains(err.Error(), "not found") {
+			time.Sleep(time.Duration(i+1) * 2 * time.Second)
+			continue
+		}
+		break
+	}
 	// snippet-end: UpdateFeedView
 
 	assertResponseSuccess(t, updateResponse, err, "update feed view")
