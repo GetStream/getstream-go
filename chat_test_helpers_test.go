@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -33,7 +34,8 @@ func (c *rateLimitClient) Do(r *http.Request) (*http.Response, error) {
 		r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 	}
 
-	for i := 0; i < 5; i++ {
+	const maxRetries = 8
+	for i := 0; i < maxRetries; i++ {
 		if i > 0 && bodyBytes != nil {
 			r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 		}
@@ -72,15 +74,19 @@ func rateLimitBackoff(headers http.Header, attempt int) time.Duration {
 			}
 		}
 	}
-	// Exponential backoff: 2s, 4s, 8s, 16s, 32s — plus jitter
+	// Exponential backoff: 2s, 4s, 8s, 16s, capped at 30s — plus jitter
 	base := time.Duration(1<<uint(attempt+1)) * time.Second
+	if base > 30*time.Second {
+		base = 30 * time.Second
+	}
 	jitter := time.Duration(rand.Intn(1000)) * time.Millisecond
 	return base + jitter
 }
 
 // newRateLimitClient wraps an http.Client with automatic 429 retry.
+// The inner client timeout applies per-attempt, not for the whole retry chain.
 func newRateLimitClient() *rateLimitClient {
-	return &rateLimitClient{inner: &http.Client{Timeout: 30 * time.Second}}
+	return &rateLimitClient{inner: &http.Client{Timeout: 60 * time.Second}}
 }
 
 // requireNoErrorOrSkipRateLimit asserts no error, but skips the test if the
@@ -89,8 +95,7 @@ func newRateLimitClient() *rateLimitClient {
 func requireNoErrorOrSkipRateLimit(t *testing.T, err error) {
 	t.Helper()
 	if err != nil {
-		errMsg := err.Error()
-		if errMsg == "Too many requests, check response headers for more information." {
+		if strings.Contains(err.Error(), "Too many requests") {
 			t.Skipf("Skipping: rate limited after retries (%s)", t.Name())
 		}
 	}
@@ -102,7 +107,7 @@ func requireNoErrorOrSkipRateLimit(t *testing.T, err error) {
 // The rateLimitClient handles 429 retries at the HTTP level, so this just
 // does a single attempt — cleanup failures are acceptable.
 func deleteUsersWithRetry(client *Stream, userIDs []string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 	_, _ = client.DeleteUsers(ctx, &DeleteUsersRequest{
 		UserIds:       userIDs,
