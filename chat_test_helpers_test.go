@@ -15,9 +15,9 @@ import (
 // Used in t.Cleanup to avoid "Too many requests" failures.
 // Cleanup failures are acceptable — leftover test users are harmless.
 func deleteUsersWithRetry(client *Stream, userIDs []string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 5; i++ {
 		_, err := client.DeleteUsers(ctx, &DeleteUsersRequest{
 			UserIds:       userIDs,
 			User:          PtrTo("hard"),
@@ -27,10 +27,12 @@ func deleteUsersWithRetry(client *Stream, userIDs []string) {
 		if err == nil || !strings.Contains(err.Error(), "Too many requests") {
 			return
 		}
+		// Exponential backoff: 2s, 4s, 8s, 16s (capped at context timeout)
+		backoff := time.Duration(1<<uint(i+1)) * time.Second
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(time.Duration(i+1) * time.Second):
+		case <-time.After(backoff):
 		}
 	}
 }

@@ -900,10 +900,10 @@ func TestChatRestoreUsersIntegration(t *testing.T) {
 	userIDs := createTestUsers(t, client, 1)
 	userID := userIDs[0]
 
-	// Delete the user (soft delete) — retry on rate limit
+	// Delete the user (soft delete) — retry with exponential backoff on rate limit
 	var delResp *StreamResponse[DeleteUsersResponse]
 	var err error
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 5; i++ {
 		delResp, err = client.DeleteUsers(ctx, &DeleteUsersRequest{
 			UserIds: []string{userID},
 			User:    PtrTo("soft"),
@@ -911,8 +911,9 @@ func TestChatRestoreUsersIntegration(t *testing.T) {
 		if err == nil || !strings.Contains(err.Error(), "Too many requests") {
 			break
 		}
-		t.Logf("DeleteUsers rate limited, attempt %d/3, waiting %ds", i+1, (i+1)*2)
-		time.Sleep(time.Duration(i+1) * 2 * time.Second)
+		backoff := time.Duration(1<<uint(i+1)) * time.Second
+		t.Logf("DeleteUsers rate limited, attempt %d/5, waiting %s", i+1, backoff)
+		time.Sleep(backoff)
 	}
 	require.NoError(t, err)
 	assert.NotEmpty(t, delResp.Data.TaskID)

@@ -578,8 +578,8 @@ func TestChatMessageIntegration(t *testing.T) {
 		require.Error(t, err, "Using both Query and MessageFilterConditions should error")
 	})
 
-	t.Run("SearchOffsetAndSortError", func(t *testing.T) {
-		// Using Offset with Sort should error
+	t.Run("SearchOffsetAndSort", func(t *testing.T) {
+		// The API now allows using Offset with Sort
 		_, err := client.Chat().Search(ctx, &SearchRequest{
 			Payload: &SearchPayload{
 				FilterConditions: map[string]any{
@@ -592,7 +592,7 @@ func TestChatMessageIntegration(t *testing.T) {
 				},
 			},
 		})
-		require.Error(t, err, "Using Offset with Sort should error")
+		require.NoError(t, err, "Using Offset with Sort should succeed")
 	})
 
 	t.Run("SearchOffsetAndNextError", func(t *testing.T) {
