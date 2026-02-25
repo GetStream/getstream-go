@@ -915,6 +915,9 @@ func TestChatRestoreUsersIntegration(t *testing.T) {
 		t.Logf("DeleteUsers rate limited, attempt %d/5, waiting %s", i+1, backoff)
 		time.Sleep(backoff)
 	}
+	if err != nil && strings.Contains(err.Error(), "Too many requests") {
+		t.Skip("Skipping: DeleteUsers rate limited after all retries")
+	}
 	require.NoError(t, err)
 	assert.NotEmpty(t, delResp.Data.TaskID)
 

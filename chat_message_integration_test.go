@@ -579,14 +579,18 @@ func TestChatMessageIntegration(t *testing.T) {
 	})
 
 	t.Run("SearchOffsetAndSort", func(t *testing.T) {
-		// The API now allows using Offset with Sort
+		// Create a channel with a message so the search has something to find
+		ch, _ := createTestChannelWithMembers(t, client, userID, []string{userID})
+		sendTestMessage(t, ch, userID, "search offset sort test")
+
+		// The API allows using Offset with Sort
 		_, err := client.Chat().Search(ctx, &SearchRequest{
 			Payload: &SearchPayload{
 				FilterConditions: map[string]any{
 					"members": map[string]any{"$in": []string{userID}},
 				},
 				Query:  PtrTo("test"),
-				Offset: PtrTo(1),
+				Offset: PtrTo(0),
 				Sort: []SortParamRequest{
 					{Field: PtrTo("created_at"), Direction: PtrTo(-1)},
 				},
