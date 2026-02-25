@@ -87,6 +87,9 @@ func TestChatBlocklistIntegration(t *testing.T) {
 		})
 		require.NoError(t, err)
 		require.NotNil(t, resp.Data)
+
+		// Wait for eventual consistency
+		time.Sleep(2 * time.Second)
 	})
 
 	t.Run("GetBlockList", func(t *testing.T) {
@@ -157,6 +160,9 @@ func TestChatCommandIntegration(t *testing.T) {
 		require.NotNil(t, resp.Data.Command)
 		assert.Equal(t, cmdName, resp.Data.Command.Name)
 		assert.Equal(t, "A test command", resp.Data.Command.Description)
+
+		// Wait for eventual consistency
+		time.Sleep(2 * time.Second)
 	})
 
 	t.Run("GetCommand", func(t *testing.T) {
@@ -199,8 +205,18 @@ func TestChatCommandIntegration(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		resp, err := client.Chat().DeleteCommand(ctx, delName, &DeleteCommandRequest{})
-		require.NoError(t, err)
+		// Wait for eventual consistency then retry
+		time.Sleep(2 * time.Second)
+		var deleteErr error
+		var resp *StreamResponse[DeleteCommandResponse]
+		for i := 0; i < 5; i++ {
+			resp, deleteErr = client.Chat().DeleteCommand(ctx, delName, &DeleteCommandRequest{})
+			if deleteErr == nil {
+				break
+			}
+			time.Sleep(time.Second)
+		}
+		require.NoError(t, deleteErr)
 		assert.Equal(t, delName, resp.Data.Name)
 	})
 }
@@ -232,8 +248,16 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 	})
 
 	t.Run("GetChannelType", func(t *testing.T) {
-		resp, err := client.Chat().GetChannelType(ctx, typeName, &GetChannelTypeRequest{})
-		require.NoError(t, err)
+		var resp *StreamResponse[GetChannelTypeResponse]
+		var getErr error
+		for i := 0; i < 10; i++ {
+			resp, getErr = client.Chat().GetChannelType(ctx, typeName, &GetChannelTypeRequest{})
+			if getErr == nil {
+				break
+			}
+			time.Sleep(2 * time.Second)
+		}
+		require.NoError(t, getErr)
 		assert.Equal(t, typeName, resp.Data.Name)
 	})
 
@@ -250,13 +274,21 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 	})
 
 	t.Run("UpdateChannelTypeMarkMessagesPending", func(t *testing.T) {
-		resp, err := client.Chat().UpdateChannelType(ctx, typeName, &UpdateChannelTypeRequest{
-			Automod:             "disabled",
-			AutomodBehavior:     "flag",
-			MaxMessageLength:    10000,
-			MarkMessagesPending: PtrTo(true),
-		})
-		require.NoError(t, err)
+		var resp *StreamResponse[UpdateChannelTypeResponse]
+		var updateErr error
+		for i := 0; i < 5; i++ {
+			resp, updateErr = client.Chat().UpdateChannelType(ctx, typeName, &UpdateChannelTypeRequest{
+				Automod:             "disabled",
+				AutomodBehavior:     "flag",
+				MaxMessageLength:    10000,
+				MarkMessagesPending: PtrTo(true),
+			})
+			if updateErr == nil {
+				break
+			}
+			time.Sleep(2 * time.Second)
+		}
+		require.NoError(t, updateErr)
 		assert.True(t, resp.Data.MarkMessagesPending)
 
 		// Verify via get
@@ -282,11 +314,18 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 	})
 
 	t.Run("ListChannelTypes", func(t *testing.T) {
-		resp, err := client.Chat().ListChannelTypes(ctx, &ListChannelTypesRequest{})
-		require.NoError(t, err)
-		require.NotNil(t, resp.Data.ChannelTypes)
+		var found bool
+		for i := 0; i < 10; i++ {
+			resp, err := client.Chat().ListChannelTypes(ctx, &ListChannelTypesRequest{})
+			require.NoError(t, err)
+			require.NotNil(t, resp.Data.ChannelTypes)
 
-		_, found := resp.Data.ChannelTypes[typeName]
+			_, found = resp.Data.ChannelTypes[typeName]
+			if found {
+				break
+			}
+			time.Sleep(2 * time.Second)
+		}
 		assert.True(t, found, "Created channel type should appear in list")
 	})
 
@@ -744,16 +783,22 @@ func TestChatPermissionsIntegration(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		// List roles and verify
-		listResp, err := client.ListRoles(ctx, &ListRolesRequest{})
-		require.NoError(t, err)
+		// List roles and verify (retry for eventual consistency)
+		var found bool
+		for i := 0; i < 10; i++ {
+			listResp, err := client.ListRoles(ctx, &ListRolesRequest{})
+			require.NoError(t, err)
 
-		found := false
-		for _, role := range listResp.Data.Roles {
-			if role.Name == roleName {
-				found = true
-				assert.True(t, role.Custom, "Created role should be custom")
+			for _, role := range listResp.Data.Roles {
+				if role.Name == roleName {
+					found = true
+					assert.True(t, role.Custom, "Created role should be custom")
+				}
 			}
+			if found {
+				break
+			}
+			time.Sleep(2 * time.Second)
 		}
 		assert.True(t, found, "Created role should appear in list")
 
@@ -1381,13 +1426,21 @@ func TestChatAppFileUploadConfigIntegration(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		// Verify via GetApp
-		verifyResp, err := client.GetApp(ctx, &GetAppRequest{})
-		require.NoError(t, err)
-		cfg := verifyResp.Data.App.FileUploadConfig
-		assert.Equal(t, 10*1024*1024, cfg.SizeLimit)
-		assert.Equal(t, []string{".pdf", ".doc", ".txt"}, cfg.AllowedFileExtensions)
-		assert.Equal(t, []string{"application/pdf", "text/plain"}, cfg.AllowedMimeTypes)
+		// Verify via GetApp (retry for eventual consistency)
+		var matched bool
+		for i := 0; i < 10; i++ {
+			verifyResp, err := client.GetApp(ctx, &GetAppRequest{})
+			require.NoError(t, err)
+			cfg := verifyResp.Data.App.FileUploadConfig
+			if cfg.SizeLimit == 10*1024*1024 {
+				matched = true
+				assert.Equal(t, []string{".pdf", ".doc", ".txt"}, cfg.AllowedFileExtensions)
+				assert.Equal(t, []string{"application/pdf", "text/plain"}, cfg.AllowedMimeTypes)
+				break
+			}
+			time.Sleep(2 * time.Second)
+		}
+		assert.True(t, matched, "File upload config should be updated")
 	})
 }
 
@@ -1421,10 +1474,18 @@ func TestChatEventHooksIntegration(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		// Verify hooks were set
-		verifyResp, err := client.GetApp(ctx, &GetAppRequest{})
-		require.NoError(t, err)
-		require.NotEmpty(t, verifyResp.Data.App.EventHooks)
+		// Verify hooks were set (retry for eventual consistency)
+		var found bool
+		for i := 0; i < 10; i++ {
+			verifyResp, err := client.GetApp(ctx, &GetAppRequest{})
+			require.NoError(t, err)
+			if len(verifyResp.Data.App.EventHooks) > 0 {
+				found = true
+				break
+			}
+			time.Sleep(2 * time.Second)
+		}
+		require.True(t, found, "Event hooks should be set")
 	})
 
 	t.Run("PendingMessageAsyncModerationConfig", func(t *testing.T) {
@@ -1490,9 +1551,18 @@ func TestChatEventHooksIntegration(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		verifyResp, err := client.GetApp(ctx, &GetAppRequest{})
-		require.NoError(t, err)
-		assert.Empty(t, verifyResp.Data.App.EventHooks)
+		// Verify hooks were cleared (retry for eventual consistency)
+		var cleared bool
+		for i := 0; i < 10; i++ {
+			verifyResp, err := client.GetApp(ctx, &GetAppRequest{})
+			require.NoError(t, err)
+			if len(verifyResp.Data.App.EventHooks) == 0 {
+				cleared = true
+				break
+			}
+			time.Sleep(2 * time.Second)
+		}
+		assert.True(t, cleared, "Event hooks should be cleared")
 	})
 }
 

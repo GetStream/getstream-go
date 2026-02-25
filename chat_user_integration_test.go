@@ -2,7 +2,9 @@ package getstream_test
 
 import (
 	"context"
+	"strings"
 	"testing"
+	"time"
 
 	. "github.com/GetStream/getstream-go/v3"
 	"github.com/google/uuid"
@@ -229,10 +231,23 @@ func TestChatUserIntegration(t *testing.T) {
 	t.Run("DeleteUsers", func(t *testing.T) {
 		userIDs := newUsers(t, 2)
 
-		resp, err := client.DeleteUsers(ctx, &DeleteUsersRequest{
-			UserIds: userIDs,
-		})
-		require.NoError(t, err)
+		// Retry to handle rate limiting
+		var resp *StreamResponse[DeleteUsersResponse]
+		var deleteErr error
+		for i := 0; i < 5; i++ {
+			resp, deleteErr = client.DeleteUsers(ctx, &DeleteUsersRequest{
+				UserIds: userIDs,
+			})
+			if deleteErr == nil {
+				break
+			}
+			if strings.Contains(deleteErr.Error(), "Too many requests") {
+				time.Sleep(time.Duration(i+1) * 3 * time.Second)
+				continue
+			}
+			break
+		}
+		require.NoError(t, deleteErr)
 
 		taskID := resp.Data.TaskID
 		require.NotEmpty(t, taskID, "Task ID should not be empty")
