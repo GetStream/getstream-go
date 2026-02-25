@@ -39,7 +39,9 @@ const skipSlowTests = true
 func initClient(t *testing.T) *Stream {
 	t.Helper()
 
-	stream, err := NewClientFromEnvVars()
+	stream, err := NewClientFromEnvVars(
+		WithHTTPClient(newRateLimitClient()),
+	)
 	require.NoError(t, err, "Failed to create client from env vars")
 
 	return stream

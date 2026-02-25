@@ -25,10 +25,10 @@ func (c *StubHTTPClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func WaitForTask(ctx context.Context, client *Stream, taskID string) (*StreamResponse[GetTaskResponse], error) {
-	// Simple polling loop matching stream-chat-go's pattern:
-	// use background context for HTTP calls so the client's own timeout
+	// Poll with increasing intervals to handle slow task completion under load.
+	// Use background context for HTTP calls so the client's own timeout
 	// governs each request, not the caller's deadline.
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 30; i++ {
 		taskResult, err := client.GetTask(context.Background(), taskID, &GetTaskRequest{})
 		if err != nil {
 			return nil, fmt.Errorf("failed to get task result: %w", err)
@@ -36,9 +36,9 @@ func WaitForTask(ctx context.Context, client *Stream, taskID string) (*StreamRes
 		if taskResult.Data.Status == "completed" || taskResult.Data.Status == "failed" {
 			return taskResult, nil
 		}
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(time.Second)
 	}
-	return nil, fmt.Errorf("task %s did not complete after 20 attempts", taskID)
+	return nil, fmt.Errorf("task %s did not complete after 30 attempts", taskID)
 }
 
 // ResourceManager manages resource cleanup for tests.

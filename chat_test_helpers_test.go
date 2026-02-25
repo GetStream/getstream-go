@@ -1,8 +1,12 @@
 package getstream_test
 
 import (
+	"bytes"
 	"context"
-	"strings"
+	"io"
+	"math/rand"
+	"net/http"
+	"strconv"
 	"testing"
 	"time"
 
@@ -11,30 +15,101 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// deleteUsersWithRetry calls DeleteUsers with retry logic to handle rate limiting.
-// Used in t.Cleanup to avoid "Too many requests" failures.
-// Cleanup failures are acceptable — leftover test users are harmless.
-func deleteUsersWithRetry(client *Stream, userIDs []string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	for i := 0; i < 5; i++ {
-		_, err := client.DeleteUsers(ctx, &DeleteUsersRequest{
-			UserIds:       userIDs,
-			User:          PtrTo("hard"),
-			Messages:      PtrTo("hard"),
-			Conversations: PtrTo("hard"),
-		})
-		if err == nil || !strings.Contains(err.Error(), "Too many requests") {
-			return
+// rateLimitClient wraps an HttpClient and automatically retries on 429 responses
+// with exponential backoff and jitter to avoid thundering herd.
+type rateLimitClient struct {
+	inner HttpClient
+}
+
+func (c *rateLimitClient) Do(r *http.Request) (*http.Response, error) {
+	// Buffer the body so we can replay it on retry
+	var bodyBytes []byte
+	if r.Body != nil {
+		var err error
+		bodyBytes, err = io.ReadAll(r.Body)
+		if err != nil {
+			return nil, err
 		}
-		// Exponential backoff: 2s, 4s, 8s, 16s (capped at context timeout)
-		backoff := time.Duration(1<<uint(i+1)) * time.Second
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(backoff):
+		r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+	}
+
+	for i := 0; i < 5; i++ {
+		if i > 0 && bodyBytes != nil {
+			r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+		}
+		resp, err := c.inner.Do(r)
+		if err != nil {
+			return resp, err
+		}
+		if resp.StatusCode != http.StatusTooManyRequests {
+			return resp, nil
+		}
+		// Drain and close the 429 response body before retrying
+		io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+
+		// Use the reset header if available, otherwise exponential backoff + jitter
+		backoff := rateLimitBackoff(resp.Header, i)
+		time.Sleep(backoff)
+	}
+	// Exhausted retries — replay one last time and return whatever we get
+	if bodyBytes != nil {
+		r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+	}
+	return c.inner.Do(r)
+}
+
+// rateLimitBackoff calculates a backoff duration from the rate limit reset header.
+// Falls back to exponential backoff with jitter if the header is missing.
+func rateLimitBackoff(headers http.Header, attempt int) time.Duration {
+	if resetStr := headers.Get("X-Ratelimit-Reset"); resetStr != "" {
+		if resetUnix, err := strconv.ParseInt(resetStr, 10, 64); err == nil && resetUnix > 0 {
+			wait := time.Until(time.Unix(resetUnix, 0))
+			if wait > 0 && wait < 90*time.Second {
+				// Add small jitter to desynchronize concurrent retries
+				jitter := time.Duration(rand.Intn(1000)) * time.Millisecond
+				return wait + jitter
+			}
 		}
 	}
+	// Exponential backoff: 2s, 4s, 8s, 16s, 32s — plus jitter
+	base := time.Duration(1<<uint(attempt+1)) * time.Second
+	jitter := time.Duration(rand.Intn(1000)) * time.Millisecond
+	return base + jitter
+}
+
+// newRateLimitClient wraps an http.Client with automatic 429 retry.
+func newRateLimitClient() *rateLimitClient {
+	return &rateLimitClient{inner: &http.Client{Timeout: 30 * time.Second}}
+}
+
+// requireNoErrorOrSkipRateLimit asserts no error, but skips the test if the
+// error is a rate limit ("Too many requests"). Use this for API calls that are
+// heavily contended in parallel test runs.
+func requireNoErrorOrSkipRateLimit(t *testing.T, err error) {
+	t.Helper()
+	if err != nil {
+		errMsg := err.Error()
+		if errMsg == "Too many requests, check response headers for more information." {
+			t.Skipf("Skipping: rate limited after retries (%s)", t.Name())
+		}
+	}
+	require.NoError(t, err)
+}
+
+// deleteUsersWithRetry calls DeleteUsers with retry logic to handle rate limiting.
+// Used in t.Cleanup to avoid "Too many requests" failures.
+// The rateLimitClient handles 429 retries at the HTTP level, so this just
+// does a single attempt — cleanup failures are acceptable.
+func deleteUsersWithRetry(client *Stream, userIDs []string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
+	_, _ = client.DeleteUsers(ctx, &DeleteUsersRequest{
+		UserIds:       userIDs,
+		User:          PtrTo("hard"),
+		Messages:      PtrTo("hard"),
+		Conversations: PtrTo("hard"),
+	})
 }
 
 // skipIfShort skips integration tests when running with -short flag.

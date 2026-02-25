@@ -2,9 +2,7 @@ package getstream_test
 
 import (
 	"context"
-	"strings"
 	"testing"
-	"time"
 
 	. "github.com/GetStream/getstream-go/v3"
 	"github.com/google/uuid"
@@ -232,30 +230,10 @@ func TestChatUserIntegration(t *testing.T) {
 	t.Run("DeleteUsers", func(t *testing.T) {
 		userIDs := newUsers(t, 2)
 
-		// Retry with exponential backoff to handle rate limiting.
-		// When many parallel tests run cleanup concurrently, this endpoint
-		// can stay rate-limited for extended periods — skip if exhausted.
-		var resp *StreamResponse[DeleteUsersResponse]
-		var deleteErr error
-		for i := 0; i < 5; i++ {
-			resp, deleteErr = client.DeleteUsers(ctx, &DeleteUsersRequest{
-				UserIds: userIDs,
-			})
-			if deleteErr == nil {
-				break
-			}
-			if strings.Contains(deleteErr.Error(), "Too many requests") {
-				backoff := time.Duration(1<<uint(i+1)) * time.Second
-				t.Logf("DeleteUsers rate limited, attempt %d/5, waiting %s", i+1, backoff)
-				time.Sleep(backoff)
-				continue
-			}
-			break
-		}
-		if deleteErr != nil && strings.Contains(deleteErr.Error(), "Too many requests") {
-			t.Skip("Skipping: DeleteUsers rate limited after all retries")
-		}
-		require.NoError(t, deleteErr)
+		resp, err := client.DeleteUsers(ctx, &DeleteUsersRequest{
+			UserIds: userIDs,
+		})
+		requireNoErrorOrSkipRateLimit(t, err)
 
 		taskID := resp.Data.TaskID
 		require.NotEmpty(t, taskID, "Task ID should not be empty")
