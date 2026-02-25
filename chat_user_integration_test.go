@@ -2,9 +2,7 @@ package getstream_test
 
 import (
 	"context"
-	"strings"
 	"testing"
-	"time"
 
 	. "github.com/GetStream/getstream-go/v3"
 	"github.com/google/uuid"
@@ -17,13 +15,40 @@ func TestChatUserIntegration(t *testing.T) {
 	client := initClient(t)
 	ctx := context.Background()
 
+	// Collect all user IDs for a single batch cleanup at the end.
+	// This avoids hitting DeleteUsers rate limits from many individual API calls.
+	var allUserIDs []string
+	t.Cleanup(func() {
+		if len(allUserIDs) > 0 {
+			deleteUsersWithRetry(client, allUserIDs)
+		}
+	})
+
+	// Helper to create test users and add them to the batch cleanup list
+	// instead of registering individual per-subtest cleanups.
+	newUsers := func(t *testing.T, n int) []string {
+		t.Helper()
+		ids := make([]string, n)
+		users := make(map[string]UserRequest, n)
+		for i := 0; i < n; i++ {
+			id := "test-user-" + uuid.New().String()
+			ids[i] = id
+			users[id] = UserRequest{
+				ID:   id,
+				Name: PtrTo("Test User " + id[:8]),
+				Role: PtrTo("user"),
+			}
+		}
+		_, err := client.UpdateUsers(ctx, &UpdateUsersRequest{Users: users})
+		require.NoError(t, err, "Failed to create test users")
+		allUserIDs = append(allUserIDs, ids...)
+		return ids
+	}
+
 	t.Run("UpsertUsers", func(t *testing.T) {
 		userID1 := "upsert-" + uuid.New().String()
 		userID2 := "upsert-" + uuid.New().String()
-
-		t.Cleanup(func() {
-			deleteUsersWithRetry(client, []string{userID1, userID2})
-		})
+		allUserIDs = append(allUserIDs, userID1, userID2)
 
 		resp, err := client.UpdateUsers(ctx, &UpdateUsersRequest{
 			Users: map[string]UserRequest{
@@ -54,7 +79,7 @@ func TestChatUserIntegration(t *testing.T) {
 	})
 
 	t.Run("QueryUsers", func(t *testing.T) {
-		userIDs := createTestUsers(t, client, 2)
+		userIDs := newUsers(t, 2)
 
 		resp, err := client.QueryUsers(ctx, &QueryUsersRequest{
 			Payload: &QueryUsersPayload{
@@ -76,7 +101,7 @@ func TestChatUserIntegration(t *testing.T) {
 	})
 
 	t.Run("QueryUsersWithOffsetLimit", func(t *testing.T) {
-		userIDs := createTestUsers(t, client, 3)
+		userIDs := newUsers(t, 3)
 
 		resp, err := client.QueryUsers(ctx, &QueryUsersRequest{
 			Payload: &QueryUsersPayload{
@@ -92,7 +117,7 @@ func TestChatUserIntegration(t *testing.T) {
 	})
 
 	t.Run("PartialUpdateUser", func(t *testing.T) {
-		userIDs := createTestUsers(t, client, 1)
+		userIDs := newUsers(t, 1)
 		userID := userIDs[0]
 
 		_, err := client.UpdateUsersPartial(ctx, &UpdateUsersPartialRequest{
@@ -132,7 +157,7 @@ func TestChatUserIntegration(t *testing.T) {
 	})
 
 	t.Run("BlockUnblockUser", func(t *testing.T) {
-		userIDs := createTestUsers(t, client, 2)
+		userIDs := newUsers(t, 2)
 		alice := userIDs[0]
 		bob := userIDs[1]
 
@@ -177,7 +202,7 @@ func TestChatUserIntegration(t *testing.T) {
 	})
 
 	t.Run("DeactivateReactivateUser", func(t *testing.T) {
-		userIDs := createTestUsers(t, client, 1)
+		userIDs := newUsers(t, 1)
 		userID := userIDs[0]
 
 		// Deactivate
@@ -202,20 +227,11 @@ func TestChatUserIntegration(t *testing.T) {
 	})
 
 	t.Run("DeleteUsers", func(t *testing.T) {
-		userIDs := createTestUsers(t, client, 2)
+		userIDs := newUsers(t, 2)
 
-		var resp *StreamResponse[DeleteUsersResponse]
-		var err error
-		for i := 0; i < 10; i++ {
-			resp, err = client.DeleteUsers(ctx, &DeleteUsersRequest{
-				UserIds: userIDs,
-			})
-			if err == nil || !strings.Contains(err.Error(), "Too many requests") {
-				break
-			}
-			t.Logf("DeleteUsers rate limited, attempt %d/10, waiting %ds", i+1, (i+1)*3)
-			time.Sleep(time.Duration(i+1) * 3 * time.Second)
-		}
+		resp, err := client.DeleteUsers(ctx, &DeleteUsersRequest{
+			UserIds: userIDs,
+		})
 		require.NoError(t, err)
 
 		taskID := resp.Data.TaskID
@@ -227,7 +243,7 @@ func TestChatUserIntegration(t *testing.T) {
 	})
 
 	t.Run("ExportUser", func(t *testing.T) {
-		userIDs := createTestUsers(t, client, 1)
+		userIDs := newUsers(t, 1)
 		userID := userIDs[0]
 
 		resp, err := client.ExportUser(ctx, userID, &ExportUserRequest{})
@@ -237,10 +253,7 @@ func TestChatUserIntegration(t *testing.T) {
 
 	t.Run("CreateGuest", func(t *testing.T) {
 		guestID := "guest-" + uuid.New().String()
-
-		t.Cleanup(func() {
-			deleteUsersWithRetry(client, []string{guestID})
-		})
+		allUserIDs = append(allUserIDs, guestID)
 
 		resp, err := client.CreateGuest(ctx, &CreateGuestRequest{
 			User: UserRequest{
@@ -260,17 +273,12 @@ func TestChatUserIntegration(t *testing.T) {
 		assert.Contains(t, resp.Data.User.ID, guestID, "Guest user ID should contain the requested ID")
 
 		// Also clean up the actual server-assigned ID
-		t.Cleanup(func() {
-			deleteUsersWithRetry(client, []string{resp.Data.User.ID})
-		})
+		allUserIDs = append(allUserIDs, resp.Data.User.ID)
 	})
 
 	t.Run("UpsertUsersWithRoleAndTeamsRole", func(t *testing.T) {
 		userID := "teams-" + uuid.New().String()
-
-		t.Cleanup(func() {
-			deleteUsersWithRetry(client, []string{userID})
-		})
+		allUserIDs = append(allUserIDs, userID)
 
 		resp, err := client.UpdateUsers(ctx, &UpdateUsersRequest{
 			Users: map[string]UserRequest{
@@ -293,7 +301,7 @@ func TestChatUserIntegration(t *testing.T) {
 	})
 
 	t.Run("PartialUpdateUserWithTeam", func(t *testing.T) {
-		userIDs := createTestUsers(t, client, 1)
+		userIDs := newUsers(t, 1)
 		userID := userIDs[0]
 
 		// Partial update to add teams and teams_role
@@ -319,10 +327,7 @@ func TestChatUserIntegration(t *testing.T) {
 
 	t.Run("UpdatePrivacySettings", func(t *testing.T) {
 		userID := "privacy-" + uuid.New().String()
-
-		t.Cleanup(func() {
-			deleteUsersWithRetry(client, []string{userID})
-		})
+		allUserIDs = append(allUserIDs, userID)
 
 		// Create user without privacy settings
 		resp, err := client.UpdateUsers(ctx, &UpdateUsersRequest{
@@ -387,10 +392,7 @@ func TestChatUserIntegration(t *testing.T) {
 
 	t.Run("PartialUpdatePrivacySettings", func(t *testing.T) {
 		userID := "privacy-partial-" + uuid.New().String()
-
-		t.Cleanup(func() {
-			deleteUsersWithRetry(client, []string{userID})
-		})
+		allUserIDs = append(allUserIDs, userID)
 
 		// Create user
 		resp, err := client.UpdateUsers(ctx, &UpdateUsersRequest{
@@ -449,7 +451,7 @@ func TestChatUserIntegration(t *testing.T) {
 	})
 
 	t.Run("QueryUsersWithDeactivated", func(t *testing.T) {
-		userIDs := createTestUsers(t, client, 3)
+		userIDs := newUsers(t, 3)
 
 		// Deactivate one user
 		_, err := client.DeactivateUser(ctx, userIDs[2], &DeactivateUserRequest{})
@@ -484,7 +486,7 @@ func TestChatUserIntegration(t *testing.T) {
 	})
 
 	t.Run("DeactivateUsersPlural", func(t *testing.T) {
-		userIDs := createTestUsers(t, client, 2)
+		userIDs := newUsers(t, 2)
 
 		// Deactivate multiple users at once
 		resp, err := client.DeactivateUsers(ctx, &DeactivateUsersRequest{
@@ -512,10 +514,7 @@ func TestChatUserIntegration(t *testing.T) {
 
 	t.Run("UserCustomData", func(t *testing.T) {
 		userID := "custom-" + uuid.New().String()
-
-		t.Cleanup(func() {
-			deleteUsersWithRetry(client, []string{userID})
-		})
+		allUserIDs = append(allUserIDs, userID)
 
 		custom := map[string]any{
 			"favorite_color": "blue",
