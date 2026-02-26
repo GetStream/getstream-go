@@ -512,6 +512,81 @@ func (c *Client) UploadImage(ctx context.Context, request *UploadImageRequest) (
 	return res, err
 }
 
+// Lists user groups with cursor-based pagination
+func (c *Client) ListUserGroups(ctx context.Context, request *ListUserGroupsRequest) (*StreamResponse[ListUserGroupsResponse], error) {
+	var result ListUserGroupsResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, ListUserGroupsResponse](c, ctx, "GET", "/api/v2/usergroups", params, nil, &result, nil)
+	return res, err
+}
+
+// Creates a new user group, optionally with initial members
+func (c *Client) CreateUserGroup(ctx context.Context, request *CreateUserGroupRequest) (*StreamResponse[CreateUserGroupResponse], error) {
+	var result CreateUserGroupResponse
+	res, err := MakeRequest[CreateUserGroupRequest, CreateUserGroupResponse](c, ctx, "POST", "/api/v2/usergroups", nil, request, &result, nil)
+	return res, err
+}
+
+// Searches user groups by name prefix for autocomplete
+func (c *Client) SearchUserGroups(ctx context.Context, request *SearchUserGroupsRequest) (*StreamResponse[SearchUserGroupsResponse], error) {
+	var result SearchUserGroupsResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, SearchUserGroupsResponse](c, ctx, "GET", "/api/v2/usergroups/search", params, nil, &result, nil)
+	return res, err
+}
+
+// Deletes a user group and all its members
+func (c *Client) DeleteUserGroup(ctx context.Context, id string, request *DeleteUserGroupRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"id": id,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/usergroups/{id}", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Gets a user group by ID, including its members
+func (c *Client) GetUserGroup(ctx context.Context, id string, request *GetUserGroupRequest) (*StreamResponse[GetUserGroupResponse], error) {
+	var result GetUserGroupResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetUserGroupResponse](c, ctx, "GET", "/api/v2/usergroups/{id}", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Updates a user group's name and/or description. team_id is immutable.
+func (c *Client) UpdateUserGroup(ctx context.Context, id string, request *UpdateUserGroupRequest) (*StreamResponse[UpdateUserGroupResponse], error) {
+	var result UpdateUserGroupResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[UpdateUserGroupRequest, UpdateUserGroupResponse](c, ctx, "PUT", "/api/v2/usergroups/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Removes members from a user group. Users already not in the group are silently ignored.
+func (c *Client) RemoveUserGroupMembers(ctx context.Context, id string, request *RemoveUserGroupMembersRequest) (*StreamResponse[RemoveUserGroupMembersResponse], error) {
+	var result RemoveUserGroupMembersResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, RemoveUserGroupMembersResponse](c, ctx, "DELETE", "/api/v2/usergroups/{id}/members", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Adds members to a user group. All user IDs must exist. The operation is all-or-nothing.
+func (c *Client) AddUserGroupMembers(ctx context.Context, id string, request *AddUserGroupMembersRequest) (*StreamResponse[AddUserGroupMembersResponse], error) {
+	var result AddUserGroupMembersResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[AddUserGroupMembersRequest, AddUserGroupMembersResponse](c, ctx, "POST", "/api/v2/usergroups/{id}/members", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Find and filter users
 func (c *Client) QueryUsers(ctx context.Context, request *QueryUsersRequest) (*StreamResponse[QueryUsersResponse], error) {
 	var result QueryUsersResponse

@@ -129,6 +129,7 @@ const (
 	EventTypeFeedsFeedUpdated                   = "feeds.feed.updated"
 	EventTypeFeedsFeedGroupChanged              = "feeds.feed_group.changed"
 	EventTypeFeedsFeedGroupDeleted              = "feeds.feed_group.deleted"
+	EventTypeFeedsFeedGroupRestored             = "feeds.feed_group.restored"
 	EventTypeFeedsFeedMemberAdded               = "feeds.feed_member.added"
 	EventTypeFeedsFeedMemberRemoved             = "feeds.feed_member.removed"
 	EventTypeFeedsFeedMemberUpdated             = "feeds.feed_member.updated"
@@ -180,6 +181,11 @@ const (
 	EventTypeUserUnmuted                        = "user.unmuted"
 	EventTypeUserUnreadMessageReminder          = "user.unread_message_reminder"
 	EventTypeUserUpdated                        = "user.updated"
+	EventTypeUserGroupCreated                   = "user_group.created"
+	EventTypeUserGroupDeleted                   = "user_group.deleted"
+	EventTypeUserGroupMemberAdded               = "user_group.member_added"
+	EventTypeUserGroupMemberRemoved             = "user_group.member_removed"
+	EventTypeUserGroupUpdated                   = "user_group.updated"
 )
 
 // GetEventType extracts the event type from a raw webhook payload.
@@ -464,6 +470,8 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(FeedGroupChangedEvent)
 	case "feeds.feed_group.deleted":
 		event = new(FeedGroupDeletedEvent)
+	case "feeds.feed_group.restored":
+		event = new(FeedGroupRestoredEvent)
 	case "feeds.feed_member.added":
 		event = new(FeedMemberAddedEvent)
 	case "feeds.feed_member.removed":
@@ -566,6 +574,16 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(UserUnreadReminderEvent)
 	case "user.updated":
 		event = new(UserUpdatedEvent)
+	case "user_group.created":
+		event = new(UserGroupCreatedEvent)
+	case "user_group.deleted":
+		event = new(UserGroupDeletedEvent)
+	case "user_group.member_added":
+		event = new(UserGroupMemberAddedEvent)
+	case "user_group.member_removed":
+		event = new(UserGroupMemberRemovedEvent)
+	case "user_group.updated":
+		event = new(UserGroupUpdatedEvent)
 	default:
 		return nil, fmt.Errorf("unknown webhook event type: %s", eventType)
 	}

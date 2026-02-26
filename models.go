@@ -678,6 +678,12 @@ type AddReactionResponse struct {
 	NotificationCreated *bool `json:"notification_created,omitempty"`
 }
 
+// Response for adding members to a user group
+type AddUserGroupMembersResponse struct {
+	Duration  string             `json:"duration"`
+	UserGroup *UserGroupResponse `json:"user_group,omitempty"`
+}
+
 type AggregatedActivityResponse struct {
 	// Number of activities in this aggregation
 	ActivityCount int `json:"activity_count"`
@@ -2242,6 +2248,10 @@ type CallStatsReportReadyEvent struct {
 	SessionID string `json:"session_id"`
 	// The type of event, "call.report_ready" in this case
 	Type string `json:"type"`
+	// Whether participants_overview is truncated by the server-side limit
+	IsTrimmed *bool `json:"is_trimmed,omitempty"`
+	// Top participant sessions overview
+	ParticipantsOverview []CallStatsParticipant `json:"participants_overview,omitempty"`
 }
 
 func (e *CallStatsReportReadyEvent) GetEventType() string {
@@ -3705,6 +3715,12 @@ type CreateSIPTrunkResponse struct {
 	SipTrunk *SIPTrunkResponse `json:"sip_trunk,omitempty"`
 }
 
+// Response for creating a user group
+type CreateUserGroupResponse struct {
+	Duration  string             `json:"duration"`
+	UserGroup *UserGroupResponse `json:"user_group,omitempty"`
+}
+
 // Configuration for custom moderation action
 type CustomActionRequestPayload struct {
 	// Custom action identifier
@@ -3863,6 +3879,10 @@ type DeleteActivityReactionResponse struct {
 
 // Configuration for activity deletion action
 type DeleteActivityRequestPayload struct {
+	// ID of the activity to delete (alternative to item_id)
+	EntityID *string `json:"entity_id,omitempty"`
+	// Type of the entity (required for delete_activity to distinguish v2 vs v3)
+	EntityType *string `json:"entity_type,omitempty"`
 	// Whether to permanently delete the activity
 	HardDelete *bool `json:"hard_delete,omitempty"`
 	// Reason for deletion
@@ -3927,6 +3947,10 @@ type DeleteCommentReactionResponse struct {
 
 // Configuration for comment deletion action
 type DeleteCommentRequestPayload struct {
+	// ID of the comment to delete (alternative to item_id)
+	EntityID *string `json:"entity_id,omitempty"`
+	// Type of the entity
+	EntityType *string `json:"entity_type,omitempty"`
 	// Whether to permanently delete the comment
 	HardDelete *bool `json:"hard_delete,omitempty"`
 	// Reason for deletion
@@ -3982,6 +4006,10 @@ type DeleteImportV2TaskResponse struct {
 
 // Configuration for message deletion action
 type DeleteMessageRequestPayload struct {
+	// ID of the message to delete (alternative to item_id)
+	EntityID *string `json:"entity_id,omitempty"`
+	// Type of the entity
+	EntityType *string `json:"entity_type,omitempty"`
 	// Whether to permanently delete the message
 	HardDelete *bool `json:"hard_delete,omitempty"`
 	// Reason for deletion
@@ -4011,6 +4039,10 @@ type DeleteModerationTemplateResponse struct {
 
 // Configuration for reaction deletion action
 type DeleteReactionRequestPayload struct {
+	// ID of the reaction to delete (alternative to item_id)
+	EntityID *string `json:"entity_id,omitempty"`
+	// Type of the entity
+	EntityType *string `json:"entity_type,omitempty"`
 	// Whether to permanently delete the reaction
 	HardDelete *bool `json:"hard_delete,omitempty"`
 	// Reason for deletion
@@ -4059,6 +4091,10 @@ type DeleteUserRequestPayload struct {
 	DeleteConversationChannels *bool `json:"delete_conversation_channels,omitempty"`
 	// Delete flagged feeds content
 	DeleteFeedsContent *bool `json:"delete_feeds_content,omitempty"`
+	// ID of the user to delete (alternative to item_id)
+	EntityID *string `json:"entity_id,omitempty"`
+	// Type of the entity
+	EntityType *string `json:"entity_type,omitempty"`
 	// Whether to permanently delete the user
 	HardDelete *bool `json:"hard_delete,omitempty"`
 	// Also delete all user messages
@@ -4543,6 +4579,24 @@ type FeedGroupResponse struct {
 	PushNotification *PushNotificationConfig `json:"push_notification,omitempty"`
 	Ranking          *RankingConfig          `json:"ranking,omitempty"`
 	Stories          *StoriesConfig          `json:"stories,omitempty"`
+}
+
+// Emitted when a feed group is restored.
+type FeedGroupRestoredEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+	Fid       string    `json:"fid"`
+	// The ID of the feed group that was restored
+	GroupID string         `json:"group_id"`
+	Custom  map[string]any `json:"custom"`
+	// The type of event: "feeds.feed_group.restored" in this case
+	Type           string     `json:"type"`
+	FeedVisibility *string    `json:"feed_visibility,omitempty"`
+	ReceivedAt     *Timestamp `json:"received_at,omitempty"`
+}
+
+func (e *FeedGroupRestoredEvent) GetEventType() string {
+	return e.Type
 }
 
 type FeedInput struct {
@@ -5597,6 +5651,12 @@ type GetThreadResponse struct {
 	Thread   ThreadStateResponse `json:"thread"`
 }
 
+// Response for getting a user group
+type GetUserGroupResponse struct {
+	Duration  string             `json:"duration"`
+	UserGroup *UserGroupResponse `json:"user_group,omitempty"`
+}
+
 // Basic response information
 type GoLiveResponse struct {
 	// Duration of the request in milliseconds
@@ -5747,6 +5807,7 @@ type ImportV2TaskItem struct {
 }
 
 type ImportV2TaskSettings struct {
+	MergeCustom         *bool                   `json:"merge_custom,omitempty"`
 	Mode                *string                 `json:"mode,omitempty"`
 	Path                *string                 `json:"path,omitempty"`
 	SkipReferencesCheck *bool                   `json:"skip_references_check,omitempty"`
@@ -6166,6 +6227,13 @@ type ListTranscriptionsResponse struct {
 	Duration string `json:"duration"`
 	// List of transcriptions for the call
 	Transcriptions []CallTranscription `json:"transcriptions"`
+}
+
+// Response for listing user groups
+type ListUserGroupsResponse struct {
+	Duration string `json:"duration"`
+	// List of user groups
+	UserGroups []UserGroupResponse `json:"user_groups"`
 }
 
 // Geographic location metadata
@@ -8798,6 +8866,10 @@ type ReadCollectionsResponse struct {
 	Duration string `json:"duration"`
 	// List of collections matching the query
 	Collections []CollectionResponse `json:"collections"`
+	// Cursor for next page (when listing without collection_refs)
+	Next *string `json:"next,omitempty"`
+	// Cursor for previous page (when listing without collection_refs)
+	Prev *string `json:"prev,omitempty"`
 }
 
 type ReadReceiptsResponse struct {
@@ -8957,6 +9029,12 @@ func (e *ReminderUpdatedEvent) GetEventType() string {
 	return e.Type
 }
 
+// Response for removing members from a user group
+type RemoveUserGroupMembersResponse struct {
+	Duration  string             `json:"duration"`
+	UserGroup *UserGroupResponse `json:"user_group,omitempty"`
+}
+
 // Cursor & depth information for a comment's direct replies. Mirrors Reddit's 'load more replies' semantics.
 type RepliesMeta struct {
 	// True if the subtree was cut because the requested depth was reached.
@@ -9011,6 +9089,11 @@ type RestoreActionRequestPayload struct {
 type RestoreActivityResponse struct {
 	Duration string           `json:"duration"`
 	Activity ActivityResponse `json:"activity"`
+}
+
+type RestoreFeedGroupResponse struct {
+	Duration  string            `json:"duration"`
+	FeedGroup FeedGroupResponse `json:"feed_group"`
 }
 
 // This event is sent when a new moderation review queue item is created
@@ -9519,6 +9602,13 @@ type SearchResultMessage struct {
 	ReactionGroups       map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
 	Reminder             *ReminderResponseData             `json:"reminder,omitempty"`
 	SharedLocation       *SharedLocationResponseData       `json:"shared_location,omitempty"`
+}
+
+// Response for searching user groups
+type SearchUserGroupsResponse struct {
+	Duration string `json:"duration"`
+	// List of matching user groups
+	UserGroups []UserGroupResponse `json:"user_groups"`
 }
 
 type SearchWarning struct {
@@ -10511,6 +10601,12 @@ type UpdateThreadPartialResponse struct {
 	Thread   ThreadResponse `json:"thread"`
 }
 
+// Response for updating a user group
+type UpdateUserGroupResponse struct {
+	Duration  string             `json:"duration"`
+	UserGroup *UserGroupResponse `json:"user_group,omitempty"`
+}
+
 type UpdateUserPartialRequest struct {
 	// User ID to update
 	ID    string         `json:"id"`
@@ -10780,6 +10876,121 @@ type UserFlaggedEvent struct {
 }
 
 func (e *UserFlaggedEvent) GetEventType() string {
+	return e.Type
+}
+
+type UserGroup struct {
+	AppPk       int               `json:"app_pk"`
+	CreatedAt   Timestamp         `json:"created_at"`
+	ID          string            `json:"id"`
+	Name        string            `json:"name"`
+	UpdatedAt   Timestamp         `json:"updated_at"`
+	CreatedBy   *string           `json:"created_by,omitempty"`
+	Description *string           `json:"description,omitempty"`
+	TeamID      *string           `json:"team_id,omitempty"`
+	Members     []UserGroupMember `json:"members,omitempty"`
+}
+
+// Emitted when a user group is created.
+type UserGroupCreatedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp      `json:"created_at"`
+	Custom    map[string]any `json:"custom"`
+	// The type of event: "user_group.created" in this case
+	Type       string                    `json:"type"`
+	ReceivedAt *Timestamp                `json:"received_at,omitempty"`
+	User       *UserResponseCommonFields `json:"user,omitempty"`
+	UserGroup  *UserGroup                `json:"user_group,omitempty"`
+}
+
+func (e *UserGroupCreatedEvent) GetEventType() string {
+	return e.Type
+}
+
+// Emitted when a user group is deleted.
+type UserGroupDeletedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp      `json:"created_at"`
+	Custom    map[string]any `json:"custom"`
+	// The type of event: "user_group.deleted" in this case
+	Type       string                    `json:"type"`
+	ReceivedAt *Timestamp                `json:"received_at,omitempty"`
+	User       *UserResponseCommonFields `json:"user,omitempty"`
+	UserGroup  *UserGroup                `json:"user_group,omitempty"`
+}
+
+func (e *UserGroupDeletedEvent) GetEventType() string {
+	return e.Type
+}
+
+type UserGroupMember struct {
+	AppPk     int       `json:"app_pk"`
+	CreatedAt Timestamp `json:"created_at"`
+	GroupID   string    `json:"group_id"`
+	IsAdmin   bool      `json:"is_admin"`
+	UserID    string    `json:"user_id"`
+}
+
+// Emitted when members are added to a user group.
+type UserGroupMemberAddedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+	// The user IDs that were added
+	Members []string       `json:"members"`
+	Custom  map[string]any `json:"custom"`
+	// The type of event: "user_group.member_added" in this case
+	Type       string                    `json:"type"`
+	ReceivedAt *Timestamp                `json:"received_at,omitempty"`
+	User       *UserResponseCommonFields `json:"user,omitempty"`
+	UserGroup  *UserGroup                `json:"user_group,omitempty"`
+}
+
+func (e *UserGroupMemberAddedEvent) GetEventType() string {
+	return e.Type
+}
+
+// Emitted when members are removed from a user group.
+type UserGroupMemberRemovedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+	// The user IDs that were removed
+	Members []string       `json:"members"`
+	Custom  map[string]any `json:"custom"`
+	// The type of event: "user_group.member_removed" in this case
+	Type       string                    `json:"type"`
+	ReceivedAt *Timestamp                `json:"received_at,omitempty"`
+	User       *UserResponseCommonFields `json:"user,omitempty"`
+	UserGroup  *UserGroup                `json:"user_group,omitempty"`
+}
+
+func (e *UserGroupMemberRemovedEvent) GetEventType() string {
+	return e.Type
+}
+
+type UserGroupResponse struct {
+	CreatedAt   Timestamp         `json:"created_at"`
+	ID          string            `json:"id"`
+	Name        string            `json:"name"`
+	UpdatedAt   Timestamp         `json:"updated_at"`
+	CreatedBy   *string           `json:"created_by,omitempty"`
+	Description *string           `json:"description,omitempty"`
+	TeamID      *string           `json:"team_id,omitempty"`
+	Members     []UserGroupMember `json:"members,omitempty"`
+}
+
+// Emitted when a user group is updated.
+type UserGroupUpdatedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp      `json:"created_at"`
+	Custom    map[string]any `json:"custom"`
+	// The type of event: "user_group.updated" in this case
+	Type       string                    `json:"type"`
+	ReceivedAt *Timestamp                `json:"received_at,omitempty"`
+	User       *UserResponseCommonFields `json:"user,omitempty"`
+	UserGroup  *UserGroup                `json:"user_group,omitempty"`
+}
+
+func (e *UserGroupUpdatedEvent) GetEventType() string {
 	return e.Type
 }
 

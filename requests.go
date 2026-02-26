@@ -778,8 +778,8 @@ type DeleteCollectionsRequest struct {
 	CollectionRefs []string `json:"-" query:"collection_refs"`
 }
 type ReadCollectionsRequest struct {
-	CollectionRefs []string `json:"-" query:"collection_refs"`
 	UserID         *string  `json:"-" query:"user_id"`
+	CollectionRefs []string `json:"-" query:"collection_refs"`
 }
 type UpdateCollectionsRequest struct {
 	Collections []UpdateCollectionRequest `json:"collections"`
@@ -972,6 +972,8 @@ type GetFollowSuggestionsRequest struct {
 	Limit  *int    `json:"-" query:"limit"`
 	UserID *string `json:"-" query:"user_id"`
 }
+type RestoreFeedGroupRequest struct {
+}
 type DeleteFeedGroupRequest struct {
 	HardDelete *bool `json:"-" query:"hard_delete"`
 }
@@ -1153,8 +1155,9 @@ type CreateImportURLRequest struct {
 type ListImportsRequest struct {
 }
 type CreateImportRequest struct {
-	Mode string `json:"mode"`
-	Path string `json:"path"`
+	Mode        string `json:"mode"`
+	Path        string `json:"path"`
+	MergeCustom *bool  `json:"merge_custom"`
 }
 type ListImportV2TasksRequest struct {
 	State *int `json:"-" query:"state"`
@@ -1513,6 +1516,43 @@ type UploadImageRequest struct {
 	File        *string     `json:"file"`
 	UploadSizes []ImageSize `json:"upload_sizes"`
 	User        *OnlyUserID `json:"user"`
+}
+type ListUserGroupsRequest struct {
+	Limit       *int    `json:"-" query:"limit"`
+	IDGt        *string `json:"-" query:"id_gt"`
+	CreatedAtGt *string `json:"-" query:"created_at_gt"`
+	TeamID      *string `json:"-" query:"team_id"`
+}
+type CreateUserGroupRequest struct {
+	Name        string   `json:"name"`
+	Description *string  `json:"description"`
+	ID          *string  `json:"id"`
+	TeamID      *string  `json:"team_id"`
+	MemberIds   []string `json:"member_ids"`
+}
+type SearchUserGroupsRequest struct {
+	Query  string  `json:"-" query:"query"`
+	Limit  *int    `json:"-" query:"limit"`
+	NameGt *string `json:"-" query:"name_gt"`
+	IDGt   *string `json:"-" query:"id_gt"`
+	TeamID *string `json:"-" query:"team_id"`
+}
+type DeleteUserGroupRequest struct {
+	TeamID *string `json:"-" query:"team_id"`
+}
+type GetUserGroupRequest struct {
+	TeamID *string `json:"-" query:"team_id"`
+}
+type UpdateUserGroupRequest struct {
+	Description *string `json:"description"`
+	Name        *string `json:"name"`
+	TeamID      *string `json:"team_id"`
+}
+type RemoveUserGroupMembersRequest struct {
+}
+type AddUserGroupMembersRequest struct {
+	MemberIds []string `json:"member_ids"`
+	TeamID    *string  `json:"team_id"`
 }
 type QueryUsersRequest struct {
 	Payload *QueryUsersPayload `json:"-" query:"payload"`

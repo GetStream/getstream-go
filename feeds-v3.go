@@ -544,6 +544,16 @@ func (c *FeedsClient) GetFollowSuggestions(ctx context.Context, feedGroupID stri
 	return res, err
 }
 
+// Restores a soft-deleted feed group by its ID. Only clears DeletedAt in the database; no other fields are updated.
+func (c *FeedsClient) RestoreFeedGroup(ctx context.Context, feedGroupID string, request *RestoreFeedGroupRequest) (*StreamResponse[RestoreFeedGroupResponse], error) {
+	var result RestoreFeedGroupResponse
+	pathParams := map[string]string{
+		"feed_group_id": feedGroupID,
+	}
+	res, err := MakeRequest[any, RestoreFeedGroupResponse](c.client, ctx, "POST", "/api/v2/feeds/feed_groups/{feed_group_id}/restore", nil, nil, &result, pathParams)
+	return res, err
+}
+
 // Delete a feed group by its ID. Can perform a soft delete (default) or hard delete.
 func (c *FeedsClient) DeleteFeedGroup(ctx context.Context, id string, request *DeleteFeedGroupRequest) (*StreamResponse[DeleteFeedGroupResponse], error) {
 	var result DeleteFeedGroupResponse

@@ -380,6 +380,13 @@ func TestFeedsGetFollowSuggestions(t *testing.T) {
 	_, err = client.Feeds().GetFollowSuggestions(context.Background(), "", &getstream.GetFollowSuggestionsRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsRestoreFeedGroup(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().RestoreFeedGroup(context.Background(), "", &getstream.RestoreFeedGroupRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsDeleteFeedGroup(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

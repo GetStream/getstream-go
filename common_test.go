@@ -394,6 +394,62 @@ func TestCommonDeleteImage(t *testing.T) {
 	_, err = client.DeleteImage(context.Background(), &getstream.DeleteImageRequest{})
 	require.NoError(t, err)
 }
+func TestCommonListUserGroups(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.ListUserGroups(context.Background(), &getstream.ListUserGroupsRequest{})
+	require.NoError(t, err)
+}
+func TestCommonCreateUserGroup(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.CreateUserGroup(context.Background(), &getstream.CreateUserGroupRequest{})
+	require.NoError(t, err)
+}
+func TestCommonSearchUserGroups(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.SearchUserGroups(context.Background(), &getstream.SearchUserGroupsRequest{})
+	require.NoError(t, err)
+}
+func TestCommonDeleteUserGroup(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.DeleteUserGroup(context.Background(), "", &getstream.DeleteUserGroupRequest{})
+	require.NoError(t, err)
+}
+func TestCommonGetUserGroup(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.GetUserGroup(context.Background(), "", &getstream.GetUserGroupRequest{})
+	require.NoError(t, err)
+}
+func TestCommonUpdateUserGroup(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.UpdateUserGroup(context.Background(), "", &getstream.UpdateUserGroupRequest{})
+	require.NoError(t, err)
+}
+func TestCommonRemoveUserGroupMembers(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.RemoveUserGroupMembers(context.Background(), "", &getstream.RemoveUserGroupMembersRequest{})
+	require.NoError(t, err)
+}
+func TestCommonAddUserGroupMembers(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.AddUserGroupMembers(context.Background(), "", &getstream.AddUserGroupMembersRequest{})
+	require.NoError(t, err)
+}
 func TestCommonQueryUsers(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
