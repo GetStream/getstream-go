@@ -573,7 +573,7 @@ func (c *Client) RemoveUserGroupMembers(ctx context.Context, id string, request 
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[any, RemoveUserGroupMembersResponse](c, ctx, "DELETE", "/api/v2/usergroups/{id}/members", nil, nil, &result, pathParams)
+	res, err := MakeRequest[RemoveUserGroupMembersRequest, RemoveUserGroupMembersResponse](c, ctx, "DELETE", "/api/v2/usergroups/{id}/members", nil, request, &result, pathParams)
 	return res, err
 }
 

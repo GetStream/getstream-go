@@ -1549,6 +1549,8 @@ type UpdateUserGroupRequest struct {
 	TeamID      *string `json:"team_id"`
 }
 type RemoveUserGroupMembersRequest struct {
+	MemberIds []string `json:"member_ids"`
+	TeamID    *string  `json:"team_id"`
 }
 type AddUserGroupMembersRequest struct {
 	MemberIds []string `json:"member_ids"`
