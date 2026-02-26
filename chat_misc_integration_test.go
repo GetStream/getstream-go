@@ -1738,7 +1738,7 @@ func initMultiTenantClient(t *testing.T) *Stream {
 	if apiKey == "" || apiSecret == "" {
 		return nil
 	}
-	c, err := NewClient(apiKey, apiSecret)
+	c, err := NewClient(apiKey, apiSecret, WithHTTPClient(newRateLimitClient()))
 	require.NoError(t, err)
 	return c
 }
