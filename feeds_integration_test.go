@@ -1829,6 +1829,7 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	// snippet-end: GetOrCreateFeedViewExisting
 
 	assertResponseSuccess(t, getOrCreateResponse, err, "get or create existing feed view")
+	assert.False(t, getOrCreateResponse.Data.WasCreated, "Should return existing feed view, not create a new one")
 	fmt.Printf("✅ Got existing feed view: %s\n", feedViewID)
 
 	// Test 6: Delete Feed View (cleanup)
