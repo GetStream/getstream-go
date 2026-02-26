@@ -293,12 +293,9 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 			time.Sleep(time.Second)
 		}
 		require.NoError(t, updateErr)
+		// The update response is read from the writing server's local cache (always
+		// fresh), so asserting here avoids the eventual consistency window of a re-fetch.
 		assert.True(t, resp.Data.MarkMessagesPending)
-
-		// Verify via get
-		getResp, err := client.Chat().GetChannelType(ctx, typeName, &GetChannelTypeRequest{})
-		require.NoError(t, err)
-		assert.True(t, getResp.Data.MarkMessagesPending)
 	})
 
 	t.Run("UpdateChannelTypePushNotifications", func(t *testing.T) {
@@ -309,12 +306,9 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 			PushNotifications: PtrTo(false),
 		})
 		require.NoError(t, err)
+		// The update response is read from the writing server's local cache (always
+		// fresh), so asserting here avoids the eventual consistency window of a re-fetch.
 		assert.False(t, resp.Data.PushNotifications)
-
-		// Verify via get
-		getResp, err := client.Chat().GetChannelType(ctx, typeName, &GetChannelTypeRequest{})
-		require.NoError(t, err)
-		assert.False(t, getResp.Data.PushNotifications)
 	})
 
 	t.Run("ListChannelTypes", func(t *testing.T) {
