@@ -19,7 +19,7 @@ All notable changes to this project will be documented in this file. See [standa
 - **Video**: calls, recordings, transcription, closed captions, SFU, call statistics, user feedback analytics, and more.
 - **Moderation**: flags, review queue, moderation rules, config, appeals, moderation logs, and more.
 - Push notification types, preferences, and templates.
-- Webhook envelope type `WHEvent`.
+- Webhook support: `WHEvent` envelope type for receiving webhook payloads, utility functions for decoding and verifying webhook signatures, and a full set of individual typed event structs for every event across all products (Chat, Video, Moderation, Feeds) usable as discriminated event types.
 - Cursor-based pagination across all list endpoints.
 
 ## [3.8.0](https://github.com/GetStream/getstream-go/compare/v3.7.0...v3.8.0) (2026-02-03)
