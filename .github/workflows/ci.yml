@@ -21,7 +21,7 @@ jobs:
       max-parallel: 3
       fail-fast: false
       matrix:
-        goVer: ['1.22']
+        goVer: ['1.19', '1.20', '1.21', '1.22', '1.23', '1.24']
     steps:
       - uses: actions/checkout@v4
 
@@ -30,7 +30,16 @@ jobs:
         with:
           go-version: ${{ matrix.goVer }}
 
-      - name: Test via ${{ matrix.goVer }}
+      - name: Unit tests via ${{ matrix.goVer }}
+        if: matrix.goVer != '1.19'
+        env:
+          STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
+          STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
+          STREAM_API_SECRET: ${{ secrets.STREAM_API_SECRET }}
+        run: go test -short -v -race ./...
+
+      - name: Integration tests via ${{ matrix.goVer }}
+        if: matrix.goVer == '1.19'
         env:
           STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
           STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
@@ -40,6 +49,7 @@ jobs:
           go tool cover -func=cover.out
 
       - name: Upload coverage to Codecov
+        if: matrix.goVer == '1.19'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
