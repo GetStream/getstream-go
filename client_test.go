@@ -39,7 +39,9 @@ const skipSlowTests = true
 func initClient(t *testing.T) *Stream {
 	t.Helper()
 
-	stream, err := NewClientFromEnvVars()
+	stream, err := NewClientFromEnvVars(
+		WithHTTPClient(newRateLimitClient()),
+	)
 	require.NoError(t, err, "Failed to create client from env vars")
 
 	return stream
@@ -69,35 +71,35 @@ func setup(t *testing.T, rm *ResourceManager, createCallType bool) (*Stream, *Ca
 			},
 		}
 
-		notificationSettings := &NotificationSettings{
-			Enabled: true,
-			CallNotification: EventNotificationSettings{
-				APNS: APNS{
-					Title: "{{ user.display_name }} invites you to a call",
-					Body:  "",
+		notificationSettings := &NotificationSettingsRequest{
+			Enabled: PtrTo(true),
+			CallNotification: &EventNotificationSettingsRequest{
+				APNS: &APNSPayload{
+					Title: PtrTo("{{ user.display_name }} invites you to a call"),
+					Body:  PtrTo(""),
 				},
-				Enabled: true,
+				Enabled: PtrTo(true),
 			},
-			SessionStarted: EventNotificationSettings{
-				APNS: APNS{
-					Body:  "",
-					Title: "{{ user.display_name }} invites you to a call",
+			SessionStarted: &EventNotificationSettingsRequest{
+				APNS: &APNSPayload{
+					Body:  PtrTo(""),
+					Title: PtrTo("{{ user.display_name }} invites you to a call"),
 				},
-				Enabled: false,
+				Enabled: PtrTo(false),
 			},
-			CallLiveStarted: EventNotificationSettings{
-				APNS: APNS{
-					Body:  "",
-					Title: "{{ user.display_name }} invites you to a call",
+			CallLiveStarted: &EventNotificationSettingsRequest{
+				APNS: &APNSPayload{
+					Body:  PtrTo(""),
+					Title: PtrTo("{{ user.display_name }} invites you to a call"),
 				},
-				Enabled: false,
+				Enabled: PtrTo(false),
 			},
-			CallRing: EventNotificationSettings{
-				APNS: APNS{
-					Body:  "",
-					Title: "{{ user.display_name }} invites you to a call",
+			CallRing: &EventNotificationSettingsRequest{
+				APNS: &APNSPayload{
+					Body:  PtrTo(""),
+					Title: PtrTo("{{ user.display_name }} invites you to a call"),
 				},
-				Enabled: false,
+				Enabled: PtrTo(false),
 			},
 		}
 
@@ -213,6 +215,7 @@ func TestClientGetters(t *testing.T) {
 
 // TestCRUDCallTypeOperations tests Create, Read, Update, and Delete operations for call types.
 func TestCRUDCallTypeOperations(t *testing.T) {
+	t.Parallel()
 	if skipSlowTests {
 		t.Skip("skipping slow tests")
 	}
@@ -395,6 +398,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 
 // TestVideoExamples tests various video-related functionalities without creating call types.
 func TestVideoExamples(t *testing.T) {
+	t.Parallel()
 	rm := NewResourceManager(t)
 	client, _, _ := setup(t, rm, false)
 
@@ -472,6 +476,7 @@ func TestVideoExamples(t *testing.T) {
 
 // TestSendCustomEvent tests sending custom events within a call.
 func TestSendCustomEvent(t *testing.T) {
+	t.Parallel()
 	rm := NewResourceManager(t)
 	client, call, _ := setup(t, rm, false)
 
@@ -500,6 +505,7 @@ func TestSendCustomEvent(t *testing.T) {
 
 // TestMuteAll tests muting all users in a call.
 func TestMuteAll(t *testing.T) {
+	t.Parallel()
 	rm := NewResourceManager(t)
 	_, call, _ := setup(t, rm, false)
 
@@ -525,6 +531,7 @@ func TestMuteAll(t *testing.T) {
 
 // TestVideoExamplesAdditional tests additional video-related functionalities.
 func TestVideoExamplesAdditional(t *testing.T) {
+	t.Parallel()
 	rm := NewResourceManager(t)
 	client, call, _ := setup(t, rm, false)
 
@@ -597,10 +604,7 @@ func TestVideoExamplesAdditional(t *testing.T) {
 		assert.NoError(t, err)
 		taskID := response.Data.TaskID
 
-		taskCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
-		defer cancel()
-
-		taskStatus, err := WaitForTask(taskCtx, client, taskID)
+		taskStatus, err := WaitForTask(ctx, client, taskID)
 		assert.NoError(t, err)
 
 		if taskStatus.Data.Status == "completed" {
@@ -717,6 +721,7 @@ func TestVideoExamplesAdditional(t *testing.T) {
 
 // TestDeleteCall tests the soft deletion of a call.
 func TestDeleteCall(t *testing.T) {
+	t.Parallel()
 	client := initClient(t)
 	ctx := context.Background()
 	call := client.Video().Call("default", randomString(10))
@@ -742,6 +747,7 @@ func TestDeleteCall(t *testing.T) {
 
 // TestTeams tests functionalities related to teams.
 func TestTeams(t *testing.T) {
+	t.Parallel()
 	client := initClient(t)
 	ctx := context.Background()
 
@@ -803,6 +809,7 @@ func TestTeams(t *testing.T) {
 }
 
 func TestExternalStorageOperations(t *testing.T) {
+	t.Parallel()
 	if skipSlowTests {
 		t.Skip("skipping slow tests")
 	}
@@ -864,6 +871,7 @@ func TestExternalStorageOperations(t *testing.T) {
 }
 
 func TestEnableCallRecordingAndBackstageMode(t *testing.T) {
+	t.Parallel()
 	rm := NewResourceManager(t)
 	_, call, _ := setup(t, rm, false)
 	ctx := context.Background()
@@ -901,6 +909,7 @@ func TestEnableCallRecordingAndBackstageMode(t *testing.T) {
 }
 
 func TestDeleteRecordingsAndTranscriptions(t *testing.T) {
+	t.Parallel()
 	rm := NewResourceManager(t)
 	_, call, _ := setup(t, rm, false)
 	ctx := context.Background()
@@ -917,6 +926,7 @@ func TestDeleteRecordingsAndTranscriptions(t *testing.T) {
 }
 
 func TestHardDeleteCall(t *testing.T) {
+	t.Parallel()
 	rm := NewResourceManager(t)
 	client, call, _ := setup(t, rm, false)
 	ctx := context.Background()
@@ -937,10 +947,7 @@ func TestHardDeleteCall(t *testing.T) {
 
 		require.NotNil(t, taskID)
 
-		taskCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
-		defer cancel()
-
-		taskStatus, err := WaitForTask(taskCtx, client, *taskID)
+		taskStatus, err := WaitForTask(ctx, client, *taskID)
 		assert.NoError(t, err)
 
 		if taskStatus.Data.Status == "completed" {

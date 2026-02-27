@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -37,6 +38,7 @@ const (
 
 // TestFeedIntegrationSuite runs comprehensive integration tests for the Feeds API
 func TestFeedIntegrationSuite(t *testing.T) {
+	t.Parallel()
 	if testing.Short() {
 		t.Skip("Skipping integration tests in short mode")
 	}
@@ -1737,6 +1739,14 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	assertResponseSuccess(t, listResponse, err, "list feed views")
 	fmt.Printf("✅ Listed %d existing feed views\n", len(listResponse.Data.Views))
 
+	// Cleanup stale test feed views from previous runs to avoid hitting the limit
+	for id := range listResponse.Data.Views {
+		if strings.HasPrefix(id, "test-feed-view-") {
+			_, _ = feedsClient.DeleteFeedView(ctx, id, &getstream.DeleteFeedViewRequest{})
+			fmt.Printf("🧹 Cleaned up stale feed view: %s\n", id)
+		}
+	}
+
 	// Test 2: Create Feed View
 	fmt.Println("\n➕ Testing create feed view...")
 	// snippet-start: CreateFeedView
@@ -1757,30 +1767,52 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	assert.Equal(t, feedViewID, createResponse.Data.FeedView.ID)
 	fmt.Printf("✅ Created feed view: %s\n", feedViewID)
 
-	// Test 3: Get Feed View
+	// Test 3: Get Feed View (retry for eventual consistency)
 	fmt.Println("\n🔍 Testing get feed view...")
 	// snippet-start: GetFeedView
-	getResponse, err := feedsClient.GetFeedView(ctx, "feedViewID", &getstream.GetFeedViewRequest{})
+	var getResponse *getstream.StreamResponse[getstream.GetFeedViewResponse]
+	for i := 0; i < 5; i++ {
+		getResponse, err = feedsClient.GetFeedView(ctx, feedViewID, &getstream.GetFeedViewRequest{})
+		if err == nil {
+			break
+		}
+		if strings.Contains(err.Error(), "not found") {
+			time.Sleep(time.Duration(i+1) * time.Second)
+			continue
+		}
+		break
+	}
 	// snippet-end: GetFeedView
 
 	assertResponseSuccess(t, getResponse, err, "get feed view")
-	assert.Equal(t, "feedViewID", getResponse.Data.FeedView.ID)
+	assert.Equal(t, feedViewID, getResponse.Data.FeedView.ID)
 	fmt.Printf("✅ Retrieved feed view: %s\n", feedViewID)
 
-	// Test 4: Update Feed View
+	// Test 4: Update Feed View (retry to handle eventual consistency)
 	fmt.Println("\n✏️ Testing update feed view...")
 	// snippet-start: UpdateFeedView
-	updateResponse, err := feedsClient.UpdateFeedView(ctx, "feedViewID", &getstream.UpdateFeedViewRequest{
-		ActivitySelectors: []getstream.ActivitySelectorConfig{
-			{
-				Type:          "popular",
-				MinPopularity: getstream.PtrTo(10),
+	var updateResponse *getstream.StreamResponse[getstream.UpdateFeedViewResponse]
+	for i := 0; i < 5; i++ {
+		updateResponse, err = feedsClient.UpdateFeedView(ctx, feedViewID, &getstream.UpdateFeedViewRequest{
+			ActivitySelectors: []getstream.ActivitySelectorConfig{
+				{
+					Type:          "popular",
+					MinPopularity: getstream.PtrTo(10),
+				},
 			},
-		},
-		Aggregation: &getstream.AggregationConfig{
-			Format: getstream.PtrTo("popularity_based"),
-		},
-	})
+			Aggregation: &getstream.AggregationConfig{
+				Format: getstream.PtrTo("popularity_based"),
+			},
+		})
+		if err == nil {
+			break
+		}
+		if strings.Contains(err.Error(), "not found") {
+			time.Sleep(time.Duration(i+1) * time.Second)
+			continue
+		}
+		break
+	}
 	// snippet-end: UpdateFeedView
 
 	assertResponseSuccess(t, updateResponse, err, "update feed view")
@@ -1797,12 +1829,17 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	// snippet-end: GetOrCreateFeedViewExisting
 
 	assertResponseSuccess(t, getOrCreateResponse, err, "get or create existing feed view")
+	assert.False(t, getOrCreateResponse.Data.WasCreated, "Should return existing feed view, not create a new one")
 	fmt.Printf("✅ Got existing feed view: %s\n", feedViewID)
 
-	// Test 6: Delete Feed Views (cleanup)
+	// Test 6: Delete Feed View (cleanup)
+	fmt.Println("\n🗑️ Testing delete feed view...")
 	// snippet-start: DeleteFeedView
-	_, err = feedsClient.DeleteFeedView(ctx, "viewID-123", &getstream.DeleteFeedViewRequest{})
+	_, err = feedsClient.DeleteFeedView(ctx, feedViewID, &getstream.DeleteFeedViewRequest{})
 	// snippet-end: DeleteFeedView
+
+	require.NoError(t, err, "Failed to delete feed view for cleanup")
+	fmt.Printf("✅ Deleted feed view: %s\n", feedViewID)
 }
 
 // =================================================================

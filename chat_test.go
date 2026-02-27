@@ -30,11 +30,11 @@ func TestChatStartCampaign(t *testing.T) {
 	_, err = client.Chat().StartCampaign(context.Background(), "", &getstream.StartCampaignRequest{})
 	require.NoError(t, err)
 }
-func TestChatScheduleCampaign(t *testing.T) {
+func TestChatStopCampaign(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Chat().ScheduleCampaign(context.Background(), "", &getstream.ScheduleCampaignRequest{})
+	_, err = client.Chat().StopCampaign(context.Background(), "", &getstream.StopCampaignRequest{})
 	require.NoError(t, err)
 }
 func TestChatQueryChannels(t *testing.T) {
@@ -42,13 +42,6 @@ func TestChatQueryChannels(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Chat().QueryChannels(context.Background(), &getstream.QueryChannelsRequest{})
-	require.NoError(t, err)
-}
-func TestChatChannelBatchUpdate(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().ChannelBatchUpdate(context.Background(), &getstream.ChannelBatchUpdateRequest{})
 	require.NoError(t, err)
 }
 func TestChatDeleteChannels(t *testing.T) {
@@ -128,13 +121,6 @@ func TestChatDeleteChannelFile(t *testing.T) {
 	_, err = client.Chat().DeleteChannelFile(context.Background(), "", "", &getstream.DeleteChannelFileRequest{})
 	require.NoError(t, err)
 }
-func TestChatUploadChannelFile(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UploadChannelFile(context.Background(), "", "", &getstream.UploadChannelFileRequest{})
-	require.NoError(t, err)
-}
 func TestChatHideChannel(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -147,13 +133,6 @@ func TestChatDeleteChannelImage(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Chat().DeleteChannelImage(context.Background(), "", "", &getstream.DeleteChannelImageRequest{})
-	require.NoError(t, err)
-}
-func TestChatUploadChannelImage(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.Chat().UploadChannelImage(context.Background(), "", "", &getstream.UploadChannelImageRequest{})
 	require.NoError(t, err)
 }
 func TestChatUpdateMemberPartial(t *testing.T) {
@@ -532,6 +511,13 @@ func TestChatQuerySegmentTargets(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Chat().QuerySegmentTargets(context.Background(), "", &getstream.QuerySegmentTargetsRequest{})
+	require.NoError(t, err)
+}
+func TestChatQueryTeamUsageStats(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().QueryTeamUsageStats(context.Background(), &getstream.QueryTeamUsageStatsRequest{})
 	require.NoError(t, err)
 }
 func TestChatQueryThreads(t *testing.T) {

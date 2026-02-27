@@ -14,14 +14,17 @@ concurrency:
 
 jobs:
   test-build:
-    name: 👷 Test & Build
+    name: 👷 Test & Build ${{ matrix.goVer }}${{ matrix.label }}
     environment: feeds-enabled-shard
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 3
       fail-fast: false
       matrix:
-        goVer: ['1.22']
+        goVer: ['1.19', '1.20', '1.21', '1.22', '1.23', '1.24']
+        include:
+          - goVer: '1.19'
+            label: ' & Integration'
     steps:
       - uses: actions/checkout@v4
 
@@ -30,16 +33,26 @@ jobs:
         with:
           go-version: ${{ matrix.goVer }}
 
-      - name: Test via ${{ matrix.goVer }}
+      - name: Unit tests via ${{ matrix.goVer }}
+        if: matrix.goVer != '1.19'
+        env:
+          STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
+          STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
+          STREAM_API_SECRET: ${{ secrets.STREAM_API_SECRET }}
+        run: go test -short -v -race ./...
+
+      - name: Integration tests via ${{ matrix.goVer }}
+        if: matrix.goVer == '1.19'
         env:
           STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
           STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
           STREAM_API_SECRET: ${{ secrets.STREAM_API_SECRET }}
         run: |
-          go test -coverprofile cover.out -v -race ./...
+          go test -coverprofile cover.out -v -race -parallel 16 -timeout 20m ./...
           go tool cover -func=cover.out
 
       - name: Upload coverage to Codecov
+        if: matrix.goVer == '1.19'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0-beta.1](https://github.com/GetStream/getstream-go/compare/v3.8.0...v4.0.0-beta.1) (2026-02-27)
+
+### Breaking Changes
+
+- Type names across all products now follow the OpenAPI spec naming convention: response types are suffixed with `Response`, input types with `Request`. See [MIGRATION_v3_to_v4.md](./MIGRATION_v3_to_v4.md) for the complete rename mapping.
+- `Event` (WebSocket envelope type) renamed to `WSEvent`. Base event type renamed from `BaseEvent` to `Event` (with field `type` instead of `T`).
+- Event composition changed from monolithic `*Preset` embeds to modular `Has*` types (`HasChannel`, `HasMessage`, `HasUserCommonFields`, etc.).
+- `Pager` renamed to `PagerResponse` and migrated from offset-based to cursor-based pagination (`next`/`prev` tokens).
+- Module path changed from `github.com/GetStream/getstream-go/v3` to `github.com/GetStream/getstream-go/v4`.
+
+### Added
+
+- Full product coverage: Chat, Video, Moderation, and Feeds APIs are all supported in a single SDK.
+- **Feeds**: activities, feeds, feed groups, follows, comments, reactions, collections, bookmarks, membership levels, feed views, and more.
+- **Video**: calls, recordings, transcription, closed captions, SFU, call statistics, user feedback analytics, and more.
+- **Moderation**: flags, review queue, moderation rules, config, appeals, moderation logs, and more.
+- Push notification types, preferences, and templates.
+- Webhook support: `WHEvent` envelope type for receiving webhook payloads, utility functions for decoding and verifying webhook signatures, and a full set of individual typed event structs for every event across all products (Chat, Video, Moderation, Feeds) usable as discriminated event types.
+- Cursor-based pagination across all list endpoints.
+
 ## [3.8.0](https://github.com/GetStream/getstream-go/compare/v3.7.0...v3.8.0) (2026-02-03)
 
 ## [3.7.0](https://github.com/GetStream/getstream-go/compare/v3.6.0...v3.7.0) (2025-11-28)
