@@ -18,7 +18,7 @@ Update all import paths in your code:
 
 ```go
 // Before
-import "github.com/GetStream/getstream-go/v3"
+import "github.com/GetStream/getstream-go/v4"
 
 // After
 import "github.com/GetStream/getstream-go/v4"

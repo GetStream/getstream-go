@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/GetStream/getstream-go/v3"
+	. "github.com/GetStream/getstream-go/v4"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )

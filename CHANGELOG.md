@@ -10,7 +10,7 @@ All notable changes to this project will be documented in this file. See [standa
 - `Event` (WebSocket envelope type) renamed to `WSEvent`. Base event type renamed from `BaseEvent` to `Event` (with field `type` instead of `T`).
 - Event composition changed from monolithic `*Preset` embeds to modular `Has*` types (`HasChannel`, `HasMessage`, `HasUserCommonFields`, etc.).
 - `Pager` renamed to `PagerResponse` and migrated from offset-based to cursor-based pagination (`next`/`prev` tokens).
-- Module path changed from `github.com/GetStream/getstream-go/v3` to `github.com/GetStream/getstream-go/v4`.
+- Module path changed from `github.com/GetStream/getstream-go/v4` to `github.com/GetStream/getstream-go/v4`.
 
 ### Added
 
