@@ -29,6 +29,16 @@ func (c *FeedsClient) UpsertActivities(ctx context.Context, request *UpsertActiv
 	return res, err
 }
 
+// Updates certain fields of multiple activities in a batch. Use 'set' to update specific fields and 'unset' to remove fields. Activities that fail due to not found, permission denied, or no changes detected are silently skipped and not included in the response. However, validation errors (e.g., updating reserved fields, invalid field values) will fail the entire batch request.
+//
+// Sends events:
+// - feeds.activity.updated
+func (c *FeedsClient) UpdateActivitiesPartialBatch(ctx context.Context, request *UpdateActivitiesPartialBatchRequest) (*StreamResponse[UpdateActivitiesPartialBatchResponse], error) {
+	var result UpdateActivitiesPartialBatchResponse
+	res, err := MakeRequest[UpdateActivitiesPartialBatchRequest, UpdateActivitiesPartialBatchResponse](c.client, ctx, "PATCH", "/api/v2/feeds/activities/batch/partial", nil, request, &result, nil)
+	return res, err
+}
+
 // Delete one or more activities by their IDs
 func (c *FeedsClient) DeleteActivities(ctx context.Context, request *DeleteActivitiesRequest) (*StreamResponse[DeleteActivitiesResponse], error) {
 	var result DeleteActivitiesResponse
@@ -512,6 +522,17 @@ func (c *FeedsClient) RejectFeedMemberInvite(ctx context.Context, feedGroupID st
 	return res, err
 }
 
+// Query pinned activities for a feed with filter query
+func (c *FeedsClient) QueryPinnedActivities(ctx context.Context, feedGroupID string, feedID string, request *QueryPinnedActivitiesRequest) (*StreamResponse[QueryPinnedActivitiesResponse], error) {
+	var result QueryPinnedActivitiesResponse
+	pathParams := map[string]string{
+		"feed_group_id": feedGroupID,
+		"feed_id":       feedID,
+	}
+	res, err := MakeRequest[QueryPinnedActivitiesRequest, QueryPinnedActivitiesResponse](c.client, ctx, "POST", "/api/v2/feeds/feed_groups/{feed_group_id}/feeds/{feed_id}/pinned_activities/query", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Get follow suggestions for a feed group
 func (c *FeedsClient) GetFollowSuggestions(ctx context.Context, feedGroupID string, request *GetFollowSuggestionsRequest) (*StreamResponse[GetFollowSuggestionsResponse], error) {
 	var result GetFollowSuggestionsResponse
@@ -520,6 +541,16 @@ func (c *FeedsClient) GetFollowSuggestions(ctx context.Context, feedGroupID stri
 	}
 	params := extractQueryParams(request)
 	res, err := MakeRequest[any, GetFollowSuggestionsResponse](c.client, ctx, "GET", "/api/v2/feeds/feed_groups/{feed_group_id}/follow_suggestions", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Restores a soft-deleted feed group by its ID. Only clears DeletedAt in the database; no other fields are updated.
+func (c *FeedsClient) RestoreFeedGroup(ctx context.Context, feedGroupID string, request *RestoreFeedGroupRequest) (*StreamResponse[RestoreFeedGroupResponse], error) {
+	var result RestoreFeedGroupResponse
+	pathParams := map[string]string{
+		"feed_group_id": feedGroupID,
+	}
+	res, err := MakeRequest[any, RestoreFeedGroupResponse](c.client, ctx, "POST", "/api/v2/feeds/feed_groups/{feed_group_id}/restore", nil, nil, &result, pathParams)
 	return res, err
 }
 
