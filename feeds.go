@@ -57,6 +57,10 @@ func (c *Feeds) RejectFeedMemberInvite(ctx context.Context, request *RejectFeedM
 	return c.client.RejectFeedMemberInvite(ctx, c.feedType, c.feedID, request)
 }
 
+func (c *Feeds) QueryPinnedActivities(ctx context.Context, request *QueryPinnedActivitiesRequest) (*StreamResponse[QueryPinnedActivitiesResponse], error) {
+	return c.client.QueryPinnedActivities(ctx, c.feedType, c.feedID, request)
+}
+
 func (c *FeedsClient) Feed(feedType, feedID string) *Feeds {
 	return NewFeed(feedType, feedID, c)
 }

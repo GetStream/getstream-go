@@ -202,7 +202,7 @@ func TestVideoGetCallParticipantSessionMetrics(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
-	_, err = client.Video().GetCallParticipantSessionMetrics(context.Background(), "", "", "", &getstream.GetCallParticipantSessionMetricsRequest{})
+	_, err = client.Video().GetCallParticipantSessionMetrics(context.Background(), "", "", "", "", "", &getstream.GetCallParticipantSessionMetricsRequest{})
 	require.NoError(t, err)
 }
 func TestVideoQueryCallParticipantSessions(t *testing.T) {
