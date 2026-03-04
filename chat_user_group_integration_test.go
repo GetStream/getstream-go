@@ -96,7 +96,7 @@ func TestUserGroupIntegration(t *testing.T) {
 		}
 		require.NoError(t, err)
 
-		newName := "Updated Name"
+		newName := "Updated Name " + groupID
 		newDesc := "Updated description"
 		updateResp, err := client.UpdateUserGroup(ctx, groupID, &UpdateUserGroupRequest{
 			Name:        PtrTo(newName),
