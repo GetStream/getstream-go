@@ -139,7 +139,7 @@ func createTestUsers(t *testing.T, client *Stream, n int) []string {
 		ids[i] = id
 		users[id] = UserRequest{
 			ID:   id,
-			Name: PtrTo("Test User " + id[:8]),
+			Name: PtrTo("Test User " + id),
 			Role: PtrTo("user"),
 		}
 	}
