@@ -41,7 +41,7 @@ func (c *Client) DeleteBlockList(ctx context.Context, name string, request *Dele
 		"name": name,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteBlockListRequest, Response](c, ctx, "DELETE", "/api/v2/blocklists/{name}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/blocklists/{name}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -137,7 +137,7 @@ func (c *Client) DeleteExternalStorage(ctx context.Context, name string, request
 	pathParams := map[string]string{
 		"name": name,
 	}
-	res, err := MakeRequest[DeleteExternalStorageRequest, DeleteExternalStorageResponse](c, ctx, "DELETE", "/api/v2/external_storage/{name}", nil, request, &result, pathParams)
+	res, err := MakeRequest[any, DeleteExternalStorageResponse](c, ctx, "DELETE", "/api/v2/external_storage/{name}", nil, nil, &result, pathParams)
 	return res, err
 }
 
@@ -295,7 +295,7 @@ func (c *Client) DeletePoll(ctx context.Context, pollID string, request *DeleteP
 		"poll_id": pollID,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeletePollRequest, Response](c, ctx, "DELETE", "/api/v2/polls/{poll_id}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/polls/{poll_id}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -366,7 +366,7 @@ func (c *Client) DeletePollOption(ctx context.Context, pollID string, optionID s
 		"option_id": optionID,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeletePollOptionRequest, Response](c, ctx, "DELETE", "/api/v2/polls/{poll_id}/options/{option_id}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/polls/{poll_id}/options/{option_id}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -468,7 +468,7 @@ func (c *Client) DeleteRole(ctx context.Context, name string, request *DeleteRol
 	pathParams := map[string]string{
 		"name": name,
 	}
-	res, err := MakeRequest[DeleteRoleRequest, Response](c, ctx, "DELETE", "/api/v2/roles/{name}", nil, request, &result, pathParams)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/roles/{name}", nil, nil, &result, pathParams)
 	return res, err
 }
 
@@ -486,7 +486,7 @@ func (c *Client) GetTask(ctx context.Context, id string, request *GetTaskRequest
 func (c *Client) DeleteFile(ctx context.Context, request *DeleteFileRequest) (*StreamResponse[Response], error) {
 	var result Response
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteFileRequest, Response](c, ctx, "DELETE", "/api/v2/uploads/file", params, request, &result, nil)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/uploads/file", params, nil, &result, nil)
 	return res, err
 }
 
@@ -501,7 +501,7 @@ func (c *Client) UploadFile(ctx context.Context, request *UploadFileRequest) (*S
 func (c *Client) DeleteImage(ctx context.Context, request *DeleteImageRequest) (*StreamResponse[Response], error) {
 	var result Response
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteImageRequest, Response](c, ctx, "DELETE", "/api/v2/uploads/image", params, request, &result, nil)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/uploads/image", params, nil, &result, nil)
 	return res, err
 }
 
@@ -542,7 +542,7 @@ func (c *Client) DeleteUserGroup(ctx context.Context, id string, request *Delete
 		"id": id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteUserGroupRequest, Response](c, ctx, "DELETE", "/api/v2/usergroups/{id}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/usergroups/{id}", params, nil, &result, pathParams)
 	return res, err
 }
 

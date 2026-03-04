@@ -133,7 +133,7 @@ func (c *ChatClient) DeleteChannel(ctx context.Context, _type string, id string,
 		"id":   id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteChannelRequest, DeleteChannelResponse](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, DeleteChannelResponse](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -180,7 +180,7 @@ func (c *ChatClient) DeleteDraft(ctx context.Context, _type string, id string, r
 		"id":   id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteDraftRequest, Response](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/draft", params, request, &result, pathParams)
+	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/draft", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -215,7 +215,7 @@ func (c *ChatClient) DeleteChannelFile(ctx context.Context, _type string, id str
 		"id":   id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteChannelFileRequest, Response](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/file", params, request, &result, pathParams)
+	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/file", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -252,7 +252,7 @@ func (c *ChatClient) DeleteChannelImage(ctx context.Context, _type string, id st
 		"id":   id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteChannelImageRequest, Response](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/image", params, request, &result, pathParams)
+	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/image", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -396,7 +396,7 @@ func (c *ChatClient) DeleteChannelType(ctx context.Context, name string, request
 	pathParams := map[string]string{
 		"name": name,
 	}
-	res, err := MakeRequest[DeleteChannelTypeRequest, Response](c.client, ctx, "DELETE", "/api/v2/chat/channeltypes/{name}", nil, request, &result, pathParams)
+	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/channeltypes/{name}", nil, nil, &result, pathParams)
 	return res, err
 }
 
@@ -440,7 +440,7 @@ func (c *ChatClient) DeleteCommand(ctx context.Context, name string, request *De
 	pathParams := map[string]string{
 		"name": name,
 	}
-	res, err := MakeRequest[DeleteCommandRequest, DeleteCommandResponse](c.client, ctx, "DELETE", "/api/v2/chat/commands/{name}", nil, request, &result, pathParams)
+	res, err := MakeRequest[any, DeleteCommandResponse](c.client, ctx, "DELETE", "/api/v2/chat/commands/{name}", nil, nil, &result, pathParams)
 	return res, err
 }
 
@@ -503,7 +503,7 @@ func (c *ChatClient) DeleteMessage(ctx context.Context, id string, request *Dele
 		"id": id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteMessageRequest, DeleteMessageResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{id}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, DeleteMessageResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{id}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -609,7 +609,7 @@ func (c *ChatClient) DeleteReaction(ctx context.Context, id string, _type string
 		"type": _type,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteReactionRequest, DeleteReactionResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{id}/reaction/{type}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, DeleteReactionResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{id}/reaction/{type}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -692,7 +692,7 @@ func (c *ChatClient) DeletePollVote(ctx context.Context, messageID string, pollI
 		"vote_id":    voteID,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeletePollVoteRequest, PollVoteResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{message_id}/polls/{poll_id}/vote/{vote_id}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, PollVoteResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{message_id}/polls/{poll_id}/vote/{vote_id}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -706,7 +706,7 @@ func (c *ChatClient) DeleteReminder(ctx context.Context, messageID string, reque
 		"message_id": messageID,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteReminderRequest, DeleteReminderResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{message_id}/reminders", params, request, &result, pathParams)
+	res, err := MakeRequest[any, DeleteReminderResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{message_id}/reminders", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -819,7 +819,7 @@ func (c *ChatClient) DeleteSegment(ctx context.Context, id string, request *Dele
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[DeleteSegmentRequest, Response](c.client, ctx, "DELETE", "/api/v2/chat/segments/{id}", nil, request, &result, pathParams)
+	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/segments/{id}", nil, nil, &result, pathParams)
 	return res, err
 }
 

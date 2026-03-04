@@ -4003,9 +4003,6 @@ type DeleteCommentResponse struct {
 	Comment  CommentResponse  `json:"comment"`
 }
 
-type DeleteCustomRoleRequest struct {
-}
-
 // Basic response information
 type DeleteExternalStorageResponse struct {
 	// Duration of the request in milliseconds
@@ -4064,9 +4061,6 @@ type DeleteMessageResponse struct {
 	// Duration of the request in milliseconds
 	Duration string          `json:"duration"`
 	Message  MessageResponse `json:"message"`
-}
-
-type DeleteModerationConfigRequest struct {
 }
 
 type DeleteModerationConfigResponse struct {
@@ -5002,9 +4996,6 @@ type Field struct {
 	Short bool   `json:"short"`
 	Title string `json:"title"`
 	Value string `json:"value"`
-}
-
-type FileDeleteRequest struct {
 }
 
 type FileUploadConfig struct {

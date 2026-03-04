@@ -81,7 +81,7 @@ func (c *ModerationClient) DeleteConfig(ctx context.Context, key string, request
 		"key": key,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteConfigRequest, DeleteModerationConfigResponse](c.client, ctx, "DELETE", "/api/v2/moderation/config/{key}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, DeleteModerationConfigResponse](c.client, ctx, "DELETE", "/api/v2/moderation/config/{key}", params, nil, &result, pathParams)
 	return res, err
 }
 

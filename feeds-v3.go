@@ -126,7 +126,7 @@ func (c *FeedsClient) DeletePollVote(ctx context.Context, activityID string, pol
 		"vote_id":     voteID,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeletePollVoteRequest, PollVoteResponse](c.client, ctx, "DELETE", "/api/v2/feeds/activities/{activity_id}/polls/{poll_id}/vote/{vote_id}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, PollVoteResponse](c.client, ctx, "DELETE", "/api/v2/feeds/activities/{activity_id}/polls/{poll_id}/vote/{vote_id}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -158,7 +158,7 @@ func (c *FeedsClient) DeleteActivityReaction(ctx context.Context, activityID str
 		"type":        _type,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteActivityReactionRequest, DeleteActivityReactionResponse](c.client, ctx, "DELETE", "/api/v2/feeds/activities/{activity_id}/reactions/{type}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, DeleteActivityReactionResponse](c.client, ctx, "DELETE", "/api/v2/feeds/activities/{activity_id}/reactions/{type}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -169,7 +169,7 @@ func (c *FeedsClient) DeleteActivity(ctx context.Context, id string, request *De
 		"id": id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteActivityRequest, DeleteActivityResponse](c.client, ctx, "DELETE", "/api/v2/feeds/activities/{id}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, DeleteActivityResponse](c.client, ctx, "DELETE", "/api/v2/feeds/activities/{id}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -326,7 +326,7 @@ func (c *FeedsClient) DeleteComment(ctx context.Context, id string, request *Del
 		"id": id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteCommentRequest, DeleteCommentResponse](c.client, ctx, "DELETE", "/api/v2/feeds/comments/{id}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, DeleteCommentResponse](c.client, ctx, "DELETE", "/api/v2/feeds/comments/{id}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -378,7 +378,7 @@ func (c *FeedsClient) DeleteCommentReaction(ctx context.Context, id string, _typ
 		"type": _type,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteCommentReactionRequest, DeleteCommentReactionResponse](c.client, ctx, "DELETE", "/api/v2/feeds/comments/{id}/reactions/{type}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, DeleteCommentReactionResponse](c.client, ctx, "DELETE", "/api/v2/feeds/comments/{id}/reactions/{type}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -416,7 +416,7 @@ func (c *FeedsClient) DeleteFeed(ctx context.Context, feedGroupID string, feedID
 		"feed_id":       feedID,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteFeedRequest, DeleteFeedResponse](c.client, ctx, "DELETE", "/api/v2/feeds/feed_groups/{feed_group_id}/feeds/{feed_id}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, DeleteFeedResponse](c.client, ctx, "DELETE", "/api/v2/feeds/feed_groups/{feed_group_id}/feeds/{feed_id}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -561,7 +561,7 @@ func (c *FeedsClient) DeleteFeedGroup(ctx context.Context, id string, request *D
 		"id": id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteFeedGroupRequest, DeleteFeedGroupResponse](c.client, ctx, "DELETE", "/api/v2/feeds/feed_groups/{id}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, DeleteFeedGroupResponse](c.client, ctx, "DELETE", "/api/v2/feeds/feed_groups/{id}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -771,7 +771,7 @@ func (c *FeedsClient) Unfollow(ctx context.Context, source string, target string
 		"target": target,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[UnfollowRequest, UnfollowResponse](c.client, ctx, "DELETE", "/api/v2/feeds/follows/{source}/{target}", params, request, &result, pathParams)
+	res, err := MakeRequest[any, UnfollowResponse](c.client, ctx, "DELETE", "/api/v2/feeds/follows/{source}/{target}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -795,7 +795,7 @@ func (c *FeedsClient) DeleteMembershipLevel(ctx context.Context, id string, requ
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[DeleteMembershipLevelRequest, Response](c.client, ctx, "DELETE", "/api/v2/feeds/membership_levels/{id}", nil, request, &result, pathParams)
+	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/feeds/membership_levels/{id}", nil, nil, &result, pathParams)
 	return res, err
 }
 
