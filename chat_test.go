@@ -44,6 +44,13 @@ func TestChatQueryChannels(t *testing.T) {
 	_, err = client.Chat().QueryChannels(context.Background(), &getstream.QueryChannelsRequest{})
 	require.NoError(t, err)
 }
+func TestChatChannelBatchUpdate(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().ChannelBatchUpdate(context.Background(), &getstream.ChannelBatchUpdateRequest{})
+	require.NoError(t, err)
+}
 func TestChatDeleteChannels(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

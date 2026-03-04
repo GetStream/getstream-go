@@ -60,10 +60,26 @@ func (c *ChatClient) QueryChannels(ctx context.Context, request *QueryChannelsRe
 	return res, err
 }
 
+// Update channels in batch
+//
+// Sends events:
+// - channel.frozen
+// - channel.hidden
+// - channel.unfrozen
+// - channel.updated
+// - channel.visible
+// - member.added
+// - member.removed
+// - member.updated
+func (c *ChatClient) ChannelBatchUpdate(ctx context.Context, request *ChannelBatchUpdateRequest) (*StreamResponse[ChannelBatchUpdateResponse], error) {
+	var result ChannelBatchUpdateResponse
+	res, err := MakeRequest[ChannelBatchUpdateRequest, ChannelBatchUpdateResponse](c.client, ctx, "PUT", "/api/v2/chat/channels/batch", nil, request, &result, nil)
+	return res, err
+}
+
 // Allows to delete several channels at once asynchronously
 //
 // Sends events:
-// - channel.deleted
 // - channel.deleted
 func (c *ChatClient) DeleteChannels(ctx context.Context, request *DeleteChannelsRequest) (*StreamResponse[DeleteChannelsResponse], error) {
 	var result DeleteChannelsResponse
@@ -83,7 +99,6 @@ func (c *ChatClient) MarkDelivered(ctx context.Context, request *MarkDeliveredRe
 //
 // Sends events:
 // - message.read
-// - message.read
 func (c *ChatClient) MarkChannelsRead(ctx context.Context, request *MarkChannelsReadRequest) (*StreamResponse[MarkReadResponse], error) {
 	var result MarkReadResponse
 	res, err := MakeRequest[MarkChannelsReadRequest, MarkReadResponse](c.client, ctx, "POST", "/api/v2/chat/channels/read", nil, request, &result, nil)
@@ -98,8 +113,6 @@ func (c *ChatClient) MarkChannelsRead(ctx context.Context, request *MarkChannels
 // - member.removed
 // - member.updated
 // - user.watching.start
-// - channel.created
-// - user.watching.start
 func (c *ChatClient) GetOrCreateDistinctChannel(ctx context.Context, _type string, request *GetOrCreateDistinctChannelRequest) (*StreamResponse[ChannelStateResponse], error) {
 	var result ChannelStateResponse
 	pathParams := map[string]string{
@@ -113,7 +126,6 @@ func (c *ChatClient) GetOrCreateDistinctChannel(ctx context.Context, _type strin
 //
 // Sends events:
 // - channel.deleted
-// - channel.deleted
 func (c *ChatClient) DeleteChannel(ctx context.Context, _type string, id string, request *DeleteChannelRequest) (*StreamResponse[DeleteChannelResponse], error) {
 	var result DeleteChannelResponse
 	pathParams := map[string]string{
@@ -121,14 +133,13 @@ func (c *ChatClient) DeleteChannel(ctx context.Context, _type string, id string,
 		"id":   id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[any, DeleteChannelResponse](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}", params, nil, &result, pathParams)
+	res, err := MakeRequest[DeleteChannelRequest, DeleteChannelResponse](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}", params, request, &result, pathParams)
 	return res, err
 }
 
 // Updates certain fields of the channel
 //
 // Sends events:
-// - channel.updated
 // - channel.updated
 func (c *ChatClient) UpdateChannelPartial(ctx context.Context, _type string, id string, request *UpdateChannelPartialRequest) (*StreamResponse[UpdateChannelPartialResponse], error) {
 	var result UpdateChannelPartialResponse
@@ -147,8 +158,6 @@ func (c *ChatClient) UpdateChannelPartial(ctx context.Context, _type string, id 
 // - member.added
 // - member.removed
 // - member.updated
-// - message.new
-// - channel.updated
 // - message.new
 func (c *ChatClient) UpdateChannel(ctx context.Context, _type string, id string, request *UpdateChannelRequest) (*StreamResponse[UpdateChannelResponse], error) {
 	var result UpdateChannelResponse
@@ -171,7 +180,7 @@ func (c *ChatClient) DeleteDraft(ctx context.Context, _type string, id string, r
 		"id":   id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/draft", params, nil, &result, pathParams)
+	res, err := MakeRequest[DeleteDraftRequest, Response](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/draft", params, request, &result, pathParams)
 	return res, err
 }
 
@@ -206,7 +215,7 @@ func (c *ChatClient) DeleteChannelFile(ctx context.Context, _type string, id str
 		"id":   id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/file", params, nil, &result, pathParams)
+	res, err := MakeRequest[DeleteChannelFileRequest, Response](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/file", params, request, &result, pathParams)
 	return res, err
 }
 
@@ -224,7 +233,6 @@ func (c *ChatClient) UploadChannelFile(ctx context.Context, _type string, id str
 // Marks channel as hidden for current user
 //
 // Sends events:
-// - channel.hidden
 // - channel.hidden
 func (c *ChatClient) HideChannel(ctx context.Context, _type string, id string, request *HideChannelRequest) (*StreamResponse[HideChannelResponse], error) {
 	var result HideChannelResponse
@@ -244,7 +252,7 @@ func (c *ChatClient) DeleteChannelImage(ctx context.Context, _type string, id st
 		"id":   id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/image", params, nil, &result, pathParams)
+	res, err := MakeRequest[DeleteChannelImageRequest, Response](c.client, ctx, "DELETE", "/api/v2/chat/channels/{type}/{id}/image", params, request, &result, pathParams)
 	return res, err
 }
 
@@ -273,8 +281,6 @@ func (c *ChatClient) UpdateMemberPartial(ctx context.Context, _type string, id s
 // Sends new message to the specified channel
 //
 // Sends events:
-// - message.new
-// - message.updated
 // - message.new
 // - message.updated
 func (c *ChatClient) SendMessage(ctx context.Context, _type string, id string, request *SendMessageRequest) (*StreamResponse[SendMessageResponse], error) {
@@ -307,8 +313,6 @@ func (c *ChatClient) GetManyMessages(ctx context.Context, _type string, id strin
 // - member.removed
 // - member.updated
 // - user.watching.start
-// - channel.created
-// - user.watching.start
 func (c *ChatClient) GetOrCreateChannel(ctx context.Context, _type string, id string, request *GetOrCreateChannelRequest) (*StreamResponse[ChannelStateResponse], error) {
 	var result ChannelStateResponse
 	pathParams := map[string]string{
@@ -322,7 +326,6 @@ func (c *ChatClient) GetOrCreateChannel(ctx context.Context, _type string, id st
 // Marks channel as read up to the specific message
 //
 // Sends events:
-// - message.read
 // - message.read
 func (c *ChatClient) MarkRead(ctx context.Context, _type string, id string, request *MarkReadRequest) (*StreamResponse[MarkReadResponse], error) {
 	var result MarkReadResponse
@@ -338,7 +341,6 @@ func (c *ChatClient) MarkRead(ctx context.Context, _type string, id string, requ
 //
 // Sends events:
 // - channel.visible
-// - channel.visible
 func (c *ChatClient) ShowChannel(ctx context.Context, _type string, id string, request *ShowChannelRequest) (*StreamResponse[ShowChannelResponse], error) {
 	var result ShowChannelResponse
 	pathParams := map[string]string{
@@ -352,7 +354,6 @@ func (c *ChatClient) ShowChannel(ctx context.Context, _type string, id string, r
 // Truncates messages from a channel. Can be applied to the entire channel or scoped to specific members.
 //
 // Sends events:
-// - channel.truncated
 // - channel.truncated
 func (c *ChatClient) TruncateChannel(ctx context.Context, _type string, id string, request *TruncateChannelRequest) (*StreamResponse[TruncateChannelResponse], error) {
 	var result TruncateChannelResponse
@@ -395,7 +396,7 @@ func (c *ChatClient) DeleteChannelType(ctx context.Context, name string, request
 	pathParams := map[string]string{
 		"name": name,
 	}
-	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/channeltypes/{name}", nil, nil, &result, pathParams)
+	res, err := MakeRequest[DeleteChannelTypeRequest, Response](c.client, ctx, "DELETE", "/api/v2/chat/channeltypes/{name}", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -439,7 +440,7 @@ func (c *ChatClient) DeleteCommand(ctx context.Context, name string, request *De
 	pathParams := map[string]string{
 		"name": name,
 	}
-	res, err := MakeRequest[any, DeleteCommandResponse](c.client, ctx, "DELETE", "/api/v2/chat/commands/{name}", nil, nil, &result, pathParams)
+	res, err := MakeRequest[DeleteCommandRequest, DeleteCommandResponse](c.client, ctx, "DELETE", "/api/v2/chat/commands/{name}", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -496,14 +497,13 @@ func (c *ChatClient) QueryMessageHistory(ctx context.Context, request *QueryMess
 //
 // Sends events:
 // - message.deleted
-// - message.deleted
 func (c *ChatClient) DeleteMessage(ctx context.Context, id string, request *DeleteMessageRequest) (*StreamResponse[DeleteMessageResponse], error) {
 	var result DeleteMessageResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[any, DeleteMessageResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{id}", params, nil, &result, pathParams)
+	res, err := MakeRequest[DeleteMessageRequest, DeleteMessageResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{id}", params, request, &result, pathParams)
 	return res, err
 }
 
@@ -522,7 +522,6 @@ func (c *ChatClient) GetMessage(ctx context.Context, id string, request *GetMess
 //
 // Sends events:
 // - message.updated
-// - message.updated
 func (c *ChatClient) UpdateMessage(ctx context.Context, id string, request *UpdateMessageRequest) (*StreamResponse[UpdateMessageResponse], error) {
 	var result UpdateMessageResponse
 	pathParams := map[string]string{
@@ -536,7 +535,6 @@ func (c *ChatClient) UpdateMessage(ctx context.Context, id string, request *Upda
 //
 // Sends events:
 // - message.updated
-// - message.updated
 func (c *ChatClient) UpdateMessagePartial(ctx context.Context, id string, request *UpdateMessagePartialRequest) (*StreamResponse[UpdateMessagePartialResponse], error) {
 	var result UpdateMessagePartialResponse
 	pathParams := map[string]string{
@@ -549,7 +547,6 @@ func (c *ChatClient) UpdateMessagePartial(ctx context.Context, id string, reques
 // Executes message command action with given parameters
 //
 // Sends events:
-// - message.new
 // - message.new
 func (c *ChatClient) RunMessageAction(ctx context.Context, id string, request *RunMessageActionRequest) (*StreamResponse[MessageActionResponse], error) {
 	var result MessageActionResponse
@@ -565,8 +562,6 @@ func (c *ChatClient) RunMessageAction(ctx context.Context, id string, request *R
 // Sends events:
 // - message.new
 // - message.updated
-// - message.new
-// - message.updated
 func (c *ChatClient) CommitMessage(ctx context.Context, id string, request *CommitMessageRequest) (*StreamResponse[MessageActionResponse], error) {
 	var result MessageActionResponse
 	pathParams := map[string]string{
@@ -579,7 +574,6 @@ func (c *ChatClient) CommitMessage(ctx context.Context, id string, request *Comm
 // Updates message fields without storing in database, only sends update event
 //
 // Sends events:
-// - message.updated
 // - message.updated
 func (c *ChatClient) EphemeralMessageUpdate(ctx context.Context, id string, request *EphemeralMessageUpdateRequest) (*StreamResponse[UpdateMessagePartialResponse], error) {
 	var result UpdateMessagePartialResponse
@@ -615,7 +609,7 @@ func (c *ChatClient) DeleteReaction(ctx context.Context, id string, _type string
 		"type": _type,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[any, DeleteReactionResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{id}/reaction/{type}", params, nil, &result, pathParams)
+	res, err := MakeRequest[DeleteReactionRequest, DeleteReactionResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{id}/reaction/{type}", params, request, &result, pathParams)
 	return res, err
 }
 
@@ -644,7 +638,6 @@ func (c *ChatClient) QueryReactions(ctx context.Context, id string, request *Que
 //
 // Sends events:
 // - message.updated
-// - message.updated
 func (c *ChatClient) TranslateMessage(ctx context.Context, id string, request *TranslateMessageRequest) (*StreamResponse[MessageActionResponse], error) {
 	var result MessageActionResponse
 	pathParams := map[string]string{
@@ -657,7 +650,6 @@ func (c *ChatClient) TranslateMessage(ctx context.Context, id string, request *T
 // Undelete a message that was previously soft-deleted
 //
 // Sends events:
-// - message.undeleted
 // - message.undeleted
 func (c *ChatClient) UndeleteMessage(ctx context.Context, id string, request *UndeleteMessageRequest) (*StreamResponse[UndeleteMessageResponse], error) {
 	var result UndeleteMessageResponse
@@ -700,7 +692,7 @@ func (c *ChatClient) DeletePollVote(ctx context.Context, messageID string, pollI
 		"vote_id":    voteID,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[any, PollVoteResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{message_id}/polls/{poll_id}/vote/{vote_id}", params, nil, &result, pathParams)
+	res, err := MakeRequest[DeletePollVoteRequest, PollVoteResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{message_id}/polls/{poll_id}/vote/{vote_id}", params, request, &result, pathParams)
 	return res, err
 }
 
@@ -714,7 +706,7 @@ func (c *ChatClient) DeleteReminder(ctx context.Context, messageID string, reque
 		"message_id": messageID,
 	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[any, DeleteReminderResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{message_id}/reminders", params, nil, &result, pathParams)
+	res, err := MakeRequest[DeleteReminderRequest, DeleteReminderResponse](c.client, ctx, "DELETE", "/api/v2/chat/messages/{message_id}/reminders", params, request, &result, pathParams)
 	return res, err
 }
 
@@ -767,7 +759,6 @@ func (c *ChatClient) QueryMessageFlags(ctx context.Context, request *QueryMessag
 //
 // Sends events:
 // - channel.muted
-// - channel.muted
 func (c *ChatClient) MuteChannel(ctx context.Context, request *MuteChannelRequest) (*StreamResponse[MuteChannelResponse], error) {
 	var result MuteChannelResponse
 	res, err := MakeRequest[MuteChannelRequest, MuteChannelResponse](c.client, ctx, "POST", "/api/v2/chat/moderation/mute/channel", nil, request, &result, nil)
@@ -777,7 +768,6 @@ func (c *ChatClient) MuteChannel(ctx context.Context, request *MuteChannelReques
 // Unmutes channel for user
 //
 // Sends events:
-// - channel.unmuted
 // - channel.unmuted
 func (c *ChatClient) UnmuteChannel(ctx context.Context, request *UnmuteChannelRequest) (*StreamResponse[UnmuteResponse], error) {
 	var result UnmuteResponse
@@ -829,7 +819,7 @@ func (c *ChatClient) DeleteSegment(ctx context.Context, id string, request *Dele
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/segments/{id}", nil, nil, &result, pathParams)
+	res, err := MakeRequest[DeleteSegmentRequest, Response](c.client, ctx, "DELETE", "/api/v2/chat/segments/{id}", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -911,7 +901,6 @@ func (c *ChatClient) GetThread(ctx context.Context, messageID string, request *G
 //
 // Sends events:
 // - thread.updated
-// - thread.updated
 func (c *ChatClient) UpdateThreadPartial(ctx context.Context, messageID string, request *UpdateThreadPartialRequest) (*StreamResponse[UpdateThreadPartialResponse], error) {
 	var result UpdateThreadPartialResponse
 	pathParams := map[string]string{
@@ -939,7 +928,6 @@ func (c *ChatClient) UnreadCountsBatch(ctx context.Context, request *UnreadCount
 // Sends a custom event to a user
 //
 // Sends events:
-// - *
 // - *
 func (c *ChatClient) SendUserCustomEvent(ctx context.Context, userID string, request *SendUserCustomEventRequest) (*StreamResponse[Response], error) {
 	var result Response

@@ -21,6 +21,7 @@ type UpdateAppRequest struct {
 	MigratePermissionsToV2         *bool                           `json:"migrate_permissions_to_v2"`
 	ModerationAnalyticsEnabled     *bool                           `json:"moderation_analytics_enabled"`
 	ModerationEnabled              *bool                           `json:"moderation_enabled"`
+	ModerationS3ImageAccessRoleArn *string                         `json:"moderation_s3_image_access_role_arn"`
 	ModerationWebhookUrl           *string                         `json:"moderation_webhook_url"`
 	MultiTenantEnabled             *bool                           `json:"multi_tenant_enabled"`
 	PermissionVersion              *string                         `json:"permission_version"`
@@ -108,6 +109,12 @@ type QueryChannelsRequest struct {
 	FilterValues     map[string]any     `json:"filter_values"`
 	SortValues       map[string]any     `json:"sort_values"`
 	User             *UserRequest       `json:"user"`
+}
+type ChannelBatchUpdateRequest struct {
+	Operation string                      `json:"operation"`
+	Filter    map[string]any              `json:"filter"`
+	Members   []ChannelBatchMemberRequest `json:"members"`
+	Data      *ChannelDataUpdate          `json:"data"`
 }
 type DeleteChannelsRequest struct {
 	Cids       []string `json:"cids"`
@@ -760,6 +767,8 @@ type QueryBookmarkFoldersRequest struct {
 	Filter map[string]any     `json:"filter"`
 }
 type DeleteBookmarkFolderRequest struct {
+	UserID *string      `json:"user_id"`
+	User   *UserRequest `json:"user"`
 }
 type UpdateBookmarkFolderRequest struct {
 	Name   *string        `json:"name"`
@@ -775,7 +784,9 @@ type QueryBookmarksRequest struct {
 	Filter map[string]any     `json:"filter"`
 }
 type DeleteCollectionsRequest struct {
-	CollectionRefs []string `json:"-" query:"collection_refs"`
+	CollectionRefs []string     `json:"-" query:"collection_refs"`
+	UserID         *string      `json:"user_id"`
+	User           *UserRequest `json:"user"`
 }
 type ReadCollectionsRequest struct {
 	UserID         *string  `json:"-" query:"user_id"`
@@ -825,11 +836,14 @@ type AddCommentsBatchRequest struct {
 	Comments []AddCommentRequest `json:"comments"`
 }
 type QueryCommentsRequest struct {
-	Filter map[string]any `json:"filter"`
-	Limit  *int           `json:"limit"`
-	Next   *string        `json:"next"`
-	Prev   *string        `json:"prev"`
-	Sort   *string        `json:"sort"`
+	Filter   map[string]any `json:"filter"`
+	IDAround *string        `json:"id_around"`
+	Limit    *int           `json:"limit"`
+	Next     *string        `json:"next"`
+	Prev     *string        `json:"prev"`
+	Sort     *string        `json:"sort"`
+	UserID   *string        `json:"user_id"`
+	User     *UserRequest   `json:"user"`
 }
 type DeleteCommentRequest struct {
 	HardDelete                 *bool `json:"-" query:"hard_delete"`
@@ -1220,6 +1234,9 @@ type CheckRequest struct {
 	Options           map[string]any     `json:"options"`
 	User              *UserRequest       `json:"user"`
 }
+type CheckS3AccessRequest struct {
+	S3Url *string `json:"s3_url"`
+}
 type UpsertConfigRequest struct {
 	Key                                string                              `json:"key"`
 	Async                              *bool                               `json:"async"`
@@ -1266,6 +1283,7 @@ type CustomCheckRequest struct {
 	User              *UserRequest              `json:"user"`
 }
 type V2DeleteTemplateRequest struct {
+	Name string `json:"name"`
 }
 type V2QueryTemplatesRequest struct {
 }

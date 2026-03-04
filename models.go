@@ -504,9 +504,13 @@ type ActivityResponse struct {
 	// When the activity will expire
 	ExpiresAt *Timestamp `json:"expires_at,omitempty"`
 	// Total count of reactions from friends on this activity
-	FriendReactionCount *int    `json:"friend_reaction_count,omitempty"`
-	IsWatched           *bool   `json:"is_watched,omitempty"`
-	ModerationAction    *string `json:"moderation_action,omitempty"`
+	FriendReactionCount *int `json:"friend_reaction_count,omitempty"`
+	// Whether this activity has been read. Only set for feed groups with notification config (track_seen/track_read enabled).
+	IsRead *bool `json:"is_read,omitempty"`
+	// Whether this activity has been seen. Only set for feed groups with notification config (track_seen/track_read enabled).
+	IsSeen           *bool   `json:"is_seen,omitempty"`
+	IsWatched        *bool   `json:"is_watched,omitempty"`
+	ModerationAction *string `json:"moderation_action,omitempty"`
 	// Which activity selector provided this activity (e.g., 'following', 'popular', 'interest'). Only set when using multiple activity selectors with ranking.
 	SelectorSource *string `json:"selector_source,omitempty"`
 	// Text content of the activity
@@ -701,7 +705,11 @@ type AggregatedActivityResponse struct {
 	UserCountTruncated bool `json:"user_count_truncated"`
 	// List of activities in this aggregation
 	Activities []ActivityResponse `json:"activities"`
-	IsWatched  *bool              `json:"is_watched,omitempty"`
+	// Whether this aggregated group has been read. Only set for feed groups with notification config (track_seen/track_read enabled).
+	IsRead *bool `json:"is_read,omitempty"`
+	// Whether this aggregated group has been seen. Only set for feed groups with notification config (track_seen/track_read enabled).
+	IsSeen    *bool `json:"is_seen,omitempty"`
+	IsWatched *bool `json:"is_watched,omitempty"`
 }
 
 type AggregationConfig struct {
@@ -757,6 +765,7 @@ type AppResponseFields struct {
 	Policies                              map[string][]Policy             `json:"policies"`
 	PushNotifications                     PushNotificationFields          `json:"push_notifications"`
 	BeforeMessageSendHookUrl              *string                         `json:"before_message_send_hook_url,omitempty"`
+	ModerationS3ImageAccessRoleArn        *string                         `json:"moderation_s3_image_access_role_arn,omitempty"`
 	RevokeTokensIssuedBefore              *Timestamp                      `json:"revoke_tokens_issued_before,omitempty"`
 	AllowedFlagReasons                    []string                        `json:"allowed_flag_reasons,omitempty"`
 	Geofences                             []GeofenceResponse              `json:"geofences,omitempty"`
@@ -1099,9 +1108,10 @@ type BlockActionRequestPayload struct {
 }
 
 type BlockListConfig struct {
-	Async   *bool           `json:"async,omitempty"`
-	Enabled *bool           `json:"enabled,omitempty"`
-	Rules   []BlockListRule `json:"rules,omitempty"`
+	Async          *bool           `json:"async,omitempty"`
+	Enabled        *bool           `json:"enabled,omitempty"`
+	MatchSubstring *bool           `json:"match_substring,omitempty"`
+	Rules          []BlockListRule `json:"rules,omitempty"`
 }
 
 type BlockListOptions struct {
@@ -2532,6 +2542,11 @@ func (e *ChannelBatchCompletedEvent) GetEventType() string {
 	return e.Type
 }
 
+type ChannelBatchMemberRequest struct {
+	UserID      string  `json:"user_id"`
+	ChannelRole *string `json:"channel_role,omitempty"`
+}
+
 type ChannelBatchStartedEvent struct {
 	BatchCreatedAt       Timestamp              `json:"batch_created_at"`
 	CreatedAt            Timestamp              `json:"created_at"`
@@ -2548,6 +2563,13 @@ type ChannelBatchStartedEvent struct {
 
 func (e *ChannelBatchStartedEvent) GetEventType() string {
 	return e.Type
+}
+
+// Basic response information
+type ChannelBatchUpdateResponse struct {
+	// Duration of the request in milliseconds
+	Duration string  `json:"duration"`
+	TaskID   *string `json:"task_id,omitempty"`
 }
 
 type ChannelConfig struct {
@@ -2654,6 +2676,16 @@ type ChannelCreatedEvent struct {
 
 func (e *ChannelCreatedEvent) GetEventType() string {
 	return e.Type
+}
+
+type ChannelDataUpdate struct {
+	AutoTranslationEnabled  *bool          `json:"auto_translation_enabled,omitempty"`
+	AutoTranslationLanguage *string        `json:"auto_translation_language,omitempty"`
+	Disabled                *bool          `json:"disabled,omitempty"`
+	Frozen                  *bool          `json:"frozen,omitempty"`
+	Team                    *string        `json:"team,omitempty"`
+	ConfigOverrides         *ChannelConfig `json:"config_overrides,omitempty"`
+	Custom                  map[string]any `json:"custom,omitempty"`
 }
 
 // Emitted when a channel is successfully deleted.
@@ -3224,6 +3256,14 @@ type CheckResponse struct {
 	// ID of the running moderation task
 	TaskID *string                  `json:"task_id,omitempty"`
 	Item   *ReviewQueueItemResponse `json:"item,omitempty"`
+}
+
+type CheckS3AccessResponse struct {
+	Duration string `json:"duration"`
+	// Whether the S3 access check succeeded
+	Success bool `json:"success"`
+	// Descriptive message about the check result
+	Message *string `json:"message,omitempty"`
 }
 
 type CheckSNSResponse struct {
@@ -3963,6 +4003,9 @@ type DeleteCommentResponse struct {
 	Comment  CommentResponse  `json:"comment"`
 }
 
+type DeleteCustomRoleRequest struct {
+}
+
 // Basic response information
 type DeleteExternalStorageResponse struct {
 	// Duration of the request in milliseconds
@@ -4023,6 +4066,9 @@ type DeleteMessageResponse struct {
 	Message  MessageResponse `json:"message"`
 }
 
+type DeleteModerationConfigRequest struct {
+}
+
 type DeleteModerationConfigResponse struct {
 	Duration string `json:"duration"`
 }
@@ -4031,6 +4077,11 @@ type DeleteModerationConfigResponse struct {
 type DeleteModerationRuleResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
+}
+
+type DeleteModerationTemplateRequest struct {
+	// Name of the moderation template to delete
+	Name string `json:"name"`
 }
 
 type DeleteModerationTemplateResponse struct {
@@ -4850,7 +4901,7 @@ type FeedSuggestionResponse struct {
 	OwnMembership *FeedMemberResponse `json:"own_membership,omitempty"`
 }
 
-// Emitted when a feed is created.
+// Emitted when a feed is updated.
 type FeedUpdatedEvent struct {
 	CreatedAt Timestamp      `json:"created_at"`
 	Fid       string         `json:"fid"`
@@ -4951,6 +5002,9 @@ type Field struct {
 	Short bool   `json:"short"`
 	Title string `json:"title"`
 	Value string `json:"value"`
+}
+
+type FileDeleteRequest struct {
 }
 
 type FileUploadConfig struct {
@@ -7400,12 +7454,14 @@ type NotificationStatusResponse struct {
 	// Number of unread notifications
 	Unread int `json:"unread"`
 	// Number of unseen notifications
-	Unseen     int        `json:"unseen"`
+	Unseen int `json:"unseen"`
+	// When notifications were last read
 	LastReadAt *Timestamp `json:"last_read_at,omitempty"`
 	// When notifications were last seen
 	LastSeenAt *Timestamp `json:"last_seen_at,omitempty"`
-	// IDs of activities that have been read
+	// Deprecated: use is_read on each activity/group instead. IDs of activities that have been read. Capped at ~101 entries for aggregated feeds.
 	ReadActivities []string `json:"read_activities,omitempty"`
+	// Deprecated: use is_seen on each activity/group instead. IDs of activities that have been seen. Capped at ~101 entries for aggregated feeds.
 	SeenActivities []string `json:"seen_activities,omitempty"`
 }
 
@@ -8485,14 +8541,16 @@ type QueryModerationRulesResponse struct {
 	Duration string `json:"duration"`
 	// Available harm labels for closed caption rules
 	ClosedCaptionLabels []string `json:"closed_caption_labels"`
-	// Available harm labels for keyframe rules
+	// Deprecated: use keyframe_label_classifications instead. Available L1 harm labels for keyframe rules
 	KeyframeLabels []string `json:"keyframe_labels"`
 	// List of moderation rules
 	Rules []ModerationRuleV2Response `json:"rules"`
 	// Default LLM label descriptions
 	DefaultLlmLabels map[string]string `json:"default_llm_labels"`
-	Next             *string           `json:"next,omitempty"`
-	Prev             *string           `json:"prev,omitempty"`
+	// L1 to L2 mapping of keyframe harm label classifications
+	KeyframeLabelClassifications map[string][]string `json:"keyframe_label_classifications"`
+	Next                         *string             `json:"next,omitempty"`
+	Prev                         *string             `json:"prev,omitempty"`
 }
 
 type QueryPinnedActivitiesResponse struct {
