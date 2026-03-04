@@ -113,7 +113,7 @@ func (c *ModerationClient) CustomCheck(ctx context.Context, request *CustomCheck
 // Delete a specific moderation template by its name
 func (c *ModerationClient) V2DeleteTemplate(ctx context.Context, request *V2DeleteTemplateRequest) (*StreamResponse[DeleteModerationTemplateResponse], error) {
 	var result DeleteModerationTemplateResponse
-	res, err := MakeRequest[V2DeleteTemplateRequest, DeleteModerationTemplateResponse](c.client, ctx, "DELETE", "/api/v2/moderation/feeds_moderation_template", nil, request, &result, nil)
+	res, err := MakeRequest[any, DeleteModerationTemplateResponse](c.client, ctx, "DELETE", "/api/v2/moderation/feeds_moderation_template", nil, nil, &result, nil)
 	return res, err
 }
 

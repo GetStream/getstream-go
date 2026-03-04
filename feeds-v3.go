@@ -232,7 +232,7 @@ func (c *FeedsClient) DeleteBookmarkFolder(ctx context.Context, folderID string,
 	pathParams := map[string]string{
 		"folder_id": folderID,
 	}
-	res, err := MakeRequest[DeleteBookmarkFolderRequest, DeleteBookmarkFolderResponse](c.client, ctx, "DELETE", "/api/v2/feeds/bookmark_folders/{folder_id}", nil, request, &result, pathParams)
+	res, err := MakeRequest[any, DeleteBookmarkFolderResponse](c.client, ctx, "DELETE", "/api/v2/feeds/bookmark_folders/{folder_id}", nil, nil, &result, pathParams)
 	return res, err
 }
 
@@ -257,7 +257,7 @@ func (c *FeedsClient) QueryBookmarks(ctx context.Context, request *QueryBookmark
 func (c *FeedsClient) DeleteCollections(ctx context.Context, request *DeleteCollectionsRequest) (*StreamResponse[DeleteCollectionsResponse], error) {
 	var result DeleteCollectionsResponse
 	params := extractQueryParams(request)
-	res, err := MakeRequest[DeleteCollectionsRequest, DeleteCollectionsResponse](c.client, ctx, "DELETE", "/api/v2/feeds/collections", params, request, &result, nil)
+	res, err := MakeRequest[any, DeleteCollectionsResponse](c.client, ctx, "DELETE", "/api/v2/feeds/collections", params, nil, &result, nil)
 	return res, err
 }
 

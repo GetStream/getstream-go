@@ -4073,11 +4073,6 @@ type DeleteModerationRuleResponse struct {
 	Duration string `json:"duration"`
 }
 
-type DeleteModerationTemplateRequest struct {
-	// Name of the moderation template to delete
-	Name string `json:"name"`
-}
-
 type DeleteModerationTemplateResponse struct {
 	Duration string `json:"duration"`
 }

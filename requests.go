@@ -767,8 +767,6 @@ type QueryBookmarkFoldersRequest struct {
 	Filter map[string]any     `json:"filter"`
 }
 type DeleteBookmarkFolderRequest struct {
-	UserID *string      `json:"user_id"`
-	User   *UserRequest `json:"user"`
 }
 type UpdateBookmarkFolderRequest struct {
 	Name   *string        `json:"name"`
@@ -784,9 +782,7 @@ type QueryBookmarksRequest struct {
 	Filter map[string]any     `json:"filter"`
 }
 type DeleteCollectionsRequest struct {
-	CollectionRefs []string     `json:"-" query:"collection_refs"`
-	UserID         *string      `json:"user_id"`
-	User           *UserRequest `json:"user"`
+	CollectionRefs []string `json:"-" query:"collection_refs"`
 }
 type ReadCollectionsRequest struct {
 	UserID         *string  `json:"-" query:"user_id"`
@@ -1283,7 +1279,6 @@ type CustomCheckRequest struct {
 	User              *UserRequest              `json:"user"`
 }
 type V2DeleteTemplateRequest struct {
-	Name string `json:"name"`
 }
 type V2QueryTemplatesRequest struct {
 }
@@ -1566,11 +1561,11 @@ type UpdateUserGroupRequest struct {
 	Name        *string `json:"name"`
 	TeamID      *string `json:"team_id"`
 }
-type RemoveUserGroupMembersRequest struct {
+type AddUserGroupMembersRequest struct {
 	MemberIds []string `json:"member_ids"`
 	TeamID    *string  `json:"team_id"`
 }
-type AddUserGroupMembersRequest struct {
+type RemoveUserGroupMembersRequest struct {
 	MemberIds []string `json:"member_ids"`
 	TeamID    *string  `json:"team_id"`
 }
