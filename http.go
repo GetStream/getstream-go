@@ -163,7 +163,7 @@ func newRequest[T any](c *Client, ctx context.Context, method, path string, para
 	case io.Reader:
 		c.logger.Debug("Data is io.Reader")
 		r.Body = io.NopCloser(t)
-	case *UploadFileRequest, *UploadImageRequest:
+	case *UploadFileRequest, *UploadImageRequest, *UploadChannelFileRequest, *UploadChannelImageRequest:
 		return c.createMultipartRequest(r, t)
 	default:
 		c.logger.Debug("Data is of type %T, attempting to marshal to JSON", t)
@@ -227,6 +227,62 @@ func (c *Client) createMultipartRequest(r *http.Request, data any) (*http.Reques
 		}
 
 	case *UploadImageRequest:
+		if req.File == nil {
+			return nil, fmt.Errorf("file name must be provided")
+		}
+		fileName = *req.File
+		fileContent, err = getFileContent(*req.File, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open file: %w", err)
+		}
+
+		// Add upload_sizes field if present
+		if req.UploadSizes != nil && len(req.UploadSizes) > 0 {
+			uploadSizesJSON, err := json.Marshal(req.UploadSizes)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal upload_sizes: %w", err)
+			}
+			err = writer.WriteField("upload_sizes", string(uploadSizesJSON))
+			if err != nil {
+				return nil, fmt.Errorf("failed to write upload_sizes field: %w", err)
+			}
+		}
+
+		// Add user field if present
+		if req.User != nil {
+			userJSON, err := json.Marshal(req.User)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal user: %w", err)
+			}
+			err = writer.WriteField("user", string(userJSON))
+			if err != nil {
+				return nil, fmt.Errorf("failed to write user field: %w", err)
+			}
+		}
+
+	case *UploadChannelFileRequest:
+		if req.File == nil {
+			return nil, fmt.Errorf("file name must be provided")
+		}
+		fileName = *req.File
+		fileContent, err = getFileContent(*req.File, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open file: %w", err)
+		}
+
+		// Add user field if present
+		if req.User != nil {
+			userJSON, err := json.Marshal(req.User)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal user: %w", err)
+			}
+			err = writer.WriteField("user", string(userJSON))
+			if err != nil {
+				return nil, fmt.Errorf("failed to write user field: %w", err)
+			}
+		}
+
+	case *UploadChannelImageRequest:
 		if req.File == nil {
 			return nil, fmt.Errorf("file name must be provided")
 		}
@@ -363,7 +419,14 @@ func EncodeValueToQueryParam(value any) string {
 		return strconv.FormatFloat(val.Float(), 'f', -1, 64)
 	case reflect.Bool:
 		return strconv.FormatBool(val.Bool())
-	case reflect.Map, reflect.Struct, reflect.Slice:
+	case reflect.Slice:
+		// For query params, slices of primitives should be comma-separated (e.g. ids=a,b,c)
+		parts := make([]string, val.Len())
+		for i := 0; i < val.Len(); i++ {
+			parts[i] = EncodeValueToQueryParam(val.Index(i).Interface())
+		}
+		return strings.Join(parts, ",")
+	case reflect.Map, reflect.Struct:
 		b, err := json.Marshal(value)
 		if err != nil {
 			panic(err)

@@ -46,6 +46,13 @@ func (c *FeedsClient) DeleteActivities(ctx context.Context, request *DeleteActiv
 	return res, err
 }
 
+// Track metric events (views, clicks, impressions) for activities. Supports batching up to 100 events per request. Each event is independently rate-limited per user per activity per metric. Server-side calls must include user_id.
+func (c *FeedsClient) TrackActivityMetrics(ctx context.Context, request *TrackActivityMetricsRequest) (*StreamResponse[TrackActivityMetricsResponse], error) {
+	var result TrackActivityMetricsResponse
+	res, err := MakeRequest[TrackActivityMetricsRequest, TrackActivityMetricsResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/metrics/track", nil, request, &result, nil)
+	return res, err
+}
+
 // Query activities based on filters with pagination and sorting options
 func (c *FeedsClient) QueryActivities(ctx context.Context, request *QueryActivitiesRequest) (*StreamResponse[QueryActivitiesResponse], error) {
 	var result QueryActivitiesResponse
@@ -215,7 +222,8 @@ func (c *FeedsClient) RestoreActivity(ctx context.Context, id string, request *R
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[RestoreActivityRequest, RestoreActivityResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/{id}/restore", nil, request, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[RestoreActivityRequest, RestoreActivityResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/{id}/restore", params, request, &result, pathParams)
 	return res, err
 }
 

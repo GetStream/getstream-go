@@ -567,16 +567,6 @@ func (c *Client) UpdateUserGroup(ctx context.Context, id string, request *Update
 	return res, err
 }
 
-// Removes members from a user group. Users already not in the group are silently ignored.
-func (c *Client) RemoveUserGroupMembers(ctx context.Context, id string, request *RemoveUserGroupMembersRequest) (*StreamResponse[RemoveUserGroupMembersResponse], error) {
-	var result RemoveUserGroupMembersResponse
-	pathParams := map[string]string{
-		"id": id,
-	}
-	res, err := MakeRequest[any, RemoveUserGroupMembersResponse](c, ctx, "DELETE", "/api/v2/usergroups/{id}/members", nil, nil, &result, pathParams)
-	return res, err
-}
-
 // Adds members to a user group. All user IDs must exist. The operation is all-or-nothing.
 func (c *Client) AddUserGroupMembers(ctx context.Context, id string, request *AddUserGroupMembersRequest) (*StreamResponse[AddUserGroupMembersResponse], error) {
 	var result AddUserGroupMembersResponse
@@ -584,6 +574,16 @@ func (c *Client) AddUserGroupMembers(ctx context.Context, id string, request *Ad
 		"id": id,
 	}
 	res, err := MakeRequest[AddUserGroupMembersRequest, AddUserGroupMembersResponse](c, ctx, "POST", "/api/v2/usergroups/{id}/members", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Removes members from a user group. Users already not in the group are silently ignored.
+func (c *Client) RemoveUserGroupMembers(ctx context.Context, id string, request *RemoveUserGroupMembersRequest) (*StreamResponse[RemoveUserGroupMembersResponse], error) {
+	var result RemoveUserGroupMembersResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[RemoveUserGroupMembersRequest, RemoveUserGroupMembersResponse](c, ctx, "POST", "/api/v2/usergroups/{id}/members/delete", nil, request, &result, pathParams)
 	return res, err
 }
 

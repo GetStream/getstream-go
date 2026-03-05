@@ -30,6 +30,16 @@ We enforce code formatting with [`gofumpt`](https://github.com/mvdan/gofumpt) (a
 
 Gofumpt will mostly take care of your linting issues as well.
 
+### Pre-commit hook
+
+We provide a pre-commit hook that runs the linter automatically before each commit. To enable it, run:
+
+```bash
+make setup-hooks
+```
+
+This only needs to be done once per local clone.
+
 ## Commit message convention
 
 Since we're autogenerating our [CHANGELOG](./CHANGELOG.md), we need to follow a specific commit message convention.
