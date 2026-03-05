@@ -626,6 +626,7 @@ type AddActivityRequest struct {
 	Feeds                      []string          `json:"feeds"`
 	CopyCustomToNotification   *bool             `json:"copy_custom_to_notification"`
 	CreateNotificationActivity *bool             `json:"create_notification_activity"`
+	EnrichOwnFields            *bool             `json:"enrich_own_fields"`
 	ExpiresAt                  *string           `json:"expires_at"`
 	ID                         *string           `json:"id"`
 	ParentID                   *string           `json:"parent_id"`
@@ -647,7 +648,8 @@ type AddActivityRequest struct {
 	SearchData                 map[string]any    `json:"search_data"`
 }
 type UpsertActivitiesRequest struct {
-	Activities []ActivityRequest `json:"activities"`
+	Activities      []ActivityRequest `json:"activities"`
+	EnrichOwnFields *bool             `json:"enrich_own_fields"`
 }
 type UpdateActivitiesPartialBatchRequest struct {
 	Changes []UpdateActivityPartialChangeRequest `json:"changes"`
@@ -659,7 +661,13 @@ type DeleteActivitiesRequest struct {
 	UserID                     *string      `json:"user_id"`
 	User                       *UserRequest `json:"user"`
 }
+type TrackActivityMetricsRequest struct {
+	Events []TrackActivityMetricsEvent `json:"events"`
+	UserID *string                     `json:"user_id"`
+	User   *UserRequest                `json:"user"`
+}
 type QueryActivitiesRequest struct {
+	EnrichOwnFields          *bool              `json:"enrich_own_fields"`
 	IncludeExpiredActivities *bool              `json:"include_expired_activities"`
 	IncludePrivateActivities *bool              `json:"include_private_activities"`
 	Limit                    *int               `json:"limit"`
@@ -725,6 +733,7 @@ type GetActivityRequest struct {
 }
 type UpdateActivityPartialRequest struct {
 	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
+	EnrichOwnFields            *bool          `json:"enrich_own_fields"`
 	HandleMentionNotifications *bool          `json:"handle_mention_notifications"`
 	RunActivityProcessors      *bool          `json:"run_activity_processors"`
 	UserID                     *string        `json:"user_id"`
@@ -734,6 +743,7 @@ type UpdateActivityPartialRequest struct {
 }
 type UpdateActivityRequest struct {
 	CopyCustomToNotification   *bool             `json:"copy_custom_to_notification"`
+	EnrichOwnFields            *bool             `json:"enrich_own_fields"`
 	ExpiresAt                  *Timestamp        `json:"expires_at"`
 	HandleMentionNotifications *bool             `json:"handle_mention_notifications"`
 	PollID                     *string           `json:"poll_id"`
@@ -756,8 +766,9 @@ type UpdateActivityRequest struct {
 	User                       *UserRequest      `json:"user"`
 }
 type RestoreActivityRequest struct {
-	UserID *string      `json:"user_id"`
-	User   *UserRequest `json:"user"`
+	EnrichOwnFields *bool        `json:"-" query:"enrich_own_fields"`
+	UserID          *string      `json:"user_id"`
+	User            *UserRequest `json:"user"`
 }
 type QueryBookmarkFoldersRequest struct {
 	Limit  *int               `json:"limit"`
@@ -775,11 +786,12 @@ type UpdateBookmarkFolderRequest struct {
 	User   *UserRequest   `json:"user"`
 }
 type QueryBookmarksRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
+	EnrichOwnFields *bool              `json:"enrich_own_fields"`
+	Limit           *int               `json:"limit"`
+	Next            *string            `json:"next"`
+	Prev            *string            `json:"prev"`
+	Sort            []SortParamRequest `json:"sort"`
+	Filter          map[string]any     `json:"filter"`
 }
 type DeleteCollectionsRequest struct {
 	CollectionRefs []string `json:"-" query:"collection_refs"`
@@ -927,11 +939,12 @@ type GetOrCreateFeedRequest struct {
 	User                   *UserRequest            `json:"user"`
 }
 type UpdateFeedRequest struct {
-	CreatedByID *string        `json:"created_by_id"`
-	Description *string        `json:"description"`
-	Name        *string        `json:"name"`
-	FilterTags  []string       `json:"filter_tags"`
-	Custom      map[string]any `json:"custom"`
+	CreatedByID     *string        `json:"created_by_id"`
+	Description     *string        `json:"description"`
+	EnrichOwnFields *bool          `json:"enrich_own_fields"`
+	Name            *string        `json:"name"`
+	FilterTags      []string       `json:"filter_tags"`
+	Custom          map[string]any `json:"custom"`
 }
 type MarkActivityRequest struct {
 	MarkAllRead *bool        `json:"mark_all_read"`
@@ -943,11 +956,13 @@ type MarkActivityRequest struct {
 	User        *UserRequest `json:"user"`
 }
 type UnpinActivityRequest struct {
-	UserID *string `json:"-" query:"user_id"`
+	EnrichOwnFields *bool   `json:"-" query:"enrich_own_fields"`
+	UserID          *string `json:"-" query:"user_id"`
 }
 type PinActivityRequest struct {
-	UserID *string      `json:"user_id"`
-	User   *UserRequest `json:"user"`
+	EnrichOwnFields *bool        `json:"enrich_own_fields"`
+	UserID          *string      `json:"user_id"`
+	User            *UserRequest `json:"user"`
 }
 type UpdateFeedMembersRequest struct {
 	Operation string              `json:"operation"`
@@ -972,11 +987,12 @@ type RejectFeedMemberInviteRequest struct {
 	User   *UserRequest `json:"user"`
 }
 type QueryPinnedActivitiesRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
+	EnrichOwnFields *bool              `json:"enrich_own_fields"`
+	Limit           *int               `json:"limit"`
+	Next            *string            `json:"next"`
+	Prev            *string            `json:"prev"`
+	Sort            []SortParamRequest `json:"sort"`
+	Filter          map[string]any     `json:"filter"`
 }
 type GetFollowSuggestionsRequest struct {
 	Limit  *int    `json:"-" query:"limit"`
@@ -1042,7 +1058,8 @@ type UpdateFeedVisibilityRequest struct {
 	Grants map[string][]string `json:"grants"`
 }
 type CreateFeedsBatchRequest struct {
-	Feeds []FeedRequest `json:"feeds"`
+	Feeds           []FeedRequest `json:"feeds"`
+	EnrichOwnFields *bool         `json:"enrich_own_fields"`
 }
 type DeleteFeedsBatchRequest struct {
 	Feeds      []string `json:"feeds"`
@@ -1055,12 +1072,13 @@ type OwnBatchRequest struct {
 	User   *UserRequest `json:"user"`
 }
 type QueryFeedsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	Watch  *bool              `json:"watch"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
+	EnrichOwnFields *bool              `json:"enrich_own_fields"`
+	Limit           *int               `json:"limit"`
+	Next            *string            `json:"next"`
+	Prev            *string            `json:"prev"`
+	Watch           *bool              `json:"watch"`
+	Sort            []SortParamRequest `json:"sort"`
+	Filter          map[string]any     `json:"filter"`
 }
 type GetFeedsRateLimitsRequest struct {
 	Endpoints  *string `json:"-" query:"endpoints"`
@@ -1074,6 +1092,7 @@ type UpdateFollowRequest struct {
 	Target                     string         `json:"target"`
 	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
+	EnrichOwnFields            *bool          `json:"enrich_own_fields"`
 	FollowerRole               *string        `json:"follower_role"`
 	PushPreference             *string        `json:"push_preference"`
 	SkipPush                   *bool          `json:"skip_push"`
@@ -1085,6 +1104,7 @@ type FollowRequest struct {
 	Target                     string         `json:"target"`
 	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
 	CreateNotificationActivity *bool          `json:"create_notification_activity"`
+	EnrichOwnFields            *bool          `json:"enrich_own_fields"`
 	PushPreference             *string        `json:"push_preference"`
 	SkipPush                   *bool          `json:"skip_push"`
 	Status                     *string        `json:"status"`
@@ -1096,10 +1116,12 @@ type AcceptFollowRequest struct {
 	FollowerRole *string `json:"follower_role"`
 }
 type FollowBatchRequest struct {
-	Follows []FollowRequest `json:"follows"`
+	Follows         []FollowRequest `json:"follows"`
+	EnrichOwnFields *bool           `json:"enrich_own_fields"`
 }
 type GetOrCreateFollowsRequest struct {
-	Follows []FollowRequest `json:"follows"`
+	Follows         []FollowRequest `json:"follows"`
+	EnrichOwnFields *bool           `json:"enrich_own_fields"`
 }
 type QueryFollowsRequest struct {
 	Limit  *int               `json:"limit"`
@@ -1114,6 +1136,7 @@ type RejectFollowRequest struct {
 }
 type UnfollowRequest struct {
 	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
+	EnrichOwnFields            *bool `json:"-" query:"enrich_own_fields"`
 }
 type CreateMembershipLevelRequest struct {
 	ID          string         `json:"id"`
@@ -1146,10 +1169,12 @@ type QueryFeedsUsageStatsRequest struct {
 type UnfollowBatchRequest struct {
 	Follows                    []FollowPair `json:"follows"`
 	DeleteNotificationActivity *bool        `json:"delete_notification_activity"`
+	EnrichOwnFields            *bool        `json:"enrich_own_fields"`
 }
 type GetOrCreateUnfollowsRequest struct {
 	Follows                    []FollowPair `json:"follows"`
 	DeleteNotificationActivity *bool        `json:"delete_notification_activity"`
+	EnrichOwnFields            *bool        `json:"enrich_own_fields"`
 }
 type DeleteFeedUserDataRequest struct {
 	HardDelete *bool `json:"hard_delete"`

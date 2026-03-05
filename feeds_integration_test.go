@@ -1938,6 +1938,26 @@ func test36BatchFeedOperations(t *testing.T, ctx context.Context, feedsClient *g
 }
 
 func testFileUploadIntegration(t *testing.T, ctx context.Context, client *getstream.Stream, testUserID string) {
+	// Clear any file upload restrictions so we can upload .txt files
+	appResp, err := client.GetApp(ctx, &getstream.GetAppRequest{})
+	require.NoError(t, err, "Failed to get app config")
+	originalConfig := appResp.Data.App.FileUploadConfig
+	_, err = client.UpdateApp(ctx, &getstream.UpdateAppRequest{
+		FileUploadConfig: &getstream.FileUploadConfig{
+			AllowedFileExtensions: []string{},
+			BlockedFileExtensions: []string{},
+			AllowedMimeTypes:      []string{},
+			BlockedMimeTypes:      []string{},
+		},
+	})
+	require.NoError(t, err, "Failed to clear file upload config")
+	time.Sleep(2 * time.Second)
+	defer func() {
+		_, _ = client.UpdateApp(ctx, &getstream.UpdateAppRequest{
+			FileUploadConfig: &originalConfig,
+		})
+	}()
+
 	// Create a temporary test file
 	testContent := "This is a test file for multipart upload integration test\nContains multiple lines\nWith various content"
 	tmpFile, err := os.CreateTemp("", "integration-test-*.txt")
@@ -1970,6 +1990,26 @@ func testFileUploadIntegration(t *testing.T, ctx context.Context, client *getstr
 }
 
 func testImageUploadIntegration(t *testing.T, ctx context.Context, client *getstream.Stream, testUserID string) {
+	// Clear any image upload restrictions so we can upload .png files
+	appResp, err := client.GetApp(ctx, &getstream.GetAppRequest{})
+	require.NoError(t, err, "Failed to get app config")
+	originalConfig := appResp.Data.App.ImageUploadConfig
+	_, err = client.UpdateApp(ctx, &getstream.UpdateAppRequest{
+		ImageUploadConfig: &getstream.FileUploadConfig{
+			AllowedFileExtensions: []string{},
+			BlockedFileExtensions: []string{},
+			AllowedMimeTypes:      []string{},
+			BlockedMimeTypes:      []string{},
+		},
+	})
+	require.NoError(t, err, "Failed to clear image upload config")
+	time.Sleep(2 * time.Second)
+	defer func() {
+		_, _ = client.UpdateApp(ctx, &getstream.UpdateAppRequest{
+			ImageUploadConfig: &originalConfig,
+		})
+	}()
+
 	// Create a temporary test image file (fake image data)
 	testImageContent := "fake-png-image-data-for-testing"
 	tmpFile, err := os.CreateTemp("", "integration-test-*.png")

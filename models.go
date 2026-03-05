@@ -521,6 +521,7 @@ type ActivityResponse struct {
 	FriendReactions     []FeedsReactionResponse `json:"friend_reactions,omitempty"`
 	CurrentFeed         *FeedResponse           `json:"current_feed,omitempty"`
 	Location            *ActivityLocation       `json:"location,omitempty"`
+	Metrics             map[string]int          `json:"metrics,omitempty"`
 	Moderation          *ModerationV2Response   `json:"moderation,omitempty"`
 	NotificationContext *NotificationContext    `json:"notification_context,omitempty"`
 	Parent              *ActivityResponse       `json:"parent,omitempty"`
@@ -4995,10 +4996,10 @@ type Field struct {
 
 type FileUploadConfig struct {
 	SizeLimit             int      `json:"size_limit"`
-	AllowedFileExtensions []string `json:"allowed_file_extensions,omitempty"`
-	AllowedMimeTypes      []string `json:"allowed_mime_types,omitempty"`
-	BlockedFileExtensions []string `json:"blocked_file_extensions,omitempty"`
-	BlockedMimeTypes      []string `json:"blocked_mime_types,omitempty"`
+	AllowedFileExtensions []string `json:"allowed_file_extensions"`
+	AllowedMimeTypes      []string `json:"allowed_mime_types"`
+	BlockedFileExtensions []string `json:"blocked_file_extensions"`
+	BlockedMimeTypes      []string `json:"blocked_mime_types"`
 }
 
 type FileUploadRequest struct {
@@ -10214,6 +10215,35 @@ type ThumbnailsSettingsResponse struct {
 }
 
 type Time struct {
+}
+
+// A single metric event to track for an activity
+type TrackActivityMetricsEvent struct {
+	// The ID of the activity to track the metric for
+	ActivityID string `json:"activity_id"`
+	// The metric name (e.g. views, clicks, impressions). Alphanumeric and underscores only.
+	Metric string `json:"metric"`
+	// The amount to increment (positive) or decrement (negative). Defaults to 1. The absolute value counts against rate limits.
+	Delta *int `json:"delta,omitempty"`
+}
+
+// Result of tracking a single metric event
+type TrackActivityMetricsEventResult struct {
+	// The activity ID from the request
+	ActivityID string `json:"activity_id"`
+	// Whether the metric was counted (false if rate-limited)
+	Allowed bool `json:"allowed"`
+	// The metric name from the request
+	Metric string `json:"metric"`
+	// Error message if processing failed
+	Error *string `json:"error,omitempty"`
+}
+
+// Response containing results for each tracked metric event
+type TrackActivityMetricsResponse struct {
+	Duration string `json:"duration"`
+	// Results for each event in the request, in the same order
+	Results []TrackActivityMetricsEventResult `json:"results"`
 }
 
 type TrackStatsResponse struct {

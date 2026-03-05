@@ -36,7 +36,7 @@ func TestChatUserIntegration(t *testing.T) {
 			ids[i] = id
 			users[id] = UserRequest{
 				ID:   id,
-				Name: PtrTo("Test User " + id[:8]),
+				Name: PtrTo("Test User " + id),
 				Role: PtrTo("user"),
 			}
 		}
@@ -55,12 +55,12 @@ func TestChatUserIntegration(t *testing.T) {
 			Users: map[string]UserRequest{
 				userID1: {
 					ID:   userID1,
-					Name: PtrTo("User One"),
+					Name: PtrTo("User One " + userID1),
 					Role: PtrTo("user"),
 				},
 				userID2: {
 					ID:   userID2,
-					Name: PtrTo("User Two"),
+					Name: PtrTo("User Two " + userID2),
 					Role: PtrTo("user"),
 				},
 			},
@@ -71,12 +71,12 @@ func TestChatUserIntegration(t *testing.T) {
 		u1, ok := resp.Data.Users[userID1]
 		require.True(t, ok, "User 1 should be in response")
 		assert.Equal(t, userID1, u1.ID)
-		assert.Equal(t, "User One", *u1.Name)
+		assert.Equal(t, "User One "+userID1, *u1.Name)
 
 		u2, ok := resp.Data.Users[userID2]
 		require.True(t, ok, "User 2 should be in response")
 		assert.Equal(t, userID2, u2.ID)
-		assert.Equal(t, "User Two", *u2.Name)
+		assert.Equal(t, "User Two "+userID2, *u2.Name)
 	})
 
 	t.Run("QueryUsers", func(t *testing.T) {
@@ -259,7 +259,7 @@ func TestChatUserIntegration(t *testing.T) {
 		resp, err := client.CreateGuest(ctx, &CreateGuestRequest{
 			User: UserRequest{
 				ID:   guestID,
-				Name: PtrTo("Guest User"),
+				Name: PtrTo("Guest User " + guestID),
 			},
 		})
 		if err != nil {
@@ -285,7 +285,7 @@ func TestChatUserIntegration(t *testing.T) {
 			Users: map[string]UserRequest{
 				userID: {
 					ID:        userID,
-					Name:      PtrTo("Teams User"),
+					Name:      PtrTo("Teams User " + userID),
 					Role:      PtrTo("admin"),
 					Teams:     []string{"blue"},
 					TeamsRole: map[string]string{"blue": "admin"},
@@ -335,7 +335,7 @@ func TestChatUserIntegration(t *testing.T) {
 			Users: map[string]UserRequest{
 				userID: {
 					ID:   userID,
-					Name: PtrTo("Privacy User"),
+					Name: PtrTo("Privacy User " + userID),
 				},
 			},
 		})
@@ -398,7 +398,7 @@ func TestChatUserIntegration(t *testing.T) {
 		// Create user
 		resp, err := client.UpdateUsers(ctx, &UpdateUsersRequest{
 			Users: map[string]UserRequest{
-				userID: {ID: userID, Name: PtrTo("Privacy Partial User")},
+				userID: {ID: userID, Name: PtrTo("Privacy Partial User " + userID)},
 			},
 		})
 		require.NoError(t, err)
@@ -527,7 +527,7 @@ func TestChatUserIntegration(t *testing.T) {
 			Users: map[string]UserRequest{
 				userID: {
 					ID:     userID,
-					Name:   PtrTo("Custom User"),
+					Name:   PtrTo("Custom User " + userID),
 					Custom: custom,
 				},
 			},

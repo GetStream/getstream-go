@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"testing"
+	"time"
 
 	. "github.com/GetStream/getstream-go/v4"
 	"github.com/stretchr/testify/assert"
@@ -806,6 +807,28 @@ func TestChatChannelIntegration(t *testing.T) {
 
 	t.Run("UploadAndDeleteFile", func(t *testing.T) {
 		ch, _ := createTestChannelWithMembers(t, client, creatorID, []string{creatorID})
+
+		// Save original file upload config and allow .txt uploads
+		appResp, err := client.GetApp(ctx, &GetAppRequest{})
+		require.NoError(t, err)
+		originalConfig := appResp.Data.App.FileUploadConfig
+
+		_, err = client.UpdateApp(ctx, &UpdateAppRequest{
+			FileUploadConfig: &FileUploadConfig{
+				AllowedFileExtensions: []string{},
+				BlockedFileExtensions: []string{},
+				AllowedMimeTypes:      []string{},
+				BlockedMimeTypes:      []string{},
+			},
+		})
+		require.NoError(t, err)
+		time.Sleep(2 * time.Second)
+		defer func() {
+			// Restore original file upload config
+			_, _ = client.UpdateApp(ctx, &UpdateAppRequest{
+				FileUploadConfig: &originalConfig,
+			})
+		}()
 
 		// Create a temp file to upload
 		tmpFile, err := os.CreateTemp("", "chat-test-*.txt")

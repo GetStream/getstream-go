@@ -37,6 +37,13 @@ func TestFeedsDeleteActivities(t *testing.T) {
 	_, err = client.Feeds().DeleteActivities(context.Background(), &getstream.DeleteActivitiesRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsTrackActivityMetrics(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().TrackActivityMetrics(context.Background(), &getstream.TrackActivityMetricsRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsQueryActivities(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
