@@ -46,6 +46,13 @@ func (c *FeedsClient) DeleteActivities(ctx context.Context, request *DeleteActiv
 	return res, err
 }
 
+// Track metric events (views, clicks, impressions) for activities. Supports batching up to 100 events per request. Each event is independently rate-limited per user per activity per metric. Server-side calls must include user_id.
+func (c *FeedsClient) TrackActivityMetrics(ctx context.Context, request *TrackActivityMetricsRequest) (*StreamResponse[TrackActivityMetricsResponse], error) {
+	var result TrackActivityMetricsResponse
+	res, err := MakeRequest[TrackActivityMetricsRequest, TrackActivityMetricsResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/metrics/track", nil, request, &result, nil)
+	return res, err
+}
+
 // Query activities based on filters with pagination and sorting options
 func (c *FeedsClient) QueryActivities(ctx context.Context, request *QueryActivitiesRequest) (*StreamResponse[QueryActivitiesResponse], error) {
 	var result QueryActivitiesResponse
@@ -215,7 +222,8 @@ func (c *FeedsClient) RestoreActivity(ctx context.Context, id string, request *R
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[RestoreActivityRequest, RestoreActivityResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/{id}/restore", nil, request, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[RestoreActivityRequest, RestoreActivityResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/{id}/restore", params, request, &result, pathParams)
 	return res, err
 }
 
@@ -261,7 +269,7 @@ func (c *FeedsClient) DeleteCollections(ctx context.Context, request *DeleteColl
 	return res, err
 }
 
-// Read collections with optional filtering by user ID and collection name. By default, users can only read their own collections.
+// Read collections by their references. By default, users can only read their own collections.
 func (c *FeedsClient) ReadCollections(ctx context.Context, request *ReadCollectionsRequest) (*StreamResponse[ReadCollectionsResponse], error) {
 	var result ReadCollectionsResponse
 	params := extractQueryParams(request)
@@ -287,6 +295,13 @@ func (c *FeedsClient) CreateCollections(ctx context.Context, request *CreateColl
 func (c *FeedsClient) UpsertCollections(ctx context.Context, request *UpsertCollectionsRequest) (*StreamResponse[UpsertCollectionsResponse], error) {
 	var result UpsertCollectionsResponse
 	res, err := MakeRequest[UpsertCollectionsRequest, UpsertCollectionsResponse](c.client, ctx, "PUT", "/api/v2/feeds/collections", nil, request, &result, nil)
+	return res, err
+}
+
+// Query collections with filter query
+func (c *FeedsClient) QueryCollections(ctx context.Context, request *QueryCollectionsRequest) (*StreamResponse[QueryCollectionsResponse], error) {
+	var result QueryCollectionsResponse
+	res, err := MakeRequest[QueryCollectionsRequest, QueryCollectionsResponse](c.client, ctx, "POST", "/api/v2/feeds/collections/query", nil, request, &result, nil)
 	return res, err
 }
 

@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/GetStream/getstream-go/v3"
+	"github.com/GetStream/getstream-go/v4"
 	"github.com/stretchr/testify/require"
 )
 
@@ -436,18 +436,18 @@ func TestCommonUpdateUserGroup(t *testing.T) {
 	_, err = client.UpdateUserGroup(context.Background(), "", &getstream.UpdateUserGroupRequest{})
 	require.NoError(t, err)
 }
-func TestCommonRemoveUserGroupMembers(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.RemoveUserGroupMembers(context.Background(), "", &getstream.RemoveUserGroupMembersRequest{})
-	require.NoError(t, err)
-}
 func TestCommonAddUserGroupMembers(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
 	_, err = client.AddUserGroupMembers(context.Background(), "", &getstream.AddUserGroupMembersRequest{})
+	require.NoError(t, err)
+}
+func TestCommonRemoveUserGroupMembers(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.RemoveUserGroupMembers(context.Background(), "", &getstream.RemoveUserGroupMembersRequest{})
 	require.NoError(t, err)
 }
 func TestCommonQueryUsers(t *testing.T) {

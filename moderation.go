@@ -60,6 +60,13 @@ func (c *ModerationClient) Check(ctx context.Context, request *CheckRequest) (*S
 	return res, err
 }
 
+// Verifies that the configured IAM role ARN can access private S3 images for moderation. Optionally accepts a stream+s3:// URL to check access to a specific object.
+func (c *ModerationClient) CheckS3Access(ctx context.Context, request *CheckS3AccessRequest) (*StreamResponse[CheckS3AccessResponse], error) {
+	var result CheckS3AccessResponse
+	res, err := MakeRequest[CheckS3AccessRequest, CheckS3AccessResponse](c.client, ctx, "POST", "/api/v2/moderation/check_s3_access", nil, request, &result, nil)
+	return res, err
+}
+
 // Create a new moderation configuration or update an existing one. Configure settings for content filtering, AI analysis, toxicity detection, and other moderation features.
 func (c *ModerationClient) UpsertConfig(ctx context.Context, request *UpsertConfigRequest) (*StreamResponse[UpsertConfigResponse], error) {
 	var result UpsertConfigResponse

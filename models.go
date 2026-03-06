@@ -521,6 +521,7 @@ type ActivityResponse struct {
 	FriendReactions     []FeedsReactionResponse `json:"friend_reactions,omitempty"`
 	CurrentFeed         *FeedResponse           `json:"current_feed,omitempty"`
 	Location            *ActivityLocation       `json:"location,omitempty"`
+	Metrics             map[string]int          `json:"metrics,omitempty"`
 	Moderation          *ModerationV2Response   `json:"moderation,omitempty"`
 	NotificationContext *NotificationContext    `json:"notification_context,omitempty"`
 	Parent              *ActivityResponse       `json:"parent,omitempty"`
@@ -765,6 +766,7 @@ type AppResponseFields struct {
 	Policies                              map[string][]Policy             `json:"policies"`
 	PushNotifications                     PushNotificationFields          `json:"push_notifications"`
 	BeforeMessageSendHookUrl              *string                         `json:"before_message_send_hook_url,omitempty"`
+	ModerationS3ImageAccessRoleArn        *string                         `json:"moderation_s3_image_access_role_arn,omitempty"`
 	RevokeTokensIssuedBefore              *Timestamp                      `json:"revoke_tokens_issued_before,omitempty"`
 	AllowedFlagReasons                    []string                        `json:"allowed_flag_reasons,omitempty"`
 	Geofences                             []GeofenceResponse              `json:"geofences,omitempty"`
@@ -1053,7 +1055,8 @@ type BackstageSettingsResponse struct {
 // Configuration for ban moderation action
 type BanActionRequestPayload struct {
 	// Ban only from specific channel
-	ChannelBanOnly *bool `json:"channel_ban_only,omitempty"`
+	ChannelBanOnly *bool   `json:"channel_ban_only,omitempty"`
+	ChannelCid     *string `json:"channel_cid,omitempty"`
 	// Message deletion mode: soft, pruning, or hard
 	DeleteMessages *string `json:"delete_messages,omitempty"`
 	// Whether to ban by IP address
@@ -1107,9 +1110,10 @@ type BlockActionRequestPayload struct {
 }
 
 type BlockListConfig struct {
-	Async   *bool           `json:"async,omitempty"`
-	Enabled *bool           `json:"enabled,omitempty"`
-	Rules   []BlockListRule `json:"rules,omitempty"`
+	Async          *bool           `json:"async,omitempty"`
+	Enabled        *bool           `json:"enabled,omitempty"`
+	MatchSubstring *bool           `json:"match_substring,omitempty"`
+	Rules          []BlockListRule `json:"rules,omitempty"`
 }
 
 type BlockListOptions struct {
@@ -3254,6 +3258,14 @@ type CheckResponse struct {
 	// ID of the running moderation task
 	TaskID *string                  `json:"task_id,omitempty"`
 	Item   *ReviewQueueItemResponse `json:"item,omitempty"`
+}
+
+type CheckS3AccessResponse struct {
+	Duration string `json:"duration"`
+	// Whether the S3 access check succeeded
+	Success bool `json:"success"`
+	// Descriptive message about the check result
+	Message *string `json:"message,omitempty"`
 }
 
 type CheckSNSResponse struct {
@@ -6743,8 +6755,10 @@ type MessageRequest struct {
 	// Contains type of the message. One of: regular, system
 	Type *string `json:"type,omitempty"`
 	// Array of message attachments
-	Attachments    []Attachment `json:"attachments,omitempty"`
-	MentionedRoles []string     `json:"mentioned_roles,omitempty"`
+	Attachments []Attachment `json:"attachments,omitempty"`
+	// List of user group IDs to mention. Group members who are also channel members will receive push notifications. Max 10 groups
+	MentionedGroupIds []string `json:"mentioned_group_ids,omitempty"`
+	MentionedRoles    []string `json:"mentioned_roles,omitempty"`
 	// Array of user IDs to mention
 	MentionedUsers []string `json:"mentioned_users,omitempty"`
 	// A list of user ids that have restricted visibility to the message
@@ -6818,6 +6832,8 @@ type MessageResponse struct {
 	QuotedMessageID *string `json:"quoted_message_id,omitempty"`
 	// Whether thread reply should be shown in the channel as well
 	ShowInChannel *bool `json:"show_in_channel,omitempty"`
+	// List of user group IDs mentioned in the message. Group members who are also channel members will receive push notifications based on their push preferences. Max 10 groups
+	MentionedGroupIds []string `json:"mentioned_group_ids,omitempty"`
 	// List of roles mentioned in the message (e.g. admin, channel_moderator, custom roles). Members with matching roles will receive push notifications based on their push preferences. Max 10 roles
 	MentionedRoles []string `json:"mentioned_roles,omitempty"`
 	// List of users who participate in thread
@@ -6990,6 +7006,8 @@ type MessageWithChannelResponse struct {
 	QuotedMessageID *string `json:"quoted_message_id,omitempty"`
 	// Whether thread reply should be shown in the channel as well
 	ShowInChannel *bool `json:"show_in_channel,omitempty"`
+	// List of user group IDs mentioned in the message. Group members who are also channel members will receive push notifications based on their push preferences. Max 10 groups
+	MentionedGroupIds []string `json:"mentioned_group_ids,omitempty"`
 	// List of roles mentioned in the message (e.g. admin, channel_moderator, custom roles). Members with matching roles will receive push notifications based on their push preferences. Max 10 roles
 	MentionedRoles []string `json:"mentioned_roles,omitempty"`
 	// List of users who participate in thread
@@ -7111,13 +7129,14 @@ func (e *ModerationCustomActionEvent) GetEventType() string {
 }
 
 type ModerationDashboardPreferences struct {
-	AsyncReviewQueueUpsert         *bool                    `json:"async_review_queue_upsert,omitempty"`
-	DisableAuditLogs               *bool                    `json:"disable_audit_logs,omitempty"`
-	DisableFlaggingReviewedEntity  *bool                    `json:"disable_flagging_reviewed_entity,omitempty"`
-	FlagUserOnFlaggedContent       *bool                    `json:"flag_user_on_flagged_content,omitempty"`
-	MediaQueueBlurEnabled          *bool                    `json:"media_queue_blur_enabled,omitempty"`
-	AllowedModerationActionReasons []string                 `json:"allowed_moderation_action_reasons,omitempty"`
-	OverviewDashboard              *OverviewDashboardConfig `json:"overview_dashboard,omitempty"`
+	AsyncReviewQueueUpsert         *bool                      `json:"async_review_queue_upsert,omitempty"`
+	DisableAuditLogs               *bool                      `json:"disable_audit_logs,omitempty"`
+	DisableFlaggingReviewedEntity  *bool                      `json:"disable_flagging_reviewed_entity,omitempty"`
+	FlagUserOnFlaggedContent       *bool                      `json:"flag_user_on_flagged_content,omitempty"`
+	MediaQueueBlurEnabled          *bool                      `json:"media_queue_blur_enabled,omitempty"`
+	AllowedModerationActionReasons []string                   `json:"allowed_moderation_action_reasons,omitempty"`
+	KeyframeClassificationsMap     map[string]map[string]bool `json:"keyframe_classifications_map,omitempty"`
+	OverviewDashboard              *OverviewDashboardConfig   `json:"overview_dashboard,omitempty"`
 }
 
 type ModerationFlagResponse struct {
@@ -8336,6 +8355,16 @@ type QueryChannelsResponse struct {
 	PredefinedFilter *ParsedPredefinedFilterResponse `json:"predefined_filter,omitempty"`
 }
 
+type QueryCollectionsResponse struct {
+	Duration string `json:"duration"`
+	// List of collections matching the query
+	Collections []CollectionResponse `json:"collections"`
+	// Cursor for next page
+	Next *string `json:"next,omitempty"`
+	// Cursor for previous page
+	Prev *string `json:"prev,omitempty"`
+}
+
 // Basic response information
 type QueryCommentReactionsResponse struct {
 	// Duration of the request in milliseconds
@@ -8517,14 +8546,16 @@ type QueryModerationRulesResponse struct {
 	Duration string `json:"duration"`
 	// Available harm labels for closed caption rules
 	ClosedCaptionLabels []string `json:"closed_caption_labels"`
-	// Available harm labels for keyframe rules
+	// Deprecated: use keyframe_label_classifications instead. Available L1 harm labels for keyframe rules
 	KeyframeLabels []string `json:"keyframe_labels"`
 	// List of moderation rules
 	Rules []ModerationRuleV2Response `json:"rules"`
 	// Default LLM label descriptions
 	DefaultLlmLabels map[string]string `json:"default_llm_labels"`
-	Next             *string           `json:"next,omitempty"`
-	Prev             *string           `json:"prev,omitempty"`
+	// L1 to L2 mapping of keyframe harm label classifications
+	KeyframeLabelClassifications map[string][]string `json:"keyframe_label_classifications"`
+	Next                         *string             `json:"next,omitempty"`
+	Prev                         *string             `json:"prev,omitempty"`
 }
 
 type QueryPinnedActivitiesResponse struct {
@@ -8896,12 +8927,8 @@ type ReactivateUsersResponse struct {
 
 type ReadCollectionsResponse struct {
 	Duration string `json:"duration"`
-	// List of collections matching the query
+	// List of collections matching the references
 	Collections []CollectionResponse `json:"collections"`
-	// Cursor for next page (when listing without collection_refs)
-	Next *string `json:"next,omitempty"`
-	// Cursor for previous page (when listing without collection_refs)
-	Prev *string `json:"prev,omitempty"`
 }
 
 type ReadReceiptsResponse struct {
@@ -9620,6 +9647,7 @@ type SearchResultMessage struct {
 	PollID               *string                           `json:"poll_id,omitempty"`
 	QuotedMessageID      *string                           `json:"quoted_message_id,omitempty"`
 	ShowInChannel        *bool                             `json:"show_in_channel,omitempty"`
+	MentionedGroupIds    []string                          `json:"mentioned_group_ids,omitempty"`
 	MentionedRoles       []string                          `json:"mentioned_roles,omitempty"`
 	ThreadParticipants   []UserResponse                    `json:"thread_participants,omitempty"`
 	Channel              *ChannelResponse                  `json:"channel,omitempty"`
@@ -10202,6 +10230,35 @@ type ThumbnailsSettingsResponse struct {
 }
 
 type Time struct {
+}
+
+// A single metric event to track for an activity
+type TrackActivityMetricsEvent struct {
+	// The ID of the activity to track the metric for
+	ActivityID string `json:"activity_id"`
+	// The metric name (e.g. views, clicks, impressions). Alphanumeric and underscores only.
+	Metric string `json:"metric"`
+	// The amount to increment (positive) or decrement (negative). Defaults to 1. The absolute value counts against rate limits.
+	Delta *int `json:"delta,omitempty"`
+}
+
+// Result of tracking a single metric event
+type TrackActivityMetricsEventResult struct {
+	// The activity ID from the request
+	ActivityID string `json:"activity_id"`
+	// Whether the metric was counted (false if rate-limited)
+	Allowed bool `json:"allowed"`
+	// The metric name from the request
+	Metric string `json:"metric"`
+	// Error message if processing failed
+	Error *string `json:"error,omitempty"`
+}
+
+// Response containing results for each tracked metric event
+type TrackActivityMetricsResponse struct {
+	Duration string `json:"duration"`
+	// Results for each event in the request, in the same order
+	Results []TrackActivityMetricsEventResult `json:"results"`
 }
 
 type TrackStatsResponse struct {

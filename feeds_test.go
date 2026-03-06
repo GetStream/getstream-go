@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/GetStream/getstream-go/v3"
+	"github.com/GetStream/getstream-go/v4"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,6 +35,13 @@ func TestFeedsDeleteActivities(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().DeleteActivities(context.Background(), &getstream.DeleteActivitiesRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsTrackActivityMetrics(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().TrackActivityMetrics(context.Background(), &getstream.TrackActivityMetricsRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsQueryActivities(t *testing.T) {
@@ -203,6 +210,13 @@ func TestFeedsUpsertCollections(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().UpsertCollections(context.Background(), &getstream.UpsertCollectionsRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsQueryCollections(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().QueryCollections(context.Background(), &getstream.QueryCollectionsRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsGetComments(t *testing.T) {
