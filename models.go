@@ -4997,10 +4997,10 @@ type Field struct {
 
 type FileUploadConfig struct {
 	SizeLimit             int      `json:"size_limit"`
-	AllowedFileExtensions []string `json:"allowed_file_extensions,omitempty"`
-	AllowedMimeTypes      []string `json:"allowed_mime_types,omitempty"`
-	BlockedFileExtensions []string `json:"blocked_file_extensions,omitempty"`
-	BlockedMimeTypes      []string `json:"blocked_mime_types,omitempty"`
+	AllowedFileExtensions []string `json:"allowed_file_extensions"`
+	AllowedMimeTypes      []string `json:"allowed_mime_types"`
+	BlockedFileExtensions []string `json:"blocked_file_extensions"`
+	BlockedMimeTypes      []string `json:"blocked_mime_types"`
 }
 
 type FileUploadRequest struct {
