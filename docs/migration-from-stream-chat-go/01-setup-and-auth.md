@@ -151,3 +151,14 @@ func main() {
 **Key changes:**
 - `CreateToken` uses functional options (`WithExpiration`) instead of positional `time.Time` arguments
 - Expiration is specified as a duration, not an absolute time
+
+## Sub-clients
+
+The new SDK organizes methods into product-specific sub-clients accessed from the main client:
+
+| Sub-client | Access | Description |
+|------------|--------|-------------|
+| Chat | `client.Chat()` | Channels, messages, reactions |
+| Video | `client.Video()` | Calls, call types |
+| Moderation | `client.Moderation()` | Ban, mute, flag |
+| Feeds | `client.Feeds()` | Activity feeds |
