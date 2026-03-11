@@ -21,6 +21,10 @@
     <a href="https://github.com/GetStream/getstream-go/issues">Request Feature</a>
 </p>
 
+## Migrating from stream-chat-go?
+
+If you are currently using [`stream-chat-go`](https://github.com/GetStream/stream-chat-go), we have a detailed migration guide with side-by-side code examples for common Chat use cases. See the [Migration Guide](docs/migration-from-stream-chat-go/README.md).
+
 ## **Quick Links**
 
 - [Register](https://getstream.io/chat/trial/) to get an API key for Stream
