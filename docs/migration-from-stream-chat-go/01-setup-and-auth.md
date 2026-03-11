@@ -27,6 +27,8 @@ go get github.com/GetStream/getstream-go/v4
 package main
 
 import (
+	"time"
+
 	stream "github.com/GetStream/stream-chat-go/v8"
 )
 
@@ -48,6 +50,8 @@ func main() {
 package main
 
 import (
+	"time"
+
 	"github.com/GetStream/getstream-go/v4"
 )
 
