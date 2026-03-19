@@ -188,7 +188,7 @@ func TestUsers(t *testing.T) {
 				Custom: map[string]interface{}{
 					"color": "red",
 				},
-				Name:  getstream.PtrTo("test-user-" + userID),
+				Name:  getstream.PtrTo(userID),
 				Image: getstream.PtrTo("link/to/profile/image"),
 			},
 		},
@@ -205,7 +205,7 @@ func TestUsers(t *testing.T) {
 					Custom: map[string]interface{}{
 						"color": "blue",
 					},
-					Name:  getstream.PtrTo("test-user-" + userID),
+					Name:  getstream.PtrTo(userID),
 					Image: getstream.PtrTo("link/to/profile/image"),
 				},
 			},
