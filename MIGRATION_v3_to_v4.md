@@ -232,7 +232,10 @@ client.UpdateApp(ctx, &UpdateAppRequest{
 // Backend: sets enforce_unique_usernames="no", all other fields preserved
 ```
 
-Slice and map fields (e.g., `EventHooks`, `Grants`) are NOT affected by this change. They are still serialized when set, including as empty (`[]` / `{}`), so you can continue to send an empty slice to clear a list field.
+Slice and map fields (e.g., `EventHooks`, `Grants`) are NOT affected by this change and do not use `omitempty`. This means:
+- `nil` (zero value) is serialized as JSON `null`, which clears the field on the backend
+- Empty (`[]` / `{}`) is serialized as an empty collection, which also clears the field
+- If you do not want to modify a slice/map field, do not include it in the request struct (this is only possible with pointer fields, not slices/maps; for slices/maps the current behavior matches v3)
 
 ## Getting Help
 
