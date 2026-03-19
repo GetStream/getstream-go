@@ -778,6 +778,7 @@ type AppResponseFields struct {
 	AllowedFlagReasons                    []string                        `json:"allowed_flag_reasons,omitempty"`
 	Geofences                             []GeofenceResponse              `json:"geofences,omitempty"`
 	ImageModerationLabels                 []string                        `json:"image_moderation_labels,omitempty"`
+	ActivityMetricsConfig                 map[string]int                  `json:"activity_metrics_config,omitempty"`
 	DatadogInfo                           *DataDogInfo                    `json:"datadog_info,omitempty"`
 	ModerationDashboardPreferences        *ModerationDashboardPreferences `json:"moderation_dashboard_preferences,omitempty"`
 }

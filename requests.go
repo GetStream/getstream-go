@@ -4,55 +4,56 @@ package getstream
 type GetAppRequest struct {
 }
 type UpdateAppRequest struct {
-	AsyncUrlEnrichEnabled          *bool                           `json:"async_url_enrich_enabled"`
-	AutoTranslationEnabled         *bool                           `json:"auto_translation_enabled"`
-	BeforeMessageSendHookUrl       *string                         `json:"before_message_send_hook_url"`
-	CdnExpirationSeconds           *int                            `json:"cdn_expiration_seconds"`
-	ChannelHideMembersOnly         *bool                           `json:"channel_hide_members_only"`
-	CustomActionHandlerUrl         *string                         `json:"custom_action_handler_url"`
-	DisableAuthChecks              *bool                           `json:"disable_auth_checks"`
-	DisablePermissionsChecks       *bool                           `json:"disable_permissions_checks"`
-	EnforceUniqueUsernames         *string                         `json:"enforce_unique_usernames"`
-	FeedsModerationEnabled         *bool                           `json:"feeds_moderation_enabled"`
-	FeedsV2Region                  *string                         `json:"feeds_v2_region"`
-	GuestUserCreationDisabled      *bool                           `json:"guest_user_creation_disabled"`
-	ImageModerationEnabled         *bool                           `json:"image_moderation_enabled"`
-	MaxAggregatedActivitiesLength  *int                            `json:"max_aggregated_activities_length"`
-	MigratePermissionsToV2         *bool                           `json:"migrate_permissions_to_v2"`
-	ModerationAnalyticsEnabled     *bool                           `json:"moderation_analytics_enabled"`
-	ModerationEnabled              *bool                           `json:"moderation_enabled"`
-	ModerationS3ImageAccessRoleArn *string                         `json:"moderation_s3_image_access_role_arn"`
-	ModerationWebhookUrl           *string                         `json:"moderation_webhook_url"`
-	MultiTenantEnabled             *bool                           `json:"multi_tenant_enabled"`
-	PermissionVersion              *string                         `json:"permission_version"`
-	RemindersInterval              *int                            `json:"reminders_interval"`
-	RemindersMaxMembers            *int                            `json:"reminders_max_members"`
-	RevokeTokensIssuedBefore       *Timestamp                      `json:"revoke_tokens_issued_before"`
-	SnsKey                         *string                         `json:"sns_key"`
-	SnsSecret                      *string                         `json:"sns_secret"`
-	SnsTopicArn                    *string                         `json:"sns_topic_arn"`
-	SqsKey                         *string                         `json:"sqs_key"`
-	SqsSecret                      *string                         `json:"sqs_secret"`
-	SqsUrl                         *string                         `json:"sqs_url"`
-	UserResponseTimeEnabled        *bool                           `json:"user_response_time_enabled"`
-	WebhookUrl                     *string                         `json:"webhook_url"`
+	AsyncUrlEnrichEnabled          *bool                           `json:"async_url_enrich_enabled,omitempty"`
+	AutoTranslationEnabled         *bool                           `json:"auto_translation_enabled,omitempty"`
+	BeforeMessageSendHookUrl       *string                         `json:"before_message_send_hook_url,omitempty"`
+	CdnExpirationSeconds           *int                            `json:"cdn_expiration_seconds,omitempty"`
+	ChannelHideMembersOnly         *bool                           `json:"channel_hide_members_only,omitempty"`
+	CustomActionHandlerUrl         *string                         `json:"custom_action_handler_url,omitempty"`
+	DisableAuthChecks              *bool                           `json:"disable_auth_checks,omitempty"`
+	DisablePermissionsChecks       *bool                           `json:"disable_permissions_checks,omitempty"`
+	EnforceUniqueUsernames         *string                         `json:"enforce_unique_usernames,omitempty"`
+	FeedsModerationEnabled         *bool                           `json:"feeds_moderation_enabled,omitempty"`
+	FeedsV2Region                  *string                         `json:"feeds_v2_region,omitempty"`
+	GuestUserCreationDisabled      *bool                           `json:"guest_user_creation_disabled,omitempty"`
+	ImageModerationEnabled         *bool                           `json:"image_moderation_enabled,omitempty"`
+	MaxAggregatedActivitiesLength  *int                            `json:"max_aggregated_activities_length,omitempty"`
+	MigratePermissionsToV2         *bool                           `json:"migrate_permissions_to_v2,omitempty"`
+	ModerationAnalyticsEnabled     *bool                           `json:"moderation_analytics_enabled,omitempty"`
+	ModerationEnabled              *bool                           `json:"moderation_enabled,omitempty"`
+	ModerationS3ImageAccessRoleArn *string                         `json:"moderation_s3_image_access_role_arn,omitempty"`
+	ModerationWebhookUrl           *string                         `json:"moderation_webhook_url,omitempty"`
+	MultiTenantEnabled             *bool                           `json:"multi_tenant_enabled,omitempty"`
+	PermissionVersion              *string                         `json:"permission_version,omitempty"`
+	RemindersInterval              *int                            `json:"reminders_interval,omitempty"`
+	RemindersMaxMembers            *int                            `json:"reminders_max_members,omitempty"`
+	RevokeTokensIssuedBefore       *Timestamp                      `json:"revoke_tokens_issued_before,omitempty"`
+	SnsKey                         *string                         `json:"sns_key,omitempty"`
+	SnsSecret                      *string                         `json:"sns_secret,omitempty"`
+	SnsTopicArn                    *string                         `json:"sns_topic_arn,omitempty"`
+	SqsKey                         *string                         `json:"sqs_key,omitempty"`
+	SqsSecret                      *string                         `json:"sqs_secret,omitempty"`
+	SqsUrl                         *string                         `json:"sqs_url,omitempty"`
+	UserResponseTimeEnabled        *bool                           `json:"user_response_time_enabled,omitempty"`
+	WebhookUrl                     *string                         `json:"webhook_url,omitempty"`
 	AllowedFlagReasons             []string                        `json:"allowed_flag_reasons"`
 	EventHooks                     []EventHook                     `json:"event_hooks"`
 	ImageModerationBlockLabels     []string                        `json:"image_moderation_block_labels"`
 	ImageModerationLabels          []string                        `json:"image_moderation_labels"`
 	UserSearchDisallowedRoles      []string                        `json:"user_search_disallowed_roles"`
 	WebhookEvents                  []string                        `json:"webhook_events"`
-	ApnConfig                      *APNConfig                      `json:"apn_config"`
-	AsyncModerationConfig          *AsyncModerationConfiguration   `json:"async_moderation_config"`
-	DatadogInfo                    *DataDogInfo                    `json:"datadog_info"`
-	FileUploadConfig               *FileUploadConfig               `json:"file_upload_config"`
-	FirebaseConfig                 *FirebaseConfig                 `json:"firebase_config"`
+	ActivityMetricsConfig          map[string]int                  `json:"activity_metrics_config"`
+	ApnConfig                      *APNConfig                      `json:"apn_config,omitempty"`
+	AsyncModerationConfig          *AsyncModerationConfiguration   `json:"async_moderation_config,omitempty"`
+	DatadogInfo                    *DataDogInfo                    `json:"datadog_info,omitempty"`
+	FileUploadConfig               *FileUploadConfig               `json:"file_upload_config,omitempty"`
+	FirebaseConfig                 *FirebaseConfig                 `json:"firebase_config,omitempty"`
 	Grants                         map[string][]string             `json:"grants"`
-	HuaweiConfig                   *HuaweiConfig                   `json:"huawei_config"`
-	ImageUploadConfig              *FileUploadConfig               `json:"image_upload_config"`
-	ModerationDashboardPreferences *ModerationDashboardPreferences `json:"moderation_dashboard_preferences"`
-	PushConfig                     *PushConfig                     `json:"push_config"`
-	XiaomiConfig                   *XiaomiConfig                   `json:"xiaomi_config"`
+	HuaweiConfig                   *HuaweiConfig                   `json:"huawei_config,omitempty"`
+	ImageUploadConfig              *FileUploadConfig               `json:"image_upload_config,omitempty"`
+	ModerationDashboardPreferences *ModerationDashboardPreferences `json:"moderation_dashboard_preferences,omitempty"`
+	PushConfig                     *PushConfig                     `json:"push_config,omitempty"`
+	XiaomiConfig                   *XiaomiConfig                   `json:"xiaomi_config,omitempty"`
 }
 type ListBlockListsRequest struct {
 	Team *string `json:"-" query:"team"`
@@ -60,10 +61,10 @@ type ListBlockListsRequest struct {
 type CreateBlockListRequest struct {
 	Name                 string   `json:"name"`
 	Words                []string `json:"words"`
-	IsLeetCheckEnabled   *bool    `json:"is_leet_check_enabled"`
-	IsPluralCheckEnabled *bool    `json:"is_plural_check_enabled"`
-	Team                 *string  `json:"team"`
-	Type                 *string  `json:"type"`
+	IsLeetCheckEnabled   *bool    `json:"is_leet_check_enabled,omitempty"`
+	IsPluralCheckEnabled *bool    `json:"is_plural_check_enabled,omitempty"`
+	Team                 *string  `json:"team,omitempty"`
+	Type                 *string  `json:"type,omitempty"`
 }
 type DeleteBlockListRequest struct {
 	Team *string `json:"-" query:"team"`
@@ -72,16 +73,16 @@ type GetBlockListRequest struct {
 	Team *string `json:"-" query:"team"`
 }
 type UpdateBlockListRequest struct {
-	IsLeetCheckEnabled   *bool    `json:"is_leet_check_enabled"`
-	IsPluralCheckEnabled *bool    `json:"is_plural_check_enabled"`
-	Team                 *string  `json:"team"`
+	IsLeetCheckEnabled   *bool    `json:"is_leet_check_enabled,omitempty"`
+	IsPluralCheckEnabled *bool    `json:"is_plural_check_enabled,omitempty"`
+	Team                 *string  `json:"team,omitempty"`
 	Words                []string `json:"words"`
 }
 type QueryCampaignsRequest struct {
-	Limit     *int               `json:"limit"`
-	Next      *string            `json:"next"`
-	Prev      *string            `json:"prev"`
-	UserLimit *int               `json:"user_limit"`
+	Limit     *int               `json:"limit,omitempty"`
+	Next      *string            `json:"next,omitempty"`
+	Prev      *string            `json:"prev,omitempty"`
+	UserLimit *int               `json:"user_limit,omitempty"`
 	Sort      []SortParamRequest `json:"sort"`
 	Filter    map[string]any     `json:"filter"`
 }
@@ -91,70 +92,70 @@ type GetCampaignRequest struct {
 	Limit *int    `json:"-" query:"limit"`
 }
 type StartCampaignRequest struct {
-	ScheduledFor *Timestamp `json:"scheduled_for"`
-	StopAt       *Timestamp `json:"stop_at"`
+	ScheduledFor *Timestamp `json:"scheduled_for,omitempty"`
+	StopAt       *Timestamp `json:"stop_at,omitempty"`
 }
 type StopCampaignRequest struct {
 }
 type QueryChannelsRequest struct {
-	Limit            *int               `json:"limit"`
-	MemberLimit      *int               `json:"member_limit"`
-	MessageLimit     *int               `json:"message_limit"`
-	Offset           *int               `json:"offset"`
-	PredefinedFilter *string            `json:"predefined_filter"`
-	State            *bool              `json:"state"`
-	UserID           *string            `json:"user_id"`
+	Limit            *int               `json:"limit,omitempty"`
+	MemberLimit      *int               `json:"member_limit,omitempty"`
+	MessageLimit     *int               `json:"message_limit,omitempty"`
+	Offset           *int               `json:"offset,omitempty"`
+	PredefinedFilter *string            `json:"predefined_filter,omitempty"`
+	State            *bool              `json:"state,omitempty"`
+	UserID           *string            `json:"user_id,omitempty"`
 	Sort             []SortParamRequest `json:"sort"`
 	FilterConditions map[string]any     `json:"filter_conditions"`
 	FilterValues     map[string]any     `json:"filter_values"`
 	SortValues       map[string]any     `json:"sort_values"`
-	User             *UserRequest       `json:"user"`
+	User             *UserRequest       `json:"user,omitempty"`
 }
 type ChannelBatchUpdateRequest struct {
 	Operation string                      `json:"operation"`
 	Filter    map[string]any              `json:"filter"`
 	Members   []ChannelBatchMemberRequest `json:"members"`
-	Data      *ChannelDataUpdate          `json:"data"`
+	Data      *ChannelDataUpdate          `json:"data,omitempty"`
 }
 type DeleteChannelsRequest struct {
 	Cids       []string `json:"cids"`
-	HardDelete *bool    `json:"hard_delete"`
+	HardDelete *bool    `json:"hard_delete,omitempty"`
 }
 type MarkDeliveredRequest struct {
 	UserID                  *string                   `json:"-" query:"user_id"`
 	LatestDeliveredMessages []DeliveredMessagePayload `json:"latest_delivered_messages"`
 }
 type MarkChannelsReadRequest struct {
-	UserID        *string           `json:"user_id"`
+	UserID        *string           `json:"user_id,omitempty"`
 	ReadByChannel map[string]string `json:"read_by_channel"`
-	User          *UserRequest      `json:"user"`
+	User          *UserRequest      `json:"user,omitempty"`
 }
 type GetOrCreateDistinctChannelRequest struct {
-	HideForCreator     *bool                    `json:"hide_for_creator"`
-	State              *bool                    `json:"state"`
-	ThreadUnreadCounts *bool                    `json:"thread_unread_counts"`
-	Data               *ChannelInput            `json:"data"`
-	Members            *PaginationParams        `json:"members"`
-	Messages           *MessagePaginationParams `json:"messages"`
-	Watchers           *PaginationParams        `json:"watchers"`
+	HideForCreator     *bool                    `json:"hide_for_creator,omitempty"`
+	State              *bool                    `json:"state,omitempty"`
+	ThreadUnreadCounts *bool                    `json:"thread_unread_counts,omitempty"`
+	Data               *ChannelInput            `json:"data,omitempty"`
+	Members            *PaginationParams        `json:"members,omitempty"`
+	Messages           *MessagePaginationParams `json:"messages,omitempty"`
+	Watchers           *PaginationParams        `json:"watchers,omitempty"`
 }
 type DeleteChannelRequest struct {
 	HardDelete *bool `json:"-" query:"hard_delete"`
 }
 type UpdateChannelPartialRequest struct {
-	UserID *string        `json:"user_id"`
+	UserID *string        `json:"user_id,omitempty"`
 	Unset  []string       `json:"unset"`
 	Set    map[string]any `json:"set"`
-	User   *UserRequest   `json:"user"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type UpdateChannelRequest struct {
-	AcceptInvite      *bool                  `json:"accept_invite"`
-	Cooldown          *int                   `json:"cooldown"`
-	HideHistory       *bool                  `json:"hide_history"`
-	HideHistoryBefore *Timestamp             `json:"hide_history_before"`
-	RejectInvite      *bool                  `json:"reject_invite"`
-	SkipPush          *bool                  `json:"skip_push"`
-	UserID            *string                `json:"user_id"`
+	AcceptInvite      *bool                  `json:"accept_invite,omitempty"`
+	Cooldown          *int                   `json:"cooldown,omitempty"`
+	HideHistory       *bool                  `json:"hide_history,omitempty"`
+	HideHistoryBefore *Timestamp             `json:"hide_history_before,omitempty"`
+	RejectInvite      *bool                  `json:"reject_invite,omitempty"`
+	SkipPush          *bool                  `json:"skip_push,omitempty"`
+	UserID            *string                `json:"user_id,omitempty"`
 	AddFilterTags     []string               `json:"add_filter_tags"`
 	AddMembers        []ChannelMemberRequest `json:"add_members"`
 	AddModerators     []string               `json:"add_moderators"`
@@ -163,9 +164,9 @@ type UpdateChannelRequest struct {
 	Invites           []ChannelMemberRequest `json:"invites"`
 	RemoveFilterTags  []string               `json:"remove_filter_tags"`
 	RemoveMembers     []string               `json:"remove_members"`
-	Data              *ChannelInputRequest   `json:"data"`
-	Message           *MessageRequest        `json:"message"`
-	User              *UserRequest           `json:"user"`
+	Data              *ChannelInputRequest   `json:"data,omitempty"`
+	Message           *MessageRequest        `json:"message,omitempty"`
+	User              *UserRequest           `json:"user,omitempty"`
 }
 type DeleteDraftRequest struct {
 	ParentID *string `json:"-" query:"parent_id"`
@@ -182,21 +183,21 @@ type DeleteChannelFileRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 type UploadChannelFileRequest struct {
-	File *string     `json:"file"`
-	User *OnlyUserID `json:"user"`
+	File *string     `json:"file,omitempty"`
+	User *OnlyUserID `json:"user,omitempty"`
 }
 type HideChannelRequest struct {
-	ClearHistory *bool        `json:"clear_history"`
-	UserID       *string      `json:"user_id"`
-	User         *UserRequest `json:"user"`
+	ClearHistory *bool        `json:"clear_history,omitempty"`
+	UserID       *string      `json:"user_id,omitempty"`
+	User         *UserRequest `json:"user,omitempty"`
 }
 type DeleteChannelImageRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 type UploadChannelImageRequest struct {
-	File        *string     `json:"file"`
+	File        *string     `json:"file,omitempty"`
 	UploadSizes []ImageSize `json:"upload_sizes"`
-	User        *OnlyUserID `json:"user"`
+	User        *OnlyUserID `json:"user,omitempty"`
 }
 type UpdateMemberPartialRequest struct {
 	UserID *string        `json:"-" query:"user_id"`
@@ -205,50 +206,50 @@ type UpdateMemberPartialRequest struct {
 }
 type SendMessageRequest struct {
 	Message                MessageRequest    `json:"message"`
-	ForceModeration        *bool             `json:"force_moderation"`
-	KeepChannelHidden      *bool             `json:"keep_channel_hidden"`
-	Pending                *bool             `json:"pending"`
-	SkipEnrichUrl          *bool             `json:"skip_enrich_url"`
-	SkipPush               *bool             `json:"skip_push"`
+	ForceModeration        *bool             `json:"force_moderation,omitempty"`
+	KeepChannelHidden      *bool             `json:"keep_channel_hidden,omitempty"`
+	Pending                *bool             `json:"pending,omitempty"`
+	SkipEnrichUrl          *bool             `json:"skip_enrich_url,omitempty"`
+	SkipPush               *bool             `json:"skip_push,omitempty"`
 	PendingMessageMetadata map[string]string `json:"pending_message_metadata"`
 }
 type GetManyMessagesRequest struct {
 	Ids []string `json:"-" query:"ids"`
 }
 type GetOrCreateChannelRequest struct {
-	HideForCreator     *bool                    `json:"hide_for_creator"`
-	State              *bool                    `json:"state"`
-	ThreadUnreadCounts *bool                    `json:"thread_unread_counts"`
-	Data               *ChannelInput            `json:"data"`
-	Members            *PaginationParams        `json:"members"`
-	Messages           *MessagePaginationParams `json:"messages"`
-	Watchers           *PaginationParams        `json:"watchers"`
+	HideForCreator     *bool                    `json:"hide_for_creator,omitempty"`
+	State              *bool                    `json:"state,omitempty"`
+	ThreadUnreadCounts *bool                    `json:"thread_unread_counts,omitempty"`
+	Data               *ChannelInput            `json:"data,omitempty"`
+	Members            *PaginationParams        `json:"members,omitempty"`
+	Messages           *MessagePaginationParams `json:"messages,omitempty"`
+	Watchers           *PaginationParams        `json:"watchers,omitempty"`
 }
 type MarkReadRequest struct {
-	MessageID *string      `json:"message_id"`
-	ThreadID  *string      `json:"thread_id"`
-	UserID    *string      `json:"user_id"`
-	User      *UserRequest `json:"user"`
+	MessageID *string      `json:"message_id,omitempty"`
+	ThreadID  *string      `json:"thread_id,omitempty"`
+	UserID    *string      `json:"user_id,omitempty"`
+	User      *UserRequest `json:"user,omitempty"`
 }
 type ShowChannelRequest struct {
-	UserID *string      `json:"user_id"`
-	User   *UserRequest `json:"user"`
+	UserID *string      `json:"user_id,omitempty"`
+	User   *UserRequest `json:"user,omitempty"`
 }
 type TruncateChannelRequest struct {
-	HardDelete  *bool           `json:"hard_delete"`
-	SkipPush    *bool           `json:"skip_push"`
-	TruncatedAt *Timestamp      `json:"truncated_at"`
-	UserID      *string         `json:"user_id"`
+	HardDelete  *bool           `json:"hard_delete,omitempty"`
+	SkipPush    *bool           `json:"skip_push,omitempty"`
+	TruncatedAt *Timestamp      `json:"truncated_at,omitempty"`
+	UserID      *string         `json:"user_id,omitempty"`
 	MemberIds   []string        `json:"member_ids"`
-	Message     *MessageRequest `json:"message"`
-	User        *UserRequest    `json:"user"`
+	Message     *MessageRequest `json:"message,omitempty"`
+	User        *UserRequest    `json:"user,omitempty"`
 }
 type MarkUnreadRequest struct {
-	MessageID        *string      `json:"message_id"`
-	MessageTimestamp *Timestamp   `json:"message_timestamp"`
-	ThreadID         *string      `json:"thread_id"`
-	UserID           *string      `json:"user_id"`
-	User             *UserRequest `json:"user"`
+	MessageID        *string      `json:"message_id,omitempty"`
+	MessageTimestamp *Timestamp   `json:"message_timestamp,omitempty"`
+	ThreadID         *string      `json:"thread_id,omitempty"`
+	UserID           *string      `json:"user_id,omitempty"`
+	User             *UserRequest `json:"user,omitempty"`
 }
 type ListChannelTypesRequest struct {
 }
@@ -257,34 +258,34 @@ type CreateChannelTypeRequest struct {
 	AutomodBehavior                string              `json:"automod_behavior"`
 	MaxMessageLength               int                 `json:"max_message_length"`
 	Name                           string              `json:"name"`
-	Blocklist                      *string             `json:"blocklist"`
-	BlocklistBehavior              *string             `json:"blocklist_behavior"`
-	ConnectEvents                  *bool               `json:"connect_events"`
-	CountMessages                  *bool               `json:"count_messages"`
-	CustomEvents                   *bool               `json:"custom_events"`
-	DeliveryEvents                 *bool               `json:"delivery_events"`
-	MarkMessagesPending            *bool               `json:"mark_messages_pending"`
-	MessageRetention               *string             `json:"message_retention"`
-	Mutes                          *bool               `json:"mutes"`
-	PartitionSize                  *int                `json:"partition_size"`
-	PartitionTtl                   *string             `json:"partition_ttl"`
-	Polls                          *bool               `json:"polls"`
-	PushLevel                      *string             `json:"push_level"`
-	PushNotifications              *bool               `json:"push_notifications"`
-	Reactions                      *bool               `json:"reactions"`
-	ReadEvents                     *bool               `json:"read_events"`
-	Replies                        *bool               `json:"replies"`
-	Search                         *bool               `json:"search"`
-	SharedLocations                *bool               `json:"shared_locations"`
-	SkipLastMsgUpdateForSystemMsgs *bool               `json:"skip_last_msg_update_for_system_msgs"`
-	TypingEvents                   *bool               `json:"typing_events"`
-	Uploads                        *bool               `json:"uploads"`
-	UrlEnrichment                  *bool               `json:"url_enrichment"`
-	UserMessageReminders           *bool               `json:"user_message_reminders"`
+	Blocklist                      *string             `json:"blocklist,omitempty"`
+	BlocklistBehavior              *string             `json:"blocklist_behavior,omitempty"`
+	ConnectEvents                  *bool               `json:"connect_events,omitempty"`
+	CountMessages                  *bool               `json:"count_messages,omitempty"`
+	CustomEvents                   *bool               `json:"custom_events,omitempty"`
+	DeliveryEvents                 *bool               `json:"delivery_events,omitempty"`
+	MarkMessagesPending            *bool               `json:"mark_messages_pending,omitempty"`
+	MessageRetention               *string             `json:"message_retention,omitempty"`
+	Mutes                          *bool               `json:"mutes,omitempty"`
+	PartitionSize                  *int                `json:"partition_size,omitempty"`
+	PartitionTtl                   *string             `json:"partition_ttl,omitempty"`
+	Polls                          *bool               `json:"polls,omitempty"`
+	PushLevel                      *string             `json:"push_level,omitempty"`
+	PushNotifications              *bool               `json:"push_notifications,omitempty"`
+	Reactions                      *bool               `json:"reactions,omitempty"`
+	ReadEvents                     *bool               `json:"read_events,omitempty"`
+	Replies                        *bool               `json:"replies,omitempty"`
+	Search                         *bool               `json:"search,omitempty"`
+	SharedLocations                *bool               `json:"shared_locations,omitempty"`
+	SkipLastMsgUpdateForSystemMsgs *bool               `json:"skip_last_msg_update_for_system_msgs,omitempty"`
+	TypingEvents                   *bool               `json:"typing_events,omitempty"`
+	Uploads                        *bool               `json:"uploads,omitempty"`
+	UrlEnrichment                  *bool               `json:"url_enrichment,omitempty"`
+	UserMessageReminders           *bool               `json:"user_message_reminders,omitempty"`
 	Blocklists                     []BlockListOptions  `json:"blocklists"`
 	Commands                       []string            `json:"commands"`
 	Permissions                    []PolicyRequest     `json:"permissions"`
-	ChatPreferences                *ChatPreferences    `json:"chat_preferences"`
+	ChatPreferences                *ChatPreferences    `json:"chat_preferences,omitempty"`
 	Grants                         map[string][]string `json:"grants"`
 }
 type DeleteChannelTypeRequest struct {
@@ -295,37 +296,37 @@ type UpdateChannelTypeRequest struct {
 	Automod                        string              `json:"automod"`
 	AutomodBehavior                string              `json:"automod_behavior"`
 	MaxMessageLength               int                 `json:"max_message_length"`
-	Blocklist                      *string             `json:"blocklist"`
-	BlocklistBehavior              *string             `json:"blocklist_behavior"`
-	ConnectEvents                  *bool               `json:"connect_events"`
-	CountMessages                  *bool               `json:"count_messages"`
-	CustomEvents                   *bool               `json:"custom_events"`
-	DeliveryEvents                 *bool               `json:"delivery_events"`
-	MarkMessagesPending            *bool               `json:"mark_messages_pending"`
-	Mutes                          *bool               `json:"mutes"`
-	PartitionSize                  *int                `json:"partition_size"`
-	PartitionTtl                   *string             `json:"partition_ttl"`
-	Polls                          *bool               `json:"polls"`
-	PushLevel                      *string             `json:"push_level"`
-	PushNotifications              *bool               `json:"push_notifications"`
-	Quotes                         *bool               `json:"quotes"`
-	Reactions                      *bool               `json:"reactions"`
-	ReadEvents                     *bool               `json:"read_events"`
-	Reminders                      *bool               `json:"reminders"`
-	Replies                        *bool               `json:"replies"`
-	Search                         *bool               `json:"search"`
-	SharedLocations                *bool               `json:"shared_locations"`
-	SkipLastMsgUpdateForSystemMsgs *bool               `json:"skip_last_msg_update_for_system_msgs"`
-	TypingEvents                   *bool               `json:"typing_events"`
-	Uploads                        *bool               `json:"uploads"`
-	UrlEnrichment                  *bool               `json:"url_enrichment"`
-	UserMessageReminders           *bool               `json:"user_message_reminders"`
+	Blocklist                      *string             `json:"blocklist,omitempty"`
+	BlocklistBehavior              *string             `json:"blocklist_behavior,omitempty"`
+	ConnectEvents                  *bool               `json:"connect_events,omitempty"`
+	CountMessages                  *bool               `json:"count_messages,omitempty"`
+	CustomEvents                   *bool               `json:"custom_events,omitempty"`
+	DeliveryEvents                 *bool               `json:"delivery_events,omitempty"`
+	MarkMessagesPending            *bool               `json:"mark_messages_pending,omitempty"`
+	Mutes                          *bool               `json:"mutes,omitempty"`
+	PartitionSize                  *int                `json:"partition_size,omitempty"`
+	PartitionTtl                   *string             `json:"partition_ttl,omitempty"`
+	Polls                          *bool               `json:"polls,omitempty"`
+	PushLevel                      *string             `json:"push_level,omitempty"`
+	PushNotifications              *bool               `json:"push_notifications,omitempty"`
+	Quotes                         *bool               `json:"quotes,omitempty"`
+	Reactions                      *bool               `json:"reactions,omitempty"`
+	ReadEvents                     *bool               `json:"read_events,omitempty"`
+	Reminders                      *bool               `json:"reminders,omitempty"`
+	Replies                        *bool               `json:"replies,omitempty"`
+	Search                         *bool               `json:"search,omitempty"`
+	SharedLocations                *bool               `json:"shared_locations,omitempty"`
+	SkipLastMsgUpdateForSystemMsgs *bool               `json:"skip_last_msg_update_for_system_msgs,omitempty"`
+	TypingEvents                   *bool               `json:"typing_events,omitempty"`
+	Uploads                        *bool               `json:"uploads,omitempty"`
+	UrlEnrichment                  *bool               `json:"url_enrichment,omitempty"`
+	UserMessageReminders           *bool               `json:"user_message_reminders,omitempty"`
 	AllowedFlagReasons             []string            `json:"allowed_flag_reasons"`
 	Blocklists                     []BlockListOptions  `json:"blocklists"`
 	Commands                       []string            `json:"commands"`
 	Permissions                    []PolicyRequest     `json:"permissions"`
-	AutomodThresholds              *Thresholds         `json:"automod_thresholds"`
-	ChatPreferences                *ChatPreferences    `json:"chat_preferences"`
+	AutomodThresholds              *Thresholds         `json:"automod_thresholds,omitempty"`
+	ChatPreferences                *ChatPreferences    `json:"chat_preferences,omitempty"`
 	Grants                         map[string][]string `json:"grants"`
 }
 type ListCommandsRequest struct {
@@ -333,8 +334,8 @@ type ListCommandsRequest struct {
 type CreateCommandRequest struct {
 	Description string  `json:"description"`
 	Name        string  `json:"name"`
-	Args        *string `json:"args"`
-	Set         *string `json:"set"`
+	Args        *string `json:"args,omitempty"`
+	Set         *string `json:"set,omitempty"`
 }
 type DeleteCommandRequest struct {
 }
@@ -342,34 +343,34 @@ type GetCommandRequest struct {
 }
 type UpdateCommandRequest struct {
 	Description string  `json:"description"`
-	Args        *string `json:"args"`
-	Set         *string `json:"set"`
+	Args        *string `json:"args,omitempty"`
+	Set         *string `json:"set,omitempty"`
 }
 type QueryDraftsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	UserID *string            `json:"user_id"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
+	UserID *string            `json:"user_id,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user"`
+	User   *UserRequest       `json:"user,omitempty"`
 }
 type ExportChannelsRequest struct {
 	Channels                   []ChannelExport `json:"channels"`
-	ClearDeletedMessageText    *bool           `json:"clear_deleted_message_text"`
-	ExportUsers                *bool           `json:"export_users"`
-	IncludeSoftDeletedChannels *bool           `json:"include_soft_deleted_channels"`
-	IncludeTruncatedMessages   *bool           `json:"include_truncated_messages"`
-	Version                    *string         `json:"version"`
+	ClearDeletedMessageText    *bool           `json:"clear_deleted_message_text,omitempty"`
+	ExportUsers                *bool           `json:"export_users,omitempty"`
+	IncludeSoftDeletedChannels *bool           `json:"include_soft_deleted_channels,omitempty"`
+	IncludeTruncatedMessages   *bool           `json:"include_truncated_messages,omitempty"`
+	Version                    *string         `json:"version,omitempty"`
 }
 type QueryMembersRequest struct {
 	Payload *QueryMembersPayload `json:"-" query:"payload"`
 }
 type QueryMessageHistoryRequest struct {
 	Filter map[string]any     `json:"filter"`
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 }
 type DeleteMessageRequest struct {
@@ -382,36 +383,36 @@ type GetMessageRequest struct {
 }
 type UpdateMessageRequest struct {
 	Message       MessageRequest `json:"message"`
-	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
-	SkipPush      *bool          `json:"skip_push"`
+	SkipEnrichUrl *bool          `json:"skip_enrich_url,omitempty"`
+	SkipPush      *bool          `json:"skip_push,omitempty"`
 }
 type UpdateMessagePartialRequest struct {
-	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
-	SkipPush      *bool          `json:"skip_push"`
-	UserID        *string        `json:"user_id"`
+	SkipEnrichUrl *bool          `json:"skip_enrich_url,omitempty"`
+	SkipPush      *bool          `json:"skip_push,omitempty"`
+	UserID        *string        `json:"user_id,omitempty"`
 	Unset         []string       `json:"unset"`
 	Set           map[string]any `json:"set"`
-	User          *UserRequest   `json:"user"`
+	User          *UserRequest   `json:"user,omitempty"`
 }
 type RunMessageActionRequest struct {
 	FormData map[string]string `json:"form_data"`
-	UserID   *string           `json:"user_id"`
-	User     *UserRequest      `json:"user"`
+	UserID   *string           `json:"user_id,omitempty"`
+	User     *UserRequest      `json:"user,omitempty"`
 }
 type CommitMessageRequest struct {
 }
 type EphemeralMessageUpdateRequest struct {
-	SkipEnrichUrl *bool          `json:"skip_enrich_url"`
-	SkipPush      *bool          `json:"skip_push"`
-	UserID        *string        `json:"user_id"`
+	SkipEnrichUrl *bool          `json:"skip_enrich_url,omitempty"`
+	SkipPush      *bool          `json:"skip_push,omitempty"`
+	UserID        *string        `json:"user_id,omitempty"`
 	Unset         []string       `json:"unset"`
 	Set           map[string]any `json:"set"`
-	User          *UserRequest   `json:"user"`
+	User          *UserRequest   `json:"user,omitempty"`
 }
 type SendReactionRequest struct {
 	Reaction      ReactionRequest `json:"reaction"`
-	EnforceUnique *bool           `json:"enforce_unique"`
-	SkipPush      *bool           `json:"skip_push"`
+	EnforceUnique *bool           `json:"enforce_unique,omitempty"`
+	SkipPush      *bool           `json:"skip_push,omitempty"`
 }
 type DeleteReactionRequest struct {
 	UserID *string `json:"-" query:"user_id"`
@@ -421,13 +422,13 @@ type GetReactionsRequest struct {
 	Offset *int `json:"-" query:"offset"`
 }
 type QueryReactionsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	UserID *string            `json:"user_id"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
+	UserID *string            `json:"user_id,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user"`
+	User   *UserRequest       `json:"user,omitempty"`
 }
 type TranslateMessageRequest struct {
 	Language string `json:"language"`
@@ -436,9 +437,9 @@ type UndeleteMessageRequest struct {
 	UndeletedBy string `json:"undeleted_by"`
 }
 type CastPollVoteRequest struct {
-	UserID *string      `json:"user_id"`
-	User   *UserRequest `json:"user"`
-	Vote   *VoteData    `json:"vote"`
+	UserID *string      `json:"user_id,omitempty"`
+	User   *UserRequest `json:"user,omitempty"`
+	Vote   *VoteData    `json:"vote,omitempty"`
 }
 type DeletePollVoteRequest struct {
 	UserID *string `json:"-" query:"user_id"`
@@ -447,14 +448,14 @@ type DeleteReminderRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
 type UpdateReminderRequest struct {
-	RemindAt *Timestamp   `json:"remind_at"`
-	UserID   *string      `json:"user_id"`
-	User     *UserRequest `json:"user"`
+	RemindAt *Timestamp   `json:"remind_at,omitempty"`
+	UserID   *string      `json:"user_id,omitempty"`
+	User     *UserRequest `json:"user,omitempty"`
 }
 type CreateReminderRequest struct {
-	RemindAt *Timestamp   `json:"remind_at"`
-	UserID   *string      `json:"user_id"`
-	User     *UserRequest `json:"user"`
+	RemindAt *Timestamp   `json:"remind_at,omitempty"`
+	UserID   *string      `json:"user_id,omitempty"`
+	User     *UserRequest `json:"user,omitempty"`
 }
 type GetRepliesRequest struct {
 	Limit    *int               `json:"-" query:"limit"`
@@ -469,16 +470,16 @@ type QueryMessageFlagsRequest struct {
 	Payload *QueryMessageFlagsPayload `json:"-" query:"payload"`
 }
 type MuteChannelRequest struct {
-	Expiration  *int         `json:"expiration"`
-	UserID      *string      `json:"user_id"`
+	Expiration  *int         `json:"expiration,omitempty"`
+	UserID      *string      `json:"user_id,omitempty"`
 	ChannelCids []string     `json:"channel_cids"`
-	User        *UserRequest `json:"user"`
+	User        *UserRequest `json:"user,omitempty"`
 }
 type UnmuteChannelRequest struct {
-	Expiration  *int         `json:"expiration"`
-	UserID      *string      `json:"user_id"`
+	Expiration  *int         `json:"expiration,omitempty"`
+	UserID      *string      `json:"user_id,omitempty"`
 	ChannelCids []string     `json:"channel_cids"`
-	User        *UserRequest `json:"user"`
+	User        *UserRequest `json:"user,omitempty"`
 }
 type QueryBannedUsersRequest struct {
 	Payload *QueryBannedUsersPayload `json:"-" query:"payload"`
@@ -487,22 +488,22 @@ type QueryFutureChannelBansRequest struct {
 	Payload *QueryFutureChannelBansPayload `json:"-" query:"payload"`
 }
 type QueryRemindersRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	UserID *string            `json:"user_id"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
+	UserID *string            `json:"user_id,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user"`
+	User   *UserRequest       `json:"user,omitempty"`
 }
 type SearchRequest struct {
 	Payload *SearchPayload `json:"-" query:"payload"`
 }
 type QuerySegmentsRequest struct {
 	Filter map[string]any     `json:"filter"`
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 }
 type DeleteSegmentRequest struct {
@@ -515,30 +516,30 @@ type DeleteSegmentTargetsRequest struct {
 type SegmentTargetExistsRequest struct {
 }
 type QuerySegmentTargetsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
 	Sort   []SortParamRequest `json:"Sort"`
 	Filter map[string]any     `json:"Filter"`
 }
 type QueryTeamUsageStatsRequest struct {
-	EndDate   *string `json:"end_date"`
-	Limit     *int    `json:"limit"`
-	Month     *string `json:"month"`
-	Next      *string `json:"next"`
-	StartDate *string `json:"start_date"`
+	EndDate   *string `json:"end_date,omitempty"`
+	Limit     *int    `json:"limit,omitempty"`
+	Month     *string `json:"month,omitempty"`
+	Next      *string `json:"next,omitempty"`
+	StartDate *string `json:"start_date,omitempty"`
 }
 type QueryThreadsRequest struct {
-	Limit            *int               `json:"limit"`
-	MemberLimit      *int               `json:"member_limit"`
-	Next             *string            `json:"next"`
-	ParticipantLimit *int               `json:"participant_limit"`
-	Prev             *string            `json:"prev"`
-	ReplyLimit       *int               `json:"reply_limit"`
-	UserID           *string            `json:"user_id"`
+	Limit            *int               `json:"limit,omitempty"`
+	MemberLimit      *int               `json:"member_limit,omitempty"`
+	Next             *string            `json:"next,omitempty"`
+	ParticipantLimit *int               `json:"participant_limit,omitempty"`
+	Prev             *string            `json:"prev,omitempty"`
+	ReplyLimit       *int               `json:"reply_limit,omitempty"`
+	UserID           *string            `json:"user_id,omitempty"`
 	Sort             []SortParamRequest `json:"sort"`
 	Filter           map[string]any     `json:"filter"`
-	User             *UserRequest       `json:"user"`
+	User             *UserRequest       `json:"user,omitempty"`
 }
 type GetThreadRequest struct {
 	ReplyLimit       *int `json:"-" query:"reply_limit"`
@@ -546,10 +547,10 @@ type GetThreadRequest struct {
 	MemberLimit      *int `json:"-" query:"member_limit"`
 }
 type UpdateThreadPartialRequest struct {
-	UserID *string        `json:"user_id"`
+	UserID *string        `json:"user_id,omitempty"`
 	Unset  []string       `json:"unset"`
 	Set    map[string]any `json:"set"`
-	User   *UserRequest   `json:"user"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type UnreadCountsRequest struct {
 	UserID *string `json:"-" query:"user_id"`
@@ -561,26 +562,26 @@ type SendUserCustomEventRequest struct {
 	Event UserCustomEventRequest `json:"event"`
 }
 type CheckPushRequest struct {
-	ApnTemplate          *string      `json:"apn_template"`
-	EventType            *string      `json:"event_type"`
-	FirebaseDataTemplate *string      `json:"firebase_data_template"`
-	FirebaseTemplate     *string      `json:"firebase_template"`
-	MessageID            *string      `json:"message_id"`
-	PushProviderName     *string      `json:"push_provider_name"`
-	PushProviderType     *string      `json:"push_provider_type"`
-	SkipDevices          *bool        `json:"skip_devices"`
-	UserID               *string      `json:"user_id"`
-	User                 *UserRequest `json:"user"`
+	ApnTemplate          *string      `json:"apn_template,omitempty"`
+	EventType            *string      `json:"event_type,omitempty"`
+	FirebaseDataTemplate *string      `json:"firebase_data_template,omitempty"`
+	FirebaseTemplate     *string      `json:"firebase_template,omitempty"`
+	MessageID            *string      `json:"message_id,omitempty"`
+	PushProviderName     *string      `json:"push_provider_name,omitempty"`
+	PushProviderType     *string      `json:"push_provider_type,omitempty"`
+	SkipDevices          *bool        `json:"skip_devices,omitempty"`
+	UserID               *string      `json:"user_id,omitempty"`
+	User                 *UserRequest `json:"user,omitempty"`
 }
 type CheckSNSRequest struct {
-	SnsKey      *string `json:"sns_key"`
-	SnsSecret   *string `json:"sns_secret"`
-	SnsTopicArn *string `json:"sns_topic_arn"`
+	SnsKey      *string `json:"sns_key,omitempty"`
+	SnsSecret   *string `json:"sns_secret,omitempty"`
+	SnsTopicArn *string `json:"sns_topic_arn,omitempty"`
 }
 type CheckSQSRequest struct {
-	SqsKey    *string `json:"sqs_key"`
-	SqsSecret *string `json:"sqs_secret"`
-	SqsUrl    *string `json:"sqs_url"`
+	SqsKey    *string `json:"sqs_key,omitempty"`
+	SqsSecret *string `json:"sqs_secret,omitempty"`
+	SqsUrl    *string `json:"sqs_url,omitempty"`
 }
 type DeleteDeviceRequest struct {
 	ID     string  `json:"-" query:"id"`
@@ -592,10 +593,10 @@ type ListDevicesRequest struct {
 type CreateDeviceRequest struct {
 	ID               string       `json:"id"`
 	PushProvider     string       `json:"push_provider"`
-	PushProviderName *string      `json:"push_provider_name"`
-	UserID           *string      `json:"user_id"`
-	VoipToken        *bool        `json:"voip_token"`
-	User             *UserRequest `json:"user"`
+	PushProviderName *string      `json:"push_provider_name,omitempty"`
+	UserID           *string      `json:"user_id,omitempty"`
+	VoipToken        *bool        `json:"voip_token,omitempty"`
+	User             *UserRequest `json:"user,omitempty"`
 }
 type ExportUsersRequest struct {
 	UserIds []string `json:"user_ids"`
@@ -606,120 +607,120 @@ type CreateExternalStorageRequest struct {
 	Bucket         string        `json:"bucket"`
 	Name           string        `json:"name"`
 	StorageType    string        `json:"storage_type"`
-	GcsCredentials *string       `json:"gcs_credentials"`
-	Path           *string       `json:"path"`
-	AWSS3          *S3Request    `json:"aws_s3"`
-	AzureBlob      *AzureRequest `json:"azure_blob"`
+	GcsCredentials *string       `json:"gcs_credentials,omitempty"`
+	Path           *string       `json:"path,omitempty"`
+	AWSS3          *S3Request    `json:"aws_s3,omitempty"`
+	AzureBlob      *AzureRequest `json:"azure_blob,omitempty"`
 }
 type DeleteExternalStorageRequest struct {
 }
 type UpdateExternalStorageRequest struct {
 	Bucket         string        `json:"bucket"`
 	StorageType    string        `json:"storage_type"`
-	GcsCredentials *string       `json:"gcs_credentials"`
-	Path           *string       `json:"path"`
-	AWSS3          *S3Request    `json:"aws_s3"`
-	AzureBlob      *AzureRequest `json:"azure_blob"`
+	GcsCredentials *string       `json:"gcs_credentials,omitempty"`
+	Path           *string       `json:"path,omitempty"`
+	AWSS3          *S3Request    `json:"aws_s3,omitempty"`
+	AzureBlob      *AzureRequest `json:"azure_blob,omitempty"`
 }
 type CheckExternalStorageRequest struct {
 }
 type AddActivityRequest struct {
 	Type                       string            `json:"type"`
 	Feeds                      []string          `json:"feeds"`
-	CopyCustomToNotification   *bool             `json:"copy_custom_to_notification"`
-	CreateNotificationActivity *bool             `json:"create_notification_activity"`
-	EnrichOwnFields            *bool             `json:"enrich_own_fields"`
-	ExpiresAt                  *string           `json:"expires_at"`
-	ID                         *string           `json:"id"`
-	ParentID                   *string           `json:"parent_id"`
-	PollID                     *string           `json:"poll_id"`
-	RestrictReplies            *string           `json:"restrict_replies"`
-	SkipEnrichUrl              *bool             `json:"skip_enrich_url"`
-	SkipPush                   *bool             `json:"skip_push"`
-	Text                       *string           `json:"text"`
-	UserID                     *string           `json:"user_id"`
-	Visibility                 *string           `json:"visibility"`
-	VisibilityTag              *string           `json:"visibility_tag"`
+	CopyCustomToNotification   *bool             `json:"copy_custom_to_notification,omitempty"`
+	CreateNotificationActivity *bool             `json:"create_notification_activity,omitempty"`
+	EnrichOwnFields            *bool             `json:"enrich_own_fields,omitempty"`
+	ExpiresAt                  *string           `json:"expires_at,omitempty"`
+	ID                         *string           `json:"id,omitempty"`
+	ParentID                   *string           `json:"parent_id,omitempty"`
+	PollID                     *string           `json:"poll_id,omitempty"`
+	RestrictReplies            *string           `json:"restrict_replies,omitempty"`
+	SkipEnrichUrl              *bool             `json:"skip_enrich_url,omitempty"`
+	SkipPush                   *bool             `json:"skip_push,omitempty"`
+	Text                       *string           `json:"text,omitempty"`
+	UserID                     *string           `json:"user_id,omitempty"`
+	Visibility                 *string           `json:"visibility,omitempty"`
+	VisibilityTag              *string           `json:"visibility_tag,omitempty"`
 	Attachments                []Attachment      `json:"attachments"`
 	CollectionRefs             []string          `json:"collection_refs"`
 	FilterTags                 []string          `json:"filter_tags"`
 	InterestTags               []string          `json:"interest_tags"`
 	MentionedUserIds           []string          `json:"mentioned_user_ids"`
 	Custom                     map[string]any    `json:"custom"`
-	Location                   *ActivityLocation `json:"location"`
+	Location                   *ActivityLocation `json:"location,omitempty"`
 	SearchData                 map[string]any    `json:"search_data"`
 }
 type UpsertActivitiesRequest struct {
 	Activities      []ActivityRequest `json:"activities"`
-	EnrichOwnFields *bool             `json:"enrich_own_fields"`
+	EnrichOwnFields *bool             `json:"enrich_own_fields,omitempty"`
 }
 type UpdateActivitiesPartialBatchRequest struct {
 	Changes []UpdateActivityPartialChangeRequest `json:"changes"`
 }
 type DeleteActivitiesRequest struct {
 	Ids                        []string     `json:"ids"`
-	DeleteNotificationActivity *bool        `json:"delete_notification_activity"`
-	HardDelete                 *bool        `json:"hard_delete"`
-	UserID                     *string      `json:"user_id"`
-	User                       *UserRequest `json:"user"`
+	DeleteNotificationActivity *bool        `json:"delete_notification_activity,omitempty"`
+	HardDelete                 *bool        `json:"hard_delete,omitempty"`
+	UserID                     *string      `json:"user_id,omitempty"`
+	User                       *UserRequest `json:"user,omitempty"`
 }
 type TrackActivityMetricsRequest struct {
 	Events []TrackActivityMetricsEvent `json:"events"`
-	UserID *string                     `json:"user_id"`
-	User   *UserRequest                `json:"user"`
+	UserID *string                     `json:"user_id,omitempty"`
+	User   *UserRequest                `json:"user,omitempty"`
 }
 type QueryActivitiesRequest struct {
-	EnrichOwnFields          *bool              `json:"enrich_own_fields"`
-	IncludeExpiredActivities *bool              `json:"include_expired_activities"`
-	IncludePrivateActivities *bool              `json:"include_private_activities"`
-	Limit                    *int               `json:"limit"`
-	Next                     *string            `json:"next"`
-	Prev                     *string            `json:"prev"`
-	UserID                   *string            `json:"user_id"`
+	EnrichOwnFields          *bool              `json:"enrich_own_fields,omitempty"`
+	IncludeExpiredActivities *bool              `json:"include_expired_activities,omitempty"`
+	IncludePrivateActivities *bool              `json:"include_private_activities,omitempty"`
+	Limit                    *int               `json:"limit,omitempty"`
+	Next                     *string            `json:"next,omitempty"`
+	Prev                     *string            `json:"prev,omitempty"`
+	UserID                   *string            `json:"user_id,omitempty"`
 	Sort                     []SortParamRequest `json:"sort"`
 	Filter                   map[string]any     `json:"filter"`
-	User                     *UserRequest       `json:"user"`
+	User                     *UserRequest       `json:"user,omitempty"`
 }
 type DeleteBookmarkRequest struct {
 	FolderID *string `json:"-" query:"folder_id"`
 	UserID   *string `json:"-" query:"user_id"`
 }
 type UpdateBookmarkRequest struct {
-	FolderID    *string           `json:"folder_id"`
-	NewFolderID *string           `json:"new_folder_id"`
-	UserID      *string           `json:"user_id"`
+	FolderID    *string           `json:"folder_id,omitempty"`
+	NewFolderID *string           `json:"new_folder_id,omitempty"`
+	UserID      *string           `json:"user_id,omitempty"`
 	Custom      map[string]any    `json:"custom"`
-	NewFolder   *AddFolderRequest `json:"new_folder"`
-	User        *UserRequest      `json:"user"`
+	NewFolder   *AddFolderRequest `json:"new_folder,omitempty"`
+	User        *UserRequest      `json:"user,omitempty"`
 }
 type AddBookmarkRequest struct {
-	FolderID  *string           `json:"folder_id"`
-	UserID    *string           `json:"user_id"`
+	FolderID  *string           `json:"folder_id,omitempty"`
+	UserID    *string           `json:"user_id,omitempty"`
 	Custom    map[string]any    `json:"custom"`
-	NewFolder *AddFolderRequest `json:"new_folder"`
-	User      *UserRequest      `json:"user"`
+	NewFolder *AddFolderRequest `json:"new_folder,omitempty"`
+	User      *UserRequest      `json:"user,omitempty"`
 }
 type ActivityFeedbackRequest struct {
-	Hide     *bool        `json:"hide"`
-	ShowLess *bool        `json:"show_less"`
-	ShowMore *bool        `json:"show_more"`
-	UserID   *string      `json:"user_id"`
-	User     *UserRequest `json:"user"`
+	Hide     *bool        `json:"hide,omitempty"`
+	ShowLess *bool        `json:"show_less,omitempty"`
+	ShowMore *bool        `json:"show_more,omitempty"`
+	UserID   *string      `json:"user_id,omitempty"`
+	User     *UserRequest `json:"user,omitempty"`
 }
 type AddActivityReactionRequest struct {
 	Type                       string         `json:"type"`
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
-	CreateNotificationActivity *bool          `json:"create_notification_activity"`
-	EnforceUnique              *bool          `json:"enforce_unique"`
-	SkipPush                   *bool          `json:"skip_push"`
-	UserID                     *string        `json:"user_id"`
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
+	CreateNotificationActivity *bool          `json:"create_notification_activity,omitempty"`
+	EnforceUnique              *bool          `json:"enforce_unique,omitempty"`
+	SkipPush                   *bool          `json:"skip_push,omitempty"`
+	UserID                     *string        `json:"user_id,omitempty"`
 	Custom                     map[string]any `json:"custom"`
-	User                       *UserRequest   `json:"user"`
+	User                       *UserRequest   `json:"user,omitempty"`
 }
 type QueryActivityReactionsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
 }
@@ -734,28 +735,28 @@ type DeleteActivityRequest struct {
 type GetActivityRequest struct {
 }
 type UpdateActivityPartialRequest struct {
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
-	EnrichOwnFields            *bool          `json:"enrich_own_fields"`
-	HandleMentionNotifications *bool          `json:"handle_mention_notifications"`
-	RunActivityProcessors      *bool          `json:"run_activity_processors"`
-	UserID                     *string        `json:"user_id"`
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
+	EnrichOwnFields            *bool          `json:"enrich_own_fields,omitempty"`
+	HandleMentionNotifications *bool          `json:"handle_mention_notifications,omitempty"`
+	RunActivityProcessors      *bool          `json:"run_activity_processors,omitempty"`
+	UserID                     *string        `json:"user_id,omitempty"`
 	Unset                      []string       `json:"unset"`
 	Set                        map[string]any `json:"set"`
-	User                       *UserRequest   `json:"user"`
+	User                       *UserRequest   `json:"user,omitempty"`
 }
 type UpdateActivityRequest struct {
-	CopyCustomToNotification   *bool             `json:"copy_custom_to_notification"`
-	EnrichOwnFields            *bool             `json:"enrich_own_fields"`
-	ExpiresAt                  *Timestamp        `json:"expires_at"`
-	HandleMentionNotifications *bool             `json:"handle_mention_notifications"`
-	PollID                     *string           `json:"poll_id"`
-	RestrictReplies            *string           `json:"restrict_replies"`
-	RunActivityProcessors      *bool             `json:"run_activity_processors"`
-	SkipEnrichUrl              *bool             `json:"skip_enrich_url"`
-	Text                       *string           `json:"text"`
-	UserID                     *string           `json:"user_id"`
-	Visibility                 *string           `json:"visibility"`
-	VisibilityTag              *string           `json:"visibility_tag"`
+	CopyCustomToNotification   *bool             `json:"copy_custom_to_notification,omitempty"`
+	EnrichOwnFields            *bool             `json:"enrich_own_fields,omitempty"`
+	ExpiresAt                  *Timestamp        `json:"expires_at,omitempty"`
+	HandleMentionNotifications *bool             `json:"handle_mention_notifications,omitempty"`
+	PollID                     *string           `json:"poll_id,omitempty"`
+	RestrictReplies            *string           `json:"restrict_replies,omitempty"`
+	RunActivityProcessors      *bool             `json:"run_activity_processors,omitempty"`
+	SkipEnrichUrl              *bool             `json:"skip_enrich_url,omitempty"`
+	Text                       *string           `json:"text,omitempty"`
+	UserID                     *string           `json:"user_id,omitempty"`
+	Visibility                 *string           `json:"visibility,omitempty"`
+	VisibilityTag              *string           `json:"visibility_tag,omitempty"`
 	Attachments                []Attachment      `json:"attachments"`
 	CollectionRefs             []string          `json:"collection_refs"`
 	Feeds                      []string          `json:"feeds"`
@@ -763,35 +764,35 @@ type UpdateActivityRequest struct {
 	InterestTags               []string          `json:"interest_tags"`
 	MentionedUserIds           []string          `json:"mentioned_user_ids"`
 	Custom                     map[string]any    `json:"custom"`
-	Location                   *ActivityLocation `json:"location"`
+	Location                   *ActivityLocation `json:"location,omitempty"`
 	SearchData                 map[string]any    `json:"search_data"`
-	User                       *UserRequest      `json:"user"`
+	User                       *UserRequest      `json:"user,omitempty"`
 }
 type RestoreActivityRequest struct {
 	EnrichOwnFields *bool        `json:"-" query:"enrich_own_fields"`
-	UserID          *string      `json:"user_id"`
-	User            *UserRequest `json:"user"`
+	UserID          *string      `json:"user_id,omitempty"`
+	User            *UserRequest `json:"user,omitempty"`
 }
 type QueryBookmarkFoldersRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
 }
 type DeleteBookmarkFolderRequest struct {
 }
 type UpdateBookmarkFolderRequest struct {
-	Name   *string        `json:"name"`
-	UserID *string        `json:"user_id"`
+	Name   *string        `json:"name,omitempty"`
+	UserID *string        `json:"user_id,omitempty"`
 	Custom map[string]any `json:"custom"`
-	User   *UserRequest   `json:"user"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type QueryBookmarksRequest struct {
-	EnrichOwnFields *bool              `json:"enrich_own_fields"`
-	Limit           *int               `json:"limit"`
-	Next            *string            `json:"next"`
-	Prev            *string            `json:"prev"`
+	EnrichOwnFields *bool              `json:"enrich_own_fields,omitempty"`
+	Limit           *int               `json:"limit,omitempty"`
+	Next            *string            `json:"next,omitempty"`
+	Prev            *string            `json:"prev,omitempty"`
 	Sort            []SortParamRequest `json:"sort"`
 	Filter          map[string]any     `json:"filter"`
 }
@@ -804,25 +805,25 @@ type ReadCollectionsRequest struct {
 }
 type UpdateCollectionsRequest struct {
 	Collections []UpdateCollectionRequest `json:"collections"`
-	UserID      *string                   `json:"user_id"`
-	User        *UserRequest              `json:"user"`
+	UserID      *string                   `json:"user_id,omitempty"`
+	User        *UserRequest              `json:"user,omitempty"`
 }
 type CreateCollectionsRequest struct {
 	Collections []CollectionRequest `json:"collections"`
-	UserID      *string             `json:"user_id"`
-	User        *UserRequest        `json:"user"`
+	UserID      *string             `json:"user_id,omitempty"`
+	User        *UserRequest        `json:"user,omitempty"`
 }
 type UpsertCollectionsRequest struct {
 	Collections []CollectionRequest `json:"collections"`
 }
 type QueryCollectionsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	UserID *string            `json:"user_id"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
+	UserID *string            `json:"user_id,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user"`
+	User   *UserRequest       `json:"user,omitempty"`
 }
 type GetCommentsRequest struct {
 	ObjectID     string  `json:"-" query:"object_id"`
@@ -836,33 +837,33 @@ type GetCommentsRequest struct {
 	Next         *string `json:"-" query:"next"`
 }
 type AddCommentRequest struct {
-	Comment                    *string        `json:"comment"`
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
-	CreateNotificationActivity *bool          `json:"create_notification_activity"`
-	ID                         *string        `json:"id"`
-	ObjectID                   *string        `json:"object_id"`
-	ObjectType                 *string        `json:"object_type"`
-	ParentID                   *string        `json:"parent_id"`
-	SkipEnrichUrl              *bool          `json:"skip_enrich_url"`
-	SkipPush                   *bool          `json:"skip_push"`
-	UserID                     *string        `json:"user_id"`
+	Comment                    *string        `json:"comment,omitempty"`
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
+	CreateNotificationActivity *bool          `json:"create_notification_activity,omitempty"`
+	ID                         *string        `json:"id,omitempty"`
+	ObjectID                   *string        `json:"object_id,omitempty"`
+	ObjectType                 *string        `json:"object_type,omitempty"`
+	ParentID                   *string        `json:"parent_id,omitempty"`
+	SkipEnrichUrl              *bool          `json:"skip_enrich_url,omitempty"`
+	SkipPush                   *bool          `json:"skip_push,omitempty"`
+	UserID                     *string        `json:"user_id,omitempty"`
 	Attachments                []Attachment   `json:"attachments"`
 	MentionedUserIds           []string       `json:"mentioned_user_ids"`
 	Custom                     map[string]any `json:"custom"`
-	User                       *UserRequest   `json:"user"`
+	User                       *UserRequest   `json:"user,omitempty"`
 }
 type AddCommentsBatchRequest struct {
 	Comments []AddCommentRequest `json:"comments"`
 }
 type QueryCommentsRequest struct {
 	Filter   map[string]any `json:"filter"`
-	IDAround *string        `json:"id_around"`
-	Limit    *int           `json:"limit"`
-	Next     *string        `json:"next"`
-	Prev     *string        `json:"prev"`
-	Sort     *string        `json:"sort"`
-	UserID   *string        `json:"user_id"`
-	User     *UserRequest   `json:"user"`
+	IDAround *string        `json:"id_around,omitempty"`
+	Limit    *int           `json:"limit,omitempty"`
+	Next     *string        `json:"next,omitempty"`
+	Prev     *string        `json:"prev,omitempty"`
+	Sort     *string        `json:"sort,omitempty"`
+	UserID   *string        `json:"user_id,omitempty"`
+	User     *UserRequest   `json:"user,omitempty"`
 }
 type DeleteCommentRequest struct {
 	HardDelete                 *bool `json:"-" query:"hard_delete"`
@@ -871,31 +872,31 @@ type DeleteCommentRequest struct {
 type GetCommentRequest struct {
 }
 type UpdateCommentRequest struct {
-	Comment                    *string        `json:"comment"`
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
-	HandleMentionNotifications *bool          `json:"handle_mention_notifications"`
-	SkipEnrichUrl              *bool          `json:"skip_enrich_url"`
-	SkipPush                   *bool          `json:"skip_push"`
-	UserID                     *string        `json:"user_id"`
+	Comment                    *string        `json:"comment,omitempty"`
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
+	HandleMentionNotifications *bool          `json:"handle_mention_notifications,omitempty"`
+	SkipEnrichUrl              *bool          `json:"skip_enrich_url,omitempty"`
+	SkipPush                   *bool          `json:"skip_push,omitempty"`
+	UserID                     *string        `json:"user_id,omitempty"`
 	Attachments                []Attachment   `json:"attachments"`
 	MentionedUserIds           []string       `json:"mentioned_user_ids"`
 	Custom                     map[string]any `json:"custom"`
-	User                       *UserRequest   `json:"user"`
+	User                       *UserRequest   `json:"user,omitempty"`
 }
 type AddCommentReactionRequest struct {
 	Type                       string         `json:"type"`
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
-	CreateNotificationActivity *bool          `json:"create_notification_activity"`
-	EnforceUnique              *bool          `json:"enforce_unique"`
-	SkipPush                   *bool          `json:"skip_push"`
-	UserID                     *string        `json:"user_id"`
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
+	CreateNotificationActivity *bool          `json:"create_notification_activity,omitempty"`
+	EnforceUnique              *bool          `json:"enforce_unique,omitempty"`
+	SkipPush                   *bool          `json:"skip_push,omitempty"`
+	UserID                     *string        `json:"user_id,omitempty"`
 	Custom                     map[string]any `json:"custom"`
-	User                       *UserRequest   `json:"user"`
+	User                       *UserRequest   `json:"user,omitempty"`
 }
 type QueryCommentReactionsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
 }
@@ -917,91 +918,91 @@ type ListFeedGroupsRequest struct {
 }
 type CreateFeedGroupRequest struct {
 	ID                 string                    `json:"id"`
-	DefaultVisibility  *string                   `json:"default_visibility"`
+	DefaultVisibility  *string                   `json:"default_visibility,omitempty"`
 	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
 	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
-	Aggregation        *AggregationConfig        `json:"aggregation"`
+	Aggregation        *AggregationConfig        `json:"aggregation,omitempty"`
 	Custom             map[string]any            `json:"custom"`
-	Notification       *NotificationConfig       `json:"notification"`
-	PushNotification   *PushNotificationConfig   `json:"push_notification"`
-	Ranking            *RankingConfig            `json:"ranking"`
-	Stories            *StoriesConfig            `json:"stories"`
+	Notification       *NotificationConfig       `json:"notification,omitempty"`
+	PushNotification   *PushNotificationConfig   `json:"push_notification,omitempty"`
+	Ranking            *RankingConfig            `json:"ranking,omitempty"`
+	Stories            *StoriesConfig            `json:"stories,omitempty"`
 }
 type DeleteFeedRequest struct {
 	HardDelete *bool `json:"-" query:"hard_delete"`
 }
 type GetOrCreateFeedRequest struct {
-	IDAround               *string                 `json:"id_around"`
-	Limit                  *int                    `json:"limit"`
-	Next                   *string                 `json:"next"`
-	Prev                   *string                 `json:"prev"`
-	UserID                 *string                 `json:"user_id"`
-	View                   *string                 `json:"view"`
-	Watch                  *bool                   `json:"watch"`
-	Data                   *FeedInput              `json:"data"`
-	EnrichmentOptions      *EnrichmentOptions      `json:"enrichment_options"`
+	IDAround               *string                 `json:"id_around,omitempty"`
+	Limit                  *int                    `json:"limit,omitempty"`
+	Next                   *string                 `json:"next,omitempty"`
+	Prev                   *string                 `json:"prev,omitempty"`
+	UserID                 *string                 `json:"user_id,omitempty"`
+	View                   *string                 `json:"view,omitempty"`
+	Watch                  *bool                   `json:"watch,omitempty"`
+	Data                   *FeedInput              `json:"data,omitempty"`
+	EnrichmentOptions      *EnrichmentOptions      `json:"enrichment_options,omitempty"`
 	ExternalRanking        map[string]any          `json:"external_ranking"`
 	Filter                 map[string]any          `json:"filter"`
-	FollowersPagination    *PagerRequest           `json:"followers_pagination"`
-	FollowingPagination    *PagerRequest           `json:"following_pagination"`
-	FriendReactionsOptions *FriendReactionsOptions `json:"friend_reactions_options"`
+	FollowersPagination    *PagerRequest           `json:"followers_pagination,omitempty"`
+	FollowingPagination    *PagerRequest           `json:"following_pagination,omitempty"`
+	FriendReactionsOptions *FriendReactionsOptions `json:"friend_reactions_options,omitempty"`
 	InterestWeights        map[string]float64      `json:"interest_weights"`
-	MemberPagination       *PagerRequest           `json:"member_pagination"`
-	User                   *UserRequest            `json:"user"`
+	MemberPagination       *PagerRequest           `json:"member_pagination,omitempty"`
+	User                   *UserRequest            `json:"user,omitempty"`
 }
 type UpdateFeedRequest struct {
-	CreatedByID     *string        `json:"created_by_id"`
-	Description     *string        `json:"description"`
-	EnrichOwnFields *bool          `json:"enrich_own_fields"`
-	Name            *string        `json:"name"`
+	CreatedByID     *string        `json:"created_by_id,omitempty"`
+	Description     *string        `json:"description,omitempty"`
+	EnrichOwnFields *bool          `json:"enrich_own_fields,omitempty"`
+	Name            *string        `json:"name,omitempty"`
 	FilterTags      []string       `json:"filter_tags"`
 	Custom          map[string]any `json:"custom"`
 }
 type MarkActivityRequest struct {
-	MarkAllRead *bool        `json:"mark_all_read"`
-	MarkAllSeen *bool        `json:"mark_all_seen"`
-	UserID      *string      `json:"user_id"`
+	MarkAllRead *bool        `json:"mark_all_read,omitempty"`
+	MarkAllSeen *bool        `json:"mark_all_seen,omitempty"`
+	UserID      *string      `json:"user_id,omitempty"`
 	MarkRead    []string     `json:"mark_read"`
 	MarkSeen    []string     `json:"mark_seen"`
 	MarkWatched []string     `json:"mark_watched"`
-	User        *UserRequest `json:"user"`
+	User        *UserRequest `json:"user,omitempty"`
 }
 type UnpinActivityRequest struct {
 	EnrichOwnFields *bool   `json:"-" query:"enrich_own_fields"`
 	UserID          *string `json:"-" query:"user_id"`
 }
 type PinActivityRequest struct {
-	EnrichOwnFields *bool        `json:"enrich_own_fields"`
-	UserID          *string      `json:"user_id"`
-	User            *UserRequest `json:"user"`
+	EnrichOwnFields *bool        `json:"enrich_own_fields,omitempty"`
+	UserID          *string      `json:"user_id,omitempty"`
+	User            *UserRequest `json:"user,omitempty"`
 }
 type UpdateFeedMembersRequest struct {
 	Operation string              `json:"operation"`
-	Limit     *int                `json:"limit"`
-	Next      *string             `json:"next"`
-	Prev      *string             `json:"prev"`
+	Limit     *int                `json:"limit,omitempty"`
+	Next      *string             `json:"next,omitempty"`
+	Prev      *string             `json:"prev,omitempty"`
 	Members   []FeedMemberRequest `json:"members"`
 }
 type AcceptFeedMemberInviteRequest struct {
-	UserID *string      `json:"user_id"`
-	User   *UserRequest `json:"user"`
+	UserID *string      `json:"user_id,omitempty"`
+	User   *UserRequest `json:"user,omitempty"`
 }
 type QueryFeedMembersRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
 }
 type RejectFeedMemberInviteRequest struct {
-	UserID *string      `json:"user_id"`
-	User   *UserRequest `json:"user"`
+	UserID *string      `json:"user_id,omitempty"`
+	User   *UserRequest `json:"user,omitempty"`
 }
 type QueryPinnedActivitiesRequest struct {
-	EnrichOwnFields *bool              `json:"enrich_own_fields"`
-	Limit           *int               `json:"limit"`
-	Next            *string            `json:"next"`
-	Prev            *string            `json:"prev"`
+	EnrichOwnFields *bool              `json:"enrich_own_fields,omitempty"`
+	Limit           *int               `json:"limit,omitempty"`
+	Next            *string            `json:"next,omitempty"`
+	Prev            *string            `json:"prev,omitempty"`
 	Sort            []SortParamRequest `json:"sort"`
 	Filter          map[string]any     `json:"filter"`
 }
@@ -1018,34 +1019,34 @@ type GetFeedGroupRequest struct {
 	IncludeSoftDeleted *bool `json:"-" query:"include_soft_deleted"`
 }
 type GetOrCreateFeedGroupRequest struct {
-	DefaultVisibility  *string                   `json:"default_visibility"`
+	DefaultVisibility  *string                   `json:"default_visibility,omitempty"`
 	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
 	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
-	Aggregation        *AggregationConfig        `json:"aggregation"`
+	Aggregation        *AggregationConfig        `json:"aggregation,omitempty"`
 	Custom             map[string]any            `json:"custom"`
-	Notification       *NotificationConfig       `json:"notification"`
-	PushNotification   *PushNotificationConfig   `json:"push_notification"`
-	Ranking            *RankingConfig            `json:"ranking"`
-	Stories            *StoriesConfig            `json:"stories"`
+	Notification       *NotificationConfig       `json:"notification,omitempty"`
+	PushNotification   *PushNotificationConfig   `json:"push_notification,omitempty"`
+	Ranking            *RankingConfig            `json:"ranking,omitempty"`
+	Stories            *StoriesConfig            `json:"stories,omitempty"`
 }
 type UpdateFeedGroupRequest struct {
-	DefaultVisibility  *string                   `json:"default_visibility"`
+	DefaultVisibility  *string                   `json:"default_visibility,omitempty"`
 	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
 	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
-	Aggregation        *AggregationConfig        `json:"aggregation"`
+	Aggregation        *AggregationConfig        `json:"aggregation,omitempty"`
 	Custom             map[string]any            `json:"custom"`
-	Notification       *NotificationConfig       `json:"notification"`
-	PushNotification   *PushNotificationConfig   `json:"push_notification"`
-	Ranking            *RankingConfig            `json:"ranking"`
-	Stories            *StoriesConfig            `json:"stories"`
+	Notification       *NotificationConfig       `json:"notification,omitempty"`
+	PushNotification   *PushNotificationConfig   `json:"push_notification,omitempty"`
+	Ranking            *RankingConfig            `json:"ranking,omitempty"`
+	Stories            *StoriesConfig            `json:"stories,omitempty"`
 }
 type ListFeedViewsRequest struct {
 }
 type CreateFeedViewRequest struct {
 	ID                string                   `json:"id"`
 	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
-	Aggregation       *AggregationConfig       `json:"aggregation"`
-	Ranking           *RankingConfig           `json:"ranking"`
+	Aggregation       *AggregationConfig       `json:"aggregation,omitempty"`
+	Ranking           *RankingConfig           `json:"ranking,omitempty"`
 }
 type DeleteFeedViewRequest struct {
 }
@@ -1053,13 +1054,13 @@ type GetFeedViewRequest struct {
 }
 type GetOrCreateFeedViewRequest struct {
 	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
-	Aggregation       *AggregationConfig       `json:"aggregation"`
-	Ranking           *RankingConfig           `json:"ranking"`
+	Aggregation       *AggregationConfig       `json:"aggregation,omitempty"`
+	Ranking           *RankingConfig           `json:"ranking,omitempty"`
 }
 type UpdateFeedViewRequest struct {
 	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
-	Aggregation       *AggregationConfig       `json:"aggregation"`
-	Ranking           *RankingConfig           `json:"ranking"`
+	Aggregation       *AggregationConfig       `json:"aggregation,omitempty"`
+	Ranking           *RankingConfig           `json:"ranking,omitempty"`
 }
 type ListFeedVisibilitiesRequest struct {
 }
@@ -1070,24 +1071,24 @@ type UpdateFeedVisibilityRequest struct {
 }
 type CreateFeedsBatchRequest struct {
 	Feeds           []FeedRequest `json:"feeds"`
-	EnrichOwnFields *bool         `json:"enrich_own_fields"`
+	EnrichOwnFields *bool         `json:"enrich_own_fields,omitempty"`
 }
 type DeleteFeedsBatchRequest struct {
 	Feeds      []string `json:"feeds"`
-	HardDelete *bool    `json:"hard_delete"`
+	HardDelete *bool    `json:"hard_delete,omitempty"`
 }
 type OwnBatchRequest struct {
 	Feeds  []string     `json:"feeds"`
-	UserID *string      `json:"user_id"`
+	UserID *string      `json:"user_id,omitempty"`
 	Fields []string     `json:"fields"`
-	User   *UserRequest `json:"user"`
+	User   *UserRequest `json:"user,omitempty"`
 }
 type QueryFeedsRequest struct {
-	EnrichOwnFields *bool              `json:"enrich_own_fields"`
-	Limit           *int               `json:"limit"`
-	Next            *string            `json:"next"`
-	Prev            *string            `json:"prev"`
-	Watch           *bool              `json:"watch"`
+	EnrichOwnFields *bool              `json:"enrich_own_fields,omitempty"`
+	Limit           *int               `json:"limit,omitempty"`
+	Next            *string            `json:"next,omitempty"`
+	Prev            *string            `json:"prev,omitempty"`
+	Watch           *bool              `json:"watch,omitempty"`
 	Sort            []SortParamRequest `json:"sort"`
 	Filter          map[string]any     `json:"filter"`
 }
@@ -1101,43 +1102,43 @@ type GetFeedsRateLimitsRequest struct {
 type UpdateFollowRequest struct {
 	Source                     string         `json:"source"`
 	Target                     string         `json:"target"`
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
-	CreateNotificationActivity *bool          `json:"create_notification_activity"`
-	EnrichOwnFields            *bool          `json:"enrich_own_fields"`
-	FollowerRole               *string        `json:"follower_role"`
-	PushPreference             *string        `json:"push_preference"`
-	SkipPush                   *bool          `json:"skip_push"`
-	Status                     *string        `json:"status"`
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
+	CreateNotificationActivity *bool          `json:"create_notification_activity,omitempty"`
+	EnrichOwnFields            *bool          `json:"enrich_own_fields,omitempty"`
+	FollowerRole               *string        `json:"follower_role,omitempty"`
+	PushPreference             *string        `json:"push_preference,omitempty"`
+	SkipPush                   *bool          `json:"skip_push,omitempty"`
+	Status                     *string        `json:"status,omitempty"`
 	Custom                     map[string]any `json:"custom"`
 }
 type FollowRequest struct {
 	Source                     string         `json:"source"`
 	Target                     string         `json:"target"`
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification"`
-	CreateNotificationActivity *bool          `json:"create_notification_activity"`
-	EnrichOwnFields            *bool          `json:"enrich_own_fields"`
-	PushPreference             *string        `json:"push_preference"`
-	SkipPush                   *bool          `json:"skip_push"`
-	Status                     *string        `json:"status"`
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
+	CreateNotificationActivity *bool          `json:"create_notification_activity,omitempty"`
+	EnrichOwnFields            *bool          `json:"enrich_own_fields,omitempty"`
+	PushPreference             *string        `json:"push_preference,omitempty"`
+	SkipPush                   *bool          `json:"skip_push,omitempty"`
+	Status                     *string        `json:"status,omitempty"`
 	Custom                     map[string]any `json:"custom"`
 }
 type AcceptFollowRequest struct {
 	Source       string  `json:"source"`
 	Target       string  `json:"target"`
-	FollowerRole *string `json:"follower_role"`
+	FollowerRole *string `json:"follower_role,omitempty"`
 }
 type FollowBatchRequest struct {
 	Follows         []FollowRequest `json:"follows"`
-	EnrichOwnFields *bool           `json:"enrich_own_fields"`
+	EnrichOwnFields *bool           `json:"enrich_own_fields,omitempty"`
 }
 type GetOrCreateFollowsRequest struct {
 	Follows         []FollowRequest `json:"follows"`
-	EnrichOwnFields *bool           `json:"enrich_own_fields"`
+	EnrichOwnFields *bool           `json:"enrich_own_fields,omitempty"`
 }
 type QueryFollowsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
 }
@@ -1152,43 +1153,43 @@ type UnfollowRequest struct {
 type CreateMembershipLevelRequest struct {
 	ID          string         `json:"id"`
 	Name        string         `json:"name"`
-	Description *string        `json:"description"`
-	Priority    *int           `json:"priority"`
+	Description *string        `json:"description,omitempty"`
+	Priority    *int           `json:"priority,omitempty"`
 	Tags        []string       `json:"tags"`
 	Custom      map[string]any `json:"custom"`
 }
 type QueryMembershipLevelsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
 }
 type DeleteMembershipLevelRequest struct {
 }
 type UpdateMembershipLevelRequest struct {
-	Description *string        `json:"description"`
-	Name        *string        `json:"name"`
-	Priority    *int           `json:"priority"`
+	Description *string        `json:"description,omitempty"`
+	Name        *string        `json:"name,omitempty"`
+	Priority    *int           `json:"priority,omitempty"`
 	Tags        []string       `json:"tags"`
 	Custom      map[string]any `json:"custom"`
 }
 type QueryFeedsUsageStatsRequest struct {
-	From *string `json:"from"`
-	To   *string `json:"to"`
+	From *string `json:"from,omitempty"`
+	To   *string `json:"to,omitempty"`
 }
 type UnfollowBatchRequest struct {
 	Follows                    []FollowPair `json:"follows"`
-	DeleteNotificationActivity *bool        `json:"delete_notification_activity"`
-	EnrichOwnFields            *bool        `json:"enrich_own_fields"`
+	DeleteNotificationActivity *bool        `json:"delete_notification_activity,omitempty"`
+	EnrichOwnFields            *bool        `json:"enrich_own_fields,omitempty"`
 }
 type GetOrCreateUnfollowsRequest struct {
 	Follows                    []FollowPair `json:"follows"`
-	DeleteNotificationActivity *bool        `json:"delete_notification_activity"`
-	EnrichOwnFields            *bool        `json:"enrich_own_fields"`
+	DeleteNotificationActivity *bool        `json:"delete_notification_activity,omitempty"`
+	EnrichOwnFields            *bool        `json:"enrich_own_fields,omitempty"`
 }
 type DeleteFeedUserDataRequest struct {
-	HardDelete *bool `json:"hard_delete"`
+	HardDelete *bool `json:"hard_delete,omitempty"`
 }
 type ExportFeedUserDataRequest struct {
 }
@@ -1196,14 +1197,14 @@ type CreateGuestRequest struct {
 	User UserRequest `json:"user"`
 }
 type CreateImportURLRequest struct {
-	Filename *string `json:"filename"`
+	Filename *string `json:"filename,omitempty"`
 }
 type ListImportsRequest struct {
 }
 type CreateImportRequest struct {
 	Mode        string `json:"mode"`
 	Path        string `json:"path"`
-	MergeCustom *bool  `json:"merge_custom"`
+	MergeCustom *bool  `json:"merge_custom,omitempty"`
 }
 type ListImportV2TasksRequest struct {
 	State *int `json:"-" query:"state"`
@@ -1211,8 +1212,8 @@ type ListImportV2TasksRequest struct {
 type CreateImportV2TaskRequest struct {
 	Product  string               `json:"product"`
 	Settings ImportV2TaskSettings `json:"settings"`
-	UserID   *string              `json:"user_id"`
-	User     *UserRequest         `json:"user"`
+	UserID   *string              `json:"user_id,omitempty"`
+	User     *UserRequest         `json:"user,omitempty"`
 }
 type DeleteImportV2TaskRequest struct {
 }
@@ -1224,31 +1225,31 @@ type AppealRequest struct {
 	AppealReason string       `json:"appeal_reason"`
 	EntityID     string       `json:"entity_id"`
 	EntityType   string       `json:"entity_type"`
-	UserID       *string      `json:"user_id"`
+	UserID       *string      `json:"user_id,omitempty"`
 	Attachments  []string     `json:"attachments"`
-	User         *UserRequest `json:"user"`
+	User         *UserRequest `json:"user,omitempty"`
 }
 type GetAppealRequest struct {
 }
 type QueryAppealsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	UserID *string            `json:"user_id"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
+	UserID *string            `json:"user_id,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user"`
+	User   *UserRequest       `json:"user,omitempty"`
 }
 type BanRequest struct {
 	TargetUserID   string       `json:"target_user_id"`
-	BannedByID     *string      `json:"banned_by_id"`
-	ChannelCid     *string      `json:"channel_cid"`
-	DeleteMessages *string      `json:"delete_messages"`
-	IpBan          *bool        `json:"ip_ban"`
-	Reason         *string      `json:"reason"`
-	Shadow         *bool        `json:"shadow"`
-	Timeout        *int         `json:"timeout"`
-	BannedBy       *UserRequest `json:"banned_by"`
+	BannedByID     *string      `json:"banned_by_id,omitempty"`
+	ChannelCid     *string      `json:"channel_cid,omitempty"`
+	DeleteMessages *string      `json:"delete_messages,omitempty"`
+	IpBan          *bool        `json:"ip_ban,omitempty"`
+	Reason         *string      `json:"reason,omitempty"`
+	Shadow         *bool        `json:"shadow,omitempty"`
+	Timeout        *int         `json:"timeout,omitempty"`
+	BannedBy       *UserRequest `json:"banned_by,omitempty"`
 }
 type BulkImageModerationRequest struct {
 	CsvFile string `json:"csv_file"`
@@ -1257,38 +1258,38 @@ type CheckRequest struct {
 	EntityCreatorID   string             `json:"entity_creator_id"`
 	EntityID          string             `json:"entity_id"`
 	EntityType        string             `json:"entity_type"`
-	ConfigKey         *string            `json:"config_key"`
-	ConfigTeam        *string            `json:"config_team"`
-	TestMode          *bool              `json:"test_mode"`
-	UserID            *string            `json:"user_id"`
-	Config            *ModerationConfig  `json:"config"`
-	ModerationPayload *ModerationPayload `json:"moderation_payload"`
+	ConfigKey         *string            `json:"config_key,omitempty"`
+	ConfigTeam        *string            `json:"config_team,omitempty"`
+	TestMode          *bool              `json:"test_mode,omitempty"`
+	UserID            *string            `json:"user_id,omitempty"`
+	Config            *ModerationConfig  `json:"config,omitempty"`
+	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
 	Options           map[string]any     `json:"options"`
-	User              *UserRequest       `json:"user"`
+	User              *UserRequest       `json:"user,omitempty"`
 }
 type CheckS3AccessRequest struct {
-	S3Url *string `json:"s3_url"`
+	S3Url *string `json:"s3_url,omitempty"`
 }
 type UpsertConfigRequest struct {
 	Key                                string                              `json:"key"`
-	Async                              *bool                               `json:"async"`
-	Team                               *string                             `json:"team"`
-	UserID                             *string                             `json:"user_id"`
-	AWSRekognitionConfig               *AIImageConfig                      `json:"aws_rekognition_config"`
-	AiImageConfig                      *AIImageConfig                      `json:"ai_image_config"`
-	AiTextConfig                       *AITextConfig                       `json:"ai_text_config"`
-	AiVideoConfig                      *AIVideoConfig                      `json:"ai_video_config"`
-	AutomodPlatformCircumventionConfig *AutomodPlatformCircumventionConfig `json:"automod_platform_circumvention_config"`
-	AutomodSemanticFiltersConfig       *AutomodSemanticFiltersConfig       `json:"automod_semantic_filters_config"`
-	AutomodToxicityConfig              *AutomodToxicityConfig              `json:"automod_toxicity_config"`
-	BlockListConfig                    *BlockListConfig                    `json:"block_list_config"`
-	BodyguardConfig                    *AITextConfig                       `json:"bodyguard_config"`
-	GoogleVisionConfig                 *GoogleVisionConfig                 `json:"google_vision_config"`
-	LlmConfig                          *LLMConfig                          `json:"llm_config"`
-	RuleBuilderConfig                  *RuleBuilderConfig                  `json:"rule_builder_config"`
-	User                               *UserRequest                        `json:"user"`
-	VelocityFilterConfig               *VelocityFilterConfig               `json:"velocity_filter_config"`
-	VideoCallRuleConfig                *VideoCallRuleConfig                `json:"video_call_rule_config"`
+	Async                              *bool                               `json:"async,omitempty"`
+	Team                               *string                             `json:"team,omitempty"`
+	UserID                             *string                             `json:"user_id,omitempty"`
+	AWSRekognitionConfig               *AIImageConfig                      `json:"aws_rekognition_config,omitempty"`
+	AiImageConfig                      *AIImageConfig                      `json:"ai_image_config,omitempty"`
+	AiTextConfig                       *AITextConfig                       `json:"ai_text_config,omitempty"`
+	AiVideoConfig                      *AIVideoConfig                      `json:"ai_video_config,omitempty"`
+	AutomodPlatformCircumventionConfig *AutomodPlatformCircumventionConfig `json:"automod_platform_circumvention_config,omitempty"`
+	AutomodSemanticFiltersConfig       *AutomodSemanticFiltersConfig       `json:"automod_semantic_filters_config,omitempty"`
+	AutomodToxicityConfig              *AutomodToxicityConfig              `json:"automod_toxicity_config,omitempty"`
+	BlockListConfig                    *BlockListConfig                    `json:"block_list_config,omitempty"`
+	BodyguardConfig                    *AITextConfig                       `json:"bodyguard_config,omitempty"`
+	GoogleVisionConfig                 *GoogleVisionConfig                 `json:"google_vision_config,omitempty"`
+	LlmConfig                          *LLMConfig                          `json:"llm_config,omitempty"`
+	RuleBuilderConfig                  *RuleBuilderConfig                  `json:"rule_builder_config,omitempty"`
+	User                               *UserRequest                        `json:"user,omitempty"`
+	VelocityFilterConfig               *VelocityFilterConfig               `json:"velocity_filter_config,omitempty"`
+	VideoCallRuleConfig                *VideoCallRuleConfig                `json:"video_call_rule_config,omitempty"`
 }
 type DeleteConfigRequest struct {
 	Team *string `json:"-" query:"team"`
@@ -1297,22 +1298,22 @@ type GetConfigRequest struct {
 	Team *string `json:"-" query:"team"`
 }
 type QueryModerationConfigsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	UserID *string            `json:"user_id"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
+	UserID *string            `json:"user_id,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user"`
+	User   *UserRequest       `json:"user,omitempty"`
 }
 type CustomCheckRequest struct {
 	EntityID          string                    `json:"entity_id"`
 	EntityType        string                    `json:"entity_type"`
 	Flags             []CustomCheckFlag         `json:"flags"`
-	EntityCreatorID   *string                   `json:"entity_creator_id"`
-	UserID            *string                   `json:"user_id"`
-	ModerationPayload *ModerationPayloadRequest `json:"moderation_payload"`
-	User              *UserRequest              `json:"user"`
+	EntityCreatorID   *string                   `json:"entity_creator_id,omitempty"`
+	UserID            *string                   `json:"user_id,omitempty"`
+	ModerationPayload *ModerationPayloadRequest `json:"moderation_payload,omitempty"`
+	User              *UserRequest              `json:"user,omitempty"`
 }
 type V2DeleteTemplateRequest struct {
 }
@@ -1325,110 +1326,110 @@ type V2UpsertTemplateRequest struct {
 type FlagRequest struct {
 	EntityID          string             `json:"entity_id"`
 	EntityType        string             `json:"entity_type"`
-	EntityCreatorID   *string            `json:"entity_creator_id"`
-	Reason            *string            `json:"reason"`
-	UserID            *string            `json:"user_id"`
+	EntityCreatorID   *string            `json:"entity_creator_id,omitempty"`
+	Reason            *string            `json:"reason,omitempty"`
+	UserID            *string            `json:"user_id,omitempty"`
 	Custom            map[string]any     `json:"custom"`
-	ModerationPayload *ModerationPayload `json:"moderation_payload"`
-	User              *UserRequest       `json:"user"`
+	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
+	User              *UserRequest       `json:"user,omitempty"`
 }
 type QueryModerationFlagsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
 }
 type QueryModerationLogsRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	UserID *string            `json:"user_id"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
+	UserID *string            `json:"user_id,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user"`
+	User   *UserRequest       `json:"user,omitempty"`
 }
 type UpsertModerationRuleRequest struct {
 	Name            string                      `json:"name"`
 	RuleType        string                      `json:"rule_type"`
-	CooldownPeriod  *string                     `json:"cooldown_period"`
-	Description     *string                     `json:"description"`
-	Enabled         *bool                       `json:"enabled"`
-	Logic           *string                     `json:"logic"`
-	Team            *string                     `json:"team"`
+	CooldownPeriod  *string                     `json:"cooldown_period,omitempty"`
+	Description     *string                     `json:"description,omitempty"`
+	Enabled         *bool                       `json:"enabled,omitempty"`
+	Logic           *string                     `json:"logic,omitempty"`
+	Team            *string                     `json:"team,omitempty"`
 	ActionSequences []CallRuleActionSequence    `json:"action_sequences"`
 	Conditions      []RuleBuilderCondition      `json:"conditions"`
 	ConfigKeys      []string                    `json:"config_keys"`
 	Groups          []RuleBuilderConditionGroup `json:"groups"`
-	Action          *RuleBuilderAction          `json:"action"`
+	Action          *RuleBuilderAction          `json:"action,omitempty"`
 }
 type DeleteModerationRuleRequest struct {
 }
 type GetModerationRuleRequest struct {
 }
 type QueryModerationRulesRequest struct {
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
-	UserID *string            `json:"user_id"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
+	UserID *string            `json:"user_id,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user"`
+	User   *UserRequest       `json:"user,omitempty"`
 }
 type MuteRequest struct {
 	TargetIds []string     `json:"target_ids"`
-	Timeout   *int         `json:"timeout"`
-	UserID    *string      `json:"user_id"`
-	User      *UserRequest `json:"user"`
+	Timeout   *int         `json:"timeout,omitempty"`
+	UserID    *string      `json:"user_id,omitempty"`
+	User      *UserRequest `json:"user,omitempty"`
 }
 type QueryReviewQueueRequest struct {
-	Limit        *int               `json:"limit"`
-	LockCount    *int               `json:"lock_count"`
-	LockDuration *int               `json:"lock_duration"`
-	LockItems    *bool              `json:"lock_items"`
-	Next         *string            `json:"next"`
-	Prev         *string            `json:"prev"`
-	StatsOnly    *bool              `json:"stats_only"`
-	UserID       *string            `json:"user_id"`
+	Limit        *int               `json:"limit,omitempty"`
+	LockCount    *int               `json:"lock_count,omitempty"`
+	LockDuration *int               `json:"lock_duration,omitempty"`
+	LockItems    *bool              `json:"lock_items,omitempty"`
+	Next         *string            `json:"next,omitempty"`
+	Prev         *string            `json:"prev,omitempty"`
+	StatsOnly    *bool              `json:"stats_only,omitempty"`
+	UserID       *string            `json:"user_id,omitempty"`
 	Sort         []SortParamRequest `json:"sort"`
 	Filter       map[string]any     `json:"filter"`
-	User         *UserRequest       `json:"user"`
+	User         *UserRequest       `json:"user,omitempty"`
 }
 type GetReviewQueueItemRequest struct {
 }
 type SubmitActionRequest struct {
 	ActionType     string                           `json:"action_type"`
-	AppealID       *string                          `json:"appeal_id"`
-	ItemID         *string                          `json:"item_id"`
-	UserID         *string                          `json:"user_id"`
-	Ban            *BanActionRequestPayload         `json:"ban"`
-	Block          *BlockActionRequestPayload       `json:"block"`
-	Custom         *CustomActionRequestPayload      `json:"custom"`
-	DeleteActivity *DeleteActivityRequestPayload    `json:"delete_activity"`
-	DeleteComment  *DeleteCommentRequestPayload     `json:"delete_comment"`
-	DeleteMessage  *DeleteMessageRequestPayload     `json:"delete_message"`
-	DeleteReaction *DeleteReactionRequestPayload    `json:"delete_reaction"`
-	DeleteUser     *DeleteUserRequestPayload        `json:"delete_user"`
-	Flag           *FlagRequest                     `json:"flag"`
-	MarkReviewed   *MarkReviewedRequestPayload      `json:"mark_reviewed"`
-	RejectAppeal   *RejectAppealRequestPayload      `json:"reject_appeal"`
-	Restore        *RestoreActionRequestPayload     `json:"restore"`
-	ShadowBlock    *ShadowBlockActionRequestPayload `json:"shadow_block"`
-	Unban          *UnbanActionRequestPayload       `json:"unban"`
-	Unblock        *UnblockActionRequestPayload     `json:"unblock"`
-	User           *UserRequest                     `json:"user"`
+	AppealID       *string                          `json:"appeal_id,omitempty"`
+	ItemID         *string                          `json:"item_id,omitempty"`
+	UserID         *string                          `json:"user_id,omitempty"`
+	Ban            *BanActionRequestPayload         `json:"ban,omitempty"`
+	Block          *BlockActionRequestPayload       `json:"block,omitempty"`
+	Custom         *CustomActionRequestPayload      `json:"custom,omitempty"`
+	DeleteActivity *DeleteActivityRequestPayload    `json:"delete_activity,omitempty"`
+	DeleteComment  *DeleteCommentRequestPayload     `json:"delete_comment,omitempty"`
+	DeleteMessage  *DeleteMessageRequestPayload     `json:"delete_message,omitempty"`
+	DeleteReaction *DeleteReactionRequestPayload    `json:"delete_reaction,omitempty"`
+	DeleteUser     *DeleteUserRequestPayload        `json:"delete_user,omitempty"`
+	Flag           *FlagRequest                     `json:"flag,omitempty"`
+	MarkReviewed   *MarkReviewedRequestPayload      `json:"mark_reviewed,omitempty"`
+	RejectAppeal   *RejectAppealRequestPayload      `json:"reject_appeal,omitempty"`
+	Restore        *RestoreActionRequestPayload     `json:"restore,omitempty"`
+	ShadowBlock    *ShadowBlockActionRequestPayload `json:"shadow_block,omitempty"`
+	Unban          *UnbanActionRequestPayload       `json:"unban,omitempty"`
+	Unblock        *UnblockActionRequestPayload     `json:"unblock,omitempty"`
+	User           *UserRequest                     `json:"user,omitempty"`
 }
 type UnbanRequest struct {
 	TargetUserID string       `json:"-" query:"target_user_id"`
 	ChannelCid   *string      `json:"-" query:"channel_cid"`
 	CreatedBy    *string      `json:"-" query:"created_by"`
-	UnbannedByID *string      `json:"unbanned_by_id"`
-	UnbannedBy   *UserRequest `json:"unbanned_by"`
+	UnbannedByID *string      `json:"unbanned_by_id,omitempty"`
+	UnbannedBy   *UserRequest `json:"unbanned_by,omitempty"`
 }
 type UnmuteRequest struct {
 	TargetIds []string     `json:"target_ids"`
-	UserID    *string      `json:"user_id"`
-	User      *UserRequest `json:"user"`
+	UserID    *string      `json:"user_id,omitempty"`
+	User      *UserRequest `json:"user,omitempty"`
 }
 type GetOGRequest struct {
 	Url string `json:"-" query:"url"`
@@ -1439,39 +1440,39 @@ type GetPermissionRequest struct {
 }
 type CreatePollRequest struct {
 	Name                      string            `json:"name"`
-	AllowAnswers              *bool             `json:"allow_answers"`
-	AllowUserSuggestedOptions *bool             `json:"allow_user_suggested_options"`
-	Description               *string           `json:"description"`
-	EnforceUniqueVote         *bool             `json:"enforce_unique_vote"`
-	ID                        *string           `json:"id"`
-	IsClosed                  *bool             `json:"is_closed"`
-	MaxVotesAllowed           *int              `json:"max_votes_allowed"`
-	UserID                    *string           `json:"user_id"`
-	VotingVisibility          *string           `json:"voting_visibility"`
+	AllowAnswers              *bool             `json:"allow_answers,omitempty"`
+	AllowUserSuggestedOptions *bool             `json:"allow_user_suggested_options,omitempty"`
+	Description               *string           `json:"description,omitempty"`
+	EnforceUniqueVote         *bool             `json:"enforce_unique_vote,omitempty"`
+	ID                        *string           `json:"id,omitempty"`
+	IsClosed                  *bool             `json:"is_closed,omitempty"`
+	MaxVotesAllowed           *int              `json:"max_votes_allowed,omitempty"`
+	UserID                    *string           `json:"user_id,omitempty"`
+	VotingVisibility          *string           `json:"voting_visibility,omitempty"`
 	Options                   []PollOptionInput `json:"options"`
 	Custom                    map[string]any    `json:"Custom"`
-	User                      *UserRequest      `json:"user"`
+	User                      *UserRequest      `json:"user,omitempty"`
 }
 type UpdatePollRequest struct {
 	ID                        string              `json:"id"`
 	Name                      string              `json:"name"`
-	AllowAnswers              *bool               `json:"allow_answers"`
-	AllowUserSuggestedOptions *bool               `json:"allow_user_suggested_options"`
-	Description               *string             `json:"description"`
-	EnforceUniqueVote         *bool               `json:"enforce_unique_vote"`
-	IsClosed                  *bool               `json:"is_closed"`
-	MaxVotesAllowed           *int                `json:"max_votes_allowed"`
-	UserID                    *string             `json:"user_id"`
-	VotingVisibility          *string             `json:"voting_visibility"`
+	AllowAnswers              *bool               `json:"allow_answers,omitempty"`
+	AllowUserSuggestedOptions *bool               `json:"allow_user_suggested_options,omitempty"`
+	Description               *string             `json:"description,omitempty"`
+	EnforceUniqueVote         *bool               `json:"enforce_unique_vote,omitempty"`
+	IsClosed                  *bool               `json:"is_closed,omitempty"`
+	MaxVotesAllowed           *int                `json:"max_votes_allowed,omitempty"`
+	UserID                    *string             `json:"user_id,omitempty"`
+	VotingVisibility          *string             `json:"voting_visibility,omitempty"`
 	Options                   []PollOptionRequest `json:"options"`
 	Custom                    map[string]any      `json:"Custom"`
-	User                      *UserRequest        `json:"user"`
+	User                      *UserRequest        `json:"user,omitempty"`
 }
 type QueryPollsRequest struct {
 	UserID *string            `json:"-" query:"user_id"`
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
 }
@@ -1482,23 +1483,23 @@ type GetPollRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
 type UpdatePollPartialRequest struct {
-	UserID *string        `json:"user_id"`
+	UserID *string        `json:"user_id,omitempty"`
 	Unset  []string       `json:"unset"`
 	Set    map[string]any `json:"set"`
-	User   *UserRequest   `json:"user"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type CreatePollOptionRequest struct {
 	Text   string         `json:"text"`
-	UserID *string        `json:"user_id"`
+	UserID *string        `json:"user_id,omitempty"`
 	Custom map[string]any `json:"Custom"`
-	User   *UserRequest   `json:"user"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type UpdatePollOptionRequest struct {
 	ID     string         `json:"id"`
 	Text   string         `json:"text"`
-	UserID *string        `json:"user_id"`
+	UserID *string        `json:"user_id,omitempty"`
 	Custom map[string]any `json:"Custom"`
-	User   *UserRequest   `json:"user"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type DeletePollOptionRequest struct {
 	UserID *string `json:"-" query:"user_id"`
@@ -1508,9 +1509,9 @@ type GetPollOptionRequest struct {
 }
 type QueryPollVotesRequest struct {
 	UserID *string            `json:"-" query:"user_id"`
-	Limit  *int               `json:"limit"`
-	Next   *string            `json:"next"`
-	Prev   *string            `json:"prev"`
+	Limit  *int               `json:"limit,omitempty"`
+	Next   *string            `json:"next,omitempty"`
+	Prev   *string            `json:"prev,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
 }
@@ -1520,7 +1521,7 @@ type UpdatePushNotificationPreferencesRequest struct {
 type ListPushProvidersRequest struct {
 }
 type UpsertPushProviderRequest struct {
-	PushProvider *PushProviderRequest `json:"push_provider"`
+	PushProvider *PushProviderRequest `json:"push_provider,omitempty"`
 }
 type DeletePushProviderRequest struct {
 }
@@ -1531,9 +1532,9 @@ type GetPushTemplatesRequest struct {
 type UpsertPushTemplateRequest struct {
 	EventType        string  `json:"event_type"`
 	PushProviderType string  `json:"push_provider_type"`
-	EnablePush       *bool   `json:"enable_push"`
-	PushProviderName *string `json:"push_provider_name"`
-	Template         *string `json:"template"`
+	EnablePush       *bool   `json:"enable_push,omitempty"`
+	PushProviderName *string `json:"push_provider_name,omitempty"`
+	Template         *string `json:"template,omitempty"`
 }
 type GetRateLimitsRequest struct {
 	ServerSide *bool   `json:"-" query:"server_side"`
@@ -1555,16 +1556,16 @@ type DeleteFileRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 type UploadFileRequest struct {
-	File *string     `json:"file"`
-	User *OnlyUserID `json:"user"`
+	File *string     `json:"file,omitempty"`
+	User *OnlyUserID `json:"user,omitempty"`
 }
 type DeleteImageRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 type UploadImageRequest struct {
-	File        *string     `json:"file"`
+	File        *string     `json:"file,omitempty"`
 	UploadSizes []ImageSize `json:"upload_sizes"`
-	User        *OnlyUserID `json:"user"`
+	User        *OnlyUserID `json:"user,omitempty"`
 }
 type ListUserGroupsRequest struct {
 	Limit       *int    `json:"-" query:"limit"`
@@ -1574,9 +1575,9 @@ type ListUserGroupsRequest struct {
 }
 type CreateUserGroupRequest struct {
 	Name        string   `json:"name"`
-	Description *string  `json:"description"`
-	ID          *string  `json:"id"`
-	TeamID      *string  `json:"team_id"`
+	Description *string  `json:"description,omitempty"`
+	ID          *string  `json:"id,omitempty"`
+	TeamID      *string  `json:"team_id,omitempty"`
 	MemberIds   []string `json:"member_ids"`
 }
 type SearchUserGroupsRequest struct {
@@ -1593,17 +1594,17 @@ type GetUserGroupRequest struct {
 	TeamID *string `json:"-" query:"team_id"`
 }
 type UpdateUserGroupRequest struct {
-	Description *string `json:"description"`
-	Name        *string `json:"name"`
-	TeamID      *string `json:"team_id"`
+	Description *string `json:"description,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	TeamID      *string `json:"team_id,omitempty"`
 }
 type AddUserGroupMembersRequest struct {
 	MemberIds []string `json:"member_ids"`
-	TeamID    *string  `json:"team_id"`
+	TeamID    *string  `json:"team_id,omitempty"`
 }
 type RemoveUserGroupMembersRequest struct {
 	MemberIds []string `json:"member_ids"`
-	TeamID    *string  `json:"team_id"`
+	TeamID    *string  `json:"team_id,omitempty"`
 }
 type QueryUsersRequest struct {
 	Payload *QueryUsersPayload `json:"-" query:"payload"`
@@ -1619,24 +1620,24 @@ type GetBlockedUsersRequest struct {
 }
 type BlockUsersRequest struct {
 	BlockedUserID string       `json:"blocked_user_id"`
-	UserID        *string      `json:"user_id"`
-	User          *UserRequest `json:"user"`
+	UserID        *string      `json:"user_id,omitempty"`
+	User          *UserRequest `json:"user,omitempty"`
 }
 type DeactivateUsersRequest struct {
 	UserIds             []string `json:"user_ids"`
-	CreatedByID         *string  `json:"created_by_id"`
-	MarkChannelsDeleted *bool    `json:"mark_channels_deleted"`
-	MarkMessagesDeleted *bool    `json:"mark_messages_deleted"`
+	CreatedByID         *string  `json:"created_by_id,omitempty"`
+	MarkChannelsDeleted *bool    `json:"mark_channels_deleted,omitempty"`
+	MarkMessagesDeleted *bool    `json:"mark_messages_deleted,omitempty"`
 }
 type DeleteUsersRequest struct {
 	UserIds           []string `json:"user_ids"`
-	Calls             *string  `json:"calls"`
-	Conversations     *string  `json:"conversations"`
-	Files             *bool    `json:"files"`
-	Messages          *string  `json:"messages"`
-	NewCallOwnerID    *string  `json:"new_call_owner_id"`
-	NewChannelOwnerID *string  `json:"new_channel_owner_id"`
-	User              *string  `json:"user"`
+	Calls             *string  `json:"calls,omitempty"`
+	Conversations     *string  `json:"conversations,omitempty"`
+	Files             *bool    `json:"files,omitempty"`
+	Messages          *string  `json:"messages,omitempty"`
+	NewCallOwnerID    *string  `json:"new_call_owner_id,omitempty"`
+	NewChannelOwnerID *string  `json:"new_channel_owner_id,omitempty"`
+	User              *string  `json:"user,omitempty"`
 }
 type GetUserLiveLocationsRequest struct {
 	UserID *string `json:"-" query:"user_id"`
@@ -1644,58 +1645,58 @@ type GetUserLiveLocationsRequest struct {
 type UpdateLiveLocationRequest struct {
 	UserID    *string    `json:"-" query:"user_id"`
 	MessageID string     `json:"message_id"`
-	EndAt     *Timestamp `json:"end_at"`
-	Latitude  *float64   `json:"latitude"`
-	Longitude *float64   `json:"longitude"`
+	EndAt     *Timestamp `json:"end_at,omitempty"`
+	Latitude  *float64   `json:"latitude,omitempty"`
+	Longitude *float64   `json:"longitude,omitempty"`
 }
 type ReactivateUsersRequest struct {
 	UserIds         []string `json:"user_ids"`
-	CreatedByID     *string  `json:"created_by_id"`
-	RestoreChannels *bool    `json:"restore_channels"`
-	RestoreMessages *bool    `json:"restore_messages"`
+	CreatedByID     *string  `json:"created_by_id,omitempty"`
+	RestoreChannels *bool    `json:"restore_channels,omitempty"`
+	RestoreMessages *bool    `json:"restore_messages,omitempty"`
 }
 type RestoreUsersRequest struct {
 	UserIds []string `json:"user_ids"`
 }
 type UnblockUsersRequest struct {
 	BlockedUserID string       `json:"blocked_user_id"`
-	UserID        *string      `json:"user_id"`
-	User          *UserRequest `json:"user"`
+	UserID        *string      `json:"user_id,omitempty"`
+	User          *UserRequest `json:"user,omitempty"`
 }
 type DeactivateUserRequest struct {
-	CreatedByID         *string `json:"created_by_id"`
-	MarkMessagesDeleted *bool   `json:"mark_messages_deleted"`
+	CreatedByID         *string `json:"created_by_id,omitempty"`
+	MarkMessagesDeleted *bool   `json:"mark_messages_deleted,omitempty"`
 }
 type ExportUserRequest struct {
 }
 type ReactivateUserRequest struct {
-	CreatedByID     *string `json:"created_by_id"`
-	Name            *string `json:"name"`
-	RestoreMessages *bool   `json:"restore_messages"`
+	CreatedByID     *string `json:"created_by_id,omitempty"`
+	Name            *string `json:"name,omitempty"`
+	RestoreMessages *bool   `json:"restore_messages,omitempty"`
 }
 type GetActiveCallsStatusRequest struct {
 }
 type QueryUserFeedbackRequest struct {
 	Full             *bool              `json:"-" query:"full"`
-	Limit            *int               `json:"limit"`
-	Next             *string            `json:"next"`
-	Prev             *string            `json:"prev"`
+	Limit            *int               `json:"limit,omitempty"`
+	Next             *string            `json:"next,omitempty"`
+	Prev             *string            `json:"prev,omitempty"`
 	Sort             []SortParamRequest `json:"sort"`
 	FilterConditions map[string]any     `json:"filter_conditions"`
 }
 type QueryCallMembersRequest struct {
 	ID               string             `json:"id"`
 	Type             string             `json:"type"`
-	Limit            *int               `json:"limit"`
-	Next             *string            `json:"next"`
-	Prev             *string            `json:"prev"`
+	Limit            *int               `json:"limit,omitempty"`
+	Next             *string            `json:"next,omitempty"`
+	Prev             *string            `json:"prev,omitempty"`
 	Sort             []SortParamRequest `json:"sort"`
 	FilterConditions map[string]any     `json:"filter_conditions"`
 }
 type QueryCallStatsRequest struct {
-	Limit            *int               `json:"limit"`
-	Next             *string            `json:"next"`
-	Prev             *string            `json:"prev"`
+	Limit            *int               `json:"limit,omitempty"`
+	Next             *string            `json:"next,omitempty"`
+	Prev             *string            `json:"prev,omitempty"`
 	Sort             []SortParamRequest `json:"sort"`
 	FilterConditions map[string]any     `json:"filter_conditions"`
 }
@@ -1706,16 +1707,16 @@ type GetCallRequest struct {
 	Video        *bool `json:"-" query:"video"`
 }
 type UpdateCallRequest struct {
-	StartsAt         *Timestamp           `json:"starts_at"`
+	StartsAt         *Timestamp           `json:"starts_at,omitempty"`
 	Custom           map[string]any       `json:"custom"`
-	SettingsOverride *CallSettingsRequest `json:"settings_override"`
+	SettingsOverride *CallSettingsRequest `json:"settings_override,omitempty"`
 }
 type GetOrCreateCallRequest struct {
-	MembersLimit *int         `json:"members_limit"`
-	Notify       *bool        `json:"notify"`
-	Ring         *bool        `json:"ring"`
-	Video        *bool        `json:"video"`
-	Data         *CallRequest `json:"data"`
+	MembersLimit *int         `json:"members_limit,omitempty"`
+	Notify       *bool        `json:"notify,omitempty"`
+	Ring         *bool        `json:"ring,omitempty"`
+	Video        *bool        `json:"video,omitempty"`
+	Data         *CallRequest `json:"data,omitempty"`
 }
 type BlockUserRequest struct {
 	UserID string `json:"user_id"`
@@ -1723,46 +1724,46 @@ type BlockUserRequest struct {
 type SendClosedCaptionRequest struct {
 	SpeakerID  string       `json:"speaker_id"`
 	Text       string       `json:"text"`
-	EndTime    *Timestamp   `json:"end_time"`
-	Language   *string      `json:"language"`
-	Service    *string      `json:"service"`
-	StartTime  *Timestamp   `json:"start_time"`
-	Translated *bool        `json:"translated"`
-	UserID     *string      `json:"user_id"`
-	User       *UserRequest `json:"user"`
+	EndTime    *Timestamp   `json:"end_time,omitempty"`
+	Language   *string      `json:"language,omitempty"`
+	Service    *string      `json:"service,omitempty"`
+	StartTime  *Timestamp   `json:"start_time,omitempty"`
+	Translated *bool        `json:"translated,omitempty"`
+	UserID     *string      `json:"user_id,omitempty"`
+	User       *UserRequest `json:"user,omitempty"`
 }
 type DeleteCallRequest struct {
-	Hard *bool `json:"hard"`
+	Hard *bool `json:"hard,omitempty"`
 }
 type SendCallEventRequest struct {
-	UserID *string        `json:"user_id"`
+	UserID *string        `json:"user_id,omitempty"`
 	Custom map[string]any `json:"custom"`
-	User   *UserRequest   `json:"user"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type CollectUserFeedbackRequest struct {
 	Rating        int            `json:"rating"`
 	Sdk           string         `json:"sdk"`
 	SdkVersion    string         `json:"sdk_version"`
-	Reason        *string        `json:"reason"`
-	UserSessionID *string        `json:"user_session_id"`
+	Reason        *string        `json:"reason,omitempty"`
+	UserSessionID *string        `json:"user_session_id,omitempty"`
 	Custom        map[string]any `json:"custom"`
 }
 type GoLiveRequest struct {
-	RecordingStorageName     *string `json:"recording_storage_name"`
-	StartClosedCaption       *bool   `json:"start_closed_caption"`
-	StartCompositeRecording  *bool   `json:"start_composite_recording"`
-	StartHLS                 *bool   `json:"start_hls"`
-	StartIndividualRecording *bool   `json:"start_individual_recording"`
-	StartRawRecording        *bool   `json:"start_raw_recording"`
-	StartRecording           *bool   `json:"start_recording"`
-	StartTranscription       *bool   `json:"start_transcription"`
-	TranscriptionStorageName *string `json:"transcription_storage_name"`
+	RecordingStorageName     *string `json:"recording_storage_name,omitempty"`
+	StartClosedCaption       *bool   `json:"start_closed_caption,omitempty"`
+	StartCompositeRecording  *bool   `json:"start_composite_recording,omitempty"`
+	StartHLS                 *bool   `json:"start_hls,omitempty"`
+	StartIndividualRecording *bool   `json:"start_individual_recording,omitempty"`
+	StartRawRecording        *bool   `json:"start_raw_recording,omitempty"`
+	StartRecording           *bool   `json:"start_recording,omitempty"`
+	StartTranscription       *bool   `json:"start_transcription,omitempty"`
+	TranscriptionStorageName *string `json:"transcription_storage_name,omitempty"`
 }
 type KickUserRequest struct {
 	UserID     string       `json:"user_id"`
-	Block      *bool        `json:"block"`
-	KickedByID *string      `json:"kicked_by_id"`
-	KickedBy   *UserRequest `json:"kicked_by"`
+	Block      *bool        `json:"block,omitempty"`
+	KickedByID *string      `json:"kicked_by_id,omitempty"`
+	KickedBy   *UserRequest `json:"kicked_by,omitempty"`
 }
 type EndCallRequest struct {
 }
@@ -1771,14 +1772,14 @@ type UpdateCallMembersRequest struct {
 	UpdateMembers []MemberRequest `json:"update_members"`
 }
 type MuteUsersRequest struct {
-	Audio            *bool        `json:"audio"`
-	MuteAllUsers     *bool        `json:"mute_all_users"`
-	MutedByID        *string      `json:"muted_by_id"`
-	Screenshare      *bool        `json:"screenshare"`
-	ScreenshareAudio *bool        `json:"screenshare_audio"`
-	Video            *bool        `json:"video"`
+	Audio            *bool        `json:"audio,omitempty"`
+	MuteAllUsers     *bool        `json:"mute_all_users,omitempty"`
+	MutedByID        *string      `json:"muted_by_id,omitempty"`
+	Screenshare      *bool        `json:"screenshare,omitempty"`
+	ScreenshareAudio *bool        `json:"screenshare_audio,omitempty"`
+	Video            *bool        `json:"video,omitempty"`
 	UserIds          []string     `json:"user_ids"`
-	MutedBy          *UserRequest `json:"muted_by"`
+	MutedBy          *UserRequest `json:"muted_by,omitempty"`
 }
 type QueryCallParticipantsRequest struct {
 	Limit            *int           `json:"-" query:"limit"`
@@ -1791,7 +1792,7 @@ type VideoPinRequest struct {
 type ListRecordingsRequest struct {
 }
 type StartRecordingRequest struct {
-	RecordingExternalStorage *string `json:"recording_external_storage"`
+	RecordingExternalStorage *string `json:"recording_external_storage,omitempty"`
 }
 type StopRecordingRequest struct {
 }
@@ -1799,7 +1800,7 @@ type GetCallReportRequest struct {
 	SessionID *string `json:"-" query:"session_id"`
 }
 type RingCallRequest struct {
-	Video      *bool    `json:"video"`
+	Video      *bool    `json:"video,omitempty"`
 	MembersIds []string `json:"members_ids"`
 }
 type StartRTMPBroadcastsRequest struct {
@@ -1822,38 +1823,38 @@ type QueryCallParticipantSessionsRequest struct {
 type StartHLSBroadcastingRequest struct {
 }
 type StartClosedCaptionsRequest struct {
-	EnableTranscription *bool                `json:"enable_transcription"`
-	ExternalStorage     *string              `json:"external_storage"`
-	Language            *string              `json:"language"`
-	SpeechSegmentConfig *SpeechSegmentConfig `json:"speech_segment_config"`
+	EnableTranscription *bool                `json:"enable_transcription,omitempty"`
+	ExternalStorage     *string              `json:"external_storage,omitempty"`
+	Language            *string              `json:"language,omitempty"`
+	SpeechSegmentConfig *SpeechSegmentConfig `json:"speech_segment_config,omitempty"`
 }
 type StartFrameRecordingRequest struct {
-	RecordingExternalStorage *string `json:"recording_external_storage"`
+	RecordingExternalStorage *string `json:"recording_external_storage,omitempty"`
 }
 type StartTranscriptionRequest struct {
-	EnableClosedCaptions         *bool   `json:"enable_closed_captions"`
-	Language                     *string `json:"language"`
-	TranscriptionExternalStorage *string `json:"transcription_external_storage"`
+	EnableClosedCaptions         *bool   `json:"enable_closed_captions,omitempty"`
+	Language                     *string `json:"language,omitempty"`
+	TranscriptionExternalStorage *string `json:"transcription_external_storage,omitempty"`
 }
 type StopHLSBroadcastingRequest struct {
 }
 type StopClosedCaptionsRequest struct {
-	StopTranscription *bool `json:"stop_transcription"`
+	StopTranscription *bool `json:"stop_transcription,omitempty"`
 }
 type StopFrameRecordingRequest struct {
 }
 type StopLiveRequest struct {
-	ContinueClosedCaption       *bool `json:"continue_closed_caption"`
-	ContinueCompositeRecording  *bool `json:"continue_composite_recording"`
-	ContinueHLS                 *bool `json:"continue_hls"`
-	ContinueIndividualRecording *bool `json:"continue_individual_recording"`
-	ContinueRTMPBroadcasts      *bool `json:"continue_rtmp_broadcasts"`
-	ContinueRawRecording        *bool `json:"continue_raw_recording"`
-	ContinueRecording           *bool `json:"continue_recording"`
-	ContinueTranscription       *bool `json:"continue_transcription"`
+	ContinueClosedCaption       *bool `json:"continue_closed_caption,omitempty"`
+	ContinueCompositeRecording  *bool `json:"continue_composite_recording,omitempty"`
+	ContinueHLS                 *bool `json:"continue_hls,omitempty"`
+	ContinueIndividualRecording *bool `json:"continue_individual_recording,omitempty"`
+	ContinueRTMPBroadcasts      *bool `json:"continue_rtmp_broadcasts,omitempty"`
+	ContinueRawRecording        *bool `json:"continue_raw_recording,omitempty"`
+	ContinueRecording           *bool `json:"continue_recording,omitempty"`
+	ContinueTranscription       *bool `json:"continue_transcription,omitempty"`
 }
 type StopTranscriptionRequest struct {
-	StopClosedCaptions *bool `json:"stop_closed_captions"`
+	StopClosedCaptions *bool `json:"stop_closed_captions,omitempty"`
 }
 type ListTranscriptionsRequest struct {
 }
@@ -1898,9 +1899,9 @@ type GetCallSessionParticipantStatsTimelineRequest struct {
 	Severity  []string `json:"-" query:"severity"`
 }
 type QueryCallsRequest struct {
-	Limit            *int               `json:"limit"`
-	Next             *string            `json:"next"`
-	Prev             *string            `json:"prev"`
+	Limit            *int               `json:"limit,omitempty"`
+	Next             *string            `json:"next,omitempty"`
+	Prev             *string            `json:"prev,omitempty"`
 	Sort             []SortParamRequest `json:"sort"`
 	FilterConditions map[string]any     `json:"filter_conditions"`
 }
@@ -1908,28 +1909,28 @@ type ListCallTypesRequest struct {
 }
 type CreateCallTypeRequest struct {
 	Name                 string                       `json:"name"`
-	ExternalStorage      *string                      `json:"external_storage"`
+	ExternalStorage      *string                      `json:"external_storage,omitempty"`
 	Grants               map[string][]string          `json:"grants"`
-	NotificationSettings *NotificationSettingsRequest `json:"notification_settings"`
-	Settings             *CallSettingsRequest         `json:"settings"`
+	NotificationSettings *NotificationSettingsRequest `json:"notification_settings,omitempty"`
+	Settings             *CallSettingsRequest         `json:"settings,omitempty"`
 }
 type DeleteCallTypeRequest struct {
 }
 type GetCallTypeRequest struct {
 }
 type UpdateCallTypeRequest struct {
-	ExternalStorage      *string                      `json:"external_storage"`
+	ExternalStorage      *string                      `json:"external_storage,omitempty"`
 	Grants               map[string][]string          `json:"grants"`
-	NotificationSettings *NotificationSettingsRequest `json:"notification_settings"`
-	Settings             *CallSettingsRequest         `json:"settings"`
+	NotificationSettings *NotificationSettingsRequest `json:"notification_settings,omitempty"`
+	Settings             *CallSettingsRequest         `json:"settings,omitempty"`
 }
 type GetEdgesRequest struct {
 }
 type ResolveSipAuthRequest struct {
 	SipCallerNumber string  `json:"sip_caller_number"`
 	SipTrunkNumber  string  `json:"sip_trunk_number"`
-	FromHost        *string `json:"from_host"`
-	SourceIp        *string `json:"source_ip"`
+	FromHost        *string `json:"from_host,omitempty"`
+	SourceIp        *string `json:"source_ip,omitempty"`
 }
 type ListSIPInboundRoutingRuleRequest struct {
 }
@@ -1939,10 +1940,10 @@ type CreateSIPInboundRoutingRuleRequest struct {
 	CallerConfigs        SIPCallerConfigsRequest                 `json:"caller_configs"`
 	CalledNumbers        []string                                `json:"called_numbers"`
 	CallerNumbers        []string                                `json:"caller_numbers"`
-	CallConfigs          *SIPCallConfigsRequest                  `json:"call_configs"`
-	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsRequest `json:"direct_routing_configs"`
-	PinProtectionConfigs *SIPPinProtectionConfigsRequest         `json:"pin_protection_configs"`
-	PinRoutingConfigs    *SIPInboundRoutingRulePinConfigsRequest `json:"pin_routing_configs"`
+	CallConfigs          *SIPCallConfigsRequest                  `json:"call_configs,omitempty"`
+	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsRequest `json:"direct_routing_configs,omitempty"`
+	PinProtectionConfigs *SIPPinProtectionConfigsRequest         `json:"pin_protection_configs,omitempty"`
+	PinRoutingConfigs    *SIPInboundRoutingRulePinConfigsRequest `json:"pin_routing_configs,omitempty"`
 }
 type DeleteSIPInboundRoutingRuleRequest struct {
 }
@@ -1952,17 +1953,17 @@ type UpdateSIPInboundRoutingRuleRequest struct {
 	CallerConfigs        SIPCallerConfigsRequest                 `json:"caller_configs"`
 	CalledNumbers        []string                                `json:"called_numbers"`
 	CallerNumbers        []string                                `json:"caller_numbers"`
-	CallConfigs          *SIPCallConfigsRequest                  `json:"call_configs"`
-	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsRequest `json:"direct_routing_configs"`
-	PinProtectionConfigs *SIPPinProtectionConfigsRequest         `json:"pin_protection_configs"`
-	PinRoutingConfigs    *SIPInboundRoutingRulePinConfigsRequest `json:"pin_routing_configs"`
+	CallConfigs          *SIPCallConfigsRequest                  `json:"call_configs,omitempty"`
+	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsRequest `json:"direct_routing_configs,omitempty"`
+	PinProtectionConfigs *SIPPinProtectionConfigsRequest         `json:"pin_protection_configs,omitempty"`
+	PinRoutingConfigs    *SIPInboundRoutingRulePinConfigsRequest `json:"pin_routing_configs,omitempty"`
 }
 type ListSIPTrunksRequest struct {
 }
 type CreateSIPTrunkRequest struct {
 	Name       string   `json:"name"`
 	Numbers    []string `json:"numbers"`
-	Password   *string  `json:"password"`
+	Password   *string  `json:"password,omitempty"`
 	AllowedIps []string `json:"allowed_ips"`
 }
 type DeleteSIPTrunkRequest struct {
@@ -1970,19 +1971,19 @@ type DeleteSIPTrunkRequest struct {
 type UpdateSIPTrunkRequest struct {
 	Name       string   `json:"name"`
 	Numbers    []string `json:"numbers"`
-	Password   *string  `json:"password"`
+	Password   *string  `json:"password,omitempty"`
 	AllowedIps []string `json:"allowed_ips"`
 }
 type ResolveSipInboundRequest struct {
 	SipCallerNumber string               `json:"sip_caller_number"`
 	SipTrunkNumber  string               `json:"sip_trunk_number"`
-	RoutingNumber   *string              `json:"routing_number"`
-	TrunkID         *string              `json:"trunk_id"`
-	Challenge       *SIPChallengeRequest `json:"challenge"`
+	RoutingNumber   *string              `json:"routing_number,omitempty"`
+	TrunkID         *string              `json:"trunk_id,omitempty"`
+	Challenge       *SIPChallengeRequest `json:"challenge,omitempty"`
 	SipHeaders      map[string]string    `json:"sip_headers"`
 }
 type QueryAggregateCallStatsRequest struct {
-	From        *string  `json:"from"`
-	To          *string  `json:"to"`
+	From        *string  `json:"from,omitempty"`
+	To          *string  `json:"to,omitempty"`
 	ReportTypes []string `json:"report_types"`
 }
