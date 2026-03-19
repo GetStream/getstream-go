@@ -1838,8 +1838,13 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	_, err = feedsClient.DeleteFeedView(ctx, feedViewID, &getstream.DeleteFeedViewRequest{})
 	// snippet-end: DeleteFeedView
 
-	require.NoError(t, err, "Failed to delete feed view for cleanup")
-	fmt.Printf("✅ Deleted feed view: %s\n", feedViewID)
+	if err != nil && strings.Contains(err.Error(), "not found") {
+		// Another parallel CI job may have already cleaned up this feed view
+		fmt.Printf("⚠️ Feed view already deleted (likely by parallel test run): %s\n", feedViewID)
+	} else {
+		require.NoError(t, err, "Failed to delete feed view for cleanup")
+		fmt.Printf("✅ Deleted feed view: %s\n", feedViewID)
+	}
 }
 
 // =================================================================

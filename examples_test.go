@@ -178,15 +178,17 @@ func TestCreateCall(t *testing.T) {
 func TestUsers(t *testing.T) {
 	client := initClient(t)
 
+	userID := "test-user-" + uuid.New().String()
+
 	response, err := client.UpdateUsers(ctx, &getstream.UpdateUsersRequest{
 		Users: map[string]getstream.UserRequest{
-			"user_id": {
-				ID:   "user_id",
+			userID: {
+				ID:   userID,
 				Role: getstream.PtrTo("admin"),
 				Custom: map[string]interface{}{
 					"color": "red",
 				},
-				Name:  getstream.PtrTo("This is a test user"),
+				Name:  getstream.PtrTo(userID),
 				Image: getstream.PtrTo("link/to/profile/image"),
 			},
 		},
@@ -197,13 +199,13 @@ func TestUsers(t *testing.T) {
 	{
 		response, err := client.UpdateUsers(ctx, &getstream.UpdateUsersRequest{
 			Users: map[string]getstream.UserRequest{
-				"user_id": {
-					ID:   "user_id",
+				userID: {
+					ID:   userID,
 					Role: getstream.PtrTo("user"),
 					Custom: map[string]interface{}{
 						"color": "blue",
 					},
-					Name:  getstream.PtrTo("This is a test user"),
+					Name:  getstream.PtrTo(userID),
 					Image: getstream.PtrTo("link/to/profile/image"),
 				},
 			},
@@ -213,7 +215,7 @@ func TestUsers(t *testing.T) {
 		response, err = client.UpdateUsersPartial(ctx, &getstream.UpdateUsersPartialRequest{
 			Users: []getstream.UpdateUserPartialRequest{
 				{
-					ID: "user_id",
+					ID: userID,
 					Set: map[string]interface{}{
 						"new-field": "value",
 					},
@@ -224,11 +226,11 @@ func TestUsers(t *testing.T) {
 
 		require.NoError(t, err)
 		require.NotEmpty(t, response)
-		require.Empty(t, response.Data.Users["user_id"].Name)
+		require.Empty(t, response.Data.Users[userID].Name)
 		require.Equal(t, map[string]interface{}{
 			"color":     "blue",
 			"new-field": "value",
-		}, response.Data.Users["user_id"].Custom)
+		}, response.Data.Users[userID].Custom)
 	}
 
 	aliceID := uuid.New().String()
