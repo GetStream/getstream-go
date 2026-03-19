@@ -244,12 +244,12 @@ func setupEnvironment(t *testing.T, ctx context.Context, client *getstream.Strea
 		Users: map[string]getstream.UserRequest{
 			testUserID: {
 				ID:   testUserID,
-				Name: getstream.PtrTo("Test User 1"),
+				Name: getstream.PtrTo("Test User " + testUserID),
 				Role: getstream.PtrTo("user"),
 			},
 			testUserID2: {
 				ID:   testUserID2,
-				Name: getstream.PtrTo("Test User 2"),
+				Name: getstream.PtrTo("Test User " + testUserID2),
 				Role: getstream.PtrTo("user"),
 			},
 		},
