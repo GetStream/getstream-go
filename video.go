@@ -653,6 +653,13 @@ func (c *VideoClient) GetEdges(ctx context.Context, request *GetEdgesRequest) (*
 	return res, err
 }
 
+// Determine authentication requirements for an inbound SIP call before sending a digest challenge
+func (c *VideoClient) ResolveSipAuth(ctx context.Context, request *ResolveSipAuthRequest) (*StreamResponse[ResolveSipAuthResponse], error) {
+	var result ResolveSipAuthResponse
+	res, err := MakeRequest[ResolveSipAuthRequest, ResolveSipAuthResponse](c.client, ctx, "POST", "/api/v2/video/sip/auth", nil, request, &result, nil)
+	return res, err
+}
+
 // List all SIP Inbound Routing Rules for the application
 func (c *VideoClient) ListSIPInboundRoutingRule(ctx context.Context, request *ListSIPInboundRoutingRuleRequest) (*StreamResponse[ListSIPInboundRoutingRuleResponse], error) {
 	var result ListSIPInboundRoutingRuleResponse

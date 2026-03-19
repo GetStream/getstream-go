@@ -284,6 +284,7 @@ type CreateChannelTypeRequest struct {
 	Blocklists                     []BlockListOptions  `json:"blocklists"`
 	Commands                       []string            `json:"commands"`
 	Permissions                    []PolicyRequest     `json:"permissions"`
+	ChatPreferences                *ChatPreferences    `json:"chat_preferences"`
 	Grants                         map[string][]string `json:"grants"`
 }
 type DeleteChannelTypeRequest struct {
@@ -324,6 +325,7 @@ type UpdateChannelTypeRequest struct {
 	Commands                       []string            `json:"commands"`
 	Permissions                    []PolicyRequest     `json:"permissions"`
 	AutomodThresholds              *Thresholds         `json:"automod_thresholds"`
+	ChatPreferences                *ChatPreferences    `json:"chat_preferences"`
 	Grants                         map[string][]string `json:"grants"`
 }
 type ListCommandsRequest struct {
@@ -812,6 +814,15 @@ type CreateCollectionsRequest struct {
 }
 type UpsertCollectionsRequest struct {
 	Collections []CollectionRequest `json:"collections"`
+}
+type QueryCollectionsRequest struct {
+	Limit  *int               `json:"limit"`
+	Next   *string            `json:"next"`
+	Prev   *string            `json:"prev"`
+	UserID *string            `json:"user_id"`
+	Sort   []SortParamRequest `json:"sort"`
+	Filter map[string]any     `json:"filter"`
+	User   *UserRequest       `json:"user"`
 }
 type GetCommentsRequest struct {
 	ObjectID     string  `json:"-" query:"object_id"`
@@ -1914,6 +1925,12 @@ type UpdateCallTypeRequest struct {
 }
 type GetEdgesRequest struct {
 }
+type ResolveSipAuthRequest struct {
+	SipCallerNumber string  `json:"sip_caller_number"`
+	SipTrunkNumber  string  `json:"sip_trunk_number"`
+	FromHost        *string `json:"from_host"`
+	SourceIp        *string `json:"source_ip"`
+}
 type ListSIPInboundRoutingRuleRequest struct {
 }
 type CreateSIPInboundRoutingRuleRequest struct {
@@ -1931,9 +1948,9 @@ type DeleteSIPInboundRoutingRuleRequest struct {
 }
 type UpdateSIPInboundRoutingRuleRequest struct {
 	Name                 string                                  `json:"name"`
-	CalledNumbers        []string                                `json:"called_numbers"`
 	TrunkIds             []string                                `json:"trunk_ids"`
 	CallerConfigs        SIPCallerConfigsRequest                 `json:"caller_configs"`
+	CalledNumbers        []string                                `json:"called_numbers"`
 	CallerNumbers        []string                                `json:"caller_numbers"`
 	CallConfigs          *SIPCallConfigsRequest                  `json:"call_configs"`
 	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsRequest `json:"direct_routing_configs"`
@@ -1943,21 +1960,26 @@ type UpdateSIPInboundRoutingRuleRequest struct {
 type ListSIPTrunksRequest struct {
 }
 type CreateSIPTrunkRequest struct {
-	Name    string   `json:"name"`
-	Numbers []string `json:"numbers"`
+	Name       string   `json:"name"`
+	Numbers    []string `json:"numbers"`
+	Password   *string  `json:"password"`
+	AllowedIps []string `json:"allowed_ips"`
 }
 type DeleteSIPTrunkRequest struct {
 }
 type UpdateSIPTrunkRequest struct {
-	Name    string   `json:"name"`
-	Numbers []string `json:"numbers"`
+	Name       string   `json:"name"`
+	Numbers    []string `json:"numbers"`
+	Password   *string  `json:"password"`
+	AllowedIps []string `json:"allowed_ips"`
 }
 type ResolveSipInboundRequest struct {
-	SipCallerNumber string              `json:"sip_caller_number"`
-	SipTrunkNumber  string              `json:"sip_trunk_number"`
-	Challenge       SIPChallengeRequest `json:"challenge"`
-	RoutingNumber   *string             `json:"routing_number"`
-	SipHeaders      map[string]string   `json:"sip_headers"`
+	SipCallerNumber string               `json:"sip_caller_number"`
+	SipTrunkNumber  string               `json:"sip_trunk_number"`
+	RoutingNumber   *string              `json:"routing_number"`
+	TrunkID         *string              `json:"trunk_id"`
+	Challenge       *SIPChallengeRequest `json:"challenge"`
+	SipHeaders      map[string]string    `json:"sip_headers"`
 }
 type QueryAggregateCallStatsRequest struct {
 	From        *string  `json:"from"`
