@@ -269,7 +269,7 @@ func (c *FeedsClient) DeleteCollections(ctx context.Context, request *DeleteColl
 	return res, err
 }
 
-// Read collections with optional filtering by user ID and collection name. By default, users can only read their own collections.
+// Read collections by their references. By default, users can only read their own collections.
 func (c *FeedsClient) ReadCollections(ctx context.Context, request *ReadCollectionsRequest) (*StreamResponse[ReadCollectionsResponse], error) {
 	var result ReadCollectionsResponse
 	params := extractQueryParams(request)
@@ -295,6 +295,13 @@ func (c *FeedsClient) CreateCollections(ctx context.Context, request *CreateColl
 func (c *FeedsClient) UpsertCollections(ctx context.Context, request *UpsertCollectionsRequest) (*StreamResponse[UpsertCollectionsResponse], error) {
 	var result UpsertCollectionsResponse
 	res, err := MakeRequest[UpsertCollectionsRequest, UpsertCollectionsResponse](c.client, ctx, "PUT", "/api/v2/feeds/collections", nil, request, &result, nil)
+	return res, err
+}
+
+// Query collections with filter query
+func (c *FeedsClient) QueryCollections(ctx context.Context, request *QueryCollectionsRequest) (*StreamResponse[QueryCollectionsResponse], error) {
+	var result QueryCollectionsResponse
+	res, err := MakeRequest[QueryCollectionsRequest, QueryCollectionsResponse](c.client, ctx, "POST", "/api/v2/feeds/collections/query", nil, request, &result, nil)
 	return res, err
 }
 
