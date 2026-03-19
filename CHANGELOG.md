@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.0.1](https://github.com/GetStream/getstream-go/compare/v4.0.0...v4.0.1) (2026-03-19)
+
 ## [4.0.0](https://github.com/GetStream/getstream-go/compare/v3.9.0...v4.0.0) (2026-03-05)
 
 ### Breaking Changes
