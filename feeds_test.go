@@ -212,6 +212,13 @@ func TestFeedsUpsertCollections(t *testing.T) {
 	_, err = client.Feeds().UpsertCollections(context.Background(), &getstream.UpsertCollectionsRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsQueryCollections(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().QueryCollections(context.Background(), &getstream.QueryCollectionsRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsGetComments(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

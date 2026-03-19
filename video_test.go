@@ -394,6 +394,13 @@ func TestVideoGetEdges(t *testing.T) {
 	_, err = client.Video().GetEdges(context.Background(), &getstream.GetEdgesRequest{})
 	require.NoError(t, err)
 }
+func TestVideoResolveSipAuth(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().ResolveSipAuth(context.Background(), &getstream.ResolveSipAuthRequest{})
+	require.NoError(t, err)
+}
 func TestVideoListSIPInboundRoutingRule(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
