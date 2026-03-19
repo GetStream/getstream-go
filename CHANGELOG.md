@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.0.2](https://github.com/GetStream/getstream-go/compare/v4.0.1...v4.0.2) (2026-03-19)
+
+
+### Bug Fixes
+
+* add omitempty on pointer types ([#87](https://github.com/GetStream/getstream-go/issues/87)) ([e98f4c9](https://github.com/GetStream/getstream-go/commit/e98f4c9b020dc854b53a728297a8674713da0d16))
+
 ### [4.0.1](https://github.com/GetStream/getstream-go/compare/v4.0.0...v4.0.1) (2026-03-19)
 
 ## [4.0.0](https://github.com/GetStream/getstream-go/compare/v3.9.0...v4.0.0) (2026-03-05)
