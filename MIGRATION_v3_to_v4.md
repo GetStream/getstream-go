@@ -228,14 +228,17 @@ client.UpdateApp(ctx, &UpdateAppRequest{
 client.UpdateApp(ctx, &UpdateAppRequest{
     EnforceUniqueUsernames: PtrTo("no"),
 })
-// Wire: {"enforce_unique_usernames":"no"}
-// Backend: sets enforce_unique_usernames="no", all other fields preserved
+// Wire: {"enforce_unique_usernames":"no","allowed_flag_reasons":null,"event_hooks":null,...}
+//        ^^^ webhook_url, multi_tenant_enabled etc. now omitted (pointer fields)
+//            but slice/map fields like allowed_flag_reasons still sent as null
+// Backend: sets enforce_unique_usernames="no", pointer fields preserved;
+//          slice/map null values will clear those fields on the backend
 ```
 
-Slice and map fields (e.g., `EventHooks`, `Grants`) are NOT affected by this change and do not use `omitempty`. This means:
+**Note:** Slice and map fields (e.g., `AllowedFlagReasons`, `EventHooks`, `Grants`) do not use `omitempty` and are always serialized. In Go, there is no way to omit a slice or map field from a struct literal; unset fields default to `nil`, which serializes as JSON `null`. This means:
 - `nil` (zero value) is serialized as JSON `null`, which clears the field on the backend
 - Empty (`[]` / `{}`) is serialized as an empty collection, which also clears the field
-- If you do not want to modify a slice/map field, do not include it in the request struct (this is only possible with pointer fields, not slices/maps; for slices/maps the current behavior matches v3)
+- This behavior matches v3 and is unchanged
 
 ## Getting Help
 
