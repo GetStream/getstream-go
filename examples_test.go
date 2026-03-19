@@ -42,11 +42,12 @@ func TestCreateUserAndToken(t *testing.T) {
 	client := initClient(t)
 
 	// optional values are passed as pointers, you can use `getstream.PtrTo` to get pointers from literals of any type
+	userID := "test-user-" + uuid.New().String()
 	response, err := client.UpdateUsers(ctx, &getstream.UpdateUsersRequest{
 		Users: map[string]getstream.UserRequest{
-			"user-id": {
-				ID:     "user-id",
-				Name:   getstream.PtrTo("tommaso"),
+			userID: {
+				ID:     userID,
+				Name:   getstream.PtrTo("tommaso-" + userID),
 				Role:   getstream.PtrTo("admin"),
 				Custom: map[string]any{"country": "NL"},
 			},
@@ -55,7 +56,7 @@ func TestCreateUserAndToken(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, response)
 
-	token, err := client.CreateToken("tommaso-id", getstream.WithExpiration(24*time.Hour))
+	token, err := client.CreateToken(userID, getstream.WithExpiration(24*time.Hour))
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 }
