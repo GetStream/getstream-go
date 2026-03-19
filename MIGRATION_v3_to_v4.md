@@ -210,6 +210,30 @@ New composition types: `HasOwnUser`, `HasUserCommonFields`, `HasUserPrivacyField
 | `MembershipLevel` | `MembershipLevelResponse` | |
 | `ThreadedComment` | `ThreadedCommentResponse` | |
 
+## JSON Serialization of Optional Fields
+
+Optional (pointer) fields in request structs now use `omitempty`. Previously, every unset field was sent as explicit JSON `null`, which caused the backend to zero out existing values on partial updates.
+
+**Before:**
+```go
+client.UpdateApp(ctx, &UpdateAppRequest{
+    EnforceUniqueUsernames: PtrTo("no"),
+})
+// Wire: {"enforce_unique_usernames":"no","webhook_url":null,"multi_tenant_enabled":null,...}
+// Backend: sets enforce_unique_usernames="no", but ALSO resets webhook_url="", multi_tenant_enabled=false, etc.
+```
+
+**After:**
+```go
+client.UpdateApp(ctx, &UpdateAppRequest{
+    EnforceUniqueUsernames: PtrTo("no"),
+})
+// Wire: {"enforce_unique_usernames":"no"}
+// Backend: sets enforce_unique_usernames="no", all other fields preserved
+```
+
+Slice and map fields (e.g., `EventHooks`, `Grants`) are NOT affected by this change. They are still serialized when set, including as empty (`[]` / `{}`), so you can continue to send an empty slice to clear a list field.
+
 ## Getting Help
 
 - [Stream documentation](https://getstream.io/docs/)
