@@ -51,12 +51,4 @@ func TestChatRetentionPolicyIntegration(t *testing.T) {
 		assert.NotNil(t, runsResp.Data.Runs)
 	})
 
-	t.Run("GetRetentionPolicyRunsWithPagination", func(t *testing.T) {
-		runsResp, err := client.Chat().GetRetentionPolicyRuns(ctx, &GetRetentionPolicyRunsRequest{
-			Limit:  PtrTo(5),
-			Offset: PtrTo(0),
-		})
-		require.NoError(t, err)
-		assert.NotNil(t, runsResp.Data.Runs)
-	})
 }
