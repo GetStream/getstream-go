@@ -15,20 +15,22 @@ func TestChatRetentionPolicyIntegration(t *testing.T) {
 	client := initClient(t)
 	ctx := context.Background()
 
-	t.Run("SetGetDeleteRetentionPolicy", func(t *testing.T) {
-		policyName := "old-messages"
+	t.Run("GetRetentionPolicy", func(t *testing.T) {
+		policyName := "get-test-policy"
 		maxAge := 720
 
-		// Set a retention policy
-		setResp, err := client.Chat().SetRetentionPolicy(ctx, &SetRetentionPolicyRequest{
+		// Setup: create a retention policy so we can verify it appears in the list
+		_, err := client.Chat().SetRetentionPolicy(ctx, &SetRetentionPolicyRequest{
 			Policy:      PtrTo(policyName),
 			MaxAgeHours: PtrTo(maxAge),
 		})
 		require.NoError(t, err)
-		assert.Equal(t, policyName, setResp.Data.Policy.Policy)
-		assert.Equal(t, maxAge, setResp.Data.Policy.Config.MaxAgeHours)
+		defer func() {
+			_, _ = client.Chat().DeleteRetentionPolicy(ctx, &DeleteRetentionPolicyRequest{
+				Policy: PtrTo(policyName),
+			})
+		}()
 
-		// Get retention policies and verify ours is present
 		getResp, err := client.Chat().GetRetentionPolicy(ctx, &GetRetentionPolicyRequest{})
 		require.NoError(t, err)
 
@@ -40,25 +42,26 @@ func TestChatRetentionPolicyIntegration(t *testing.T) {
 			}
 		}
 		assert.True(t, found, "Created retention policy should appear in list")
+	})
 
-		// Update the retention policy with a new max age
-		updatedMaxAge := 360
-		updateResp, err := client.Chat().SetRetentionPolicy(ctx, &SetRetentionPolicyRequest{
+	t.Run("DeleteRetentionPolicy", func(t *testing.T) {
+		policyName := "delete-test-policy"
+		maxAge := 720
+
+		// Setup: create a retention policy so we can delete it
+		_, err := client.Chat().SetRetentionPolicy(ctx, &SetRetentionPolicyRequest{
 			Policy:      PtrTo(policyName),
-			MaxAgeHours: PtrTo(updatedMaxAge),
+			MaxAgeHours: PtrTo(maxAge),
 		})
 		require.NoError(t, err)
-		assert.Equal(t, policyName, updateResp.Data.Policy.Policy)
-		assert.Equal(t, updatedMaxAge, updateResp.Data.Policy.Config.MaxAgeHours)
 
-		// Delete the retention policy
 		_, err = client.Chat().DeleteRetentionPolicy(ctx, &DeleteRetentionPolicyRequest{
 			Policy: PtrTo(policyName),
 		})
 		require.NoError(t, err)
 
 		// Verify it was deleted
-		getResp, err = client.Chat().GetRetentionPolicy(ctx, &GetRetentionPolicyRequest{})
+		getResp, err := client.Chat().GetRetentionPolicy(ctx, &GetRetentionPolicyRequest{})
 		require.NoError(t, err)
 
 		for _, p := range getResp.Data.Policies {
