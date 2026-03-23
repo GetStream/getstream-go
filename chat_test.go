@@ -471,6 +471,34 @@ func TestChatQueryReminders(t *testing.T) {
 	_, err = client.Chat().QueryReminders(context.Background(), &getstream.QueryRemindersRequest{})
 	require.NoError(t, err)
 }
+func TestChatGetRetentionPolicy(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().GetRetentionPolicy(context.Background(), &getstream.GetRetentionPolicyRequest{})
+	require.NoError(t, err)
+}
+func TestChatSetRetentionPolicy(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().SetRetentionPolicy(context.Background(), &getstream.SetRetentionPolicyRequest{})
+	require.NoError(t, err)
+}
+func TestChatDeleteRetentionPolicy(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().DeleteRetentionPolicy(context.Background(), &getstream.DeleteRetentionPolicyRequest{})
+	require.NoError(t, err)
+}
+func TestChatGetRetentionPolicyRuns(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().GetRetentionPolicyRuns(context.Background(), &getstream.GetRetentionPolicyRunsRequest{})
+	require.NoError(t, err)
+}
 func TestChatSearch(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

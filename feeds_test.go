@@ -268,6 +268,13 @@ func TestFeedsUpdateComment(t *testing.T) {
 	_, err = client.Feeds().UpdateComment(context.Background(), "", &getstream.UpdateCommentRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsUpdateCommentPartial(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().UpdateCommentPartial(context.Background(), "", &getstream.UpdateCommentPartialRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsAddCommentReaction(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -294,6 +301,13 @@ func TestFeedsGetCommentReplies(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().GetCommentReplies(context.Background(), "", &getstream.GetCommentRepliesRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsRestoreComment(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().RestoreComment(context.Background(), "", &getstream.RestoreCommentRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsListFeedGroups(t *testing.T) {

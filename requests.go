@@ -496,6 +496,19 @@ type QueryRemindersRequest struct {
 	Filter map[string]any     `json:"filter"`
 	User   *UserRequest       `json:"user,omitempty"`
 }
+type GetRetentionPolicyRequest struct {
+}
+type SetRetentionPolicyRequest struct {
+	MaxAgeHours *int    `json:"max_age_hours,omitempty"`
+	Policy      *string `json:"policy,omitempty"`
+}
+type DeleteRetentionPolicyRequest struct {
+	Policy *string `json:"policy,omitempty"`
+}
+type GetRetentionPolicyRunsRequest struct {
+	Limit  *int `json:"-" query:"limit"`
+	Offset *int `json:"-" query:"offset"`
+}
 type SearchRequest struct {
 	Payload *SearchPayload `json:"-" query:"payload"`
 }
@@ -883,6 +896,16 @@ type UpdateCommentRequest struct {
 	Custom                     map[string]any `json:"custom"`
 	User                       *UserRequest   `json:"user,omitempty"`
 }
+type UpdateCommentPartialRequest struct {
+	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
+	HandleMentionNotifications *bool          `json:"handle_mention_notifications,omitempty"`
+	SkipEnrichUrl              *bool          `json:"skip_enrich_url,omitempty"`
+	SkipPush                   *bool          `json:"skip_push,omitempty"`
+	UserID                     *string        `json:"user_id,omitempty"`
+	Unset                      []string       `json:"unset"`
+	Set                        map[string]any `json:"set"`
+	User                       *UserRequest   `json:"user,omitempty"`
+}
 type AddCommentReactionRequest struct {
 	Type                       string         `json:"type"`
 	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
@@ -912,6 +935,10 @@ type GetCommentRepliesRequest struct {
 	Limit        *int    `json:"-" query:"limit"`
 	Prev         *string `json:"-" query:"prev"`
 	Next         *string `json:"-" query:"next"`
+}
+type RestoreCommentRequest struct {
+	UserID *string      `json:"user_id,omitempty"`
+	User   *UserRequest `json:"user,omitempty"`
 }
 type ListFeedGroupsRequest struct {
 	IncludeSoftDeleted *bool `json:"-" query:"include_soft_deleted"`
@@ -1220,6 +1247,14 @@ type DeleteImportV2TaskRequest struct {
 type GetImportV2TaskRequest struct {
 }
 type GetImportRequest struct {
+}
+type InsertActionLogRequest struct {
+	ActionType      string         `json:"action_type"`
+	EntityCreatorID string         `json:"entity_creator_id"`
+	EntityID        string         `json:"entity_id"`
+	EntityType      string         `json:"entity_type"`
+	Reason          *string        `json:"reason,omitempty"`
+	Custom          map[string]any `json:"custom"`
 }
 type AppealRequest struct {
 	AppealReason string       `json:"appeal_reason"`

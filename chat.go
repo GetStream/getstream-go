@@ -798,6 +798,35 @@ func (c *ChatClient) QueryReminders(ctx context.Context, request *QueryReminders
 	return res, err
 }
 
+// Returns all retention policies configured for the app. Server-side only.
+func (c *ChatClient) GetRetentionPolicy(ctx context.Context, request *GetRetentionPolicyRequest) (*StreamResponse[GetRetentionPolicyResponse], error) {
+	var result GetRetentionPolicyResponse
+	res, err := MakeRequest[any, GetRetentionPolicyResponse](c.client, ctx, "GET", "/api/v2/chat/retention_policy", nil, nil, &result, nil)
+	return res, err
+}
+
+// Creates or updates a retention policy for the app. Server-side only.
+func (c *ChatClient) SetRetentionPolicy(ctx context.Context, request *SetRetentionPolicyRequest) (*StreamResponse[SetRetentionPolicyResponse], error) {
+	var result SetRetentionPolicyResponse
+	res, err := MakeRequest[SetRetentionPolicyRequest, SetRetentionPolicyResponse](c.client, ctx, "POST", "/api/v2/chat/retention_policy", nil, request, &result, nil)
+	return res, err
+}
+
+// Removes a retention policy for the app. Server-side only.
+func (c *ChatClient) DeleteRetentionPolicy(ctx context.Context, request *DeleteRetentionPolicyRequest) (*StreamResponse[DeleteRetentionPolicyResponse], error) {
+	var result DeleteRetentionPolicyResponse
+	res, err := MakeRequest[DeleteRetentionPolicyRequest, DeleteRetentionPolicyResponse](c.client, ctx, "POST", "/api/v2/chat/retention_policy/delete", nil, request, &result, nil)
+	return res, err
+}
+
+// Returns paginated retention cleanup run history for the app. Server-side only.
+func (c *ChatClient) GetRetentionPolicyRuns(ctx context.Context, request *GetRetentionPolicyRunsRequest) (*StreamResponse[GetRetentionPolicyRunsResponse], error) {
+	var result GetRetentionPolicyRunsResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetRetentionPolicyRunsResponse](c.client, ctx, "GET", "/api/v2/chat/retention_policy/runs", params, nil, &result, nil)
+	return res, err
+}
+
 // Search messages across channels
 func (c *ChatClient) Search(ctx context.Context, request *SearchRequest) (*StreamResponse[SearchResponse], error) {
 	var result SearchResponse

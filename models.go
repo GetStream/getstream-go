@@ -3553,6 +3553,24 @@ type CommentResponse struct {
 	ReactionGroups map[string]FeedsReactionGroupResponse `json:"reaction_groups,omitempty"`
 }
 
+// Emitted when a soft-deleted comment is restored.
+type CommentRestoredEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp       `json:"created_at"`
+	Fid       string          `json:"fid"`
+	Comment   CommentResponse `json:"comment"`
+	Custom    map[string]any  `json:"custom"`
+	// The type of event: "feeds.comment.restored" in this case
+	Type           string                    `json:"type"`
+	FeedVisibility *string                   `json:"feed_visibility,omitempty"`
+	ReceivedAt     *Timestamp                `json:"received_at,omitempty"`
+	User           *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (e *CommentRestoredEvent) GetEventType() string {
+	return e.Type
+}
+
 // Emitted when a comment is updated.
 type CommentUpdatedEvent struct {
 	// Date/time of creation
@@ -4158,6 +4176,12 @@ type DeleteRecordingResponse struct {
 
 // Basic response information
 type DeleteReminderResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+}
+
+// Basic response information
+type DeleteRetentionPolicyResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
 }
@@ -5717,6 +5741,20 @@ type GetRepliesResponse struct {
 	Messages []MessageResponse `json:"messages"`
 }
 
+// Basic response information
+type GetRetentionPolicyResponse struct {
+	// Duration of the request in milliseconds
+	Duration string            `json:"duration"`
+	Policies []RetentionPolicy `json:"policies"`
+}
+
+// Basic response information
+type GetRetentionPolicyRunsResponse struct {
+	// Duration of the request in milliseconds
+	Duration string                `json:"duration"`
+	Runs     []RetentionCleanupRun `json:"runs"`
+}
+
 type GetReviewQueueItemResponse struct {
 	Duration string                   `json:"duration"`
 	Item     *ReviewQueueItemResponse `json:"item,omitempty"`
@@ -5820,7 +5858,8 @@ type HuaweiConfigFields struct {
 }
 
 type ImageContentParameters struct {
-	HarmLabels []string `json:"harm_labels,omitempty"`
+	MinConfidence *float64 `json:"min_confidence,omitempty"`
+	HarmLabels    []string `json:"harm_labels,omitempty"`
 }
 
 type ImageData struct {
@@ -5832,9 +5871,10 @@ type ImageData struct {
 }
 
 type ImageRuleParameters struct {
-	Threshold  *int     `json:"threshold,omitempty"`
-	TimeWindow *string  `json:"time_window,omitempty"`
-	HarmLabels []string `json:"harm_labels,omitempty"`
+	MinConfidence *float64 `json:"min_confidence,omitempty"`
+	Threshold     *int     `json:"threshold,omitempty"`
+	TimeWindow    *string  `json:"time_window,omitempty"`
+	HarmLabels    []string `json:"harm_labels,omitempty"`
 }
 
 type ImageSize struct {
@@ -6087,6 +6127,11 @@ type IngressVideoLayerResponse struct {
 	FrameRateLimit int    `json:"frame_rate_limit"`
 	MaxDimension   int    `json:"max_dimension"`
 	MinDimension   int    `json:"min_dimension"`
+}
+
+// Response after inserting a moderation action log
+type InsertActionLogResponse struct {
+	Duration string `json:"duration"`
 }
 
 type JoinCallAPIMetrics struct {
@@ -7892,6 +7937,10 @@ type Policy struct {
 	Roles     []string  `json:"roles"`
 }
 
+type PolicyConfig struct {
+	MaxAgeHours int `json:"max_age_hours"`
+}
+
 // Policy request
 type PolicyRequest struct {
 	Action string `json:"action"`
@@ -9222,9 +9271,35 @@ type RestoreActivityResponse struct {
 	Activity ActivityResponse `json:"activity"`
 }
 
+type RestoreCommentResponse struct {
+	Duration string           `json:"duration"`
+	Activity ActivityResponse `json:"activity"`
+	Comment  CommentResponse  `json:"comment"`
+}
+
 type RestoreFeedGroupResponse struct {
 	Duration  string            `json:"duration"`
 	FeedGroup FeedGroupResponse `json:"feed_group"`
+}
+
+type RetentionCleanupRun struct {
+	AppPk      int        `json:"app_pk"`
+	Date       Timestamp  `json:"date"`
+	Policy     string     `json:"policy"`
+	StartedAt  Timestamp  `json:"started_at"`
+	Status     string     `json:"status"`
+	Stats      RunStats   `json:"stats"`
+	CursorID   *string    `json:"cursor_id,omitempty"`
+	CursorTs   *Timestamp `json:"cursor_ts,omitempty"`
+	Error      *string    `json:"error,omitempty"`
+	FinishedAt *Timestamp `json:"finished_at,omitempty"`
+}
+
+type RetentionPolicy struct {
+	AppPk     int          `json:"app_pk"`
+	EnabledAt Timestamp    `json:"enabled_at"`
+	Policy    string       `json:"policy"`
+	Config    PolicyConfig `json:"config"`
 }
 
 // This event is sent when a new moderation review queue item is created
@@ -9404,6 +9479,11 @@ type RuleBuilderRule struct {
 	Conditions      []RuleBuilderCondition      `json:"conditions,omitempty"`
 	Groups          []RuleBuilderConditionGroup `json:"groups,omitempty"`
 	Action          *RuleBuilderAction          `json:"action,omitempty"`
+}
+
+type RunStats struct {
+	ChannelsDeleted *int `json:"channels_deleted,omitempty"`
+	MessagesDeleted *int `json:"messages_deleted,omitempty"`
 }
 
 // Config for creating Amazon S3 storage.
@@ -9842,6 +9922,13 @@ type SessionWarningResponse struct {
 	Code    string     `json:"code"`
 	Warning string     `json:"warning"`
 	Time    *Timestamp `json:"time,omitempty"`
+}
+
+// Basic response information
+type SetRetentionPolicyResponse struct {
+	// Duration of the request in milliseconds
+	Duration string          `json:"duration"`
+	Policy   RetentionPolicy `json:"policy"`
 }
 
 // Configuration for shadow block action
@@ -10375,11 +10462,11 @@ type TranslationSettings struct {
 type TriggeredRuleResponse struct {
 	// ID of the moderation rule that triggered
 	RuleID string `json:"rule_id"`
-	// Array of action types resolved from the rule's action sequence (e.g. mute_video, kick_user, end_call, warning, blur)
+	// Action types resolved from the rule's action sequence
 	Actions []string `json:"actions"`
 	// Name of the moderation rule that triggered
 	RuleName *string `json:"rule_name,omitempty"`
-	// The violation count for action sequence rules (1-based)
+	// Violation count for action sequence rules (1-based)
 	ViolationNumber *int               `json:"violation_number,omitempty"`
 	CallOptions     *CallActionOptions `json:"call_options,omitempty"`
 }
@@ -10675,6 +10762,11 @@ type UpdateCollectionsResponse struct {
 type UpdateCommandResponse struct {
 	Duration string   `json:"duration"`
 	Command  *Command `json:"command,omitempty"`
+}
+
+type UpdateCommentPartialResponse struct {
+	Duration string          `json:"duration"`
+	Comment  CommentResponse `json:"comment"`
 }
 
 type UpdateCommentResponse struct {

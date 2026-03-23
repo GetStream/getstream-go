@@ -15,6 +15,13 @@ func NewModerationClient(client *Client) *ModerationClient {
 	}
 }
 
+// Insert a moderation action log entry. Server-side only. Used by product services to log moderation-related actions.
+func (c *ModerationClient) InsertActionLog(ctx context.Context, request *InsertActionLogRequest) (*StreamResponse[InsertActionLogResponse], error) {
+	var result InsertActionLogResponse
+	res, err := MakeRequest[InsertActionLogRequest, InsertActionLogResponse](c.client, ctx, "POST", "/api/v2/moderation/action_logs", nil, request, &result, nil)
+	return res, err
+}
+
 // Appeal against the moderation decision
 func (c *ModerationClient) Appeal(ctx context.Context, request *AppealRequest) (*StreamResponse[AppealResponse], error) {
 	var result AppealResponse

@@ -123,6 +123,7 @@ const (
 	EventTypeFeedsCommentReactionAdded          = "feeds.comment.reaction.added"
 	EventTypeFeedsCommentReactionDeleted        = "feeds.comment.reaction.deleted"
 	EventTypeFeedsCommentReactionUpdated        = "feeds.comment.reaction.updated"
+	EventTypeFeedsCommentRestored               = "feeds.comment.restored"
 	EventTypeFeedsCommentUpdated                = "feeds.comment.updated"
 	EventTypeFeedsFeedCreated                   = "feeds.feed.created"
 	EventTypeFeedsFeedDeleted                   = "feeds.feed.deleted"
@@ -458,6 +459,8 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(CommentReactionDeletedEvent)
 	case "feeds.comment.reaction.updated":
 		event = new(CommentReactionUpdatedEvent)
+	case "feeds.comment.restored":
+		event = new(CommentRestoredEvent)
 	case "feeds.comment.updated":
 		event = new(CommentUpdatedEvent)
 	case "feeds.feed.created":
