@@ -365,6 +365,20 @@ func (c *FeedsClient) UpdateComment(ctx context.Context, id string, request *Upd
 	return res, err
 }
 
+// Updates certain fields of the comment. Use 'set' to update specific fields and 'unset' to remove fields.
+//
+// Sends events:
+// - feeds.activity.updated
+// - feeds.comment.updated
+func (c *FeedsClient) UpdateCommentPartial(ctx context.Context, id string, request *UpdateCommentPartialRequest) (*StreamResponse[UpdateCommentPartialResponse], error) {
+	var result UpdateCommentPartialResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[UpdateCommentPartialRequest, UpdateCommentPartialResponse](c.client, ctx, "POST", "/api/v2/feeds/comments/{id}/partial", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Adds a reaction to a comment
 func (c *FeedsClient) AddCommentReaction(ctx context.Context, id string, request *AddCommentReactionRequest) (*StreamResponse[AddCommentReactionResponse], error) {
 	var result AddCommentReactionResponse
@@ -405,6 +419,16 @@ func (c *FeedsClient) GetCommentReplies(ctx context.Context, id string, request 
 	}
 	params := extractQueryParams(request)
 	res, err := MakeRequest[any, GetCommentRepliesResponse](c.client, ctx, "GET", "/api/v2/feeds/comments/{id}/replies", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Restores a soft-deleted comment by its ID. The comment and all its descendants are restored. Requires moderator permissions.
+func (c *FeedsClient) RestoreComment(ctx context.Context, id string, request *RestoreCommentRequest) (*StreamResponse[RestoreCommentResponse], error) {
+	var result RestoreCommentResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[RestoreCommentRequest, RestoreCommentResponse](c.client, ctx, "POST", "/api/v2/feeds/comments/{id}/restore", nil, request, &result, pathParams)
 	return res, err
 }
 
