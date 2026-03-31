@@ -201,6 +201,34 @@ func (c *Client) CreateImportV2Task(ctx context.Context, request *CreateImportV2
 	return res, err
 }
 
+// Removes the external storage configuration for the app. Idempotent: succeeds even if no configuration exists.
+func (c *Client) DeleteImporterExternalStorage(ctx context.Context, request *DeleteImporterExternalStorageRequest) (*StreamResponse[DeleteExternalStorageResponse], error) {
+	var result DeleteExternalStorageResponse
+	res, err := MakeRequest[any, DeleteExternalStorageResponse](c, ctx, "DELETE", "/api/v2/imports/v2/external-storage", nil, nil, &result, nil)
+	return res, err
+}
+
+// Returns the current external storage configuration for the app. Returns 404 if no configuration exists.
+func (c *Client) GetImporterExternalStorage(ctx context.Context, request *GetImporterExternalStorageRequest) (*StreamResponse[GetExternalStorageResponse], error) {
+	var result GetExternalStorageResponse
+	res, err := MakeRequest[any, GetExternalStorageResponse](c, ctx, "GET", "/api/v2/imports/v2/external-storage", nil, nil, &result, nil)
+	return res, err
+}
+
+// Creates or updates the external storage configuration for the app. Currently only AWS S3 (via cross-account IAM role assumption) is supported.
+func (c *Client) UpsertImporterExternalStorage(ctx context.Context, request *UpsertImporterExternalStorageRequest) (*StreamResponse[UpsertExternalStorageResponse], error) {
+	var result UpsertExternalStorageResponse
+	res, err := MakeRequest[UpsertImporterExternalStorageRequest, UpsertExternalStorageResponse](c, ctx, "PUT", "/api/v2/imports/v2/external-storage", nil, request, &result, nil)
+	return res, err
+}
+
+// Validates the configured external S3 storage by performing a live STS AssumeRole and S3 ListObjectsV2 check.
+func (c *Client) ValidateImporterExternalStorage(ctx context.Context, request *ValidateImporterExternalStorageRequest) (*StreamResponse[ValidateExternalStorageResponse], error) {
+	var result ValidateExternalStorageResponse
+	res, err := MakeRequest[any, ValidateExternalStorageResponse](c, ctx, "POST", "/api/v2/imports/v2/external-storage/validate", nil, nil, &result, nil)
+	return res, err
+}
+
 // Deletes an import v2 task. Can only delete tasks in queued state.
 func (c *Client) DeleteImportV2Task(ctx context.Context, id string, request *DeleteImportV2TaskRequest) (*StreamResponse[DeleteImportV2TaskResponse], error) {
 	var result DeleteImportV2TaskResponse
