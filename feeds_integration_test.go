@@ -1796,12 +1796,11 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 		updateResponse, err = feedsClient.UpdateFeedView(ctx, feedViewID, &getstream.UpdateFeedViewRequest{
 			ActivitySelectors: []getstream.ActivitySelectorConfig{
 				{
-					Type:          "popular",
-					MinPopularity: getstream.PtrTo(10),
+					Type: "following",
 				},
 			},
 			Aggregation: &getstream.AggregationConfig{
-				Format: getstream.PtrTo("popularity_based"),
+				Format: getstream.PtrTo("verb"),
 			},
 		})
 		if err == nil {
