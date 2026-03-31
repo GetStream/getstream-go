@@ -145,6 +145,13 @@ func (c *ModerationClient) Flag(ctx context.Context, request *FlagRequest) (*Str
 	return res, err
 }
 
+// Returns the number of moderation flags created against a specific user's content. Optionally filter by entity type.
+func (c *ModerationClient) GetFlagCount(ctx context.Context, request *GetFlagCountRequest) (*StreamResponse[GetFlagCountResponse], error) {
+	var result GetFlagCountResponse
+	res, err := MakeRequest[GetFlagCountRequest, GetFlagCountResponse](c.client, ctx, "POST", "/api/v2/moderation/flag_count", nil, request, &result, nil)
+	return res, err
+}
+
 // Query flags associated with moderation items. This is used for building a moderation dashboard.
 func (c *ModerationClient) QueryModerationFlags(ctx context.Context, request *QueryModerationFlagsRequest) (*StreamResponse[QueryModerationFlagsResponse], error) {
 	var result QueryModerationFlagsResponse
