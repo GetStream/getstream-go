@@ -59,12 +59,15 @@ type ListBlockListsRequest struct {
 	Team *string `json:"-" query:"team"`
 }
 type CreateBlockListRequest struct {
-	Name                 string   `json:"name"`
+	// Block list name
+	Name string `json:"name"`
+	// List of words to block
 	Words                []string `json:"words"`
 	IsLeetCheckEnabled   *bool    `json:"is_leet_check_enabled,omitempty"`
 	IsPluralCheckEnabled *bool    `json:"is_plural_check_enabled,omitempty"`
 	Team                 *string  `json:"team,omitempty"`
-	Type                 *string  `json:"type,omitempty"`
+	// Block list type. One of: regex, domain, domain_allowlist, email, email_allowlist, word
+	Type *string `json:"type,omitempty"`
 }
 type DeleteBlockListRequest struct {
 	Team *string `json:"-" query:"team"`
@@ -73,10 +76,11 @@ type GetBlockListRequest struct {
 	Team *string `json:"-" query:"team"`
 }
 type UpdateBlockListRequest struct {
-	IsLeetCheckEnabled   *bool    `json:"is_leet_check_enabled,omitempty"`
-	IsPluralCheckEnabled *bool    `json:"is_plural_check_enabled,omitempty"`
-	Team                 *string  `json:"team,omitempty"`
-	Words                []string `json:"words"`
+	IsLeetCheckEnabled   *bool   `json:"is_leet_check_enabled,omitempty"`
+	IsPluralCheckEnabled *bool   `json:"is_plural_check_enabled,omitempty"`
+	Team                 *string `json:"team,omitempty"`
+	// List of words to block
+	Words []string `json:"words"`
 }
 type QueryCampaignsRequest struct {
 	Limit     *int               `json:"limit,omitempty"`
@@ -98,18 +102,27 @@ type StartCampaignRequest struct {
 type StopCampaignRequest struct {
 }
 type QueryChannelsRequest struct {
-	Limit            *int               `json:"limit,omitempty"`
-	MemberLimit      *int               `json:"member_limit,omitempty"`
-	MessageLimit     *int               `json:"message_limit,omitempty"`
-	Offset           *int               `json:"offset,omitempty"`
-	PredefinedFilter *string            `json:"predefined_filter,omitempty"`
-	State            *bool              `json:"state,omitempty"`
-	UserID           *string            `json:"user_id,omitempty"`
-	Sort             []SortParamRequest `json:"sort"`
-	FilterConditions map[string]any     `json:"filter_conditions"`
-	FilterValues     map[string]any     `json:"filter_values"`
-	SortValues       map[string]any     `json:"sort_values"`
-	User             *UserRequest       `json:"user,omitempty"`
+	// Number of channels to limit
+	Limit *int `json:"limit,omitempty"`
+	// Number of members to limit
+	MemberLimit *int `json:"member_limit,omitempty"`
+	// Number of messages to limit
+	MessageLimit *int `json:"message_limit,omitempty"`
+	// Channel pagination offset
+	Offset *int `json:"offset,omitempty"`
+	// ID of a predefined filter to use instead of filter_conditions
+	PredefinedFilter *string `json:"predefined_filter,omitempty"`
+	// Whether to update channel state or not
+	State  *bool   `json:"state,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// List of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+	// Filter conditions to apply to the query
+	FilterConditions map[string]any `json:"filter_conditions"`
+	// Values to interpolate into the predefined filter template
+	FilterValues map[string]any `json:"filter_values"`
+	SortValues   map[string]any `json:"sort_values"`
+	User         *UserRequest   `json:"user,omitempty"`
 }
 type ChannelBatchUpdateRequest struct {
 	Operation string                      `json:"operation"`
@@ -118,20 +131,25 @@ type ChannelBatchUpdateRequest struct {
 	Data      *ChannelDataUpdate          `json:"data,omitempty"`
 }
 type DeleteChannelsRequest struct {
-	Cids       []string `json:"cids"`
-	HardDelete *bool    `json:"hard_delete,omitempty"`
+	// All channels that should be deleted
+	Cids []string `json:"cids"`
+	// Specify if channels and all ressources should be hard deleted
+	HardDelete *bool `json:"hard_delete,omitempty"`
 }
 type MarkDeliveredRequest struct {
 	UserID                  *string                   `json:"-" query:"user_id"`
 	LatestDeliveredMessages []DeliveredMessagePayload `json:"latest_delivered_messages"`
 }
 type MarkChannelsReadRequest struct {
-	UserID        *string           `json:"user_id,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Map of channel ID to last read message ID
 	ReadByChannel map[string]string `json:"read_by_channel"`
 	User          *UserRequest      `json:"user,omitempty"`
 }
 type GetOrCreateDistinctChannelRequest struct {
-	HideForCreator     *bool                    `json:"hide_for_creator,omitempty"`
+	// Whether this channel will be hidden for the user who created the channel or not
+	HideForCreator *bool `json:"hide_for_creator,omitempty"`
+	// Refresh channel state
 	State              *bool                    `json:"state,omitempty"`
 	ThreadUnreadCounts *bool                    `json:"thread_unread_counts,omitempty"`
 	Data               *ChannelInput            `json:"data,omitempty"`
@@ -149,24 +167,38 @@ type UpdateChannelPartialRequest struct {
 	User   *UserRequest   `json:"user,omitempty"`
 }
 type UpdateChannelRequest struct {
-	AcceptInvite      *bool                  `json:"accept_invite,omitempty"`
-	Cooldown          *int                   `json:"cooldown,omitempty"`
-	HideHistory       *bool                  `json:"hide_history,omitempty"`
-	HideHistoryBefore *Timestamp             `json:"hide_history_before,omitempty"`
-	RejectInvite      *bool                  `json:"reject_invite,omitempty"`
-	SkipPush          *bool                  `json:"skip_push,omitempty"`
-	UserID            *string                `json:"user_id,omitempty"`
-	AddFilterTags     []string               `json:"add_filter_tags"`
-	AddMembers        []ChannelMemberRequest `json:"add_members"`
-	AddModerators     []string               `json:"add_moderators"`
-	AssignRoles       []ChannelMemberRequest `json:"assign_roles"`
-	DemoteModerators  []string               `json:"demote_moderators"`
-	Invites           []ChannelMemberRequest `json:"invites"`
-	RemoveFilterTags  []string               `json:"remove_filter_tags"`
-	RemoveMembers     []string               `json:"remove_members"`
-	Data              *ChannelInputRequest   `json:"data,omitempty"`
-	Message           *MessageRequest        `json:"message,omitempty"`
-	User              *UserRequest           `json:"user,omitempty"`
+	// Set to `true` to accept the invite
+	AcceptInvite *bool `json:"accept_invite,omitempty"`
+	// Sets cool down period for the channel in seconds
+	Cooldown *int `json:"cooldown,omitempty"`
+	// Set to `true` to hide channel's history when adding new members
+	HideHistory *bool `json:"hide_history,omitempty"`
+	// If set, hides channel's history before this time when adding new members. Takes precedence over `hide_history` when both are provided. Must be in RFC3339 format (e.g., "2024-01-01T10:00:00Z") and in the past.
+	HideHistoryBefore *Timestamp `json:"hide_history_before,omitempty"`
+	// Set to `true` to reject the invite
+	RejectInvite *bool `json:"reject_invite,omitempty"`
+	// When `message` is set disables all push notifications for it
+	SkipPush *bool   `json:"skip_push,omitempty"`
+	UserID   *string `json:"user_id,omitempty"`
+	// List of filter tags to add to the channel
+	AddFilterTags []string `json:"add_filter_tags"`
+	// List of user IDs to add to the channel
+	AddMembers []ChannelMemberRequest `json:"add_members"`
+	// List of user IDs to make channel moderators
+	AddModerators []string `json:"add_moderators"`
+	// List of channel member role assignments. If any specified user is not part of the channel, the request will fail
+	AssignRoles []ChannelMemberRequest `json:"assign_roles"`
+	// List of user IDs to take away moderators status from
+	DemoteModerators []string `json:"demote_moderators"`
+	// List of user IDs to invite to the channel
+	Invites []ChannelMemberRequest `json:"invites"`
+	// List of filter tags to remove from the channel
+	RemoveFilterTags []string `json:"remove_filter_tags"`
+	// List of user IDs to remove from the channel
+	RemoveMembers []string             `json:"remove_members"`
+	Data          *ChannelInputRequest `json:"data,omitempty"`
+	Message       *MessageRequest      `json:"message,omitempty"`
+	User          *UserRequest         `json:"user,omitempty"`
 }
 type DeleteDraftRequest struct {
 	ParentID *string `json:"-" query:"parent_id"`
@@ -183,10 +215,12 @@ type DeleteChannelFileRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 type UploadChannelFileRequest struct {
+	// file field
 	File *string     `json:"file,omitempty"`
 	User *OnlyUserID `json:"user,omitempty"`
 }
 type HideChannelRequest struct {
+	// Whether to clear message history of the channel or not
 	ClearHistory *bool        `json:"clear_history,omitempty"`
 	UserID       *string      `json:"user_id,omitempty"`
 	User         *UserRequest `json:"user,omitempty"`
@@ -195,7 +229,8 @@ type DeleteChannelImageRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 type UploadChannelImageRequest struct {
-	File        *string     `json:"file,omitempty"`
+	File *string `json:"file,omitempty"`
+	// field with JSON-encoded array of image size configurations
 	UploadSizes []ImageSize `json:"upload_sizes"`
 	User        *OnlyUserID `json:"user,omitempty"`
 }
@@ -217,7 +252,9 @@ type GetManyMessagesRequest struct {
 	Ids []string `json:"-" query:"ids"`
 }
 type GetOrCreateChannelRequest struct {
-	HideForCreator     *bool                    `json:"hide_for_creator,omitempty"`
+	// Whether this channel will be hidden for the user who created the channel or not
+	HideForCreator *bool `json:"hide_for_creator,omitempty"`
+	// Refresh channel state
 	State              *bool                    `json:"state,omitempty"`
 	ThreadUnreadCounts *bool                    `json:"thread_unread_counts,omitempty"`
 	Data               *ChannelInput            `json:"data,omitempty"`
@@ -226,152 +263,207 @@ type GetOrCreateChannelRequest struct {
 	Watchers           *PaginationParams        `json:"watchers,omitempty"`
 }
 type MarkReadRequest struct {
-	MessageID *string      `json:"message_id,omitempty"`
-	ThreadID  *string      `json:"thread_id,omitempty"`
-	UserID    *string      `json:"user_id,omitempty"`
-	User      *UserRequest `json:"user,omitempty"`
+	// ID of the message that is considered last read by client
+	MessageID *string `json:"message_id,omitempty"`
+	// Optional Thread ID to specifically mark a given thread as read
+	ThreadID *string      `json:"thread_id,omitempty"`
+	UserID   *string      `json:"user_id,omitempty"`
+	User     *UserRequest `json:"user,omitempty"`
 }
 type ShowChannelRequest struct {
 	UserID *string      `json:"user_id,omitempty"`
 	User   *UserRequest `json:"user,omitempty"`
 }
 type TruncateChannelRequest struct {
-	HardDelete  *bool           `json:"hard_delete,omitempty"`
-	SkipPush    *bool           `json:"skip_push,omitempty"`
-	TruncatedAt *Timestamp      `json:"truncated_at,omitempty"`
-	UserID      *string         `json:"user_id,omitempty"`
-	MemberIds   []string        `json:"member_ids"`
-	Message     *MessageRequest `json:"message,omitempty"`
-	User        *UserRequest    `json:"user,omitempty"`
+	// Permanently delete channel data (messages, reactions, etc.)
+	HardDelete *bool `json:"hard_delete,omitempty"`
+	// When `message` is set disables all push notifications for it
+	SkipPush *bool `json:"skip_push,omitempty"`
+	// Truncate channel data up to `truncated_at`. The system message (if provided) creation time is always greater than `truncated_at`
+	TruncatedAt *Timestamp `json:"truncated_at,omitempty"`
+	UserID      *string    `json:"user_id,omitempty"`
+	// List of member IDs to hide message history for. If empty, truncates the channel for all members
+	MemberIds []string        `json:"member_ids"`
+	Message   *MessageRequest `json:"message,omitempty"`
+	User      *UserRequest    `json:"user,omitempty"`
 }
 type MarkUnreadRequest struct {
-	MessageID        *string      `json:"message_id,omitempty"`
-	MessageTimestamp *Timestamp   `json:"message_timestamp,omitempty"`
-	ThreadID         *string      `json:"thread_id,omitempty"`
-	UserID           *string      `json:"user_id,omitempty"`
-	User             *UserRequest `json:"user,omitempty"`
+	// ID of the message from where the channel is marked unread
+	MessageID *string `json:"message_id,omitempty"`
+	// Timestamp of the message from where the channel is marked unread
+	MessageTimestamp *Timestamp `json:"message_timestamp,omitempty"`
+	// Mark a thread unread, specify one of the thread, message timestamp, or message id
+	ThreadID *string      `json:"thread_id,omitempty"`
+	UserID   *string      `json:"user_id,omitempty"`
+	User     *UserRequest `json:"user,omitempty"`
 }
 type ListChannelTypesRequest struct {
 }
 type CreateChannelTypeRequest struct {
-	Automod                        string              `json:"automod"`
-	AutomodBehavior                string              `json:"automod_behavior"`
-	MaxMessageLength               int                 `json:"max_message_length"`
-	Name                           string              `json:"name"`
-	Blocklist                      *string             `json:"blocklist,omitempty"`
-	BlocklistBehavior              *string             `json:"blocklist_behavior,omitempty"`
-	ConnectEvents                  *bool               `json:"connect_events,omitempty"`
-	CountMessages                  *bool               `json:"count_messages,omitempty"`
-	CustomEvents                   *bool               `json:"custom_events,omitempty"`
-	DeliveryEvents                 *bool               `json:"delivery_events,omitempty"`
-	MarkMessagesPending            *bool               `json:"mark_messages_pending,omitempty"`
-	MessageRetention               *string             `json:"message_retention,omitempty"`
-	Mutes                          *bool               `json:"mutes,omitempty"`
-	PartitionSize                  *int                `json:"partition_size,omitempty"`
-	PartitionTtl                   *string             `json:"partition_ttl,omitempty"`
-	Polls                          *bool               `json:"polls,omitempty"`
-	PushLevel                      *string             `json:"push_level,omitempty"`
-	PushNotifications              *bool               `json:"push_notifications,omitempty"`
-	Reactions                      *bool               `json:"reactions,omitempty"`
-	ReadEvents                     *bool               `json:"read_events,omitempty"`
-	Replies                        *bool               `json:"replies,omitempty"`
-	Search                         *bool               `json:"search,omitempty"`
-	SharedLocations                *bool               `json:"shared_locations,omitempty"`
-	SkipLastMsgUpdateForSystemMsgs *bool               `json:"skip_last_msg_update_for_system_msgs,omitempty"`
-	TypingEvents                   *bool               `json:"typing_events,omitempty"`
-	Uploads                        *bool               `json:"uploads,omitempty"`
-	UrlEnrichment                  *bool               `json:"url_enrichment,omitempty"`
-	UserMessageReminders           *bool               `json:"user_message_reminders,omitempty"`
-	Blocklists                     []BlockListOptions  `json:"blocklists"`
-	Commands                       []string            `json:"commands"`
-	Permissions                    []PolicyRequest     `json:"permissions"`
-	ChatPreferences                *ChatPreferences    `json:"chat_preferences,omitempty"`
-	Grants                         map[string][]string `json:"grants"`
+	// Automod. One of: disabled, simple, AI
+	Automod string `json:"automod"`
+	// Automod behavior. One of: flag, block
+	AutomodBehavior string `json:"automod_behavior"`
+	// Max message length
+	MaxMessageLength int `json:"max_message_length"`
+	// Channel type name
+	Name string `json:"name"`
+	// Blocklist
+	Blocklist *string `json:"blocklist,omitempty"`
+	// Blocklist behavior. One of: flag, block, shadow_block
+	BlocklistBehavior *string `json:"blocklist_behavior,omitempty"`
+	// Connect events
+	ConnectEvents *bool `json:"connect_events,omitempty"`
+	// Count messages in channel.
+	CountMessages *bool `json:"count_messages,omitempty"`
+	// Custom events
+	CustomEvents   *bool `json:"custom_events,omitempty"`
+	DeliveryEvents *bool `json:"delivery_events,omitempty"`
+	// Mark messages pending
+	MarkMessagesPending *bool `json:"mark_messages_pending,omitempty"`
+	// Message retention. One of: infinite, numeric
+	MessageRetention *string `json:"message_retention,omitempty"`
+	// Mutes
+	Mutes *bool `json:"mutes,omitempty"`
+	// Partition size
+	PartitionSize *int `json:"partition_size,omitempty"`
+	// Partition TTL
+	PartitionTtl *string `json:"partition_ttl,omitempty"`
+	// Polls
+	Polls *bool `json:"polls,omitempty"`
+	// Default push notification level for the channel type. One of: all, all_mentions, mentions, direct_mentions, none
+	PushLevel *string `json:"push_level,omitempty"`
+	// Push notifications
+	PushNotifications *bool `json:"push_notifications,omitempty"`
+	// Reactions
+	Reactions *bool `json:"reactions,omitempty"`
+	// Read events
+	ReadEvents *bool `json:"read_events,omitempty"`
+	// Replies
+	Replies *bool `json:"replies,omitempty"`
+	// Search
+	Search *bool `json:"search,omitempty"`
+	// Enables shared location messages
+	SharedLocations                *bool `json:"shared_locations,omitempty"`
+	SkipLastMsgUpdateForSystemMsgs *bool `json:"skip_last_msg_update_for_system_msgs,omitempty"`
+	// Typing events
+	TypingEvents *bool `json:"typing_events,omitempty"`
+	// Uploads
+	Uploads *bool `json:"uploads,omitempty"`
+	// URL enrichment
+	UrlEnrichment        *bool `json:"url_enrichment,omitempty"`
+	UserMessageReminders *bool `json:"user_message_reminders,omitempty"`
+	// Blocklists
+	Blocklists []BlockListOptions `json:"blocklists"`
+	// List of commands that channel supports
+	Commands []string `json:"commands"`
+	// List of permissions for the channel type
+	Permissions     []PolicyRequest  `json:"permissions"`
+	ChatPreferences *ChatPreferences `json:"chat_preferences,omitempty"`
+	// List of grants for the channel type
+	Grants map[string][]string `json:"grants"`
 }
 type DeleteChannelTypeRequest struct {
 }
 type GetChannelTypeRequest struct {
 }
 type UpdateChannelTypeRequest struct {
-	Automod                        string              `json:"automod"`
-	AutomodBehavior                string              `json:"automod_behavior"`
-	MaxMessageLength               int                 `json:"max_message_length"`
-	Blocklist                      *string             `json:"blocklist,omitempty"`
-	BlocklistBehavior              *string             `json:"blocklist_behavior,omitempty"`
-	ConnectEvents                  *bool               `json:"connect_events,omitempty"`
-	CountMessages                  *bool               `json:"count_messages,omitempty"`
-	CustomEvents                   *bool               `json:"custom_events,omitempty"`
-	DeliveryEvents                 *bool               `json:"delivery_events,omitempty"`
-	MarkMessagesPending            *bool               `json:"mark_messages_pending,omitempty"`
-	Mutes                          *bool               `json:"mutes,omitempty"`
-	PartitionSize                  *int                `json:"partition_size,omitempty"`
-	PartitionTtl                   *string             `json:"partition_ttl,omitempty"`
-	Polls                          *bool               `json:"polls,omitempty"`
-	PushLevel                      *string             `json:"push_level,omitempty"`
-	PushNotifications              *bool               `json:"push_notifications,omitempty"`
-	Quotes                         *bool               `json:"quotes,omitempty"`
-	Reactions                      *bool               `json:"reactions,omitempty"`
-	ReadEvents                     *bool               `json:"read_events,omitempty"`
-	Reminders                      *bool               `json:"reminders,omitempty"`
-	Replies                        *bool               `json:"replies,omitempty"`
-	Search                         *bool               `json:"search,omitempty"`
-	SharedLocations                *bool               `json:"shared_locations,omitempty"`
-	SkipLastMsgUpdateForSystemMsgs *bool               `json:"skip_last_msg_update_for_system_msgs,omitempty"`
-	TypingEvents                   *bool               `json:"typing_events,omitempty"`
-	Uploads                        *bool               `json:"uploads,omitempty"`
-	UrlEnrichment                  *bool               `json:"url_enrichment,omitempty"`
-	UserMessageReminders           *bool               `json:"user_message_reminders,omitempty"`
-	AllowedFlagReasons             []string            `json:"allowed_flag_reasons"`
-	Blocklists                     []BlockListOptions  `json:"blocklists"`
-	Commands                       []string            `json:"commands"`
-	Permissions                    []PolicyRequest     `json:"permissions"`
-	AutomodThresholds              *Thresholds         `json:"automod_thresholds,omitempty"`
-	ChatPreferences                *ChatPreferences    `json:"chat_preferences,omitempty"`
-	Grants                         map[string][]string `json:"grants"`
+	Automod                        string             `json:"automod"`
+	AutomodBehavior                string             `json:"automod_behavior"`
+	MaxMessageLength               int                `json:"max_message_length"`
+	Blocklist                      *string            `json:"blocklist,omitempty"`
+	BlocklistBehavior              *string            `json:"blocklist_behavior,omitempty"`
+	ConnectEvents                  *bool              `json:"connect_events,omitempty"`
+	CountMessages                  *bool              `json:"count_messages,omitempty"`
+	CustomEvents                   *bool              `json:"custom_events,omitempty"`
+	DeliveryEvents                 *bool              `json:"delivery_events,omitempty"`
+	MarkMessagesPending            *bool              `json:"mark_messages_pending,omitempty"`
+	Mutes                          *bool              `json:"mutes,omitempty"`
+	PartitionSize                  *int               `json:"partition_size,omitempty"`
+	PartitionTtl                   *string            `json:"partition_ttl,omitempty"`
+	Polls                          *bool              `json:"polls,omitempty"`
+	PushLevel                      *string            `json:"push_level,omitempty"`
+	PushNotifications              *bool              `json:"push_notifications,omitempty"`
+	Quotes                         *bool              `json:"quotes,omitempty"`
+	Reactions                      *bool              `json:"reactions,omitempty"`
+	ReadEvents                     *bool              `json:"read_events,omitempty"`
+	Reminders                      *bool              `json:"reminders,omitempty"`
+	Replies                        *bool              `json:"replies,omitempty"`
+	Search                         *bool              `json:"search,omitempty"`
+	SharedLocations                *bool              `json:"shared_locations,omitempty"`
+	SkipLastMsgUpdateForSystemMsgs *bool              `json:"skip_last_msg_update_for_system_msgs,omitempty"`
+	TypingEvents                   *bool              `json:"typing_events,omitempty"`
+	Uploads                        *bool              `json:"uploads,omitempty"`
+	UrlEnrichment                  *bool              `json:"url_enrichment,omitempty"`
+	UserMessageReminders           *bool              `json:"user_message_reminders,omitempty"`
+	AllowedFlagReasons             []string           `json:"allowed_flag_reasons"`
+	Blocklists                     []BlockListOptions `json:"blocklists"`
+	// List of commands that channel supports
+	Commands          []string            `json:"commands"`
+	Permissions       []PolicyRequest     `json:"permissions"`
+	AutomodThresholds *Thresholds         `json:"automod_thresholds,omitempty"`
+	ChatPreferences   *ChatPreferences    `json:"chat_preferences,omitempty"`
+	Grants            map[string][]string `json:"grants"`
 }
 type ListCommandsRequest struct {
 }
 type CreateCommandRequest struct {
-	Description string  `json:"description"`
-	Name        string  `json:"name"`
-	Args        *string `json:"args,omitempty"`
-	Set         *string `json:"set,omitempty"`
+	// Description, shown in commands auto-completion
+	Description string `json:"description"`
+	// Unique command name
+	Name string `json:"name"`
+	// Arguments help text, shown in commands auto-completion
+	Args *string `json:"args,omitempty"`
+	// Set name used for grouping commands
+	Set *string `json:"set,omitempty"`
 }
 type DeleteCommandRequest struct {
 }
 type GetCommandRequest struct {
 }
 type UpdateCommandRequest struct {
-	Description string  `json:"description"`
-	Args        *string `json:"args,omitempty"`
-	Set         *string `json:"set,omitempty"`
+	// Description, shown in commands auto-completion
+	Description string `json:"description"`
+	// Arguments help text, shown in commands auto-completion
+	Args *string `json:"args,omitempty"`
+	// Set name used for grouping commands
+	Set *string `json:"set,omitempty"`
 }
 type QueryDraftsRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	UserID *string            `json:"user_id,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user,omitempty"`
+	Limit  *int    `json:"limit,omitempty"`
+	Next   *string `json:"next,omitempty"`
+	Prev   *string `json:"prev,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+	// Filter to apply to the query
+	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type ExportChannelsRequest struct {
-	Channels                   []ChannelExport `json:"channels"`
-	ClearDeletedMessageText    *bool           `json:"clear_deleted_message_text,omitempty"`
-	ExportUsers                *bool           `json:"export_users,omitempty"`
-	IncludeSoftDeletedChannels *bool           `json:"include_soft_deleted_channels,omitempty"`
-	IncludeTruncatedMessages   *bool           `json:"include_truncated_messages,omitempty"`
-	Version                    *string         `json:"version,omitempty"`
+	// Export options for channels
+	Channels []ChannelExport `json:"channels"`
+	// Set if deleted message text should be cleared
+	ClearDeletedMessageText *bool `json:"clear_deleted_message_text,omitempty"`
+	ExportUsers             *bool `json:"export_users,omitempty"`
+	// Set if you want to include deleted channels
+	IncludeSoftDeletedChannels *bool `json:"include_soft_deleted_channels,omitempty"`
+	// Set if you want to include truncated messages
+	IncludeTruncatedMessages *bool `json:"include_truncated_messages,omitempty"`
+	// Export version
+	Version *string `json:"version,omitempty"`
 }
 type QueryMembersRequest struct {
 	Payload *QueryMembersPayload `json:"-" query:"payload"`
 }
 type QueryMessageHistoryRequest struct {
-	Filter map[string]any     `json:"filter"`
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
+	// Filter to apply to the query
+	Filter map[string]any `json:"filter"`
+	Limit  *int           `json:"limit,omitempty"`
+	Next   *string        `json:"next,omitempty"`
+	Prev   *string        `json:"prev,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
 }
 type DeleteMessageRequest struct {
 	Hard        *bool   `json:"-" query:"hard"`
@@ -382,19 +474,24 @@ type GetMessageRequest struct {
 	ShowDeletedMessage *bool `json:"-" query:"show_deleted_message"`
 }
 type UpdateMessageRequest struct {
-	Message       MessageRequest `json:"message"`
-	SkipEnrichUrl *bool          `json:"skip_enrich_url,omitempty"`
-	SkipPush      *bool          `json:"skip_push,omitempty"`
+	Message MessageRequest `json:"message"`
+	// Skip enrich URL
+	SkipEnrichUrl *bool `json:"skip_enrich_url,omitempty"`
+	SkipPush      *bool `json:"skip_push,omitempty"`
 }
 type UpdateMessagePartialRequest struct {
-	SkipEnrichUrl *bool          `json:"skip_enrich_url,omitempty"`
-	SkipPush      *bool          `json:"skip_push,omitempty"`
-	UserID        *string        `json:"user_id,omitempty"`
-	Unset         []string       `json:"unset"`
-	Set           map[string]any `json:"set"`
-	User          *UserRequest   `json:"user,omitempty"`
+	// Skip enriching the URL in the message
+	SkipEnrichUrl *bool   `json:"skip_enrich_url,omitempty"`
+	SkipPush      *bool   `json:"skip_push,omitempty"`
+	UserID        *string `json:"user_id,omitempty"`
+	// Array of field names to unset
+	Unset []string `json:"unset"`
+	// Sets new field values
+	Set  map[string]any `json:"set"`
+	User *UserRequest   `json:"user,omitempty"`
 }
 type RunMessageActionRequest struct {
+	// ReadOnlyData to execute command with
 	FormData map[string]string `json:"form_data"`
 	UserID   *string           `json:"user_id,omitempty"`
 	User     *UserRequest      `json:"user,omitempty"`
@@ -402,17 +499,22 @@ type RunMessageActionRequest struct {
 type CommitMessageRequest struct {
 }
 type EphemeralMessageUpdateRequest struct {
-	SkipEnrichUrl *bool          `json:"skip_enrich_url,omitempty"`
-	SkipPush      *bool          `json:"skip_push,omitempty"`
-	UserID        *string        `json:"user_id,omitempty"`
-	Unset         []string       `json:"unset"`
-	Set           map[string]any `json:"set"`
-	User          *UserRequest   `json:"user,omitempty"`
+	// Skip enriching the URL in the message
+	SkipEnrichUrl *bool   `json:"skip_enrich_url,omitempty"`
+	SkipPush      *bool   `json:"skip_push,omitempty"`
+	UserID        *string `json:"user_id,omitempty"`
+	// Array of field names to unset
+	Unset []string `json:"unset"`
+	// Sets new field values
+	Set  map[string]any `json:"set"`
+	User *UserRequest   `json:"user,omitempty"`
 }
 type SendReactionRequest struct {
-	Reaction      ReactionRequest `json:"reaction"`
-	EnforceUnique *bool           `json:"enforce_unique,omitempty"`
-	SkipPush      *bool           `json:"skip_push,omitempty"`
+	Reaction ReactionRequest `json:"reaction"`
+	// Whether to replace all existing user reactions
+	EnforceUnique *bool `json:"enforce_unique,omitempty"`
+	// Skips any mobile push notifications
+	SkipPush *bool `json:"skip_push,omitempty"`
 }
 type DeleteReactionRequest struct {
 	UserID *string `json:"-" query:"user_id"`
@@ -431,9 +533,11 @@ type QueryReactionsRequest struct {
 	User   *UserRequest       `json:"user,omitempty"`
 }
 type TranslateMessageRequest struct {
+	// Language to translate message to
 	Language string `json:"language"`
 }
 type UndeleteMessageRequest struct {
+	// ID of the user who is undeleting the message
 	UndeletedBy string `json:"undeleted_by"`
 }
 type CastPollVoteRequest struct {
@@ -470,14 +574,18 @@ type QueryMessageFlagsRequest struct {
 	Payload *QueryMessageFlagsPayload `json:"-" query:"payload"`
 }
 type MuteChannelRequest struct {
-	Expiration  *int         `json:"expiration,omitempty"`
-	UserID      *string      `json:"user_id,omitempty"`
+	// Duration of mute in milliseconds
+	Expiration *int    `json:"expiration,omitempty"`
+	UserID     *string `json:"user_id,omitempty"`
+	// Channel CIDs to mute (if multiple channels)
 	ChannelCids []string     `json:"channel_cids"`
 	User        *UserRequest `json:"user,omitempty"`
 }
 type UnmuteChannelRequest struct {
-	Expiration  *int         `json:"expiration,omitempty"`
-	UserID      *string      `json:"user_id,omitempty"`
+	// Duration of mute in milliseconds
+	Expiration *int    `json:"expiration,omitempty"`
+	UserID     *string `json:"user_id,omitempty"`
+	// Channel CIDs to mute (if multiple channels)
 	ChannelCids []string     `json:"channel_cids"`
 	User        *UserRequest `json:"user,omitempty"`
 }
@@ -488,71 +596,93 @@ type QueryFutureChannelBansRequest struct {
 	Payload *QueryFutureChannelBansPayload `json:"-" query:"payload"`
 }
 type QueryRemindersRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	UserID *string            `json:"user_id,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user,omitempty"`
+	Limit  *int    `json:"limit,omitempty"`
+	Next   *string `json:"next,omitempty"`
+	Prev   *string `json:"prev,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+	// Filter to apply to the query
+	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type GetRetentionPolicyRequest struct {
 }
 type SetRetentionPolicyRequest struct {
-	MaxAgeHours *int    `json:"max_age_hours,omitempty"`
-	Policy      *string `json:"policy,omitempty"`
+	MaxAgeHours int    `json:"max_age_hours"`
+	Policy      string `json:"policy"`
 }
 type DeleteRetentionPolicyRequest struct {
-	Policy *string `json:"policy,omitempty"`
+	Policy string `json:"policy"`
 }
 type GetRetentionPolicyRunsRequest struct {
-	Limit  *int `json:"-" query:"limit"`
-	Offset *int `json:"-" query:"offset"`
+	Limit *int    `json:"limit,omitempty"`
+	Next  *string `json:"next,omitempty"`
+	Prev  *string `json:"prev,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+	// Filter conditions to apply to the query
+	FilterConditions map[string]any `json:"filter_conditions"`
 }
 type SearchRequest struct {
 	Payload *SearchPayload `json:"-" query:"payload"`
 }
 type QuerySegmentsRequest struct {
-	Filter map[string]any     `json:"filter"`
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
+	// Filter to apply to the query
+	Filter map[string]any `json:"filter"`
+	Limit  *int           `json:"limit,omitempty"`
+	Next   *string        `json:"next,omitempty"`
+	Prev   *string        `json:"prev,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
 }
 type DeleteSegmentRequest struct {
 }
 type GetSegmentRequest struct {
 }
 type DeleteSegmentTargetsRequest struct {
+	// Target IDs
 	TargetIds []string `json:"target_ids"`
 }
 type SegmentTargetExistsRequest struct {
 }
 type QuerySegmentTargetsRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
+	// Limit
+	Limit *int `json:"limit,omitempty"`
+	// Next
+	Next *string `json:"next,omitempty"`
+	// Prev
 	Prev   *string            `json:"prev,omitempty"`
 	Sort   []SortParamRequest `json:"Sort"`
 	Filter map[string]any     `json:"Filter"`
 }
 type QueryTeamUsageStatsRequest struct {
-	EndDate   *string `json:"end_date,omitempty"`
-	Limit     *int    `json:"limit,omitempty"`
-	Month     *string `json:"month,omitempty"`
-	Next      *string `json:"next,omitempty"`
+	// End date in YYYY-MM-DD format. Used with start_date for custom date range. Returns daily breakdown.
+	EndDate *string `json:"end_date,omitempty"`
+	// Maximum number of teams to return per page (default: 30, max: 30)
+	Limit *int `json:"limit,omitempty"`
+	// Month in YYYY-MM format (e.g., '2026-01'). Mutually exclusive with start_date/end_date. Returns aggregated monthly values.
+	Month *string `json:"month,omitempty"`
+	// Cursor for pagination to fetch next page of teams
+	Next *string `json:"next,omitempty"`
+	// Start date in YYYY-MM-DD format. Used with end_date for custom date range. Returns daily breakdown.
 	StartDate *string `json:"start_date,omitempty"`
 }
 type QueryThreadsRequest struct {
-	Limit            *int               `json:"limit,omitempty"`
-	MemberLimit      *int               `json:"member_limit,omitempty"`
-	Next             *string            `json:"next,omitempty"`
-	ParticipantLimit *int               `json:"participant_limit,omitempty"`
-	Prev             *string            `json:"prev,omitempty"`
-	ReplyLimit       *int               `json:"reply_limit,omitempty"`
-	UserID           *string            `json:"user_id,omitempty"`
-	Sort             []SortParamRequest `json:"sort"`
-	Filter           map[string]any     `json:"filter"`
-	User             *UserRequest       `json:"user,omitempty"`
+	Limit       *int    `json:"limit,omitempty"`
+	MemberLimit *int    `json:"member_limit,omitempty"`
+	Next        *string `json:"next,omitempty"`
+	// Limit the number of participants returned per each thread
+	ParticipantLimit *int    `json:"participant_limit,omitempty"`
+	Prev             *string `json:"prev,omitempty"`
+	// Limit the number of replies returned per each thread
+	ReplyLimit *int    `json:"reply_limit,omitempty"`
+	UserID     *string `json:"user_id,omitempty"`
+	// Sort conditions to apply to threads
+	Sort []SortParamRequest `json:"sort"`
+	// Filter conditions to apply to threads
+	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type GetThreadRequest struct {
 	ReplyLimit       *int `json:"-" query:"reply_limit"`
@@ -560,10 +690,12 @@ type GetThreadRequest struct {
 	MemberLimit      *int `json:"-" query:"member_limit"`
 }
 type UpdateThreadPartialRequest struct {
-	UserID *string        `json:"user_id,omitempty"`
-	Unset  []string       `json:"unset"`
-	Set    map[string]any `json:"set"`
-	User   *UserRequest   `json:"user,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Array of field names to unset
+	Unset []string `json:"unset"`
+	// Sets new field values
+	Set  map[string]any `json:"set"`
+	User *UserRequest   `json:"user,omitempty"`
 }
 type UnreadCountsRequest struct {
 	UserID *string `json:"-" query:"user_id"`
@@ -575,26 +707,40 @@ type SendUserCustomEventRequest struct {
 	Event UserCustomEventRequest `json:"event"`
 }
 type CheckPushRequest struct {
-	ApnTemplate          *string      `json:"apn_template,omitempty"`
-	EventType            *string      `json:"event_type,omitempty"`
-	FirebaseDataTemplate *string      `json:"firebase_data_template,omitempty"`
-	FirebaseTemplate     *string      `json:"firebase_template,omitempty"`
-	MessageID            *string      `json:"message_id,omitempty"`
-	PushProviderName     *string      `json:"push_provider_name,omitempty"`
-	PushProviderType     *string      `json:"push_provider_type,omitempty"`
-	SkipDevices          *bool        `json:"skip_devices,omitempty"`
-	UserID               *string      `json:"user_id,omitempty"`
-	User                 *UserRequest `json:"user,omitempty"`
+	// Push message template for APN
+	ApnTemplate *string `json:"apn_template,omitempty"`
+	// Type of event for push templates (default: message.new). One of: message.new, message.updated, reaction.new, reaction.updated, notification.reminder_due
+	EventType *string `json:"event_type,omitempty"`
+	// Push message data template for Firebase
+	FirebaseDataTemplate *string `json:"firebase_data_template,omitempty"`
+	// Push message template for Firebase
+	FirebaseTemplate *string `json:"firebase_template,omitempty"`
+	// Message ID to send push notification for
+	MessageID *string `json:"message_id,omitempty"`
+	// Name of push provider
+	PushProviderName *string `json:"push_provider_name,omitempty"`
+	// Push provider type. One of: firebase, apn, huawei, xiaomi
+	PushProviderType *string `json:"push_provider_type,omitempty"`
+	// Don't require existing devices to render templates
+	SkipDevices *bool        `json:"skip_devices,omitempty"`
+	UserID      *string      `json:"user_id,omitempty"`
+	User        *UserRequest `json:"user,omitempty"`
 }
 type CheckSNSRequest struct {
-	SnsKey      *string `json:"sns_key,omitempty"`
-	SnsSecret   *string `json:"sns_secret,omitempty"`
+	// AWS SNS access key
+	SnsKey *string `json:"sns_key,omitempty"`
+	// AWS SNS key secret
+	SnsSecret *string `json:"sns_secret,omitempty"`
+	// AWS SNS topic ARN
 	SnsTopicArn *string `json:"sns_topic_arn,omitempty"`
 }
 type CheckSQSRequest struct {
-	SqsKey    *string `json:"sqs_key,omitempty"`
+	// AWS SQS access key
+	SqsKey *string `json:"sqs_key,omitempty"`
+	// AWS SQS key secret
 	SqsSecret *string `json:"sqs_secret,omitempty"`
-	SqsUrl    *string `json:"sqs_url,omitempty"`
+	// AWS SQS endpoint URL
+	SqsUrl *string `json:"sqs_url,omitempty"`
 }
 type DeleteDeviceRequest struct {
 	ID     string  `json:"-" query:"id"`
@@ -604,12 +750,17 @@ type ListDevicesRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
 type CreateDeviceRequest struct {
-	ID               string       `json:"id"`
-	PushProvider     string       `json:"push_provider"`
-	PushProviderName *string      `json:"push_provider_name,omitempty"`
-	UserID           *string      `json:"user_id,omitempty"`
-	VoipToken        *bool        `json:"voip_token,omitempty"`
-	User             *UserRequest `json:"user,omitempty"`
+	// Device ID
+	ID string `json:"id"`
+	// Push provider
+	PushProvider string `json:"push_provider"`
+	// Push provider name
+	PushProviderName *string `json:"push_provider_name,omitempty"`
+	// **Server-side only**. User ID which server acts upon
+	UserID *string `json:"user_id,omitempty"`
+	// When true the token is for Apple VoIP push notifications
+	VoipToken *bool        `json:"voip_token,omitempty"`
+	User      *UserRequest `json:"user,omitempty"`
 }
 type ExportUsersRequest struct {
 	UserIds []string `json:"user_ids"`
@@ -617,118 +768,171 @@ type ExportUsersRequest struct {
 type ListExternalStorageRequest struct {
 }
 type CreateExternalStorageRequest struct {
-	Bucket         string        `json:"bucket"`
-	Name           string        `json:"name"`
-	StorageType    string        `json:"storage_type"`
-	GcsCredentials *string       `json:"gcs_credentials,omitempty"`
-	Path           *string       `json:"path,omitempty"`
-	AWSS3          *S3Request    `json:"aws_s3,omitempty"`
-	AzureBlob      *AzureRequest `json:"azure_blob,omitempty"`
+	// The name of the bucket on the service provider
+	Bucket string `json:"bucket"`
+	// The name of the provider, this must be unique
+	Name string `json:"name"`
+	// The type of storage to use
+	StorageType    string  `json:"storage_type"`
+	GcsCredentials *string `json:"gcs_credentials,omitempty"`
+	// The path prefix to use for storing files
+	Path      *string       `json:"path,omitempty"`
+	AWSS3     *S3Request    `json:"aws_s3,omitempty"`
+	AzureBlob *AzureRequest `json:"azure_blob,omitempty"`
 }
 type DeleteExternalStorageRequest struct {
 }
 type UpdateExternalStorageRequest struct {
-	Bucket         string        `json:"bucket"`
-	StorageType    string        `json:"storage_type"`
-	GcsCredentials *string       `json:"gcs_credentials,omitempty"`
-	Path           *string       `json:"path,omitempty"`
-	AWSS3          *S3Request    `json:"aws_s3,omitempty"`
-	AzureBlob      *AzureRequest `json:"azure_blob,omitempty"`
+	// The name of the bucket on the service provider
+	Bucket string `json:"bucket"`
+	// The type of storage to use
+	StorageType    string  `json:"storage_type"`
+	GcsCredentials *string `json:"gcs_credentials,omitempty"`
+	// The path prefix to use for storing files
+	Path      *string       `json:"path,omitempty"`
+	AWSS3     *S3Request    `json:"aws_s3,omitempty"`
+	AzureBlob *AzureRequest `json:"azure_blob,omitempty"`
 }
 type CheckExternalStorageRequest struct {
 }
 type AddActivityRequest struct {
-	Type                       string            `json:"type"`
-	Feeds                      []string          `json:"feeds"`
-	CopyCustomToNotification   *bool             `json:"copy_custom_to_notification,omitempty"`
-	CreateNotificationActivity *bool             `json:"create_notification_activity,omitempty"`
-	EnrichOwnFields            *bool             `json:"enrich_own_fields,omitempty"`
-	ExpiresAt                  *string           `json:"expires_at,omitempty"`
-	ID                         *string           `json:"id,omitempty"`
-	ParentID                   *string           `json:"parent_id,omitempty"`
-	PollID                     *string           `json:"poll_id,omitempty"`
-	RestrictReplies            *string           `json:"restrict_replies,omitempty"`
-	SkipEnrichUrl              *bool             `json:"skip_enrich_url,omitempty"`
-	SkipPush                   *bool             `json:"skip_push,omitempty"`
-	Text                       *string           `json:"text,omitempty"`
-	UserID                     *string           `json:"user_id,omitempty"`
-	Visibility                 *string           `json:"visibility,omitempty"`
-	VisibilityTag              *string           `json:"visibility_tag,omitempty"`
-	Attachments                []Attachment      `json:"attachments"`
-	CollectionRefs             []string          `json:"collection_refs"`
-	FilterTags                 []string          `json:"filter_tags"`
-	InterestTags               []string          `json:"interest_tags"`
-	MentionedUserIds           []string          `json:"mentioned_user_ids"`
-	Custom                     map[string]any    `json:"custom"`
-	Location                   *ActivityLocation `json:"location,omitempty"`
-	SearchData                 map[string]any    `json:"search_data"`
+	// Type of activity
+	Type string `json:"type"`
+	// List of feeds to add the activity to with a default max limit of 25 feeds
+	Feeds []string `json:"feeds"`
+	// Whether to copy custom data to the notification activity (only applies when create_notification_activity is true) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
+	// Deprecated: this field is deprecated.
+	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
+	// Whether to create notification activities for mentioned users
+	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+	EnrichOwnFields            *bool `json:"enrich_own_fields,omitempty"`
+	// Expiration time for the activity
+	ExpiresAt *string `json:"expires_at,omitempty"`
+	// Optional ID for the activity
+	ID *string `json:"id,omitempty"`
+	// ID of parent activity for replies/comments
+	ParentID *string `json:"parent_id,omitempty"`
+	// ID of a poll to attach to activity
+	PollID *string `json:"poll_id,omitempty"`
+	// Controls who can add comments/replies to this activity. One of: everyone, people_i_follow, nobody
+	RestrictReplies *string `json:"restrict_replies,omitempty"`
+	// Whether to skip URL enrichment for the activity
+	SkipEnrichUrl *bool `json:"skip_enrich_url,omitempty"`
+	// Whether to skip push notifications
+	SkipPush *bool `json:"skip_push,omitempty"`
+	// Text content of the activity
+	Text *string `json:"text,omitempty"`
+	// ID of the user creating the activity
+	UserID *string `json:"user_id,omitempty"`
+	// Visibility setting for the activity. One of: public, private, tag
+	Visibility *string `json:"visibility,omitempty"`
+	// If visibility is 'tag', this is the tag name and is required
+	VisibilityTag *string `json:"visibility_tag,omitempty"`
+	// List of attachments for the activity
+	Attachments []Attachment `json:"attachments"`
+	// Collections that this activity references
+	CollectionRefs []string `json:"collection_refs"`
+	// Tags for filtering activities
+	FilterTags []string `json:"filter_tags"`
+	// Tags for indicating user interests
+	InterestTags []string `json:"interest_tags"`
+	// List of users mentioned in the activity
+	MentionedUserIds []string `json:"mentioned_user_ids"`
+	// Custom data for the activity
+	Custom   map[string]any    `json:"custom"`
+	Location *ActivityLocation `json:"location,omitempty"`
+	// Additional data for search indexing
+	SearchData map[string]any `json:"search_data"`
 }
 type UpsertActivitiesRequest struct {
-	Activities      []ActivityRequest `json:"activities"`
-	EnrichOwnFields *bool             `json:"enrich_own_fields,omitempty"`
+	// List of activities to create or update
+	Activities []ActivityRequest `json:"activities"`
+	// If true, enriches the activities' current_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
+	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 }
 type UpdateActivitiesPartialBatchRequest struct {
+	// List of activity changes to apply. Each change specifies an activity ID and the fields to set/unset
 	Changes []UpdateActivityPartialChangeRequest `json:"changes"`
 }
 type DeleteActivitiesRequest struct {
-	Ids                        []string     `json:"ids"`
-	DeleteNotificationActivity *bool        `json:"delete_notification_activity,omitempty"`
-	HardDelete                 *bool        `json:"hard_delete,omitempty"`
-	UserID                     *string      `json:"user_id,omitempty"`
-	User                       *UserRequest `json:"user,omitempty"`
+	// List of activity IDs to delete
+	Ids []string `json:"ids"`
+	// Whether to also delete any notification activities created from mentions in these activities
+	DeleteNotificationActivity *bool `json:"delete_notification_activity,omitempty"`
+	// Whether to permanently delete the activities
+	HardDelete *bool        `json:"hard_delete,omitempty"`
+	UserID     *string      `json:"user_id,omitempty"`
+	User       *UserRequest `json:"user,omitempty"`
 }
 type TrackActivityMetricsRequest struct {
+	// List of metric events to track (max 100 per request)
 	Events []TrackActivityMetricsEvent `json:"events"`
 	UserID *string                     `json:"user_id,omitempty"`
 	User   *UserRequest                `json:"user,omitempty"`
 }
 type QueryActivitiesRequest struct {
-	EnrichOwnFields          *bool              `json:"enrich_own_fields,omitempty"`
-	IncludeExpiredActivities *bool              `json:"include_expired_activities,omitempty"`
-	IncludePrivateActivities *bool              `json:"include_private_activities,omitempty"`
-	Limit                    *int               `json:"limit,omitempty"`
-	Next                     *string            `json:"next,omitempty"`
-	Prev                     *string            `json:"prev,omitempty"`
-	UserID                   *string            `json:"user_id,omitempty"`
-	Sort                     []SortParamRequest `json:"sort"`
-	Filter                   map[string]any     `json:"filter"`
-	User                     *UserRequest       `json:"user,omitempty"`
+	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
+	// When true, include both expired and non-expired activities in the result.
+	IncludeExpiredActivities *bool   `json:"include_expired_activities,omitempty"`
+	IncludePrivateActivities *bool   `json:"include_private_activities,omitempty"`
+	Limit                    *int    `json:"limit,omitempty"`
+	Next                     *string `json:"next,omitempty"`
+	Prev                     *string `json:"prev,omitempty"`
+	UserID                   *string `json:"user_id,omitempty"`
+	// Sorting parameters for the query
+	Sort []SortParamRequest `json:"sort"`
+	// Filters to apply to the query. Supports location-based queries with 'near' and 'within_bounds' operators.
+	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type DeleteBookmarkRequest struct {
 	FolderID *string `json:"-" query:"folder_id"`
 	UserID   *string `json:"-" query:"user_id"`
 }
 type UpdateBookmarkRequest struct {
-	FolderID    *string           `json:"folder_id,omitempty"`
-	NewFolderID *string           `json:"new_folder_id,omitempty"`
-	UserID      *string           `json:"user_id,omitempty"`
-	Custom      map[string]any    `json:"custom"`
-	NewFolder   *AddFolderRequest `json:"new_folder,omitempty"`
-	User        *UserRequest      `json:"user,omitempty"`
+	// ID of the folder to move the bookmark to
+	FolderID    *string `json:"folder_id,omitempty"`
+	NewFolderID *string `json:"new_folder_id,omitempty"`
+	UserID      *string `json:"user_id,omitempty"`
+	// Custom data for the bookmark
+	Custom    map[string]any    `json:"custom"`
+	NewFolder *AddFolderRequest `json:"new_folder,omitempty"`
+	User      *UserRequest      `json:"user,omitempty"`
 }
 type AddBookmarkRequest struct {
-	FolderID  *string           `json:"folder_id,omitempty"`
-	UserID    *string           `json:"user_id,omitempty"`
+	// ID of the folder to add the bookmark to
+	FolderID *string `json:"folder_id,omitempty"`
+	UserID   *string `json:"user_id,omitempty"`
+	// Custom data for the bookmark
 	Custom    map[string]any    `json:"custom"`
 	NewFolder *AddFolderRequest `json:"new_folder,omitempty"`
 	User      *UserRequest      `json:"user,omitempty"`
 }
 type ActivityFeedbackRequest struct {
-	Hide     *bool        `json:"hide,omitempty"`
-	ShowLess *bool        `json:"show_less,omitempty"`
+	// Whether to hide this activity
+	Hide *bool `json:"hide,omitempty"`
+	// Whether to show less content like this
+	ShowLess *bool `json:"show_less,omitempty"`
+	// Whether to show more content like this
 	ShowMore *bool        `json:"show_more,omitempty"`
 	UserID   *string      `json:"user_id,omitempty"`
 	User     *UserRequest `json:"user,omitempty"`
 }
 type AddActivityReactionRequest struct {
-	Type                       string         `json:"type"`
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
-	CreateNotificationActivity *bool          `json:"create_notification_activity,omitempty"`
-	EnforceUnique              *bool          `json:"enforce_unique,omitempty"`
-	SkipPush                   *bool          `json:"skip_push,omitempty"`
-	UserID                     *string        `json:"user_id,omitempty"`
-	Custom                     map[string]any `json:"custom"`
-	User                       *UserRequest   `json:"user,omitempty"`
+	// Type of reaction
+	Type string `json:"type"`
+	// Whether to copy custom data to the notification activity (only applies when create_notification_activity is true) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
+	// Deprecated: this field is deprecated.
+	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
+	// Whether to create a notification activity for this reaction
+	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+	// Whether to enforce unique reactions per user (remove other reaction types from the user when adding this one)
+	EnforceUnique *bool   `json:"enforce_unique,omitempty"`
+	SkipPush      *bool   `json:"skip_push,omitempty"`
+	UserID        *string `json:"user_id,omitempty"`
+	// Custom data for the reaction
+	Custom map[string]any `json:"custom"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type QueryActivityReactionsRequest struct {
 	Limit  *int               `json:"limit,omitempty"`
@@ -748,38 +952,65 @@ type DeleteActivityRequest struct {
 type GetActivityRequest struct {
 }
 type UpdateActivityPartialRequest struct {
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
-	EnrichOwnFields            *bool          `json:"enrich_own_fields,omitempty"`
-	HandleMentionNotifications *bool          `json:"handle_mention_notifications,omitempty"`
-	RunActivityProcessors      *bool          `json:"run_activity_processors,omitempty"`
-	UserID                     *string        `json:"user_id,omitempty"`
-	Unset                      []string       `json:"unset"`
-	Set                        map[string]any `json:"set"`
-	User                       *UserRequest   `json:"user,omitempty"`
+	// Whether to copy custom data to the notification activity (only applies when handle_mention_notifications creates notifications) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
+	// Deprecated: this field is deprecated.
+	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
+	// If true, enriches the activity's current_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
+	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
+	// If true, creates notification activities for newly mentioned users and deletes notifications for users no longer mentioned
+	HandleMentionNotifications *bool `json:"handle_mention_notifications,omitempty"`
+	// If true, runs activity processors on the updated activity. Processors will only run if the activity text and/or attachments are changed. Defaults to false.
+	RunActivityProcessors *bool   `json:"run_activity_processors,omitempty"`
+	UserID                *string `json:"user_id,omitempty"`
+	// List of field names to remove. Supported fields: 'custom', 'visibility_tag', 'location', 'expires_at', 'filter_tags', 'interest_tags', 'attachments', 'poll_id', 'mentioned_user_ids', 'search_data'. Use dot-notation for nested custom fields (e.g., 'custom.field_name')
+	Unset []string `json:"unset"`
+	// Map of field names to new values. Supported fields: 'text', 'attachments', 'custom', 'visibility', 'visibility_tag', 'restrict_replies' (values: 'everyone', 'people_i_follow', 'nobody'), 'location', 'expires_at', 'filter_tags', 'interest_tags', 'poll_id', 'feeds', 'mentioned_user_ids', 'search_data'. For custom fields, use dot-notation (e.g., 'custom.field_name')
+	Set  map[string]any `json:"set"`
+	User *UserRequest   `json:"user,omitempty"`
 }
 type UpdateActivityRequest struct {
-	CopyCustomToNotification   *bool             `json:"copy_custom_to_notification,omitempty"`
-	EnrichOwnFields            *bool             `json:"enrich_own_fields,omitempty"`
-	ExpiresAt                  *Timestamp        `json:"expires_at,omitempty"`
-	HandleMentionNotifications *bool             `json:"handle_mention_notifications,omitempty"`
-	PollID                     *string           `json:"poll_id,omitempty"`
-	RestrictReplies            *string           `json:"restrict_replies,omitempty"`
-	RunActivityProcessors      *bool             `json:"run_activity_processors,omitempty"`
-	SkipEnrichUrl              *bool             `json:"skip_enrich_url,omitempty"`
-	Text                       *string           `json:"text,omitempty"`
-	UserID                     *string           `json:"user_id,omitempty"`
-	Visibility                 *string           `json:"visibility,omitempty"`
-	VisibilityTag              *string           `json:"visibility_tag,omitempty"`
-	Attachments                []Attachment      `json:"attachments"`
-	CollectionRefs             []string          `json:"collection_refs"`
-	Feeds                      []string          `json:"feeds"`
-	FilterTags                 []string          `json:"filter_tags"`
-	InterestTags               []string          `json:"interest_tags"`
-	MentionedUserIds           []string          `json:"mentioned_user_ids"`
-	Custom                     map[string]any    `json:"custom"`
-	Location                   *ActivityLocation `json:"location,omitempty"`
-	SearchData                 map[string]any    `json:"search_data"`
-	User                       *UserRequest      `json:"user,omitempty"`
+	// Whether to copy custom data to the notification activity (only applies when handle_mention_notifications creates notifications) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
+	// Deprecated: this field is deprecated.
+	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
+	// If true, enriches the activity's current_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
+	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
+	// Time when the activity will expire
+	ExpiresAt *Timestamp `json:"expires_at,omitempty"`
+	// If true, creates notification activities for newly mentioned users and deletes notifications for users no longer mentioned
+	HandleMentionNotifications *bool `json:"handle_mention_notifications,omitempty"`
+	// Poll ID
+	PollID *string `json:"poll_id,omitempty"`
+	// Controls who can add comments/replies to this activity. One of: everyone, people_i_follow, nobody
+	RestrictReplies *string `json:"restrict_replies,omitempty"`
+	// If true, runs activity processors on the updated activity. Processors will only run if the activity text and/or attachments are changed. Defaults to false.
+	RunActivityProcessors *bool `json:"run_activity_processors,omitempty"`
+	// Whether to skip URL enrichment for the activity
+	SkipEnrichUrl *bool `json:"skip_enrich_url,omitempty"`
+	// The text content of the activity
+	Text   *string `json:"text,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Visibility setting for the activity
+	Visibility *string `json:"visibility,omitempty"`
+	// If visibility is 'tag', this is the tag name and is required
+	VisibilityTag *string `json:"visibility_tag,omitempty"`
+	// List of attachments for the activity
+	Attachments []Attachment `json:"attachments"`
+	// Collections that this activity references
+	CollectionRefs []string `json:"collection_refs"`
+	// List of feeds the activity is present in
+	Feeds []string `json:"feeds"`
+	// Tags used for filtering the activity
+	FilterTags []string `json:"filter_tags"`
+	// Tags indicating interest categories
+	InterestTags []string `json:"interest_tags"`
+	// List of user IDs mentioned in the activity
+	MentionedUserIds []string `json:"mentioned_user_ids"`
+	// Custom data for the activity
+	Custom   map[string]any    `json:"custom"`
+	Location *ActivityLocation `json:"location,omitempty"`
+	// Additional data for search indexing
+	SearchData map[string]any `json:"search_data"`
+	User       *UserRequest   `json:"user,omitempty"`
 }
 type RestoreActivityRequest struct {
 	EnrichOwnFields *bool        `json:"-" query:"enrich_own_fields"`
@@ -787,27 +1018,33 @@ type RestoreActivityRequest struct {
 	User            *UserRequest `json:"user,omitempty"`
 }
 type QueryBookmarkFoldersRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
+	Limit *int    `json:"limit,omitempty"`
+	Next  *string `json:"next,omitempty"`
+	Prev  *string `json:"prev,omitempty"`
+	// Sorting parameters for the query
+	Sort []SortParamRequest `json:"sort"`
+	// Filters to apply to the query
+	Filter map[string]any `json:"filter"`
 }
 type DeleteBookmarkFolderRequest struct {
 }
 type UpdateBookmarkFolderRequest struct {
-	Name   *string        `json:"name,omitempty"`
-	UserID *string        `json:"user_id,omitempty"`
+	// Name of the folder
+	Name   *string `json:"name,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Custom data for the folder
 	Custom map[string]any `json:"custom"`
 	User   *UserRequest   `json:"user,omitempty"`
 }
 type QueryBookmarksRequest struct {
-	EnrichOwnFields *bool              `json:"enrich_own_fields,omitempty"`
-	Limit           *int               `json:"limit,omitempty"`
-	Next            *string            `json:"next,omitempty"`
-	Prev            *string            `json:"prev,omitempty"`
-	Sort            []SortParamRequest `json:"sort"`
-	Filter          map[string]any     `json:"filter"`
+	EnrichOwnFields *bool   `json:"enrich_own_fields,omitempty"`
+	Limit           *int    `json:"limit,omitempty"`
+	Next            *string `json:"next,omitempty"`
+	Prev            *string `json:"prev,omitempty"`
+	// Sorting parameters for the query
+	Sort []SortParamRequest `json:"sort"`
+	// Filters to apply to the query
+	Filter map[string]any `json:"filter"`
 }
 type DeleteCollectionsRequest struct {
 	CollectionRefs []string `json:"-" query:"collection_refs"`
@@ -817,26 +1054,31 @@ type ReadCollectionsRequest struct {
 	CollectionRefs []string `json:"-" query:"collection_refs"`
 }
 type UpdateCollectionsRequest struct {
+	// List of collections to update (only custom data is updatable)
 	Collections []UpdateCollectionRequest `json:"collections"`
 	UserID      *string                   `json:"user_id,omitempty"`
 	User        *UserRequest              `json:"user,omitempty"`
 }
 type CreateCollectionsRequest struct {
+	// List of collections to create
 	Collections []CollectionRequest `json:"collections"`
 	UserID      *string             `json:"user_id,omitempty"`
 	User        *UserRequest        `json:"user,omitempty"`
 }
 type UpsertCollectionsRequest struct {
+	// List of collections to upsert (insert if new, update if existing)
 	Collections []CollectionRequest `json:"collections"`
 }
 type QueryCollectionsRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	UserID *string            `json:"user_id,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user,omitempty"`
+	Limit  *int    `json:"limit,omitempty"`
+	Next   *string `json:"next,omitempty"`
+	Prev   *string `json:"prev,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Sorting parameters for the query
+	Sort []SortParamRequest `json:"sort"`
+	// Filters to apply to the query
+	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type GetCommentsRequest struct {
 	ObjectID     string  `json:"-" query:"object_id"`
@@ -844,39 +1086,57 @@ type GetCommentsRequest struct {
 	Depth        *int    `json:"-" query:"depth"`
 	Sort         *string `json:"-" query:"sort"`
 	RepliesLimit *int    `json:"-" query:"replies_limit"`
+	IDAround     *string `json:"-" query:"id_around"`
 	UserID       *string `json:"-" query:"user_id"`
 	Limit        *int    `json:"-" query:"limit"`
 	Prev         *string `json:"-" query:"prev"`
 	Next         *string `json:"-" query:"next"`
 }
 type AddCommentRequest struct {
-	Comment                    *string        `json:"comment,omitempty"`
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
-	CreateNotificationActivity *bool          `json:"create_notification_activity,omitempty"`
-	ID                         *string        `json:"id,omitempty"`
-	ObjectID                   *string        `json:"object_id,omitempty"`
-	ObjectType                 *string        `json:"object_type,omitempty"`
-	ParentID                   *string        `json:"parent_id,omitempty"`
-	SkipEnrichUrl              *bool          `json:"skip_enrich_url,omitempty"`
-	SkipPush                   *bool          `json:"skip_push,omitempty"`
-	UserID                     *string        `json:"user_id,omitempty"`
-	Attachments                []Attachment   `json:"attachments"`
-	MentionedUserIds           []string       `json:"mentioned_user_ids"`
-	Custom                     map[string]any `json:"custom"`
-	User                       *UserRequest   `json:"user,omitempty"`
+	// Text content of the comment
+	Comment *string `json:"comment,omitempty"`
+	// Whether to copy custom data to the notification activity (only applies when create_notification_activity is true) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
+	// Deprecated: this field is deprecated.
+	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
+	// Whether to create a notification activity for this comment
+	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+	// Optional custom ID for the comment (max 255 characters). If not provided, a UUID will be generated.
+	ID *string `json:"id,omitempty"`
+	// ID of the object to comment on. Required for root comments
+	ObjectID *string `json:"object_id,omitempty"`
+	// Type of the object to comment on. Required for root comments
+	ObjectType *string `json:"object_type,omitempty"`
+	// ID of parent comment for replies. When provided, object_id and object_type are automatically inherited from the parent comment.
+	ParentID *string `json:"parent_id,omitempty"`
+	// Whether to skip URL enrichment for this comment
+	SkipEnrichUrl *bool   `json:"skip_enrich_url,omitempty"`
+	SkipPush      *bool   `json:"skip_push,omitempty"`
+	UserID        *string `json:"user_id,omitempty"`
+	// Media attachments for the reply
+	Attachments []Attachment `json:"attachments"`
+	// List of users mentioned in the reply
+	MentionedUserIds []string `json:"mentioned_user_ids"`
+	// Custom data for the comment
+	Custom map[string]any `json:"custom"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type AddCommentsBatchRequest struct {
+	// List of comments to add
 	Comments []AddCommentRequest `json:"comments"`
 }
 type QueryCommentsRequest struct {
-	Filter   map[string]any `json:"filter"`
-	IDAround *string        `json:"id_around,omitempty"`
-	Limit    *int           `json:"limit,omitempty"`
-	Next     *string        `json:"next,omitempty"`
-	Prev     *string        `json:"prev,omitempty"`
-	Sort     *string        `json:"sort,omitempty"`
-	UserID   *string        `json:"user_id,omitempty"`
-	User     *UserRequest   `json:"user,omitempty"`
+	// MongoDB-style filter for querying comments
+	Filter map[string]any `json:"filter"`
+	// Returns the comment with the specified ID along with surrounding comments for context
+	IDAround *string `json:"id_around,omitempty"`
+	// Maximum number of comments to return
+	Limit *int    `json:"limit,omitempty"`
+	Next  *string `json:"next,omitempty"`
+	Prev  *string `json:"prev,omitempty"`
+	// first (oldest), last (newest) or top. One of: first, last, top, best, controversial
+	Sort   *string      `json:"sort,omitempty"`
+	UserID *string      `json:"user_id,omitempty"`
+	User   *UserRequest `json:"user,omitempty"`
 }
 type DeleteCommentRequest struct {
 	HardDelete                 *bool `json:"-" query:"hard_delete"`
@@ -885,36 +1145,57 @@ type DeleteCommentRequest struct {
 type GetCommentRequest struct {
 }
 type UpdateCommentRequest struct {
-	Comment                    *string        `json:"comment,omitempty"`
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
-	HandleMentionNotifications *bool          `json:"handle_mention_notifications,omitempty"`
-	SkipEnrichUrl              *bool          `json:"skip_enrich_url,omitempty"`
-	SkipPush                   *bool          `json:"skip_push,omitempty"`
-	UserID                     *string        `json:"user_id,omitempty"`
-	Attachments                []Attachment   `json:"attachments"`
-	MentionedUserIds           []string       `json:"mentioned_user_ids"`
-	Custom                     map[string]any `json:"custom"`
-	User                       *UserRequest   `json:"user,omitempty"`
+	// Updated text content of the comment
+	Comment *string `json:"comment,omitempty"`
+	// Whether to copy custom data to the notification activity (only applies when handle_mention_notifications creates notifications) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
+	// Deprecated: this field is deprecated.
+	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
+	// If true, creates notification activities for newly mentioned users and deletes notifications for users no longer mentioned
+	HandleMentionNotifications *bool `json:"handle_mention_notifications,omitempty"`
+	// Whether to skip URL enrichment for this comment
+	SkipEnrichUrl *bool   `json:"skip_enrich_url,omitempty"`
+	SkipPush      *bool   `json:"skip_push,omitempty"`
+	UserID        *string `json:"user_id,omitempty"`
+	// Updated media attachments for the comment. Providing this field will replace all existing attachments.
+	Attachments []Attachment `json:"attachments"`
+	// List of user IDs mentioned in the comment
+	MentionedUserIds []string `json:"mentioned_user_ids"`
+	// Updated custom data for the comment
+	Custom map[string]any `json:"custom"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type UpdateCommentPartialRequest struct {
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
-	HandleMentionNotifications *bool          `json:"handle_mention_notifications,omitempty"`
-	SkipEnrichUrl              *bool          `json:"skip_enrich_url,omitempty"`
-	SkipPush                   *bool          `json:"skip_push,omitempty"`
-	UserID                     *string        `json:"user_id,omitempty"`
-	Unset                      []string       `json:"unset"`
-	Set                        map[string]any `json:"set"`
-	User                       *UserRequest   `json:"user,omitempty"`
+	// Whether to copy custom data to notification activities Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
+	// Deprecated: this field is deprecated.
+	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
+	// Whether to handle mention notification changes
+	HandleMentionNotifications *bool `json:"handle_mention_notifications,omitempty"`
+	// Whether to skip URL enrichment
+	SkipEnrichUrl *bool `json:"skip_enrich_url,omitempty"`
+	// Whether to skip push notifications
+	SkipPush *bool   `json:"skip_push,omitempty"`
+	UserID   *string `json:"user_id,omitempty"`
+	// List of field names to remove. Supported fields: 'custom', 'attachments', 'mentioned_user_ids', 'status'. Use dot-notation for nested custom fields (e.g., 'custom.field_name')
+	Unset []string `json:"unset"`
+	// Map of field names to new values. Supported fields: 'text', 'attachments', 'custom', 'mentioned_user_ids', 'status'. Use dot-notation for nested custom fields (e.g., 'custom.field_name')
+	Set  map[string]any `json:"set"`
+	User *UserRequest   `json:"user,omitempty"`
 }
 type AddCommentReactionRequest struct {
-	Type                       string         `json:"type"`
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
-	CreateNotificationActivity *bool          `json:"create_notification_activity,omitempty"`
-	EnforceUnique              *bool          `json:"enforce_unique,omitempty"`
-	SkipPush                   *bool          `json:"skip_push,omitempty"`
-	UserID                     *string        `json:"user_id,omitempty"`
-	Custom                     map[string]any `json:"custom"`
-	User                       *UserRequest   `json:"user,omitempty"`
+	// The type of reaction, eg upvote, like, ...
+	Type string `json:"type"`
+	// Whether to copy custom data to the notification activity (only applies when create_notification_activity is true) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
+	// Deprecated: this field is deprecated.
+	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
+	// Whether to create a notification activity for this reaction
+	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+	// Whether to enforce unique reactions per user (remove other reaction types from the user when adding this one)
+	EnforceUnique *bool   `json:"enforce_unique,omitempty"`
+	SkipPush      *bool   `json:"skip_push,omitempty"`
+	UserID        *string `json:"user_id,omitempty"`
+	// Optional custom data to add to the reaction
+	Custom map[string]any `json:"custom"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type QueryCommentReactionsRequest struct {
 	Limit  *int               `json:"limit,omitempty"`
@@ -931,6 +1212,7 @@ type GetCommentRepliesRequest struct {
 	Depth        *int    `json:"-" query:"depth"`
 	Sort         *string `json:"-" query:"sort"`
 	RepliesLimit *int    `json:"-" query:"replies_limit"`
+	IDAround     *string `json:"-" query:"id_around"`
 	UserID       *string `json:"-" query:"user_id"`
 	Limit        *int    `json:"-" query:"limit"`
 	Prev         *string `json:"-" query:"prev"`
@@ -944,16 +1226,21 @@ type ListFeedGroupsRequest struct {
 	IncludeSoftDeleted *bool `json:"-" query:"include_soft_deleted"`
 }
 type CreateFeedGroupRequest struct {
-	ID                 string                    `json:"id"`
-	DefaultVisibility  *string                   `json:"default_visibility,omitempty"`
+	// Unique identifier for the feed group
+	ID string `json:"id"`
+	// Default visibility for the feed group, can be 'public', 'visible', 'followers', 'members', or 'private'. Defaults to 'visible' if not provided.
+	DefaultVisibility *string `json:"default_visibility,omitempty"`
+	// Configuration for activity processors
 	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
-	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
-	Aggregation        *AggregationConfig        `json:"aggregation,omitempty"`
-	Custom             map[string]any            `json:"custom"`
-	Notification       *NotificationConfig       `json:"notification,omitempty"`
-	PushNotification   *PushNotificationConfig   `json:"push_notification,omitempty"`
-	Ranking            *RankingConfig            `json:"ranking,omitempty"`
-	Stories            *StoriesConfig            `json:"stories,omitempty"`
+	// Configuration for activity selectors
+	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
+	Aggregation       *AggregationConfig       `json:"aggregation,omitempty"`
+	// Custom data for the feed group
+	Custom           map[string]any          `json:"custom"`
+	Notification     *NotificationConfig     `json:"notification,omitempty"`
+	PushNotification *PushNotificationConfig `json:"push_notification,omitempty"`
+	Ranking          *RankingConfig          `json:"ranking,omitempty"`
+	Stories          *StoriesConfig          `json:"stories,omitempty"`
 }
 type DeleteFeedRequest struct {
 	HardDelete *bool `json:"-" query:"hard_delete"`
@@ -978,19 +1265,30 @@ type GetOrCreateFeedRequest struct {
 	User                   *UserRequest            `json:"user,omitempty"`
 }
 type UpdateFeedRequest struct {
-	CreatedByID     *string        `json:"created_by_id,omitempty"`
-	Description     *string        `json:"description,omitempty"`
-	EnrichOwnFields *bool          `json:"enrich_own_fields,omitempty"`
-	Name            *string        `json:"name,omitempty"`
-	FilterTags      []string       `json:"filter_tags"`
-	Custom          map[string]any `json:"custom"`
+	// ID of the new feed creator (owner)
+	CreatedByID *string `json:"created_by_id,omitempty"`
+	// Description of the feed
+	Description *string `json:"description,omitempty"`
+	// If true, enriches the feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
+	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
+	// Name of the feed
+	Name *string `json:"name,omitempty"`
+	// Tags used for filtering feeds
+	FilterTags []string `json:"filter_tags"`
+	// Custom data for the feed
+	Custom map[string]any `json:"custom"`
 }
 type MarkActivityRequest struct {
-	MarkAllRead *bool        `json:"mark_all_read,omitempty"`
-	MarkAllSeen *bool        `json:"mark_all_seen,omitempty"`
-	UserID      *string      `json:"user_id,omitempty"`
-	MarkRead    []string     `json:"mark_read"`
-	MarkSeen    []string     `json:"mark_seen"`
+	// Whether to mark all activities as read
+	MarkAllRead *bool `json:"mark_all_read,omitempty"`
+	// Whether to mark all activities as seen
+	MarkAllSeen *bool   `json:"mark_all_seen,omitempty"`
+	UserID      *string `json:"user_id,omitempty"`
+	// List of activity IDs to mark as read
+	MarkRead []string `json:"mark_read"`
+	// List of activity IDs to mark as seen
+	MarkSeen []string `json:"mark_seen"`
+	// List of activity IDs to mark as watched (for stories)
 	MarkWatched []string     `json:"mark_watched"`
 	User        *UserRequest `json:"user,omitempty"`
 }
@@ -999,39 +1297,46 @@ type UnpinActivityRequest struct {
 	UserID          *string `json:"-" query:"user_id"`
 }
 type PinActivityRequest struct {
+	// If true, enriches the activity's current_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
 	EnrichOwnFields *bool        `json:"enrich_own_fields,omitempty"`
 	UserID          *string      `json:"user_id,omitempty"`
 	User            *UserRequest `json:"user,omitempty"`
 }
 type UpdateFeedMembersRequest struct {
-	Operation string              `json:"operation"`
-	Limit     *int                `json:"limit,omitempty"`
-	Next      *string             `json:"next,omitempty"`
-	Prev      *string             `json:"prev,omitempty"`
-	Members   []FeedMemberRequest `json:"members"`
+	// Type of update operation to perform. One of: upsert, remove, set
+	Operation string  `json:"operation"`
+	Limit     *int    `json:"limit,omitempty"`
+	Next      *string `json:"next,omitempty"`
+	Prev      *string `json:"prev,omitempty"`
+	// List of members to upsert, remove, or set
+	Members []FeedMemberRequest `json:"members"`
 }
 type AcceptFeedMemberInviteRequest struct {
 	UserID *string      `json:"user_id,omitempty"`
 	User   *UserRequest `json:"user,omitempty"`
 }
 type QueryFeedMembersRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
+	Limit *int    `json:"limit,omitempty"`
+	Next  *string `json:"next,omitempty"`
+	Prev  *string `json:"prev,omitempty"`
+	// Sort parameters for the query
+	Sort []SortParamRequest `json:"sort"`
+	// Filter parameters for the query
+	Filter map[string]any `json:"filter"`
 }
 type RejectFeedMemberInviteRequest struct {
 	UserID *string      `json:"user_id,omitempty"`
 	User   *UserRequest `json:"user,omitempty"`
 }
 type QueryPinnedActivitiesRequest struct {
-	EnrichOwnFields *bool              `json:"enrich_own_fields,omitempty"`
-	Limit           *int               `json:"limit,omitempty"`
-	Next            *string            `json:"next,omitempty"`
-	Prev            *string            `json:"prev,omitempty"`
-	Sort            []SortParamRequest `json:"sort"`
-	Filter          map[string]any     `json:"filter"`
+	EnrichOwnFields *bool   `json:"enrich_own_fields,omitempty"`
+	Limit           *int    `json:"limit,omitempty"`
+	Next            *string `json:"next,omitempty"`
+	Prev            *string `json:"prev,omitempty"`
+	// Sorting parameters for the query
+	Sort []SortParamRequest `json:"sort"`
+	// Filters to apply to the query
+	Filter map[string]any `json:"filter"`
 }
 type GetFollowSuggestionsRequest struct {
 	Limit  *int    `json:"-" query:"limit"`
@@ -1046,31 +1351,40 @@ type GetFeedGroupRequest struct {
 	IncludeSoftDeleted *bool `json:"-" query:"include_soft_deleted"`
 }
 type GetOrCreateFeedGroupRequest struct {
-	DefaultVisibility  *string                   `json:"default_visibility,omitempty"`
+	// Default visibility for the feed group, can be 'public', 'visible', 'followers', 'members', or 'private'. Defaults to 'visible' if not provided.
+	DefaultVisibility *string `json:"default_visibility,omitempty"`
+	// Configuration for activity processors
 	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
-	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
-	Aggregation        *AggregationConfig        `json:"aggregation,omitempty"`
-	Custom             map[string]any            `json:"custom"`
-	Notification       *NotificationConfig       `json:"notification,omitempty"`
-	PushNotification   *PushNotificationConfig   `json:"push_notification,omitempty"`
-	Ranking            *RankingConfig            `json:"ranking,omitempty"`
-	Stories            *StoriesConfig            `json:"stories,omitempty"`
+	// Configuration for activity selectors
+	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
+	Aggregation       *AggregationConfig       `json:"aggregation,omitempty"`
+	// Custom data for the feed group
+	Custom           map[string]any          `json:"custom"`
+	Notification     *NotificationConfig     `json:"notification,omitempty"`
+	PushNotification *PushNotificationConfig `json:"push_notification,omitempty"`
+	Ranking          *RankingConfig          `json:"ranking,omitempty"`
+	Stories          *StoriesConfig          `json:"stories,omitempty"`
 }
 type UpdateFeedGroupRequest struct {
-	DefaultVisibility  *string                   `json:"default_visibility,omitempty"`
+	DefaultVisibility *string `json:"default_visibility,omitempty"`
+	// Configuration for activity processors
 	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
-	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
-	Aggregation        *AggregationConfig        `json:"aggregation,omitempty"`
-	Custom             map[string]any            `json:"custom"`
-	Notification       *NotificationConfig       `json:"notification,omitempty"`
-	PushNotification   *PushNotificationConfig   `json:"push_notification,omitempty"`
-	Ranking            *RankingConfig            `json:"ranking,omitempty"`
-	Stories            *StoriesConfig            `json:"stories,omitempty"`
+	// Configuration for activity selectors
+	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
+	Aggregation       *AggregationConfig       `json:"aggregation,omitempty"`
+	// Custom data for the feed group
+	Custom           map[string]any          `json:"custom"`
+	Notification     *NotificationConfig     `json:"notification,omitempty"`
+	PushNotification *PushNotificationConfig `json:"push_notification,omitempty"`
+	Ranking          *RankingConfig          `json:"ranking,omitempty"`
+	Stories          *StoriesConfig          `json:"stories,omitempty"`
 }
 type ListFeedViewsRequest struct {
 }
 type CreateFeedViewRequest struct {
-	ID                string                   `json:"id"`
+	// Unique identifier for the feed view
+	ID string `json:"id"`
+	// Configuration for selecting activities
 	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
 	Aggregation       *AggregationConfig       `json:"aggregation,omitempty"`
 	Ranking           *RankingConfig           `json:"ranking,omitempty"`
@@ -1080,11 +1394,13 @@ type DeleteFeedViewRequest struct {
 type GetFeedViewRequest struct {
 }
 type GetOrCreateFeedViewRequest struct {
+	// Configuration for selecting activities
 	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
 	Aggregation       *AggregationConfig       `json:"aggregation,omitempty"`
 	Ranking           *RankingConfig           `json:"ranking,omitempty"`
 }
 type UpdateFeedViewRequest struct {
+	// Updated configuration for selecting activities
 	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
 	Aggregation       *AggregationConfig       `json:"aggregation,omitempty"`
 	Ranking           *RankingConfig           `json:"ranking,omitempty"`
@@ -1094,30 +1410,40 @@ type ListFeedVisibilitiesRequest struct {
 type GetFeedVisibilityRequest struct {
 }
 type UpdateFeedVisibilityRequest struct {
+	// Updated permission grants for each role
 	Grants map[string][]string `json:"grants"`
 }
 type CreateFeedsBatchRequest struct {
-	Feeds           []FeedRequest `json:"feeds"`
-	EnrichOwnFields *bool         `json:"enrich_own_fields,omitempty"`
+	// List of feeds to create
+	Feeds []FeedRequest `json:"feeds"`
+	// If true, enriches the created feeds with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
+	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 }
 type DeleteFeedsBatchRequest struct {
-	Feeds      []string `json:"feeds"`
-	HardDelete *bool    `json:"hard_delete,omitempty"`
+	// List of fully qualified feed IDs (format: group_id:feed_id) to delete
+	Feeds []string `json:"feeds"`
+	// Whether to permanently delete the feeds instead of soft delete
+	HardDelete *bool `json:"hard_delete,omitempty"`
 }
 type OwnBatchRequest struct {
-	Feeds  []string     `json:"feeds"`
-	UserID *string      `json:"user_id,omitempty"`
+	// List of feed IDs to get own fields for
+	Feeds  []string `json:"feeds"`
+	UserID *string  `json:"user_id,omitempty"`
+	// Optional list of specific fields to return. If not specified, all fields (own_follows, own_followings, own_capabilities, own_membership) are returned
 	Fields []string     `json:"fields"`
 	User   *UserRequest `json:"user,omitempty"`
 }
 type QueryFeedsRequest struct {
-	EnrichOwnFields *bool              `json:"enrich_own_fields,omitempty"`
-	Limit           *int               `json:"limit,omitempty"`
-	Next            *string            `json:"next,omitempty"`
-	Prev            *string            `json:"prev,omitempty"`
-	Watch           *bool              `json:"watch,omitempty"`
-	Sort            []SortParamRequest `json:"sort"`
-	Filter          map[string]any     `json:"filter"`
+	EnrichOwnFields *bool   `json:"enrich_own_fields,omitempty"`
+	Limit           *int    `json:"limit,omitempty"`
+	Next            *string `json:"next,omitempty"`
+	Prev            *string `json:"prev,omitempty"`
+	// Whether to subscribe to realtime updates
+	Watch *bool `json:"watch,omitempty"`
+	// Sorting parameters for the query
+	Sort []SortParamRequest `json:"sort"`
+	// Filters to apply to the query
+	Filter map[string]any `json:"filter"`
 }
 type GetFeedsRateLimitsRequest struct {
 	Endpoints  *string `json:"-" query:"endpoints"`
@@ -1127,95 +1453,149 @@ type GetFeedsRateLimitsRequest struct {
 	ServerSide *bool   `json:"-" query:"server_side"`
 }
 type UpdateFollowRequest struct {
-	Source                     string         `json:"source"`
-	Target                     string         `json:"target"`
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
-	CreateNotificationActivity *bool          `json:"create_notification_activity,omitempty"`
-	EnrichOwnFields            *bool          `json:"enrich_own_fields,omitempty"`
-	FollowerRole               *string        `json:"follower_role,omitempty"`
-	PushPreference             *string        `json:"push_preference,omitempty"`
-	SkipPush                   *bool          `json:"skip_push,omitempty"`
-	Status                     *string        `json:"status,omitempty"`
-	Custom                     map[string]any `json:"custom"`
+	// Fully qualified ID of the source feed
+	Source string `json:"source"`
+	// Fully qualified ID of the target feed
+	Target string `json:"target"`
+	// Whether to copy custom data to the notification activity (only applies when create_notification_activity is true) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
+	// Deprecated: this field is deprecated.
+	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
+	// Whether to create a notification activity for this follow
+	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
+	EnrichOwnFields *bool   `json:"enrich_own_fields,omitempty"`
+	FollowerRole    *string `json:"follower_role,omitempty"`
+	// Push preference for the follow relationship
+	PushPreference *string `json:"push_preference,omitempty"`
+	// Whether to skip push for this follow
+	SkipPush *bool `json:"skip_push,omitempty"`
+	// Status of the follow relationship. One of: accepted, pending, rejected
+	Status *string `json:"status,omitempty"`
+	// Custom data for the follow relationship
+	Custom map[string]any `json:"custom"`
 }
 type FollowRequest struct {
-	Source                     string         `json:"source"`
-	Target                     string         `json:"target"`
-	CopyCustomToNotification   *bool          `json:"copy_custom_to_notification,omitempty"`
-	CreateNotificationActivity *bool          `json:"create_notification_activity,omitempty"`
-	EnrichOwnFields            *bool          `json:"enrich_own_fields,omitempty"`
-	PushPreference             *string        `json:"push_preference,omitempty"`
-	SkipPush                   *bool          `json:"skip_push,omitempty"`
-	Status                     *string        `json:"status,omitempty"`
-	Custom                     map[string]any `json:"custom"`
+	// Fully qualified ID of the source feed
+	Source string `json:"source"`
+	// Fully qualified ID of the target feed
+	Target string `json:"target"`
+	// Whether to copy custom data to the notification activity (only applies when create_notification_activity is true) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
+	// Deprecated: this field is deprecated.
+	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
+	// Whether to create a notification activity for this follow
+	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
+	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
+	// Push preference for the follow relationship
+	PushPreference *string `json:"push_preference,omitempty"`
+	// Whether to skip push for this follow
+	SkipPush *bool `json:"skip_push,omitempty"`
+	// Status of the follow relationship. One of: accepted, pending, rejected
+	Status *string `json:"status,omitempty"`
+	// Custom data for the follow relationship
+	Custom map[string]any `json:"custom"`
 }
 type AcceptFollowRequest struct {
-	Source       string  `json:"source"`
-	Target       string  `json:"target"`
+	// Fully qualified ID of the source feed
+	Source string `json:"source"`
+	// Fully qualified ID of the target feed
+	Target string `json:"target"`
+	// Optional role for the follower in the follow relationship
 	FollowerRole *string `json:"follower_role,omitempty"`
 }
 type FollowBatchRequest struct {
-	Follows         []FollowRequest `json:"follows"`
-	EnrichOwnFields *bool           `json:"enrich_own_fields,omitempty"`
+	// List of follow relationships to create
+	Follows []FollowRequest `json:"follows"`
+	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
+	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 }
 type GetOrCreateFollowsRequest struct {
-	Follows         []FollowRequest `json:"follows"`
-	EnrichOwnFields *bool           `json:"enrich_own_fields,omitempty"`
+	// List of follow relationships to create
+	Follows []FollowRequest `json:"follows"`
+	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
+	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 }
 type QueryFollowsRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
+	Limit *int    `json:"limit,omitempty"`
+	Next  *string `json:"next,omitempty"`
+	Prev  *string `json:"prev,omitempty"`
+	// Sorting parameters for the query
+	Sort []SortParamRequest `json:"sort"`
+	// Filters to apply to the query
+	Filter map[string]any `json:"filter"`
 }
 type RejectFollowRequest struct {
+	// Fully qualified ID of the source feed
 	Source string `json:"source"`
+	// Fully qualified ID of the target feed
 	Target string `json:"target"`
 }
 type UnfollowRequest struct {
 	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
+	KeepHistory                *bool `json:"-" query:"keep_history"`
 	EnrichOwnFields            *bool `json:"-" query:"enrich_own_fields"`
 }
 type CreateMembershipLevelRequest struct {
-	ID          string         `json:"id"`
-	Name        string         `json:"name"`
-	Description *string        `json:"description,omitempty"`
-	Priority    *int           `json:"priority,omitempty"`
-	Tags        []string       `json:"tags"`
-	Custom      map[string]any `json:"custom"`
+	// Unique identifier for the membership level
+	ID string `json:"id"`
+	// Display name for the membership level
+	Name string `json:"name"`
+	// Optional description of the membership level
+	Description *string `json:"description,omitempty"`
+	// Priority level (higher numbers = higher priority)
+	Priority *int `json:"priority,omitempty"`
+	// Activity tags this membership level gives access to
+	Tags []string `json:"tags"`
+	// Custom data for the membership level
+	Custom map[string]any `json:"custom"`
 }
 type QueryMembershipLevelsRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
+	Limit *int    `json:"limit,omitempty"`
+	Next  *string `json:"next,omitempty"`
+	Prev  *string `json:"prev,omitempty"`
+	// Sorting parameters for the query
+	Sort []SortParamRequest `json:"sort"`
+	// Filters to apply to the query
+	Filter map[string]any `json:"filter"`
 }
 type DeleteMembershipLevelRequest struct {
 }
 type UpdateMembershipLevelRequest struct {
-	Description *string        `json:"description,omitempty"`
-	Name        *string        `json:"name,omitempty"`
-	Priority    *int           `json:"priority,omitempty"`
-	Tags        []string       `json:"tags"`
-	Custom      map[string]any `json:"custom"`
+	// Optional description of the membership level
+	Description *string `json:"description,omitempty"`
+	// Display name for the membership level
+	Name *string `json:"name,omitempty"`
+	// Priority level (higher numbers = higher priority)
+	Priority *int `json:"priority,omitempty"`
+	// Activity tags this membership level gives access to
+	Tags []string `json:"tags"`
+	// Custom data for the membership level
+	Custom map[string]any `json:"custom"`
 }
 type QueryFeedsUsageStatsRequest struct {
+	// Start date in YYYY-MM-DD format (optional, defaults to 30 days ago)
 	From *string `json:"from,omitempty"`
-	To   *string `json:"to,omitempty"`
+	// End date in YYYY-MM-DD format (optional, defaults to today)
+	To *string `json:"to,omitempty"`
 }
 type UnfollowBatchRequest struct {
-	Follows                    []FollowPair `json:"follows"`
-	DeleteNotificationActivity *bool        `json:"delete_notification_activity,omitempty"`
-	EnrichOwnFields            *bool        `json:"enrich_own_fields,omitempty"`
+	// List of follow relationships to remove, each with optional keep_history
+	Follows []UnfollowPair `json:"follows"`
+	// Whether to delete the corresponding notification activity (default: false)
+	DeleteNotificationActivity *bool `json:"delete_notification_activity,omitempty"`
+	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
+	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 }
 type GetOrCreateUnfollowsRequest struct {
-	Follows                    []FollowPair `json:"follows"`
-	DeleteNotificationActivity *bool        `json:"delete_notification_activity,omitempty"`
-	EnrichOwnFields            *bool        `json:"enrich_own_fields,omitempty"`
+	// List of follow relationships to remove, each with optional keep_history
+	Follows []UnfollowPair `json:"follows"`
+	// Whether to delete the corresponding notification activity (default: false)
+	DeleteNotificationActivity *bool `json:"delete_notification_activity,omitempty"`
+	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
+	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 }
 type DeleteFeedUserDataRequest struct {
+	// Whether to perform a hard delete instead of a soft delete
 	HardDelete *bool `json:"hard_delete,omitempty"`
 }
 type ExportFeedUserDataRequest struct {
@@ -1242,6 +1622,16 @@ type CreateImportV2TaskRequest struct {
 	UserID   *string              `json:"user_id,omitempty"`
 	User     *UserRequest         `json:"user,omitempty"`
 }
+type DeleteImporterExternalStorageRequest struct {
+}
+type GetImporterExternalStorageRequest struct {
+}
+type UpsertImporterExternalStorageRequest struct {
+	Type  string                             `json:"type"`
+	AWSS3 *UpsertExternalStorageAWSS3Request `json:"aws_s3,omitempty"`
+}
+type ValidateImporterExternalStorageRequest struct {
+}
 type DeleteImportV2TaskRequest struct {
 }
 type GetImportV2TaskRequest struct {
@@ -1249,65 +1639,98 @@ type GetImportV2TaskRequest struct {
 type GetImportRequest struct {
 }
 type InsertActionLogRequest struct {
-	ActionType      string         `json:"action_type"`
-	EntityCreatorID string         `json:"entity_creator_id"`
-	EntityID        string         `json:"entity_id"`
-	EntityType      string         `json:"entity_type"`
-	Reason          *string        `json:"reason,omitempty"`
-	Custom          map[string]any `json:"custom"`
+	// Type of moderation action taken
+	ActionType string `json:"action_type"`
+	// ID of the user who created the entity
+	EntityCreatorID string `json:"entity_creator_id"`
+	// ID of the entity the action was taken on
+	EntityID string `json:"entity_id"`
+	// Type of entity the action was taken on
+	EntityType string `json:"entity_type"`
+	// Reason for the action
+	Reason *string `json:"reason,omitempty"`
+	// Custom metadata for the action log
+	Custom map[string]any `json:"custom"`
 }
 type AppealRequest struct {
-	AppealReason string       `json:"appeal_reason"`
-	EntityID     string       `json:"entity_id"`
-	EntityType   string       `json:"entity_type"`
-	UserID       *string      `json:"user_id,omitempty"`
-	Attachments  []string     `json:"attachments"`
-	User         *UserRequest `json:"user,omitempty"`
+	// Explanation for why the content is being appealed
+	AppealReason string `json:"appeal_reason"`
+	// Unique identifier of the entity being appealed
+	EntityID string `json:"entity_id"`
+	// Type of entity being appealed (e.g., message, user)
+	EntityType string  `json:"entity_type"`
+	UserID     *string `json:"user_id,omitempty"`
+	// Array of Attachment URLs(e.g., images)
+	Attachments []string     `json:"attachments"`
+	User        *UserRequest `json:"user,omitempty"`
 }
 type GetAppealRequest struct {
 }
 type QueryAppealsRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	UserID *string            `json:"user_id,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user,omitempty"`
+	Limit  *int    `json:"limit,omitempty"`
+	Next   *string `json:"next,omitempty"`
+	Prev   *string `json:"prev,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Sorting parameters for appeals
+	Sort []SortParamRequest `json:"sort"`
+	// Filter conditions for appeals
+	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type BanRequest struct {
-	TargetUserID   string       `json:"target_user_id"`
-	BannedByID     *string      `json:"banned_by_id,omitempty"`
-	ChannelCid     *string      `json:"channel_cid,omitempty"`
-	DeleteMessages *string      `json:"delete_messages,omitempty"`
-	IpBan          *bool        `json:"ip_ban,omitempty"`
-	Reason         *string      `json:"reason,omitempty"`
-	Shadow         *bool        `json:"shadow,omitempty"`
-	Timeout        *int         `json:"timeout,omitempty"`
-	BannedBy       *UserRequest `json:"banned_by,omitempty"`
+	// ID of the user to ban
+	TargetUserID string `json:"target_user_id"`
+	// ID of the user performing the ban
+	BannedByID *string `json:"banned_by_id,omitempty"`
+	// Channel where the ban applies
+	ChannelCid     *string `json:"channel_cid,omitempty"`
+	DeleteMessages *string `json:"delete_messages,omitempty"`
+	// Whether to ban the user's IP address
+	IpBan *bool `json:"ip_ban,omitempty"`
+	// Optional explanation for the ban
+	Reason *string `json:"reason,omitempty"`
+	// Whether this is a shadow ban
+	Shadow *bool `json:"shadow,omitempty"`
+	// Duration of the ban in minutes
+	Timeout  *int         `json:"timeout,omitempty"`
+	BannedBy *UserRequest `json:"banned_by,omitempty"`
 }
 type BulkImageModerationRequest struct {
+	// URL to CSV file containing image URLs to moderate
 	CsvFile string `json:"csv_file"`
 }
 type CheckRequest struct {
-	EntityCreatorID   string             `json:"entity_creator_id"`
-	EntityID          string             `json:"entity_id"`
-	EntityType        string             `json:"entity_type"`
-	ConfigKey         *string            `json:"config_key,omitempty"`
-	ConfigTeam        *string            `json:"config_team,omitempty"`
+	// ID of the user who created the entity
+	EntityCreatorID string `json:"entity_creator_id"`
+	// Unique identifier of the entity to moderate
+	EntityID string `json:"entity_id"`
+	// Type of entity to moderate
+	EntityType string `json:"entity_type"`
+	// Key of the moderation configuration to use
+	ConfigKey *string `json:"config_key,omitempty"`
+	// Team associated with the configuration
+	ConfigTeam *string `json:"config_team,omitempty"`
+	// Original timestamp when the content was produced (for correlating flagged content with source video timeline)
+	ContentPublishedAt *Timestamp `json:"content_published_at,omitempty"`
+	// Whether to run moderation in test mode
 	TestMode          *bool              `json:"test_mode,omitempty"`
 	UserID            *string            `json:"user_id,omitempty"`
 	Config            *ModerationConfig  `json:"config,omitempty"`
 	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
-	Options           map[string]any     `json:"options"`
-	User              *UserRequest       `json:"user,omitempty"`
+	// Additional moderation configuration options
+	Options map[string]any `json:"options"`
+	User    *UserRequest   `json:"user,omitempty"`
 }
 type CheckS3AccessRequest struct {
+	// Optional stream+s3:// reference to test access against
 	S3Url *string `json:"s3_url,omitempty"`
 }
 type UpsertConfigRequest struct {
-	Key                                string                              `json:"key"`
-	Async                              *bool                               `json:"async,omitempty"`
+	// Unique identifier for the moderation configuration
+	Key string `json:"key"`
+	// Whether moderation should be performed asynchronously
+	Async *bool `json:"async,omitempty"`
+	// Team associated with the configuration
 	Team                               *string                             `json:"team,omitempty"`
 	UserID                             *string                             `json:"user_id,omitempty"`
 	AWSRekognitionConfig               *AIImageConfig                      `json:"aws_rekognition_config,omitempty"`
@@ -1333,18 +1756,24 @@ type GetConfigRequest struct {
 	Team *string `json:"-" query:"team"`
 }
 type QueryModerationConfigsRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	UserID *string            `json:"user_id,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user,omitempty"`
+	Limit  *int    `json:"limit,omitempty"`
+	Next   *string `json:"next,omitempty"`
+	Prev   *string `json:"prev,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Sorting parameters for the results
+	Sort []SortParamRequest `json:"sort"`
+	// Filter conditions for moderation configs
+	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type CustomCheckRequest struct {
-	EntityID          string                    `json:"entity_id"`
-	EntityType        string                    `json:"entity_type"`
-	Flags             []CustomCheckFlag         `json:"flags"`
+	// Unique identifier of the entity
+	EntityID string `json:"entity_id"`
+	// Type of entity to perform custom check on
+	EntityType string `json:"entity_type"`
+	// List of custom check flags (1-10 flags required)
+	Flags []CustomCheckFlag `json:"flags"`
+	// ID of the user who created the entity (required for non-message entities)
 	EntityCreatorID   *string                   `json:"entity_creator_id,omitempty"`
 	UserID            *string                   `json:"user_id,omitempty"`
 	ModerationPayload *ModerationPayloadRequest `json:"moderation_payload,omitempty"`
@@ -1355,18 +1784,30 @@ type V2DeleteTemplateRequest struct {
 type V2QueryTemplatesRequest struct {
 }
 type V2UpsertTemplateRequest struct {
+	// Name of the moderation template
 	Name   string                               `json:"name"`
 	Config FeedsModerationTemplateConfigPayload `json:"config"`
 }
 type FlagRequest struct {
-	EntityID          string             `json:"entity_id"`
-	EntityType        string             `json:"entity_type"`
-	EntityCreatorID   *string            `json:"entity_creator_id,omitempty"`
-	Reason            *string            `json:"reason,omitempty"`
-	UserID            *string            `json:"user_id,omitempty"`
+	// Unique identifier of the entity being flagged
+	EntityID string `json:"entity_id"`
+	// Type of entity being flagged (e.g., message, user)
+	EntityType string `json:"entity_type"`
+	// ID of the user who created the flagged entity
+	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
+	// Optional explanation for why the content is being flagged
+	Reason *string `json:"reason,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Additional metadata about the flag
 	Custom            map[string]any     `json:"custom"`
 	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
 	User              *UserRequest       `json:"user,omitempty"`
+}
+type GetFlagCountRequest struct {
+	// ID of the user whose content was flagged
+	EntityCreatorID string `json:"entity_creator_id"`
+	// Optional entity type filter (e.g., stream:chat:v1:message, stream:user)
+	EntityType *string `json:"entity_type,omitempty"`
 }
 type QueryModerationFlagsRequest struct {
 	Limit  *int               `json:"limit,omitempty"`
@@ -1376,13 +1817,15 @@ type QueryModerationFlagsRequest struct {
 	Filter map[string]any     `json:"filter"`
 }
 type QueryModerationLogsRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	UserID *string            `json:"user_id,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user,omitempty"`
+	Limit  *int    `json:"limit,omitempty"`
+	Next   *string `json:"next,omitempty"`
+	Prev   *string `json:"prev,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Sorting parameters for the results
+	Sort []SortParamRequest `json:"sort"`
+	// Filter conditions for moderation logs
+	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type UpsertModerationRuleRequest struct {
 	Name            string                      `json:"name"`
@@ -1403,38 +1846,51 @@ type DeleteModerationRuleRequest struct {
 type GetModerationRuleRequest struct {
 }
 type QueryModerationRulesRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	UserID *string            `json:"user_id,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user,omitempty"`
+	Limit  *int    `json:"limit,omitempty"`
+	Next   *string `json:"next,omitempty"`
+	Prev   *string `json:"prev,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Sorting parameters for the results
+	Sort []SortParamRequest `json:"sort"`
+	// Filter conditions for moderation rules
+	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type MuteRequest struct {
-	TargetIds []string     `json:"target_ids"`
-	Timeout   *int         `json:"timeout,omitempty"`
-	UserID    *string      `json:"user_id,omitempty"`
-	User      *UserRequest `json:"user,omitempty"`
+	// User IDs to mute (if multiple users)
+	TargetIds []string `json:"target_ids"`
+	// Duration of mute in minutes
+	Timeout *int         `json:"timeout,omitempty"`
+	UserID  *string      `json:"user_id,omitempty"`
+	User    *UserRequest `json:"user,omitempty"`
 }
 type QueryReviewQueueRequest struct {
-	Limit        *int               `json:"limit,omitempty"`
-	LockCount    *int               `json:"lock_count,omitempty"`
-	LockDuration *int               `json:"lock_duration,omitempty"`
-	LockItems    *bool              `json:"lock_items,omitempty"`
-	Next         *string            `json:"next,omitempty"`
-	Prev         *string            `json:"prev,omitempty"`
-	StatsOnly    *bool              `json:"stats_only,omitempty"`
-	UserID       *string            `json:"user_id,omitempty"`
-	Sort         []SortParamRequest `json:"sort"`
-	Filter       map[string]any     `json:"filter"`
-	User         *UserRequest       `json:"user,omitempty"`
+	Limit *int `json:"limit,omitempty"`
+	// Number of items to lock (1-25)
+	LockCount *int `json:"lock_count,omitempty"`
+	// Duration for which items should be locked
+	LockDuration *int `json:"lock_duration,omitempty"`
+	// Whether to lock items for review (true), unlock items (false), or just fetch (nil)
+	LockItems *bool   `json:"lock_items,omitempty"`
+	Next      *string `json:"next,omitempty"`
+	Prev      *string `json:"prev,omitempty"`
+	// Whether to return only statistics
+	StatsOnly *bool   `json:"stats_only,omitempty"`
+	UserID    *string `json:"user_id,omitempty"`
+	// Sorting parameters for the results
+	Sort []SortParamRequest `json:"sort"`
+	// Filter conditions for review queue items
+	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type GetReviewQueueItemRequest struct {
 }
 type SubmitActionRequest struct {
-	ActionType     string                           `json:"action_type"`
-	AppealID       *string                          `json:"appeal_id,omitempty"`
+	// Type of moderation action to perform. One of: mark_reviewed, delete_message, delete_activity, delete_comment, delete_reaction, ban, custom, unban, restore, delete_user, unblock, block, shadow_block, unmask, kick_user, end_call, escalate, de_escalate
+	ActionType string `json:"action_type"`
+	// UUID of the appeal to act on (required for reject_appeal, optional for other actions)
+	AppealID *string `json:"appeal_id,omitempty"`
+	// UUID of the review queue item to act on
 	ItemID         *string                          `json:"item_id,omitempty"`
 	UserID         *string                          `json:"user_id,omitempty"`
 	Ban            *BanActionRequestPayload         `json:"ban,omitempty"`
@@ -1445,6 +1901,7 @@ type SubmitActionRequest struct {
 	DeleteMessage  *DeleteMessageRequestPayload     `json:"delete_message,omitempty"`
 	DeleteReaction *DeleteReactionRequestPayload    `json:"delete_reaction,omitempty"`
 	DeleteUser     *DeleteUserRequestPayload        `json:"delete_user,omitempty"`
+	Escalate       *EscalatePayload                 `json:"escalate,omitempty"`
 	Flag           *FlagRequest                     `json:"flag,omitempty"`
 	MarkReviewed   *MarkReviewedRequestPayload      `json:"mark_reviewed,omitempty"`
 	RejectAppeal   *RejectAppealRequestPayload      `json:"reject_appeal,omitempty"`
@@ -1455,13 +1912,15 @@ type SubmitActionRequest struct {
 	User           *UserRequest                     `json:"user,omitempty"`
 }
 type UnbanRequest struct {
-	TargetUserID string       `json:"-" query:"target_user_id"`
-	ChannelCid   *string      `json:"-" query:"channel_cid"`
-	CreatedBy    *string      `json:"-" query:"created_by"`
+	TargetUserID string  `json:"-" query:"target_user_id"`
+	ChannelCid   *string `json:"-" query:"channel_cid"`
+	CreatedBy    *string `json:"-" query:"created_by"`
+	// ID of the user performing the unban
 	UnbannedByID *string      `json:"unbanned_by_id,omitempty"`
 	UnbannedBy   *UserRequest `json:"unbanned_by,omitempty"`
 }
 type UnmuteRequest struct {
+	// User IDs to unmute
 	TargetIds []string     `json:"target_ids"`
 	UserID    *string      `json:"user_id,omitempty"`
 	User      *UserRequest `json:"user,omitempty"`
@@ -1474,42 +1933,60 @@ type ListPermissionsRequest struct {
 type GetPermissionRequest struct {
 }
 type CreatePollRequest struct {
-	Name                      string            `json:"name"`
-	AllowAnswers              *bool             `json:"allow_answers,omitempty"`
-	AllowUserSuggestedOptions *bool             `json:"allow_user_suggested_options,omitempty"`
-	Description               *string           `json:"description,omitempty"`
-	EnforceUniqueVote         *bool             `json:"enforce_unique_vote,omitempty"`
-	ID                        *string           `json:"id,omitempty"`
-	IsClosed                  *bool             `json:"is_closed,omitempty"`
-	MaxVotesAllowed           *int              `json:"max_votes_allowed,omitempty"`
-	UserID                    *string           `json:"user_id,omitempty"`
-	VotingVisibility          *string           `json:"voting_visibility,omitempty"`
-	Options                   []PollOptionInput `json:"options"`
-	Custom                    map[string]any    `json:"Custom"`
-	User                      *UserRequest      `json:"user,omitempty"`
+	// The name of the poll
+	Name string `json:"name"`
+	// Indicates whether users can suggest user defined answers
+	AllowAnswers              *bool `json:"allow_answers,omitempty"`
+	AllowUserSuggestedOptions *bool `json:"allow_user_suggested_options,omitempty"`
+	// A description of the poll
+	Description *string `json:"description,omitempty"`
+	// Indicates whether users can cast multiple votes
+	EnforceUniqueVote *bool   `json:"enforce_unique_vote,omitempty"`
+	ID                *string `json:"id,omitempty"`
+	// Indicates whether the poll is open for voting
+	IsClosed *bool `json:"is_closed,omitempty"`
+	// Indicates the maximum amount of votes a user can cast
+	MaxVotesAllowed  *int              `json:"max_votes_allowed,omitempty"`
+	UserID           *string           `json:"user_id,omitempty"`
+	VotingVisibility *string           `json:"voting_visibility,omitempty"`
+	Options          []PollOptionInput `json:"options"`
+	Custom           map[string]any    `json:"Custom"`
+	User             *UserRequest      `json:"user,omitempty"`
 }
 type UpdatePollRequest struct {
-	ID                        string              `json:"id"`
-	Name                      string              `json:"name"`
-	AllowAnswers              *bool               `json:"allow_answers,omitempty"`
-	AllowUserSuggestedOptions *bool               `json:"allow_user_suggested_options,omitempty"`
-	Description               *string             `json:"description,omitempty"`
-	EnforceUniqueVote         *bool               `json:"enforce_unique_vote,omitempty"`
-	IsClosed                  *bool               `json:"is_closed,omitempty"`
-	MaxVotesAllowed           *int                `json:"max_votes_allowed,omitempty"`
-	UserID                    *string             `json:"user_id,omitempty"`
-	VotingVisibility          *string             `json:"voting_visibility,omitempty"`
-	Options                   []PollOptionRequest `json:"options"`
-	Custom                    map[string]any      `json:"Custom"`
-	User                      *UserRequest        `json:"user,omitempty"`
+	// Poll ID
+	ID string `json:"id"`
+	// Poll name
+	Name string `json:"name"`
+	// Allow answers
+	AllowAnswers *bool `json:"allow_answers,omitempty"`
+	// Allow user suggested options
+	AllowUserSuggestedOptions *bool `json:"allow_user_suggested_options,omitempty"`
+	// Poll description
+	Description *string `json:"description,omitempty"`
+	// Enforce unique vote
+	EnforceUniqueVote *bool `json:"enforce_unique_vote,omitempty"`
+	// Is closed
+	IsClosed *bool `json:"is_closed,omitempty"`
+	// Max votes allowed
+	MaxVotesAllowed *int    `json:"max_votes_allowed,omitempty"`
+	UserID          *string `json:"user_id,omitempty"`
+	// Voting visibility
+	VotingVisibility *string `json:"voting_visibility,omitempty"`
+	// Poll options
+	Options []PollOptionRequest `json:"options"`
+	Custom  map[string]any      `json:"Custom"`
+	User    *UserRequest        `json:"user,omitempty"`
 }
 type QueryPollsRequest struct {
-	UserID *string            `json:"-" query:"user_id"`
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
+	UserID *string `json:"-" query:"user_id"`
+	Limit  *int    `json:"limit,omitempty"`
+	Next   *string `json:"next,omitempty"`
+	Prev   *string `json:"prev,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+	// Filter to apply to the query
+	Filter map[string]any `json:"filter"`
 }
 type DeletePollRequest struct {
 	UserID *string `json:"-" query:"user_id"`
@@ -1518,19 +1995,24 @@ type GetPollRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
 type UpdatePollPartialRequest struct {
-	UserID *string        `json:"user_id,omitempty"`
-	Unset  []string       `json:"unset"`
-	Set    map[string]any `json:"set"`
-	User   *UserRequest   `json:"user,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Array of field names to unset
+	Unset []string `json:"unset"`
+	// Sets new field values
+	Set  map[string]any `json:"set"`
+	User *UserRequest   `json:"user,omitempty"`
 }
 type CreatePollOptionRequest struct {
+	// Option text
 	Text   string         `json:"text"`
 	UserID *string        `json:"user_id,omitempty"`
 	Custom map[string]any `json:"Custom"`
 	User   *UserRequest   `json:"user,omitempty"`
 }
 type UpdatePollOptionRequest struct {
-	ID     string         `json:"id"`
+	// Option ID
+	ID string `json:"id"`
+	// Option text
 	Text   string         `json:"text"`
 	UserID *string        `json:"user_id,omitempty"`
 	Custom map[string]any `json:"Custom"`
@@ -1543,14 +2025,17 @@ type GetPollOptionRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
 type QueryPollVotesRequest struct {
-	UserID *string            `json:"-" query:"user_id"`
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
+	UserID *string `json:"-" query:"user_id"`
+	Limit  *int    `json:"limit,omitempty"`
+	Next   *string `json:"next,omitempty"`
+	Prev   *string `json:"prev,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+	// Filter to apply to the query
+	Filter map[string]any `json:"filter"`
 }
 type UpdatePushNotificationPreferencesRequest struct {
+	// A list of push preferences for channels, calls, or the user.
 	Preferences []PushPreferenceInput `json:"preferences"`
 }
 type ListPushProvidersRequest struct {
@@ -1565,11 +2050,16 @@ type GetPushTemplatesRequest struct {
 	PushProviderName *string `json:"-" query:"push_provider_name"`
 }
 type UpsertPushTemplateRequest struct {
-	EventType        string  `json:"event_type"`
-	PushProviderType string  `json:"push_provider_type"`
-	EnablePush       *bool   `json:"enable_push,omitempty"`
+	// Event type. One of: message.new, message.updated, reaction.new, notification.reminder_due, feeds.activity.added, feeds.comment.added, feeds.activity.reaction.added, feeds.comment.reaction.added, feeds.follow.created, feeds.notification_feed.updated
+	EventType string `json:"event_type"`
+	// Push provider type. One of: firebase, apn, huawei, xiaomi
+	PushProviderType string `json:"push_provider_type"`
+	// Whether to send push notification for this event
+	EnablePush *bool `json:"enable_push,omitempty"`
+	// Push provider name
 	PushProviderName *string `json:"push_provider_name,omitempty"`
-	Template         *string `json:"template,omitempty"`
+	// Push template
+	Template *string `json:"template,omitempty"`
 }
 type GetRateLimitsRequest struct {
 	ServerSide *bool   `json:"-" query:"server_side"`
@@ -1581,6 +2071,7 @@ type GetRateLimitsRequest struct {
 type ListRolesRequest struct {
 }
 type CreateRoleRequest struct {
+	// Role name
 	Name string `json:"name"`
 }
 type DeleteRoleRequest struct {
@@ -1591,6 +2082,7 @@ type DeleteFileRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 type UploadFileRequest struct {
+	// file field
 	File *string     `json:"file,omitempty"`
 	User *OnlyUserID `json:"user,omitempty"`
 }
@@ -1598,7 +2090,8 @@ type DeleteImageRequest struct {
 	Url *string `json:"-" query:"url"`
 }
 type UploadImageRequest struct {
-	File        *string     `json:"file,omitempty"`
+	File *string `json:"file,omitempty"`
+	// field with JSON-encoded array of image size configurations
 	UploadSizes []ImageSize `json:"upload_sizes"`
 	User        *OnlyUserID `json:"user,omitempty"`
 }
@@ -1609,11 +2102,16 @@ type ListUserGroupsRequest struct {
 	TeamID      *string `json:"-" query:"team_id"`
 }
 type CreateUserGroupRequest struct {
-	Name        string   `json:"name"`
-	Description *string  `json:"description,omitempty"`
-	ID          *string  `json:"id,omitempty"`
-	TeamID      *string  `json:"team_id,omitempty"`
-	MemberIds   []string `json:"member_ids"`
+	// The user friendly name of the user group
+	Name string `json:"name"`
+	// An optional description for the group
+	Description *string `json:"description,omitempty"`
+	// Optional user group ID. If not provided, a UUID v7 will be generated
+	ID *string `json:"id,omitempty"`
+	// Optional team ID to scope the group to a team
+	TeamID *string `json:"team_id,omitempty"`
+	// Optional initial list of user IDs to add as members
+	MemberIds []string `json:"member_ids"`
 }
 type SearchUserGroupsRequest struct {
 	Query  string  `json:"-" query:"query"`
@@ -1629,15 +2127,21 @@ type GetUserGroupRequest struct {
 	TeamID *string `json:"-" query:"team_id"`
 }
 type UpdateUserGroupRequest struct {
+	// The new description for the group
 	Description *string `json:"description,omitempty"`
-	Name        *string `json:"name,omitempty"`
-	TeamID      *string `json:"team_id,omitempty"`
+	// The new name of the user group
+	Name   *string `json:"name,omitempty"`
+	TeamID *string `json:"team_id,omitempty"`
 }
 type AddUserGroupMembersRequest struct {
+	// List of user IDs to add as members
 	MemberIds []string `json:"member_ids"`
-	TeamID    *string  `json:"team_id,omitempty"`
+	// Whether to add the members as group admins. Defaults to false
+	AsAdmin *bool   `json:"as_admin,omitempty"`
+	TeamID  *string `json:"team_id,omitempty"`
 }
 type RemoveUserGroupMembersRequest struct {
+	// List of user IDs to remove
 	MemberIds []string `json:"member_ids"`
 	TeamID    *string  `json:"team_id,omitempty"`
 }
@@ -1648,47 +2152,82 @@ type UpdateUsersPartialRequest struct {
 	Users []UpdateUserPartialRequest `json:"users"`
 }
 type UpdateUsersRequest struct {
+	// Object containing users
 	Users map[string]UserRequest `json:"users"`
 }
 type GetBlockedUsersRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
 type BlockUsersRequest struct {
+	// User id to block
 	BlockedUserID string       `json:"blocked_user_id"`
 	UserID        *string      `json:"user_id,omitempty"`
 	User          *UserRequest `json:"user,omitempty"`
 }
 type DeactivateUsersRequest struct {
-	UserIds             []string `json:"user_ids"`
-	CreatedByID         *string  `json:"created_by_id,omitempty"`
-	MarkChannelsDeleted *bool    `json:"mark_channels_deleted,omitempty"`
-	MarkMessagesDeleted *bool    `json:"mark_messages_deleted,omitempty"`
+	// User IDs to deactivate
+	UserIds []string `json:"user_ids"`
+	// ID of the user who deactivated the users
+	CreatedByID         *string `json:"created_by_id,omitempty"`
+	MarkChannelsDeleted *bool   `json:"mark_channels_deleted,omitempty"`
+	// Makes messages appear to be deleted
+	MarkMessagesDeleted *bool `json:"mark_messages_deleted,omitempty"`
 }
 type DeleteUsersRequest struct {
-	UserIds           []string `json:"user_ids"`
-	Calls             *string  `json:"calls,omitempty"`
-	Conversations     *string  `json:"conversations,omitempty"`
-	Files             *bool    `json:"files,omitempty"`
-	Messages          *string  `json:"messages,omitempty"`
-	NewCallOwnerID    *string  `json:"new_call_owner_id,omitempty"`
-	NewChannelOwnerID *string  `json:"new_channel_owner_id,omitempty"`
-	User              *string  `json:"user,omitempty"`
+	// IDs of users to delete
+	UserIds []string `json:"user_ids"`
+	// Calls delete mode.
+	// Affected calls are those that include exactly two members, one of whom is the user being deleted.
+	// * null or empty string - doesn't delete any calls
+	// * soft - marks user's calls and their related data as deleted (soft-delete)
+	// * hard - deletes user's calls and their data completely (hard-delete)
+	Calls *string `json:"calls,omitempty"`
+	// Conversation channels delete mode.
+	// Conversation channel is any channel which only has two members one of which is the user being deleted.
+	// * null or empty string - doesn't delete any conversation channels
+	// * soft - marks all conversation channels as deleted (same effect as Delete Channels with 'hard' option disabled)
+	// * hard - deletes channel and all its data completely including messages (same effect as Delete Channels with 'hard' option enabled)
+	Conversations *string `json:"conversations,omitempty"`
+	// Delete user files.
+	// * false or empty string - doesn't delete any files
+	// * true - deletes all files uploaded by the user, including images and attachments.
+	Files *bool `json:"files,omitempty"`
+	// Message delete mode.
+	// * null or empty string - doesn't delete user messages
+	// * soft - marks all user messages as deleted without removing any related message data
+	// * pruning - marks all user messages as deleted, nullifies message information and removes some message data such as reactions and flags
+	// * hard - deletes messages completely with all related information
+	Messages          *string `json:"messages,omitempty"`
+	NewCallOwnerID    *string `json:"new_call_owner_id,omitempty"`
+	NewChannelOwnerID *string `json:"new_channel_owner_id,omitempty"`
+	// User delete mode.
+	// * soft - marks user as deleted and retains all user data
+	// * pruning - marks user as deleted and nullifies user information
+	// * hard - deletes user completely. Requires 'hard' option for messages and conversations as well
+	User *string `json:"user,omitempty"`
 }
 type GetUserLiveLocationsRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
 type UpdateLiveLocationRequest struct {
-	UserID    *string    `json:"-" query:"user_id"`
-	MessageID string     `json:"message_id"`
-	EndAt     *Timestamp `json:"end_at,omitempty"`
-	Latitude  *float64   `json:"latitude,omitempty"`
-	Longitude *float64   `json:"longitude,omitempty"`
+	UserID *string `json:"-" query:"user_id"`
+	// Live location ID
+	MessageID string `json:"message_id"`
+	// Time when the live location expires
+	EndAt *Timestamp `json:"end_at,omitempty"`
+	// Latitude coordinate
+	Latitude *float64 `json:"latitude,omitempty"`
+	// Longitude coordinate
+	Longitude *float64 `json:"longitude,omitempty"`
 }
 type ReactivateUsersRequest struct {
-	UserIds         []string `json:"user_ids"`
-	CreatedByID     *string  `json:"created_by_id,omitempty"`
-	RestoreChannels *bool    `json:"restore_channels,omitempty"`
-	RestoreMessages *bool    `json:"restore_messages,omitempty"`
+	// User IDs to reactivate
+	UserIds []string `json:"user_ids"`
+	// ID of the user who's reactivating the users
+	CreatedByID     *string `json:"created_by_id,omitempty"`
+	RestoreChannels *bool   `json:"restore_channels,omitempty"`
+	// Restore previously deleted messages
+	RestoreMessages *bool `json:"restore_messages,omitempty"`
 }
 type RestoreUsersRequest struct {
 	UserIds []string `json:"user_ids"`
@@ -1699,41 +2238,52 @@ type UnblockUsersRequest struct {
 	User          *UserRequest `json:"user,omitempty"`
 }
 type DeactivateUserRequest struct {
-	CreatedByID         *string `json:"created_by_id,omitempty"`
-	MarkMessagesDeleted *bool   `json:"mark_messages_deleted,omitempty"`
+	// ID of the user who deactivated the user
+	CreatedByID *string `json:"created_by_id,omitempty"`
+	// Makes messages appear to be deleted
+	MarkMessagesDeleted *bool `json:"mark_messages_deleted,omitempty"`
 }
 type ExportUserRequest struct {
 }
 type ReactivateUserRequest struct {
-	CreatedByID     *string `json:"created_by_id,omitempty"`
-	Name            *string `json:"name,omitempty"`
-	RestoreMessages *bool   `json:"restore_messages,omitempty"`
+	// ID of the user who's reactivating the user
+	CreatedByID *string `json:"created_by_id,omitempty"`
+	// Set this field to put new name for the user
+	Name *string `json:"name,omitempty"`
+	// Restore previously deleted messages
+	RestoreMessages *bool `json:"restore_messages,omitempty"`
 }
 type GetActiveCallsStatusRequest struct {
 }
 type QueryUserFeedbackRequest struct {
-	Full             *bool              `json:"-" query:"full"`
-	Limit            *int               `json:"limit,omitempty"`
-	Next             *string            `json:"next,omitempty"`
-	Prev             *string            `json:"prev,omitempty"`
-	Sort             []SortParamRequest `json:"sort"`
-	FilterConditions map[string]any     `json:"filter_conditions"`
+	Full  *bool   `json:"-" query:"full"`
+	Limit *int    `json:"limit,omitempty"`
+	Next  *string `json:"next,omitempty"`
+	Prev  *string `json:"prev,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+	// Filter conditions to apply to the query
+	FilterConditions map[string]any `json:"filter_conditions"`
 }
 type QueryCallMembersRequest struct {
-	ID               string             `json:"id"`
-	Type             string             `json:"type"`
-	Limit            *int               `json:"limit,omitempty"`
-	Next             *string            `json:"next,omitempty"`
-	Prev             *string            `json:"prev,omitempty"`
-	Sort             []SortParamRequest `json:"sort"`
-	FilterConditions map[string]any     `json:"filter_conditions"`
+	ID    string  `json:"id"`
+	Type  string  `json:"type"`
+	Limit *int    `json:"limit,omitempty"`
+	Next  *string `json:"next,omitempty"`
+	Prev  *string `json:"prev,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+	// Filter conditions to apply to the query
+	FilterConditions map[string]any `json:"filter_conditions"`
 }
 type QueryCallStatsRequest struct {
-	Limit            *int               `json:"limit,omitempty"`
-	Next             *string            `json:"next,omitempty"`
-	Prev             *string            `json:"prev,omitempty"`
-	Sort             []SortParamRequest `json:"sort"`
-	FilterConditions map[string]any     `json:"filter_conditions"`
+	Limit *int    `json:"limit,omitempty"`
+	Next  *string `json:"next,omitempty"`
+	Prev  *string `json:"prev,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+	// Filter conditions to apply to the query
+	FilterConditions map[string]any `json:"filter_conditions"`
 }
 type GetCallRequest struct {
 	MembersLimit *int  `json:"-" query:"members_limit"`
@@ -1742,18 +2292,23 @@ type GetCallRequest struct {
 	Video        *bool `json:"-" query:"video"`
 }
 type UpdateCallRequest struct {
-	StartsAt         *Timestamp           `json:"starts_at,omitempty"`
+	// the time the call is scheduled to start
+	StartsAt *Timestamp `json:"starts_at,omitempty"`
+	// Custom data for this object
 	Custom           map[string]any       `json:"custom"`
 	SettingsOverride *CallSettingsRequest `json:"settings_override,omitempty"`
 }
 type GetOrCreateCallRequest struct {
-	MembersLimit *int         `json:"members_limit,omitempty"`
-	Notify       *bool        `json:"notify,omitempty"`
-	Ring         *bool        `json:"ring,omitempty"`
-	Video        *bool        `json:"video,omitempty"`
-	Data         *CallRequest `json:"data,omitempty"`
+	MembersLimit *int `json:"members_limit,omitempty"`
+	// if provided it sends a notification event to the members for this call
+	Notify *bool `json:"notify,omitempty"`
+	// if provided it sends a ring event to the members for this call
+	Ring  *bool        `json:"ring,omitempty"`
+	Video *bool        `json:"video,omitempty"`
+	Data  *CallRequest `json:"data,omitempty"`
 }
 type BlockUserRequest struct {
+	// the user to block
 	UserID string `json:"user_id"`
 }
 type SendClosedCaptionRequest struct {
@@ -1768,6 +2323,7 @@ type SendClosedCaptionRequest struct {
 	User       *UserRequest `json:"user,omitempty"`
 }
 type DeleteCallRequest struct {
+	// if true the call will be hard deleted along with all related data
 	Hard *bool `json:"hard,omitempty"`
 }
 type SendCallEventRequest struct {
@@ -1795,15 +2351,20 @@ type GoLiveRequest struct {
 	TranscriptionStorageName *string `json:"transcription_storage_name,omitempty"`
 }
 type KickUserRequest struct {
-	UserID     string       `json:"user_id"`
-	Block      *bool        `json:"block,omitempty"`
+	// The user to kick
+	UserID string `json:"user_id"`
+	// If true, also block the user from rejoining the call
+	Block *bool `json:"block,omitempty"`
+	// Server-side: ID of the user performing the action
 	KickedByID *string      `json:"kicked_by_id,omitempty"`
 	KickedBy   *UserRequest `json:"kicked_by,omitempty"`
 }
 type EndCallRequest struct {
 }
 type UpdateCallMembersRequest struct {
-	RemoveMembers []string        `json:"remove_members"`
+	// List of userID to remove
+	RemoveMembers []string `json:"remove_members"`
+	// List of members to update or insert
 	UpdateMembers []MemberRequest `json:"update_members"`
 }
 type MuteUsersRequest struct {
@@ -1817,12 +2378,15 @@ type MuteUsersRequest struct {
 	MutedBy          *UserRequest `json:"muted_by,omitempty"`
 }
 type QueryCallParticipantsRequest struct {
-	Limit            *int           `json:"-" query:"limit"`
+	Limit *int `json:"-" query:"limit"`
+	// Filter conditions to apply to the query
 	FilterConditions map[string]any `json:"filter_conditions"`
 }
 type VideoPinRequest struct {
+	// the session ID of the user who pinned the message
 	SessionID string `json:"session_id"`
-	UserID    string `json:"user_id"`
+	// the user ID of the user who pinned the message
+	UserID string `json:"user_id"`
 }
 type ListRecordingsRequest struct {
 }
@@ -1835,10 +2399,13 @@ type GetCallReportRequest struct {
 	SessionID *string `json:"-" query:"session_id"`
 }
 type RingCallRequest struct {
-	Video      *bool    `json:"video,omitempty"`
+	// Indicate if call should be video
+	Video *bool `json:"video,omitempty"`
+	// Members that should receive the ring. If no ids are provided, all call members who are not already in the call will receive ring notifications.
 	MembersIds []string `json:"members_ids"`
 }
 type StartRTMPBroadcastsRequest struct {
+	// List of broadcasts to start
 	Broadcasts []RTMPBroadcastRequest `json:"broadcasts"`
 }
 type StopAllRTMPBroadcastsRequest struct {
@@ -1858,8 +2425,11 @@ type QueryCallParticipantSessionsRequest struct {
 type StartHLSBroadcastingRequest struct {
 }
 type StartClosedCaptionsRequest struct {
-	EnableTranscription *bool                `json:"enable_transcription,omitempty"`
-	ExternalStorage     *string              `json:"external_storage,omitempty"`
+	// Enable transcriptions along with closed captions
+	EnableTranscription *bool `json:"enable_transcription,omitempty"`
+	// Which external storage to use for transcriptions (only applicable if enable_transcription is true)
+	ExternalStorage *string `json:"external_storage,omitempty"`
+	// The spoken language in the call, if not provided the language defined in the transcription settings will be used. One of: auto, ar, bg, ca, cs, da, de, el, en, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, ms, nl, no, pl, pt, ro, ru, sk, sl, sv, ta, th, tl, tr, uk, zh
 	Language            *string              `json:"language,omitempty"`
 	SpeechSegmentConfig *SpeechSegmentConfig `json:"speech_segment_config,omitempty"`
 }
@@ -1867,8 +2437,11 @@ type StartFrameRecordingRequest struct {
 	RecordingExternalStorage *string `json:"recording_external_storage,omitempty"`
 }
 type StartTranscriptionRequest struct {
-	EnableClosedCaptions         *bool   `json:"enable_closed_captions,omitempty"`
-	Language                     *string `json:"language,omitempty"`
+	// Enable closed captions along with transcriptions
+	EnableClosedCaptions *bool `json:"enable_closed_captions,omitempty"`
+	// The spoken language in the call, if not provided the language defined in the transcription settings will be used. One of: auto, ar, bg, ca, cs, da, de, el, en, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, ms, nl, no, pl, pt, ro, ru, sk, sl, sv, ta, th, tl, tr, uk, zh
+	Language *string `json:"language,omitempty"`
+	// Store transcriptions in this external storage
 	TranscriptionExternalStorage *string `json:"transcription_external_storage,omitempty"`
 }
 type StopHLSBroadcastingRequest struct {
@@ -1894,11 +2467,14 @@ type StopTranscriptionRequest struct {
 type ListTranscriptionsRequest struct {
 }
 type UnblockUserRequest struct {
+	// the user to unblock
 	UserID string `json:"user_id"`
 }
 type VideoUnpinRequest struct {
+	// the session ID of the user who pinned the message
 	SessionID string `json:"session_id"`
-	UserID    string `json:"user_id"`
+	// the user ID of the user who pinned the message
+	UserID string `json:"user_id"`
 }
 type UpdateUserPermissionsRequest struct {
 	UserID            string   `json:"user_id"`
@@ -1934,17 +2510,21 @@ type GetCallSessionParticipantStatsTimelineRequest struct {
 	Severity  []string `json:"-" query:"severity"`
 }
 type QueryCallsRequest struct {
-	Limit            *int               `json:"limit,omitempty"`
-	Next             *string            `json:"next,omitempty"`
-	Prev             *string            `json:"prev,omitempty"`
-	Sort             []SortParamRequest `json:"sort"`
-	FilterConditions map[string]any     `json:"filter_conditions"`
+	Limit *int    `json:"limit,omitempty"`
+	Next  *string `json:"next,omitempty"`
+	Prev  *string `json:"prev,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+	// Filter conditions to apply to the query
+	FilterConditions map[string]any `json:"filter_conditions"`
 }
 type ListCallTypesRequest struct {
 }
 type CreateCallTypeRequest struct {
-	Name                 string                       `json:"name"`
-	ExternalStorage      *string                      `json:"external_storage,omitempty"`
+	Name string `json:"name"`
+	// the external storage for the call type
+	ExternalStorage *string `json:"external_storage,omitempty"`
+	// the permissions granted to each role
 	Grants               map[string][]string          `json:"grants"`
 	NotificationSettings *NotificationSettingsRequest `json:"notification_settings,omitempty"`
 	Settings             *CallSettingsRequest         `json:"settings,omitempty"`
@@ -1962,18 +2542,26 @@ type UpdateCallTypeRequest struct {
 type GetEdgesRequest struct {
 }
 type ResolveSipAuthRequest struct {
-	SipCallerNumber string  `json:"sip_caller_number"`
-	SipTrunkNumber  string  `json:"sip_trunk_number"`
-	FromHost        *string `json:"from_host,omitempty"`
-	SourceIp        *string `json:"source_ip,omitempty"`
+	// SIP caller number
+	SipCallerNumber string `json:"sip_caller_number"`
+	// SIP trunk number to look up
+	SipTrunkNumber string `json:"sip_trunk_number"`
+	// Host from the SIP From header
+	FromHost *string `json:"from_host,omitempty"`
+	// Transport-layer source IP address of the SIP request
+	SourceIp *string `json:"source_ip,omitempty"`
 }
 type ListSIPInboundRoutingRuleRequest struct {
 }
 type CreateSIPInboundRoutingRuleRequest struct {
-	Name                 string                                  `json:"name"`
-	TrunkIds             []string                                `json:"trunk_ids"`
-	CallerConfigs        SIPCallerConfigsRequest                 `json:"caller_configs"`
-	CalledNumbers        []string                                `json:"called_numbers"`
+	// Name of the SIP Inbound Routing Rule
+	Name string `json:"name"`
+	// List of SIP trunk IDs
+	TrunkIds      []string                `json:"trunk_ids"`
+	CallerConfigs SIPCallerConfigsRequest `json:"caller_configs"`
+	// List of called numbers
+	CalledNumbers []string `json:"called_numbers"`
+	// List of caller numbers (optional)
 	CallerNumbers        []string                                `json:"caller_numbers"`
 	CallConfigs          *SIPCallConfigsRequest                  `json:"call_configs,omitempty"`
 	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsRequest `json:"direct_routing_configs,omitempty"`
@@ -1983,10 +2571,14 @@ type CreateSIPInboundRoutingRuleRequest struct {
 type DeleteSIPInboundRoutingRuleRequest struct {
 }
 type UpdateSIPInboundRoutingRuleRequest struct {
-	Name                 string                                  `json:"name"`
-	TrunkIds             []string                                `json:"trunk_ids"`
-	CallerConfigs        SIPCallerConfigsRequest                 `json:"caller_configs"`
-	CalledNumbers        []string                                `json:"called_numbers"`
+	// Name of the SIP Inbound Routing Rule
+	Name string `json:"name"`
+	// List of SIP trunk IDs
+	TrunkIds      []string                `json:"trunk_ids"`
+	CallerConfigs SIPCallerConfigsRequest `json:"caller_configs"`
+	// List of called numbers
+	CalledNumbers []string `json:"called_numbers"`
+	// List of caller numbers (optional)
 	CallerNumbers        []string                                `json:"caller_numbers"`
 	CallConfigs          *SIPCallConfigsRequest                  `json:"call_configs,omitempty"`
 	DirectRoutingConfigs *SIPDirectRoutingRuleCallConfigsRequest `json:"direct_routing_configs,omitempty"`
@@ -1996,26 +2588,39 @@ type UpdateSIPInboundRoutingRuleRequest struct {
 type ListSIPTrunksRequest struct {
 }
 type CreateSIPTrunkRequest struct {
-	Name       string   `json:"name"`
-	Numbers    []string `json:"numbers"`
-	Password   *string  `json:"password,omitempty"`
+	// Name of the SIP trunk
+	Name string `json:"name"`
+	// Phone numbers associated with this SIP trunk
+	Numbers []string `json:"numbers"`
+	// Optional password for SIP trunk authentication
+	Password *string `json:"password,omitempty"`
+	// Optional list of allowed IPv4/IPv6 addresses or CIDR blocks
 	AllowedIps []string `json:"allowed_ips"`
 }
 type DeleteSIPTrunkRequest struct {
 }
 type UpdateSIPTrunkRequest struct {
-	Name       string   `json:"name"`
-	Numbers    []string `json:"numbers"`
-	Password   *string  `json:"password,omitempty"`
+	// Name of the SIP trunk
+	Name string `json:"name"`
+	// Phone numbers associated with this SIP trunk
+	Numbers []string `json:"numbers"`
+	// Optional password for SIP trunk authentication
+	Password *string `json:"password,omitempty"`
+	// Optional list of allowed IPv4/IPv6 addresses or CIDR blocks
 	AllowedIps []string `json:"allowed_ips"`
 }
 type ResolveSipInboundRequest struct {
-	SipCallerNumber string               `json:"sip_caller_number"`
-	SipTrunkNumber  string               `json:"sip_trunk_number"`
-	RoutingNumber   *string              `json:"routing_number,omitempty"`
-	TrunkID         *string              `json:"trunk_id,omitempty"`
-	Challenge       *SIPChallengeRequest `json:"challenge,omitempty"`
-	SipHeaders      map[string]string    `json:"sip_headers"`
+	// SIP caller number
+	SipCallerNumber string `json:"sip_caller_number"`
+	// SIP trunk number to resolve
+	SipTrunkNumber string `json:"sip_trunk_number"`
+	// Optional routing number for routing number-based call routing (10 digits)
+	RoutingNumber *string `json:"routing_number,omitempty"`
+	// Optional pre-authenticated trunk ID (from PreAuth no-auth flow)
+	TrunkID   *string              `json:"trunk_id,omitempty"`
+	Challenge *SIPChallengeRequest `json:"challenge,omitempty"`
+	// Optional SIP headers as key-value pairs
+	SipHeaders map[string]string `json:"sip_headers"`
 }
 type QueryAggregateCallStatsRequest struct {
 	From        *string  `json:"from,omitempty"`

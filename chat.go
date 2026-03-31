@@ -819,11 +819,10 @@ func (c *ChatClient) DeleteRetentionPolicy(ctx context.Context, request *DeleteR
 	return res, err
 }
 
-// Returns paginated retention cleanup run history for the app. Server-side only.
+// Returns filtered and sorted retention cleanup run history for the app. Supports filter_conditions on 'policy' (possible values: 'old-messages', 'inactive-channels') and 'date' fields. Server-side only.
 func (c *ChatClient) GetRetentionPolicyRuns(ctx context.Context, request *GetRetentionPolicyRunsRequest) (*StreamResponse[GetRetentionPolicyRunsResponse], error) {
 	var result GetRetentionPolicyRunsResponse
-	params := extractQueryParams(request)
-	res, err := MakeRequest[any, GetRetentionPolicyRunsResponse](c.client, ctx, "GET", "/api/v2/chat/retention_policy/runs", params, nil, &result, nil)
+	res, err := MakeRequest[GetRetentionPolicyRunsRequest, GetRetentionPolicyRunsResponse](c.client, ctx, "POST", "/api/v2/chat/retention_policy/runs", nil, request, &result, nil)
 	return res, err
 }
 
