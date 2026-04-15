@@ -524,13 +524,15 @@ type GetReactionsRequest struct {
 	Offset *int `json:"-" query:"offset"`
 }
 type QueryReactionsRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	UserID *string            `json:"user_id,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
-	User   *UserRequest       `json:"user,omitempty"`
+	Limit  *int    `json:"limit,omitempty"`
+	Next   *string `json:"next,omitempty"`
+	Prev   *string `json:"prev,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+	// Filter to apply to the query
+	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type TranslateMessageRequest struct {
 	// Language to translate message to
@@ -678,9 +680,9 @@ type QueryThreadsRequest struct {
 	// Limit the number of replies returned per each thread
 	ReplyLimit *int    `json:"reply_limit,omitempty"`
 	UserID     *string `json:"user_id,omitempty"`
-	// Sort conditions to apply to threads
+	// Array of sort parameters
 	Sort []SortParamRequest `json:"sort"`
-	// Filter conditions to apply to threads
+	// Filter to apply to the query
 	Filter map[string]any `json:"filter"`
 	User   *UserRequest   `json:"user,omitempty"`
 }
@@ -839,8 +841,8 @@ type AddActivityRequest struct {
 	// List of users mentioned in the activity
 	MentionedUserIds []string `json:"mentioned_user_ids"`
 	// Custom data for the activity
-	Custom   map[string]any    `json:"custom"`
-	Location *ActivityLocation `json:"location,omitempty"`
+	Custom   map[string]any `json:"custom"`
+	Location *Location      `json:"location,omitempty"`
 	// Additional data for search indexing
 	SearchData map[string]any `json:"search_data"`
 }
@@ -873,12 +875,14 @@ type TrackActivityMetricsRequest struct {
 type QueryActivitiesRequest struct {
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 	// When true, include both expired and non-expired activities in the result.
-	IncludeExpiredActivities *bool   `json:"include_expired_activities,omitempty"`
-	IncludePrivateActivities *bool   `json:"include_private_activities,omitempty"`
-	Limit                    *int    `json:"limit,omitempty"`
-	Next                     *string `json:"next,omitempty"`
-	Prev                     *string `json:"prev,omitempty"`
-	UserID                   *string `json:"user_id,omitempty"`
+	IncludeExpiredActivities *bool `json:"include_expired_activities,omitempty"`
+	IncludePrivateActivities *bool `json:"include_private_activities,omitempty"`
+	// When true, include soft-deleted activities in the result.
+	IncludeSoftDeletedActivities *bool   `json:"include_soft_deleted_activities,omitempty"`
+	Limit                        *int    `json:"limit,omitempty"`
+	Next                         *string `json:"next,omitempty"`
+	Prev                         *string `json:"prev,omitempty"`
+	UserID                       *string `json:"user_id,omitempty"`
 	// Sorting parameters for the query
 	Sort []SortParamRequest `json:"sort"`
 	// Filters to apply to the query. Supports location-based queries with 'near' and 'within_bounds' operators.
@@ -890,8 +894,9 @@ type DeleteBookmarkRequest struct {
 	UserID   *string `json:"-" query:"user_id"`
 }
 type UpdateBookmarkRequest struct {
-	// ID of the folder to move the bookmark to
-	FolderID    *string `json:"folder_id,omitempty"`
+	// ID of the folder containing the bookmark
+	FolderID *string `json:"folder_id,omitempty"`
+	// Move the bookmark to this folder (empty string removes the folder)
 	NewFolderID *string `json:"new_folder_id,omitempty"`
 	UserID      *string `json:"user_id,omitempty"`
 	// Custom data for the bookmark
@@ -1006,8 +1011,8 @@ type UpdateActivityRequest struct {
 	// List of user IDs mentioned in the activity
 	MentionedUserIds []string `json:"mentioned_user_ids"`
 	// Custom data for the activity
-	Custom   map[string]any    `json:"custom"`
-	Location *ActivityLocation `json:"location,omitempty"`
+	Custom   map[string]any `json:"custom"`
+	Location *Location      `json:"location,omitempty"`
 	// Additional data for search indexing
 	SearchData map[string]any `json:"search_data"`
 	User       *UserRequest   `json:"user,omitempty"`
@@ -1125,7 +1130,7 @@ type AddCommentsBatchRequest struct {
 	Comments []AddCommentRequest `json:"comments"`
 }
 type QueryCommentsRequest struct {
-	// MongoDB-style filter for querying comments
+	// Filter to apply to the query
 	Filter map[string]any `json:"filter"`
 	// Returns the comment with the specified ID along with surrounding comments for context
 	IDAround *string `json:"id_around,omitempty"`
@@ -1133,10 +1138,34 @@ type QueryCommentsRequest struct {
 	Limit *int    `json:"limit,omitempty"`
 	Next  *string `json:"next,omitempty"`
 	Prev  *string `json:"prev,omitempty"`
-	// first (oldest), last (newest) or top. One of: first, last, top, best, controversial
+	// Array of sort parameters
 	Sort   *string      `json:"sort,omitempty"`
 	UserID *string      `json:"user_id,omitempty"`
 	User   *UserRequest `json:"user,omitempty"`
+}
+type DeleteCommentBookmarkRequest struct {
+	FolderID *string `json:"-" query:"folder_id"`
+	UserID   *string `json:"-" query:"user_id"`
+}
+type UpdateCommentBookmarkRequest struct {
+	// ID of the folder containing the bookmark
+	FolderID *string `json:"folder_id,omitempty"`
+	// Move the bookmark to this folder (empty string removes the folder)
+	NewFolderID *string `json:"new_folder_id,omitempty"`
+	UserID      *string `json:"user_id,omitempty"`
+	// Custom data for the bookmark
+	Custom    map[string]any    `json:"custom"`
+	NewFolder *AddFolderRequest `json:"new_folder,omitempty"`
+	User      *UserRequest      `json:"user,omitempty"`
+}
+type AddCommentBookmarkRequest struct {
+	// ID of the folder to add the bookmark to
+	FolderID *string `json:"folder_id,omitempty"`
+	UserID   *string `json:"user_id,omitempty"`
+	// Custom data for the bookmark
+	Custom    map[string]any    `json:"custom"`
+	NewFolder *AddFolderRequest `json:"new_folder,omitempty"`
+	User      *UserRequest      `json:"user,omitempty"`
 }
 type DeleteCommentRequest struct {
 	HardDelete                 *bool `json:"-" query:"hard_delete"`
@@ -1265,6 +1294,8 @@ type GetOrCreateFeedRequest struct {
 	User                   *UserRequest            `json:"user,omitempty"`
 }
 type UpdateFeedRequest struct {
+	// If true, removes the geographic location from the feed
+	ClearLocation *bool `json:"clear_location,omitempty"`
 	// ID of the new feed creator (owner)
 	CreatedByID *string `json:"created_by_id,omitempty"`
 	// Description of the feed
@@ -1276,7 +1307,8 @@ type UpdateFeedRequest struct {
 	// Tags used for filtering feeds
 	FilterTags []string `json:"filter_tags"`
 	// Custom data for the feed
-	Custom map[string]any `json:"custom"`
+	Custom   map[string]any `json:"custom"`
+	Location *Location      `json:"location,omitempty"`
 }
 type MarkActivityRequest struct {
 	// Whether to mark all activities as read
@@ -1457,6 +1489,8 @@ type UpdateFollowRequest struct {
 	Source string `json:"source"`
 	// Fully qualified ID of the target feed
 	Target string `json:"target"`
+	// Maximum number of historical activities to copy from the target feed when the follow is first materialized. Not set = unlimited (default). 0 = copy nothing. Range: 0-1000.
+	ActivityCopyLimit *int `json:"activity_copy_limit,omitempty"`
 	// Whether to copy custom data to the notification activity (only applies when create_notification_activity is true) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
 	// Deprecated: this field is deprecated.
 	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
@@ -1479,6 +1513,8 @@ type FollowRequest struct {
 	Source string `json:"source"`
 	// Fully qualified ID of the target feed
 	Target string `json:"target"`
+	// Maximum number of historical activities to copy from the target feed when the follow is first materialized. Not set = unlimited (default). 0 = copy nothing. Range: 0-1000.
+	ActivityCopyLimit *int `json:"activity_copy_limit,omitempty"`
 	// Whether to copy custom data to the notification activity (only applies when create_notification_activity is true) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
 	// Deprecated: this field is deprecated.
 	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
@@ -1699,6 +1735,12 @@ type BulkImageModerationRequest struct {
 	// URL to CSV file containing image URLs to moderate
 	CsvFile string `json:"csv_file"`
 }
+type BypassRequest struct {
+	// Whether to enable moderation bypass for this user
+	Enabled bool `json:"enabled"`
+	// ID of the user to update
+	TargetUserID string `json:"target_user_id"`
+}
 type CheckRequest struct {
 	// ID of the user who created the entity
 	EntityCreatorID string `json:"entity_creator_id"`
@@ -1731,7 +1773,8 @@ type UpsertConfigRequest struct {
 	// Whether moderation should be performed asynchronously
 	Async *bool `json:"async,omitempty"`
 	// Team associated with the configuration
-	Team                               *string                             `json:"team,omitempty"`
+	Team *string `json:"team,omitempty"`
+	// Optional user ID to associate with the audit log entry
 	UserID                             *string                             `json:"user_id,omitempty"`
 	AWSRekognitionConfig               *AIImageConfig                      `json:"aws_rekognition_config,omitempty"`
 	AiImageConfig                      *AIImageConfig                      `json:"ai_image_config,omitempty"`
@@ -1750,7 +1793,8 @@ type UpsertConfigRequest struct {
 	VideoCallRuleConfig                *VideoCallRuleConfig                `json:"video_call_rule_config,omitempty"`
 }
 type DeleteConfigRequest struct {
-	Team *string `json:"-" query:"team"`
+	Team   *string `json:"-" query:"team"`
+	UserID *string `json:"-" query:"user_id"`
 }
 type GetConfigRequest struct {
 	Team *string `json:"-" query:"team"`
@@ -1828,20 +1872,35 @@ type QueryModerationLogsRequest struct {
 	User   *UserRequest   `json:"user,omitempty"`
 }
 type UpsertModerationRuleRequest struct {
-	Name            string                      `json:"name"`
-	RuleType        string                      `json:"rule_type"`
-	CooldownPeriod  *string                     `json:"cooldown_period,omitempty"`
-	Description     *string                     `json:"description,omitempty"`
-	Enabled         *bool                       `json:"enabled,omitempty"`
-	Logic           *string                     `json:"logic,omitempty"`
-	Team            *string                     `json:"team,omitempty"`
-	ActionSequences []CallRuleActionSequence    `json:"action_sequences"`
-	Conditions      []RuleBuilderCondition      `json:"conditions"`
-	ConfigKeys      []string                    `json:"config_keys"`
-	Groups          []RuleBuilderConditionGroup `json:"groups"`
-	Action          *RuleBuilderAction          `json:"action,omitempty"`
+	// Unique rule name
+	Name string `json:"name"`
+	// Type of rule: user, content, or call
+	RuleType string `json:"rule_type"`
+	// Duration before rule can trigger again (e.g. 24h, 7d)
+	CooldownPeriod *string `json:"cooldown_period,omitempty"`
+	// Optional description of the rule
+	Description *string `json:"description,omitempty"`
+	// Whether the rule is active
+	Enabled *bool `json:"enabled,omitempty"`
+	// Logical operator between conditions/groups: AND or OR
+	Logic *string `json:"logic,omitempty"`
+	// Team scope for the rule
+	Team *string `json:"team,omitempty"`
+	// Optional user ID to associate with the audit log entry
+	UserID *string `json:"user_id,omitempty"`
+	// Escalation sequences for call rules
+	ActionSequences []CallRuleActionSequence `json:"action_sequences"`
+	// Flat list of conditions (legacy)
+	Conditions []RuleBuilderCondition `json:"conditions"`
+	// List of config keys this rule applies to
+	ConfigKeys []string `json:"config_keys"`
+	// Nested condition groups
+	Groups []RuleBuilderConditionGroup `json:"groups"`
+	Action *RuleBuilderAction          `json:"action,omitempty"`
+	User   *UserRequest                `json:"user,omitempty"`
 }
 type DeleteModerationRuleRequest struct {
+	UserID *string `json:"-" query:"user_id"`
 }
 type GetModerationRuleRequest struct {
 }
@@ -1895,6 +1954,7 @@ type SubmitActionRequest struct {
 	UserID         *string                          `json:"user_id,omitempty"`
 	Ban            *BanActionRequestPayload         `json:"ban,omitempty"`
 	Block          *BlockActionRequestPayload       `json:"block,omitempty"`
+	Bypass         *BypassActionRequest             `json:"bypass,omitempty"`
 	Custom         *CustomActionRequestPayload      `json:"custom,omitempty"`
 	DeleteActivity *DeleteActivityRequestPayload    `json:"delete_activity,omitempty"`
 	DeleteComment  *DeleteCommentRequestPayload     `json:"delete_comment,omitempty"`

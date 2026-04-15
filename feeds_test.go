@@ -247,6 +247,27 @@ func TestFeedsQueryComments(t *testing.T) {
 	_, err = client.Feeds().QueryComments(context.Background(), &getstream.QueryCommentsRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsDeleteCommentBookmark(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().DeleteCommentBookmark(context.Background(), "", &getstream.DeleteCommentBookmarkRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsUpdateCommentBookmark(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().UpdateCommentBookmark(context.Background(), "", &getstream.UpdateCommentBookmarkRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsAddCommentBookmark(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().AddCommentBookmark(context.Background(), "", &getstream.AddCommentBookmarkRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsDeleteComment(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

@@ -256,13 +256,6 @@ type ActivityFeedbackResponse struct {
 	Duration   string `json:"duration"`
 }
 
-type ActivityLocation struct {
-	// Latitude coordinate
-	Lat float64 `json:"lat"`
-	// Longitude coordinate
-	Lng float64 `json:"lng"`
-}
-
 // Emitted when activities are marked as read, seen, or watched.
 type ActivityMarkEvent struct {
 	// Date/time of creation
@@ -443,8 +436,8 @@ type ActivityRequest struct {
 	// List of users mentioned in the activity
 	MentionedUserIds []string `json:"mentioned_user_ids,omitempty"`
 	// Custom data for the activity
-	Custom   map[string]any    `json:"custom,omitempty"`
-	Location *ActivityLocation `json:"location,omitempty"`
+	Custom   map[string]any `json:"custom,omitempty"`
+	Location *Location      `json:"location,omitempty"`
 	// Additional data for search indexing
 	SearchData map[string]any `json:"search_data,omitempty"`
 }
@@ -528,7 +521,7 @@ type ActivityResponse struct {
 	// Reactions from users the current user follows or has mutual follows with
 	FriendReactions     []FeedsReactionResponse `json:"friend_reactions,omitempty"`
 	CurrentFeed         *FeedResponse           `json:"current_feed,omitempty"`
-	Location            *ActivityLocation       `json:"location,omitempty"`
+	Location            *Location               `json:"location,omitempty"`
 	Metrics             map[string]int          `json:"metrics,omitempty"`
 	Moderation          *ModerationV2Response   `json:"moderation,omitempty"`
 	NotificationContext *NotificationContext    `json:"notification_context,omitempty"`
@@ -638,6 +631,11 @@ type AddBookmarkResponse struct {
 	Bookmark BookmarkResponse `json:"bookmark"`
 }
 
+type AddCommentBookmarkResponse struct {
+	Duration string           `json:"duration"`
+	Bookmark BookmarkResponse `json:"bookmark"`
+}
+
 type AddCommentReactionResponse struct {
 	// Duration of the request
 	Duration string                `json:"duration"`
@@ -725,6 +723,8 @@ type AggregatedActivityResponse struct {
 }
 
 type AggregationConfig struct {
+	// Order of member activities inside each aggregated group for non-stories feeds: created_at_desc (newest first, default) or created_at_asc (oldest first). Stories feeds ignore this and always use oldest first.
+	ActivitiesSort *string `json:"activities_sort,omitempty"`
 	// Format for activity aggregation
 	Format *string `json:"format,omitempty"`
 	// Strategy for computing aggregated group scores from member activity scores when ranking is enabled. Valid values: sum, max, avg
@@ -1068,6 +1068,8 @@ type BackstageSettingsResponse struct {
 
 // Configuration for ban moderation action
 type BanActionRequestPayload struct {
+	// Also ban user from all channels this moderator creates in the future
+	BanFromFutureChannels *bool `json:"ban_from_future_channels,omitempty"`
 	// Ban only from specific channel
 	ChannelBanOnly *bool   `json:"channel_ban_only,omitempty"`
 	ChannelCid     *string `json:"channel_cid,omitempty"`
@@ -1299,10 +1301,16 @@ func (e *BookmarkFolderUpdatedEvent) GetEventType() string {
 type BookmarkResponse struct {
 	// When the bookmark was created
 	CreatedAt Timestamp `json:"created_at"`
+	// ID of the bookmarked object
+	ObjectID string `json:"object_id"`
+	// Type of the bookmarked object (activity or comment)
+	ObjectType string `json:"object_type"`
 	// When the bookmark was last updated
-	UpdatedAt Timestamp        `json:"updated_at"`
-	Activity  ActivityResponse `json:"activity"`
-	User      UserResponse     `json:"user"`
+	UpdatedAt  Timestamp        `json:"updated_at"`
+	Activity   ActivityResponse `json:"activity"`
+	User       UserResponse     `json:"user"`
+	ActivityID *string          `json:"activity_id,omitempty"`
+	Comment    *CommentResponse `json:"comment,omitempty"`
 	// Custom data for the bookmark
 	Custom map[string]any          `json:"custom,omitempty"`
 	Folder *BookmarkFolderResponse `json:"folder,omitempty"`
@@ -1357,6 +1365,14 @@ type BulkImageModerationResponse struct {
 	Duration string `json:"duration"`
 	// ID of the task for processing the bulk image moderation
 	TaskID string `json:"task_id"`
+}
+
+type BypassActionRequest struct {
+	Enabled *bool `json:"enabled,omitempty"`
+}
+
+type BypassResponse struct {
+	Duration string `json:"duration"`
 }
 
 // This event is sent when a user accepts a notification to join a call.
@@ -2251,8 +2267,12 @@ type CallStatsParticipantCounts struct {
 	PeakConcurrentUsers      int  `json:"peak_concurrent_users"`
 	Publishers               int  `json:"publishers"`
 	Sessions                 int  `json:"sessions"`
+	SfusUsed                 int  `json:"sfus_used"`
+	AverageJitterMs          *int `json:"average_jitter_ms,omitempty"`
+	AverageLatencyMs         *int `json:"average_latency_ms,omitempty"`
 	CallEventCount           *int `json:"call_event_count,omitempty"`
 	CqScore                  *int `json:"cq_score,omitempty"`
+	MaxFreezesDurationMs     *int `json:"max_freezes_duration_ms,omitempty"`
 	TotalParticipantDuration *int `json:"total_participant_duration,omitempty"`
 }
 
@@ -2267,6 +2287,9 @@ type CallStatsParticipantSession struct {
 	CurrentSfu              *string             `json:"current_sfu,omitempty"`
 	DistanceToSfuKilometers *float64            `json:"distance_to_sfu_kilometers,omitempty"`
 	EndedAt                 *Timestamp          `json:"ended_at,omitempty"`
+	FreezesDurationMs       *int                `json:"freezes_duration_ms,omitempty"`
+	JitterMs                *int                `json:"jitter_ms,omitempty"`
+	LatencyMs               *int                `json:"latency_ms,omitempty"`
 	Os                      *string             `json:"os,omitempty"`
 	PublisherType           *string             `json:"publisher_type,omitempty"`
 	Sdk                     *string             `json:"sdk,omitempty"`
@@ -3518,6 +3541,7 @@ func (e *CommentReactionUpdatedEvent) GetEventType() string {
 }
 
 type CommentResponse struct {
+	BookmarkCount int `json:"bookmark_count"`
 	// Confidence score of the comment
 	ConfidenceScore float64 `json:"confidence_score"`
 	// When the comment was created
@@ -4065,6 +4089,11 @@ type DeleteCommandResponse struct {
 	Name string `json:"name"`
 }
 
+type DeleteCommentBookmarkResponse struct {
+	Duration string           `json:"duration"`
+	Bookmark BookmarkResponse `json:"bookmark"`
+}
+
 type DeleteCommentReactionResponse struct {
 	Duration string                `json:"duration"`
 	Comment  CommentResponse       `json:"comment"`
@@ -4482,6 +4511,7 @@ type EntityCreatorResponse struct {
 	Custom                   map[string]any                    `json:"custom"`
 	AvgResponseTime          *int                              `json:"avg_response_time,omitempty"`
 	BanExpires               *Timestamp                        `json:"ban_expires,omitempty"`
+	BypassModeration         *bool                             `json:"bypass_moderation,omitempty"`
 	DeactivatedAt            *Timestamp                        `json:"deactivated_at,omitempty"`
 	DeletedAt                *Timestamp                        `json:"deleted_at,omitempty"`
 	Image                    *string                           `json:"image,omitempty"`
@@ -4766,6 +4796,7 @@ type FeedInput struct {
 	FilterTags  []string            `json:"filter_tags,omitempty"`
 	Members     []FeedMemberRequest `json:"members,omitempty"`
 	Custom      map[string]any      `json:"custom,omitempty"`
+	Location    *Location           `json:"location,omitempty"`
 }
 
 // Emitted when a feed member is added.
@@ -4920,7 +4951,8 @@ type FeedRequest struct {
 	// Initial members for the feed
 	Members []FeedMemberRequest `json:"members,omitempty"`
 	// Custom data for the feed
-	Custom map[string]any `json:"custom,omitempty"`
+	Custom   map[string]any `json:"custom,omitempty"`
+	Location *Location      `json:"location,omitempty"`
 }
 
 type FeedResponse struct {
@@ -4962,6 +4994,7 @@ type FeedResponse struct {
 	OwnFollows []FollowResponse `json:"own_follows,omitempty"`
 	// Custom data for the feed
 	Custom        map[string]any      `json:"custom,omitempty"`
+	Location      *Location           `json:"location,omitempty"`
 	OwnMembership *FeedMemberResponse `json:"own_membership,omitempty"`
 }
 
@@ -5007,6 +5040,7 @@ type FeedSuggestionResponse struct {
 	AlgorithmScores map[string]float64 `json:"algorithm_scores,omitempty"`
 	// Custom data for the feed
 	Custom        map[string]any      `json:"custom,omitempty"`
+	Location      *Location           `json:"location,omitempty"`
 	OwnMembership *FeedMemberResponse `json:"own_membership,omitempty"`
 }
 
@@ -5415,6 +5449,7 @@ type FullUserResponse struct {
 	Custom                   map[string]any           `json:"custom"`
 	AvgResponseTime          *int                     `json:"avg_response_time,omitempty"`
 	BanExpires               *Timestamp               `json:"ban_expires,omitempty"`
+	BypassModeration         *bool                    `json:"bypass_moderation,omitempty"`
 	DeactivatedAt            *Timestamp               `json:"deactivated_at,omitempty"`
 	DeletedAt                *Timestamp               `json:"deleted_at,omitempty"`
 	Image                    *string                  `json:"image,omitempty"`
@@ -5741,6 +5776,7 @@ type GetImportV2TaskResponse struct {
 	State     int                  `json:"state"`
 	UpdatedAt Timestamp            `json:"updated_at"`
 	Settings  ImportV2TaskSettings `json:"settings"`
+	Result    map[string]any       `json:"result,omitempty"`
 }
 
 type GetManyMessagesResponse struct {
@@ -6075,6 +6111,7 @@ type ImportV2TaskItem struct {
 	State     int                  `json:"state"`
 	UpdatedAt Timestamp            `json:"updated_at"`
 	Settings  ImportV2TaskSettings `json:"settings"`
+	Result    map[string]any       `json:"result,omitempty"`
 }
 
 type ImportV2TaskSettings struct {
@@ -6082,6 +6119,7 @@ type ImportV2TaskSettings struct {
 	Mode                *string                 `json:"mode,omitempty"`
 	Path                *string                 `json:"path,omitempty"`
 	SkipReferencesCheck *bool                   `json:"skip_references_check,omitempty"`
+	Source              *string                 `json:"source,omitempty"`
 	S3                  *ImportV2TaskSettingsS3 `json:"s3,omitempty"`
 }
 
@@ -6510,6 +6548,13 @@ type ListUserGroupsResponse struct {
 	Duration string `json:"duration"`
 	// List of user groups
 	UserGroups []UserGroupResponse `json:"user_groups"`
+}
+
+type Location struct {
+	// Latitude coordinate
+	Lat float64 `json:"lat"`
+	// Longitude coordinate
+	Lng float64 `json:"lng"`
 }
 
 // Geographic location metadata
@@ -8989,7 +9034,8 @@ type RankingConfig struct {
 }
 
 type RawRecordSettings struct {
-	Mode string `json:"mode"`
+	Mode      string `json:"mode"`
+	AudioOnly *bool  `json:"audio_only,omitempty"`
 }
 
 type RawRecordingResponse struct {
@@ -8999,10 +9045,13 @@ type RawRecordingResponse struct {
 type RawRecordingSettingsRequest struct {
 	// Recording mode. One of: available, disabled, auto-on
 	Mode string `json:"mode"`
+	// If true, only audio tracks will be recorded
+	AudioOnly *bool `json:"audio_only,omitempty"`
 }
 
 type RawRecordingSettingsResponse struct {
-	Mode string `json:"mode"`
+	Mode      string `json:"mode"`
+	AudioOnly *bool  `json:"audio_only,omitempty"`
 }
 
 type Reaction struct {
@@ -10500,6 +10549,7 @@ func (e *ThreadUpdatedEvent) GetEventType() string {
 
 // A comment with an optional, depth‑limited slice of nested replies.
 type ThreadedCommentResponse struct {
+	BookmarkCount   int       `json:"bookmark_count"`
 	ConfidenceScore float64   `json:"confidence_score"`
 	CreatedAt       Timestamp `json:"created_at"`
 	DownvoteCount   int       `json:"downvote_count"`
@@ -10651,6 +10701,8 @@ type UnbanActionRequestPayload struct {
 	ChannelCid *string `json:"channel_cid,omitempty"`
 	// Reason for the appeal decision
 	DecisionReason *string `json:"decision_reason,omitempty"`
+	// Also remove the future channels ban for this user
+	RemoveFutureChannelsBan *bool `json:"remove_future_channels_ban,omitempty"`
 }
 
 type UnbanResponse struct {
@@ -10935,6 +10987,11 @@ type UpdateCollectionsResponse struct {
 type UpdateCommandResponse struct {
 	Duration string   `json:"duration"`
 	Command  *Command `json:"command,omitempty"`
+}
+
+type UpdateCommentBookmarkResponse struct {
+	Duration string           `json:"duration"`
+	Bookmark BookmarkResponse `json:"bookmark"`
 }
 
 type UpdateCommentPartialResponse struct {
@@ -11581,7 +11638,8 @@ type UserResponse struct {
 	Custom          map[string]any `json:"custom"`
 	AvgResponseTime *int           `json:"avg_response_time,omitempty"`
 	// Date when ban expires
-	BanExpires *Timestamp `json:"ban_expires,omitempty"`
+	BanExpires       *Timestamp `json:"ban_expires,omitempty"`
+	BypassModeration *bool      `json:"bypass_moderation,omitempty"`
 	// Date of deactivation
 	DeactivatedAt *Timestamp `json:"deactivated_at,omitempty"`
 	// Date/time of deletion
