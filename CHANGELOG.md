@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.0.5](https://github.com/GetStream/getstream-go/compare/v4.0.4...v4.0.5) (2026-04-16)
+
+
+### Features
+
+* add bookmark for comments ([#97](https://github.com/GetStream/getstream-go/issues/97)) ([7e41662](https://github.com/GetStream/getstream-go/commit/7e41662f20af4df9bf30040da2448c44d594b8e8))
+* regenerate from latest OpenAPI spec, keep only retention runs test ([5d543c4](https://github.com/GetStream/getstream-go/commit/5d543c48dc4b14fb3d95f538031f0e3029c2618c))
+
+
+### Bug Fixes
+
+* skip retention tests when endpoints unavailable (404) ([faff5e6](https://github.com/GetStream/getstream-go/commit/faff5e66c79c1f30a7adddefa8d59c7ad1c25bbb))
+
 ### [4.0.4](https://github.com/GetStream/getstream-go/compare/v4.0.3...v4.0.4) (2026-03-31)
 
 ### [4.0.3](https://github.com/GetStream/getstream-go/compare/v4.0.2...v4.0.3) (2026-03-23)
