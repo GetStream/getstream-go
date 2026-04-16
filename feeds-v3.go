@@ -334,6 +334,37 @@ func (c *FeedsClient) QueryComments(ctx context.Context, request *QueryCommentsR
 	return res, err
 }
 
+// Deletes a bookmark from a comment
+func (c *FeedsClient) DeleteCommentBookmark(ctx context.Context, commentID string, request *DeleteCommentBookmarkRequest) (*StreamResponse[DeleteCommentBookmarkResponse], error) {
+	var result DeleteCommentBookmarkResponse
+	pathParams := map[string]string{
+		"comment_id": commentID,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, DeleteCommentBookmarkResponse](c.client, ctx, "DELETE", "/api/v2/feeds/comments/{comment_id}/bookmarks", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Updates a bookmark for a comment
+func (c *FeedsClient) UpdateCommentBookmark(ctx context.Context, commentID string, request *UpdateCommentBookmarkRequest) (*StreamResponse[UpdateCommentBookmarkResponse], error) {
+	var result UpdateCommentBookmarkResponse
+	pathParams := map[string]string{
+		"comment_id": commentID,
+	}
+	res, err := MakeRequest[UpdateCommentBookmarkRequest, UpdateCommentBookmarkResponse](c.client, ctx, "PATCH", "/api/v2/feeds/comments/{comment_id}/bookmarks", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Adds a bookmark to a comment
+func (c *FeedsClient) AddCommentBookmark(ctx context.Context, commentID string, request *AddCommentBookmarkRequest) (*StreamResponse[AddCommentBookmarkResponse], error) {
+	var result AddCommentBookmarkResponse
+	pathParams := map[string]string{
+		"comment_id": commentID,
+	}
+	res, err := MakeRequest[AddCommentBookmarkRequest, AddCommentBookmarkResponse](c.client, ctx, "POST", "/api/v2/feeds/comments/{comment_id}/bookmarks", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Deletes a comment from an object (e.g., activity) and broadcasts appropriate events
 func (c *FeedsClient) DeleteComment(ctx context.Context, id string, request *DeleteCommentRequest) (*StreamResponse[DeleteCommentResponse], error) {
 	var result DeleteCommentResponse

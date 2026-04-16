@@ -60,6 +60,13 @@ func (c *ModerationClient) BulkImageModeration(ctx context.Context, request *Bul
 	return res, err
 }
 
+// Enable or disable moderation bypass for a user. This endpoint is server-side only.
+func (c *ModerationClient) Bypass(ctx context.Context, request *BypassRequest) (*StreamResponse[BypassResponse], error) {
+	var result BypassResponse
+	res, err := MakeRequest[BypassRequest, BypassResponse](c.client, ctx, "POST", "/api/v2/moderation/bypass", nil, request, &result, nil)
+	return res, err
+}
+
 // Run moderation checks on the provided content
 func (c *ModerationClient) Check(ctx context.Context, request *CheckRequest) (*StreamResponse[CheckResponse], error) {
 	var result CheckResponse
@@ -176,7 +183,8 @@ func (c *ModerationClient) UpsertModerationRule(ctx context.Context, request *Up
 // Delete an existing moderation rule
 func (c *ModerationClient) DeleteModerationRule(ctx context.Context, request *DeleteModerationRuleRequest) (*StreamResponse[DeleteModerationRuleResponse], error) {
 	var result DeleteModerationRuleResponse
-	res, err := MakeRequest[any, DeleteModerationRuleResponse](c.client, ctx, "DELETE", "/api/v2/moderation/moderation_rule/{id}", nil, nil, &result, nil)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, DeleteModerationRuleResponse](c.client, ctx, "DELETE", "/api/v2/moderation/moderation_rule/{id}", params, nil, &result, nil)
 	return res, err
 }
 
