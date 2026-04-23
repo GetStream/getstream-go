@@ -809,7 +809,8 @@ type AddActivityRequest struct {
 	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
 	EnrichOwnFields            *bool `json:"enrich_own_fields,omitempty"`
 	// Expiration time for the activity
-	ExpiresAt *string `json:"expires_at,omitempty"`
+	ExpiresAt       *string `json:"expires_at,omitempty"`
+	ForceModeration *bool   `json:"force_moderation,omitempty"`
 	// Optional ID for the activity
 	ID *string `json:"id,omitempty"`
 	// ID of parent activity for replies/comments
@@ -851,10 +852,14 @@ type UpsertActivitiesRequest struct {
 	Activities []ActivityRequest `json:"activities"`
 	// If true, enriches the activities' current_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
+	// If true, forces moderation to run for server-side requests. By default, server-side requests skip moderation. Client-side requests always run moderation regardless of this field.
+	ForceModeration *bool `json:"force_moderation,omitempty"`
 }
 type UpdateActivitiesPartialBatchRequest struct {
 	// List of activity changes to apply. Each change specifies an activity ID and the fields to set/unset
 	Changes []UpdateActivityPartialChangeRequest `json:"changes"`
+	// If true, forces moderation to run for server-side requests. By default, server-side requests skip moderation. Client-side requests always run moderation regardless of this field.
+	ForceModeration *bool `json:"force_moderation,omitempty"`
 }
 type DeleteActivitiesRequest struct {
 	// List of activity IDs to delete
@@ -955,6 +960,9 @@ type DeleteActivityRequest struct {
 	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
 }
 type GetActivityRequest struct {
+	CommentSort  *string `json:"-" query:"comment_sort"`
+	CommentLimit *int    `json:"-" query:"comment_limit"`
+	UserID       *string `json:"-" query:"user_id"`
 }
 type UpdateActivityPartialRequest struct {
 	// Whether to copy custom data to the notification activity (only applies when handle_mention_notifications creates notifications) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
@@ -962,6 +970,8 @@ type UpdateActivityPartialRequest struct {
 	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
 	// If true, enriches the activity's current_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
+	// If true, forces moderation to run for server-side requests. By default, server-side requests skip moderation. Client-side requests always run moderation regardless of this field.
+	ForceModeration *bool `json:"force_moderation,omitempty"`
 	// If true, creates notification activities for newly mentioned users and deletes notifications for users no longer mentioned
 	HandleMentionNotifications *bool `json:"handle_mention_notifications,omitempty"`
 	// If true, runs activity processors on the updated activity. Processors will only run if the activity text and/or attachments are changed. Defaults to false.
@@ -981,6 +991,8 @@ type UpdateActivityRequest struct {
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 	// Time when the activity will expire
 	ExpiresAt *Timestamp `json:"expires_at,omitempty"`
+	// If true, forces moderation to run for server-side requests. By default, server-side requests skip moderation. Client-side requests always run moderation regardless of this field.
+	ForceModeration *bool `json:"force_moderation,omitempty"`
 	// If true, creates notification activities for newly mentioned users and deletes notifications for users no longer mentioned
 	HandleMentionNotifications *bool `json:"handle_mention_notifications,omitempty"`
 	// Poll ID
@@ -1105,6 +1117,8 @@ type AddCommentRequest struct {
 	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
 	// Whether to create a notification activity for this comment
 	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+	// If true, forces moderation to run for server-side requests. By default, server-side requests skip moderation. Client-side requests always run moderation regardless of this field.
+	ForceModeration *bool `json:"force_moderation,omitempty"`
 	// Optional custom ID for the comment (max 255 characters). If not provided, a UUID will be generated.
 	ID *string `json:"id,omitempty"`
 	// ID of the object to comment on. Required for root comments
@@ -1172,6 +1186,7 @@ type DeleteCommentRequest struct {
 	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
 }
 type GetCommentRequest struct {
+	UserID *string `json:"-" query:"user_id"`
 }
 type UpdateCommentRequest struct {
 	// Updated text content of the comment
@@ -1179,6 +1194,8 @@ type UpdateCommentRequest struct {
 	// Whether to copy custom data to the notification activity (only applies when handle_mention_notifications creates notifications) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
 	// Deprecated: this field is deprecated.
 	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
+	// If true, forces moderation to run for server-side requests. By default, server-side requests skip moderation. Client-side requests always run moderation regardless of this field.
+	ForceModeration *bool `json:"force_moderation,omitempty"`
 	// If true, creates notification activities for newly mentioned users and deletes notifications for users no longer mentioned
 	HandleMentionNotifications *bool `json:"handle_mention_notifications,omitempty"`
 	// Whether to skip URL enrichment for this comment
@@ -1197,6 +1214,8 @@ type UpdateCommentPartialRequest struct {
 	// Whether to copy custom data to notification activities Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
 	// Deprecated: this field is deprecated.
 	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
+	// If true, forces moderation to run for server-side requests. By default, server-side requests skip moderation. Client-side requests always run moderation regardless of this field.
+	ForceModeration *bool `json:"force_moderation,omitempty"`
 	// Whether to handle mention notification changes
 	HandleMentionNotifications *bool `json:"handle_mention_notifications,omitempty"`
 	// Whether to skip URL enrichment
@@ -1263,6 +1282,7 @@ type CreateFeedGroupRequest struct {
 	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
 	// Configuration for activity selectors
 	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
+	ActivityFilter    *ActivityFilterConfig    `json:"activity_filter,omitempty"`
 	Aggregation       *AggregationConfig       `json:"aggregation,omitempty"`
 	// Custom data for the feed group
 	Custom           map[string]any          `json:"custom"`
@@ -1389,6 +1409,7 @@ type GetOrCreateFeedGroupRequest struct {
 	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
 	// Configuration for activity selectors
 	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
+	ActivityFilter    *ActivityFilterConfig    `json:"activity_filter,omitempty"`
 	Aggregation       *AggregationConfig       `json:"aggregation,omitempty"`
 	// Custom data for the feed group
 	Custom           map[string]any          `json:"custom"`
@@ -1403,6 +1424,7 @@ type UpdateFeedGroupRequest struct {
 	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
 	// Configuration for activity selectors
 	ActivitySelectors []ActivitySelectorConfig `json:"activity_selectors"`
+	ActivityFilter    *ActivityFilterConfig    `json:"activity_filter,omitempty"`
 	Aggregation       *AggregationConfig       `json:"aggregation,omitempty"`
 	// Custom data for the feed group
 	Custom           map[string]any          `json:"custom"`
@@ -1496,6 +1518,8 @@ type UpdateFollowRequest struct {
 	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
 	// Whether to create a notification activity for this follow
 	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+	// If true, auto-creates users referenced by the source and target FIDs when they don't already exist. Server-side only. Defaults to false. For FollowBatch/GetOrCreateFollows, use the top-level create_users field; per-item follows[i].create_users is rejected.
+	CreateUsers *bool `json:"create_users,omitempty"`
 	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
 	EnrichOwnFields *bool   `json:"enrich_own_fields,omitempty"`
 	FollowerRole    *string `json:"follower_role,omitempty"`
@@ -1520,6 +1544,8 @@ type FollowRequest struct {
 	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
 	// Whether to create a notification activity for this follow
 	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+	// If true, auto-creates users referenced by the source and target FIDs when they don't already exist. Server-side only. Defaults to false. For FollowBatch/GetOrCreateFollows, use the top-level create_users field; per-item follows[i].create_users is rejected.
+	CreateUsers *bool `json:"create_users,omitempty"`
 	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 	// Push preference for the follow relationship
@@ -1542,12 +1568,16 @@ type AcceptFollowRequest struct {
 type FollowBatchRequest struct {
 	// List of follow relationships to create
 	Follows []FollowRequest `json:"follows"`
+	// If true, auto-creates users referenced by source/target FIDs in the batch when they don't already exist. Server-side only. Defaults to false. This top-level field is the only supported batch/upsert create_users control.
+	CreateUsers *bool `json:"create_users,omitempty"`
 	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 }
 type GetOrCreateFollowsRequest struct {
 	// List of follow relationships to create
 	Follows []FollowRequest `json:"follows"`
+	// If true, auto-creates users referenced by source/target FIDs in the batch when they don't already exist. Server-side only. Defaults to false. This top-level field is the only supported batch/upsert create_users control.
+	CreateUsers *bool `json:"create_users,omitempty"`
 	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 }
@@ -1859,6 +1889,31 @@ type QueryModerationFlagsRequest struct {
 	Prev   *string            `json:"prev,omitempty"`
 	Sort   []SortParamRequest `json:"sort"`
 	Filter map[string]any     `json:"filter"`
+}
+type LabelsRequest struct {
+	// Content to moderate
+	Content string `json:"content"`
+	// Optional category for filtering (max 128 chars)
+	Category *string `json:"category,omitempty"`
+	// Customer-supplied identifier for the moderated content, for tracing
+	ContentID *string `json:"content_id,omitempty"`
+	// Type of content: 'text' (default), 'message', or 'username'. Stored as-sent; only 'username' routes to the username moderation API.
+	ContentType *string `json:"content_type,omitempty"`
+	// Optional moderation policy key (max 128 chars)
+	Policy *string `json:"policy,omitempty"`
+	// Optional customer-supplied user identifier for the content author (max 256 chars). Enables filtering stored results by user_id.
+	UserID *string `json:"user_id,omitempty"`
+}
+type QueryLabelResultsRequest struct {
+	Limit  *int    `json:"limit,omitempty"`
+	Next   *string `json:"next,omitempty"`
+	Prev   *string `json:"prev,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Sorting parameters
+	Sort []SortParamRequest `json:"sort"`
+	// Filter conditions
+	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type QueryModerationLogsRequest struct {
 	Limit  *int    `json:"limit,omitempty"`
@@ -2544,6 +2599,15 @@ type UpdateUserPermissionsRequest struct {
 type DeleteRecordingRequest struct {
 }
 type DeleteTranscriptionRequest struct {
+}
+type QueryCallSessionStatsRequest struct {
+	Limit *int    `json:"limit,omitempty"`
+	Next  *string `json:"next,omitempty"`
+	Prev  *string `json:"prev,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+	// Filter conditions to apply to the query
+	FilterConditions map[string]any `json:"filter_conditions"`
 }
 type GetCallStatsMapRequest struct {
 	StartTime          *Timestamp `json:"-" query:"start_time"`

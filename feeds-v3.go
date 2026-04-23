@@ -186,7 +186,8 @@ func (c *FeedsClient) GetActivity(ctx context.Context, id string, request *GetAc
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[any, GetActivityResponse](c.client, ctx, "GET", "/api/v2/feeds/activities/{id}", nil, nil, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetActivityResponse](c.client, ctx, "GET", "/api/v2/feeds/activities/{id}", params, nil, &result, pathParams)
 	return res, err
 }
 
@@ -382,7 +383,8 @@ func (c *FeedsClient) GetComment(ctx context.Context, id string, request *GetCom
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[any, GetCommentResponse](c.client, ctx, "GET", "/api/v2/feeds/comments/{id}", nil, nil, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetCommentResponse](c.client, ctx, "GET", "/api/v2/feeds/comments/{id}", params, nil, &result, pathParams)
 	return res, err
 }
 

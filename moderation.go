@@ -166,6 +166,20 @@ func (c *ModerationClient) QueryModerationFlags(ctx context.Context, request *Qu
 	return res, err
 }
 
+// Run moderation on text and return labels
+func (c *ModerationClient) Labels(ctx context.Context, request *LabelsRequest) (*StreamResponse[LabelsResponse], error) {
+	var result LabelsResponse
+	res, err := MakeRequest[LabelsRequest, LabelsResponse](c.client, ctx, "POST", "/api/v2/moderation/labels", nil, request, &result, nil)
+	return res, err
+}
+
+// Search and filter moderation label results with support for pagination and sorting. View the history of moderation labels applied to content.
+func (c *ModerationClient) QueryLabelResults(ctx context.Context, request *QueryLabelResultsRequest) (*StreamResponse[QueryLabelResultsResponse], error) {
+	var result QueryLabelResultsResponse
+	res, err := MakeRequest[QueryLabelResultsRequest, QueryLabelResultsResponse](c.client, ctx, "POST", "/api/v2/moderation/labels/results", nil, request, &result, nil)
+	return res, err
+}
+
 // Search and filter moderation action logs with support for pagination. View the history of moderation actions taken, including who performed them and when.
 func (c *ModerationClient) QueryModerationLogs(ctx context.Context, request *QueryModerationLogsRequest) (*StreamResponse[QueryModerationLogsResponse], error) {
 	var result QueryModerationLogsResponse
