@@ -548,6 +548,12 @@ func (c *VideoClient) DeleteTranscription(ctx context.Context, _type string, id 
 	return res, err
 }
 
+func (c *VideoClient) QueryCallSessionStats(ctx context.Context, request *QueryCallSessionStatsRequest) (*StreamResponse[QueryCallSessionStatsResponse], error) {
+	var result QueryCallSessionStatsResponse
+	res, err := MakeRequest[QueryCallSessionStatsRequest, QueryCallSessionStatsResponse](c.client, ctx, "POST", "/api/v2/video/call_stats", nil, request, &result, nil)
+	return res, err
+}
+
 func (c *VideoClient) GetCallStatsMap(ctx context.Context, callType string, callID string, session string, request *GetCallStatsMapRequest) (*StreamResponse[QueryCallStatsMapResponse], error) {
 	var result QueryCallStatsMapResponse
 	pathParams := map[string]string{

@@ -256,6 +256,11 @@ type ActivityFeedbackResponse struct {
 	Duration   string `json:"duration"`
 }
 
+type ActivityFilterConfig struct {
+	// When true, activities authored by the feed owner are excluded from feed reads
+	ExcludeOwnerActivities *bool `json:"exclude_owner_activities,omitempty"`
+}
+
 // Emitted when activities are marked as read, seen, or watched.
 type ActivityMarkEvent struct {
 	// Date/time of creation
@@ -2288,6 +2293,7 @@ type CallStatsParticipantSession struct {
 	DistanceToSfuKilometers *float64            `json:"distance_to_sfu_kilometers,omitempty"`
 	EndedAt                 *Timestamp          `json:"ended_at,omitempty"`
 	FreezesDurationMs       *int                `json:"freezes_duration_ms,omitempty"`
+	Ingress                 *string             `json:"ingress,omitempty"`
 	JitterMs                *int                `json:"jitter_ms,omitempty"`
 	LatencyMs               *int                `json:"latency_ms,omitempty"`
 	Os                      *string             `json:"os,omitempty"`
@@ -2305,7 +2311,8 @@ type CallStatsReportReadyEvent struct {
 	CallCid   string    `json:"call_cid"`
 	CreatedAt Timestamp `json:"created_at"`
 	// Call session ID
-	SessionID string `json:"session_id"`
+	SessionID string                     `json:"session_id"`
+	Counts    CallStatsParticipantCounts `json:"counts"`
 	// The type of event, "call.report_ready" in this case
 	Type string `json:"type"`
 	// Whether participants_overview is truncated by the server-side limit
@@ -2327,6 +2334,16 @@ type CallStatsReportSummaryResponse struct {
 	CreatedAt           *Timestamp `json:"created_at,omitempty"`
 	MinUserRating       *int       `json:"min_user_rating,omitempty"`
 	QualityScore        *int       `json:"quality_score,omitempty"`
+}
+
+type CallStatsSessionResponse struct {
+	CallID        string                     `json:"call_id"`
+	CallSessionID string                     `json:"call_session_id"`
+	CallType      string                     `json:"call_type"`
+	GeneratedAt   Timestamp                  `json:"generated_at"`
+	Counts        CallStatsParticipantCounts `json:"counts"`
+	CallEndedAt   *Timestamp                 `json:"call_ended_at,omitempty"`
+	CallStartedAt *Timestamp                 `json:"call_started_at,omitempty"`
 }
 
 // CallTranscription represents a transcription of a call.
@@ -4349,6 +4366,15 @@ type DraftResponse struct {
 	QuotedMessage *MessageResponse     `json:"quoted_message,omitempty"`
 }
 
+type EMAUStatsResponse struct {
+	// Per-day unique engaged user counts
+	Daily []DailyMetricResponse `json:"daily"`
+	// Rolling 30-day engaged user count snapshots
+	Last30Days []DailyMetricResponse `json:"last_30_days"`
+	// Calendar month-to-date engaged user count snapshots
+	MonthToDate []DailyMetricResponse `json:"month_to_date"`
+}
+
 type EdgeResponse struct {
 	ContinentCode      string  `json:"continent_code"`
 	CountryIsoCode     string  `json:"country_iso_code"`
@@ -4452,6 +4478,8 @@ type EnrichedReaction struct {
 type EnrichmentOptions struct {
 	// Default: false. When true, includes fetching and enriching own_followings (follows where activity author's feeds follow current user's feeds).
 	EnrichOwnFollowings *bool `json:"enrich_own_followings,omitempty"`
+	// Controls the top-level flat 'activities' array for aggregated feeds. For new apps, defaults to false (excluded); set to true to include. For older apps, defaults to true (included) for backward compatibility; set to false to exclude.
+	IncludeFlatActivities *bool `json:"include_flat_activities,omitempty"`
 	// Default: false. When true, includes score_vars in activity responses containing variable values used at ranking time.
 	IncludeScoreVars *bool `json:"include_score_vars,omitempty"`
 	// Default: false. When true, skips all activity enrichments.
@@ -4705,6 +4733,7 @@ type FeedGroup struct {
 	Custom             map[string]any            `json:"custom"`
 	DeletedAt          *Timestamp                `json:"deleted_at,omitempty"`
 	LastFeedGetAt      *Timestamp                `json:"last_feed_get_at,omitempty"`
+	ActivityFilter     *ActivityFilterConfig     `json:"activity_filter,omitempty"`
 	Aggregation        *AggregationConfig        `json:"aggregation,omitempty"`
 	Notification       *NotificationConfig       `json:"notification,omitempty"`
 	PushNotification   *PushNotificationConfig   `json:"push_notification,omitempty"`
@@ -4762,6 +4791,7 @@ type FeedGroupResponse struct {
 	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors,omitempty"`
 	// Configuration for activity selectors
 	ActivitySelectors []ActivitySelectorConfigResponse `json:"activity_selectors,omitempty"`
+	ActivityFilter    *ActivityFilterConfig            `json:"activity_filter,omitempty"`
 	Aggregation       *AggregationConfig               `json:"aggregation,omitempty"`
 	// Custom data for the feed group
 	Custom           map[string]any          `json:"custom,omitempty"`
@@ -6361,11 +6391,62 @@ type LabelResponse struct {
 	PhraseListIds []int    `json:"phrase_list_ids,omitempty"`
 }
 
+type LabelResultResponse struct {
+	// Category
+	Category string `json:"category"`
+	// The moderated content
+	Content     string `json:"content"`
+	ContentType string `json:"content_type"`
+	// Timestamp
+	CreatedAt Timestamp `json:"created_at"`
+	// High-level harm category
+	HarmType string `json:"harm_type"`
+	// Unique identifier
+	ID string `json:"id"`
+	// Detected language
+	Language string `json:"language"`
+	// Provider recommended action
+	RecommendedAction string `json:"recommended_action"`
+	// Severity level
+	Severity string `json:"severity"`
+	// Moderation labels
+	Labels []string `json:"labels"`
+	// Customer-supplied identifier for the moderated content
+	ContentID *string `json:"content_id,omitempty"`
+	// Who the content is directed at (USER, GROUP, EVERYONE, NONE, etc.)
+	DirectedAt *string `json:"directed_at,omitempty"`
+	// Content with blocklisted tokens masked (when a blocklist rule with action=mask rewrote the original)
+	MaskedContent *string `json:"masked_content,omitempty"`
+	Policy        *string `json:"policy,omitempty"`
+	// Customer-supplied user identifier for the content author
+	UserID *string `json:"user_id,omitempty"`
+}
+
 type LabelThresholds struct {
 	// Threshold for automatic message block
 	Block *float64 `json:"block,omitempty"`
 	// Threshold for automatic message flag
 	Flag *float64 `json:"flag,omitempty"`
+}
+
+type LabelsResponse struct {
+	Duration string `json:"duration"`
+	// Provider recommended action
+	RecommendedAction string `json:"recommended_action"`
+	// Customer-supplied identifier for the moderated content, for tracing
+	ContentID *string `json:"content_id,omitempty"`
+	// Who the content is directed at (USER, GROUP, EVERYONE, NONE, etc.), when the provider exposes it
+	DirectedAt *string `json:"directed_at,omitempty"`
+	// High-level harm category
+	HarmType *string `json:"harm_type,omitempty"`
+	// Detected language
+	Language *string `json:"language,omitempty"`
+	// Content with blocklisted tokens masked or substituted. Present only when a blocklist rewrote the original content.
+	MaskedContent *string `json:"masked_content,omitempty"`
+	// Severity level
+	Severity *string `json:"severity,omitempty"`
+	// Moderation labels detected
+	Labels []string `json:"labels,omitempty"`
 }
 
 type LayoutSettings struct {
@@ -7415,6 +7496,7 @@ type ModerationDashboardPreferences struct {
 	DisableFlaggingReviewedEntity  *bool                      `json:"disable_flagging_reviewed_entity,omitempty"`
 	EscalationQueueEnabled         *bool                      `json:"escalation_queue_enabled,omitempty"`
 	FlagUserOnFlaggedContent       *bool                      `json:"flag_user_on_flagged_content,omitempty"`
+	IncludeAttachmentPayload       *bool                      `json:"include_attachment_payload,omitempty"`
 	MediaQueueBlurEnabled          *bool                      `json:"media_queue_blur_enabled,omitempty"`
 	AllowedModerationActionReasons []string                   `json:"allowed_moderation_action_reasons,omitempty"`
 	EscalationReasons              []string                   `json:"escalation_reasons,omitempty"`
@@ -8598,6 +8680,15 @@ type QueryCallSessionParticipantStatsTimelineResponse struct {
 }
 
 // Basic response information
+type QueryCallSessionStatsResponse struct {
+	// Duration of the request in milliseconds
+	Duration  string                     `json:"duration"`
+	CallStats []CallStatsSessionResponse `json:"call_stats"`
+	Next      *string                    `json:"next,omitempty"`
+	Prev      *string                    `json:"prev,omitempty"`
+}
+
+// Basic response information
 type QueryCallStatsMapResponse struct {
 	CallID        string `json:"call_id"`
 	CallSessionID string `json:"call_session_id"`
@@ -8730,6 +8821,7 @@ type QueryFeedsUsageStatsResponse struct {
 	Activities     DailyMetricStatsResponse `json:"activities"`
 	Follows        DailyMetricStatsResponse `json:"follows"`
 	OpenaiRequests DailyMetricStatsResponse `json:"openai_requests"`
+	Emau           *EMAUStatsResponse       `json:"emau,omitempty"`
 }
 
 type QueryFollowsResponse struct {
@@ -8760,6 +8852,14 @@ type QueryFutureChannelBansResponse struct {
 	Duration string `json:"duration"`
 	// List of found future channel bans
 	Bans []FutureChannelBanResponse `json:"bans"`
+}
+
+type QueryLabelResultsResponse struct {
+	Duration string `json:"duration"`
+	// List of moderation label results
+	LabelResults []LabelResultResponse `json:"label_results"`
+	Next         *string               `json:"next,omitempty"`
+	Prev         *string               `json:"prev,omitempty"`
 }
 
 type QueryMembersPayload struct {
