@@ -4633,9 +4633,10 @@ type EntityCreatorResponse struct {
 }
 
 type ErrorResult struct {
-	Type       string  `json:"type"`
-	Stacktrace *string `json:"stacktrace,omitempty"`
-	Version    *string `json:"version,omitempty"`
+	Description string  `json:"description"`
+	Type        string  `json:"type"`
+	Stacktrace  *string `json:"stacktrace,omitempty"`
+	Version     *string `json:"version,omitempty"`
 }
 
 // Configuration for escalation action
