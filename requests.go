@@ -82,6 +82,33 @@ type UpdateBlockListRequest struct {
 	// List of words to block
 	Words []string `json:"words"`
 }
+type CreateCampaignRequest struct {
+	// The user ID of the sender
+	SenderID        string                  `json:"sender_id"`
+	MessageTemplate CampaignMessageTemplate `json:"message_template"`
+	// Whether to create channels for the campaign, if they don't exist
+	CreateChannels *bool `json:"create_channels,omitempty"`
+	// The description of the campaign
+	Description *string `json:"description,omitempty"`
+	ID          *string `json:"id,omitempty"`
+	// The name of the campaign
+	Name *string `json:"name,omitempty"`
+	// The sender mode of the campaign
+	SenderMode *string `json:"sender_mode,omitempty"`
+	// The visibility of the created channels for the sender
+	SenderVisibility *string `json:"sender_visibility,omitempty"`
+	// Whether the campaign should show channels, if they are hidden
+	ShowChannels *bool `json:"show_channels,omitempty"`
+	// Whether to skip push notifications
+	SkipPush *bool `json:"skip_push,omitempty"`
+	// Whether to skip webhooks
+	SkipWebhook *bool `json:"skip_webhook,omitempty"`
+	// The IDs of the segments to send the campaign to. Duplicate user IDs are removed. Use either user_ids or segment_ids, not both
+	SegmentIds []string `json:"segment_ids"`
+	// The userIDs to send the campaign to. Use either segment ids or user ids not both
+	UserIds         []string                 `json:"user_ids"`
+	ChannelTemplate *CampaignChannelTemplate `json:"channel_template,omitempty"`
+}
 type QueryCampaignsRequest struct {
 	Limit     *int               `json:"limit,omitempty"`
 	Next      *string            `json:"next,omitempty"`
@@ -90,10 +117,28 @@ type QueryCampaignsRequest struct {
 	Sort      []SortParamRequest `json:"sort"`
 	Filter    map[string]any     `json:"filter"`
 }
+type DeleteCampaignRequest struct {
+}
 type GetCampaignRequest struct {
 	Prev  *string `json:"-" query:"prev"`
 	Next  *string `json:"-" query:"next"`
 	Limit *int    `json:"-" query:"limit"`
+}
+type UpdateCampaignRequest struct {
+	SenderID         string                   `json:"sender_id"`
+	MessageTemplate  CampaignMessageTemplate  `json:"message_template"`
+	CreateChannels   *bool                    `json:"create_channels,omitempty"`
+	Description      *string                  `json:"description,omitempty"`
+	ID               *string                  `json:"id,omitempty"`
+	Name             *string                  `json:"name,omitempty"`
+	SenderMode       *string                  `json:"sender_mode,omitempty"`
+	SenderVisibility *string                  `json:"sender_visibility,omitempty"`
+	ShowChannels     *bool                    `json:"show_channels,omitempty"`
+	SkipPush         *bool                    `json:"skip_push,omitempty"`
+	SkipWebhook      *bool                    `json:"skip_webhook,omitempty"`
+	SegmentIds       []string                 `json:"segment_ids"`
+	UserIds          []string                 `json:"user_ids"`
+	ChannelTemplate  *CampaignChannelTemplate `json:"channel_template,omitempty"`
 }
 type StartCampaignRequest struct {
 	ScheduledFor *Timestamp `json:"scheduled_for,omitempty"`
@@ -139,6 +184,12 @@ type DeleteChannelsRequest struct {
 type MarkDeliveredRequest struct {
 	UserID                  *string                   `json:"-" query:"user_id"`
 	LatestDeliveredMessages []DeliveredMessagePayload `json:"latest_delivered_messages"`
+}
+type GroupedQueryChannelsRequest struct {
+	// Max channels per bucket (default 10)
+	Limit  *int         `json:"limit,omitempty"`
+	UserID *string      `json:"user_id,omitempty"`
+	User   *UserRequest `json:"user,omitempty"`
 }
 type MarkChannelsReadRequest struct {
 	UserID *string `json:"user_id,omitempty"`
@@ -1354,6 +1405,12 @@ type PinActivityRequest struct {
 	UserID          *string      `json:"user_id,omitempty"`
 	User            *UserRequest `json:"user,omitempty"`
 }
+type ChangeFeedVisibilityRequest struct {
+	// Feed visibility level: public, visible, followers, members, or private
+	Visibility string `json:"visibility"`
+	// What to do with existing pending follows when loosening visibility from 'followers': auto_approve (default) or reject
+	PendingFollowsAction *string `json:"pending_follows_action,omitempty"`
+}
 type UpdateFeedMembersRequest struct {
 	// Type of update operation to perform. One of: upsert, remove, set
 	Operation string  `json:"operation"`
@@ -1638,6 +1695,15 @@ type UpdateMembershipLevelRequest struct {
 	// Custom data for the membership level
 	Custom map[string]any `json:"custom"`
 }
+type QueryRevisionHistoryRequest struct {
+	// Filter to apply to the query
+	Filter map[string]any `json:"filter"`
+	Limit  *int           `json:"limit,omitempty"`
+	Next   *string        `json:"next,omitempty"`
+	Prev   *string        `json:"prev,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+}
 type QueryFeedsUsageStatsRequest struct {
 	// Start date in YYYY-MM-DD format (optional, defaults to 30 days ago)
 	From *string `json:"from,omitempty"`
@@ -1704,6 +1770,49 @@ type GetImportV2TaskRequest struct {
 }
 type GetImportRequest struct {
 }
+type GetActionConfigRequest struct {
+	QueueType       *string `json:"-" query:"queue_type"`
+	EntityType      *string `json:"-" query:"entity_type"`
+	ExcludeDefaults *bool   `json:"-" query:"exclude_defaults"`
+	OnlyDefaults    *bool   `json:"-" query:"only_defaults"`
+	UserID          *string `json:"-" query:"user_id"`
+}
+type UpsertActionConfigRequest struct {
+	// The action to perform (e.g. ban, delete_message, custom)
+	Action string `json:"action"`
+	// Type of entity this action applies to (e.g. stream:chat:v1:message)
+	EntityType string `json:"entity_type"`
+	// Display order in the dashboard (0–100, lower numbers shown first)
+	Order int `json:"order"`
+	// Human-readable label for the dashboard button
+	Description *string `json:"description,omitempty"`
+	// UUID of an existing action config to update; omit to create a new record
+	ID *string `json:"id,omitempty"`
+	// Icon identifier for the dashboard button
+	Icon *string `json:"icon,omitempty"`
+	// Queue this config belongs to; null means the default queue
+	QueueType *string `json:"queue_type,omitempty"`
+	// Optional user ID to associate with the audit log entry
+	UserID *string `json:"user_id,omitempty"`
+	// Action-specific parameters passed to the action handler
+	Custom map[string]any `json:"custom"`
+	User   *UserRequest   `json:"user,omitempty"`
+}
+type BulkUpsertActionConfigRequest struct {
+	// List of action configs to create or update
+	ActionConfigs []UpsertActionConfigItem `json:"action_configs"`
+	UserID        *string                  `json:"user_id,omitempty"`
+	User          *UserRequest             `json:"user,omitempty"`
+}
+type BulkDeleteActionConfigRequest struct {
+	// UUIDs of the action configs to delete
+	Ids    []string     `json:"ids"`
+	UserID *string      `json:"user_id,omitempty"`
+	User   *UserRequest `json:"user,omitempty"`
+}
+type DeleteActionConfigRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
 type InsertActionLogRequest struct {
 	// Type of moderation action taken
 	ActionType string `json:"action_type"`
@@ -1715,6 +1824,10 @@ type InsertActionLogRequest struct {
 	EntityType string `json:"entity_type"`
 	// Reason for the action
 	Reason *string `json:"reason,omitempty"`
+	// Type of reporter; 'api_integration' when the action was triggered by an API integration call with no authenticated user
+	ReporterType *string `json:"reporter_type,omitempty"`
+	// ID of the user who triggered the action; empty for automated actions
+	ReporterUserID *string `json:"reporter_user_id,omitempty"`
 	// Custom metadata for the action log
 	Custom map[string]any `json:"custom"`
 }
@@ -1979,7 +2092,8 @@ type MuteRequest struct {
 	User    *UserRequest `json:"user,omitempty"`
 }
 type QueryReviewQueueRequest struct {
-	Limit *int `json:"limit,omitempty"`
+	ExcludeDefaultActionConfig *bool `json:"exclude_default_action_config,omitempty"`
+	Limit                      *int  `json:"limit,omitempty"`
 	// Number of items to lock (1-25)
 	LockCount *int `json:"lock_count,omitempty"`
 	// Duration for which items should be locked

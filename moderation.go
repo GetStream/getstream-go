@@ -15,6 +15,46 @@ func NewModerationClient(client *Client) *ModerationClient {
 	}
 }
 
+// Returns moderation action configs grouped by entity type, sorted by order ascending. Supports fetching DB-configured actions, hardcoded defaults, or both.
+func (c *ModerationClient) GetActionConfig(ctx context.Context, request *GetActionConfigRequest) (*StreamResponse[GetActionConfigResponse], error) {
+	var result GetActionConfigResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetActionConfigResponse](c.client, ctx, "GET", "/api/v2/moderation/action_config", params, nil, &result, nil)
+	return res, err
+}
+
+// Create a new moderation action config entry or update an existing one. Action configs control the action buttons displayed in the moderation dashboard for each entity type.
+func (c *ModerationClient) UpsertActionConfig(ctx context.Context, request *UpsertActionConfigRequest) (*StreamResponse[UpsertActionConfigResponse], error) {
+	var result UpsertActionConfigResponse
+	res, err := MakeRequest[UpsertActionConfigRequest, UpsertActionConfigResponse](c.client, ctx, "POST", "/api/v2/moderation/action_config", nil, request, &result, nil)
+	return res, err
+}
+
+// Create or update multiple moderation action config entries in a single request. Omit the ID field to create; provide an ID to update.
+func (c *ModerationClient) BulkUpsertActionConfig(ctx context.Context, request *BulkUpsertActionConfigRequest) (*StreamResponse[BulkUpsertActionConfigResponse], error) {
+	var result BulkUpsertActionConfigResponse
+	res, err := MakeRequest[BulkUpsertActionConfigRequest, BulkUpsertActionConfigResponse](c.client, ctx, "POST", "/api/v2/moderation/action_config/bulk", nil, request, &result, nil)
+	return res, err
+}
+
+// Delete multiple moderation action config entries by UUID in a single request.
+func (c *ModerationClient) BulkDeleteActionConfig(ctx context.Context, request *BulkDeleteActionConfigRequest) (*StreamResponse[BulkDeleteActionConfigResponse], error) {
+	var result BulkDeleteActionConfigResponse
+	res, err := MakeRequest[BulkDeleteActionConfigRequest, BulkDeleteActionConfigResponse](c.client, ctx, "POST", "/api/v2/moderation/action_config/bulk_delete", nil, request, &result, nil)
+	return res, err
+}
+
+// Delete a specific moderation action config entry by its UUID.
+func (c *ModerationClient) DeleteActionConfig(ctx context.Context, id string, request *DeleteActionConfigRequest) (*StreamResponse[DeleteActionConfigResponse], error) {
+	var result DeleteActionConfigResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, DeleteActionConfigResponse](c.client, ctx, "DELETE", "/api/v2/moderation/action_config/{id}", params, nil, &result, pathParams)
+	return res, err
+}
+
 // Insert a moderation action log entry. Server-side only. Used by product services to log moderation-related actions.
 func (c *ModerationClient) InsertActionLog(ctx context.Context, request *InsertActionLogRequest) (*StreamResponse[InsertActionLogResponse], error) {
 	var result InsertActionLogResponse
