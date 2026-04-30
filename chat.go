@@ -15,10 +15,27 @@ func NewChatClient(client *Client) *ChatClient {
 	}
 }
 
+// Creates a campaign
+func (c *ChatClient) CreateCampaign(ctx context.Context, request *CreateCampaignRequest) (*StreamResponse[CreateCampaignResponse], error) {
+	var result CreateCampaignResponse
+	res, err := MakeRequest[CreateCampaignRequest, CreateCampaignResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns", nil, request, &result, nil)
+	return res, err
+}
+
 // Query campaigns with filter query
 func (c *ChatClient) QueryCampaigns(ctx context.Context, request *QueryCampaignsRequest) (*StreamResponse[QueryCampaignsResponse], error) {
 	var result QueryCampaignsResponse
 	res, err := MakeRequest[QueryCampaignsRequest, QueryCampaignsResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns/query", nil, request, &result, nil)
+	return res, err
+}
+
+// Delete campaign
+func (c *ChatClient) DeleteCampaign(ctx context.Context, id string, request *DeleteCampaignRequest) (*StreamResponse[DeleteCampaignResponse], error) {
+	var result DeleteCampaignResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, DeleteCampaignResponse](c.client, ctx, "DELETE", "/api/v2/chat/campaigns/{id}", nil, nil, &result, pathParams)
 	return res, err
 }
 
@@ -30,6 +47,16 @@ func (c *ChatClient) GetCampaign(ctx context.Context, id string, request *GetCam
 	}
 	params := extractQueryParams(request)
 	res, err := MakeRequest[any, GetCampaignResponse](c.client, ctx, "GET", "/api/v2/chat/campaigns/{id}", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Updates a campaign
+func (c *ChatClient) UpdateCampaign(ctx context.Context, id string, request *UpdateCampaignRequest) (*StreamResponse[CampaignResponse], error) {
+	var result CampaignResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[UpdateCampaignRequest, CampaignResponse](c.client, ctx, "PUT", "/api/v2/chat/campaigns/{id}", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -92,6 +119,13 @@ func (c *ChatClient) MarkDelivered(ctx context.Context, request *MarkDeliveredRe
 	var result MarkDeliveredResponse
 	params := extractQueryParams(request)
 	res, err := MakeRequest[MarkDeliveredRequest, MarkDeliveredResponse](c.client, ctx, "POST", "/api/v2/chat/channels/delivered", params, request, &result, nil)
+	return res, err
+}
+
+// Query channels grouped into predefined buckets. Only available for enterprise apps.
+func (c *ChatClient) GroupedQueryChannels(ctx context.Context, request *GroupedQueryChannelsRequest) (*StreamResponse[GroupedQueryChannelsResponse], error) {
+	var result GroupedQueryChannelsResponse
+	res, err := MakeRequest[GroupedQueryChannelsRequest, GroupedQueryChannelsResponse](c.client, ctx, "POST", "/api/v2/chat/channels/grouped", nil, request, &result, nil)
 	return res, err
 }
 

@@ -124,6 +124,8 @@ type ActionLogResponse struct {
 	ID string `json:"id"`
 	// Reason for the moderation action
 	Reason string `json:"reason"`
+	// Classification of who triggered the action (e.g. user, moderator, automod, api_integration)
+	ReporterType string `json:"reporter_type"`
 	// ID of the user who was the target of the action
 	TargetUserID string `json:"target_user_id"`
 	// ID of the user who performed the action
@@ -561,7 +563,7 @@ type ActivitySelectorConfig struct {
 	CutoffTime *string `json:"cutoff_time,omitempty"`
 	// Flexible relative time window for activity selection (e.g., '1h', '3d', '1y'). Activities older than this duration will be filtered out. Cannot be used together with cutoff_time
 	CutoffWindow *string `json:"cutoff_window,omitempty"`
-	// Minimum popularity threshold
+	// Minimum popularity threshold. For the 'popular' selector, omit to use the default (5); values below 1 are rejected
 	MinPopularity *int `json:"min_popularity,omitempty"`
 	// Sort parameters for activity selection
 	Sort []SortParamRequest `json:"sort,omitempty"`
@@ -577,7 +579,7 @@ type ActivitySelectorConfigResponse struct {
 	CutoffTime *Timestamp `json:"cutoff_time,omitempty"`
 	// Flexible relative time window for activity selection (e.g., '1h', '3d', '1y')
 	CutoffWindow *string `json:"cutoff_window,omitempty"`
-	// Minimum popularity threshold
+	// Minimum popularity threshold. For the 'popular' selector, values below 1 are normalized to the default (5) at read time.
 	MinPopularity *int `json:"min_popularity,omitempty"`
 	// Sort parameters for activity selection
 	Sort []SortParamRequest `json:"sort,omitempty"`
@@ -746,6 +748,7 @@ type AppResponseFields struct {
 	DisableAuthChecks                     bool                            `json:"disable_auth_checks"`
 	DisablePermissionsChecks              bool                            `json:"disable_permissions_checks"`
 	EnforceUniqueUsernames                string                          `json:"enforce_unique_usernames"`
+	FeedAuditLogsEnabled                  bool                            `json:"feed_audit_logs_enabled"`
 	GuestUserCreationDisabled             bool                            `json:"guest_user_creation_disabled"`
 	ID                                    int                             `json:"id"`
 	ImageModerationEnabled                bool                            `json:"image_moderation_enabled"`
@@ -1214,6 +1217,11 @@ type BodyguardImageAnalysisConfig struct {
 	Rules []BodyguardRule `json:"rules,omitempty"`
 }
 
+type BodyguardProfileSummary struct {
+	Name        string  `json:"name"`
+	DisplayName *string `json:"display_name,omitempty"`
+}
+
 type BodyguardRule struct {
 	Label         string                  `json:"label"`
 	Action        *string                 `json:"action,omitempty"`
@@ -1366,10 +1374,22 @@ type BrowserDataResponse struct {
 	Version *string `json:"version,omitempty"`
 }
 
+type BulkDeleteActionConfigResponse struct {
+	// Number of action configs deleted
+	Deleted  int    `json:"deleted"`
+	Duration string `json:"duration"`
+}
+
 type BulkImageModerationResponse struct {
 	Duration string `json:"duration"`
 	// ID of the task for processing the bulk image moderation
 	TaskID string `json:"task_id"`
+}
+
+type BulkUpsertActionConfigResponse struct {
+	Duration string `json:"duration"`
+	// The created or updated action configs in the same order as the request
+	ActionConfigs []ModerationActionConfigResponse `json:"action_configs"`
 }
 
 type BypassActionRequest struct {
@@ -2516,11 +2536,11 @@ type CampaignChannelMember struct {
 
 type CampaignChannelTemplate struct {
 	Type            string                  `json:"type"`
-	Custom          map[string]any          `json:"custom"`
 	ID              *string                 `json:"id,omitempty"`
 	Team            *string                 `json:"team,omitempty"`
 	Members         []string                `json:"members,omitempty"`
 	MembersTemplate []CampaignChannelMember `json:"members_template,omitempty"`
+	Custom          map[string]any          `json:"custom,omitempty"`
 }
 
 type CampaignCompletedEvent struct {
@@ -2536,11 +2556,11 @@ func (e *CampaignCompletedEvent) GetEventType() string {
 }
 
 type CampaignMessageTemplate struct {
-	PollID      string         `json:"poll_id"`
-	Searchable  bool           `json:"searchable"`
 	Text        string         `json:"text"`
-	Attachments []Attachment   `json:"attachments"`
-	Custom      map[string]any `json:"custom"`
+	PollID      *string        `json:"poll_id,omitempty"`
+	Searchable  *bool          `json:"searchable,omitempty"`
+	Attachments []Attachment   `json:"attachments,omitempty"`
+	Custom      map[string]any `json:"custom,omitempty"`
 }
 
 type CampaignResponse struct {
@@ -2589,6 +2609,11 @@ type CampaignStatsResponse struct {
 	StatsStartedAt       Timestamp `json:"stats_started_at"`
 	StatsUsersRead       int       `json:"stats_users_read"`
 	StatsUsersSent       int       `json:"stats_users_sent"`
+}
+
+type ChangeFeedVisibilityResponse struct {
+	Duration string       `json:"duration"`
+	Feed     FeedResponse `json:"feed"`
 }
 
 type ChannelBatchCompletedEvent struct {
@@ -3296,6 +3321,46 @@ type ChatActivityStatsResponse struct {
 	Messages *MessageStatsResponse `json:"Messages,omitempty"`
 }
 
+type ChatMessageResponse struct {
+	Cid                  string               `json:"cid"`
+	CreatedAt            Timestamp            `json:"created_at"`
+	DeletedReplyCount    int                  `json:"deleted_reply_count"`
+	Html                 string               `json:"html"`
+	ID                   string               `json:"id"`
+	MentionedChannel     bool                 `json:"mentioned_channel"`
+	MentionedHere        bool                 `json:"mentioned_here"`
+	Pinned               bool                 `json:"pinned"`
+	ReplyCount           int                  `json:"reply_count"`
+	Shadowed             bool                 `json:"shadowed"`
+	Silent               bool                 `json:"silent"`
+	Text                 string               `json:"text"`
+	UpdatedAt            Timestamp            `json:"updated_at"`
+	Type                 string               `json:"type"`
+	Attachments          []any                `json:"attachments"`
+	LatestReactions      []any                `json:"latest_reactions"`
+	MentionedUsers       []UserResponse       `json:"mentioned_users"`
+	OwnReactions         []any                `json:"own_reactions"`
+	RestrictedVisibility []string             `json:"restricted_visibility"`
+	Custom               map[string]any       `json:"custom"`
+	ReactionCounts       map[string]int       `json:"reaction_counts"`
+	ReactionScores       map[string]int       `json:"reaction_scores"`
+	User                 UserResponse         `json:"user"`
+	Command              *string              `json:"command,omitempty"`
+	DeletedAt            *Timestamp           `json:"deleted_at,omitempty"`
+	MessageTextUpdatedAt *Timestamp           `json:"message_text_updated_at,omitempty"`
+	Mml                  *string              `json:"mml,omitempty"`
+	ParentID             *string              `json:"parent_id,omitempty"`
+	PinExpires           *Timestamp           `json:"pin_expires,omitempty"`
+	PinnedAt             *Timestamp           `json:"pinned_at,omitempty"`
+	PollID               *string              `json:"poll_id,omitempty"`
+	QuotedMessageID      *string              `json:"quoted_message_id,omitempty"`
+	ShowInChannel        *bool                `json:"show_in_channel,omitempty"`
+	I18n                 map[string]string    `json:"i18n,omitempty"`
+	ImageLabels          map[string][]string  `json:"image_labels,omitempty"`
+	PinnedBy             *UserResponse        `json:"pinned_by,omitempty"`
+	QuotedMessage        *ChatMessageResponse `json:"quoted_message,omitempty"`
+}
+
 type ChatPreferences struct {
 	ChannelMentions         *string `json:"channel_mentions,omitempty"`
 	DefaultPreference       *string `json:"default_preference,omitempty"`
@@ -3697,7 +3762,9 @@ type ConfigResponse struct {
 	SupportedVideoCallHarmTypes []string  `json:"supported_video_call_harm_types"`
 	// Configurable image moderation label definitions for dashboard rendering
 	AiImageLabelDefinitions []AIImageLabelDefinition `json:"ai_image_label_definitions,omitempty"`
-	AiImageConfig           *AIImageConfig           `json:"ai_image_config,omitempty"`
+	// Names of Bodyguard credential profiles registered on this app. The dashboard uses this list to render the profile picker on the AI Text section.
+	AvailableBodyguardProfiles []BodyguardProfileSummary `json:"available_bodyguard_profiles,omitempty"`
+	AiImageConfig              *AIImageConfig            `json:"ai_image_config,omitempty"`
 	// Available L2 subclassifications per L1 image moderation label, based on the active provider
 	AiImageSubclassifications          map[string][]string                 `json:"ai_image_subclassifications,omitempty"`
 	AiTextConfig                       *AITextConfig                       `json:"ai_text_config,omitempty"`
@@ -3751,6 +3818,14 @@ type CreateCallTypeResponse struct {
 	Settings             CallSettingsResponse         `json:"settings"`
 	// the external storage for the call type
 	ExternalStorage *string `json:"external_storage,omitempty"`
+}
+
+// Basic response information
+type CreateCampaignResponse struct {
+	// Duration of the request in milliseconds
+	Duration string            `json:"duration"`
+	Campaign *CampaignResponse `json:"campaign,omitempty"`
+	Users    *PagerResponse    `json:"users,omitempty"`
 }
 
 type CreateChannelTypeResponse struct {
@@ -4032,6 +4107,12 @@ type DecayFunctionConfig struct {
 	Scale *string `json:"scale,omitempty"`
 }
 
+type DeleteActionConfigResponse struct {
+	// Number of action configs deleted (0 or 1)
+	Deleted  int    `json:"deleted"`
+	Duration string `json:"duration"`
+}
+
 type DeleteActivitiesResponse struct {
 	Duration string `json:"duration"`
 	// List of activity IDs that were successfully deleted
@@ -4074,6 +4155,12 @@ type DeleteCallResponse struct {
 	Duration string       `json:"duration"`
 	Call     CallResponse `json:"call"`
 	TaskID   *string      `json:"task_id,omitempty"`
+}
+
+// Basic response information
+type DeleteCampaignResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
 }
 
 // Basic response information
@@ -4599,6 +4686,7 @@ type EventHook struct {
 	WebhookUrl                         *string                        `json:"webhook_url,omitempty"`
 	EventTypes                         []string                       `json:"event_types,omitempty"`
 	Callback                           *AsyncModerationCallbackConfig `json:"callback,omitempty"`
+	FailoverConfig                     *WebhookFailoverConfig         `json:"failover_config,omitempty"`
 }
 
 type EventNotificationSettings struct {
@@ -5519,6 +5607,12 @@ type GeofenceSettingsResponse struct {
 	Names []string `json:"names"`
 }
 
+type GetActionConfigResponse struct {
+	Duration string `json:"duration"`
+	// Moderation action configs grouped by entity type, sorted by order ascending
+	ActionConfig map[string][]ModerationActionConfigResponse `json:"action_config"`
+}
+
 // Response containing active calls status information
 type GetActiveCallsStatusResponse struct {
 	Duration string `json:"duration"`
@@ -6000,6 +6094,20 @@ type GoLiveResponse struct {
 
 type GoogleVisionConfig struct {
 	Enabled *bool `json:"enabled,omitempty"`
+}
+
+type GroupedChannelsBucket struct {
+	// Channels returned for this bucket
+	Channels []ChannelStateResponseFields `json:"channels"`
+	// Unread channels currently classified into this bucket
+	UnreadChannels *int `json:"unread_channels,omitempty"`
+}
+
+type GroupedQueryChannelsResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+	// Predefined channel groups keyed by group name
+	Groups map[string]GroupedChannelsBucket `json:"groups"`
 }
 
 type GroupedStatsResponse struct {
@@ -7013,10 +7121,11 @@ type MessageNewEvent struct {
 	// The number of unread messages
 	UnreadCount *int `json:"unread_count,omitempty"`
 	// The participants of the thread
-	ThreadParticipants []UserResponseCommonFields `json:"thread_participants,omitempty"`
-	Channel            *ChannelResponse           `json:"channel,omitempty"`
-	ChannelCustom      map[string]any             `json:"channel_custom,omitempty"`
-	User               *UserResponseCommonFields  `json:"user,omitempty"`
+	ThreadParticipants    []UserResponseCommonFields `json:"thread_participants,omitempty"`
+	Channel               *ChannelResponse           `json:"channel,omitempty"`
+	ChannelCustom         map[string]any             `json:"channel_custom,omitempty"`
+	GroupedUnreadChannels map[string]int             `json:"grouped_unread_channels,omitempty"`
+	User                  *UserResponseCommonFields  `json:"user,omitempty"`
 }
 
 func (e *MessageNewEvent) GetEventType() string {
@@ -7424,7 +7533,8 @@ type ModerationActionConfigResponse struct {
 	// Icon for the dashboard
 	Icon string `json:"icon"`
 	// Display order (lower numbers shown first)
-	Order int `json:"order"`
+	Order int     `json:"order"`
+	ID    *string `json:"id,omitempty"`
 	// Queue type this action config belongs to
 	QueueType *string `json:"queue_type,omitempty"`
 	// Custom data for the action
@@ -7765,10 +7875,11 @@ type NotificationMarkUnreadEvent struct {
 	// The total number of unread messages in the threads
 	UnreadThreadMessages *int `json:"unread_thread_messages,omitempty"`
 	// The number of unread threads
-	UnreadThreads *int                      `json:"unread_threads,omitempty"`
-	Channel       *ChannelResponse          `json:"channel,omitempty"`
-	ChannelCustom map[string]any            `json:"channel_custom,omitempty"`
-	User          *UserResponseCommonFields `json:"user,omitempty"`
+	UnreadThreads         *int                      `json:"unread_threads,omitempty"`
+	Channel               *ChannelResponse          `json:"channel,omitempty"`
+	ChannelCustom         map[string]any            `json:"channel_custom,omitempty"`
+	GroupedUnreadChannels map[string]int            `json:"grouped_unread_channels,omitempty"`
+	User                  *UserResponseCommonFields `json:"user,omitempty"`
 }
 
 func (e *NotificationMarkUnreadEvent) GetEventType() string {
@@ -9004,10 +9115,20 @@ type QueryReviewQueueResponse struct {
 	// Configuration for moderation actions
 	ActionConfig map[string][]ModerationActionConfigResponse `json:"action_config"`
 	// Statistics about the review queue
-	Stats        map[string]any        `json:"stats"`
-	Next         *string               `json:"next,omitempty"`
-	Prev         *string               `json:"prev,omitempty"`
-	FilterConfig *FilterConfigResponse `json:"filter_config,omitempty"`
+	Stats               map[string]any                              `json:"stats"`
+	Next                *string                                     `json:"next,omitempty"`
+	Prev                *string                                     `json:"prev,omitempty"`
+	DefaultActionConfig map[string][]ModerationActionConfigResponse `json:"default_action_config,omitempty"`
+	FilterConfig        *FilterConfigResponse                       `json:"filter_config,omitempty"`
+}
+
+type QueryRevisionHistoryResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+	// Revision history entries
+	Revisions []RevisionHistoryResponse `json:"revisions"`
+	Next      *string                   `json:"next,omitempty"`
+	Prev      *string                   `json:"prev,omitempty"`
 }
 
 type QuerySegmentTargetsResponse struct {
@@ -9678,7 +9799,7 @@ type ReviewQueueItemResponse struct {
 	FeedsV2Reaction    *Reaction                  `json:"feeds_v2_reaction,omitempty"`
 	FeedsV3Activity    *FeedsV3ActivityResponse   `json:"feeds_v3_activity,omitempty"`
 	FeedsV3Comment     *FeedsV3CommentResponse    `json:"feeds_v3_comment,omitempty"`
-	Message            *MessageResponse           `json:"message,omitempty"`
+	Message            *ChatMessageResponse       `json:"message,omitempty"`
 	ModerationPayload  *ModerationPayloadResponse `json:"moderation_payload,omitempty"`
 	Reaction           *Reaction                  `json:"reaction,omitempty"`
 }
@@ -9697,6 +9818,17 @@ type ReviewQueueItemUpdatedEvent struct {
 
 func (e *ReviewQueueItemUpdatedEvent) GetEventType() string {
 	return e.Type
+}
+
+type RevisionHistoryResponse struct {
+	ActionType            string         `json:"action_type"`
+	ActorType             string         `json:"actor_type"`
+	CreatedAt             Timestamp      `json:"created_at"`
+	ObjectID              string         `json:"object_id"`
+	ObjectType            string         `json:"object_type"`
+	UserID                string         `json:"user_id"`
+	ChangedFields         []string       `json:"changed_fields,omitempty"`
+	PreviousObjSerialized map[string]any `json:"previous_obj_serialized,omitempty"`
 }
 
 type RingCallResponse struct {
@@ -11269,6 +11401,22 @@ type UploadChannelResponse struct {
 	UploadSizes []ImageSize `json:"upload_sizes,omitempty"`
 }
 
+type UpsertActionConfigItem struct {
+	Action      string         `json:"action"`
+	EntityType  string         `json:"entity_type"`
+	Order       int            `json:"order"`
+	Description *string        `json:"description,omitempty"`
+	ID          *string        `json:"id,omitempty"`
+	Icon        *string        `json:"icon,omitempty"`
+	QueueType   *string        `json:"queue_type,omitempty"`
+	Custom      map[string]any `json:"custom,omitempty"`
+}
+
+type UpsertActionConfigResponse struct {
+	Duration     string                          `json:"duration"`
+	ActionConfig *ModerationActionConfigResponse `json:"action_config,omitempty"`
+}
+
 type UpsertActivitiesResponse struct {
 	Duration string `json:"duration"`
 	// List of created or updated activities
@@ -12032,6 +12180,13 @@ type WSEvent struct {
 	Reaction             *ReactionResponse      `json:"reaction,omitempty"`
 	Thread               *ThreadResponse        `json:"thread,omitempty"`
 	User                 *UserResponse          `json:"user,omitempty"`
+}
+
+type WebhookFailoverConfig struct {
+	GcsBucket      *string `json:"gcs_bucket,omitempty"`
+	GcsCredentials *string `json:"gcs_credentials,omitempty"`
+	GcsPath        *string `json:"gcs_path,omitempty"`
+	Type           *string `json:"type,omitempty"`
 }
 
 // Basic response information

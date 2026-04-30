@@ -41,6 +41,10 @@ func (c *Feeds) PinActivity(ctx context.Context, activityID string, request *Pin
 	return c.client.PinActivity(ctx, c.feedType, c.feedID, activityID, request)
 }
 
+func (c *Feeds) ChangeFeedVisibility(ctx context.Context, request *ChangeFeedVisibilityRequest) (*StreamResponse[ChangeFeedVisibilityResponse], error) {
+	return c.client.ChangeFeedVisibility(ctx, c.feedType, c.feedID, request)
+}
+
 func (c *Feeds) UpdateFeedMembers(ctx context.Context, request *UpdateFeedMembersRequest) (*StreamResponse[UpdateFeedMembersResponse], error) {
 	return c.client.UpdateFeedMembers(ctx, c.feedType, c.feedID, request)
 }
