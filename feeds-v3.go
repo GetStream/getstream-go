@@ -455,7 +455,7 @@ func (c *FeedsClient) GetCommentReplies(ctx context.Context, id string, request 
 	return res, err
 }
 
-// Restores a soft-deleted comment by its ID. The comment and all its descendants are restored. Requires moderator permissions.
+// Restores a soft-deleted, moderation-removed, or shadow-blocked comment by its ID. The comment and all its descendants are restored. Deleted comments can be restored client-side. Moderation-blocked comments can only be restored server-side.
 func (c *FeedsClient) RestoreComment(ctx context.Context, id string, request *RestoreCommentRequest) (*StreamResponse[RestoreCommentResponse], error) {
 	var result RestoreCommentResponse
 	pathParams := map[string]string{

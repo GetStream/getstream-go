@@ -1217,6 +1217,11 @@ type BodyguardImageAnalysisConfig struct {
 	Rules []BodyguardRule `json:"rules,omitempty"`
 }
 
+type BodyguardProfileSummary struct {
+	Name        string  `json:"name"`
+	DisplayName *string `json:"display_name,omitempty"`
+}
+
 type BodyguardRule struct {
 	Label         string                  `json:"label"`
 	Action        *string                 `json:"action,omitempty"`
@@ -3757,7 +3762,9 @@ type ConfigResponse struct {
 	SupportedVideoCallHarmTypes []string  `json:"supported_video_call_harm_types"`
 	// Configurable image moderation label definitions for dashboard rendering
 	AiImageLabelDefinitions []AIImageLabelDefinition `json:"ai_image_label_definitions,omitempty"`
-	AiImageConfig           *AIImageConfig           `json:"ai_image_config,omitempty"`
+	// Names of Bodyguard credential profiles registered on this app. The dashboard uses this list to render the profile picker on the AI Text section.
+	AvailableBodyguardProfiles []BodyguardProfileSummary `json:"available_bodyguard_profiles,omitempty"`
+	AiImageConfig              *AIImageConfig            `json:"ai_image_config,omitempty"`
 	// Available L2 subclassifications per L1 image moderation label, based on the active provider
 	AiImageSubclassifications          map[string][]string                 `json:"ai_image_subclassifications,omitempty"`
 	AiTextConfig                       *AITextConfig                       `json:"ai_text_config,omitempty"`
