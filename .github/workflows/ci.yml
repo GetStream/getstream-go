@@ -13,15 +13,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check-pr-title:
-    name: Validate PR title
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: aslafy-z/conventional-pr-title-action@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   test-build:
     name: 👷 Test & Build ${{ matrix.goVer }}${{ matrix.label }}
     environment: feeds-enabled-shard
