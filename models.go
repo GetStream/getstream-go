@@ -2959,6 +2959,11 @@ type ChannelMemberResponse struct {
 	User            *UserResponse `json:"user,omitempty"`
 }
 
+type ChannelMessageCountRuleParameters struct {
+	Operator  *string `json:"operator,omitempty"`
+	Threshold *int    `json:"threshold,omitempty"`
+}
+
 // Response containing channel and its messages
 type ChannelMessagesResponse struct {
 	// List of messages
@@ -3321,44 +3326,91 @@ type ChatActivityStatsResponse struct {
 	Messages *MessageStatsResponse `json:"Messages,omitempty"`
 }
 
+type ChatDraftPayloadResponse struct {
+	ID              string         `json:"id"`
+	Text            string         `json:"text"`
+	Custom          map[string]any `json:"custom"`
+	Html            *string        `json:"html,omitempty"`
+	Mml             *string        `json:"mml,omitempty"`
+	ParentID        *string        `json:"parent_id,omitempty"`
+	PollID          *string        `json:"poll_id,omitempty"`
+	QuotedMessageID *string        `json:"quoted_message_id,omitempty"`
+	ShowInChannel   *bool          `json:"show_in_channel,omitempty"`
+	Silent          *bool          `json:"silent,omitempty"`
+	Type            *string        `json:"type,omitempty"`
+	Attachments     []Attachment   `json:"attachments,omitempty"`
+	MentionedUsers  []UserResponse `json:"mentioned_users,omitempty"`
+}
+
+type ChatDraftResponse struct {
+	ChannelCid    string                   `json:"channel_cid"`
+	CreatedAt     Timestamp                `json:"created_at"`
+	Message       ChatDraftPayloadResponse `json:"message"`
+	ParentID      *string                  `json:"parent_id,omitempty"`
+	ParentMessage *ChatMessageResponse     `json:"parent_message,omitempty"`
+	QuotedMessage *ChatMessageResponse     `json:"quoted_message,omitempty"`
+}
+
 type ChatMessageResponse struct {
-	Cid                  string               `json:"cid"`
-	CreatedAt            Timestamp            `json:"created_at"`
-	DeletedReplyCount    int                  `json:"deleted_reply_count"`
-	Html                 string               `json:"html"`
-	ID                   string               `json:"id"`
-	MentionedChannel     bool                 `json:"mentioned_channel"`
-	MentionedHere        bool                 `json:"mentioned_here"`
-	Pinned               bool                 `json:"pinned"`
-	ReplyCount           int                  `json:"reply_count"`
-	Shadowed             bool                 `json:"shadowed"`
-	Silent               bool                 `json:"silent"`
-	Text                 string               `json:"text"`
-	UpdatedAt            Timestamp            `json:"updated_at"`
-	Type                 string               `json:"type"`
-	Attachments          []any                `json:"attachments"`
-	LatestReactions      []any                `json:"latest_reactions"`
-	MentionedUsers       []UserResponse       `json:"mentioned_users"`
-	OwnReactions         []any                `json:"own_reactions"`
-	RestrictedVisibility []string             `json:"restricted_visibility"`
-	Custom               map[string]any       `json:"custom"`
-	ReactionCounts       map[string]int       `json:"reaction_counts"`
-	ReactionScores       map[string]int       `json:"reaction_scores"`
-	User                 UserResponse         `json:"user"`
-	Command              *string              `json:"command,omitempty"`
-	DeletedAt            *Timestamp           `json:"deleted_at,omitempty"`
-	MessageTextUpdatedAt *Timestamp           `json:"message_text_updated_at,omitempty"`
-	Mml                  *string              `json:"mml,omitempty"`
-	ParentID             *string              `json:"parent_id,omitempty"`
-	PinExpires           *Timestamp           `json:"pin_expires,omitempty"`
-	PinnedAt             *Timestamp           `json:"pinned_at,omitempty"`
-	PollID               *string              `json:"poll_id,omitempty"`
-	QuotedMessageID      *string              `json:"quoted_message_id,omitempty"`
-	ShowInChannel        *bool                `json:"show_in_channel,omitempty"`
-	I18n                 map[string]string    `json:"i18n,omitempty"`
-	ImageLabels          map[string][]string  `json:"image_labels,omitempty"`
-	PinnedBy             *UserResponse        `json:"pinned_by,omitempty"`
-	QuotedMessage        *ChatMessageResponse `json:"quoted_message,omitempty"`
+	Cid                  string                                `json:"cid"`
+	CreatedAt            Timestamp                             `json:"created_at"`
+	DeletedReplyCount    int                                   `json:"deleted_reply_count"`
+	Html                 string                                `json:"html"`
+	ID                   string                                `json:"id"`
+	MentionedChannel     bool                                  `json:"mentioned_channel"`
+	MentionedHere        bool                                  `json:"mentioned_here"`
+	Pinned               bool                                  `json:"pinned"`
+	ReplyCount           int                                   `json:"reply_count"`
+	Shadowed             bool                                  `json:"shadowed"`
+	Silent               bool                                  `json:"silent"`
+	Text                 string                                `json:"text"`
+	UpdatedAt            Timestamp                             `json:"updated_at"`
+	Type                 string                                `json:"type"`
+	Attachments          []Attachment                          `json:"attachments"`
+	LatestReactions      []ChatReactionResponse                `json:"latest_reactions"`
+	MentionedUsers       []UserResponse                        `json:"mentioned_users"`
+	OwnReactions         []ChatReactionResponse                `json:"own_reactions"`
+	RestrictedVisibility []string                              `json:"restricted_visibility"`
+	Custom               map[string]any                        `json:"custom"`
+	ReactionCounts       map[string]int                        `json:"reaction_counts"`
+	ReactionScores       map[string]int                        `json:"reaction_scores"`
+	User                 UserResponse                          `json:"user"`
+	Command              *string                               `json:"command,omitempty"`
+	DeletedAt            *Timestamp                            `json:"deleted_at,omitempty"`
+	DeletedForMe         *bool                                 `json:"deleted_for_me,omitempty"`
+	MessageTextUpdatedAt *Timestamp                            `json:"message_text_updated_at,omitempty"`
+	Mml                  *string                               `json:"mml,omitempty"`
+	ParentID             *string                               `json:"parent_id,omitempty"`
+	PinExpires           *Timestamp                            `json:"pin_expires,omitempty"`
+	PinnedAt             *Timestamp                            `json:"pinned_at,omitempty"`
+	PollID               *string                               `json:"poll_id,omitempty"`
+	QuotedMessageID      *string                               `json:"quoted_message_id,omitempty"`
+	ShowInChannel        *bool                                 `json:"show_in_channel,omitempty"`
+	MentionedGroupIds    []string                              `json:"mentioned_group_ids,omitempty"`
+	MentionedRoles       []string                              `json:"mentioned_roles,omitempty"`
+	ThreadParticipants   []UserResponse                        `json:"thread_participants,omitempty"`
+	Draft                *ChatDraftResponse                    `json:"draft,omitempty"`
+	I18n                 map[string]string                     `json:"i18n,omitempty"`
+	ImageLabels          map[string][]string                   `json:"image_labels,omitempty"`
+	Member               *ChannelMemberResponse                `json:"member,omitempty"`
+	Moderation           *ChatModerationV2Response             `json:"moderation,omitempty"`
+	PinnedBy             *UserResponse                         `json:"pinned_by,omitempty"`
+	Poll                 *PollResponseData                     `json:"poll,omitempty"`
+	QuotedMessage        *ChatMessageResponse                  `json:"quoted_message,omitempty"`
+	ReactionGroups       map[string]*ChatReactionGroupResponse `json:"reaction_groups,omitempty"`
+	Reminder             *ChatReminderResponseData             `json:"reminder,omitempty"`
+	SharedLocation       *ChatSharedLocationResponseData       `json:"shared_location,omitempty"`
+}
+
+type ChatModerationV2Response struct {
+	Action                string   `json:"action"`
+	OriginalText          string   `json:"original_text"`
+	BlocklistMatched      *string  `json:"blocklist_matched,omitempty"`
+	PlatformCircumvented  *bool    `json:"platform_circumvented,omitempty"`
+	SemanticFilterMatched *string  `json:"semantic_filter_matched,omitempty"`
+	BlocklistsMatched     []string `json:"blocklists_matched,omitempty"`
+	ImageHarms            []string `json:"image_harms,omitempty"`
+	TextHarms             []string `json:"text_harms,omitempty"`
 }
 
 type ChatPreferences struct {
@@ -3390,6 +3442,55 @@ type ChatPreferencesResponse struct {
 	HereMentions      *string `json:"here_mentions,omitempty"`
 	RoleMentions      *string `json:"role_mentions,omitempty"`
 	ThreadReplies     *string `json:"thread_replies,omitempty"`
+}
+
+type ChatReactionGroupResponse struct {
+	Count             int                             `json:"count"`
+	FirstReactionAt   Timestamp                       `json:"first_reaction_at"`
+	LastReactionAt    Timestamp                       `json:"last_reaction_at"`
+	SumScores         int                             `json:"sum_scores"`
+	LatestReactionsBy []ChatReactionGroupUserResponse `json:"latest_reactions_by"`
+}
+
+type ChatReactionGroupUserResponse struct {
+	CreatedAt Timestamp     `json:"created_at"`
+	UserID    string        `json:"user_id"`
+	User      *UserResponse `json:"user,omitempty"`
+}
+
+type ChatReactionResponse struct {
+	CreatedAt Timestamp      `json:"created_at"`
+	MessageID string         `json:"message_id"`
+	Score     int            `json:"score"`
+	UpdatedAt Timestamp      `json:"updated_at"`
+	UserID    string         `json:"user_id"`
+	Type      string         `json:"type"`
+	Custom    map[string]any `json:"custom"`
+	User      UserResponse   `json:"user"`
+}
+
+type ChatReminderResponseData struct {
+	ChannelCid string               `json:"channel_cid"`
+	CreatedAt  Timestamp            `json:"created_at"`
+	MessageID  string               `json:"message_id"`
+	UpdatedAt  Timestamp            `json:"updated_at"`
+	UserID     string               `json:"user_id"`
+	RemindAt   *Timestamp           `json:"remind_at,omitempty"`
+	Message    *ChatMessageResponse `json:"message,omitempty"`
+	User       *UserResponse        `json:"user,omitempty"`
+}
+
+type ChatSharedLocationResponseData struct {
+	ChannelCid        string               `json:"channel_cid"`
+	CreatedAt         Timestamp            `json:"created_at"`
+	CreatedByDeviceID string               `json:"created_by_device_id"`
+	Latitude          float64              `json:"latitude"`
+	Longitude         float64              `json:"longitude"`
+	MessageID         string               `json:"message_id"`
+	UpdatedAt         Timestamp            `json:"updated_at"`
+	UserID            string               `json:"user_id"`
+	EndAt             *Timestamp           `json:"end_at,omitempty"`
+	Message           *ChatMessageResponse `json:"message,omitempty"`
 }
 
 // Basic response information
@@ -4518,16 +4619,6 @@ type EnrichedActivity struct {
 	Target          *Data                         `json:"target,omitempty"`
 }
 
-type EnrichedCollection struct {
-	CreatedAt Timestamp      `json:"created_at"`
-	ID        string         `json:"id"`
-	Name      string         `json:"name"`
-	Status    string         `json:"status"`
-	UpdatedAt Timestamp      `json:"updated_at"`
-	UserID    string         `json:"user_id"`
-	Custom    map[string]any `json:"custom"`
-}
-
 type EnrichedCollectionResponse struct {
 	// Unique identifier for the collection within its name
 	ID string `json:"id"`
@@ -5200,12 +5291,97 @@ type FeedVisibilityResponse struct {
 	Grants map[string][]string `json:"grants"`
 }
 
+type FeedsActivityLocation struct {
+	Lat float64 `json:"lat"`
+	Lng float64 `json:"lng"`
+}
+
+type FeedsBookmarkResponse struct {
+	CreatedAt  Timestamp      `json:"created_at"`
+	ObjectID   string         `json:"object_id"`
+	ObjectType string         `json:"object_type"`
+	UpdatedAt  Timestamp      `json:"updated_at"`
+	User       UserResponse   `json:"user"`
+	ActivityID *string        `json:"activity_id,omitempty"`
+	Custom     map[string]any `json:"custom,omitempty"`
+}
+
+type FeedsEnrichedCollectionResponse struct {
+	CreatedAt Timestamp      `json:"created_at"`
+	ID        string         `json:"id"`
+	Name      string         `json:"name"`
+	Status    string         `json:"status"`
+	UpdatedAt Timestamp      `json:"updated_at"`
+	UserID    string         `json:"user_id"`
+	Custom    map[string]any `json:"custom"`
+}
+
+type FeedsFeedResponse struct {
+	ActivityCount  int                    `json:"activity_count"`
+	CreatedAt      Timestamp              `json:"created_at"`
+	Description    string                 `json:"description"`
+	Feed           string                 `json:"feed"`
+	FollowerCount  int                    `json:"follower_count"`
+	FollowingCount int                    `json:"following_count"`
+	GroupID        string                 `json:"group_id"`
+	ID             string                 `json:"id"`
+	MemberCount    int                    `json:"member_count"`
+	Name           string                 `json:"name"`
+	PinCount       int                    `json:"pin_count"`
+	UpdatedAt      Timestamp              `json:"updated_at"`
+	CreatedBy      UserResponse           `json:"created_by"`
+	DeletedAt      *Timestamp             `json:"deleted_at,omitempty"`
+	Visibility     *string                `json:"visibility,omitempty"`
+	FilterTags     []string               `json:"filter_tags,omitempty"`
+	Custom         map[string]any         `json:"custom,omitempty"`
+	Location       *FeedsActivityLocation `json:"location,omitempty"`
+}
+
 // Configuration for a feeds moderation template
 type FeedsModerationTemplateConfigPayload struct {
 	// Map of data type names to their content types
 	DataTypes map[string]string `json:"data_types"`
 	// Key of the moderation configuration to use
 	ConfigKey *string `json:"config_key,omitempty"`
+}
+
+type FeedsNotificationComment struct {
+	Comment     string       `json:"comment"`
+	ID          string       `json:"id"`
+	UserID      string       `json:"user_id"`
+	Attachments []Attachment `json:"attachments,omitempty"`
+}
+
+type FeedsNotificationContext struct {
+	Target  *FeedsNotificationTarget  `json:"target,omitempty"`
+	Trigger *FeedsNotificationTrigger `json:"trigger,omitempty"`
+}
+
+type FeedsNotificationParentActivity struct {
+	ID          string       `json:"id"`
+	Text        *string      `json:"text,omitempty"`
+	UserID      *string      `json:"user_id,omitempty"`
+	Type        *string      `json:"type,omitempty"`
+	Attachments []Attachment `json:"attachments,omitempty"`
+}
+
+type FeedsNotificationTarget struct {
+	ID             string                           `json:"id"`
+	Name           *string                          `json:"name,omitempty"`
+	Text           *string                          `json:"text,omitempty"`
+	UserID         *string                          `json:"user_id,omitempty"`
+	Type           *string                          `json:"type,omitempty"`
+	Attachments    []Attachment                     `json:"attachments,omitempty"`
+	Comment        *FeedsNotificationComment        `json:"comment,omitempty"`
+	Custom         map[string]any                   `json:"custom,omitempty"`
+	ParentActivity *FeedsNotificationParentActivity `json:"parent_activity,omitempty"`
+}
+
+type FeedsNotificationTrigger struct {
+	Text    string                    `json:"text"`
+	Type    string                    `json:"type"`
+	Comment *FeedsNotificationComment `json:"comment,omitempty"`
+	Custom  map[string]any            `json:"custom,omitempty"`
 }
 
 type FeedsPreferences struct {
@@ -5238,100 +5414,100 @@ type FeedsPreferencesResponse struct {
 	CustomActivityTypes map[string]string `json:"custom_activity_types,omitempty"`
 }
 
-type FeedsReactionGroup struct {
+type FeedsReactionGroupResponse struct {
 	Count           int       `json:"count"`
 	FirstReactionAt Timestamp `json:"first_reaction_at"`
 	LastReactionAt  Timestamp `json:"last_reaction_at"`
 }
 
-type FeedsReactionGroupResponse struct {
-	// Number of reactions in this group
-	Count int `json:"count"`
-	// Time of the first reaction
-	FirstReactionAt Timestamp `json:"first_reaction_at"`
-	// Time of the most recent reaction
-	LastReactionAt Timestamp `json:"last_reaction_at"`
-}
-
 type FeedsReactionResponse struct {
-	// ID of the activity that was reacted to
-	ActivityID string `json:"activity_id"`
-	// When the reaction was created
-	CreatedAt Timestamp `json:"created_at"`
-	// When the reaction was last updated
-	UpdatedAt Timestamp `json:"updated_at"`
-	// Type of reaction
-	Type string       `json:"type"`
-	User UserResponse `json:"user"`
-	// ID of the comment that was reacted to
-	CommentID *string `json:"comment_id,omitempty"`
-	// Custom data for the reaction
-	Custom map[string]any `json:"custom,omitempty"`
+	ActivityID string         `json:"activity_id"`
+	CreatedAt  Timestamp      `json:"created_at"`
+	UpdatedAt  Timestamp      `json:"updated_at"`
+	Type       string         `json:"type"`
+	User       UserResponse   `json:"user"`
+	CommentID  *string        `json:"comment_id,omitempty"`
+	Custom     map[string]any `json:"custom,omitempty"`
 }
 
 type FeedsV3ActivityResponse struct {
-	BookmarkCount    int                           `json:"bookmark_count"`
-	CommentCount     int                           `json:"comment_count"`
-	CreatedAt        Timestamp                     `json:"created_at"`
-	Hidden           bool                          `json:"hidden"`
-	ID               string                        `json:"id"`
-	Popularity       int                           `json:"popularity"`
-	Preview          bool                          `json:"preview"`
-	ReactionCount    int                           `json:"reaction_count"`
-	RestrictReplies  string                        `json:"restrict_replies"`
-	Score            float64                       `json:"score"`
-	ShareCount       int                           `json:"share_count"`
-	UpdatedAt        Timestamp                     `json:"updated_at"`
-	Visibility       string                        `json:"visibility"`
-	Type             string                        `json:"type"`
-	Attachments      []Attachment                  `json:"attachments"`
-	Comments         []FeedsV3CommentResponse      `json:"comments"`
-	Feeds            []string                      `json:"feeds"`
-	FilterTags       []string                      `json:"filter_tags"`
-	InterestTags     []string                      `json:"interest_tags"`
-	LatestReactions  []any                         `json:"latest_reactions"`
-	MentionedUsers   []UserResponse                `json:"mentioned_users"`
-	OwnBookmarks     []any                         `json:"own_bookmarks"`
-	OwnReactions     []any                         `json:"own_reactions"`
-	Collections      map[string]EnrichedCollection `json:"collections"`
-	Custom           map[string]any                `json:"custom"`
-	ReactionGroups   map[string]FeedsReactionGroup `json:"reaction_groups"`
-	SearchData       map[string]any                `json:"search_data"`
-	User             UserResponse                  `json:"user"`
-	DeletedAt        *Timestamp                    `json:"deleted_at,omitempty"`
-	EditedAt         *Timestamp                    `json:"edited_at,omitempty"`
-	ExpiresAt        *Timestamp                    `json:"expires_at,omitempty"`
-	ModerationAction *string                       `json:"moderation_action,omitempty"`
-	Text             *string                       `json:"text,omitempty"`
-	VisibilityTag    *string                       `json:"visibility_tag,omitempty"`
-	Metrics          map[string]int                `json:"metrics,omitempty"`
-	Moderation       *ModerationV2Response         `json:"moderation,omitempty"`
+	BookmarkCount       int                                        `json:"bookmark_count"`
+	CommentCount        int                                        `json:"comment_count"`
+	CreatedAt           Timestamp                                  `json:"created_at"`
+	Hidden              bool                                       `json:"hidden"`
+	ID                  string                                     `json:"id"`
+	Popularity          int                                        `json:"popularity"`
+	Preview             bool                                       `json:"preview"`
+	ReactionCount       int                                        `json:"reaction_count"`
+	RestrictReplies     string                                     `json:"restrict_replies"`
+	Score               float64                                    `json:"score"`
+	ShareCount          int                                        `json:"share_count"`
+	UpdatedAt           Timestamp                                  `json:"updated_at"`
+	Visibility          string                                     `json:"visibility"`
+	Type                string                                     `json:"type"`
+	Attachments         []Attachment                               `json:"attachments"`
+	Comments            []FeedsV3CommentResponse                   `json:"comments"`
+	Feeds               []string                                   `json:"feeds"`
+	FilterTags          []string                                   `json:"filter_tags"`
+	InterestTags        []string                                   `json:"interest_tags"`
+	LatestReactions     []FeedsReactionResponse                    `json:"latest_reactions"`
+	MentionedUsers      []UserResponse                             `json:"mentioned_users"`
+	OwnBookmarks        []FeedsBookmarkResponse                    `json:"own_bookmarks"`
+	OwnReactions        []FeedsReactionResponse                    `json:"own_reactions"`
+	Collections         map[string]FeedsEnrichedCollectionResponse `json:"collections"`
+	Custom              map[string]any                             `json:"custom"`
+	ReactionGroups      map[string]FeedsReactionGroupResponse      `json:"reaction_groups"`
+	SearchData          map[string]any                             `json:"search_data"`
+	User                UserResponse                               `json:"user"`
+	DeletedAt           *Timestamp                                 `json:"deleted_at,omitempty"`
+	EditedAt            *Timestamp                                 `json:"edited_at,omitempty"`
+	ExpiresAt           *Timestamp                                 `json:"expires_at,omitempty"`
+	FriendReactionCount *int                                       `json:"friend_reaction_count,omitempty"`
+	IsRead              *bool                                      `json:"is_read,omitempty"`
+	IsSeen              *bool                                      `json:"is_seen,omitempty"`
+	IsWatched           *bool                                      `json:"is_watched,omitempty"`
+	ModerationAction    *string                                    `json:"moderation_action,omitempty"`
+	SelectorSource      *string                                    `json:"selector_source,omitempty"`
+	Text                *string                                    `json:"text,omitempty"`
+	VisibilityTag       *string                                    `json:"visibility_tag,omitempty"`
+	FriendReactions     []FeedsReactionResponse                    `json:"friend_reactions,omitempty"`
+	CurrentFeed         *FeedsFeedResponse                         `json:"current_feed,omitempty"`
+	Location            *FeedsActivityLocation                     `json:"location,omitempty"`
+	Metrics             map[string]int                             `json:"metrics,omitempty"`
+	Moderation          *ModerationV2Response                      `json:"moderation,omitempty"`
+	NotificationContext *FeedsNotificationContext                  `json:"notification_context,omitempty"`
+	Parent              *FeedsV3ActivityResponse                   `json:"parent,omitempty"`
+	Poll                *PollResponseData                          `json:"poll,omitempty"`
+	ScoreVars           map[string]any                             `json:"score_vars,omitempty"`
 }
 
 type FeedsV3CommentResponse struct {
-	ConfidenceScore  float64               `json:"confidence_score"`
-	CreatedAt        Timestamp             `json:"created_at"`
-	DownvoteCount    int                   `json:"downvote_count"`
-	ID               string                `json:"id"`
-	ObjectID         string                `json:"object_id"`
-	ObjectType       string                `json:"object_type"`
-	ReactionCount    int                   `json:"reaction_count"`
-	ReplyCount       int                   `json:"reply_count"`
-	Score            int                   `json:"score"`
-	Status           string                `json:"status"`
-	UpdatedAt        Timestamp             `json:"updated_at"`
-	UpvoteCount      int                   `json:"upvote_count"`
-	MentionedUsers   []UserResponse        `json:"mentioned_users"`
-	OwnReactions     []any                 `json:"own_reactions"`
-	User             UserResponse          `json:"user"`
-	ControversyScore *float64              `json:"controversy_score,omitempty"`
-	DeletedAt        *Timestamp            `json:"deleted_at,omitempty"`
-	EditedAt         *Timestamp            `json:"edited_at,omitempty"`
-	ParentID         *string               `json:"parent_id,omitempty"`
-	Text             *string               `json:"text,omitempty"`
-	Attachments      []Attachment          `json:"attachments,omitempty"`
-	Custom           map[string]any        `json:"custom,omitempty"`
-	Moderation       *ModerationV2Response `json:"moderation,omitempty"`
+	BookmarkCount    int                                   `json:"bookmark_count"`
+	ConfidenceScore  float64                               `json:"confidence_score"`
+	CreatedAt        Timestamp                             `json:"created_at"`
+	DownvoteCount    int                                   `json:"downvote_count"`
+	ID               string                                `json:"id"`
+	ObjectID         string                                `json:"object_id"`
+	ObjectType       string                                `json:"object_type"`
+	ReactionCount    int                                   `json:"reaction_count"`
+	ReplyCount       int                                   `json:"reply_count"`
+	Score            int                                   `json:"score"`
+	Status           string                                `json:"status"`
+	UpdatedAt        Timestamp                             `json:"updated_at"`
+	UpvoteCount      int                                   `json:"upvote_count"`
+	MentionedUsers   []UserResponse                        `json:"mentioned_users"`
+	OwnReactions     []FeedsReactionResponse               `json:"own_reactions"`
+	User             UserResponse                          `json:"user"`
+	ControversyScore *float64                              `json:"controversy_score,omitempty"`
+	DeletedAt        *Timestamp                            `json:"deleted_at,omitempty"`
+	EditedAt         *Timestamp                            `json:"edited_at,omitempty"`
+	ParentID         *string                               `json:"parent_id,omitempty"`
+	Text             *string                               `json:"text,omitempty"`
+	Attachments      []Attachment                          `json:"attachments,omitempty"`
+	LatestReactions  []FeedsReactionResponse               `json:"latest_reactions,omitempty"`
+	Custom           map[string]any                        `json:"custom,omitempty"`
+	Moderation       *ModerationV2Response                 `json:"moderation,omitempty"`
+	ReactionGroups   map[string]FeedsReactionGroupResponse `json:"reaction_groups,omitempty"`
 }
 
 type Field struct {
@@ -9886,6 +10062,7 @@ type RuleBuilderCondition struct {
 	CallCustomPropertyParams        *CallCustomPropertyParameters        `json:"call_custom_property_params,omitempty"`
 	CallTypeRuleParams              *CallTypeRuleParameters              `json:"call_type_rule_params,omitempty"`
 	CallViolationCountParams        *CallViolationCountParameters        `json:"call_violation_count_params,omitempty"`
+	ChannelMessageCountRuleParams   *ChannelMessageCountRuleParameters   `json:"channel_message_count_rule_params,omitempty"`
 	ClosedCaptionRuleParams         *ClosedCaptionRuleParameters         `json:"closed_caption_rule_params,omitempty"`
 	ContentCountRuleParams          *ContentCountRuleParameters          `json:"content_count_rule_params,omitempty"`
 	ContentFlagCountRuleParams      *FlagCountRuleParameters             `json:"content_flag_count_rule_params,omitempty"`
