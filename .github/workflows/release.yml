@@ -6,25 +6,85 @@ on:
     branches:
       - main
 
+concurrency:
+  group: release-${{ github.event.pull_request.base.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
 jobs:
-  Release:
+  release:
     name: 🚀 Release
-    if: github.event.pull_request.merged && startsWith(github.head_ref, 'release-')
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/github-script@v6
         with:
-          script: |
-            // Getting the release version from the PR source branch
-            // Source branch looks like this: release-1.0.0
-            const version = context.payload.pull_request.head.ref.split('-')[1]
-            core.exportVariable('VERSION', version)
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Skip when PR is already released
+        id: already_released
+        run: |
+          if git log --oneline --grep="(pr #${{ github.event.pull_request.number }})" -n 1 | grep -q "chore(release):"; then
+            echo "value=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Determine and apply version bump
+        id: release_meta
+        if: steps.already_released.outputs.value != 'true'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          PR_BODY_FILE=$(mktemp)
+          printf '%s' "$PR_BODY" > "$PR_BODY_FILE"
+          bash scripts/release/bump_version.sh \
+            --title "$PR_TITLE" \
+            --body-file "$PR_BODY_FILE" \
+            --output "$GITHUB_OUTPUT"
+
+      - name: Stop when PR does not require release
+        if: steps.already_released.outputs.value == 'true' || steps.release_meta.outputs.should_release != 'true'
+        run: |
+          if [ "${{ steps.already_released.outputs.value }}" = "true" ]; then
+            echo "PR #${{ github.event.pull_request.number }} is already released; skipping."
+            exit 0
+          fi
+          echo "No release type found in PR title; skipping."
+          exit 0
+
+      - name: Commit version files
+        if: steps.already_released.outputs.value != 'true' && steps.release_meta.outputs.should_release == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.go
+          if git diff --cached --quiet; then
+            echo "No version changes to commit."
+            exit 0
+          fi
+          git commit -m "chore(release): v${{ steps.release_meta.outputs.version }} (pr #${{ github.event.pull_request.number }})"
+          git push origin "HEAD:${{ github.event.pull_request.base.ref }}"
+
+      - name: Create release tag
+        if: steps.already_released.outputs.value != 'true' && steps.release_meta.outputs.should_release == 'true'
+        run: |
+          git tag "${{ steps.release_meta.outputs.tag }}"
+          git push origin "${{ steps.release_meta.outputs.tag }}"
 
       - name: Create release on GitHub
+        if: steps.already_released.outputs.value != 'true' && steps.release_meta.outputs.should_release == 'true'
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ env.VERSION }}
+          tag: ${{ steps.release_meta.outputs.tag }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          generateReleaseNotes: true
+          body: |
+            Release v${{ steps.release_meta.outputs.version }}
+
+            - Bump type: `${{ steps.release_meta.outputs.bump }}`
+            - Previous: `${{ steps.release_meta.outputs.previous_version }}`
+            - Next: `${{ steps.release_meta.outputs.version }}`
