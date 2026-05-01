@@ -217,7 +217,7 @@ func (c *FeedsClient) UpdateActivity(ctx context.Context, id string, request *Up
 	return res, err
 }
 
-// Restores a soft-deleted activity by its ID. Only the activity owner can restore their own activities.
+// Restores a soft-deleted, moderation-removed, or shadow-blocked activity by its ID. Deleted activities can be restored by the owner (client-side). Moderation-blocked activities can only be restored server-side.
 func (c *FeedsClient) RestoreActivity(ctx context.Context, id string, request *RestoreActivityRequest) (*StreamResponse[RestoreActivityResponse], error) {
 	var result RestoreActivityResponse
 	pathParams := map[string]string{
@@ -455,7 +455,7 @@ func (c *FeedsClient) GetCommentReplies(ctx context.Context, id string, request 
 	return res, err
 }
 
-// Restores a soft-deleted comment by its ID. The comment and all its descendants are restored. Requires moderator permissions.
+// Restores a soft-deleted, moderation-removed, or shadow-blocked comment by its ID. The comment and all its descendants are restored. Deleted comments can be restored client-side. Moderation-blocked comments can only be restored server-side.
 func (c *FeedsClient) RestoreComment(ctx context.Context, id string, request *RestoreCommentRequest) (*StreamResponse[RestoreCommentResponse], error) {
 	var result RestoreCommentResponse
 	pathParams := map[string]string{
@@ -547,6 +547,17 @@ func (c *FeedsClient) PinActivity(ctx context.Context, feedGroupID string, feedI
 		"activity_id":   activityID,
 	}
 	res, err := MakeRequest[PinActivityRequest, PinActivityResponse](c.client, ctx, "POST", "/api/v2/feeds/feed_groups/{feed_group_id}/feeds/{feed_id}/activities/{activity_id}/pin", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Changes the visibility of an existing feed. Follow reconciliation (rewriting pending follows on loosening, or removing disallowed follows/members on tightening) runs asynchronously in the background; the response returns optimistically with the intended visibility.
+func (c *FeedsClient) ChangeFeedVisibility(ctx context.Context, feedGroupID string, feedID string, request *ChangeFeedVisibilityRequest) (*StreamResponse[ChangeFeedVisibilityResponse], error) {
+	var result ChangeFeedVisibilityResponse
+	pathParams := map[string]string{
+		"feed_group_id": feedGroupID,
+		"feed_id":       feedID,
+	}
+	res, err := MakeRequest[ChangeFeedVisibilityRequest, ChangeFeedVisibilityResponse](c.client, ctx, "POST", "/api/v2/feeds/feed_groups/{feed_group_id}/feeds/{feed_id}/change_visibility", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -878,6 +889,13 @@ func (c *FeedsClient) UpdateMembershipLevel(ctx context.Context, id string, requ
 		"id": id,
 	}
 	res, err := MakeRequest[UpdateMembershipLevelRequest, UpdateMembershipLevelResponse](c.client, ctx, "PATCH", "/api/v2/feeds/membership_levels/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Queries revision history for activities and comments
+func (c *FeedsClient) QueryRevisionHistory(ctx context.Context, request *QueryRevisionHistoryRequest) (*StreamResponse[QueryRevisionHistoryResponse], error) {
+	var result QueryRevisionHistoryResponse
+	res, err := MakeRequest[QueryRevisionHistoryRequest, QueryRevisionHistoryResponse](c.client, ctx, "POST", "/api/v2/feeds/revisions/query", nil, request, &result, nil)
 	return res, err
 }
 

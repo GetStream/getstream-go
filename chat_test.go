@@ -9,6 +9,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestChatCreateCampaign(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().CreateCampaign(context.Background(), &getstream.CreateCampaignRequest{})
+	require.NoError(t, err)
+}
 func TestChatQueryCampaigns(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -16,11 +23,25 @@ func TestChatQueryCampaigns(t *testing.T) {
 	_, err = client.Chat().QueryCampaigns(context.Background(), &getstream.QueryCampaignsRequest{})
 	require.NoError(t, err)
 }
+func TestChatDeleteCampaign(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().DeleteCampaign(context.Background(), "", &getstream.DeleteCampaignRequest{})
+	require.NoError(t, err)
+}
 func TestChatGetCampaign(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
 	_, err = client.Chat().GetCampaign(context.Background(), "", &getstream.GetCampaignRequest{})
+	require.NoError(t, err)
+}
+func TestChatUpdateCampaign(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().UpdateCampaign(context.Background(), "", &getstream.UpdateCampaignRequest{})
 	require.NoError(t, err)
 }
 func TestChatStartCampaign(t *testing.T) {
@@ -63,6 +84,13 @@ func TestChatMarkDelivered(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Chat().MarkDelivered(context.Background(), &getstream.MarkDeliveredRequest{})
+	require.NoError(t, err)
+}
+func TestChatGroupedQueryChannels(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().GroupedQueryChannels(context.Background(), &getstream.GroupedQueryChannelsRequest{})
 	require.NoError(t, err)
 }
 func TestChatMarkChannelsRead(t *testing.T) {

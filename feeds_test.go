@@ -387,6 +387,13 @@ func TestFeedsPinActivity(t *testing.T) {
 	_, err = client.Feeds().PinActivity(context.Background(), "", "", "", &getstream.PinActivityRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsChangeFeedVisibility(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().ChangeFeedVisibility(context.Background(), "", "", &getstream.ChangeFeedVisibilityRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsUpdateFeedMembers(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -644,6 +651,13 @@ func TestFeedsUpdateMembershipLevel(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().UpdateMembershipLevel(context.Background(), "", &getstream.UpdateMembershipLevelRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsQueryRevisionHistory(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().QueryRevisionHistory(context.Background(), &getstream.QueryRevisionHistoryRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsQueryFeedsUsageStats(t *testing.T) {
