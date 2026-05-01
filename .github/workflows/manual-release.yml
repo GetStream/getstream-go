@@ -1,0 +1,68 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (example: 4.2.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  manual-release:
+    name: 🚀 Manual Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Update version file
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          sed -i "s|versionName = \".*\"|versionName = \"v${VERSION}\"|" version.go
+
+      - name: Commit version update
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.go
+          if git diff --cached --quiet; then
+            echo "No version changes to commit."
+          else
+            git commit -m "chore(release): v${VERSION} (manual)"
+            git push origin HEAD:main
+          fi
+
+      - name: Run tests
+        env:
+          STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
+          STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
+          STREAM_API_SECRET: ${{ secrets.STREAM_API_SECRET }}
+        run: go test -short -v ./...
+
+      - name: Create and push tag
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+
+      - name: Create release on GitHub
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ github.event.inputs.version }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          generateReleaseNotes: true
