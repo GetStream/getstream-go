@@ -63,3 +63,18 @@ We've recently closed a [$38 million Series B funding round](https://techcrunch.
 Our APIs are used by more than a billion end-users, and you'll have a chance to make a huge impact on the product within a team of the strongest engineers all over the world.
 
 Check out our current openings and apply via [Stream's website](https://getstream.io/team/#jobs).
+
+## Release Process
+
+Releases use two paths:
+
+- Default: automatic release when a PR is merged to `main`.
+- Fallback: manual release using `.github/workflows/manual-release.yml` (admin use only).
+
+Automatic semver bump rules are based on merged PR title/body:
+
+- `feat:` -> minor
+- `fix:` (or `bug:`) -> patch
+- `feat!:` or `BREAKING CHANGE` in PR body -> major
+
+PRs with other prefixes do not trigger a release.
