@@ -178,18 +178,9 @@ func TestChatChannelIntegration(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, resp.Data.TaskID)
 
-		// The bulk-delete task can fail-and-retry repeatedly on the shared CI
-		// app under load; we treat completion as best-effort. The strong
-		// guarantee tested here is that the SDK call succeeds and returns a
-		// task ID — the task lifecycle is a backend concern.
 		taskResult, err := WaitForTask(ctx, client, *resp.Data.TaskID)
 		require.NoError(t, err)
-		if taskResult.Data.Status != "completed" {
-			t.Logf("DeleteChannels task did not complete in window: status=%s", taskResult.Data.Status)
-			if taskResult.Data.Error != nil {
-				t.Logf("DeleteChannels task error: type=%s description=%q", taskResult.Data.Error.Type, taskResult.Data.Error.Description)
-			}
-		}
+		require.Equal(t, "completed", taskResult.Data.Status)
 	})
 
 	t.Run("AddRemoveMembers", func(t *testing.T) {
