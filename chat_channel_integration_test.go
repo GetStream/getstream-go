@@ -178,18 +178,38 @@ func TestChatChannelIntegration(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, resp.Data.TaskID)
 
-		// PROBE for CHA-3056: temporarily re-assert "completed" so CI fails
-		// loud whenever the bulk hard-delete task surfaces non-terminal-completed.
-		// Logs the task error description before failing so we can read the
-		// exact backend reason from CI output. Revert before merging.
-		taskResult, err := WaitForTask(ctx, client, *resp.Data.TaskID)
-		require.NoError(t, err)
-		if taskResult.Data.Status != "completed" {
-			t.Logf("DeleteChannels task did not complete in window: status=%s", taskResult.Data.Status)
-			if taskResult.Data.Error != nil {
-				t.Logf("DeleteChannels task error: type=%s description=%q", taskResult.Data.Error.Type, taskResult.Data.Error.Description)
+		// PROBE for CHA-3056: inline poll loop that logs every "failed"
+		// observation with the backend's error type/description, then keeps
+		// polling. WaitForTask absorbs intermediate "failed" statuses
+		// silently because the chat backend writes "failed" before asynq
+		// retries; this loop surfaces those transient observations so we
+		// can see the exact backend reason. Revert before merging.
+		taskID := *resp.Data.TaskID
+		const maxAttempts = 30
+		var taskResult *StreamResponse[GetTaskResponse]
+		failedObservations := 0
+		for i := 0; i < maxAttempts; i++ {
+			r, err := client.GetTask(context.Background(), taskID, &GetTaskRequest{})
+			require.NoError(t, err)
+			taskResult = r
+			if r.Data.Status == "failed" {
+				failedObservations++
+				if r.Data.Error != nil {
+					t.Logf("CHA-3056 probe: attempt=%d status=failed type=%s description=%q", i+1, r.Data.Error.Type, r.Data.Error.Description)
+				} else {
+					t.Logf("CHA-3056 probe: attempt=%d status=failed (no error payload)", i+1)
+				}
 			}
+			if r.Data.Status == "completed" {
+				break
+			}
+			interval := time.Duration(i+1) * time.Second
+			if interval > 5*time.Second {
+				interval = 5 * time.Second
+			}
+			time.Sleep(interval)
 		}
+		t.Logf("CHA-3056 probe: terminal_status=%s failed_observations=%d", taskResult.Data.Status, failedObservations)
 		assert.Equal(t, "completed", taskResult.Data.Status, "CHA-3056 probe: see preceding t.Logf for task error description")
 	})
 
