@@ -188,17 +188,21 @@ func TestChatChannelIntegration(t *testing.T) {
 		const maxAttempts = 30
 		var taskResult *StreamResponse[GetTaskResponse]
 		failedObservations := 0
+		probeStart := time.Now()
 		for i := 0; i < maxAttempts; i++ {
 			r, err := client.GetTask(context.Background(), taskID, &GetTaskRequest{})
 			require.NoError(t, err)
 			taskResult = r
+			elapsed := time.Since(probeStart).Truncate(time.Millisecond)
 			if r.Data.Status == "failed" {
 				failedObservations++
 				if r.Data.Error != nil {
-					t.Logf("CHA-3056 probe: attempt=%d status=failed type=%s description=%q", i+1, r.Data.Error.Type, r.Data.Error.Description)
+					t.Logf("CHA-3056 probe: attempt=%d elapsed=%s status=failed type=%s description=%q", i+1, elapsed, r.Data.Error.Type, r.Data.Error.Description)
 				} else {
-					t.Logf("CHA-3056 probe: attempt=%d status=failed (no error payload)", i+1)
+					t.Logf("CHA-3056 probe: attempt=%d elapsed=%s status=failed (no error payload)", i+1, elapsed)
 				}
+			} else {
+				t.Logf("CHA-3056 probe: attempt=%d elapsed=%s status=%s", i+1, elapsed, r.Data.Status)
 			}
 			if r.Data.Status == "completed" {
 				break
@@ -209,8 +213,8 @@ func TestChatChannelIntegration(t *testing.T) {
 			}
 			time.Sleep(interval)
 		}
-		t.Logf("CHA-3056 probe: terminal_status=%s failed_observations=%d", taskResult.Data.Status, failedObservations)
-		assert.Equal(t, "completed", taskResult.Data.Status, "CHA-3056 probe: see preceding t.Logf for task error description")
+		t.Logf("CHA-3056 probe: terminal_status=%s failed_observations=%d total_elapsed=%s", taskResult.Data.Status, failedObservations, time.Since(probeStart).Truncate(time.Millisecond))
+		assert.Equal(t, "completed", taskResult.Data.Status, "CHA-3056 probe: see preceding t.Logf lines for task lifecycle")
 	})
 
 	t.Run("AddRemoveMembers", func(t *testing.T) {
