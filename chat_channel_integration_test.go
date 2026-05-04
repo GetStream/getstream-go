@@ -185,6 +185,7 @@ func TestChatChannelIntegration(t *testing.T) {
 		// retries; this loop surfaces those transient observations so we
 		// can see the exact backend reason. Revert before merging.
 		taskID := *resp.Data.TaskID
+		t.Logf("CHA-3056 probe: task_id=%s api_key=%s cids=[%s,%s]", taskID, "d2sj6pudbhz7", cid1, cid2)
 		const maxAttempts = 30
 		var taskResult *StreamResponse[GetTaskResponse]
 		failedObservations := 0
