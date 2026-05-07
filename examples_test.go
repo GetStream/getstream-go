@@ -292,7 +292,8 @@ func TestCallToken(t *testing.T) {
 	// the list of call IDs this token applies to
 	tokenClaims := getstream.Claims{CallCIDs: []string{"default:call1", "livestream:call2"}}
 
-	token, err := client.CreateToken("john",
+	token, err := client.CreateToken(
+		"john",
 		getstream.WithClaims(tokenClaims),
 		getstream.WithExpiration(24*time.Hour),
 	)
