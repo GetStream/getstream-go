@@ -11,6 +11,7 @@ import (
 
 func TestVideoIntegration(t *testing.T) {
 	t.Parallel()
+	skipIfShort(t)
 	client, err := getstream.NewClientFromEnvVars()
 	require.NoError(t, err, "Failed to create client")
 

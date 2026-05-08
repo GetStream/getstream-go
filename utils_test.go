@@ -24,18 +24,19 @@ func (c *StubHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	}, nil
 }
 
+// WaitForTask polls the task until it reaches a terminal status
+// ("completed" or "failed") and returns the final observation.
+//
+// Polling cadence ramps from 1s to a 5s cap. The 60-attempt budget
+// (~5 minutes) is sized to outlast async-task retry cycles on the
+// backend (e.g. rate-limited bulk hard-deletes that retry every
+// 10–15s for several minutes before clearing).
+//
+// If the budget is exhausted before a terminal status is observed,
+// the last observation is returned alongside a timeout error so
+// the caller can log the in-flight status for debugging.
 func WaitForTask(ctx context.Context, client *Stream, taskID string) (*StreamResponse[GetTaskResponse], error) {
-	// Poll with progressive intervals: start at 1s, increase by 1s each
-	// attempt up to 5s, for a total ceiling of ~120s. Returns on the first
-	// "completed" sighting; otherwise polls until the budget is exhausted
-	// and returns the last observed result so the caller can decide how to
-	// handle non-terminal-completed outcomes.
-	//
-	// "failed" is intentionally NOT treated as terminal here: the chat
-	// backend writes Status="failed" before asynq retries the task, and
-	// retries can flip the result to "completed" later. Bailing on the
-	// first "failed" observation flaked tests under heavy parallel load.
-	const maxAttempts = 30
+	const maxAttempts = 60
 	var lastResult *StreamResponse[GetTaskResponse]
 	for i := 0; i < maxAttempts; i++ {
 		taskResult, err := client.GetTask(context.Background(), taskID, &GetTaskRequest{})
@@ -43,7 +44,8 @@ func WaitForTask(ctx context.Context, client *Stream, taskID string) (*StreamRes
 			return nil, fmt.Errorf("failed to get task result: %w", err)
 		}
 		lastResult = taskResult
-		if taskResult.Data.Status == "completed" {
+		switch taskResult.Data.Status {
+		case "completed", "failed":
 			return taskResult, nil
 		}
 
@@ -54,14 +56,11 @@ func WaitForTask(ctx context.Context, client *Stream, taskID string) (*StreamRes
 
 		select {
 		case <-ctx.Done():
-			return nil, fmt.Errorf("context expired waiting for task %s: %w", taskID, ctx.Err())
+			return lastResult, fmt.Errorf("context expired waiting for task %s: %w", taskID, ctx.Err())
 		case <-time.After(interval):
 		}
 	}
-	if lastResult != nil {
-		return lastResult, nil
-	}
-	return nil, fmt.Errorf("task %s did not complete after %d attempts", taskID, maxAttempts)
+	return lastResult, fmt.Errorf("task %s did not reach terminal status after %d attempts", taskID, maxAttempts)
 }
 
 // ResourceManager manages resource cleanup for tests.

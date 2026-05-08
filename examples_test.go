@@ -39,6 +39,7 @@ func TestCreatingClient(t *testing.T) {
 }
 
 func TestCreateUserAndToken(t *testing.T) {
+	skipIfShort(t)
 	client := initClient(t)
 
 	// optional values are passed as pointers, you can use `getstream.PtrTo` to get pointers from literals of any type
@@ -62,6 +63,7 @@ func TestCreateUserAndToken(t *testing.T) {
 }
 
 func TestCreateCall(t *testing.T) {
+	skipIfShort(t)
 	client := initClient(t)
 
 	call := client.Video().Call("livestream", uuid.NewString())
@@ -176,6 +178,7 @@ func TestCreateCall(t *testing.T) {
 }
 
 func TestUsers(t *testing.T) {
+	skipIfShort(t)
 	client := initClient(t)
 
 	userID := "test-user-" + uuid.New().String()
@@ -283,12 +286,14 @@ func TestUsers(t *testing.T) {
 }
 
 func TestCallToken(t *testing.T) {
+	skipIfShort(t)
 	client := initClient(t)
 
 	// the list of call IDs this token applies to
 	tokenClaims := getstream.Claims{CallCIDs: []string{"default:call1", "livestream:call2"}}
 
-	token, err := client.CreateToken("john",
+	token, err := client.CreateToken(
+		"john",
 		getstream.WithClaims(tokenClaims),
 		getstream.WithExpiration(24*time.Hour),
 	)
@@ -297,6 +302,7 @@ func TestCallToken(t *testing.T) {
 }
 
 func TestCreateChatChannelBasics(t *testing.T) {
+	skipIfShort(t)
 	channel := initClient(t).Chat().Channel("messaging", uuid.NewString())
 
 	response, err := channel.GetOrCreate(ctx, &getstream.GetOrCreateChannelRequest{
@@ -366,6 +372,7 @@ func TestCall_FrameRecording(t *testing.T) {
 }
 
 func TestCall_AutoFrameRecording(t *testing.T) {
+	skipIfShort(t)
 	client := initClient(t)
 	call_type_name := "default"
 
