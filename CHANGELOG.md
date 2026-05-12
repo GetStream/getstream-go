@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [Unreleased]
+
+### Added
+
+- Webhook handling spec helpers (CHA-2961): `UnknownEvent` type for forward-compat,
+  `GunzipPayload` / `DecodeSQSPayload` / `DecodeSNSPayload` primitives,
+  `VerifyAndParseWebhookBytes` HTTP composite (verify + parse in one call),
+  `ParseSQSPayload` / `ParseSNSPayload` queue composites (no signature; backend
+  emits no HMAC for queue messages today), with transparent gzip decompression
+  via magic-byte detection.
+- New instance methods on `*Stream`: `VerifyWebhookSignature(body, signature)`
+  and `VerifyAndParseWebhookBytes(body, signature)` — drop the api_secret parameter
+  in favor of the client's stored secret. Dual API: package-level static functions
+  remain available.
+- `UnknownEvent` is returned for unrecognized event types; future event types the
+  backend adds will surface this way until the SDK is upgraded.
+- Conformance fixture suite under `tests/fixtures/webhooks/`.
+
+### Changed
+
+- No breaking changes. All existing webhook helpers preserved.
+
+[Spec](https://www.notion.so/stream-wiki/Server-Side-SDK-Webhook-Handling-Spec-34b6a5d7f9f681e78003c443f227493c)
+
 ## [4.1.0](https://github.com/GetStream/getstream-go/compare/v4.0.6...v4.1.0) (2026-05-01)
 
 ### [4.0.6](https://github.com/GetStream/getstream-go/compare/v4.0.4...v4.0.6) (2026-04-23)

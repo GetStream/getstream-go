@@ -76,3 +76,20 @@ func (s *Stream) Moderation() *ModerationClient {
 	}
 	return s.moderation
 }
+
+// VerifyWebhookSignature verifies the HMAC-SHA256 signature of a webhook body
+// using this client's API secret. Convenience wrapper around the package-level
+// VerifyWebhookSignature function — drops the secret parameter in favor of
+// the secret stored on the client.
+func (s *Stream) VerifyWebhookSignature(body []byte, signature string) bool {
+	return VerifyWebhookSignature(body, signature, string(s.apiSecret))
+}
+
+// VerifyAndParseWebhookBytes verifies and parses a webhook payload (raw bytes)
+// using this client's API secret. Convenience wrapper around the package-level
+// VerifyAndParseWebhookBytes function — drops the secret parameter in favor of
+// the secret stored on the client. Distinct from VerifyAndParseWebhook, which
+// accepts an *http.Request.
+func (s *Stream) VerifyAndParseWebhookBytes(body []byte, signature string) (WebhookEvent, error) {
+	return VerifyAndParseWebhookBytes(body, signature, string(s.apiSecret))
+}
