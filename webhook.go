@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"time"
 )
 
 // WebhookEvent is implemented by all webhook event types.
@@ -199,7 +198,7 @@ const (
 // include *UnknownEvent in your default case.
 type UnknownEvent struct {
 	Type      string         `json:"type"`
-	CreatedAt time.Time      `json:"created_at"`
+	CreatedAt Timestamp      `json:"created_at"`
 	Raw       map[string]any `json:"-"`
 }
 
@@ -736,7 +735,7 @@ func ParseEvent(payload []byte) (WebhookEvent, error) {
 	}
 	var probe struct {
 		Type      string          `json:"type"`
-		CreatedAt time.Time       `json:"created_at"`
+		CreatedAt Timestamp       `json:"created_at"`
 		Raw       json.RawMessage `json:"-"`
 	}
 	if err := json.Unmarshal(payload, &probe); err != nil {
