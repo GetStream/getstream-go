@@ -821,12 +821,12 @@ func VerifyAndParseWebhookBytes(body []byte, signature, secret string) (WebhookE
 	return ParseEvent(payload)
 }
 
-// ParseSQSPayload decodes (base64 + gzip pass-through) and parses an SQS Message Body.
+// ParseSQS decodes (base64 + gzip pass-through) and parses an SQS Message Body.
 //
 // Backend emits no signature attribute on SQS messages today, so this helper
 // performs no signature verification. If a signed variant is added later,
 // it'll be a separate function rather than retrofitting this signature.
-func ParseSQSPayload(messageBody string) (WebhookEvent, error) {
+func ParseSQS(messageBody string) (WebhookEvent, error) {
 	payload, err := DecodeSQSPayload(messageBody)
 	if err != nil {
 		return nil, err
@@ -834,9 +834,9 @@ func ParseSQSPayload(messageBody string) (WebhookEvent, error) {
 	return ParseEvent(payload)
 }
 
-// ParseSNSPayload unwraps the standard AWS SNS notification envelope and parses
-// the inner payload. Same no-signature posture as ParseSQSPayload.
-func ParseSNSPayload(notificationBody string) (WebhookEvent, error) {
+// ParseSNS unwraps the standard AWS SNS notification envelope and parses
+// the inner payload. Same no-signature posture as ParseSQS.
+func ParseSNS(notificationBody string) (WebhookEvent, error) {
 	payload, err := DecodeSNSPayload(notificationBody)
 	if err != nil {
 		return nil, err

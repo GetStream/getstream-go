@@ -347,14 +347,14 @@ func TestWebhookConformance_Happy(t *testing.T) {
 				t.Fatalf("VerifyAndParseWebhookBytes(body.gz): %v", err)
 			}
 
-			if _, err := ParseSQSPayload(sqsCompressed); err != nil {
-				t.Fatalf("ParseSQSPayload(sqs_body.txt): %v", err)
+			if _, err := ParseSQS(sqsCompressed); err != nil {
+				t.Fatalf("ParseSQS(sqs_body.txt): %v", err)
 			}
-			if _, err := ParseSQSPayload(sqsRaw); err != nil {
-				t.Fatalf("ParseSQSPayload(sqs_body_uncompressed.txt): %v", err)
+			if _, err := ParseSQS(sqsRaw); err != nil {
+				t.Fatalf("ParseSQS(sqs_body_uncompressed.txt): %v", err)
 			}
-			if _, err := ParseSNSPayload(sns); err != nil {
-				t.Fatalf("ParseSNSPayload: %v", err)
+			if _, err := ParseSNS(sns); err != nil {
+				t.Fatalf("ParseSNS: %v", err)
 			}
 		})
 	}
@@ -425,10 +425,10 @@ func TestWebhookConformance_Negative(t *testing.T) {
 	})
 	expectInvalid("bad_base64", "base64", func() (WebhookEvent, error) {
 		msg := readStr(t, filepath.Join(invalidRoot, "bad_base64", "sqs_body.txt"))
-		return ParseSQSPayload(msg)
+		return ParseSQS(msg)
 	})
 	expectInvalid("bad_sns_envelope", "SNS envelope", func() (WebhookEvent, error) {
 		notif := readStr(t, filepath.Join(invalidRoot, "bad_sns_envelope", "sns_notification.txt"))
-		return ParseSNSPayload(notif)
+		return ParseSNS(notif)
 	})
 }

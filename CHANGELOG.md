@@ -9,8 +9,8 @@ All notable changes to this project will be documented in this file. See [standa
 - Webhook handling spec helpers (CHA-2961): `UnknownEvent` type for forward-compat,
   `GunzipPayload` / `DecodeSQSPayload` / `DecodeSNSPayload` primitives,
   `VerifyAndParseWebhookBytes` HTTP composite (verify + parse in one call),
-  `ParseSQSPayload` / `ParseSNSPayload` queue composites (no signature; backend
-  emits no HMAC for queue messages today), with transparent gzip decompression
+  `ParseSQS` / `ParseSNS` queue composites (no signature param for queue helpers;
+  security is enforced via AWS IAM, not HMAC), with transparent gzip decompression
   via magic-byte detection.
 - New instance methods on `*Stream`: `VerifyWebhookSignature(body, signature)`
   and `VerifyAndParseWebhookBytes(body, signature)` — drop the api_secret parameter
