@@ -7,22 +7,35 @@ All notable changes to this project will be documented in this file. See [standa
 ### Added
 
 - Webhook handling spec helpers (CHA-2961): `UnknownEvent` type for forward-compat,
-  `GunzipPayload` / `DecodeSQSPayload` / `DecodeSNSPayload` primitives,
-  `VerifyAndParseWebhookBytes` HTTP composite (verify + parse in one call),
-  `ParseSQS` / `ParseSNS` queue composites (no signature param for queue helpers;
+  `GunzipPayload` / `DecodeSqsPayload` / `DecodeSnsPayload` primitives,
+  `VerifyAndParseWebhook` composite (verify + parse in one call from raw bytes),
+  `ParseSqs` / `ParseSns` queue composites (no signature param for queue helpers;
   security is enforced via AWS IAM, not HMAC), with transparent gzip decompression
   via magic-byte detection.
-- New instance methods on `*Stream`: `VerifyWebhookSignature(body, signature)`
-  and `VerifyAndParseWebhookBytes(body, signature)` — drop the api_secret parameter
-  in favor of the client's stored secret. Dual API: package-level static functions
-  remain available.
+- New instance methods on `*Stream`: `VerifyWebhookSignature(body, signature)`,
+  `VerifyAndParseWebhook(body, signature)`, `ParseSqs(messageBody)`, and
+  `ParseSns(notificationBody)` — drop the api_secret parameter in favor of the
+  client's stored secret. Dual API: package-level static functions remain available.
 - `UnknownEvent` is returned for unrecognized event types; future event types the
   backend adds will surface this way until the SDK is upgraded.
 - Conformance fixture suite under `tests/fixtures/webhooks/`.
 
 ### Changed
 
-- No breaking changes. All existing webhook helpers preserved.
+- **BREAKING** (in-flight CHA-2961): renamed `VerifyAndParseWebhookBytes` →
+  `VerifyAndParseWebhook` (canonical bytes-based signature). Renamed `ParseSQS` /
+  `ParseSNS` → `ParseSqs` / `ParseSns`. Renamed `DecodeSQSPayload` /
+  `DecodeSNSPayload` → `DecodeSqsPayload` / `DecodeSnsPayload`.
+- **BREAKING** (in-flight CHA-2961): dropped the `VerifyAndParseWebhook(*http.Request, secret)`
+  package-level function, the `WebhookMiddleware` HTTP middleware, and the
+  `WebhookEventKey` context key. The SDK no longer ships a `net/http`-coupled
+  convenience surface — users compose with the bytes-based primitive:
+
+  ```go
+  body, _ := io.ReadAll(r.Body)
+  sig := r.Header.Get("X-Signature")
+  event, err := getstream.VerifyAndParseWebhook(body, sig, secret)
+  ```
 
 [Spec](https://www.notion.so/stream-wiki/Server-Side-SDK-Webhook-Handling-Spec-34b6a5d7f9f681e78003c443f227493c)
 

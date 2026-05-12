@@ -85,11 +85,22 @@ func (s *Stream) VerifyWebhookSignature(body []byte, signature string) bool {
 	return VerifyWebhookSignature(body, signature, string(s.apiSecret))
 }
 
-// VerifyAndParseWebhookBytes verifies and parses a webhook payload (raw bytes)
+// VerifyAndParseWebhook verifies and parses a webhook payload (raw bytes)
 // using this client's API secret. Convenience wrapper around the package-level
-// VerifyAndParseWebhookBytes function — drops the secret parameter in favor of
-// the secret stored on the client. Distinct from VerifyAndParseWebhook, which
-// accepts an *http.Request.
-func (s *Stream) VerifyAndParseWebhookBytes(body []byte, signature string) (WebhookEvent, error) {
-	return VerifyAndParseWebhookBytes(body, signature, string(s.apiSecret))
+// VerifyAndParseWebhook function — drops the secret parameter in favor of
+// the secret stored on the client.
+func (s *Stream) VerifyAndParseWebhook(body []byte, signature string) (WebhookEvent, error) {
+	return VerifyAndParseWebhook(body, signature, string(s.apiSecret))
+}
+
+// ParseSqs is a convenience wrapper that calls the package-level ParseSqs.
+// No signature is required; SQS deliveries are authenticated via AWS IAM.
+func (s *Stream) ParseSqs(messageBody string) (WebhookEvent, error) {
+	return ParseSqs(messageBody)
+}
+
+// ParseSns is a convenience wrapper that calls the package-level ParseSns.
+// No signature is required; SNS deliveries are authenticated via AWS IAM.
+func (s *Stream) ParseSns(notificationBody string) (WebhookEvent, error) {
+	return ParseSns(notificationBody)
 }

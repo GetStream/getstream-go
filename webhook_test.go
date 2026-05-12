@@ -337,24 +337,24 @@ func TestWebhookConformance_Happy(t *testing.T) {
 				t.Fatalf("ParseEvent: %v", err)
 			}
 
-			// VerifyAndParseWebhookBytes on identity body
-			if _, err := VerifyAndParseWebhookBytes(body, sig, canonicalTestSecret); err != nil {
-				t.Fatalf("VerifyAndParseWebhookBytes(body.json): %v", err)
+			// VerifyAndParseWebhook on identity body
+			if _, err := VerifyAndParseWebhook(body, sig, canonicalTestSecret); err != nil {
+				t.Fatalf("VerifyAndParseWebhook(body.json): %v", err)
 			}
 
-			// VerifyAndParseWebhookBytes on gzip body — same signature
-			if _, err := VerifyAndParseWebhookBytes(bodyGz, sig, canonicalTestSecret); err != nil {
-				t.Fatalf("VerifyAndParseWebhookBytes(body.gz): %v", err)
+			// VerifyAndParseWebhook on gzip body — same signature
+			if _, err := VerifyAndParseWebhook(bodyGz, sig, canonicalTestSecret); err != nil {
+				t.Fatalf("VerifyAndParseWebhook(body.gz): %v", err)
 			}
 
-			if _, err := ParseSQS(sqsCompressed); err != nil {
-				t.Fatalf("ParseSQS(sqs_body.txt): %v", err)
+			if _, err := ParseSqs(sqsCompressed); err != nil {
+				t.Fatalf("ParseSqs(sqs_body.txt): %v", err)
 			}
-			if _, err := ParseSQS(sqsRaw); err != nil {
-				t.Fatalf("ParseSQS(sqs_body_uncompressed.txt): %v", err)
+			if _, err := ParseSqs(sqsRaw); err != nil {
+				t.Fatalf("ParseSqs(sqs_body_uncompressed.txt): %v", err)
 			}
-			if _, err := ParseSNS(sns); err != nil {
-				t.Fatalf("ParseSNS: %v", err)
+			if _, err := ParseSns(sns); err != nil {
+				t.Fatalf("ParseSns: %v", err)
 			}
 		})
 	}
@@ -370,7 +370,7 @@ func TestWebhookConformance_Negative(t *testing.T) {
 	t.Run("tampered_body", func(t *testing.T) {
 		body := readFile(t, filepath.Join(invalidRoot, "tampered_body", "body.json"))
 		sig := readStr(t, filepath.Join(invalidRoot, "tampered_body", "signature.txt"))
-		_, err := VerifyAndParseWebhookBytes(body, sig, canonicalTestSecret)
+		_, err := VerifyAndParseWebhook(body, sig, canonicalTestSecret)
 		if !errors.Is(err, ErrInvalidWebhook) {
 			t.Fatalf("expected ErrInvalidWebhook, got %v", err)
 		}
@@ -421,14 +421,14 @@ func TestWebhookConformance_Negative(t *testing.T) {
 	expectInvalid("bad_compression", "gzip", func() (WebhookEvent, error) {
 		body := readFile(t, filepath.Join(invalidRoot, "bad_compression", "body.gz"))
 		sig := readStr(t, filepath.Join(invalidRoot, "bad_compression", "signature.txt"))
-		return VerifyAndParseWebhookBytes(body, sig, canonicalTestSecret)
+		return VerifyAndParseWebhook(body, sig, canonicalTestSecret)
 	})
 	expectInvalid("bad_base64", "base64", func() (WebhookEvent, error) {
 		msg := readStr(t, filepath.Join(invalidRoot, "bad_base64", "sqs_body.txt"))
-		return ParseSQS(msg)
+		return ParseSqs(msg)
 	})
 	expectInvalid("bad_sns_envelope", "SNS envelope", func() (WebhookEvent, error) {
 		notif := readStr(t, filepath.Join(invalidRoot, "bad_sns_envelope", "sns_notification.txt"))
-		return ParseSNS(notif)
+		return ParseSns(notif)
 	})
 }

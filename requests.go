@@ -1351,7 +1351,8 @@ type CreateFeedGroupRequest struct {
 	Stories          *StoriesConfig          `json:"stories,omitempty"`
 }
 type DeleteFeedRequest struct {
-	HardDelete *bool `json:"-" query:"hard_delete"`
+	HardDelete          *bool `json:"-" query:"hard_delete"`
+	PurgeUserActivities *bool `json:"-" query:"purge_user_activities"`
 }
 type GetOrCreateFeedRequest struct {
 	IDAround               *string                 `json:"id_around,omitempty"`
@@ -1543,6 +1544,8 @@ type DeleteFeedsBatchRequest struct {
 	Feeds []string `json:"feeds"`
 	// Whether to permanently delete the feeds instead of soft delete
 	HardDelete *bool `json:"hard_delete,omitempty"`
+	// When hard-deleting, also fully delete activities authored by each feed's owner from every other feed those activities were fanned out to. Default false preserves existing fan-out. Requires 'hard_delete' to be true; the request is rejected otherwise. Feeds with no recorded owner (created_by_id is empty) are silently skipped for the purge step — owner-matching against an empty string is a safety guard, not a wildcard.
+	PurgeUserActivities *bool `json:"purge_user_activities,omitempty"`
 }
 type OwnBatchRequest struct {
 	// List of feed IDs to get own fields for
