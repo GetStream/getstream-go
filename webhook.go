@@ -3,14 +3,19 @@ package getstream
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
+	"time"
 )
 
 // WebhookEvent is implemented by all webhook event types.
@@ -188,6 +193,35 @@ const (
 	EventTypeUserGroupMemberRemoved             = "user_group.member_removed"
 	EventTypeUserGroupUpdated                   = "user_group.updated"
 )
+
+// UnknownEvent is returned by ParseEvent when the type discriminator is well-formed
+// but unknown to this SDK version. Forward-compat surface for new event types.
+//
+// To handle unknown events, switch on the returned event's concrete type and
+// include *UnknownEvent in your default case.
+type UnknownEvent struct {
+	Type      string         `json:"type"`
+	CreatedAt time.Time      `json:"created_at"`
+	Raw       map[string]any `json:"-"`
+}
+
+// GetEventType returns the unrecognized discriminator value.
+func (u *UnknownEvent) GetEventType() string { return u.Type }
+
+// ErrInvalidWebhook is the single sentinel returned for every webhook handling
+// failure. Match with errors.Is. Covers both signature mismatches and malformed
+// payloads (invalid JSON, missing/non-string type field, gzip-prefixed body that
+// fails to decompress, invalid base64 in a queue body, malformed SNS envelope).
+//
+// Callers distinguish failure modes via the wrapped error's message rather than
+// its class: the wrap pattern is fmt.Errorf("%w: <mode-descriptive message>",
+// ErrInvalidWebhook, ...).
+var ErrInvalidWebhook = errors.New("stream: invalid webhook")
+
+// gzipMagic is the two-byte gzip magic prefix (RFC 1952 §2.3.1).
+// JSON cannot start with these bytes, so this gives unambiguous detection
+// for Stream's always-JSON payloads.
+var gzipMagic = []byte{0x1F, 0x8B}
 
 // GetEventType extracts the event type from a raw webhook payload.
 // This is useful for routing webhooks before full deserialization.
@@ -626,6 +660,111 @@ func VerifyWebhookSignature(body []byte, signature string, secret string) bool {
 	return hmac.Equal([]byte(signature), []byte(expected))
 }
 
+// VerifySignature is the canonical name for HMAC-SHA256 signature verification.
+// It aliases the existing VerifyWebhookSignature for backward compatibility.
+//
+// Prefer this name in new code.
+func VerifySignature(body []byte, signature, secret string) bool {
+	return VerifyWebhookSignature(body, signature, secret)
+}
+
+// GunzipPayload decompresses body if gzip-prefixed, else returns body as-is.
+//
+// Detection is by the first two bytes (0x1F 0x8B). This is reliable because
+// Stream webhook bodies are always JSON, and JSON's first byte is always
+// '{', '[', '"', a digit, '-', or one of t/f/n/whitespace — never 0x1F.
+//
+// Returns ErrInvalidWebhook (wrapped) if body has the gzip magic prefix
+// but isn't a valid gzip stream.
+func GunzipPayload(body []byte) ([]byte, error) {
+	if len(body) < 2 || !bytes.Equal(body[:2], gzipMagic) {
+		return body, nil
+	}
+	r, err := gzip.NewReader(bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("%w: gzip header: %v", ErrInvalidWebhook, err)
+	}
+	defer r.Close()
+	out, err := io.ReadAll(r)
+	if err != nil {
+		return nil, fmt.Errorf("%w: gzip body: %v", ErrInvalidWebhook, err)
+	}
+	return out, nil
+}
+
+// DecodeSQSPayload base64-decodes the SQS Message Body, then gunzips if applicable.
+//
+// Forward-compat: today chat/ emits plain JSON to SQS; once CHA-3071 extends to
+// queue transports, bodies will be base64(gzip(json)). This helper handles
+// both cases via the magic-byte detection in GunzipPayload.
+//
+// Note: if the input is plain JSON (not base64), strict base64 decoding will
+// fail and return ErrInvalidWebhook (wrapped). Callers receiving today's
+// plain-JSON SQS messages should call ParseEvent directly with the body bytes.
+func DecodeSQSPayload(messageBody string) ([]byte, error) {
+	decoded, err := base64.StdEncoding.DecodeString(messageBody)
+	if err != nil {
+		return nil, fmt.Errorf("%w: base64: %v", ErrInvalidWebhook, err)
+	}
+	return GunzipPayload(decoded)
+}
+
+// DecodeSNSPayload extracts the Message field from a standard AWS SNS notification
+// envelope, then base64-decodes and gunzips it. The envelope shape is:
+//
+//	{"Type": "Notification", "Message": "<base64>", "MessageId": ..., "TopicArn": ..., "Timestamp": ...}
+func DecodeSNSPayload(notificationBody string) ([]byte, error) {
+	var env struct{ Message string }
+	if err := json.Unmarshal([]byte(notificationBody), &env); err != nil {
+		return nil, fmt.Errorf("%w: SNS envelope: %v", ErrInvalidWebhook, err)
+	}
+	if env.Message == "" {
+		return nil, fmt.Errorf("%w: SNS envelope missing 'Message' field", ErrInvalidWebhook)
+	}
+	return DecodeSQSPayload(env.Message)
+}
+
+// ParseEvent parses a webhook payload and returns the typed event for known
+// discriminators or *UnknownEvent for well-formed-but-unknown ones.
+//
+// Returns an error wrapping ErrInvalidWebhook for invalid JSON, missing/non-string
+// type field, or any deserialization failure on a known type.
+//
+// Distinct from ParseWebhookEvent: ParseEvent returns *UnknownEvent on unknown
+// discriminators (forward-compat); ParseWebhookEvent returns an error.
+func ParseEvent(payload []byte) (WebhookEvent, error) {
+	if len(payload) == 0 {
+		return nil, fmt.Errorf("%w: empty body", ErrInvalidWebhook)
+	}
+	var probe struct {
+		Type      string          `json:"type"`
+		CreatedAt time.Time       `json:"created_at"`
+		Raw       json.RawMessage `json:"-"`
+	}
+	if err := json.Unmarshal(payload, &probe); err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrInvalidWebhook, err)
+	}
+	if probe.Type == "" {
+		return nil, fmt.Errorf("%w: missing 'type' field", ErrInvalidWebhook)
+	}
+
+	event, err := ParseWebhookEvent(payload)
+	if err == nil {
+		return event, nil
+	}
+
+	// ParseWebhookEvent returns an "unknown webhook event type" error for
+	// unrecognized discriminators. Treat that case as UnknownEvent; everything
+	// else stays a malformed-webhook error.
+	if !strings.Contains(err.Error(), "unknown webhook event type") {
+		return nil, fmt.Errorf("%w: %v", ErrInvalidWebhook, err)
+	}
+
+	var raw map[string]any
+	_ = json.Unmarshal(payload, &raw)
+	return &UnknownEvent{Type: probe.Type, CreatedAt: probe.CreatedAt, Raw: raw}, nil
+}
+
 // VerifyAndParseWebhook verifies the webhook signature and parses the event.
 // The request body is restored after reading to keep it available for downstream handlers.
 //
@@ -658,6 +797,51 @@ func VerifyAndParseWebhook(r *http.Request, secret string) (WebhookEvent, error)
 	}
 
 	return ParseWebhookEvent(body)
+}
+
+// VerifyAndParseWebhookBytes is the spec-canonical HTTP composite. It takes
+// the raw HTTP body (which may be gzip-compressed), the X-Signature header
+// value, and the webhook secret. Steps: gunzip if gzip-prefixed → verify
+// HMAC-SHA256 over the uncompressed bytes → parse into a typed event.
+//
+// Returns errors wrapping ErrInvalidWebhook for both signature mismatches and
+// parse/decompression failures; distinguish modes via the wrapped message.
+//
+// The existing VerifyAndParseWebhook(*http.Request, secret) is preserved for
+// callers wiring directly to net/http; prefer the bytes-based variant for
+// non-net/http transports or testing.
+func VerifyAndParseWebhookBytes(body []byte, signature, secret string) (WebhookEvent, error) {
+	payload, err := GunzipPayload(body)
+	if err != nil {
+		return nil, err
+	}
+	if !VerifySignature(payload, signature, secret) {
+		return nil, fmt.Errorf("%w: webhook signature mismatch", ErrInvalidWebhook)
+	}
+	return ParseEvent(payload)
+}
+
+// ParseSQSPayload decodes (base64 + gzip pass-through) and parses an SQS Message Body.
+//
+// Backend emits no signature attribute on SQS messages today, so this helper
+// performs no signature verification. If a signed variant is added later,
+// it'll be a separate function rather than retrofitting this signature.
+func ParseSQSPayload(messageBody string) (WebhookEvent, error) {
+	payload, err := DecodeSQSPayload(messageBody)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEvent(payload)
+}
+
+// ParseSNSPayload unwraps the standard AWS SNS notification envelope and parses
+// the inner payload. Same no-signature posture as ParseSQSPayload.
+func ParseSNSPayload(notificationBody string) (WebhookEvent, error) {
+	payload, err := DecodeSNSPayload(notificationBody)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEvent(payload)
 }
 
 // WebhookMiddleware creates middleware that verifies signatures and parses webhook events.

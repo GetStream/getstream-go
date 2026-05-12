@@ -682,6 +682,8 @@ type AddReactionRequest struct {
 	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
 	// Whether to create a notification activity for this reaction
 	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+	// Server-side only. If true, auto-creates the reacting user identified by user_id when they don't already exist. Default: false.
+	CreateUsers *bool `json:"create_users,omitempty"`
 	// Whether to enforce unique reactions per user (remove other reaction types from the user when adding this one)
 	EnforceUnique *bool   `json:"enforce_unique,omitempty"`
 	SkipPush      *bool   `json:"skip_push,omitempty"`
@@ -1220,6 +1222,7 @@ type BodyguardImageAnalysisConfig struct {
 type BodyguardProfileSummary struct {
 	Name        string  `json:"name"`
 	DisplayName *string `json:"display_name,omitempty"`
+	TextType    *string `json:"text_type,omitempty"`
 }
 
 type BodyguardRule struct {
@@ -10778,6 +10781,10 @@ type SubmitActionResponse struct {
 	Duration   string                   `json:"duration"`
 	AppealItem *AppealItemResponse      `json:"appeal_item,omitempty"`
 	Item       *ReviewQueueItemResponse `json:"item,omitempty"`
+}
+
+type SubmitModerationFeedbackResponse struct {
+	Duration string `json:"duration"`
 }
 
 type SubscriberAllMetrics struct {
