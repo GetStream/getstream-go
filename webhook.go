@@ -206,26 +206,11 @@ type UnknownEvent struct {
 // GetEventType returns the unrecognized discriminator value.
 func (u *UnknownEvent) GetEventType() string { return u.Type }
 
-var (
-	// ErrWebhook is the base sentinel for every webhook handling failure.
-	// errors.Is(err, ErrWebhook) is true for any webhook error, including
-	// signature mismatches and parse failures.
-	//
-	// Use the subclass sentinels ErrInvalidSignature and ErrMalformedWebhook
-	// when you need to distinguish the failure mode.
-	ErrWebhook = errors.New("stream: webhook error")
-
-	// ErrInvalidSignature wraps ErrWebhook. errors.Is(err, ErrInvalidSignature)
-	// is true only for signature-mismatch failures. errors.Is(err, ErrWebhook)
-	// is also true for these errors.
-	ErrInvalidSignature = fmt.Errorf("%w: invalid signature", ErrWebhook)
-
-	// ErrMalformedWebhook wraps ErrWebhook. errors.Is(err, ErrMalformedWebhook)
-	// is true only for body-parsing failures: invalid JSON, missing/non-string
-	// type field, gzip decompression failure, base64 failure, or malformed SNS
-	// envelope. errors.Is(err, ErrWebhook) is also true for these errors.
-	ErrMalformedWebhook = fmt.Errorf("%w: malformed webhook", ErrWebhook)
-)
+// ErrInvalidWebhook is the sentinel for every webhook handling failure.
+// Use errors.Is(err, ErrInvalidWebhook). The wrapped message (err.Error())
+// identifies the failure mode: "signature mismatch", "invalid base64 encoding",
+// "gzip decompression failed", or "invalid JSON payload".
+var ErrInvalidWebhook = errors.New("stream: invalid webhook")
 
 // gzipMagic is the two-byte gzip magic prefix (RFC 1952 §2.3.1).
 // JSON cannot start with these bytes, so this gives unambiguous detection
@@ -683,7 +668,7 @@ func VerifySignature(body []byte, signature, secret string) bool {
 // Stream webhook bodies are always JSON, and JSON's first byte is always
 // '{', '[', '"', a digit, '-', or one of t/f/n/whitespace — never 0x1F.
 //
-// Returns ErrMalformedWebhook (wrapped) if body has the gzip magic prefix
+// Returns ErrInvalidWebhook (wrapped) if body has the gzip magic prefix
 // but isn't a valid gzip stream.
 func GunzipPayload(body []byte) ([]byte, error) {
 	if len(body) < 2 || !bytes.Equal(body[:2], gzipMagic) {
@@ -691,12 +676,12 @@ func GunzipPayload(body []byte) ([]byte, error) {
 	}
 	r, err := gzip.NewReader(bytes.NewReader(body))
 	if err != nil {
-		return nil, fmt.Errorf("%w: gzip header: %v", ErrMalformedWebhook, err)
+		return nil, fmt.Errorf("%w: gzip decompression failed: %v", ErrInvalidWebhook, err)
 	}
 	defer r.Close()
 	out, err := io.ReadAll(r)
 	if err != nil {
-		return nil, fmt.Errorf("%w: gzip body: %v", ErrMalformedWebhook, err)
+		return nil, fmt.Errorf("%w: gzip decompression failed: %v", ErrInvalidWebhook, err)
 	}
 	return out, nil
 }
@@ -752,14 +737,15 @@ func DecodeSnsPayload(notificationBody string) ([]byte, error) {
 // ParseEvent parses a webhook payload and returns the typed event for known
 // discriminators or *UnknownEvent for well-formed-but-unknown ones.
 //
-// Returns an error wrapping ErrMalformedWebhook for invalid JSON, missing/non-string
-// type field, or any deserialization failure on a known type.
+// Returns an error wrapping ErrInvalidWebhook for invalid JSON, missing/non-string
+// type field, or any deserialization failure on a known type. The wrapped
+// message identifies the failure mode (e.g., "invalid JSON payload").
 //
 // Distinct from ParseWebhookEvent: ParseEvent returns *UnknownEvent on unknown
 // discriminators (forward-compat); ParseWebhookEvent returns an error.
 func ParseEvent(payload []byte) (WebhookEvent, error) {
 	if len(payload) == 0 {
-		return nil, fmt.Errorf("%w: empty body", ErrMalformedWebhook)
+		return nil, fmt.Errorf("%w: invalid JSON payload: empty body", ErrInvalidWebhook)
 	}
 	var probe struct {
 		Type      string          `json:"type"`
@@ -767,10 +753,10 @@ func ParseEvent(payload []byte) (WebhookEvent, error) {
 		Raw       json.RawMessage `json:"-"`
 	}
 	if err := json.Unmarshal(payload, &probe); err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrMalformedWebhook, err)
+		return nil, fmt.Errorf("%w: invalid JSON payload: %v", ErrInvalidWebhook, err)
 	}
 	if probe.Type == "" {
-		return nil, fmt.Errorf("%w: missing 'type' field", ErrMalformedWebhook)
+		return nil, fmt.Errorf("%w: invalid JSON payload: missing 'type' field", ErrInvalidWebhook)
 	}
 
 	event, err := ParseWebhookEvent(payload)
@@ -780,9 +766,9 @@ func ParseEvent(payload []byte) (WebhookEvent, error) {
 
 	// ParseWebhookEvent returns an "unknown webhook event type" error for
 	// unrecognized discriminators. Treat that case as UnknownEvent; everything
-	// else stays a malformed-webhook error.
+	// else stays an invalid-webhook error.
 	if !strings.Contains(err.Error(), "unknown webhook event type") {
-		return nil, fmt.Errorf("%w: %v", ErrMalformedWebhook, err)
+		return nil, fmt.Errorf("%w: invalid JSON payload: %v", ErrInvalidWebhook, err)
 	}
 
 	var raw map[string]any
@@ -795,10 +781,12 @@ func ParseEvent(payload []byte) (WebhookEvent, error) {
 // value, and the webhook secret. Steps: gunzip if gzip-prefixed → verify
 // HMAC-SHA256 over the uncompressed bytes → parse into a typed event.
 //
-// Returns an error wrapping ErrInvalidSignature for signature mismatches and an
-// error wrapping ErrMalformedWebhook for parse/decompression failures. Both
-// errors also satisfy errors.Is(err, ErrWebhook) for callers that want a single
-// arm.
+// Returns an error wrapping ErrInvalidWebhook for every failure mode. The
+// wrapped message identifies which mode fired ("signature mismatch",
+// "invalid base64 encoding", "gzip decompression failed", or "invalid JSON
+// payload"). Callers that want a single arm use errors.Is(err, ErrInvalidWebhook);
+// callers that need to differentiate (security logging, retry policy) filter
+// on err.Error().
 //
 // Example:
 //
@@ -819,7 +807,7 @@ func VerifyAndParseWebhook(body []byte, signature, secret string) (WebhookEvent,
 		return nil, err
 	}
 	if !VerifySignature(payload, signature, secret) {
-		return nil, fmt.Errorf("%w: webhook signature mismatch", ErrInvalidSignature)
+		return nil, fmt.Errorf("%w: signature mismatch", ErrInvalidWebhook)
 	}
 	return ParseEvent(payload)
 }
@@ -833,11 +821,11 @@ func VerifyAndParseWebhook(body []byte, signature, secret string) (WebhookEvent,
 // in a future minor release.
 func VerifyAndParseWebhookFromRequest(r *http.Request, secret string) (WebhookEvent, error) {
 	if r == nil {
-		return nil, fmt.Errorf("%w: nil request", ErrMalformedWebhook)
+		return nil, fmt.Errorf("%w: invalid JSON payload: nil request", ErrInvalidWebhook)
 	}
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		return nil, fmt.Errorf("%w: read body: %v", ErrMalformedWebhook, err)
+		return nil, fmt.Errorf("%w: invalid JSON payload: read body: %v", ErrInvalidWebhook, err)
 	}
 	r.Body = io.NopCloser(bytes.NewReader(body))
 	return VerifyAndParseWebhook(body, r.Header.Get("X-Signature"), secret)
