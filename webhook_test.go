@@ -371,8 +371,11 @@ func TestWebhookConformance_Negative(t *testing.T) {
 		body := readFile(t, filepath.Join(invalidRoot, "tampered_body", "body.json"))
 		sig := readStr(t, filepath.Join(invalidRoot, "tampered_body", "signature.txt"))
 		_, err := VerifyAndParseWebhook(body, sig, canonicalTestSecret)
-		if !errors.Is(err, ErrInvalidWebhook) {
-			t.Fatalf("expected ErrInvalidWebhook, got %v", err)
+		if !errors.Is(err, ErrInvalidSignature) {
+			t.Fatalf("expected ErrInvalidSignature, got %v", err)
+		}
+		if !errors.Is(err, ErrWebhook) {
+			t.Fatalf("expected ErrWebhook (base), got %v", err)
 		}
 		if !strings.Contains(err.Error(), "signature mismatch") {
 			t.Fatalf("expected message to contain 'signature mismatch', got %q", err.Error())
@@ -394,11 +397,14 @@ func TestWebhookConformance_Negative(t *testing.T) {
 		}
 	})
 
-	expectInvalid := func(name string, messageSubstring string, fn func() (WebhookEvent, error)) {
+	expectMalformed := func(name string, messageSubstring string, fn func() (WebhookEvent, error)) {
 		t.Run(name, func(t *testing.T) {
 			_, err := fn()
-			if !errors.Is(err, ErrInvalidWebhook) {
-				t.Fatalf("expected ErrInvalidWebhook, got %v", err)
+			if !errors.Is(err, ErrMalformedWebhook) {
+				t.Fatalf("expected ErrMalformedWebhook, got %v", err)
+			}
+			if !errors.Is(err, ErrWebhook) {
+				t.Fatalf("expected ErrWebhook (base), got %v", err)
 			}
 			if messageSubstring != "" && !strings.Contains(err.Error(), messageSubstring) {
 				t.Fatalf("expected message to contain %q, got %q", messageSubstring, err.Error())
@@ -406,19 +412,19 @@ func TestWebhookConformance_Negative(t *testing.T) {
 		})
 	}
 
-	expectInvalid("missing_type", "missing 'type' field", func() (WebhookEvent, error) {
+	expectMalformed("missing_type", "missing 'type' field", func() (WebhookEvent, error) {
 		body := readFile(t, filepath.Join(invalidRoot, "missing_type", "body.json"))
 		return ParseEvent(body)
 	})
-	expectInvalid("malformed_json", "", func() (WebhookEvent, error) {
+	expectMalformed("malformed_json", "", func() (WebhookEvent, error) {
 		body := readFile(t, filepath.Join(invalidRoot, "malformed_json", "body.json"))
 		return ParseEvent(body)
 	})
-	expectInvalid("empty_body", "empty body", func() (WebhookEvent, error) {
+	expectMalformed("empty_body", "empty body", func() (WebhookEvent, error) {
 		body := readFile(t, filepath.Join(invalidRoot, "empty_body", "body.json"))
 		return ParseEvent(body)
 	})
-	expectInvalid("bad_compression", "gzip", func() (WebhookEvent, error) {
+	expectMalformed("bad_compression", "gzip", func() (WebhookEvent, error) {
 		body := readFile(t, filepath.Join(invalidRoot, "bad_compression", "body.gz"))
 		sig := readStr(t, filepath.Join(invalidRoot, "bad_compression", "signature.txt"))
 		return VerifyAndParseWebhook(body, sig, canonicalTestSecret)
@@ -426,12 +432,16 @@ func TestWebhookConformance_Negative(t *testing.T) {
 	// Per CHA-3071 wire format: DecodeSqsPayload falls back to raw bytes when
 	// base64 decoding fails (uncompressed wire format). For input that is
 	// neither valid base64 nor valid JSON nor gzip-prefixed, ParseSqs still
-	// returns an ErrInvalidWebhook — just down the chain at JSON parsing.
-	expectInvalid("bad_base64", "", func() (WebhookEvent, error) {
+	// returns an ErrMalformedWebhook — just down the chain at JSON parsing.
+	expectMalformed("bad_base64", "", func() (WebhookEvent, error) {
 		msg := readStr(t, filepath.Join(invalidRoot, "bad_base64", "sqs_body.txt"))
 		return ParseSqs(msg)
 	})
-	expectInvalid("bad_sns_envelope", "SNS envelope", func() (WebhookEvent, error) {
+	// Fix #4: bad_sns_envelope (a non-envelope JSON like "not json") is now
+	// treated as a pre-extracted Message string and flows through the SQS path,
+	// so it surfaces as a downstream parse failure rather than an SNS-specific
+	// one. Still ErrMalformedWebhook.
+	expectMalformed("bad_sns_envelope", "", func() (WebhookEvent, error) {
 		notif := readStr(t, filepath.Join(invalidRoot, "bad_sns_envelope", "sns_notification.txt"))
 		return ParseSns(notif)
 	})
