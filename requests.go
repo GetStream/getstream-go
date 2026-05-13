@@ -2023,6 +2023,8 @@ type LabelsRequest struct {
 	ContentID *string `json:"content_id,omitempty"`
 	// Type of content: 'text' (default), 'message', or 'username'. Stored as-sent; only 'username' routes to the username moderation API.
 	ContentType *string `json:"content_type,omitempty"`
+	// When true, run moderation and return labels without persisting the result. Useful for one-off checks (e.g. UI testers) that should not be recorded in the stored history.
+	DryRun *bool `json:"dry_run,omitempty"`
 	// Optional moderation policy key (max 128 chars)
 	Policy *string `json:"policy,omitempty"`
 	// Optional customer-supplied user identifier for the content author (max 256 chars). Enables filtering stored results by user_id.

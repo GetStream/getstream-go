@@ -689,19 +689,23 @@ func GunzipPayload(body []byte) ([]byte, error) {
 	return out, nil
 }
 
-// DecodeSqsPayload base64-decodes the SQS Message Body, then gunzips if applicable.
+// DecodeSqsPayload decodes the SQS Message Body: try base64 first, fall back
+// to raw bytes if base64 fails, then gunzip if gzip-prefixed.
 //
-// Forward-compat: today chat/ emits plain JSON to SQS; once CHA-3071 extends to
-// queue transports, bodies will be base64(gzip(json)). This helper handles
-// both cases via the magic-byte detection in GunzipPayload.
+// Wire format (per CHA-3071): SQS bodies are raw JSON when
+// enable_hook_payload_compression is off (today's default for all existing
+// apps), and base64(gzip(json)) when it's on. This helper handles both:
+// raw JSON starts with '{' which is not valid base64, so the base64 decode
+// fails and we fall through to raw bytes, then GunzipPayload's magic-byte
+// detection decides whether to decompress.
 //
-// Note: if the input is plain JSON (not base64), strict base64 decoding will
-// fail and return ErrInvalidWebhook (wrapped). Callers receiving today's
-// plain-JSON SQS messages should call ParseEvent directly with the body bytes.
+// ParseSqs sits on top of this and works transparently for both wire formats
+// — no caller code change, no flag, no header.
 func DecodeSqsPayload(messageBody string) ([]byte, error) {
 	decoded, err := base64.StdEncoding.DecodeString(messageBody)
 	if err != nil {
-		return nil, fmt.Errorf("%w: base64: %v", ErrInvalidWebhook, err)
+		// Not base64 — treat input as raw bytes (uncompressed wire format).
+		decoded = []byte(messageBody)
 	}
 	return GunzipPayload(decoded)
 }
