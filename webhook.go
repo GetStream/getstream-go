@@ -4,6 +4,7 @@ package getstream
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
@@ -13,7 +14,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 )
 
 // WebhookEvent is implemented by all webhook event types.
@@ -199,7 +199,7 @@ const (
 // include *UnknownEvent in your default case.
 type UnknownEvent struct {
 	Type      string         `json:"type"`
-	CreatedAt Timestamp      `json:"created_at"`
+	CreatedAt *Timestamp     `json:"created_at,omitempty"`
 	Raw       map[string]any `json:"-"`
 }
 
@@ -211,6 +211,11 @@ func (u *UnknownEvent) GetEventType() string { return u.Type }
 // identifies the failure mode: "signature mismatch", "invalid base64 encoding",
 // "gzip decompression failed", or "invalid JSON payload".
 var ErrInvalidWebhook = errors.New("stream: invalid webhook")
+
+// ErrUnknownEventType is returned by ParseWebhookEvent when the type discriminator
+// is well-formed but not in the codegen-known set. ParseEvent uses this signal to
+// route to UnknownEvent.
+var ErrUnknownEventType = errors.New("stream: unknown webhook event type")
 
 // gzipMagic is the two-byte gzip magic prefix (RFC 1952 §2.3.1).
 // JSON cannot start with these bytes, so this gives unambiguous detection
@@ -616,7 +621,7 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 	case "user_group.updated":
 		event = new(UserGroupUpdatedEvent)
 	default:
-		return nil, fmt.Errorf("unknown webhook event type: %s", eventType)
+		return nil, fmt.Errorf("%w: %s", ErrUnknownEventType, eventType)
 	}
 	if err := json.Unmarshal(rawEvent, event); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal webhook event: %w", err)
@@ -749,7 +754,7 @@ func ParseEvent(payload []byte) (WebhookEvent, error) {
 	}
 	var probe struct {
 		Type      string          `json:"type"`
-		CreatedAt Timestamp       `json:"created_at"`
+		CreatedAt *Timestamp      `json:"created_at"`
 		Raw       json.RawMessage `json:"-"`
 	}
 	if err := json.Unmarshal(payload, &probe); err != nil {
@@ -764,10 +769,9 @@ func ParseEvent(payload []byte) (WebhookEvent, error) {
 		return event, nil
 	}
 
-	// ParseWebhookEvent returns an "unknown webhook event type" error for
-	// unrecognized discriminators. Treat that case as UnknownEvent; everything
-	// else stays an invalid-webhook error.
-	if !strings.Contains(err.Error(), "unknown webhook event type") {
+	// ParseWebhookEvent returns ErrUnknownEventType for unrecognized discriminators.
+	// Treat that case as UnknownEvent; everything else stays an invalid-webhook error.
+	if !errors.Is(err, ErrUnknownEventType) {
 		return nil, fmt.Errorf("%w: invalid JSON payload: %v", ErrInvalidWebhook, err)
 	}
 
@@ -776,7 +780,7 @@ func ParseEvent(payload []byte) (WebhookEvent, error) {
 	return &UnknownEvent{Type: probe.Type, CreatedAt: probe.CreatedAt, Raw: raw}, nil
 }
 
-// VerifyAndParseWebhook is the spec-canonical HTTP composite. It takes
+// VerifyAndParseWebhookBytes is the spec-canonical HTTP composite. It takes
 // the raw HTTP body (which may be gzip-compressed), the X-Signature header
 // value, and the webhook secret. Steps: gunzip if gzip-prefixed → verify
 // HMAC-SHA256 over the uncompressed bytes → parse into a typed event.
@@ -793,7 +797,7 @@ func ParseEvent(payload []byte) (WebhookEvent, error) {
 //	func webhookHandler(w http.ResponseWriter, r *http.Request) {
 //	    body, _ := io.ReadAll(r.Body)
 //	    sig := r.Header.Get("X-Signature")
-//	    event, err := getstream.VerifyAndParseWebhook(body, sig, secret)
+//	    event, err := getstream.VerifyAndParseWebhookBytes(body, sig, secret)
 //	    if err != nil {
 //	        http.Error(w, err.Error(), http.StatusBadRequest)
 //	        return
@@ -801,7 +805,7 @@ func ParseEvent(payload []byte) (WebhookEvent, error) {
 //	    // Handle event...
 //	    w.WriteHeader(http.StatusOK)
 //	}
-func VerifyAndParseWebhook(body []byte, signature, secret string) (WebhookEvent, error) {
+func VerifyAndParseWebhookBytes(body []byte, signature, secret string) (WebhookEvent, error) {
 	payload, err := GunzipPayload(body)
 	if err != nil {
 		return nil, err
@@ -812,23 +816,41 @@ func VerifyAndParseWebhook(body []byte, signature, secret string) (WebhookEvent,
 	return ParseEvent(payload)
 }
 
-// VerifyAndParseWebhookFromRequest is a convenience wrapper that reads the
-// request body and X-Signature header, then delegates to VerifyAndParseWebhook.
-// The request body is restored so downstream handlers can read it again.
-//
-// Deprecated: prefer the bytes-based VerifyAndParseWebhook. Read the body and
-// extract the X-Signature header in your handler. This wrapper will be removed
-// in a future minor release.
-func VerifyAndParseWebhookFromRequest(r *http.Request, secret string) (WebhookEvent, error) {
+// VerifyAndParseWebhook reads the request body and the X-Signature header,
+// then delegates to VerifyAndParseWebhookBytes. The request body is restored
+// so downstream handlers can read it again.
+func VerifyAndParseWebhook(r *http.Request, secret string) (WebhookEvent, error) {
 	if r == nil {
-		return nil, fmt.Errorf("%w: invalid JSON payload: nil request", ErrInvalidWebhook)
+		return nil, fmt.Errorf("%w: nil request", ErrInvalidWebhook)
 	}
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		return nil, fmt.Errorf("%w: invalid JSON payload: read body: %v", ErrInvalidWebhook, err)
+		return nil, fmt.Errorf("%w: read body: %v", ErrInvalidWebhook, err)
 	}
 	r.Body = io.NopCloser(bytes.NewReader(body))
-	return VerifyAndParseWebhook(body, r.Header.Get("X-Signature"), secret)
+	return VerifyAndParseWebhookBytes(body, r.Header.Get("X-Signature"), secret)
+}
+
+// WebhookEventKey is the context key under which WebhookMiddleware stores the
+// parsed webhook event for downstream handlers.
+type webhookEventKeyType struct{}
+
+var WebhookEventKey = webhookEventKeyType{}
+
+// WebhookMiddleware verifies + parses Stream webhook requests using the given
+// secret and stores the parsed event in the request context under WebhookEventKey.
+// On signature mismatch or parse failure, responds with 401 and aborts the chain.
+func WebhookMiddleware(secret string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			event, err := VerifyAndParseWebhook(r, secret)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusUnauthorized)
+				return
+			}
+			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), WebhookEventKey, event)))
+		})
+	}
 }
 
 // ParseSqs decodes (base64 + gzip pass-through) and parses an SQS Message Body.

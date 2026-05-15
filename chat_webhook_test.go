@@ -29,20 +29,20 @@ func TestVerifyAndParseWebhook(t *testing.T) {
 	t.Run("ValidRequest", func(t *testing.T) {
 		sig := computeSignature(validBody, secret)
 
-		event, err := VerifyAndParseWebhook(validBody, sig, secret)
+		event, err := VerifyAndParseWebhookBytes(validBody, sig, secret)
 		require.NoError(t, err)
 		require.NotNil(t, event)
 		assert.Equal(t, "message.new", event.GetEventType())
 	})
 
 	t.Run("MissingSignature", func(t *testing.T) {
-		_, err := VerifyAndParseWebhook(validBody, "", secret)
+		_, err := VerifyAndParseWebhookBytes(validBody, "", secret)
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "signature")
 	})
 
 	t.Run("InvalidSignature", func(t *testing.T) {
-		_, err := VerifyAndParseWebhook(validBody, "badsignature", secret)
+		_, err := VerifyAndParseWebhookBytes(validBody, "badsignature", secret)
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "signature")
 	})
@@ -51,7 +51,7 @@ func TestVerifyAndParseWebhook(t *testing.T) {
 		body := []byte(`not json at all`)
 		sig := computeSignature(body, secret)
 
-		_, err := VerifyAndParseWebhook(body, sig, secret)
+		_, err := VerifyAndParseWebhookBytes(body, sig, secret)
 		require.Error(t, err)
 	})
 }
