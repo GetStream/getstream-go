@@ -394,6 +394,13 @@ func TestCommonCreateRole(t *testing.T) {
 	_, err = client.CreateRole(context.Background(), &getstream.CreateRoleRequest{})
 	require.NoError(t, err)
 }
+func TestCommonSearchRoles(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.SearchRoles(context.Background(), &getstream.SearchRolesRequest{})
+	require.NoError(t, err)
+}
 func TestCommonDeleteRole(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

@@ -10443,6 +10443,12 @@ type SearchResultMessage struct {
 	SharedLocation       *SharedLocationResponseData       `json:"shared_location,omitempty"`
 }
 
+type SearchRolesResponse struct {
+	Duration string `json:"duration"`
+	// Matching roles, sorted ascending by name
+	Roles []Role `json:"roles"`
+}
+
 // Response for searching user groups
 type SearchUserGroupsResponse struct {
 	Duration string `json:"duration"`

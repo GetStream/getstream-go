@@ -2336,6 +2336,13 @@ type CreateRoleRequest struct {
 	// Role name
 	Name string `json:"name"`
 }
+type SearchRolesRequest struct {
+	Query              string  `json:"-" query:"query"`
+	Limit              *int    `json:"-" query:"limit"`
+	NameGt             *string `json:"-" query:"name_gt"`
+	RoleType           *string `json:"-" query:"role_type"`
+	IncludeGlobalRoles *bool   `json:"-" query:"include_global_roles"`
+}
 type DeleteRoleRequest struct {
 }
 type GetTaskRequest struct {

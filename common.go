@@ -490,6 +490,14 @@ func (c *Client) CreateRole(ctx context.Context, request *CreateRoleRequest) (*S
 	return res, err
 }
 
+// Searches mentionable roles (user-assignable + channel-assignable, built-in and custom) by name prefix for autocomplete
+func (c *Client) SearchRoles(ctx context.Context, request *SearchRolesRequest) (*StreamResponse[SearchRolesResponse], error) {
+	var result SearchRolesResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, SearchRolesResponse](c, ctx, "GET", "/api/v2/roles/search", params, nil, &result, nil)
+	return res, err
+}
+
 // Deletes custom role
 func (c *Client) DeleteRole(ctx context.Context, name string, request *DeleteRoleRequest) (*StreamResponse[Response], error) {
 	var result Response
