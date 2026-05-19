@@ -1,12 +1,9 @@
 package getstream_test
 
 import (
-	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	. "github.com/GetStream/getstream-go/v4"
@@ -32,102 +29,30 @@ func TestVerifyAndParseWebhook(t *testing.T) {
 	t.Run("ValidRequest", func(t *testing.T) {
 		sig := computeSignature(validBody, secret)
 
-		req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(validBody))
-		req.Header.Set("X-Signature", sig)
-
-		event, err := VerifyAndParseWebhook(req, secret)
+		event, err := VerifyAndParseWebhookBytes(validBody, sig, secret)
 		require.NoError(t, err)
 		require.NotNil(t, event)
 		assert.Equal(t, "message.new", event.GetEventType())
 	})
 
-	t.Run("MissingSignatureHeader", func(t *testing.T) {
-		body := []byte(`{"type":"message.new"}`)
-		req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(body))
-
-		_, err := VerifyAndParseWebhook(req, secret)
+	t.Run("MissingSignature", func(t *testing.T) {
+		_, err := VerifyAndParseWebhookBytes(validBody, "", secret)
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "X-Signature")
+		assert.Contains(t, err.Error(), "signature")
 	})
 
 	t.Run("InvalidSignature", func(t *testing.T) {
-		body := []byte(`{"type":"message.new"}`)
-		req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(body))
-		req.Header.Set("X-Signature", "badsignature")
-
-		_, err := VerifyAndParseWebhook(req, secret)
+		_, err := VerifyAndParseWebhookBytes(validBody, "badsignature", secret)
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "invalid signature")
+		assert.Contains(t, err.Error(), "signature")
 	})
 
 	t.Run("InvalidJSON", func(t *testing.T) {
 		body := []byte(`not json at all`)
 		sig := computeSignature(body, secret)
 
-		req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(body))
-		req.Header.Set("X-Signature", sig)
-
-		_, err := VerifyAndParseWebhook(req, secret)
+		_, err := VerifyAndParseWebhookBytes(body, sig, secret)
 		require.Error(t, err)
-	})
-
-	t.Run("BodyRestoredAfterParsing", func(t *testing.T) {
-		sig := computeSignature(validBody, secret)
-
-		req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(validBody))
-		req.Header.Set("X-Signature", sig)
-
-		_, err := VerifyAndParseWebhook(req, secret)
-		require.NoError(t, err)
-
-		// Body should still be readable
-		buf := new(bytes.Buffer)
-		_, err = buf.ReadFrom(req.Body)
-		require.NoError(t, err)
-		assert.NotEmpty(t, buf.Bytes(), "Body should be restored after VerifyAndParseWebhook")
-	})
-}
-
-func TestWebhookMiddleware(t *testing.T) {
-	secret := "middleware-test-secret"
-
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		event := r.Context().Value(WebhookEventKey)
-		if event == nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-	})
-
-	middleware := WebhookMiddleware(secret)
-	wrapped := middleware(handler)
-
-	t.Run("RejectsGET", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/webhook", nil)
-		rr := httptest.NewRecorder()
-		wrapped.ServeHTTP(rr, req)
-		assert.Equal(t, http.StatusMethodNotAllowed, rr.Code)
-	})
-
-	t.Run("RejectsBadSignature", func(t *testing.T) {
-		body := []byte(`{"type":"message.new"}`)
-		req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(body))
-		req.Header.Set("X-Signature", "invalidsig")
-		rr := httptest.NewRecorder()
-		wrapped.ServeHTTP(rr, req)
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
-	})
-
-	t.Run("PassesValidRequest", func(t *testing.T) {
-		body := []byte(`{"type":"message.new","message_id":"msg1","created_at":` + testTimestampNs + `,"watcher_count":0,"custom":{},"message":{"id":"msg1","text":"hi","type":"regular","created_at":` + testTimestampNs + `,"updated_at":` + testTimestampNs + `,"cid":"messaging:test","html":""}}`)
-		sig := computeSignature(body, secret)
-
-		req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(body))
-		req.Header.Set("X-Signature", sig)
-		rr := httptest.NewRecorder()
-		wrapped.ServeHTTP(rr, req)
-		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 }
 
@@ -215,37 +140,4 @@ func TestParseWebhookEventWithPayload(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "unknown webhook event type")
 	})
-}
-
-func TestWebhookEventKey(t *testing.T) {
-	secret := "event-key-test-secret"
-
-	var capturedEvent WebhookEvent
-
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		val := r.Context().Value(WebhookEventKey)
-		if val != nil {
-			capturedEvent = val.(WebhookEvent)
-		}
-		w.WriteHeader(http.StatusOK)
-	})
-
-	middleware := WebhookMiddleware(secret)
-	wrapped := middleware(handler)
-
-	body := []byte(`{"type":"channel.created","created_at":` + testTimestampNs + `,"custom":{},"channel":{"cid":"messaging:test","id":"test","type":"messaging","created_at":` + testTimestampNs + `,"updated_at":` + testTimestampNs + `,"frozen":false,"disabled":false,"member_count":0,"config":{"automod":"disabled","automod_behavior":"flag","commands":[],"connect_events":true,"created_at":` + testTimestampNs + `,"max_message_length":5000,"message_retention":"infinite","mutes":true,"name":"messaging","reactions":true,"read_events":true,"replies":true,"search":true,"typing_events":true,"updated_at":` + testTimestampNs + `,"uploads":true,"url_enrichment":true}}}`)
-	sig := computeSignature(body, secret)
-
-	req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(body))
-	req.Header.Set("X-Signature", sig)
-	rr := httptest.NewRecorder()
-	wrapped.ServeHTTP(rr, req)
-
-	require.Equal(t, http.StatusOK, rr.Code)
-	require.NotNil(t, capturedEvent, "Event should be captured from context")
-	assert.Equal(t, "channel.created", capturedEvent.GetEventType())
-
-	chEvent, ok := capturedEvent.(*ChannelCreatedEvent)
-	require.True(t, ok)
-	assert.Equal(t, "messaging:test", chEvent.Channel.Cid)
 }

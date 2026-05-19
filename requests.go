@@ -12,6 +12,7 @@ type UpdateAppRequest struct {
 	CustomActionHandlerUrl         *string                         `json:"custom_action_handler_url,omitempty"`
 	DisableAuthChecks              *bool                           `json:"disable_auth_checks,omitempty"`
 	DisablePermissionsChecks       *bool                           `json:"disable_permissions_checks,omitempty"`
+	EnableHookPayloadCompression   *bool                           `json:"enable_hook_payload_compression,omitempty"`
 	EnforceUniqueUsernames         *string                         `json:"enforce_unique_usernames,omitempty"`
 	FeedsModerationEnabled         *bool                           `json:"feeds_moderation_enabled,omitempty"`
 	FeedsV2Region                  *string                         `json:"feeds_v2_region,omitempty"`
@@ -858,6 +859,7 @@ type AddActivityRequest struct {
 	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
 	// Whether to create notification activities for mentioned users
 	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+	CreateUsers                *bool `json:"create_users,omitempty"`
 	EnrichOwnFields            *bool `json:"enrich_own_fields,omitempty"`
 	// Expiration time for the activity
 	ExpiresAt       *string `json:"expires_at,omitempty"`
@@ -901,6 +903,8 @@ type AddActivityRequest struct {
 type UpsertActivitiesRequest struct {
 	// List of activities to create or update
 	Activities []ActivityRequest `json:"activities"`
+	// Server-side only. If true, auto-creates users referenced by activity user_id values that don't already exist. Default: false.
+	CreateUsers *bool `json:"create_users,omitempty"`
 	// If true, enriches the activities' current_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 	// If true, forces moderation to run for server-side requests. By default, server-side requests skip moderation. Client-side requests always run moderation regardless of this field.
@@ -987,6 +991,8 @@ type AddActivityReactionRequest struct {
 	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
 	// Whether to create a notification activity for this reaction
 	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+	// Server-side only. If true, auto-creates the reacting user identified by user_id when they don't already exist. Default: false.
+	CreateUsers *bool `json:"create_users,omitempty"`
 	// Whether to enforce unique reactions per user (remove other reaction types from the user when adding this one)
 	EnforceUnique *bool   `json:"enforce_unique,omitempty"`
 	SkipPush      *bool   `json:"skip_push,omitempty"`
@@ -1109,10 +1115,12 @@ type QueryBookmarksRequest struct {
 	Limit           *int    `json:"limit,omitempty"`
 	Next            *string `json:"next,omitempty"`
 	Prev            *string `json:"prev,omitempty"`
+	UserID          *string `json:"user_id,omitempty"`
 	// Sorting parameters for the query
 	Sort []SortParamRequest `json:"sort"`
 	// Filters to apply to the query
 	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type DeleteCollectionsRequest struct {
 	CollectionRefs []string `json:"-" query:"collection_refs"`
@@ -1343,7 +1351,8 @@ type CreateFeedGroupRequest struct {
 	Stories          *StoriesConfig          `json:"stories,omitempty"`
 }
 type DeleteFeedRequest struct {
-	HardDelete *bool `json:"-" query:"hard_delete"`
+	HardDelete          *bool `json:"-" query:"hard_delete"`
+	PurgeUserActivities *bool `json:"-" query:"purge_user_activities"`
 }
 type GetOrCreateFeedRequest struct {
 	IDAround               *string                 `json:"id_around,omitempty"`
@@ -1535,6 +1544,8 @@ type DeleteFeedsBatchRequest struct {
 	Feeds []string `json:"feeds"`
 	// Whether to permanently delete the feeds instead of soft delete
 	HardDelete *bool `json:"hard_delete,omitempty"`
+	// When hard-deleting, also fully delete activities authored by each feed's owner from every other feed those activities were fanned out to. Default false preserves existing fan-out. Requires 'hard_delete' to be true; the request is rejected otherwise. Feeds with no recorded owner (created_by_id is empty) are silently skipped for the purge step — owner-matching against an empty string is a safety guard, not a wildcard.
+	PurgeUserActivities *bool `json:"purge_user_activities,omitempty"`
 }
 type OwnBatchRequest struct {
 	// List of feed IDs to get own fields for
@@ -2012,6 +2023,8 @@ type LabelsRequest struct {
 	ContentID *string `json:"content_id,omitempty"`
 	// Type of content: 'text' (default), 'message', or 'username'. Stored as-sent; only 'username' routes to the username moderation API.
 	ContentType *string `json:"content_type,omitempty"`
+	// When true, run moderation and return labels without persisting the result. Useful for one-off checks (e.g. UI testers) that should not be recorded in the stored history.
+	DryRun *bool `json:"dry_run,omitempty"`
 	// Optional moderation policy key (max 128 chars)
 	Policy *string `json:"policy,omitempty"`
 	// Optional customer-supplied user identifier for the content author (max 256 chars). Enables filtering stored results by user_id.
@@ -2139,6 +2152,26 @@ type SubmitActionRequest struct {
 	Unban          *UnbanActionRequestPayload       `json:"unban,omitempty"`
 	Unblock        *UnblockActionRequestPayload     `json:"unblock,omitempty"`
 	User           *UserRequest                     `json:"user,omitempty"`
+}
+type SubmitModerationFeedbackRequest struct {
+	// The moderated content the moderator is providing feedback on
+	Message string `json:"message"`
+	// Original publication time of the moderated content (RFC3339)
+	PublishedAt string `json:"published_at"`
+	// Provider-side reference identifying the moderated content
+	Reference string `json:"reference"`
+	// Optional moderation channel UUID for context
+	ChannelID *string `json:"channel_id,omitempty"`
+	// Action originally produced by the moderation system
+	CurrentRecommendedAction *string `json:"current_recommended_action,omitempty"`
+	// Optional free-form note explaining why the classification was wrong
+	Description *string `json:"description,omitempty"`
+	// Optional moderator-supplied action
+	ExpectedRecommendedAction *string `json:"expected_recommended_action,omitempty"`
+	// Classifications originally produced by the moderation system
+	CurrentLabels []string `json:"current_labels"`
+	// Optional moderator-supplied classifications (up to 16 entries)
+	ExpectedLabels []string `json:"expected_labels"`
 }
 type UnbanRequest struct {
 	TargetUserID string  `json:"-" query:"target_user_id"`
@@ -2302,6 +2335,13 @@ type ListRolesRequest struct {
 type CreateRoleRequest struct {
 	// Role name
 	Name string `json:"name"`
+}
+type SearchRolesRequest struct {
+	Query              string  `json:"-" query:"query"`
+	Limit              *int    `json:"-" query:"limit"`
+	NameGt             *string `json:"-" query:"name_gt"`
+	RoleType           *string `json:"-" query:"role_type"`
+	IncludeGlobalRoles *bool   `json:"-" query:"include_global_roles"`
 }
 type DeleteRoleRequest struct {
 }

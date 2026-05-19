@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [Unreleased]
+
+### Added
+
+- Webhook handling spec helpers (CHA-2961): `UnknownEvent` type for forward-compat,
+  `GunzipPayload` / `DecodeSqsPayload` / `DecodeSnsPayload` primitives,
+  `VerifyAndParseWebhook` composite (verify + parse in one call from raw bytes),
+  `ParseSqs` / `ParseSns` queue composites (no signature param for queue helpers;
+  security is enforced via AWS IAM, not HMAC), with transparent gzip decompression
+  via magic-byte detection.
+- New instance methods on `*Stream`: `VerifyWebhookSignature(body, signature)`,
+  `VerifyAndParseWebhook(body, signature)`, `ParseSqs(messageBody)`, and
+  `ParseSns(notificationBody)` — drop the api_secret parameter in favor of the
+  client's stored secret. Dual API: package-level static functions remain available.
+- `UnknownEvent` is returned for unrecognized event types; future event types the
+  backend adds will surface this way until the SDK is upgraded.
+- Conformance fixture suite under `tests/fixtures/webhooks/`.
+
+### Changed
+
+- **BREAKING** (in-flight CHA-2961): renamed `VerifyAndParseWebhookBytes` →
+  `VerifyAndParseWebhook` (canonical bytes-based signature). Renamed `ParseSQS` /
+  `ParseSNS` → `ParseSqs` / `ParseSns`. Renamed `DecodeSQSPayload` /
+  `DecodeSNSPayload` → `DecodeSqsPayload` / `DecodeSnsPayload`.
+- **BREAKING** (in-flight CHA-2961): dropped the `VerifyAndParseWebhook(*http.Request, secret)`
+  package-level function, the `WebhookMiddleware` HTTP middleware, and the
+  `WebhookEventKey` context key. The SDK no longer ships a `net/http`-coupled
+  convenience surface — users compose with the bytes-based primitive:
+
+  ```go
+  body, _ := io.ReadAll(r.Body)
+  sig := r.Header.Get("X-Signature")
+  event, err := getstream.VerifyAndParseWebhook(body, sig, secret)
+  ```
+
+[Spec](https://www.notion.so/stream-wiki/Server-Side-SDK-Webhook-Handling-Spec-34b6a5d7f9f681e78003c443f227493c)
+
 ## [4.1.0](https://github.com/GetStream/getstream-go/compare/v4.0.6...v4.1.0) (2026-05-01)
 
 ### [4.0.6](https://github.com/GetStream/getstream-go/compare/v4.0.4...v4.0.6) (2026-04-23)

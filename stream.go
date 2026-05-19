@@ -1,5 +1,7 @@
 package getstream
 
+import "net/http"
+
 type Stream struct {
 	*Client
 	chat       *ChatClient
@@ -75,4 +77,39 @@ func (s *Stream) Moderation() *ModerationClient {
 		s.moderation = NewModerationClient(s.Client)
 	}
 	return s.moderation
+}
+
+// VerifyWebhookSignature verifies the HMAC-SHA256 signature of a webhook body
+// using this client's API secret. Convenience wrapper around the package-level
+// VerifyWebhookSignature function — drops the secret parameter in favor of
+// the secret stored on the client.
+func (s *Stream) VerifyWebhookSignature(body []byte, signature string) bool {
+	return VerifyWebhookSignature(body, signature, string(s.apiSecret))
+}
+
+// VerifyAndParseWebhook verifies and parses a webhook payload from an
+// *http.Request using this client's API secret. The request body is restored
+// so downstream handlers can read it again. Convenience wrapper around the
+// package-level VerifyAndParseWebhook — drops the secret parameter.
+func (s *Stream) VerifyAndParseWebhook(r *http.Request) (WebhookEvent, error) {
+	return VerifyAndParseWebhook(r, string(s.apiSecret))
+}
+
+// VerifyAndParseWebhookBytes verifies and parses a webhook payload (raw bytes)
+// using this client's API secret. Convenience wrapper around the package-level
+// VerifyAndParseWebhookBytes — drops the secret parameter.
+func (s *Stream) VerifyAndParseWebhookBytes(body []byte, signature string) (WebhookEvent, error) {
+	return VerifyAndParseWebhookBytes(body, signature, string(s.apiSecret))
+}
+
+// ParseSqs is a convenience wrapper that calls the package-level ParseSqs.
+// No signature is required; SQS deliveries are authenticated via AWS IAM.
+func (s *Stream) ParseSqs(messageBody string) (WebhookEvent, error) {
+	return ParseSqs(messageBody)
+}
+
+// ParseSns is a convenience wrapper that calls the package-level ParseSns.
+// No signature is required; SNS deliveries are authenticated via AWS IAM.
+func (s *Stream) ParseSns(notificationBody string) (WebhookEvent, error) {
+	return ParseSns(notificationBody)
 }

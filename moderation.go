@@ -287,6 +287,13 @@ func (c *ModerationClient) SubmitAction(ctx context.Context, request *SubmitActi
 	return res, err
 }
 
+// Forward a moderator-supplied correction to the moderation feedback pipeline. Server-side only.
+func (c *ModerationClient) SubmitModerationFeedback(ctx context.Context, request *SubmitModerationFeedbackRequest) (*StreamResponse[SubmitModerationFeedbackResponse], error) {
+	var result SubmitModerationFeedbackResponse
+	res, err := MakeRequest[SubmitModerationFeedbackRequest, SubmitModerationFeedbackResponse](c.client, ctx, "POST", "/api/v2/moderation/submit_moderation_feedback", nil, request, &result, nil)
+	return res, err
+}
+
 // Unban a user from a channel or globally.
 func (c *ModerationClient) Unban(ctx context.Context, request *UnbanRequest) (*StreamResponse[UnbanResponse], error) {
 	var result UnbanResponse
