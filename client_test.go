@@ -191,11 +191,15 @@ func resetCallResource(t *testing.T, call *Call) {
 func TestClientTimeout(t *testing.T) {
 	client, err := NewClient("apiKey", "apiSecret")
 	require.NoError(t, err)
-	assert.Equal(t, 6*time.Second, client.HttpClient().(*http.Client).Timeout)
+	assert.Equal(t, 30*time.Second, client.HttpClient().(*http.Client).Timeout)
 
 	client, err = NewClient("apiKey", "apiSecret", WithTimeout(time.Second))
 	require.NoError(t, err)
 	assert.Equal(t, time.Second, client.HttpClient().(*http.Client).Timeout)
+
+	client, err = NewClient("apiKey", "apiSecret", WithRequestTimeout(5*time.Second))
+	require.NoError(t, err)
+	assert.Equal(t, 5*time.Second, client.HttpClient().(*http.Client).Timeout)
 }
 
 func TestClientDefaultTransportConfig(t *testing.T) {
@@ -225,7 +229,7 @@ func TestClientGetters(t *testing.T) {
 
 	assert.Equal(t, "apiKey", client.ApiKey())
 	assert.Equal(t, "https://chat.stream-io-api.com", client.BaseUrl())
-	assert.Equal(t, 6*time.Second, client.DefaultTimeout())
+	assert.Equal(t, 30*time.Second, client.DefaultTimeout())
 }
 
 // TestCRUDCallTypeOperations tests Create, Read, Update, and Delete operations for call types.
