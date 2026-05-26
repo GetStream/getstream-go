@@ -31,9 +31,6 @@ const (
 	DefaultIdleTimeout = 55 * time.Second
 	// DefaultConnectTimeout caps TCP + TLS handshake duration.
 	DefaultConnectTimeout = 10 * time.Second
-
-	// defaultTimeout is preserved for backwards compatibility of internal references.
-	defaultTimeout = DefaultRequestTimeout
 )
 
 func PtrTo[T any](v T) *T {
