@@ -23,9 +23,6 @@ type gzipTestResponse struct {
 	Count   int    `json:"count"`
 }
 
-// TestGzipRequestAdvertisesAcceptEncoding verifies the SDK's default
-// *http.Client lets net/http auto-add "Accept-Encoding: gzip" — the SDK
-// does not set the header (which would silently disable auto-decoding).
 func TestGzipRequestAdvertisesAcceptEncoding(t *testing.T) {
 	var capturedAcceptEncoding string
 

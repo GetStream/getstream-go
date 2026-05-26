@@ -174,8 +174,6 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		client.logger = DefaultLoggerInstance
 	}
 
-	// Don't set Accept-Encoding manually or DisableCompression=true; either
-	// disables Go's automatic gzip request/response handling.
 	if client.httpClient == nil {
 		client.httpClient = &http.Client{
 			Timeout: client.defaultTimeout,
