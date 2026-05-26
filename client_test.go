@@ -236,6 +236,43 @@ func TestClientHTTPClientEscapeHatch(t *testing.T) {
 	assert.Nil(t, got.Transport, "SDK MUST NOT install a Transport on a user-supplied client")
 }
 
+type captureLogger struct {
+	infos []string
+}
+
+func (l *captureLogger) Debug(format string, v ...interface{}) {}
+func (l *captureLogger) Info(format string, v ...interface{}) {
+	l.infos = append(l.infos, fmt.Sprintf(format, v...))
+}
+func (l *captureLogger) Warn(format string, v ...interface{})  {}
+func (l *captureLogger) Error(format string, v ...interface{}) {}
+
+func TestClientInfoLogOnConstruction(t *testing.T) {
+	cap := &captureLogger{}
+	_, err := NewClient("apiKey", "apiSecret", WithLogger(cap))
+	require.NoError(t, err)
+
+	require.Len(t, cap.infos, 1, "exactly one INFO line on construction")
+	got := cap.infos[0]
+	assert.Contains(t, got, "max_conns_per_host=5")
+	assert.Contains(t, got, "idle_timeout=55s")
+	assert.Contains(t, got, "connect_timeout=10s")
+	assert.Contains(t, got, "request_timeout=30s")
+	assert.Contains(t, got, "user_http_client=false")
+}
+
+func TestClientInfoLogWithUserHTTPClient(t *testing.T) {
+	cap := &captureLogger{}
+	_, err := NewClient("apiKey", "apiSecret",
+		WithLogger(cap),
+		WithHTTPClient(&http.Client{Timeout: time.Second}),
+	)
+	require.NoError(t, err)
+
+	require.Len(t, cap.infos, 1)
+	assert.Contains(t, cap.infos[0], "user_http_client=true")
+}
+
 func TestClientGetters(t *testing.T) {
 	customLogger := NewDefaultLogger(os.Stderr, "", log.LstdFlags, LogLevelInfo)
 	client, err := NewClient("apiKey", "apiSecret", WithLogger(customLogger))

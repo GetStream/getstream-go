@@ -264,6 +264,19 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		}
 		client.authToken = token
 	}
+
+	if client.httpClientFromUser {
+		client.logger.Info("connection pool: user_http_client=true (5 knobs not applied)")
+	} else {
+		client.logger.Info(
+			"connection pool: max_conns_per_host=%d idle_timeout=%s connect_timeout=%s request_timeout=%s user_http_client=false",
+			client.maxConnsPerHost,
+			client.idleTimeout,
+			client.connectTimeout,
+			client.defaultTimeout,
+		)
+	}
+
 	return client, nil
 }
 
