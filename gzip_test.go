@@ -23,10 +23,9 @@ type gzipTestResponse struct {
 	Count   int    `json:"count"`
 }
 
-// TestGzipRequestAdvertisesAcceptEncoding verifies the CHA-2964 invariant:
-// when the SDK issues a request through its default *http.Client, net/http
-// auto-adds an "Accept-Encoding: gzip" header. The SDK itself does NOT set
-// the header (which would otherwise silently disable auto-decoding).
+// TestGzipRequestAdvertisesAcceptEncoding verifies the SDK's default
+// *http.Client lets net/http auto-add "Accept-Encoding: gzip" — the SDK
+// does not set the header (which would silently disable auto-decoding).
 func TestGzipRequestAdvertisesAcceptEncoding(t *testing.T) {
 	var capturedAcceptEncoding string
 
@@ -46,11 +45,8 @@ func TestGzipRequestAdvertisesAcceptEncoding(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	// net/http.Transport auto-adds Accept-Encoding: gzip when:
-	//   (a) the header is not set manually anywhere in the request chain
-	//   (b) Transport.DisableCompression is false
-	// Both hold for the SDK's default client, so the server must observe gzip.
-	assert.True(t,
+	assert.True(
+		t,
 		strings.Contains(capturedAcceptEncoding, "gzip"),
 		"expected Accept-Encoding header to contain \"gzip\", got %q", capturedAcceptEncoding,
 	)
