@@ -217,6 +217,25 @@ func TestClientDefaultTransportConfig(t *testing.T) {
 	assert.False(t, tr.DisableKeepAlives, "KeepAlive invariant")
 }
 
+func TestClientHTTPClientEscapeHatch(t *testing.T) {
+	custom := &http.Client{Timeout: 99 * time.Second}
+	client, err := NewClient(
+		"apiKey", "apiSecret",
+		WithHTTPClient(custom),
+		// These should all be ignored:
+		WithMaxConnsPerHost(99),
+		WithIdleTimeout(99*time.Second),
+		WithConnectTimeout(99*time.Second),
+		WithRequestTimeout(99*time.Second),
+	)
+	require.NoError(t, err)
+
+	got := client.HttpClient().(*http.Client)
+	assert.Same(t, custom, got, "WithHTTPClient is the source of truth")
+	assert.Equal(t, 99*time.Second, got.Timeout, "user-supplied client's Timeout untouched")
+	assert.Nil(t, got.Transport, "SDK MUST NOT install a Transport on a user-supplied client")
+}
+
 func TestClientGetters(t *testing.T) {
 	customLogger := NewDefaultLogger(os.Stderr, "", log.LstdFlags, LogLevelInfo)
 	client, err := NewClient("apiKey", "apiSecret", WithLogger(customLogger))
