@@ -297,7 +297,8 @@ func TestClientPerCallTimeoutOverride(t *testing.T) {
 	}))
 	defer slowServer.Close()
 
-	client, err := NewClient("apiKey", "apiSecret",
+	client, err := NewClient(
+		"apiKey", "apiSecret",
 		WithBaseUrl(slowServer.URL),
 		WithRequestTimeout(30*time.Second),
 	)
