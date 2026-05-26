@@ -198,6 +198,21 @@ func TestClientTimeout(t *testing.T) {
 	assert.Equal(t, time.Second, client.HttpClient().(*http.Client).Timeout)
 }
 
+func TestClientDefaultTransportConfig(t *testing.T) {
+	client, err := NewClient("apiKey", "apiSecret")
+	require.NoError(t, err)
+
+	httpClient := client.HttpClient().(*http.Client)
+	assert.Equal(t, 30*time.Second, httpClient.Timeout, "default RequestTimeout = 30s")
+
+	tr, ok := httpClient.Transport.(*http.Transport)
+	require.True(t, ok, "default transport must be *http.Transport, not nil")
+	assert.Equal(t, 5, tr.MaxConnsPerHost, "default MaxConnsPerHost = 5")
+	assert.Equal(t, 5, tr.MaxIdleConnsPerHost, "default MaxIdleConnsPerHost = 5")
+	assert.Equal(t, 55*time.Second, tr.IdleConnTimeout, "default IdleTimeout = 55s")
+	assert.False(t, tr.DisableKeepAlives, "KeepAlive invariant")
+}
+
 func TestClientGetters(t *testing.T) {
 	customLogger := NewDefaultLogger(os.Stderr, "", log.LstdFlags, LogLevelInfo)
 	client, err := NewClient("apiKey", "apiSecret", WithLogger(customLogger))
