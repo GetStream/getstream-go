@@ -174,6 +174,11 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		client.logger = DefaultLoggerInstance
 	}
 
+	// CHA-2964 invariant: do NOT set Accept-Encoding manually anywhere in
+	// the request path. net/http.Transport auto-adds "Accept-Encoding: gzip"
+	// and auto-decodes responses when (a) the header is absent and
+	// (b) Transport.DisableCompression is false. Setting the header manually
+	// silently disables auto-decode.
 	if client.httpClient == nil {
 		client.httpClient = &http.Client{
 			Timeout: client.defaultTimeout,
