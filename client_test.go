@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
@@ -263,7 +264,8 @@ func TestClientInfoLogOnConstruction(t *testing.T) {
 
 func TestClientInfoLogWithUserHTTPClient(t *testing.T) {
 	cap := &captureLogger{}
-	_, err := NewClient("apiKey", "apiSecret",
+	_, err := NewClient(
+		"apiKey", "apiSecret",
 		WithLogger(cap),
 		WithHTTPClient(&http.Client{Timeout: time.Second}),
 	)
@@ -286,6 +288,31 @@ func TestClientGetters(t *testing.T) {
 	assert.Equal(t, "apiKey", client.ApiKey())
 	assert.Equal(t, "https://chat.stream-io-api.com", client.BaseUrl())
 	assert.Equal(t, 30*time.Second, client.DefaultTimeout())
+}
+
+func TestClientPerCallTimeoutOverride(t *testing.T) {
+	slowServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(2 * time.Second)
+		w.WriteHeader(200)
+	}))
+	defer slowServer.Close()
+
+	client, err := NewClient("apiKey", "apiSecret",
+		WithBaseUrl(slowServer.URL),
+		WithRequestTimeout(30*time.Second),
+	)
+	require.NoError(t, err)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+
+	start := time.Now()
+	req, _ := http.NewRequestWithContext(ctx, "GET", slowServer.URL, nil)
+	_, err = client.HttpClient().Do(req)
+	elapsed := time.Since(start)
+
+	assert.Error(t, err, "expected context deadline exceeded")
+	assert.Less(t, elapsed, 500*time.Millisecond, "per-call ctx beats client timeout")
 }
 
 // TestCRUDCallTypeOperations tests Create, Read, Update, and Delete operations for call types.
