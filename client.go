@@ -75,6 +75,18 @@ func (c *Client) DefaultTimeout() time.Duration {
 	return c.defaultTimeout
 }
 
+func (c *Client) MaxConnsPerHost() int {
+	return c.maxConnsPerHost
+}
+
+func (c *Client) IdleTimeout() time.Duration {
+	return c.idleTimeout
+}
+
+func (c *Client) ConnectTimeout() time.Duration {
+	return c.connectTimeout
+}
+
 type ClientOption func(c *Client)
 
 func WithHTTPClient(httpClient HttpClient) ClientOption {
