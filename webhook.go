@@ -217,8 +217,9 @@ var ErrInvalidWebhook = errors.New("stream: invalid webhook")
 // route to UnknownEvent.
 var ErrUnknownEventType = errors.New("stream: unknown webhook event type")
 
-// gzipMagic is the two-byte gzip magic prefix (RFC 1952).
-// JSON cannot start with these bytes, so this gives unambiguous detection for Stream's always-JSON payloads.
+// gzipMagic is the two-byte gzip magic prefix (RFC 1952 §2.3.1).
+// JSON cannot start with these bytes, so this gives unambiguous detection
+// for Stream's always-JSON payloads.
 var gzipMagic = []byte{0x1F, 0x8B}
 
 // GetEventType extracts the event type from a raw webhook payload.
@@ -670,7 +671,7 @@ func VerifySignature(body []byte, signature, secret string) bool {
 //
 // Detection is by the first two bytes (0x1F 0x8B). This is reliable because
 // Stream webhook bodies are always JSON, and JSON's first byte is always
-// '{', '[', '"', a digit, '-', or one of t/f/n/whitespace, never 0x1F.
+// '{', '[', '"', a digit, '-', or one of t/f/n/whitespace — never 0x1F.
 //
 // Returns ErrInvalidWebhook (wrapped) if body has the gzip magic prefix
 // but isn't a valid gzip stream.
@@ -700,12 +701,12 @@ func GunzipPayload(body []byte) ([]byte, error) {
 // fails and we fall through to raw bytes, then GunzipPayload's magic-byte
 // detection decides whether to decompress.
 //
-// ParseSqs sits on top of this and works transparently for both wire formats:
-// no caller code change, no flag, no header.
+// ParseSqs sits on top of this and works transparently for both wire formats
+// — no caller code change, no flag, no header.
 func DecodeSqsPayload(messageBody string) ([]byte, error) {
 	decoded, err := base64.StdEncoding.DecodeString(messageBody)
 	if err != nil {
-		// Not base64, so treat input as raw bytes (uncompressed wire format).
+		// Not base64 — treat input as raw bytes (uncompressed wire format).
 		decoded = []byte(messageBody)
 	}
 	return GunzipPayload(decoded)
@@ -716,7 +717,7 @@ func DecodeSqsPayload(messageBody string) ([]byte, error) {
 // a pre-extracted Message string flows through.
 //
 // Heuristic: try to JSON-parse the input. If it yields an object with a string
-// Message field, that's the envelope shape; return the Message. Otherwise the
+// Message field, that's the envelope shape — return the Message. Otherwise the
 // input is presumed to BE the pre-extracted Message (base64-encoded bytes are
 // not valid JSON, so this falls through cleanly).
 func unwrapSNSNotificationBody(body string) string {
