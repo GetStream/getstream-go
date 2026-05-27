@@ -196,7 +196,7 @@ func buildDefaultHTTPClient(requestTimeout time.Duration, maxConnsPerHost int, i
 		Timeout:   connectTimeout,
 		KeepAlive: 30 * time.Second, // OS-level TCP keep-alive; unrelated to HTTP keep-alive
 	}).DialContext
-	transport.DisableKeepAlives = false // §5 invariant 4
+	transport.DisableKeepAlives = false // keep-alive stays on; never emit Connection: close
 
 	return &http.Client{
 		Timeout:   requestTimeout,

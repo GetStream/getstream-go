@@ -217,7 +217,7 @@ var ErrInvalidWebhook = errors.New("stream: invalid webhook")
 // route to UnknownEvent.
 var ErrUnknownEventType = errors.New("stream: unknown webhook event type")
 
-// gzipMagic is the two-byte gzip magic prefix (RFC 1952 §2.3.1).
+// gzipMagic is the two-byte gzip magic prefix (RFC 1952).
 // JSON cannot start with these bytes, so this gives unambiguous detection
 // for Stream's always-JSON payloads.
 var gzipMagic = []byte{0x1F, 0x8B}
