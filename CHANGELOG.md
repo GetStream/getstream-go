@@ -8,11 +8,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 * Explicit HTTP connection pool configuration ([CHA-2956](https://linear.app/stream/issue/CHA-2956/connection-pooling)).
   Four new functional options:
-    * `WithMaxConnsPerHost(int)` - default `5`
-    * `WithIdleTimeout(time.Duration)` - default `55s`
-    * `WithConnectTimeout(time.Duration)` - default `10s`
-    * `WithRequestTimeout(time.Duration)` - default `30s` (was `6s`; see Behavior changes)
-  These tune the underlying `*http.Transport`. `WithHTTPClient` continues to act as an escape hatch - when set, none of the four new options apply.
+    * `WithMaxConnsPerHost(int)`: default `5`
+    * `WithIdleTimeout(time.Duration)`: default `55s`
+    * `WithConnectTimeout(time.Duration)`: default `10s`
+    * `WithRequestTimeout(time.Duration)`: default `30s` (was `6s`; see Behavior changes)
+  These tune the underlying `*http.Transport`. `WithHTTPClient` continues to act as an escape hatch; when set, none of the four new options apply.
 * INFO log on client construction lists the effective pool config.
 
 ### Behavior changes
