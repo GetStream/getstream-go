@@ -12,20 +12,13 @@ All notable changes to this project will be documented in this file. See [standa
     * `WithIdleTimeout(time.Duration)` - default `55s`
     * `WithConnectTimeout(time.Duration)` - default `10s`
     * `WithRequestTimeout(time.Duration)` - default `30s` (was `6s`; see Behavior changes)
-  These tune the underlying `*http.Transport`. `WithHTTPClient` continues to act as
-  an escape hatch - when set, none of the four new options apply.
+  These tune the underlying `*http.Transport`. `WithHTTPClient` continues to act as an escape hatch - when set, none of the four new options apply.
 * INFO log on client construction lists the effective pool config.
 
 ### Behavior changes
 
-* **Default `RequestTimeout` is now `30s` (was `6s`).** Aligns the Go SDK with the
-  cross-SDK contract in CHA-2956. Existing callers using `WithTimeout(...)` are
-  unaffected. Callers relying on the 6s ceiling for fail-fast behavior should
-  pass `WithRequestTimeout(6 * time.Second)` (or `WithTimeout(...)`, kept as an
-  alias for backward compatibility).
-* Default HTTP transport now caps connections per host at `5` and closes idle
-  sockets after `55s` (vs. unlimited / unbounded previously). Behavior matches
-  legacy `stream-chat-go` (5 / 59s) modulo the 4s tighter idle window.
+* **Default `RequestTimeout` is now `30s` (was `6s`).** Aligns the Go SDK with the cross-SDK contract in CHA-2956. Existing callers using `WithTimeout(...)` are unaffected. Callers relying on the 6s ceiling for fail-fast behavior should pass `WithRequestTimeout(6 * time.Second)` (or `WithTimeout(...)`, kept as an alias for backward compatibility).
+* Default HTTP transport now caps connections per host at `5` and closes idle sockets after `55s` (vs. unlimited / unbounded previously). Behavior matches legacy `stream-chat-go` (5 / 59s) modulo the 4s tighter idle window.
 
 ### [4.1.1](https://github.com/GetStream/getstream-go/compare/v4.1.0...v4.1.1) (2026-05-21)
 

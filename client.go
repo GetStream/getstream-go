@@ -100,16 +100,14 @@ func WithMaxConnsPerHost(n int) ClientOption {
 }
 
 // WithIdleTimeout sets how long an idle connection lingers before being closed.
-// Default: 55s (sits 5s below the typical 60s LB idle timeout). Ignored when
-// WithHTTPClient is set.
+// Default: 55s (sits 5s below the typical 60s LB idle timeout). Ignored when WithHTTPClient is set.
 func WithIdleTimeout(d time.Duration) ClientOption {
 	return func(c *Client) {
 		c.idleTimeout = d
 	}
 }
 
-// WithConnectTimeout caps TCP+TLS handshake duration. Default: 10s. Ignored
-// when WithHTTPClient is set.
+// WithConnectTimeout caps TCP+TLS handshake duration. Default: 10s. Ignored when WithHTTPClient is set.
 func WithConnectTimeout(d time.Duration) ClientOption {
 	return func(c *Client) {
 		c.connectTimeout = d
@@ -117,8 +115,7 @@ func WithConnectTimeout(d time.Duration) ClientOption {
 }
 
 // WithRequestTimeout sets the default per-request timeout. Default: 30s.
-// Callers can still override per-call via context.WithTimeout. Ignored when
-// WithHTTPClient is set.
+// Callers can still override per-call via context.WithTimeout. Ignored when WithHTTPClient is set.
 func WithRequestTimeout(d time.Duration) ClientOption {
 	return func(c *Client) {
 		c.defaultTimeout = d
@@ -184,9 +181,8 @@ func newClientFromEnvVars(options ...ClientOption) (*Client, error) {
 	return newClient(apiKey, apiSecret, options...)
 }
 
-// buildDefaultHTTPClient constructs the SDK's default *http.Client with the
-// spec-mandated transport tuning. It clones http.DefaultTransport so any
-// runtime-provided ProxyFromEnvironment, ALPN, etc. defaults are preserved.
+// buildDefaultHTTPClient constructs the SDK's default *http.Client with the spec-mandated transport tuning.
+// It clones http.DefaultTransport so any runtime-provided ProxyFromEnvironment, ALPN, etc. defaults are preserved.
 func buildDefaultHTTPClient(requestTimeout time.Duration, maxConnsPerHost int, idleTimeout, connectTimeout time.Duration) *http.Client {
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.MaxConnsPerHost = maxConnsPerHost
