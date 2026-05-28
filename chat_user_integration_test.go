@@ -238,7 +238,7 @@ func TestChatUserIntegration(t *testing.T) {
 		taskID := resp.Data.TaskID
 		require.NotEmpty(t, taskID, "Task ID should not be empty")
 
-		taskResult, err := WaitForTask(ctx, client, taskID)
+		taskResult, err := waitForTaskInTests(ctx, client, taskID)
 		require.NoError(t, err)
 		assert.Equal(t, "completed", taskResult.Data.Status)
 	})
@@ -497,7 +497,7 @@ func TestChatUserIntegration(t *testing.T) {
 		assert.NotEmpty(t, resp.Data.TaskID)
 
 		// Wait for deactivation task
-		taskResult, err := WaitForTask(ctx, client, resp.Data.TaskID)
+		taskResult, err := waitForTaskInTests(ctx, client, resp.Data.TaskID)
 		require.NoError(t, err)
 		assert.Equal(t, "completed", taskResult.Data.Status)
 

@@ -178,7 +178,7 @@ func TestChatChannelIntegration(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, resp.Data.TaskID)
 
-		taskResult, err := WaitForTask(ctx, client, *resp.Data.TaskID)
+		taskResult, err := waitForTaskInTests(ctx, client, *resp.Data.TaskID)
 		require.NoError(t, err)
 		require.Equal(t, "completed", taskResult.Data.Status)
 	})
