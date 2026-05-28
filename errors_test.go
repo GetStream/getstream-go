@@ -157,7 +157,10 @@ func TestClassifyTransportError(t *testing.T) {
 	dnsErr := &net.DNSError{Err: "no such host", Name: "example.invalid"}
 	timeoutErr := &net.OpError{Op: "read", Err: timeoutError{}}
 	resetErr := errors.New("read tcp 127.0.0.1:1234: connection reset by peer")
-	tlsErr := &tls.CertificateVerificationError{UnverifiedCertificates: []*x509.Certificate{}}
+	// `tls.CertificateVerificationError` is only available from Go 1.20+.
+	// Use a generic error whose message the classifier matches via substring,
+	// so the test works on Go 1.19 and newer.
+	tlsErr := errors.New("tls: handshake failure: certificate verify failed")
 	refusedErr := errors.New("dial tcp 127.0.0.1:1: connection refused")
 
 	tests := []struct {
