@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -21,7 +22,15 @@ const (
 	// It works like CDN style and connects you to the closest production server.
 	// By default, there is no real reason to change it. Use it only if you know what you are doing.
 	DefaultBaseURL = "https://chat.stream-io-api.com"
-	defaultTimeout = 6 * time.Second
+
+	// defaultRequestTimeout is the default per-request timeout (was 6s prior to v4.2.0).
+	defaultRequestTimeout = 30 * time.Second
+	// defaultMaxConnsPerHost caps concurrent TCP connections per host.
+	defaultMaxConnsPerHost = 5
+	// defaultIdleTimeout sits below the typical 60s LB idle timeout with a 5s safety margin.
+	defaultIdleTimeout = 55 * time.Second
+	// defaultConnectTimeout caps TCP + TLS handshake duration.
+	defaultConnectTimeout = 10 * time.Second
 )
 
 func PtrTo[T any](v T) *T {
@@ -33,13 +42,17 @@ type HttpClient interface {
 }
 
 type Client struct {
-	apiKey         string
-	apiSecret      []byte
-	authToken      string
-	baseUrl        string
-	defaultTimeout time.Duration
-	httpClient     HttpClient
-	logger         Logger
+	apiKey             string
+	apiSecret          []byte
+	authToken          string
+	baseUrl            string
+	defaultTimeout     time.Duration
+	maxConnsPerHost    int
+	idleTimeout        time.Duration
+	connectTimeout     time.Duration
+	httpClient         HttpClient
+	httpClientFromUser bool // true iff WithHTTPClient was used; gates transport build
+	logger             Logger
 }
 
 func (c *Client) HttpClient() HttpClient {
@@ -62,11 +75,24 @@ func (c *Client) DefaultTimeout() time.Duration {
 	return c.defaultTimeout
 }
 
+func (c *Client) MaxConnsPerHost() int {
+	return c.maxConnsPerHost
+}
+
+func (c *Client) IdleTimeout() time.Duration {
+	return c.idleTimeout
+}
+
+func (c *Client) ConnectTimeout() time.Duration {
+	return c.connectTimeout
+}
+
 type ClientOption func(c *Client)
 
 func WithHTTPClient(httpClient HttpClient) ClientOption {
 	return func(c *Client) {
 		c.httpClient = httpClient
+		c.httpClientFromUser = true
 	}
 }
 
@@ -74,6 +100,37 @@ func WithHTTPClient(httpClient HttpClient) ClientOption {
 func WithTimeout(t time.Duration) ClientOption {
 	return func(c *Client) {
 		c.defaultTimeout = t
+	}
+}
+
+// WithMaxConnsPerHost caps concurrent TCP connections per host. Default: 5.
+// Ignored when WithHTTPClient is set.
+func WithMaxConnsPerHost(n int) ClientOption {
+	return func(c *Client) {
+		c.maxConnsPerHost = n
+	}
+}
+
+// WithIdleTimeout sets how long an idle connection lingers before being closed.
+// Default: 55s (sits 5s below the typical 60s LB idle timeout). Ignored when WithHTTPClient is set.
+func WithIdleTimeout(d time.Duration) ClientOption {
+	return func(c *Client) {
+		c.idleTimeout = d
+	}
+}
+
+// WithConnectTimeout caps TCP+TLS handshake duration. Default: 10s. Ignored when WithHTTPClient is set.
+func WithConnectTimeout(d time.Duration) ClientOption {
+	return func(c *Client) {
+		c.connectTimeout = d
+	}
+}
+
+// WithRequestTimeout sets the default per-request timeout. Default: 30s.
+// Callers can still override per-call via context.WithTimeout. Ignored when WithHTTPClient is set.
+func WithRequestTimeout(d time.Duration) ClientOption {
+	return func(c *Client) {
+		c.defaultTimeout = d
 	}
 }
 
@@ -136,6 +193,25 @@ func newClientFromEnvVars(options ...ClientOption) (*Client, error) {
 	return newClient(apiKey, apiSecret, options...)
 }
 
+// buildDefaultHTTPClient constructs the SDK's default *http.Client with the spec-mandated transport tuning.
+// It clones http.DefaultTransport so any runtime-provided ProxyFromEnvironment, ALPN, etc. defaults are preserved.
+func buildDefaultHTTPClient(requestTimeout time.Duration, maxConnsPerHost int, idleTimeout, connectTimeout time.Duration) *http.Client {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.MaxConnsPerHost = maxConnsPerHost
+	transport.MaxIdleConnsPerHost = maxConnsPerHost
+	transport.IdleConnTimeout = idleTimeout
+	transport.DialContext = (&net.Dialer{
+		Timeout:   connectTimeout,
+		KeepAlive: 30 * time.Second, // OS-level TCP keep-alive; unrelated to HTTP keep-alive
+	}).DialContext
+	transport.DisableKeepAlives = false // keep-alive stays on; never emit Connection: close
+
+	return &http.Client{
+		Timeout:   requestTimeout,
+		Transport: transport,
+	}
+}
+
 func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, error) {
 	if apiKey == "" {
 		return nil, errors.New("API key is empty")
@@ -151,10 +227,13 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 	}
 
 	client := &Client{
-		apiKey:         apiKey,
-		apiSecret:      []byte(apiSecret),
-		baseUrl:        baseURL,
-		defaultTimeout: defaultTimeout,
+		apiKey:          apiKey,
+		apiSecret:       []byte(apiSecret),
+		baseUrl:         baseURL,
+		defaultTimeout:  defaultRequestTimeout,
+		maxConnsPerHost: defaultMaxConnsPerHost,
+		idleTimeout:     defaultIdleTimeout,
+		connectTimeout:  defaultConnectTimeout,
 	}
 
 	if timeoutEnv := os.Getenv(EnvStreamHttpTimeout); timeoutEnv != "" {
@@ -175,9 +254,12 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 	}
 
 	if client.httpClient == nil {
-		client.httpClient = &http.Client{
-			Timeout: client.defaultTimeout,
-		}
+		client.httpClient = buildDefaultHTTPClient(
+			client.defaultTimeout,
+			client.maxConnsPerHost,
+			client.idleTimeout,
+			client.connectTimeout,
+		)
 	}
 
 	if client.authToken == "" {
@@ -187,6 +269,19 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		}
 		client.authToken = token
 	}
+
+	if client.httpClientFromUser {
+		client.logger.Info("connection pool: user_http_client=true (5 knobs not applied)")
+	} else {
+		client.logger.Info(
+			"connection pool: max_conns_per_host=%d idle_timeout=%s connect_timeout=%s request_timeout=%s user_http_client=false",
+			client.maxConnsPerHost,
+			client.idleTimeout,
+			client.connectTimeout,
+			client.defaultTimeout,
+		)
+	}
+
 	return client, nil
 }
 

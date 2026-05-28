@@ -388,3 +388,18 @@ func TestCall_AutoFrameRecording(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "auto-on", resp.Data.Settings.FrameRecording.Mode)
 }
+
+func ExampleNewClient_withConnectionPoolTuning() {
+	client, err := getstream.NewClient(
+		"apiKey", "apiSecret",
+		getstream.WithMaxConnsPerHost(10),
+		getstream.WithIdleTimeout(55*time.Second),
+		getstream.WithConnectTimeout(5*time.Second),
+		getstream.WithRequestTimeout(20*time.Second),
+	)
+	if err != nil {
+		panic(err)
+	}
+	_ = client
+	// Output:
+}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
@@ -191,11 +192,87 @@ func resetCallResource(t *testing.T, call *Call) {
 func TestClientTimeout(t *testing.T) {
 	client, err := NewClient("apiKey", "apiSecret")
 	require.NoError(t, err)
-	assert.Equal(t, 6*time.Second, client.HttpClient().(*http.Client).Timeout)
+	assert.Equal(t, 30*time.Second, client.HttpClient().(*http.Client).Timeout)
 
 	client, err = NewClient("apiKey", "apiSecret", WithTimeout(time.Second))
 	require.NoError(t, err)
 	assert.Equal(t, time.Second, client.HttpClient().(*http.Client).Timeout)
+
+	client, err = NewClient("apiKey", "apiSecret", WithRequestTimeout(5*time.Second))
+	require.NoError(t, err)
+	assert.Equal(t, 5*time.Second, client.HttpClient().(*http.Client).Timeout)
+}
+
+func TestClientDefaultTransportConfig(t *testing.T) {
+	client, err := NewClient("apiKey", "apiSecret")
+	require.NoError(t, err)
+
+	httpClient := client.HttpClient().(*http.Client)
+	assert.Equal(t, 30*time.Second, httpClient.Timeout, "default RequestTimeout = 30s")
+
+	tr, ok := httpClient.Transport.(*http.Transport)
+	require.True(t, ok, "default transport must be *http.Transport, not nil")
+	assert.Equal(t, 5, tr.MaxConnsPerHost, "default MaxConnsPerHost = 5")
+	assert.Equal(t, 5, tr.MaxIdleConnsPerHost, "default MaxIdleConnsPerHost = 5")
+	assert.Equal(t, 55*time.Second, tr.IdleConnTimeout, "default IdleTimeout = 55s")
+	assert.False(t, tr.DisableKeepAlives, "KeepAlive invariant")
+}
+
+func TestClientHTTPClientEscapeHatch(t *testing.T) {
+	custom := &http.Client{Timeout: 99 * time.Second}
+	client, err := NewClient(
+		"apiKey", "apiSecret",
+		WithHTTPClient(custom),
+		// These should all be ignored:
+		WithMaxConnsPerHost(99),
+		WithIdleTimeout(99*time.Second),
+		WithConnectTimeout(99*time.Second),
+		WithRequestTimeout(99*time.Second),
+	)
+	require.NoError(t, err)
+
+	got := client.HttpClient().(*http.Client)
+	assert.Same(t, custom, got, "WithHTTPClient is the source of truth")
+	assert.Equal(t, 99*time.Second, got.Timeout, "user-supplied client's Timeout untouched")
+	assert.Nil(t, got.Transport, "SDK MUST NOT install a Transport on a user-supplied client")
+}
+
+type captureLogger struct {
+	infos []string
+}
+
+func (l *captureLogger) Debug(format string, v ...interface{}) {}
+func (l *captureLogger) Info(format string, v ...interface{}) {
+	l.infos = append(l.infos, fmt.Sprintf(format, v...))
+}
+func (l *captureLogger) Warn(format string, v ...interface{})  {}
+func (l *captureLogger) Error(format string, v ...interface{}) {}
+
+func TestClientInfoLogOnConstruction(t *testing.T) {
+	cap := &captureLogger{}
+	_, err := NewClient("apiKey", "apiSecret", WithLogger(cap))
+	require.NoError(t, err)
+
+	require.Len(t, cap.infos, 1, "exactly one INFO line on construction")
+	got := cap.infos[0]
+	assert.Contains(t, got, "max_conns_per_host=5")
+	assert.Contains(t, got, "idle_timeout=55s")
+	assert.Contains(t, got, "connect_timeout=10s")
+	assert.Contains(t, got, "request_timeout=30s")
+	assert.Contains(t, got, "user_http_client=false")
+}
+
+func TestClientInfoLogWithUserHTTPClient(t *testing.T) {
+	cap := &captureLogger{}
+	_, err := NewClient(
+		"apiKey", "apiSecret",
+		WithLogger(cap),
+		WithHTTPClient(&http.Client{Timeout: time.Second}),
+	)
+	require.NoError(t, err)
+
+	require.Len(t, cap.infos, 1)
+	assert.Contains(t, cap.infos[0], "user_http_client=true")
 }
 
 func TestClientGetters(t *testing.T) {
@@ -210,7 +287,33 @@ func TestClientGetters(t *testing.T) {
 
 	assert.Equal(t, "apiKey", client.ApiKey())
 	assert.Equal(t, "https://chat.stream-io-api.com", client.BaseUrl())
-	assert.Equal(t, 6*time.Second, client.DefaultTimeout())
+	assert.Equal(t, 30*time.Second, client.DefaultTimeout())
+}
+
+func TestClientPerCallTimeoutOverride(t *testing.T) {
+	slowServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(2 * time.Second)
+		w.WriteHeader(200)
+	}))
+	defer slowServer.Close()
+
+	client, err := NewClient(
+		"apiKey", "apiSecret",
+		WithBaseUrl(slowServer.URL),
+		WithRequestTimeout(30*time.Second),
+	)
+	require.NoError(t, err)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+
+	start := time.Now()
+	req, _ := http.NewRequestWithContext(ctx, "GET", slowServer.URL, nil)
+	_, err = client.HttpClient().Do(req)
+	elapsed := time.Since(start)
+
+	assert.Error(t, err, "expected context deadline exceeded")
+	assert.Less(t, elapsed, 500*time.Millisecond, "per-call ctx beats client timeout")
 }
 
 // TestCRUDCallTypeOperations tests Create, Read, Update, and Delete operations for call types.
