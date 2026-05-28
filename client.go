@@ -23,14 +23,14 @@ const (
 	// By default, there is no real reason to change it. Use it only if you know what you are doing.
 	DefaultBaseURL = "https://chat.stream-io-api.com"
 
-	// DefaultRequestTimeout is the default per-request timeout (was 6s prior to v4.2.0).
-	DefaultRequestTimeout = 30 * time.Second
-	// DefaultMaxConnsPerHost caps concurrent TCP connections per host.
-	DefaultMaxConnsPerHost = 5
-	// DefaultIdleTimeout sits below the typical 60s LB idle timeout with a 5s safety margin.
-	DefaultIdleTimeout = 55 * time.Second
-	// DefaultConnectTimeout caps TCP + TLS handshake duration.
-	DefaultConnectTimeout = 10 * time.Second
+	// defaultRequestTimeout is the default per-request timeout (was 6s prior to v4.2.0).
+	defaultRequestTimeout = 30 * time.Second
+	// defaultMaxConnsPerHost caps concurrent TCP connections per host.
+	defaultMaxConnsPerHost = 5
+	// defaultIdleTimeout sits below the typical 60s LB idle timeout with a 5s safety margin.
+	defaultIdleTimeout = 55 * time.Second
+	// defaultConnectTimeout caps TCP + TLS handshake duration.
+	defaultConnectTimeout = 10 * time.Second
 )
 
 func PtrTo[T any](v T) *T {
@@ -230,10 +230,10 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		apiKey:          apiKey,
 		apiSecret:       []byte(apiSecret),
 		baseUrl:         baseURL,
-		defaultTimeout:  DefaultRequestTimeout,
-		maxConnsPerHost: DefaultMaxConnsPerHost,
-		idleTimeout:     DefaultIdleTimeout,
-		connectTimeout:  DefaultConnectTimeout,
+		defaultTimeout:  defaultRequestTimeout,
+		maxConnsPerHost: defaultMaxConnsPerHost,
+		idleTimeout:     defaultIdleTimeout,
+		connectTimeout:  defaultConnectTimeout,
 	}
 
 	if timeoutEnv := os.Getenv(EnvStreamHttpTimeout); timeoutEnv != "" {
