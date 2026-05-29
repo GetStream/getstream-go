@@ -6,8 +6,7 @@ import (
 	"time"
 )
 
-// Default polling parameters for WaitForTask, per Server-Side SDK Error
-// Handling Spec §8.
+// Default poll interval is 1s; default timeout is 60s.
 const (
 	defaultTaskPollInterval = 1 * time.Second
 	defaultTaskWaitTimeout  = 60 * time.Second
@@ -50,8 +49,7 @@ func WithWaitForTaskTimeout(d time.Duration) WaitForTaskOption {
 //     ErrTransport and ErrorType "timeout"; the original cause (a
 //     context.DeadlineExceeded or ctx.Err()) is reachable via errors.Unwrap.
 //
-// Behavior matches Server-Side SDK Error Handling Spec §8. Defaults:
-// pollInterval = 1s, timeout = 60s; override with WaitForTaskOption.
+// Defaults: pollInterval = 1s, timeout = 60s; override with WaitForTaskOption.
 func WaitForTask(ctx context.Context, client *Stream, taskID string, opts ...WaitForTaskOption) (*StreamResponse[GetTaskResponse], error) {
 	cfg := &waitForTaskConfig{
 		pollInterval: defaultTaskPollInterval,

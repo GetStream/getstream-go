@@ -11,16 +11,15 @@ import (
 	"time"
 )
 
-// Sentinel errors expose the SDK error categories defined by the
-// Server-Side SDK Error Handling Spec §4.2 (Go expression). All concrete
-// errors returned from the SDK are *StreamError; callers branch on
-// category with errors.Is(err, sentinel) and extract structured fields with
+// Sentinel errors expose the SDK error categories. All concrete errors
+// returned from the SDK are *StreamError; callers branch on category
+// with errors.Is(err, sentinel) and extract structured fields with
 // errors.As(err, &streamErr).
 var (
 	// ErrApiResponse fires when the backend returned an HTTP 4xx/5xx
 	// (auth, validation, server error, or any other API failure with the
-	// APIError envelope). Also satisfied by ErrRateLimited via the spec
-	// §4.2 wrap chain.
+	// APIError envelope). Also satisfied by ErrRateLimited via the
+	// Unwrap chain.
 	ErrApiResponse = errors.New("stream: api error")
 
 	// ErrRateLimited fires when the backend returned HTTP 429.
@@ -40,7 +39,7 @@ var (
 )
 
 // Transport-error subtype values populated on StreamError.ErrorType when the
-// sentinel is ErrTransport. Mirrors the logging spec §6.4 error.type enum.
+// sentinel is ErrTransport.
 const (
 	ErrorTypeConnectionReset = "connection_reset"
 	ErrorTypeTimeout         = "timeout"
@@ -59,9 +58,9 @@ type TaskErrorDetails struct {
 	Version     string
 }
 
-// classifyTransportError maps a transport-layer error to the spec §6.1
-// errorType enum. The mapping inspects the error chain via errors.Is /
-// errors.As so it survives library wrapping.
+// classifyTransportError maps a transport-layer error to an errorType
+// enum. The mapping inspects the error chain via errors.Is / errors.As
+// so it survives library wrapping.
 func classifyTransportError(err error) string {
 	if err == nil {
 		return ErrorTypeUnknown
@@ -130,7 +129,7 @@ func wrapTransportError(err error) *StreamError {
 
 // parseRetryAfter parses an HTTP Retry-After header value per RFC 7231 §7.1.3.
 // Accepts either a non-negative integer in seconds or an HTTP-date. Returns 0
-// if the header is missing or unparseable (no error — graceful per spec §7).
+// if the header is missing or unparseable.
 //
 // now is injectable for deterministic tests; pass time.Now in production.
 func parseRetryAfter(value string, now time.Time) time.Duration {

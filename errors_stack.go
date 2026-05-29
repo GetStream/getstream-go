@@ -18,12 +18,10 @@ type stackErr struct {
 	n     int
 }
 
-// stackWrap wraps err with a contextual message and captures a stack trace
-// at the call site. Returns nil if err is nil.
-//
-// This is the Go SDK's mandated wrapper for user-facing error paths
-// (Server-Side SDK Error Handling Spec §6.5). fmt.Errorf("...: %w", err)
-// is forbidden in those paths because it loses the wrap site.
+// stackWrap wraps err with the call site captured via runtime.Callers.
+// The wrap site is rendered by Format("%+v") and accessible via
+// StackTrace(). Use stackWrap instead of fmt.Errorf("...: %w", ...) in
+// user-facing paths so the original wrap site survives the cause chain.
 func stackWrap(err error, msg string) error {
 	if err == nil {
 		return nil

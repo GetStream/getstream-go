@@ -45,21 +45,7 @@ func (c *Client) logResponse(resp *http.Response, body []byte, duration time.Dur
 //
 // Category is signaled by the sentinel embedded via Is: callers branch with
 // errors.Is(err, ErrApiResponse | ErrRateLimited | ErrTransport | ErrTaskFailed)
-// and extract fields with errors.As(err, &streamErr). See
-// Server-Side SDK Error Handling Spec §4.2 / §5 for the field schema.
-//
-// Per-field population by sentinel:
-//
-//   - ErrApiResponse:  StatusCode, Code, Message, ExceptionFields, Unrecoverable,
-//     RawResponseBody, MoreInfo, Details, RateLimit, Duration are set from the
-//     APIError envelope. RetryAfter is zero. ErrorType is "". Task is nil.
-//   - ErrRateLimited:  same as ErrApiResponse + RetryAfter parsed from the
-//     Retry-After header (RFC 7231 §7.1.3). errors.Is(err, ErrApiResponse) also
-//     returns true.
-//   - ErrTransport:    Message and ErrorType are set; underlying transport
-//     error is reachable via errors.Unwrap. All API-envelope fields are zero.
-//   - ErrTaskFailed:   Task is set with the failed task's ErrorResult fields.
-//     All API-envelope fields are zero.
+// and extract fields with errors.As(err, &streamErr).
 type StreamError struct {
 	Code            int               `json:"code"`
 	Message         string            `json:"message"`
@@ -74,7 +60,7 @@ type StreamError struct {
 	// the backend omitted the field.
 	Details json.RawMessage `json:"details,omitempty"`
 	// RawResponseBody is the unparsed response body. Always set on API-response
-	// errors (including the §6.3 unparseable-body case).
+	// errors (including the unparseable-body case).
 	RawResponseBody string `json:"-"`
 	// RetryAfter is the parsed Retry-After header on HTTP 429. Zero otherwise.
 	RetryAfter time.Duration `json:"-"`
@@ -101,7 +87,7 @@ func (e *StreamError) Error() string {
 }
 
 // Is reports whether target matches the StreamError's category sentinel.
-// ErrRateLimited additionally matches ErrApiResponse per spec §4.2.
+// ErrRateLimited additionally matches ErrApiResponse.
 func (e *StreamError) Is(target error) bool {
 	if e == nil || target == nil {
 		return false
@@ -141,8 +127,8 @@ type StreamResponse[T any] struct {
 }
 
 // parseResponse parses the HTTP response into the provided result.
-// On HTTP 4xx/5xx returns a *StreamError populated per Server-Side SDK
-// Error Handling Spec §5/§6.
+// On HTTP 4xx/5xx returns a *StreamError populated from the APIError
+// envelope, or a sentinel-message StreamError when the body cannot be parsed.
 func parseResponse[GResponse any](c *Client, resp *http.Response, body []byte, result *GResponse) (*StreamResponse[GResponse], error) {
 	statusCode := resp.StatusCode
 	c.logger.Debug("Status Code: %d", statusCode)
@@ -157,8 +143,9 @@ func parseResponse[GResponse any](c *Client, resp *http.Response, body []byte, r
 	return addRateLimitInfo(resp.Header, result)
 }
 
-// buildAPIError constructs a *StreamError for an HTTP 4xx/5xx response per
-// spec §6.2 (parsed APIError envelope) and §6.3 (unparseable body).
+// buildAPIError constructs a *StreamError for an HTTP 4xx/5xx response.
+// Returns *StreamError populated from the APIError envelope, or a
+// sentinel-message StreamError when the body cannot be parsed.
 func buildAPIError(resp *http.Response, body []byte) *StreamError {
 	apiErr := &StreamError{
 		StatusCode:      resp.StatusCode,
@@ -169,8 +156,6 @@ func buildAPIError(resp *http.Response, body []byte) *StreamError {
 
 	if len(body) > 0 {
 		if err := json.Unmarshal(body, apiErr); err != nil {
-			// §6.3 — HTTP response received but body unparseable. NOT a
-			// transport error (the HTTP layer succeeded).
 			apiErr.Code = 0
 			apiErr.Message = "failed to parse error response"
 			apiErr.ExceptionFields = map[string]string{}
@@ -183,9 +168,6 @@ func buildAPIError(resp *http.Response, body []byte) *StreamError {
 		apiErr.Message = "empty response body"
 	}
 
-	// json.Unmarshal overwrites StatusCode if the body carries the legacy
-	// uppercase "StatusCode" field, then leaves zero values for absent fields.
-	// Restore non-zero StatusCode and ExceptionFields from the response.
 	if apiErr.StatusCode == 0 {
 		apiErr.StatusCode = resp.StatusCode
 	}
@@ -563,16 +545,12 @@ func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, me
 	start := time.Now()
 	resp, err := c.httpClient.Do(r)
 	if err != nil {
-		// §6.1 — no HTTP response received. Wrap as ErrTransport with the
-		// language-side errorType classification; preserve the cause chain.
 		return nil, wrapTransportError(err)
 	}
 	defer resp.Body.Close()
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		// Body-read failure occurs after headers but before the full body
-		// arrives — treat as transport per spec §6.1.
 		return nil, wrapTransportError(err)
 	}
 

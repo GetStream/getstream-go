@@ -24,15 +24,7 @@ func (c *StubHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-// waitForTaskInTests is a test-only wrapper over the public WaitForTask that
-// raises the wait budget to ~5 minutes with a 5s poll cadence — sized to
-// outlast async-task retry cycles on the backend (e.g. rate-limited bulk
-// hard-deletes that retry every 10-15s for several minutes before clearing).
-//
-// Behavioral note: unlike the public WaitForTask, on status "failed" this
-// returns the response with a nil error so existing tests can inspect
-// taskStatus.Data.Status without altering their assertions. New tests should
-// use the public WaitForTask directly and branch on errors.Is(err, ErrTaskFailed).
+// Test helper; raised wait budget for hard-delete style tasks.
 func waitForTaskInTests(ctx context.Context, client *Stream, taskID string) (*StreamResponse[GetTaskResponse], error) {
 	res, err := WaitForTask(
 		ctx, client, taskID,
