@@ -41,7 +41,11 @@ func (c *Client) logResponse(resp *http.Response, body []byte, duration time.Dur
 	c.logger.Debug("\n%s", string(body))
 }
 
-// Error represents an API error
+// StreamError is the single concrete error type returned by the SDK.
+//
+// Category is signaled by the sentinel embedded via Is: callers branch with
+// errors.Is(err, ErrApiResponse | ErrRateLimited | ErrTransport | ErrTaskFailed)
+// and extract fields with errors.As(err, &streamErr).
 type StreamError struct {
 	Code            int               `json:"code"`
 	Message         string            `json:"message"`
@@ -49,11 +53,71 @@ type StreamError struct {
 	StatusCode      int               `json:"StatusCode"`
 	Duration        string            `json:"duration"`
 	MoreInfo        string            `json:"more_info"`
-	RateLimit       *RateLimitInfo    `json:"-"`
+	// Unrecoverable mirrors APIError.unrecoverable. When true, the request
+	// that produced this error must not be retried.
+	Unrecoverable bool `json:"unrecoverable,omitempty"`
+	// Details carries the opaque APIError.details payload verbatim. nil if
+	// the backend omitted the field.
+	Details json.RawMessage `json:"details,omitempty"`
+	// RawResponseBody is the unparsed response body. Always set on API-response
+	// errors (including the unparseable-body case).
+	RawResponseBody string `json:"-"`
+	// RetryAfter is the parsed Retry-After header on HTTP 429. Zero otherwise.
+	RetryAfter time.Duration `json:"-"`
+	// ErrorType is populated only when the sentinel is ErrTransport. One of
+	// ErrorTypeConnectionReset, ErrorTypeTimeout, ErrorTypeDNSFailure,
+	// ErrorTypeTLSHandshake, ErrorTypeUnknown.
+	ErrorType string `json:"-"`
+	// Task carries the failed-task payload when the sentinel is ErrTaskFailed.
+	Task *TaskErrorDetails `json:"-"`
+	// RateLimit carries the rate-limit window info from response headers.
+	RateLimit *RateLimitInfo `json:"-"`
+
+	// sentinel selects the category surfaced via Is. cause is the wrapped
+	// underlying error (typically a stack-bearing wrapper).
+	sentinel error
+	cause    error
 }
 
-func (e StreamError) Error() string {
+func (e *StreamError) Error() string {
+	if e == nil {
+		return "<nil>"
+	}
 	return e.Message
+}
+
+// Is reports whether target matches the StreamError's category sentinel.
+// ErrRateLimited additionally matches ErrApiResponse.
+func (e *StreamError) Is(target error) bool {
+	if e == nil || target == nil {
+		return false
+	}
+	if e.sentinel != nil && target == e.sentinel {
+		return true
+	}
+	if e.sentinel == ErrRateLimited && target == ErrApiResponse {
+		return true
+	}
+	return false
+}
+
+// Unwrap returns the underlying cause (typically a stack-bearing wrapper
+// over the original transport error or JSON-parse error). Returns nil for
+// API-response errors that have no upstream cause.
+func (e *StreamError) Unwrap() error {
+	if e == nil {
+		return nil
+	}
+	return e.cause
+}
+
+// Sentinel reports the category sentinel this error belongs to (e.g.
+// ErrApiResponse). Returns nil if no category was set.
+func (e *StreamError) Sentinel() error {
+	if e == nil {
+		return nil
+	}
+	return e.sentinel
 }
 
 // Response is the base response returned to the client
@@ -62,31 +126,63 @@ type StreamResponse[T any] struct {
 	Data          T
 }
 
-// parseResponse parses the HTTP response into the provided result
+// parseResponse parses the HTTP response into the provided result.
+// On HTTP 4xx/5xx returns a *StreamError populated from the APIError
+// envelope, or a sentinel-message StreamError when the body cannot be parsed.
 func parseResponse[GResponse any](c *Client, resp *http.Response, body []byte, result *GResponse) (*StreamResponse[GResponse], error) {
 	statusCode := resp.StatusCode
 	c.logger.Debug("Status Code: %d", statusCode)
-	// If status code indicates an error
 	if statusCode >= 399 {
-		var apiErr StreamError
-		err := json.Unmarshal(body, &apiErr)
-		if err != nil {
-			apiErr.Message = string(body)
-			apiErr.StatusCode = resp.StatusCode
-			return nil, apiErr
-		}
-		apiErr.RateLimit = NewRateLimitFromHeaders(resp.Header)
-		return nil, apiErr
+		return nil, buildAPIError(resp, body)
 	}
 
-	// Attempt to unmarshal the response into the result
-	err := json.Unmarshal(body, result)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
+	if err := json.Unmarshal(body, result); err != nil {
+		return nil, stackWrap(err, "failed to unmarshal response body")
 	}
 
-	// Add rate limit info to the result
 	return addRateLimitInfo(resp.Header, result)
+}
+
+// buildAPIError constructs a *StreamError for an HTTP 4xx/5xx response.
+// Returns *StreamError populated from the APIError envelope, or a
+// sentinel-message StreamError when the body cannot be parsed.
+func buildAPIError(resp *http.Response, body []byte) *StreamError {
+	apiErr := &StreamError{
+		StatusCode:      resp.StatusCode,
+		RawResponseBody: string(body),
+		ExceptionFields: map[string]string{},
+		RateLimit:       NewRateLimitFromHeaders(resp.Header),
+	}
+
+	if len(body) > 0 {
+		if err := json.Unmarshal(body, apiErr); err != nil {
+			apiErr.Code = 0
+			apiErr.Message = "failed to parse error response"
+			apiErr.ExceptionFields = map[string]string{}
+			apiErr.Unrecoverable = false
+			apiErr.cause = stackWrap(err, "parse api error response")
+			apiErr.sentinel = ErrApiResponse
+			return apiErr
+		}
+	} else {
+		apiErr.Message = "empty response body"
+	}
+
+	if apiErr.StatusCode == 0 {
+		apiErr.StatusCode = resp.StatusCode
+	}
+	if apiErr.ExceptionFields == nil {
+		apiErr.ExceptionFields = map[string]string{}
+	}
+
+	if apiErr.StatusCode == http.StatusTooManyRequests {
+		apiErr.sentinel = ErrRateLimited
+		apiErr.RetryAfter = parseRetryAfter(resp.Header.Get("Retry-After"), time.Now())
+	} else {
+		apiErr.sentinel = ErrApiResponse
+	}
+
+	return apiErr
 }
 
 // requestURL constructs the full request URL
@@ -95,7 +191,7 @@ func (c *Client) requestURL(path string, values url.Values, pathParams map[strin
 
 	u, err := url.Parse(c.baseUrl + path)
 	if err != nil {
-		return "", fmt.Errorf("url.Parse: %w", err)
+		return "", stackWrap(err, "url.Parse")
 	}
 
 	if values == nil {
@@ -187,7 +283,7 @@ func getFileContent(fileName string, fileContent io.Reader) (io.Reader, error) {
 	if fileName != "" {
 		file, err := os.Open(fileName)
 		if err != nil {
-			return nil, fmt.Errorf("failed to open file: %w", err)
+			return nil, stackWrap(err, "failed to open file")
 		}
 		return file, nil
 	}
@@ -211,18 +307,18 @@ func (c *Client) createMultipartRequest(r *http.Request, data any) (*http.Reques
 		fileName = *req.File
 		fileContent, err = getFileContent(*req.File, nil)
 		if err != nil {
-			return nil, fmt.Errorf("failed to open file: %w", err)
+			return nil, stackWrap(err, "failed to open file")
 		}
 
 		// Add user field if present
 		if req.User != nil {
 			userJSON, err := json.Marshal(req.User)
 			if err != nil {
-				return nil, fmt.Errorf("failed to marshal user: %w", err)
+				return nil, stackWrap(err, "failed to marshal user")
 			}
 			err = writer.WriteField("user", string(userJSON))
 			if err != nil {
-				return nil, fmt.Errorf("failed to write user field: %w", err)
+				return nil, stackWrap(err, "failed to write user field")
 			}
 		}
 
@@ -233,18 +329,18 @@ func (c *Client) createMultipartRequest(r *http.Request, data any) (*http.Reques
 		fileName = *req.File
 		fileContent, err = getFileContent(*req.File, nil)
 		if err != nil {
-			return nil, fmt.Errorf("failed to open file: %w", err)
+			return nil, stackWrap(err, "failed to open file")
 		}
 
 		// Add upload_sizes field if present
 		if req.UploadSizes != nil && len(req.UploadSizes) > 0 {
 			uploadSizesJSON, err := json.Marshal(req.UploadSizes)
 			if err != nil {
-				return nil, fmt.Errorf("failed to marshal upload_sizes: %w", err)
+				return nil, stackWrap(err, "failed to marshal upload_sizes")
 			}
 			err = writer.WriteField("upload_sizes", string(uploadSizesJSON))
 			if err != nil {
-				return nil, fmt.Errorf("failed to write upload_sizes field: %w", err)
+				return nil, stackWrap(err, "failed to write upload_sizes field")
 			}
 		}
 
@@ -252,11 +348,11 @@ func (c *Client) createMultipartRequest(r *http.Request, data any) (*http.Reques
 		if req.User != nil {
 			userJSON, err := json.Marshal(req.User)
 			if err != nil {
-				return nil, fmt.Errorf("failed to marshal user: %w", err)
+				return nil, stackWrap(err, "failed to marshal user")
 			}
 			err = writer.WriteField("user", string(userJSON))
 			if err != nil {
-				return nil, fmt.Errorf("failed to write user field: %w", err)
+				return nil, stackWrap(err, "failed to write user field")
 			}
 		}
 
@@ -267,18 +363,18 @@ func (c *Client) createMultipartRequest(r *http.Request, data any) (*http.Reques
 		fileName = *req.File
 		fileContent, err = getFileContent(*req.File, nil)
 		if err != nil {
-			return nil, fmt.Errorf("failed to open file: %w", err)
+			return nil, stackWrap(err, "failed to open file")
 		}
 
 		// Add user field if present
 		if req.User != nil {
 			userJSON, err := json.Marshal(req.User)
 			if err != nil {
-				return nil, fmt.Errorf("failed to marshal user: %w", err)
+				return nil, stackWrap(err, "failed to marshal user")
 			}
 			err = writer.WriteField("user", string(userJSON))
 			if err != nil {
-				return nil, fmt.Errorf("failed to write user field: %w", err)
+				return nil, stackWrap(err, "failed to write user field")
 			}
 		}
 
@@ -289,18 +385,18 @@ func (c *Client) createMultipartRequest(r *http.Request, data any) (*http.Reques
 		fileName = *req.File
 		fileContent, err = getFileContent(*req.File, nil)
 		if err != nil {
-			return nil, fmt.Errorf("failed to open file: %w", err)
+			return nil, stackWrap(err, "failed to open file")
 		}
 
 		// Add upload_sizes field if present
 		if req.UploadSizes != nil && len(req.UploadSizes) > 0 {
 			uploadSizesJSON, err := json.Marshal(req.UploadSizes)
 			if err != nil {
-				return nil, fmt.Errorf("failed to marshal upload_sizes: %w", err)
+				return nil, stackWrap(err, "failed to marshal upload_sizes")
 			}
 			err = writer.WriteField("upload_sizes", string(uploadSizesJSON))
 			if err != nil {
-				return nil, fmt.Errorf("failed to write upload_sizes field: %w", err)
+				return nil, stackWrap(err, "failed to write upload_sizes field")
 			}
 		}
 
@@ -308,11 +404,11 @@ func (c *Client) createMultipartRequest(r *http.Request, data any) (*http.Reques
 		if req.User != nil {
 			userJSON, err := json.Marshal(req.User)
 			if err != nil {
-				return nil, fmt.Errorf("failed to marshal user: %w", err)
+				return nil, stackWrap(err, "failed to marshal user")
 			}
 			err = writer.WriteField("user", string(userJSON))
 			if err != nil {
-				return nil, fmt.Errorf("failed to write user field: %w", err)
+				return nil, stackWrap(err, "failed to write user field")
 			}
 		}
 
@@ -323,17 +419,17 @@ func (c *Client) createMultipartRequest(r *http.Request, data any) (*http.Reques
 	// Add file field
 	fileWriter, err := writer.CreateFormFile("file", fileName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create form file: %w", err)
+		return nil, stackWrap(err, "failed to create form file")
 	}
 
 	_, err = io.Copy(fileWriter, fileContent)
 	if err != nil {
-		return nil, fmt.Errorf("failed to copy file content: %w", err)
+		return nil, stackWrap(err, "failed to copy file content")
 	}
 
 	err = writer.Close()
 	if err != nil {
-		return nil, fmt.Errorf("failed to close multipart writer: %w", err)
+		return nil, stackWrap(err, "failed to close multipart writer")
 	}
 
 	// Update request body and content type
@@ -449,13 +545,13 @@ func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, me
 	start := time.Now()
 	resp, err := c.httpClient.Do(r)
 	if err != nil {
-		return nil, err
+		return nil, wrapTransportError(err)
 	}
 	defer resp.Body.Close()
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read HTTP response: %w", err)
+		return nil, wrapTransportError(err)
 	}
 
 	duration := time.Since(start)

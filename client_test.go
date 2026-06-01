@@ -711,7 +711,7 @@ func TestVideoExamplesAdditional(t *testing.T) {
 		assert.NoError(t, err)
 		taskID := response.Data.TaskID
 
-		taskStatus, err := WaitForTask(ctx, client, taskID)
+		taskStatus, err := waitForTaskInTests(ctx, client, taskID)
 		assert.NoError(t, err)
 
 		if taskStatus.Data.Status == "completed" {
@@ -1059,7 +1059,7 @@ func TestHardDeleteCall(t *testing.T) {
 
 		require.NotNil(t, taskID)
 
-		taskStatus, err := WaitForTask(ctx, client, *taskID)
+		taskStatus, err := waitForTaskInTests(ctx, client, *taskID)
 		assert.NoError(t, err)
 
 		if taskStatus.Data.Status == "completed" {

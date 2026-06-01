@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Features
 
+* Standardized error handling per the Server-Side SDK Error Handling Spec ([CHA-2958](https://linear.app/stream/issue/CHA-2958)).
+  * Four sentinel error categories on the existing `*StreamError`: `ErrApiResponse`, `ErrRateLimited`, `ErrTransport`, `ErrTaskFailed`. Use `errors.Is(err, ...)` to branch and `errors.As(err, &streamErr)` to extract typed fields. `ErrRateLimited` also satisfies `errors.Is(err, ErrApiResponse)`.
+  * New fields on `StreamError`: `Unrecoverable`, `Details`, `RawResponseBody`, `RetryAfter`, `ErrorType`, `Task`. No existing field accesses change.
+  * Transport-layer failures (connection reset / refused, timeout, DNS, TLS, broken pipe) are now wrapped at the HTTP-client boundary into `*StreamError` with `ErrTransport`; the original error is preserved via `errors.Unwrap`. `ErrorType` is one of `connection_reset`, `timeout`, `dns_failure`, `tls_handshake_failed`, `unknown` (matches the logging spec error.type enum).
+  * `Retry-After` response header is parsed on HTTP 429 (both RFC 7231 §7.1.3 integer-seconds and HTTP-date forms) and exposed as `StreamError.RetryAfter`. Auto-retry is **not** part of this SDK; callers compose their own retry strategy using `RetryAfter` and `Unrecoverable`.
+  * Unparseable error bodies (HTTP response received but JSON envelope malformed or absent) surface as `ErrApiResponse` with `code=0`, `Message="failed to parse error response"`, and the raw body preserved on `RawResponseBody`. The JSON parse error is reachable via the cause chain.
+  * New public helper `WaitForTask(ctx, client, taskID, opts...)` polls the task-status endpoint until terminal state. On `status="failed"` returns `*StreamError` with `ErrTaskFailed` and `Task` populated from the backend's `ErrorResult`. On timeout / context cancellation returns `*StreamError` with `ErrTransport` and `ErrorType="timeout"`. Defaults: 1s poll interval, 60s wait timeout — override with `WithWaitForTaskPollInterval` / `WithWaitForTaskTimeout`.
+  * Internal `stack.Wrap` helper (~30 lines, `runtime.Caller`-based, no external dependency) replaces `fmt.Errorf("...: %w", err)` in every user-facing path. `fmt.Sprintf("%+v", err)` now prints the captured wrap site for any error produced by the SDK.
+
 * Explicit HTTP connection pool configuration ([CHA-2956](https://linear.app/stream/issue/CHA-2956/connection-pooling)).
   Four new functional options:
     * `WithMaxConnsPerHost(int)`: default `5`

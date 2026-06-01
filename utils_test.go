@@ -3,7 +3,7 @@ package getstream_test
 import (
 	"bytes"
 	"context"
-	"fmt"
+	"errors"
 	"io"
 	"math/rand"
 	"net/http"
@@ -24,43 +24,20 @@ func (c *StubHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-// WaitForTask polls the task until it reaches a terminal status
-// ("completed" or "failed") and returns the final observation.
-//
-// Polling cadence ramps from 1s to a 5s cap. The 60-attempt budget
-// (~5 minutes) is sized to outlast async-task retry cycles on the
-// backend (e.g. rate-limited bulk hard-deletes that retry every
-// 10–15s for several minutes before clearing).
-//
-// If the budget is exhausted before a terminal status is observed,
-// the last observation is returned alongside a timeout error so
-// the caller can log the in-flight status for debugging.
-func WaitForTask(ctx context.Context, client *Stream, taskID string) (*StreamResponse[GetTaskResponse], error) {
-	const maxAttempts = 60
-	var lastResult *StreamResponse[GetTaskResponse]
-	for i := 0; i < maxAttempts; i++ {
-		taskResult, err := client.GetTask(context.Background(), taskID, &GetTaskRequest{})
-		if err != nil {
-			return nil, fmt.Errorf("failed to get task result: %w", err)
-		}
-		lastResult = taskResult
-		switch taskResult.Data.Status {
-		case "completed", "failed":
-			return taskResult, nil
-		}
-
-		interval := time.Duration(i+1) * time.Second
-		if interval > 5*time.Second {
-			interval = 5 * time.Second
-		}
-
-		select {
-		case <-ctx.Done():
-			return lastResult, fmt.Errorf("context expired waiting for task %s: %w", taskID, ctx.Err())
-		case <-time.After(interval):
-		}
+// Test helper; raised wait budget for hard-delete style tasks.
+func waitForTaskInTests(ctx context.Context, client *Stream, taskID string) (*StreamResponse[GetTaskResponse], error) {
+	res, err := WaitForTask(
+		ctx, client, taskID,
+		WithWaitForTaskTimeout(5*time.Minute),
+		WithWaitForTaskPollInterval(5*time.Second),
+	)
+	var streamErr *StreamError
+	if err != nil && errors.As(err, &streamErr) && errors.Is(err, ErrTaskFailed) {
+		// Preserve legacy test behavior: surface the failed observation
+		// rather than the new ErrTaskFailed error.
+		return res, nil
 	}
-	return lastResult, fmt.Errorf("task %s did not reach terminal status after %d attempts", taskID, maxAttempts)
+	return res, err
 }
 
 // ResourceManager manages resource cleanup for tests.
