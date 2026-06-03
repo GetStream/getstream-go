@@ -9,17 +9,19 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    environment: feeds-enabled-shard
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.19"
 
       - name: Run tests
         env:
-          STREAM_KEY: ${{ secrets.STREAM_CHAT_API_KEY }}
-          STREAM_SECRET: ${{ secrets.STREAM_CHAT_API_SECRET }}
+          STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
+          STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
+          STREAM_API_SECRET: ${{ secrets.STREAM_API_SECRET }}
         run: |
           # Retry 3 times because tests can be flaky
           for _ in 1 2 3;
