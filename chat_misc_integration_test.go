@@ -1927,6 +1927,11 @@ func TestChatSegmentCampaignIntegration(t *testing.T) {
 		SegmentIds:      []string{segmentID},
 		CreateChannels:  PtrTo(true),
 		MessageTemplate: CampaignMessageTemplate{Text: "hello from integration test"},
+		// channel_template is required by the backend when create_channels is true.
+		ChannelTemplate: &CampaignChannelTemplate{
+			Type: "messaging",
+			ID:   PtrTo("{{receiver.id}}-{{sender.id}}"),
+		},
 	})
 	require.NoError(t, err)
 	require.NotNil(t, campaignResp.Data.Campaign)
@@ -1936,7 +1941,13 @@ func TestChatSegmentCampaignIntegration(t *testing.T) {
 		_, _ = client.Chat().DeleteCampaign(context.Background(), campaignID, &DeleteCampaignRequest{})
 	})
 
-	_, err = client.Chat().StartCampaign(ctx, campaignID, &StartCampaignRequest{})
+	// Schedule for the future so the campaign stays in "scheduled" state, then
+	// stop it. A campaign started immediately could complete before the stop
+	// call lands, and a completed campaign cannot be stopped.
+	scheduledFor := time.Now().Add(time.Hour)
+	_, err = client.Chat().StartCampaign(ctx, campaignID, &StartCampaignRequest{
+		ScheduledFor: PtrTo(Timestamp{Time: &scheduledFor}),
+	})
 	require.NoError(t, err)
 
 	_, err = client.Chat().StopCampaign(ctx, campaignID, &StopCampaignRequest{})
