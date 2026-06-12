@@ -534,6 +534,13 @@ func TestChatSearch(t *testing.T) {
 	_, err = client.Chat().Search(context.Background(), &getstream.SearchRequest{})
 	require.NoError(t, err)
 }
+func TestChatCreateSegment(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().CreateSegment(context.Background(), &getstream.CreateSegmentRequest{})
+	require.NoError(t, err)
+}
 func TestChatQuerySegments(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -553,6 +560,20 @@ func TestChatGetSegment(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Chat().GetSegment(context.Background(), "", &getstream.GetSegmentRequest{})
+	require.NoError(t, err)
+}
+func TestChatUpdateSegment(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().UpdateSegment(context.Background(), "", &getstream.UpdateSegmentRequest{})
+	require.NoError(t, err)
+}
+func TestChatAddSegmentTargets(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().AddSegmentTargets(context.Background(), "", &getstream.AddSegmentTargetsRequest{})
 	require.NoError(t, err)
 }
 func TestChatDeleteSegmentTargets(t *testing.T) {

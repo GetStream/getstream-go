@@ -1875,3 +1875,70 @@ func TestChatContextExceededIntegration(t *testing.T) {
 	require.Error(t, err)
 	assert.ErrorIs(t, err, context.DeadlineExceeded)
 }
+
+// TestChatSegmentCampaignIntegration exercises the full campaign flow that
+// requires the segment management endpoints: create a segment, add targets,
+// create a campaign that targets it, then start and stop it. Skips when the
+// app does not have the campaigns feature enabled.
+func TestChatSegmentCampaignIntegration(t *testing.T) {
+	t.Parallel()
+	skipIfShort(t)
+	client := initClient(t)
+	ctx := context.Background()
+
+	userIDs := createTestUsers(t, client, 2)
+	senderID, targetID := userIDs[0], userIDs[1]
+
+	segmentID := "test-segment-" + randomString(12)
+	createResp, err := client.Chat().CreateSegment(ctx, &CreateSegmentRequest{
+		Type: "user",
+		ID:   PtrTo(segmentID),
+		Name: PtrTo("integration test segment"),
+	})
+	if err != nil && (strings.Contains(err.Error(), "not enabled") || strings.Contains(err.Error(), "not available")) {
+		t.Skip("Campaigns feature not enabled for this app")
+	}
+	require.NoError(t, err)
+	require.NotNil(t, createResp.Data.Segment)
+	require.Equal(t, segmentID, createResp.Data.Segment.ID)
+
+	t.Cleanup(func() {
+		_, _ = client.Chat().DeleteSegment(context.Background(), segmentID, &DeleteSegmentRequest{})
+	})
+
+	// Add the target user, then confirm it is in the segment.
+	_, err = client.Chat().AddSegmentTargets(ctx, segmentID, &AddSegmentTargetsRequest{
+		TargetIds: []string{targetID},
+	})
+	require.NoError(t, err)
+
+	_, err = client.Chat().SegmentTargetExists(ctx, segmentID, targetID, &SegmentTargetExistsRequest{})
+	require.NoError(t, err)
+
+	// Update the segment description through the newly exposed endpoint.
+	_, err = client.Chat().UpdateSegment(ctx, segmentID, &UpdateSegmentRequest{
+		Description: PtrTo("updated by integration test"),
+	})
+	require.NoError(t, err)
+
+	// Create a campaign targeting the segment, then start and stop it.
+	campaignResp, err := client.Chat().CreateCampaign(ctx, &CreateCampaignRequest{
+		SenderID:        senderID,
+		SegmentIds:      []string{segmentID},
+		CreateChannels:  PtrTo(true),
+		MessageTemplate: CampaignMessageTemplate{Text: "hello from integration test"},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, campaignResp.Data.Campaign)
+	campaignID := campaignResp.Data.Campaign.ID
+
+	t.Cleanup(func() {
+		_, _ = client.Chat().DeleteCampaign(context.Background(), campaignID, &DeleteCampaignRequest{})
+	})
+
+	_, err = client.Chat().StartCampaign(ctx, campaignID, &StartCampaignRequest{})
+	require.NoError(t, err)
+
+	_, err = client.Chat().StopCampaign(ctx, campaignID, &StopCampaignRequest{})
+	require.NoError(t, err)
+}
