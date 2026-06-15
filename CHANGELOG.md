@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.1.2](https://github.com/GetStream/getstream-go/compare/v4.1.1...v4.1.2) (2026-06-15)
+
+
+### Features
+
+* [CHA-2958] standardize error handling ([#112](https://github.com/GetStream/getstream-go/issues/112)) ([fcd20e7](https://github.com/GetStream/getstream-go/commit/fcd20e7beeb240527adac2face785fe944237720))
+
 ## [4.2.0](https://github.com/GetStream/getstream-go/compare/v4.1.1...v4.2.0) (2026-MM-DD)
 
 ### Features

@@ -846,6 +846,13 @@ func (c *FeedsClient) RejectFollow(ctx context.Context, request *RejectFollowReq
 	return res, err
 }
 
+// Creates a follow if it does not exist, or returns the existing one. Broadcasts feeds.follow.created (FollowCreatedEvent) only when the follow is newly created.
+func (c *FeedsClient) GetOrCreateFollow(ctx context.Context, request *GetOrCreateFollowRequest) (*StreamResponse[GetOrCreateFollowResponse], error) {
+	var result GetOrCreateFollowResponse
+	res, err := MakeRequest[GetOrCreateFollowRequest, GetOrCreateFollowResponse](c.client, ctx, "POST", "/api/v2/feeds/follows/upsert", nil, request, &result, nil)
+	return res, err
+}
+
 // Removes a follow and broadcasts FollowRemovedEvent
 func (c *FeedsClient) Unfollow(ctx context.Context, source string, target string, request *UnfollowRequest) (*StreamResponse[UnfollowResponse], error) {
 	var result UnfollowResponse
@@ -922,6 +929,13 @@ func (c *FeedsClient) GetOrCreateUnfollows(ctx context.Context, request *GetOrCr
 	return res, err
 }
 
+// Removes a follow and broadcasts feeds.follow.deleted (FollowDeletedEvent). Does not return an error if the follow does not exist.
+func (c *FeedsClient) GetOrCreateUnfollow(ctx context.Context, request *GetOrCreateUnfollowRequest) (*StreamResponse[GetOrCreateUnfollowResponse], error) {
+	var result GetOrCreateUnfollowResponse
+	res, err := MakeRequest[GetOrCreateUnfollowRequest, GetOrCreateUnfollowResponse](c.client, ctx, "POST", "/api/v2/feeds/unfollow/upsert", nil, request, &result, nil)
+	return res, err
+}
+
 // Delete all feed data for a user including: feeds, activities, follows, comments, feed reactions, bookmark folders, bookmarks, and collections owned by the user
 func (c *FeedsClient) DeleteFeedUserData(ctx context.Context, userID string, request *DeleteFeedUserDataRequest) (*StreamResponse[DeleteFeedUserDataResponse], error) {
 	var result DeleteFeedUserDataResponse
@@ -939,5 +953,16 @@ func (c *FeedsClient) ExportFeedUserData(ctx context.Context, userID string, req
 		"user_id": userID,
 	}
 	res, err := MakeRequest[any, ExportFeedUserDataResponse](c.client, ctx, "POST", "/api/v2/feeds/users/{user_id}/export", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Returns the user's most common interest tags ranked by the number of distinct activities they reacted to that carried each tag. Client-side callers may only read their own interests; server-side callers may fetch any user. Results are sorted by descending count, then alphabetically by tag.
+func (c *FeedsClient) GetUserInterests(ctx context.Context, userID string, request *GetUserInterestsRequest) (*StreamResponse[GetUserInterestsResponse], error) {
+	var result GetUserInterestsResponse
+	pathParams := map[string]string{
+		"user_id": userID,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetUserInterestsResponse](c.client, ctx, "GET", "/api/v2/feeds/users/{user_id}/interests", params, nil, &result, pathParams)
 	return res, err
 }

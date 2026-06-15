@@ -351,7 +351,7 @@ func TestChatUserIntegration(t *testing.T) {
 					ID: userID,
 					PrivacySettings: &PrivacySettingsResponse{
 						TypingIndicators: &TypingIndicatorsResponse{
-							Enabled: PtrTo(false),
+							Enabled: false,
 						},
 					},
 				},
@@ -362,7 +362,7 @@ func TestChatUserIntegration(t *testing.T) {
 		require.True(t, ok)
 		require.NotNil(t, u.PrivacySettings)
 		require.NotNil(t, u.PrivacySettings.TypingIndicators)
-		assert.Equal(t, false, *u.PrivacySettings.TypingIndicators.Enabled)
+		assert.Equal(t, false, u.PrivacySettings.TypingIndicators.Enabled)
 		assert.Nil(t, u.PrivacySettings.ReadReceipts, "ReadReceipts should still be nil")
 
 		// Update with both TypingIndicators=true and ReadReceipts=false
@@ -372,10 +372,10 @@ func TestChatUserIntegration(t *testing.T) {
 					ID: userID,
 					PrivacySettings: &PrivacySettingsResponse{
 						TypingIndicators: &TypingIndicatorsResponse{
-							Enabled: PtrTo(true),
+							Enabled: true,
 						},
 						ReadReceipts: &ReadReceiptsResponse{
-							Enabled: PtrTo(false),
+							Enabled: false,
 						},
 					},
 				},
@@ -386,9 +386,9 @@ func TestChatUserIntegration(t *testing.T) {
 		require.True(t, ok)
 		require.NotNil(t, u.PrivacySettings)
 		require.NotNil(t, u.PrivacySettings.TypingIndicators)
-		assert.Equal(t, true, *u.PrivacySettings.TypingIndicators.Enabled)
+		assert.Equal(t, true, u.PrivacySettings.TypingIndicators.Enabled)
 		require.NotNil(t, u.PrivacySettings.ReadReceipts)
-		assert.Equal(t, false, *u.PrivacySettings.ReadReceipts.Enabled)
+		assert.Equal(t, false, u.PrivacySettings.ReadReceipts.Enabled)
 	})
 
 	t.Run("PartialUpdatePrivacySettings", func(t *testing.T) {
@@ -424,7 +424,7 @@ func TestChatUserIntegration(t *testing.T) {
 		u2 := partialResp.Data.Users[userID]
 		require.NotNil(t, u2.PrivacySettings)
 		require.NotNil(t, u2.PrivacySettings.TypingIndicators)
-		assert.True(t, *u2.PrivacySettings.TypingIndicators.Enabled)
+		assert.True(t, u2.PrivacySettings.TypingIndicators.Enabled)
 		assert.Nil(t, u2.PrivacySettings.ReadReceipts, "ReadReceipts should still be nil")
 
 		// Partial update: set read_receipts.enabled = false
@@ -446,9 +446,9 @@ func TestChatUserIntegration(t *testing.T) {
 		u3 := partialResp2.Data.Users[userID]
 		require.NotNil(t, u3.PrivacySettings)
 		require.NotNil(t, u3.PrivacySettings.TypingIndicators)
-		assert.True(t, *u3.PrivacySettings.TypingIndicators.Enabled, "TypingIndicators should still be true")
+		assert.True(t, u3.PrivacySettings.TypingIndicators.Enabled, "TypingIndicators should still be true")
 		require.NotNil(t, u3.PrivacySettings.ReadReceipts)
-		assert.False(t, *u3.PrivacySettings.ReadReceipts.Enabled)
+		assert.False(t, u3.PrivacySettings.ReadReceipts.Enabled)
 	})
 
 	t.Run("QueryUsersWithDeactivated", func(t *testing.T) {

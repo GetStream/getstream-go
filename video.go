@@ -548,6 +548,13 @@ func (c *VideoClient) DeleteTranscription(ctx context.Context, _type string, id 
 	return res, err
 }
 
+// Reports a batch of client-side telemetry events. Events are processed independently; one invalid event does not block the rest of the batch, but the request fails if any event is invalid.
+func (c *VideoClient) ReportClientCallEvent(ctx context.Context, request *ReportClientCallEventRequest) (*StreamResponse[ReportClientEventResponse], error) {
+	var result ReportClientEventResponse
+	res, err := MakeRequest[ReportClientCallEventRequest, ReportClientEventResponse](c.client, ctx, "POST", "/api/v2/video/call_client_event", nil, request, &result, nil)
+	return res, err
+}
+
 func (c *VideoClient) QueryCallSessionStats(ctx context.Context, request *QueryCallSessionStatsRequest) (*StreamResponse[QueryCallSessionStatsResponse], error) {
 	var result QueryCallSessionStatsResponse
 	res, err := MakeRequest[QueryCallSessionStatsRequest, QueryCallSessionStatsResponse](c.client, ctx, "POST", "/api/v2/video/call_stats", nil, request, &result, nil)

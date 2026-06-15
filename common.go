@@ -249,6 +249,16 @@ func (c *Client) GetImportV2Task(ctx context.Context, id string, request *GetImp
 	return res, err
 }
 
+// Requests a controlled stop of an import v2 task. Allowed only for tasks in queued or processing state; a processing import stops cleanly on its next progress tick.
+func (c *Client) CancelImportV2Task(ctx context.Context, id string, request *CancelImportV2TaskRequest) (*StreamResponse[CancelImportV2TaskResponse], error) {
+	var result CancelImportV2TaskResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, CancelImportV2TaskResponse](c, ctx, "POST", "/api/v2/imports/v2/{id}/cancel", nil, nil, &result, pathParams)
+	return res, err
+}
+
 // Gets an import
 func (c *Client) GetImport(ctx context.Context, id string, request *GetImportRequest) (*StreamResponse[GetImportResponse], error) {
 	var result GetImportResponse
