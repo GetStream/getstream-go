@@ -697,19 +697,19 @@ type CreateSegmentRequest struct {
 	AllSenderChannels *bool `json:"all_sender_channels,omitempty"`
 	// If true, all users are included in the segment
 	AllUsers *bool `json:"all_users,omitempty"`
-	// The description of the segment
+	// The description of the segment (max 256 characters)
 	Description *string `json:"description,omitempty"`
 	// The ID of the segment
 	ID *string `json:"id,omitempty"`
-	// The name of the segment
+	// The name of the segment (max 128 characters)
 	Name *string `json:"name,omitempty"`
 	// Filter to apply to the query
 	Filter map[string]any `json:"filter"`
 }
 type UpdateSegmentRequest struct {
-	// Description
+	// The description of the segment (max 256 characters)
 	Description *string `json:"description,omitempty"`
-	// Name
+	// The name of the segment (max 128 characters)
 	Name *string `json:"name,omitempty"`
 	// Filter to apply to the query
 	Filter map[string]any `json:"filter"`
