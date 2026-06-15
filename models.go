@@ -12293,13 +12293,14 @@ func (e *UserGroupMemberRemovedEvent) GetEventType() string {
 }
 
 type UserGroupResponse struct {
-	CreatedAt   Timestamp `json:"created_at"`
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	UpdatedAt   Timestamp `json:"updated_at"`
-	CreatedBy   *string   `json:"created_by,omitempty"`
-	Description *string   `json:"description,omitempty"`
-	TeamID      *string   `json:"team_id,omitempty"`
+	CreatedAt   Timestamp         `json:"created_at"`
+	ID          string            `json:"id"`
+	Name        string            `json:"name"`
+	UpdatedAt   Timestamp         `json:"updated_at"`
+	CreatedBy   *string           `json:"created_by,omitempty"`
+	Description *string           `json:"description,omitempty"`
+	TeamID      *string           `json:"team_id,omitempty"`
+	Members     []UserGroupMember `json:"members,omitempty"`
 }
 
 // Emitted when a user group is updated.
