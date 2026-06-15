@@ -159,7 +159,9 @@ const (
 	EventTypeMessageUpdated                     = "message.updated"
 	EventTypeModerationCustomAction             = "moderation.custom_action"
 	EventTypeModerationFlagged                  = "moderation.flagged"
+	EventTypeModerationImageAnalysisComplete    = "moderation.image_analysis.complete"
 	EventTypeModerationMarkReviewed             = "moderation.mark_reviewed"
+	EventTypeModerationTextAnalysisComplete     = "moderation.text_analysis.complete"
 	EventTypeModerationCheckCompleted           = "moderation_check.completed"
 	EventTypeModerationRuleTriggered            = "moderation_rule.triggered"
 	EventTypeNotificationMarkUnread             = "notification.mark_unread"
@@ -558,8 +560,12 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(ModerationCustomActionEvent)
 	case "moderation.flagged":
 		event = new(ModerationFlaggedEvent)
+	case "moderation.image_analysis.complete":
+		event = new(ModerationImageAnalysisCompleteEvent)
 	case "moderation.mark_reviewed":
 		event = new(ModerationMarkReviewedEvent)
+	case "moderation.text_analysis.complete":
+		event = new(ModerationTextAnalysisCompleteEvent)
 	case "moderation_check.completed":
 		event = new(ModerationCheckCompletedEvent)
 	case "moderation_rule.triggered":
