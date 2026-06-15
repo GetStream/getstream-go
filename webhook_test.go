@@ -214,7 +214,9 @@ func TestParseWebhookEvent(t *testing.T) {
 		{"parse message.updated", []byte(`{"type":"message.updated"}`), "message.updated", false},
 		{"parse moderation.custom_action", []byte(`{"type":"moderation.custom_action"}`), "moderation.custom_action", false},
 		{"parse moderation.flagged", []byte(`{"type":"moderation.flagged"}`), "moderation.flagged", false},
+		{"parse moderation.image_analysis.complete", []byte(`{"type":"moderation.image_analysis.complete"}`), "moderation.image_analysis.complete", false},
 		{"parse moderation.mark_reviewed", []byte(`{"type":"moderation.mark_reviewed"}`), "moderation.mark_reviewed", false},
+		{"parse moderation.text_analysis.complete", []byte(`{"type":"moderation.text_analysis.complete"}`), "moderation.text_analysis.complete", false},
 		{"parse moderation_check.completed", []byte(`{"type":"moderation_check.completed"}`), "moderation_check.completed", false},
 		{"parse moderation_rule.triggered", []byte(`{"type":"moderation_rule.triggered"}`), "moderation_rule.triggered", false},
 		{"parse notification.mark_unread", []byte(`{"type":"notification.mark_unread"}`), "notification.mark_unread", false},
@@ -287,7 +289,7 @@ func TestVerifyAndParseWebhookFromRequest(t *testing.T) {
 		t.Fatal("expected non-nil event")
 	}
 
-	// Body should be restored — downstream handlers can still read it.
+	// Body should be restored; downstream handlers can still read it.
 	restored, err := io.ReadAll(req.Body)
 	if err != nil {
 		t.Fatalf("read restored body: %v", err)
@@ -433,7 +435,7 @@ func TestWebhookConformance_Happy(t *testing.T) {
 				t.Fatalf("VerifyAndParseWebhookBytes(body.json): %v", err)
 			}
 
-			// VerifyAndParseWebhookBytes on gzip body — same signature
+			// VerifyAndParseWebhookBytes on gzip body, same signature
 			if _, err := VerifyAndParseWebhookBytes(bodyGz, sig, canonicalTestSecret); err != nil {
 				t.Fatalf("VerifyAndParseWebhookBytes(body.gz): %v", err)
 			}
@@ -517,7 +519,7 @@ func TestWebhookConformance_Negative(t *testing.T) {
 	// Per CHA-3071 wire format: DecodeSqsPayload falls back to raw bytes when
 	// base64 decoding fails (uncompressed wire format). For input that is
 	// neither valid base64 nor valid JSON nor gzip-prefixed, ParseSqs still
-	// returns an ErrInvalidWebhook — just down the chain at JSON parsing.
+	// returns an ErrInvalidWebhook, just down the chain at JSON parsing.
 	expectInvalid("bad_base64", "", func() (WebhookEvent, error) {
 		msg := readStr(t, filepath.Join(invalidRoot, "bad_base64", "sqs_body.txt"))
 		return ParseSqs(msg)

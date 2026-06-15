@@ -618,6 +618,13 @@ func TestFeedsRejectFollow(t *testing.T) {
 	_, err = client.Feeds().RejectFollow(context.Background(), &getstream.RejectFollowRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsGetOrCreateFollow(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().GetOrCreateFollow(context.Background(), &getstream.GetOrCreateFollowRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsUnfollow(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -681,6 +688,13 @@ func TestFeedsGetOrCreateUnfollows(t *testing.T) {
 	_, err = client.Feeds().GetOrCreateUnfollows(context.Background(), &getstream.GetOrCreateUnfollowsRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsGetOrCreateUnfollow(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().GetOrCreateUnfollow(context.Background(), &getstream.GetOrCreateUnfollowRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsDeleteFeedUserData(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -693,5 +707,12 @@ func TestFeedsExportFeedUserData(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().ExportFeedUserData(context.Background(), "", &getstream.ExportFeedUserDataRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsGetUserInterests(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().GetUserInterests(context.Background(), "", &getstream.GetUserInterestsRequest{})
 	require.NoError(t, err)
 }

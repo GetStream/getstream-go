@@ -226,6 +226,13 @@ func TestCommonGetImportV2Task(t *testing.T) {
 	_, err = client.GetImportV2Task(context.Background(), "", &getstream.GetImportV2TaskRequest{})
 	require.NoError(t, err)
 }
+func TestCommonCancelImportV2Task(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.CancelImportV2Task(context.Background(), "", &getstream.CancelImportV2TaskRequest{})
+	require.NoError(t, err)
+}
 func TestCommonGetImport(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

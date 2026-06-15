@@ -62,6 +62,13 @@ func (c *ModerationClient) InsertActionLog(ctx context.Context, request *InsertA
 	return res, err
 }
 
+// Moderate named text fields and raw image bytes via multipart/form-data. Returns a per-field lightweight verdict.
+func (c *ModerationClient) Analyze(ctx context.Context, request *AnalyzeRequest) (*StreamResponse[AnalyzeResponse], error) {
+	var result AnalyzeResponse
+	res, err := MakeRequest[AnalyzeRequest, AnalyzeResponse](c.client, ctx, "POST", "/api/v2/moderation/analyze", nil, request, &result, nil)
+	return res, err
+}
+
 // Appeal against the moderation decision
 func (c *ModerationClient) Appeal(ctx context.Context, request *AppealRequest) (*StreamResponse[AppealResponse], error) {
 	var result AppealResponse
@@ -83,6 +90,13 @@ func (c *ModerationClient) GetAppeal(ctx context.Context, id string, request *Ge
 func (c *ModerationClient) QueryAppeals(ctx context.Context, request *QueryAppealsRequest) (*StreamResponse[QueryAppealsResponse], error) {
 	var result QueryAppealsResponse
 	res, err := MakeRequest[QueryAppealsRequest, QueryAppealsResponse](c.client, ctx, "POST", "/api/v2/moderation/appeals", nil, request, &result, nil)
+	return res, err
+}
+
+// Process multiple appeals in a single request by applying the specified action to each. Supported actions: unban, restore, unblock, mark_reviewed, reject_appeal. Each appeal goes through the same path as a single submit_action call.
+func (c *ModerationClient) BulkActionAppeals(ctx context.Context, request *BulkActionAppealsRequest) (*StreamResponse[BulkActionAppealsResponse], error) {
+	var result BulkActionAppealsResponse
+	res, err := MakeRequest[BulkActionAppealsRequest, BulkActionAppealsResponse](c.client, ctx, "POST", "/api/v2/moderation/appeals/bulk_action", nil, request, &result, nil)
 	return res, err
 }
 
@@ -277,6 +291,20 @@ func (c *ModerationClient) GetReviewQueueItem(ctx context.Context, id string, re
 		"id": id,
 	}
 	res, err := MakeRequest[any, GetReviewQueueItemResponse](c.client, ctx, "GET", "/api/v2/moderation/review_queue/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Retrieve a setup session for an app
+func (c *ModerationClient) GetSetupSession(ctx context.Context, request *GetSetupSessionRequest) (*StreamResponse[GetSetupSessionResponse], error) {
+	var result GetSetupSessionResponse
+	res, err := MakeRequest[any, GetSetupSessionResponse](c.client, ctx, "GET", "/api/v2/moderation/setup", nil, nil, &result, nil)
+	return res, err
+}
+
+// Update a setup session for an app
+func (c *ModerationClient) UpsertSetupSession(ctx context.Context, request *UpsertSetupSessionRequest) (*StreamResponse[UpsertSetupSessionResponse], error) {
+	var result UpsertSetupSessionResponse
+	res, err := MakeRequest[UpsertSetupSessionRequest, UpsertSetupSessionResponse](c.client, ctx, "POST", "/api/v2/moderation/setup", nil, request, &result, nil)
 	return res, err
 }
 
