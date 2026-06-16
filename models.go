@@ -6444,6 +6444,18 @@ type GetReviewQueueItemResponse struct {
 	Item     *ReviewQueueItemResponse `json:"item,omitempty"`
 }
 
+type CreateSegmentResponse struct {
+	// Duration of the request in milliseconds
+	Duration string           `json:"duration"`
+	Segment  *SegmentResponse `json:"segment,omitempty"`
+}
+
+type UpdateSegmentResponse struct {
+	// Duration of the request in milliseconds
+	Duration string          `json:"duration"`
+	Segment  SegmentResponse `json:"segment"`
+}
+
 type GetSegmentResponse struct {
 	// Duration of the request in milliseconds
 	Duration string           `json:"duration"`

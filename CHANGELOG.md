@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Features
 
+* Added segment management methods to `ChatClient`: `CreateSegment`, `UpdateSegment`, and `AddSegmentTargets`. Segments targeted by a campaign can now be created and edited through the SDK, completing the campaign workflow without falling back to raw REST ([CHA-3483](https://linear.app/stream/issue/CHA-3483)).
 * Standardized error handling per the Server-Side SDK Error Handling Spec ([CHA-2958](https://linear.app/stream/issue/CHA-2958)).
   * Four sentinel error categories on the existing `*StreamError`: `ErrApiResponse`, `ErrRateLimited`, `ErrTransport`, `ErrTaskFailed`. Use `errors.Is(err, ...)` to branch and `errors.As(err, &streamErr)` to extract typed fields. `ErrRateLimited` also satisfies `errors.Is(err, ErrApiResponse)`.
   * New fields on `StreamError`: `Unrecoverable`, `Details`, `RawResponseBody`, `RetryAfter`, `ErrorType`, `Task`. No existing field accesses change.

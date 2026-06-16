@@ -868,6 +868,13 @@ func (c *ChatClient) Search(ctx context.Context, request *SearchRequest) (*Strea
 	return res, err
 }
 
+// Create segment
+func (c *ChatClient) CreateSegment(ctx context.Context, request *CreateSegmentRequest) (*StreamResponse[CreateSegmentResponse], error) {
+	var result CreateSegmentResponse
+	res, err := MakeRequest[CreateSegmentRequest, CreateSegmentResponse](c.client, ctx, "POST", "/api/v2/chat/segments", nil, request, &result, nil)
+	return res, err
+}
+
 // Query segments
 func (c *ChatClient) QuerySegments(ctx context.Context, request *QuerySegmentsRequest) (*StreamResponse[QuerySegmentsResponse], error) {
 	var result QuerySegmentsResponse
@@ -892,6 +899,26 @@ func (c *ChatClient) GetSegment(ctx context.Context, id string, request *GetSegm
 		"id": id,
 	}
 	res, err := MakeRequest[any, GetSegmentResponse](c.client, ctx, "GET", "/api/v2/chat/segments/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Update an existing segment
+func (c *ChatClient) UpdateSegment(ctx context.Context, id string, request *UpdateSegmentRequest) (*StreamResponse[UpdateSegmentResponse], error) {
+	var result UpdateSegmentResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[UpdateSegmentRequest, UpdateSegmentResponse](c.client, ctx, "PUT", "/api/v2/chat/segments/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Add targets to a segment
+func (c *ChatClient) AddSegmentTargets(ctx context.Context, id string, request *AddSegmentTargetsRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[AddSegmentTargetsRequest, Response](c.client, ctx, "POST", "/api/v2/chat/segments/{id}/addtargets", nil, request, &result, pathParams)
 	return res, err
 }
 
