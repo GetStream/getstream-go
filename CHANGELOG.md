@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.2.0](https://github.com/GetStream/getstream-go/compare/v4.1.2...v4.2.0) (2026-06-16)
+
+
+### Features
+
+* add segment management methods to ChatClient ([#114](https://github.com/GetStream/getstream-go/issues/114)) ([566815e](https://github.com/GetStream/getstream-go/commit/566815e6f5c5aa9fcd447d10f140df9d6e6e6677))
+
 ### [4.1.2](https://github.com/GetStream/getstream-go/compare/v4.1.1...v4.1.2) (2026-06-15)
 
 
