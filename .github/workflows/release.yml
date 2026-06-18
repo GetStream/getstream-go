@@ -7,24 +7,43 @@ on:
       - main
 
 jobs:
-  Release:
-    name: 🚀 Release
+  prepare_release:
+    name: Prepare release
     if: github.event.pull_request.merged && startsWith(github.head_ref, 'release-')
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release_meta.outputs.version }}
+      tag: ${{ steps.release_meta.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/github-script@v6
-        with:
-          script: |
-            // Getting the release version from the PR source branch
-            // Source branch looks like this: release-1.0.0
-            const version = context.payload.pull_request.head.ref.split('-')[1]
-            core.exportVariable('VERSION', version)
+      - name: Resolve release version
+        id: release_meta
+        run: |
+          VERSION="${GITHUB_HEAD_REF#release-}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${VERSION}" >> "$GITHUB_OUTPUT"
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Run tests
+        env:
+          STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
+          STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
+          STREAM_API_SECRET: ${{ secrets.STREAM_API_SECRET }}
+        run: go test -short -v ./...
+
+  publish_release:
+    name: Publish release
+    needs: prepare_release
+    runs-on: ubuntu-latest
+    steps:
       - name: Create release on GitHub
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ env.VERSION }}
+          tag: ${{ needs.prepare_release.outputs.tag }}
           token: ${{ secrets.GITHUB_TOKEN }}
           generateReleaseNotes: true
