@@ -688,15 +688,6 @@ type GetRetentionPolicyRunsRequest struct {
 type SearchRequest struct {
 	Payload *SearchPayload `json:"-" query:"payload"`
 }
-type QuerySegmentsRequest struct {
-	// Filter to apply to the query
-	Filter map[string]any `json:"filter"`
-	Limit  *int           `json:"limit,omitempty"`
-	Next   *string        `json:"next,omitempty"`
-	Prev   *string        `json:"prev,omitempty"`
-	// Array of sort parameters
-	Sort []SortParamRequest `json:"sort"`
-}
 type CreateSegmentRequest struct {
 	// The type of the segment
 	Type string `json:"type"`
@@ -713,6 +704,19 @@ type CreateSegmentRequest struct {
 	// Filter to apply to the query
 	Filter map[string]any `json:"filter"`
 }
+type QuerySegmentsRequest struct {
+	// Filter to apply to the query
+	Filter map[string]any `json:"filter"`
+	Limit  *int           `json:"limit,omitempty"`
+	Next   *string        `json:"next,omitempty"`
+	Prev   *string        `json:"prev,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+}
+type DeleteSegmentRequest struct {
+}
+type GetSegmentRequest struct {
+}
 type UpdateSegmentRequest struct {
 	// The description of the segment (max 256 characters)
 	Description *string `json:"description,omitempty"`
@@ -721,15 +725,11 @@ type UpdateSegmentRequest struct {
 	// Filter to apply to the query
 	Filter map[string]any `json:"filter"`
 }
-type DeleteSegmentRequest struct {
-}
-type GetSegmentRequest struct {
-}
-type DeleteSegmentTargetsRequest struct {
+type AddSegmentTargetsRequest struct {
 	// Target IDs
 	TargetIds []string `json:"target_ids"`
 }
-type AddSegmentTargetsRequest struct {
+type DeleteSegmentTargetsRequest struct {
 	// Target IDs
 	TargetIds []string `json:"target_ids"`
 }

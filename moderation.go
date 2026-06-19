@@ -101,9 +101,9 @@ func (c *ModerationClient) BulkActionAppeals(ctx context.Context, request *BulkA
 }
 
 // Ban a user from a channel or the entire app
-func (c *ModerationClient) Ban(ctx context.Context, request *BanRequest) (*StreamResponse[BanResponse], error) {
-	var result BanResponse
-	res, err := MakeRequest[BanRequest, BanResponse](c.client, ctx, "POST", "/api/v2/moderation/ban", nil, request, &result, nil)
+func (c *ModerationClient) Ban(ctx context.Context, request *BanRequest) (*StreamResponse[ModerationBanResponse], error) {
+	var result ModerationBanResponse
+	res, err := MakeRequest[BanRequest, ModerationBanResponse](c.client, ctx, "POST", "/api/v2/moderation/ban", nil, request, &result, nil)
 	return res, err
 }
 
@@ -200,9 +200,9 @@ func (c *ModerationClient) V2UpsertTemplate(ctx context.Context, request *V2Upse
 }
 
 // Flag any type of content (messages, users, channels, activities) for moderation review. Supports custom content types and additional metadata for flagged content.
-func (c *ModerationClient) Flag(ctx context.Context, request *FlagRequest) (*StreamResponse[FlagResponse], error) {
-	var result FlagResponse
-	res, err := MakeRequest[FlagRequest, FlagResponse](c.client, ctx, "POST", "/api/v2/moderation/flag", nil, request, &result, nil)
+func (c *ModerationClient) Flag(ctx context.Context, request *FlagRequest) (*StreamResponse[FlagItemResponse], error) {
+	var result FlagItemResponse
+	res, err := MakeRequest[FlagRequest, FlagItemResponse](c.client, ctx, "POST", "/api/v2/moderation/flag", nil, request, &result, nil)
 	return res, err
 }
 
