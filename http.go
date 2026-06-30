@@ -23,13 +23,22 @@ func (c *Client) logRequest(req *http.Request) {
 	for key, values := range req.Header {
 		c.logger.Debug("%s: %s", key, strings.Join(values, ", "))
 	}
-	if req.Body != nil {
-		var buf bytes.Buffer
-		body, _ := io.ReadAll(req.Body)
-		buf.Write(body)
-		req.Body = io.NopCloser(&buf)
-		c.logger.Debug("\n%s", string(body))
+	if req.Body == nil {
+		return
 	}
+	// Read via GetBody so the live body stays intact; only drain+restore when
+	// there's no GetBody (streaming bodies).
+	if req.GetBody != nil {
+		if rc, err := req.GetBody(); err == nil {
+			body, _ := io.ReadAll(rc)
+			rc.Close()
+			c.logger.Debug("\n%s", string(body))
+			return
+		}
+	}
+	body, _ := io.ReadAll(req.Body)
+	req.Body = io.NopCloser(bytes.NewReader(body))
+	c.logger.Debug("\n%s", string(body))
 }
 
 // logResponse logs the details of an HTTP response
@@ -268,12 +277,23 @@ func newRequest[T any](c *Client, ctx context.Context, method, path string, para
 			c.logger.Error("Error marshaling data: %+v, setting body to nil", err)
 			r.Body = nil
 		} else {
-			r.Body = io.NopCloser(bytes.NewReader(b))
+			setRetryableBody(r, b)
 			c.logger.Debug("Request body set with JSON: %s", string(b))
 		}
 	}
 
 	return r, nil
+}
+
+// setRetryableBody sets an in-memory body with ContentLength and GetBody. GetBody
+// lets the HTTP/2 transport retry the request on GOAWAY/REFUSED_STREAM, which it
+// can't do without a rewindable body.
+func setRetryableBody(r *http.Request, b []byte) {
+	r.ContentLength = int64(len(b))
+	r.Body = io.NopCloser(bytes.NewReader(b))
+	r.GetBody = func() (io.ReadCloser, error) {
+		return io.NopCloser(bytes.NewReader(b)), nil
+	}
 }
 
 func getFileContent(fileName string, fileContent io.Reader) (io.Reader, error) {
@@ -432,8 +452,8 @@ func (c *Client) createMultipartRequest(r *http.Request, data any) (*http.Reques
 		return nil, stackWrap(err, "failed to close multipart writer")
 	}
 
-	// Update request body and content type
-	r.Body = io.NopCloser(&buf)
+	// buf isn't mutated after this, so sharing its slice is safe.
+	setRetryableBody(r, buf.Bytes())
 	r.Header.Set("Content-Type", writer.FormDataContentType())
 
 	c.logger.Debug("Created multipart request with file: %s", fileName)
