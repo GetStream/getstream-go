@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.2.2](https://github.com/GetStream/getstream-go/compare/v4.2.1...v4.2.2) (2026-06-30)
+
+
+### Features
+
+* Update OpenAPI specs ([#120](https://github.com/GetStream/getstream-go/issues/120)) ([eb3092b](https://github.com/GetStream/getstream-go/commit/eb3092b6990dc33bb45e1107cdde8febc1559c55))
+
 ### [4.2.1](https://github.com/GetStream/getstream-go/compare/v4.2.0...v4.2.1) (2026-06-30)
 
 ## [4.2.0](https://github.com/GetStream/getstream-go/compare/v4.1.2...v4.2.0) (2026-06-16)
