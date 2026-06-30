@@ -70,6 +70,7 @@ type CreateBlockListRequest struct {
 	IsConfusableFoldingEnabled *bool    `json:"is_confusable_folding_enabled,omitempty"`
 	IsLeetCheckEnabled         *bool    `json:"is_leet_check_enabled,omitempty"`
 	IsPluralCheckEnabled       *bool    `json:"is_plural_check_enabled,omitempty"`
+	IsSubstringMatchingEnabled *bool    `json:"is_substring_matching_enabled,omitempty"`
 	Team                       *string  `json:"team,omitempty"`
 	// Block list type. One of: regex, domain, domain_allowlist, email, email_allowlist, word
 	Type *string `json:"type,omitempty"`
@@ -84,6 +85,7 @@ type UpdateBlockListRequest struct {
 	IsConfusableFoldingEnabled *bool   `json:"is_confusable_folding_enabled,omitempty"`
 	IsLeetCheckEnabled         *bool   `json:"is_leet_check_enabled,omitempty"`
 	IsPluralCheckEnabled       *bool   `json:"is_plural_check_enabled,omitempty"`
+	IsSubstringMatchingEnabled *bool   `json:"is_substring_matching_enabled,omitempty"`
 	Team                       *string `json:"team,omitempty"`
 	// List of words to block
 	Words []string `json:"words"`
@@ -688,15 +690,6 @@ type GetRetentionPolicyRunsRequest struct {
 type SearchRequest struct {
 	Payload *SearchPayload `json:"-" query:"payload"`
 }
-type QuerySegmentsRequest struct {
-	// Filter to apply to the query
-	Filter map[string]any `json:"filter"`
-	Limit  *int           `json:"limit,omitempty"`
-	Next   *string        `json:"next,omitempty"`
-	Prev   *string        `json:"prev,omitempty"`
-	// Array of sort parameters
-	Sort []SortParamRequest `json:"sort"`
-}
 type CreateSegmentRequest struct {
 	// The type of the segment
 	Type string `json:"type"`
@@ -713,6 +706,19 @@ type CreateSegmentRequest struct {
 	// Filter to apply to the query
 	Filter map[string]any `json:"filter"`
 }
+type QuerySegmentsRequest struct {
+	// Filter to apply to the query
+	Filter map[string]any `json:"filter"`
+	Limit  *int           `json:"limit,omitempty"`
+	Next   *string        `json:"next,omitempty"`
+	Prev   *string        `json:"prev,omitempty"`
+	// Array of sort parameters
+	Sort []SortParamRequest `json:"sort"`
+}
+type DeleteSegmentRequest struct {
+}
+type GetSegmentRequest struct {
+}
 type UpdateSegmentRequest struct {
 	// The description of the segment (max 256 characters)
 	Description *string `json:"description,omitempty"`
@@ -721,15 +727,11 @@ type UpdateSegmentRequest struct {
 	// Filter to apply to the query
 	Filter map[string]any `json:"filter"`
 }
-type DeleteSegmentRequest struct {
-}
-type GetSegmentRequest struct {
-}
-type DeleteSegmentTargetsRequest struct {
+type AddSegmentTargetsRequest struct {
 	// Target IDs
 	TargetIds []string `json:"target_ids"`
 }
-type AddSegmentTargetsRequest struct {
+type DeleteSegmentTargetsRequest struct {
 	// Target IDs
 	TargetIds []string `json:"target_ids"`
 }
@@ -983,6 +985,19 @@ type QueryActivitiesRequest struct {
 	// Sorting parameters for the query
 	Sort []SortParamRequest `json:"sort"`
 	// Filters to apply to the query. Supports location-based queries with 'near' and 'within_bounds' operators.
+	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
+}
+type BatchQueryActivityReactionsRequest struct {
+	// Activity IDs to fetch the user's reactions for (max 100)
+	ActivityIds []string `json:"activity_ids"`
+	Limit       *int     `json:"limit,omitempty"`
+	Next        *string  `json:"next,omitempty"`
+	Prev        *string  `json:"prev,omitempty"`
+	// Server-side only. The user whose reactions to fetch; defaults to the authenticated user for client-side requests
+	UserID *string            `json:"user_id,omitempty"`
+	Sort   []SortParamRequest `json:"sort"`
+	// Optional filter on reaction_type or created_at
 	Filter map[string]any `json:"filter"`
 	User   *UserRequest   `json:"user,omitempty"`
 }
@@ -1252,6 +1267,19 @@ type QueryCommentsRequest struct {
 	Sort   *string      `json:"sort,omitempty"`
 	UserID *string      `json:"user_id,omitempty"`
 	User   *UserRequest `json:"user,omitempty"`
+}
+type BatchQueryCommentReactionsRequest struct {
+	// Comment IDs to fetch the user's reactions for (max 100)
+	CommentIds []string `json:"comment_ids"`
+	Limit      *int     `json:"limit,omitempty"`
+	Next       *string  `json:"next,omitempty"`
+	Prev       *string  `json:"prev,omitempty"`
+	// Server-side only. The user whose reactions to fetch; defaults to the authenticated user for client-side requests
+	UserID *string            `json:"user_id,omitempty"`
+	Sort   []SortParamRequest `json:"sort"`
+	// Optional filter on reaction_type or created_at
+	Filter map[string]any `json:"filter"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type DeleteCommentBookmarkRequest struct {
 	FolderID *string `json:"-" query:"folder_id"`
@@ -2221,6 +2249,32 @@ type MuteRequest struct {
 	Timeout *int         `json:"timeout,omitempty"`
 	UserID  *string      `json:"user_id,omitempty"`
 	User    *UserRequest `json:"user,omitempty"`
+}
+type ListQueuesRequest struct {
+}
+type CreateQueueRequest struct {
+	Name        string           `json:"name"`
+	Type        string           `json:"type"`
+	Description *string          `json:"description,omitempty"`
+	UserID      *string          `json:"user_id,omitempty"`
+	Sort        []map[string]any `json:"sort"`
+	Filters     map[string]any   `json:"filters"`
+	User        *UserRequest     `json:"user,omitempty"`
+}
+type GetQueueRequest struct {
+	UserID *string `json:"-" query:"user_id"`
+}
+type UpdateQueueRequest struct {
+	Description *string          `json:"description,omitempty"`
+	Name        *string          `json:"name,omitempty"`
+	UserID      *string          `json:"user_id,omitempty"`
+	Sort        []map[string]any `json:"sort"`
+	Filters     map[string]any   `json:"filters"`
+	User        *UserRequest     `json:"user,omitempty"`
+}
+type DeleteQueueRequest struct {
+	UserID *string      `json:"user_id,omitempty"`
+	User   *UserRequest `json:"user,omitempty"`
 }
 type QueryReviewQueueRequest struct {
 	ExcludeDefaultActionConfig *bool `json:"exclude_default_action_config,omitempty"`
