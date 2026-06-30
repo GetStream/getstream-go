@@ -101,9 +101,9 @@ func (c *ModerationClient) BulkActionAppeals(ctx context.Context, request *BulkA
 }
 
 // Ban a user from a channel or the entire app
-func (c *ModerationClient) Ban(ctx context.Context, request *BanRequest) (*StreamResponse[BanResponse], error) {
-	var result BanResponse
-	res, err := MakeRequest[BanRequest, BanResponse](c.client, ctx, "POST", "/api/v2/moderation/ban", nil, request, &result, nil)
+func (c *ModerationClient) Ban(ctx context.Context, request *BanRequest) (*StreamResponse[ModerationBanResponse], error) {
+	var result ModerationBanResponse
+	res, err := MakeRequest[BanRequest, ModerationBanResponse](c.client, ctx, "POST", "/api/v2/moderation/ban", nil, request, &result, nil)
 	return res, err
 }
 
@@ -200,9 +200,9 @@ func (c *ModerationClient) V2UpsertTemplate(ctx context.Context, request *V2Upse
 }
 
 // Flag any type of content (messages, users, channels, activities) for moderation review. Supports custom content types and additional metadata for flagged content.
-func (c *ModerationClient) Flag(ctx context.Context, request *FlagRequest) (*StreamResponse[FlagResponse], error) {
-	var result FlagResponse
-	res, err := MakeRequest[FlagRequest, FlagResponse](c.client, ctx, "POST", "/api/v2/moderation/flag", nil, request, &result, nil)
+func (c *ModerationClient) Flag(ctx context.Context, request *FlagRequest) (*StreamResponse[FlagItemResponse], error) {
+	var result FlagItemResponse
+	res, err := MakeRequest[FlagRequest, FlagItemResponse](c.client, ctx, "POST", "/api/v2/moderation/flag", nil, request, &result, nil)
 	return res, err
 }
 
@@ -274,6 +274,46 @@ func (c *ModerationClient) QueryModerationRules(ctx context.Context, request *Qu
 func (c *ModerationClient) Mute(ctx context.Context, request *MuteRequest) (*StreamResponse[MuteResponse], error) {
 	var result MuteResponse
 	res, err := MakeRequest[MuteRequest, MuteResponse](c.client, ctx, "POST", "/api/v2/moderation/mute", nil, request, &result, nil)
+	return res, err
+}
+
+func (c *ModerationClient) ListQueues(ctx context.Context, request *ListQueuesRequest) (*StreamResponse[ListQueuesResponse], error) {
+	var result ListQueuesResponse
+	res, err := MakeRequest[any, ListQueuesResponse](c.client, ctx, "GET", "/api/v2/moderation/queues", nil, nil, &result, nil)
+	return res, err
+}
+
+func (c *ModerationClient) CreateQueue(ctx context.Context, request *CreateQueueRequest) (*StreamResponse[QueueResponse], error) {
+	var result QueueResponse
+	res, err := MakeRequest[CreateQueueRequest, QueueResponse](c.client, ctx, "POST", "/api/v2/moderation/queues", nil, request, &result, nil)
+	return res, err
+}
+
+func (c *ModerationClient) GetQueue(ctx context.Context, id string, request *GetQueueRequest) (*StreamResponse[QueueResponse], error) {
+	var result QueueResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, QueueResponse](c.client, ctx, "GET", "/api/v2/moderation/queues/{id}", params, nil, &result, pathParams)
+	return res, err
+}
+
+func (c *ModerationClient) UpdateQueue(ctx context.Context, id string, request *UpdateQueueRequest) (*StreamResponse[QueueResponse], error) {
+	var result QueueResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[UpdateQueueRequest, QueueResponse](c.client, ctx, "PATCH", "/api/v2/moderation/queues/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
+func (c *ModerationClient) DeleteQueue(ctx context.Context, id string, request *DeleteQueueRequest) (*StreamResponse[QueueResponse], error) {
+	var result QueueResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[DeleteQueueRequest, QueueResponse](c.client, ctx, "POST", "/api/v2/moderation/queues/{id}/delete", nil, request, &result, pathParams)
 	return res, err
 }
 

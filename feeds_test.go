@@ -51,6 +51,13 @@ func TestFeedsQueryActivities(t *testing.T) {
 	_, err = client.Feeds().QueryActivities(context.Background(), &getstream.QueryActivitiesRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsBatchQueryActivityReactions(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().BatchQueryActivityReactions(context.Background(), &getstream.BatchQueryActivityReactionsRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsDeleteBookmark(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -245,6 +252,13 @@ func TestFeedsQueryComments(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().QueryComments(context.Background(), &getstream.QueryCommentsRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsBatchQueryCommentReactions(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().BatchQueryCommentReactions(context.Background(), &getstream.BatchQueryCommentReactionsRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsDeleteCommentBookmark(t *testing.T) {

@@ -868,7 +868,7 @@ func (c *ChatClient) Search(ctx context.Context, request *SearchRequest) (*Strea
 	return res, err
 }
 
-// Create segment
+// Create a segment
 func (c *ChatClient) CreateSegment(ctx context.Context, request *CreateSegmentRequest) (*StreamResponse[CreateSegmentResponse], error) {
 	var result CreateSegmentResponse
 	res, err := MakeRequest[CreateSegmentRequest, CreateSegmentResponse](c.client, ctx, "POST", "/api/v2/chat/segments", nil, request, &result, nil)

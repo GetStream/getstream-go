@@ -29,7 +29,7 @@ func (c *FeedsClient) UpsertActivities(ctx context.Context, request *UpsertActiv
 	return res, err
 }
 
-// Updates certain fields of multiple activities in a batch. Use 'set' to update specific fields and 'unset' to remove fields. Activities that fail due to not found, permission denied, or no changes detected are silently skipped and not included in the response. However, validation errors (e.g., updating reserved fields, invalid field values) will fail the entire batch request.
+// Updates certain fields of multiple activities in a batch. Use 'set' to update specific fields and 'unset' to remove fields. Activities that fail due to not found, permission denied, or no changes detected are silently skipped and not included in the response. However, validation errors (e.g., updating reserved fields, invalid field values, exceeding size limits) will fail the entire batch request.
 //
 // Sends events:
 // - feeds.activity.updated
@@ -57,6 +57,13 @@ func (c *FeedsClient) TrackActivityMetrics(ctx context.Context, request *TrackAc
 func (c *FeedsClient) QueryActivities(ctx context.Context, request *QueryActivitiesRequest) (*StreamResponse[QueryActivitiesResponse], error) {
 	var result QueryActivitiesResponse
 	res, err := MakeRequest[QueryActivitiesRequest, QueryActivitiesResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/query", nil, request, &result, nil)
+	return res, err
+}
+
+// Returns a single user's reactions across a set of activity IDs, without activity payloads
+func (c *FeedsClient) BatchQueryActivityReactions(ctx context.Context, request *BatchQueryActivityReactionsRequest) (*StreamResponse[BatchQueryActivityReactionsResponse], error) {
+	var result BatchQueryActivityReactionsResponse
+	res, err := MakeRequest[BatchQueryActivityReactionsRequest, BatchQueryActivityReactionsResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/reactions/query", nil, request, &result, nil)
 	return res, err
 }
 
@@ -332,6 +339,13 @@ func (c *FeedsClient) AddCommentsBatch(ctx context.Context, request *AddComments
 func (c *FeedsClient) QueryComments(ctx context.Context, request *QueryCommentsRequest) (*StreamResponse[QueryCommentsResponse], error) {
 	var result QueryCommentsResponse
 	res, err := MakeRequest[QueryCommentsRequest, QueryCommentsResponse](c.client, ctx, "POST", "/api/v2/feeds/comments/query", nil, request, &result, nil)
+	return res, err
+}
+
+// Returns a single user's reactions across a set of comment IDs, without comment payloads
+func (c *FeedsClient) BatchQueryCommentReactions(ctx context.Context, request *BatchQueryCommentReactionsRequest) (*StreamResponse[BatchQueryCommentReactionsResponse], error) {
+	var result BatchQueryCommentReactionsResponse
+	res, err := MakeRequest[BatchQueryCommentReactionsRequest, BatchQueryCommentReactionsResponse](c.client, ctx, "POST", "/api/v2/feeds/comments/reactions/query", nil, request, &result, nil)
 	return res, err
 }
 

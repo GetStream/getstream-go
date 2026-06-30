@@ -648,8 +648,13 @@ type AddCommentReactionResponse struct {
 	Duration string                `json:"duration"`
 	Comment  CommentResponse       `json:"comment"`
 	Reaction FeedsReactionResponse `json:"reaction"`
-	// Whether a notification activity was successfully created
+	// Whether notification creation was accepted for asynchronous processing
+	NotificationAccepted *bool `json:"notification_accepted,omitempty"`
+	// Deprecated. Mirrors notification_accepted; use notification_accepted for async enqueue status Deprecated: use notification_accepted
+	// Deprecated: this field is deprecated.
 	NotificationCreated *bool `json:"notification_created,omitempty"`
+	// ID of the async notification-creation task; poll GET /tasks/{id} for its status
+	NotificationTaskID *string `json:"notification_task_id,omitempty"`
 }
 
 type AddCommentResponse struct {
@@ -697,8 +702,13 @@ type AddReactionResponse struct {
 	Duration string                `json:"duration"`
 	Activity ActivityResponse      `json:"activity"`
 	Reaction FeedsReactionResponse `json:"reaction"`
-	// Whether a notification activity was successfully created
+	// Whether notification creation was accepted for asynchronous processing
+	NotificationAccepted *bool `json:"notification_accepted,omitempty"`
+	// Deprecated. Mirrors notification_accepted; use notification_accepted for async enqueue status Deprecated: use notification_accepted
+	// Deprecated: this field is deprecated.
 	NotificationCreated *bool `json:"notification_created,omitempty"`
+	// ID of the async notification-creation task; poll GET /tasks/{id} for its status
+	NotificationTaskID *string `json:"notification_task_id,omitempty"`
 }
 
 // Response for adding members to a user group
@@ -796,6 +806,7 @@ type AppResponseFields struct {
 	ImageModerationEnabled                bool                            `json:"image_moderation_enabled"`
 	MaxAggregatedActivitiesLength         int                             `json:"max_aggregated_activities_length"`
 	ModerationAudioCallModerationEnabled  bool                            `json:"moderation_audio_call_moderation_enabled"`
+	ModerationAudioFileEnabled            bool                            `json:"moderation_audio_file_enabled"`
 	ModerationEnabled                     bool                            `json:"moderation_enabled"`
 	ModerationLlmConfigurabilityEnabled   bool                            `json:"moderation_llm_configurability_enabled"`
 	ModerationMultitenantBlocklistEnabled bool                            `json:"moderation_multitenant_blocklist_enabled"`
@@ -822,7 +833,7 @@ type AppResponseFields struct {
 	UserSearchDisallowedRoles             []string                        `json:"user_search_disallowed_roles"`
 	WebhookEvents                         []string                        `json:"webhook_events"`
 	CallTypes                             map[string]*CallType            `json:"call_types"`
-	ChannelConfigs                        map[string]ChannelConfig        `json:"channel_configs"`
+	ChannelConfigs                        map[string]*ChannelConfig       `json:"channel_configs"`
 	FileUploadConfig                      FileUploadConfig                `json:"file_upload_config"`
 	Grants                                map[string][]string             `json:"grants"`
 	ImageUploadConfig                     FileUploadConfig                `json:"image_upload_config"`
@@ -1194,6 +1205,24 @@ type BanResponse struct {
 	User      *UserResponse    `json:"user,omitempty"`
 }
 
+// Basic response information
+type BatchQueryActivityReactionsResponse struct {
+	// Duration of the request in milliseconds
+	Duration  string                  `json:"duration"`
+	Reactions []FeedsReactionResponse `json:"reactions"`
+	Next      *string                 `json:"next,omitempty"`
+	Prev      *string                 `json:"prev,omitempty"`
+}
+
+// Basic response information
+type BatchQueryCommentReactionsResponse struct {
+	// Duration of the request in milliseconds
+	Duration  string                  `json:"duration"`
+	Reactions []FeedsReactionResponse `json:"reactions"`
+	Next      *string                 `json:"next,omitempty"`
+	Prev      *string                 `json:"prev,omitempty"`
+}
+
 // Configuration for block action
 type BlockActionRequestPayload struct {
 	// Reason for blocking
@@ -1219,6 +1248,7 @@ type BlockListResponse struct {
 	IsConfusableFoldingEnabled bool `json:"is_confusable_folding_enabled"`
 	IsLeetCheckEnabled         bool `json:"is_leet_check_enabled"`
 	IsPluralCheckEnabled       bool `json:"is_plural_check_enabled"`
+	IsSubstringMatchingEnabled bool `json:"is_substring_matching_enabled"`
 	// Block list name
 	Name string `json:"name"`
 	// Block list type. One of: regex, domain, domain_allowlist, email, email_allowlist, word
@@ -2759,8 +2789,48 @@ type ChannelBatchUpdateResponse struct {
 	TaskID   *string `json:"task_id,omitempty"`
 }
 
-// Channel configuration overrides
 type ChannelConfig struct {
+	Automod                        string    `json:"automod"`
+	AutomodBehavior                string    `json:"automod_behavior"`
+	ConnectEvents                  bool      `json:"connect_events"`
+	CountMessages                  bool      `json:"count_messages"`
+	CreatedAt                      Timestamp `json:"created_at"`
+	CustomEvents                   bool      `json:"custom_events"`
+	DeliveryEvents                 bool      `json:"delivery_events"`
+	MarkMessagesPending            bool      `json:"mark_messages_pending"`
+	MaxMessageLength               int       `json:"max_message_length"`
+	Mutes                          bool      `json:"mutes"`
+	Name                           string    `json:"name"`
+	Polls                          bool      `json:"polls"`
+	PushNotifications              bool      `json:"push_notifications"`
+	Quotes                         bool      `json:"quotes"`
+	Reactions                      bool      `json:"reactions"`
+	ReadEvents                     bool      `json:"read_events"`
+	Reminders                      bool      `json:"reminders"`
+	Replies                        bool      `json:"replies"`
+	Search                         bool      `json:"search"`
+	SharedLocations                bool      `json:"shared_locations"`
+	SkipLastMsgUpdateForSystemMsgs bool      `json:"skip_last_msg_update_for_system_msgs"`
+	TypingEvents                   bool      `json:"typing_events"`
+	UpdatedAt                      Timestamp `json:"updated_at"`
+	Uploads                        bool      `json:"uploads"`
+	UrlEnrichment                  bool      `json:"url_enrichment"`
+	UserMessageReminders           bool      `json:"user_message_reminders"`
+	// List of commands that channel supports
+	Commands           []string           `json:"commands"`
+	Blocklist          *string            `json:"blocklist,omitempty"`
+	BlocklistBehavior  *string            `json:"blocklist_behavior,omitempty"`
+	PartitionSize      *int               `json:"partition_size,omitempty"`
+	PartitionTtl       *string            `json:"partition_ttl,omitempty"`
+	PushLevel          *string            `json:"push_level,omitempty"`
+	AllowedFlagReasons []string           `json:"allowed_flag_reasons,omitempty"`
+	Blocklists         []BlockListOptions `json:"blocklists,omitempty"`
+	AutomodThresholds  *Thresholds        `json:"automod_thresholds,omitempty"`
+	ChatPreferences    *ChatPreferences   `json:"chat_preferences,omitempty"`
+}
+
+// Channel configuration overrides
+type ChannelConfigOverrides struct {
 	Blocklist         *string `json:"blocklist,omitempty"`
 	BlocklistBehavior *string `json:"blocklist_behavior,omitempty"`
 	// Enable/disable message counting
@@ -2860,13 +2930,13 @@ func (e *ChannelCreatedEvent) GetEventType() string {
 }
 
 type ChannelDataUpdate struct {
-	AutoTranslationEnabled  *bool          `json:"auto_translation_enabled,omitempty"`
-	AutoTranslationLanguage *string        `json:"auto_translation_language,omitempty"`
-	Disabled                *bool          `json:"disabled,omitempty"`
-	Frozen                  *bool          `json:"frozen,omitempty"`
-	Team                    *string        `json:"team,omitempty"`
-	ConfigOverrides         *ChannelConfig `json:"config_overrides,omitempty"`
-	Custom                  map[string]any `json:"custom,omitempty"`
+	AutoTranslationEnabled  *bool                   `json:"auto_translation_enabled,omitempty"`
+	AutoTranslationLanguage *string                 `json:"auto_translation_language,omitempty"`
+	Disabled                *bool                   `json:"disabled,omitempty"`
+	Frozen                  *bool                   `json:"frozen,omitempty"`
+	Team                    *string                 `json:"team,omitempty"`
+	ConfigOverrides         *ChannelConfigOverrides `json:"config_overrides,omitempty"`
+	Custom                  map[string]any          `json:"custom,omitempty"`
 }
 
 // Emitted when a channel is successfully deleted.
@@ -2981,14 +3051,14 @@ type ChannelInput struct {
 	// Freeze or unfreeze the channel
 	Frozen *bool `json:"frozen,omitempty"`
 	// Team the channel belongs to (if multi-tenant mode is enabled)
-	Team            *string                `json:"team,omitempty"`
-	TruncatedByID   *string                `json:"truncated_by_id,omitempty"`
-	FilterTags      []string               `json:"filter_tags,omitempty"`
-	Invites         []ChannelMemberRequest `json:"invites,omitempty"`
-	Members         []ChannelMemberRequest `json:"members,omitempty"`
-	ConfigOverrides *ChannelConfig         `json:"config_overrides,omitempty"`
-	CreatedBy       *UserRequest           `json:"created_by,omitempty"`
-	Custom          map[string]any         `json:"custom,omitempty"`
+	Team            *string                 `json:"team,omitempty"`
+	TruncatedByID   *string                 `json:"truncated_by_id,omitempty"`
+	FilterTags      []string                `json:"filter_tags,omitempty"`
+	Invites         []ChannelMemberRequest  `json:"invites,omitempty"`
+	Members         []ChannelMemberRequest  `json:"members,omitempty"`
+	ConfigOverrides *ChannelConfigOverrides `json:"config_overrides,omitempty"`
+	CreatedBy       *UserRequest            `json:"created_by,omitempty"`
+	Custom          map[string]any          `json:"custom,omitempty"`
 }
 
 type ChannelInputRequest struct {
@@ -3094,6 +3164,7 @@ const (
 	CAST_POLL_VOTE                     ChannelOwnCapability = "cast-poll-vote"
 	CONNECT_EVENTS                     ChannelOwnCapability = "connect-events"
 	CREATE_ATTACHMENT                  ChannelOwnCapability = "create-attachment"
+	CREATE_MENTION                     ChannelOwnCapability = "create-mention"
 	DELETE_ANY_MESSAGE                 ChannelOwnCapability = "delete-any-message"
 	DELETE_CHANNEL                     ChannelOwnCapability = "delete-channel"
 	DELETE_OWN_MESSAGE                 ChannelOwnCapability = "delete-own-message"
@@ -4225,6 +4296,13 @@ type CreateRoleResponse struct {
 type CreateSIPTrunkResponse struct {
 	Duration string            `json:"duration"`
 	SipTrunk *SIPTrunkResponse `json:"sip_trunk,omitempty"`
+}
+
+// Basic response information
+type CreateSegmentResponse struct {
+	// Duration of the request in milliseconds
+	Duration string           `json:"duration"`
+	Segment  *SegmentResponse `json:"segment,omitempty"`
 }
 
 // Response for creating a user group
@@ -5713,6 +5791,8 @@ type FileUploadResponse struct {
 type FilterConfigResponse struct {
 	// LLM moderation labels available as filter values
 	LlmLabels []string `json:"llm_labels"`
+	// AI image moderation labels available as filter values. Reflects the app's effective image taxonomy: custom Bodyguard taxonomy when enabled, otherwise the standard L1 label set.
+	AiImageLabels []string `json:"ai_image_labels,omitempty"`
 	// AI text moderation labels available as filter values
 	AiTextLabels []string `json:"ai_text_labels,omitempty"`
 	// Moderation config keys present in the queue, available as filter values
@@ -5743,6 +5823,11 @@ type FlagCountRuleParameters struct {
 	Threshold *int `json:"threshold,omitempty"`
 }
 
+type FlagDetails struct {
+	OriginalText string                  `json:"original_text"`
+	Automod      *AutomodDetailsResponse `json:"automod,omitempty"`
+}
+
 type FlagDetailsResponse struct {
 	OriginalText string                  `json:"original_text"`
 	Automod      *AutomodDetailsResponse `json:"automod,omitempty"`
@@ -5755,6 +5840,12 @@ type FlagFeedbackResponse struct {
 	Labels    []LabelResponse `json:"labels"`
 }
 
+type FlagItemResponse struct {
+	Duration string `json:"duration"`
+	// Unique identifier of the created moderation item
+	ItemID string `json:"item_id"`
+}
+
 type FlagMessageDetailsResponse struct {
 	PinChanged   *bool   `json:"pin_changed,omitempty"`
 	ShouldEnrich *bool   `json:"should_enrich,omitempty"`
@@ -5763,9 +5854,20 @@ type FlagMessageDetailsResponse struct {
 }
 
 type FlagResponse struct {
-	Duration string `json:"duration"`
-	// Unique identifier of the created moderation item
-	ItemID string `json:"item_id"`
+	CreatedAt        Timestamp        `json:"created_at"`
+	CreatedByAutomod bool             `json:"created_by_automod"`
+	UpdatedAt        Timestamp        `json:"updated_at"`
+	ApprovedAt       *Timestamp       `json:"approved_at,omitempty"`
+	Reason           *string          `json:"reason,omitempty"`
+	RejectedAt       *Timestamp       `json:"rejected_at,omitempty"`
+	ReviewedAt       *Timestamp       `json:"reviewed_at,omitempty"`
+	ReviewedBy       *string          `json:"reviewed_by,omitempty"`
+	TargetMessageID  *string          `json:"target_message_id,omitempty"`
+	Custom           map[string]any   `json:"custom,omitempty"`
+	Details          *FlagDetails     `json:"details,omitempty"`
+	TargetMessage    *MessageResponse `json:"target_message,omitempty"`
+	TargetUser       *UserResponse    `json:"target_user,omitempty"`
+	User             *UserResponse    `json:"user,omitempty"`
 }
 
 type FlagUpdatedEvent struct {
@@ -6442,18 +6544,6 @@ type GetRetentionPolicyRunsResponse struct {
 type GetReviewQueueItemResponse struct {
 	Duration string                   `json:"duration"`
 	Item     *ReviewQueueItemResponse `json:"item,omitempty"`
-}
-
-type CreateSegmentResponse struct {
-	// Duration of the request in milliseconds
-	Duration string           `json:"duration"`
-	Segment  *SegmentResponse `json:"segment,omitempty"`
-}
-
-type UpdateSegmentResponse struct {
-	// Duration of the request in milliseconds
-	Duration string          `json:"duration"`
-	Segment  SegmentResponse `json:"segment"`
 }
 
 type GetSegmentResponse struct {
@@ -7140,6 +7230,13 @@ type ListPushProvidersResponse struct {
 	// Duration of the request in milliseconds
 	Duration      string                 `json:"duration"`
 	PushProviders []PushProviderResponse `json:"push_providers"`
+}
+
+// Basic response information
+type ListQueuesResponse struct {
+	// Duration of the request in milliseconds
+	Duration string                    `json:"duration"`
+	Queues   []ModerationQueueResponse `json:"queues"`
 }
 
 // Response for listing recordings
@@ -8005,6 +8102,10 @@ type ModerationActionConfigResponse struct {
 	Custom map[string]any `json:"custom,omitempty"`
 }
 
+type ModerationBanResponse struct {
+	Duration string `json:"duration"`
+}
+
 // This event is sent when a moderation check is completed
 type ModerationCheckCompletedEvent struct {
 	CreatedAt Timestamp `json:"created_at"`
@@ -8067,6 +8168,7 @@ func (e *ModerationCustomActionEvent) GetEventType() string {
 
 type ModerationDashboardPreferences struct {
 	AnalyzeMaxImageSizeBytes        *int                       `json:"analyze_max_image_size_bytes,omitempty"`
+	AnalyzeMaxKeyframeSizeBytes     *int                       `json:"analyze_max_keyframe_size_bytes,omitempty"`
 	AsyncReviewQueueUpsert          *bool                      `json:"async_review_queue_upsert,omitempty"`
 	DisableAuditLogs                *bool                      `json:"disable_audit_logs,omitempty"`
 	DisableFlaggingReviewedEntity   *bool                      `json:"disable_flagging_reviewed_entity,omitempty"`
@@ -8158,14 +8260,21 @@ func (e *ModerationMarkReviewedEvent) GetEventType() string {
 }
 
 type ModerationPayload struct {
-	Images []string       `json:"images,omitempty"`
-	Texts  []string       `json:"texts,omitempty"`
-	Videos []string       `json:"videos,omitempty"`
-	Custom map[string]any `json:"custom,omitempty"`
+	Audios           []string          `json:"audios,omitempty"`
+	ImageOrderedKeys []string          `json:"image_ordered_keys,omitempty"`
+	Images           []string          `json:"images,omitempty"`
+	TextOrderedKeys  []string          `json:"text_ordered_keys,omitempty"`
+	Texts            []string          `json:"texts,omitempty"`
+	Videos           []string          `json:"videos,omitempty"`
+	Custom           map[string]any    `json:"custom,omitempty"`
+	ImageIds         map[string]string `json:"image_ids,omitempty"`
+	TextIds          map[string]string `json:"text_ids,omitempty"`
 }
 
 // Content payload for moderation
 type ModerationPayloadRequest struct {
+	// Audio URLs to moderate
+	Audios []string `json:"audios,omitempty"`
 	// Image URLs to moderate (max 30)
 	Images []string `json:"images,omitempty"`
 	// Text content to moderate
@@ -8178,14 +8287,37 @@ type ModerationPayloadRequest struct {
 
 // Content payload for moderation
 type ModerationPayloadResponse struct {
+	// Audio URLs to moderate
+	Audios []string `json:"audios,omitempty"`
+	// Caller-supplied keys for images, index-aligned with images[]
+	ImageOrderedKeys []string `json:"image_ordered_keys,omitempty"`
 	// Image URLs to moderate
 	Images []string `json:"images,omitempty"`
+	// Caller-supplied keys for texts (e.g. "title", "description"), index-aligned with texts[]
+	TextOrderedKeys []string `json:"text_ordered_keys,omitempty"`
 	// Text content to moderate
 	Texts []string `json:"texts,omitempty"`
 	// Video URLs to moderate
 	Videos []string `json:"videos,omitempty"`
 	// Custom data for moderation
 	Custom map[string]any `json:"custom,omitempty"`
+	// Caller-supplied content IDs per image key (from content_ids on /analyze)
+	ImageIds map[string]string `json:"image_ids,omitempty"`
+	// Caller-supplied content IDs per text key (from content_ids on /analyze)
+	TextIds map[string]string `json:"text_ids,omitempty"`
+}
+
+type ModerationQueueResponse struct {
+	CreatedAt   Timestamp        `json:"created_at"`
+	CreatedBy   string           `json:"created_by"`
+	Description string           `json:"description"`
+	ID          string           `json:"id"`
+	ItemCount   int              `json:"item_count"`
+	Name        string           `json:"name"`
+	UpdatedAt   Timestamp        `json:"updated_at"`
+	Type        string           `json:"type"`
+	Sort        []map[string]any `json:"sort"`
+	Filters     map[string]any   `json:"filters"`
 }
 
 type ModerationResponse struct {
@@ -8775,6 +8907,8 @@ type Permission struct {
 	Name string `json:"name"`
 	// Whether this permission applies to resource owner or not
 	Owner bool `json:"owner"`
+	// Resource type that defines ownership for this permission's action (e.g. 'Channel' for CreateMessage, 'Message' for UpdateMessage). Identical across all variants of an action; primarily meaningful for owner grants.
+	OwnerResource string `json:"owner_resource"`
 	// Whether this permission applies to teammates (multi-tenancy mode only)
 	SameTeam bool `json:"same_team"`
 	// List of tags of the permission
@@ -9721,6 +9855,13 @@ type QueryUsersResponse struct {
 	Duration string `json:"duration"`
 	// Array of users as result of filters applied.
 	Users []FullUserResponse `json:"users"`
+}
+
+// Basic response information
+type QueueResponse struct {
+	// Duration of the request in milliseconds
+	Duration string                   `json:"duration"`
+	Queue    *ModerationQueueResponse `json:"queue,omitempty"`
 }
 
 // RTMPBroadcastRequest is the payload for starting an RTMP broadcast.
@@ -11224,12 +11365,14 @@ type TeamUsageStats struct {
 }
 
 type TextContentParameters struct {
-	ContainsUrl    *bool             `json:"contains_url,omitempty"`
-	LabelOperator  *string           `json:"label_operator,omitempty"`
-	Severity       *string           `json:"severity,omitempty"`
-	BlocklistMatch []string          `json:"blocklist_match,omitempty"`
-	HarmLabels     []string          `json:"harm_labels,omitempty"`
-	LlmHarmLabels  map[string]string `json:"llm_harm_labels,omitempty"`
+	ContainsUrl        *bool             `json:"contains_url,omitempty"`
+	LabelOperator      *string           `json:"label_operator,omitempty"`
+	Severity           *string           `json:"severity,omitempty"`
+	TextLength         *int              `json:"text_length,omitempty"`
+	TextLengthOperator *string           `json:"text_length_operator,omitempty"`
+	BlocklistMatch     []string          `json:"blocklist_match,omitempty"`
+	HarmLabels         []string          `json:"harm_labels,omitempty"`
+	LlmHarmLabels      map[string]string `json:"llm_harm_labels,omitempty"`
 }
 
 type TextRuleParameters struct {
@@ -11889,6 +12032,12 @@ type UpdateSIPInboundRoutingRuleResponse struct {
 type UpdateSIPTrunkResponse struct {
 	Duration string            `json:"duration"`
 	SipTrunk *SIPTrunkResponse `json:"sip_trunk,omitempty"`
+}
+
+type UpdateSegmentResponse struct {
+	// Duration of the request in milliseconds
+	Duration string          `json:"duration"`
+	Segment  SegmentResponse `json:"segment"`
 }
 
 type UpdateThreadPartialResponse struct {
