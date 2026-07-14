@@ -157,6 +157,8 @@ func TestParseWebhookEvent(t *testing.T) {
 		{"parse export.channels.success", []byte(`{"type":"export.channels.success"}`), "export.channels.success", false},
 		{"parse export.moderation_logs.error", []byte(`{"type":"export.moderation_logs.error"}`), "export.moderation_logs.error", false},
 		{"parse export.moderation_logs.success", []byte(`{"type":"export.moderation_logs.success"}`), "export.moderation_logs.success", false},
+		{"parse export.review_queue.error", []byte(`{"type":"export.review_queue.error"}`), "export.review_queue.error", false},
+		{"parse export.review_queue.success", []byte(`{"type":"export.review_queue.success"}`), "export.review_queue.success", false},
 		{"parse export.users.error", []byte(`{"type":"export.users.error"}`), "export.users.error", false},
 		{"parse export.users.success", []byte(`{"type":"export.users.success"}`), "export.users.success", false},
 		{"parse feeds.activity.added", []byte(`{"type":"feeds.activity.added"}`), "feeds.activity.added", false},

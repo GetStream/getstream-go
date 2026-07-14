@@ -21,6 +21,10 @@ func (c *Channels) Delete(ctx context.Context, request *DeleteChannelRequest) (*
 	return c.client.DeleteChannel(ctx, c.channelType, c.channelD, request)
 }
 
+func (c *Channels) Get(ctx context.Context, request *GetChannelRequest) (*StreamResponse[ChannelStateResponse], error) {
+	return c.client.GetChannel(ctx, c.channelType, c.channelD, request)
+}
+
 func (c *Channels) UpdateChannelPartial(ctx context.Context, request *UpdateChannelPartialRequest) (*StreamResponse[UpdateChannelPartialResponse], error) {
 	return c.client.UpdateChannelPartial(ctx, c.channelType, c.channelD, request)
 }
