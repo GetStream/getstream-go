@@ -56,7 +56,8 @@ func (c *FeedsClient) TrackActivityMetrics(ctx context.Context, request *TrackAc
 // Query activities based on filters with pagination and sorting options
 func (c *FeedsClient) QueryActivities(ctx context.Context, request *QueryActivitiesRequest) (*StreamResponse[QueryActivitiesResponse], error) {
 	var result QueryActivitiesResponse
-	res, err := MakeRequest[QueryActivitiesRequest, QueryActivitiesResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/query", nil, request, &result, nil)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[QueryActivitiesRequest, QueryActivitiesResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/query", params, request, &result, nil)
 	return res, err
 }
 
@@ -176,6 +177,17 @@ func (c *FeedsClient) DeleteActivityReaction(ctx context.Context, activityID str
 	return res, err
 }
 
+// List the shares recorded for an activity, newest-first
+func (c *FeedsClient) QueryActivityShares(ctx context.Context, activityID string, request *QueryActivitySharesRequest) (*StreamResponse[QueryActivitySharesResponse], error) {
+	var result QueryActivitySharesResponse
+	pathParams := map[string]string{
+		"activity_id": activityID,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, QueryActivitySharesResponse](c.client, ctx, "GET", "/api/v2/feeds/activities/{activity_id}/shares", params, nil, &result, pathParams)
+	return res, err
+}
+
 // Delete a single activity by its ID
 func (c *FeedsClient) DeleteActivity(ctx context.Context, id string, request *DeleteActivityRequest) (*StreamResponse[DeleteActivityResponse], error) {
 	var result DeleteActivityResponse
@@ -235,6 +247,19 @@ func (c *FeedsClient) RestoreActivity(ctx context.Context, id string, request *R
 	return res, err
 }
 
+// Translates an activity's text to a given language using automated translation
+//
+// Sends events:
+// - feeds.activity.updated
+func (c *FeedsClient) TranslateActivity(ctx context.Context, id string, request *TranslateActivityRequest) (*StreamResponse[TranslateActivityResponse], error) {
+	var result TranslateActivityResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[TranslateActivityRequest, TranslateActivityResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/{id}/translate", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Query bookmark folders with filter query
 func (c *FeedsClient) QueryBookmarkFolders(ctx context.Context, request *QueryBookmarkFoldersRequest) (*StreamResponse[QueryBookmarkFoldersResponse], error) {
 	var result QueryBookmarkFoldersResponse
@@ -265,7 +290,8 @@ func (c *FeedsClient) UpdateBookmarkFolder(ctx context.Context, folderID string,
 // Query bookmarks with filter query
 func (c *FeedsClient) QueryBookmarks(ctx context.Context, request *QueryBookmarksRequest) (*StreamResponse[QueryBookmarksResponse], error) {
 	var result QueryBookmarksResponse
-	res, err := MakeRequest[QueryBookmarksRequest, QueryBookmarksResponse](c.client, ctx, "POST", "/api/v2/feeds/bookmarks/query", nil, request, &result, nil)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[QueryBookmarksRequest, QueryBookmarksResponse](c.client, ctx, "POST", "/api/v2/feeds/bookmarks/query", params, request, &result, nil)
 	return res, err
 }
 
@@ -338,7 +364,8 @@ func (c *FeedsClient) AddCommentsBatch(ctx context.Context, request *AddComments
 // Query comments using MongoDB-style filters with pagination and sorting options
 func (c *FeedsClient) QueryComments(ctx context.Context, request *QueryCommentsRequest) (*StreamResponse[QueryCommentsResponse], error) {
 	var result QueryCommentsResponse
-	res, err := MakeRequest[QueryCommentsRequest, QueryCommentsResponse](c.client, ctx, "POST", "/api/v2/feeds/comments/query", nil, request, &result, nil)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[QueryCommentsRequest, QueryCommentsResponse](c.client, ctx, "POST", "/api/v2/feeds/comments/query", params, request, &result, nil)
 	return res, err
 }
 
@@ -479,6 +506,19 @@ func (c *FeedsClient) RestoreComment(ctx context.Context, id string, request *Re
 	return res, err
 }
 
+// Translates a comment's text to a given language using automated translation
+//
+// Sends events:
+// - feeds.comment.updated
+func (c *FeedsClient) TranslateComment(ctx context.Context, id string, request *TranslateCommentRequest) (*StreamResponse[TranslateCommentResponse], error) {
+	var result TranslateCommentResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[TranslateCommentRequest, TranslateCommentResponse](c.client, ctx, "POST", "/api/v2/feeds/comments/{id}/translate", nil, request, &result, pathParams)
+	return res, err
+}
+
 // List all feed groups for the application
 func (c *FeedsClient) ListFeedGroups(ctx context.Context, request *ListFeedGroupsRequest) (*StreamResponse[ListFeedGroupsResponse], error) {
 	var result ListFeedGroupsResponse
@@ -513,7 +553,8 @@ func (c *FeedsClient) GetOrCreateFeed(ctx context.Context, feedGroupID string, f
 		"feed_group_id": feedGroupID,
 		"feed_id":       feedID,
 	}
-	res, err := MakeRequest[GetOrCreateFeedRequest, GetOrCreateFeedResponse](c.client, ctx, "POST", "/api/v2/feeds/feed_groups/{feed_group_id}/feeds/{feed_id}", nil, request, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[GetOrCreateFeedRequest, GetOrCreateFeedResponse](c.client, ctx, "POST", "/api/v2/feeds/feed_groups/{feed_group_id}/feeds/{feed_id}", params, request, &result, pathParams)
 	return res, err
 }
 
@@ -626,7 +667,8 @@ func (c *FeedsClient) QueryPinnedActivities(ctx context.Context, feedGroupID str
 		"feed_group_id": feedGroupID,
 		"feed_id":       feedID,
 	}
-	res, err := MakeRequest[QueryPinnedActivitiesRequest, QueryPinnedActivitiesResponse](c.client, ctx, "POST", "/api/v2/feeds/feed_groups/{feed_group_id}/feeds/{feed_id}/pinned_activities/query", nil, request, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[QueryPinnedActivitiesRequest, QueryPinnedActivitiesResponse](c.client, ctx, "POST", "/api/v2/feeds/feed_groups/{feed_group_id}/feeds/{feed_id}/pinned_activities/query", params, request, &result, pathParams)
 	return res, err
 }
 
