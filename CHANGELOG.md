@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.0.0](https://github.com/GetStream/getstream-go/compare/v4.2.2...v5.0.0) (2026-07-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* add GetChannel endpoint (#123)
+
+### Features
+
+* add GetChannel endpoint ([#123](https://github.com/GetStream/getstream-go/issues/123)) ([070f2e1](https://github.com/GetStream/getstream-go/commit/070f2e143ca7410bd5a5e3f1a96c3d711ec3ff57))
+
 ### [4.2.2](https://github.com/GetStream/getstream-go/compare/v4.2.1...v4.2.2) (2026-06-30)
 
 
