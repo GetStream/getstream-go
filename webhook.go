@@ -102,6 +102,8 @@ const (
 	EventTypeExportChannelsSuccess              = "export.channels.success"
 	EventTypeExportModerationLogsError          = "export.moderation_logs.error"
 	EventTypeExportModerationLogsSuccess        = "export.moderation_logs.success"
+	EventTypeExportReviewQueueError             = "export.review_queue.error"
+	EventTypeExportReviewQueueSuccess           = "export.review_queue.success"
 	EventTypeExportUsersError                   = "export.users.error"
 	EventTypeExportUsersSuccess                 = "export.users.success"
 	EventTypeFeedsActivityAdded                 = "feeds.activity.added"
@@ -446,6 +448,10 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(AsyncExportErrorEvent)
 	case "export.moderation_logs.success":
 		event = new(AsyncExportModerationLogsEvent)
+	case "export.review_queue.error":
+		event = new(AsyncExportErrorEvent)
+	case "export.review_queue.success":
+		event = new(AsyncExportReviewQueueEvent)
 	case "export.users.error":
 		event = new(AsyncExportErrorEvent)
 	case "export.users.success":

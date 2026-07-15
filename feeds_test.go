@@ -121,6 +121,13 @@ func TestFeedsDeleteActivityReaction(t *testing.T) {
 	_, err = client.Feeds().DeleteActivityReaction(context.Background(), "", "", &getstream.DeleteActivityReactionRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsQueryActivityShares(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().QueryActivityShares(context.Background(), "", &getstream.QueryActivitySharesRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsDeleteActivity(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -154,6 +161,13 @@ func TestFeedsRestoreActivity(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().RestoreActivity(context.Background(), "", &getstream.RestoreActivityRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsTranslateActivity(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().TranslateActivity(context.Background(), "", &getstream.TranslateActivityRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsQueryBookmarkFolders(t *testing.T) {
@@ -343,6 +357,13 @@ func TestFeedsRestoreComment(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().RestoreComment(context.Background(), "", &getstream.RestoreCommentRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsTranslateComment(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().TranslateComment(context.Background(), "", &getstream.TranslateCommentRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsListFeedGroups(t *testing.T) {
