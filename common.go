@@ -34,6 +34,20 @@ func (c *Client) CreateBlockList(ctx context.Context, request *CreateBlockListRe
 	return res, err
 }
 
+// Enqueues an asynchronous bulk import of items into an existing blocklist.
+// Returns a task ID that can be polled via GET /tasks/{id} to observe progress.
+// AddItems is idempotent: items already present are skipped without error.
+// For lists exceeding the HTTP request-body cap, issue repeated import calls each
+// carrying a bounded slice of items — the task result accumulates correctly.
+func (c *Client) ImportBlockList(ctx context.Context, id string, request *ImportBlockListRequest) (*StreamResponse[ImportBlockListResponse], error) {
+	var result ImportBlockListResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[ImportBlockListRequest, ImportBlockListResponse](c, ctx, "POST", "/api/v2/blocklists/{id}/import", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Deletes previously created application blocklist
 func (c *Client) DeleteBlockList(ctx context.Context, name string, request *DeleteBlockListRequest) (*StreamResponse[Response], error) {
 	var result Response
@@ -198,34 +212,6 @@ func (c *Client) ListImportV2Tasks(ctx context.Context, request *ListImportV2Tas
 func (c *Client) CreateImportV2Task(ctx context.Context, request *CreateImportV2TaskRequest) (*StreamResponse[CreateImportV2TaskResponse], error) {
 	var result CreateImportV2TaskResponse
 	res, err := MakeRequest[CreateImportV2TaskRequest, CreateImportV2TaskResponse](c, ctx, "POST", "/api/v2/imports/v2", nil, request, &result, nil)
-	return res, err
-}
-
-// Removes the external storage configuration for the app. Idempotent: succeeds even if no configuration exists.
-func (c *Client) DeleteImporterExternalStorage(ctx context.Context, request *DeleteImporterExternalStorageRequest) (*StreamResponse[DeleteExternalStorageResponse], error) {
-	var result DeleteExternalStorageResponse
-	res, err := MakeRequest[any, DeleteExternalStorageResponse](c, ctx, "DELETE", "/api/v2/imports/v2/external-storage", nil, nil, &result, nil)
-	return res, err
-}
-
-// Returns the current external storage configuration for the app. Returns 404 if no configuration exists.
-func (c *Client) GetImporterExternalStorage(ctx context.Context, request *GetImporterExternalStorageRequest) (*StreamResponse[GetExternalStorageResponse], error) {
-	var result GetExternalStorageResponse
-	res, err := MakeRequest[any, GetExternalStorageResponse](c, ctx, "GET", "/api/v2/imports/v2/external-storage", nil, nil, &result, nil)
-	return res, err
-}
-
-// Creates or updates the external storage configuration for the app. Currently only AWS S3 (via cross-account IAM role assumption) is supported.
-func (c *Client) UpsertImporterExternalStorage(ctx context.Context, request *UpsertImporterExternalStorageRequest) (*StreamResponse[UpsertExternalStorageResponse], error) {
-	var result UpsertExternalStorageResponse
-	res, err := MakeRequest[UpsertImporterExternalStorageRequest, UpsertExternalStorageResponse](c, ctx, "PUT", "/api/v2/imports/v2/external-storage", nil, request, &result, nil)
-	return res, err
-}
-
-// Validates the configured external S3 storage by performing a live STS AssumeRole and S3 ListObjectsV2 check.
-func (c *Client) ValidateImporterExternalStorage(ctx context.Context, request *ValidateImporterExternalStorageRequest) (*StreamResponse[ValidateExternalStorageResponse], error) {
-	var result ValidateExternalStorageResponse
-	res, err := MakeRequest[any, ValidateExternalStorageResponse](c, ctx, "POST", "/api/v2/imports/v2/external-storage/validate", nil, nil, &result, nil)
 	return res, err
 }
 
