@@ -44,6 +44,14 @@ Stream is free for most side and hobby projects. To qualify, your project/compan
 
 This repo contains the Golang server-side SDK developed by the team and Stream community. For a feature overview please visit our [roadmap](https://github.com/GetStream/protocol/discussions/177).
 
+## 🪵 Logging
+
+The client accepts a custom logger via `WithLogger` (any type implementing the `Logger` interface: `Debug`/`Info`/`Warn`/`Error`). Without one, it falls back to a stderr logger at INFO level, so per-request DEBUG events are silent by default; inject a logger with DEBUG enabled to see them.
+
+Four structured events are emitted: `client.initialized` (INFO, once at construction, with SDK name/version and connection-pool settings), `http.request.sent` (DEBUG, before each request), `http.response.received` (DEBUG, after any response including 4xx/5xx, status codes are just data on this event), and `http.request.failed` (ERROR, transport-layer failures only, e.g. connection reset, timeout, DNS, TLS, when no HTTP response was received at all).
+
+**Security:** these events never log HTTP headers (so `Authorization` is never written to logs), and known-secret values are always redacted regardless of logger: query parameters `api_key`, `api_secret`, and `token` become `<redacted>`, and top-level JSON body keys `api_secret`, `token`, and `password` become `<redacted>`. Request/response bodies are not logged by default. Opt in with `WithLogBodies(true)` if you need them for debugging, this logs a one-time WARN on construction because other sensitive data (message content, PII) may still appear in bodies even with the known-secret keys redacted.
+
 ## ✍️ Contributing
 
 We welcome code changes that improve this library or fix a problem, please make sure to follow all best practices and add tests if applicable before submitting a Pull Request on Github. We are very happy to merge your code in the official repository. Make sure to sign our [Contributor License Agreement (CLA)](https://docs.google.com/forms/d/e/1FAIpQLScFKsKkAJI7mhCr7K9rEIOpqIDThrWxuvxnwUq2XkHyG154vQ/viewform) first. See our [license file](./LICENSE) for more details.
