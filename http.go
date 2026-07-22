@@ -519,7 +519,10 @@ func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, me
 	if c.logBodies && data != nil && method != http.MethodGet && method != http.MethodHead {
 		reqBody, _ = json.Marshal(data)
 	}
-	c.logRequestSent(method, path, params, reqBody)
+	// r.URL.Query() is the actual built query (includes the api_key requestURL
+	// injects), not the caller's params — params alone would log an empty
+	// query for the ~246 of 316 call sites that pass nil.
+	c.logRequestSent(method, path, r.URL.Query(), reqBody)
 
 	start := time.Now()
 	resp, err := c.httpClient.Do(r)

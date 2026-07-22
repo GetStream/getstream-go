@@ -159,6 +159,66 @@ func TestLogBodiesOptInAndWarn(t *testing.T) {
 	}
 }
 
+// Real *http.Client transport failures wrap the underlying cause in
+// *url.Error, whose Error() string embeds the full outgoing URL (including
+// api_key/api_secret/token query values). http.request.failed must not let
+// that URL reach error.message.
+func TestRequestFailedRedactsURLErrorMessage(t *testing.T) {
+	leaked := &url.Error{
+		Op:  "Get",
+		URL: "https://chat.stream-io-api.com/api/v2/app?api_key=SUPERSECRETKEY",
+		Err: syscall.ECONNRESET,
+	}
+	rec, err := loggedGET(t, &oneShotClient{err: leaked})
+	if err == nil {
+		t.Fatal("want error")
+	}
+	for _, e := range rec.errs {
+		if strings.Contains(e, "SUPERSECRETKEY") {
+			t.Fatalf("api_key leaked into error log: %q", e)
+		}
+	}
+	var line string
+	for _, e := range rec.errs {
+		if strings.Contains(e, "http.request.failed") {
+			line = e
+		}
+	}
+	if line == "" {
+		t.Fatalf("want http.request.failed event: %v", rec.errs)
+	}
+	if !strings.Contains(line, "error.type=") {
+		t.Fatalf("want error.type field: %q", line)
+	}
+	if strings.Contains(line, `error.message=""`) {
+		t.Fatalf("want non-empty error.message: %q", line)
+	}
+}
+
+// http.request.sent must log the actual built request query (with api_key
+// redacted) even when the caller passes nil params — requestURL injects
+// api_key into its own local copy, so only the built request carries it.
+func TestQuerySentReflectsBuiltRequestForNilParams(t *testing.T) {
+	rec := &recordingLogger{}
+	c, err := NewClient("realkey", "secret", WithHTTPClient(&oneShotClient{status: 200, body: `{}`}), WithLogger(rec))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var out map[string]any
+	_, err = MakeRequest[map[string]any, map[string]any](c.Client, context.Background(), http.MethodGet, "/api/v2/app", nil, nil, &out, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !has(rec.debug, "api_key=%3Credacted%3E") && !has(rec.debug, "api_key=<redacted>") {
+		t.Fatalf("want redacted api_key in url.query for nil params: %v", rec.debug)
+	}
+	for _, e := range rec.debug {
+		if strings.Contains(e, "realkey") {
+			t.Fatalf("raw api_key leaked with nil params: %q", e)
+		}
+	}
+}
+
 func TestRedactJSONBody(t *testing.T) {
 	out := redactJSONBody([]byte(`{"token":"t","password":"p","api_secret":"s","keep":"v"}`))
 	for _, leak := range []string{`"t"`, `"p"`, `"s"`} {

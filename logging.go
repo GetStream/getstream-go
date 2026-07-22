@@ -2,7 +2,9 @@ package getstream
 
 import (
 	"encoding/json"
+	"errors"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -15,7 +17,7 @@ var redactedBodyKeys = []string{"api_secret", "token", "password"}
 func redactQuery(q url.Values) string {
 	clone := url.Values{}
 	for k, vs := range q {
-		if _, secret := redactedQueryParams[toLowerASCII(k)]; secret {
+		if _, secret := redactedQueryParams[strings.ToLower(k)]; secret {
 			clone[k] = []string{"<redacted>"}
 			continue
 		}
@@ -48,23 +50,16 @@ func redactJSONBody(b []byte) string {
 	return string(out)
 }
 
-func toLowerASCII(s string) string {
-	b := []byte(s)
-	for i := range b {
-		if b[i] >= 'A' && b[i] <= 'Z' {
-			b[i] += 'a' - 'A'
-		}
-	}
-	return string(b)
-}
-
-func (c *Client) logRequestSent(method, path string, params url.Values, body []byte) {
+// logRequestSent logs the outgoing request. query must be the built request's
+// actual query (e.g. r.URL.Query()), not the caller-supplied params — the
+// caller's params never carry the api_key that requestURL injects.
+func (c *Client) logRequestSent(method, path string, query url.Values, body []byte) {
 	if c.logBodies && body != nil {
 		c.logger.Debug("http.request.sent http.request.method=%s url.path=%s url.query=%s http.request.body=%s",
-			method, path, redactQuery(params), redactJSONBody(body))
+			method, path, redactQuery(query), redactJSONBody(body))
 		return
 	}
-	c.logger.Debug("http.request.sent http.request.method=%s url.path=%s url.query=%s", method, path, redactQuery(params))
+	c.logger.Debug("http.request.sent http.request.method=%s url.path=%s url.query=%s", method, path, redactQuery(query))
 }
 
 func (c *Client) logResponseReceived(method, path string, statusCode, bodySize int, d time.Duration, body []byte) {
@@ -77,7 +72,18 @@ func (c *Client) logResponseReceived(method, path string, statusCode, bodySize i
 		method, path, statusCode, bodySize, d.Milliseconds())
 }
 
+// logRequestFailed logs a transport-layer failure. Classification runs on the
+// original err (needed to see through *url.Error to the real cause), but the
+// logged message unwraps *url.Error to its underlying cause: url.Error.Error()
+// embeds the full request URL, including unredacted api_key/api_secret/token
+// query values, so logging it verbatim would leak secrets on every real
+// *http.Client transport failure.
 func (c *Client) logRequestFailed(method, path string, err error, d time.Duration) {
+	msg := err.Error()
+	var ue *url.Error
+	if errors.As(err, &ue) {
+		msg = ue.Err.Error()
+	}
 	c.logger.Error("http.request.failed http.request.method=%s url.path=%s error.type=%s error.message=%q duration_ms=%d",
-		method, path, classifyTransportError(err), err.Error(), d.Milliseconds())
+		method, path, classifyTransportError(err), msg, d.Milliseconds())
 }
