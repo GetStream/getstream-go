@@ -255,11 +255,13 @@ func TestClientInfoLogOnConstruction(t *testing.T) {
 
 	require.Len(t, cap.infos, 1, "exactly one INFO line on construction")
 	got := cap.infos[0]
-	assert.Contains(t, got, "max_conns_per_host=5")
-	assert.Contains(t, got, "idle_timeout=55s")
-	assert.Contains(t, got, "connect_timeout=10s")
-	assert.Contains(t, got, "request_timeout=30s")
-	assert.Contains(t, got, "user_http_client=false")
+	assert.Contains(t, got, "client.initialized")
+	assert.Contains(t, got, "stream.sdk.name=getstream-go")
+	assert.Contains(t, got, "stream.client.max_conns_per_host=5")
+	assert.Contains(t, got, "stream.client.idle_timeout_seconds=55")
+	assert.Contains(t, got, "stream.client.connect_timeout_seconds=10")
+	assert.Contains(t, got, "stream.client.request_timeout_seconds=30")
+	assert.Contains(t, got, "stream.client.user_http_client=false")
 }
 
 func TestClientInfoLogWithUserHTTPClient(t *testing.T) {
@@ -272,7 +274,7 @@ func TestClientInfoLogWithUserHTTPClient(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Len(t, cap.infos, 1)
-	assert.Contains(t, cap.infos[0], "user_http_client=true")
+	assert.Contains(t, cap.infos[0], "stream.client.user_http_client=true")
 }
 
 func TestClientGetters(t *testing.T) {
