@@ -18,12 +18,15 @@ type recordingLogger struct {
 func (l *recordingLogger) Debug(f string, v ...interface{}) {
 	l.debug = append(l.debug, fmt.Sprintf(f, v...))
 }
+
 func (l *recordingLogger) Info(f string, v ...interface{}) {
 	l.info = append(l.info, fmt.Sprintf(f, v...))
 }
+
 func (l *recordingLogger) Warn(f string, v ...interface{}) {
 	l.warn = append(l.warn, fmt.Sprintf(f, v...))
 }
+
 func (l *recordingLogger) Error(f string, v ...interface{}) {
 	l.errs = append(l.errs, fmt.Sprintf(f, v...))
 }
