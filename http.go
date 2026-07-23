@@ -530,7 +530,9 @@ func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, me
 		c.logRetryScheduled(method, path, err, attempt+1, delay)
 		select {
 		case <-ctx.Done():
-			return nil, wrapTransportError(ctx.Err())
+			ctxErr := wrapTransportError(ctx.Err())
+			c.logRequestFailed(method, path, ctxErr, time.Since(start))
+			return nil, ctxErr
 		case <-time.After(delay):
 		}
 	}

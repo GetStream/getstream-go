@@ -83,6 +83,84 @@ func TestRetryEnabledGet429ThenSuccess(t *testing.T) {
 	}
 }
 
+func TestRetryEnabledHead429ThenSuccess(t *testing.T) {
+	script := &scriptedRetryClient{responses: []func() (*http.Response, error){
+		canned(429, `{}`, nil),
+		canned(200, `{}`, nil),
+	}}
+	c := newRetryTestClient(t, script, &RetryConfig{Enabled: true, MaxAttempts: 3, MaxBackoff: time.Millisecond})
+	var out map[string]any
+	_, err := MakeRequest[map[string]any, map[string]any](c, context.Background(), http.MethodHead, "/api/v2/x", url.Values{}, nil, &out, nil)
+	if err != nil {
+		t.Fatalf("want success, got %v", err)
+	}
+	if script.calls != 2 {
+		t.Fatalf("want 2 calls, got %d", script.calls)
+	}
+}
+
+// Guards shouldRetry's ErrRateLimited||ErrTransport gate: a 5xx (ErrApiResponse
+// only) must not be retried even with retry enabled, unlike a 429 or a
+// transport error.
+func TestRetryEnabledDoesNotRetry5xx(t *testing.T) {
+	script := &scriptedRetryClient{responses: []func() (*http.Response, error){
+		canned(500, `{"code":1,"message":"boom"}`, nil),
+	}}
+	c := newRetryTestClient(t, script, &RetryConfig{Enabled: true, MaxAttempts: 3, MaxBackoff: time.Millisecond})
+	err := doGET(c)
+	if !errors.Is(err, ErrApiResponse) || errors.Is(err, ErrRateLimited) {
+		t.Fatalf("want ErrApiResponse (not ErrRateLimited), got %v", err)
+	}
+	if script.calls != 1 {
+		t.Fatalf("want exactly 1 call (5xx must not be retried), got %d", script.calls)
+	}
+}
+
+// A ctx cancellation during the backoff wait must return promptly, make no
+// further attempt, and still emit the final-failure ERROR log (Fix for the
+// silent-exit gap: every other final-failure path logs via logRequestFailed).
+// Retry-After makes retryDelay deterministic (no jitter), and the fake cancels
+// the context synchronously on the first response so the ctx.Done() branch of
+// the select is already ready when the loop reaches it — no real sleep, no race.
+func TestRetryCtxCancelDuringBackoffEmitsRequestFailed(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	script := &scriptedRetryClient{responses: []func() (*http.Response, error){
+		func() (*http.Response, error) {
+			resp, err := canned(429, `{}`, map[string]string{"Retry-After": "5"})()
+			cancel()
+			return resp, err
+		},
+		canned(429, `{}`, map[string]string{"Retry-After": "5"}),
+	}}
+	rec := &recordingLogger{}
+	c, err := newClient("key", "secret",
+		WithHTTPClient(script), WithLogger(rec),
+		WithRetry(RetryConfig{Enabled: true, MaxAttempts: 3, MaxBackoff: 50 * time.Millisecond}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var out map[string]any
+	_, err = MakeRequest[map[string]any, map[string]any](c, ctx, http.MethodGet, "/api/v2/x", url.Values{}, nil, &out, nil)
+	if err == nil {
+		t.Fatal("want error")
+	}
+	if !errors.Is(err, ErrTransport) {
+		t.Fatalf("want ErrTransport wrapping ctx.Err(), got %v", err)
+	}
+	if script.calls != 1 {
+		t.Fatalf("want exactly 1 call (no attempt after ctx cancel), got %d", script.calls)
+	}
+	count := 0
+	for _, e := range rec.errs {
+		if strings.Contains(e, "http.request.failed") {
+			count++
+		}
+	}
+	if count != 1 {
+		t.Fatalf("want exactly 1 ERROR http.request.failed, got %d: %v", count, rec.errs)
+	}
+}
+
 func TestRetryNeverRetriesPost(t *testing.T) {
 	script := &scriptedRetryClient{responses: []func() (*http.Response, error){
 		canned(429, `{}`, nil),
