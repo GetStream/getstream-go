@@ -72,18 +72,50 @@ func (c *Client) logResponseReceived(method, path string, statusCode, bodySize i
 		method, path, statusCode, bodySize, d.Milliseconds())
 }
 
-// logRequestFailed logs a transport-layer failure. Classification runs on the
-// original err (needed to see through *url.Error to the real cause), but the
-// logged message unwraps *url.Error to its underlying cause: url.Error.Error()
-// embeds the full request URL, including unredacted api_key/api_secret/token
-// query values, so logging it verbatim would leak secrets on every real
-// *http.Client transport failure.
-func (c *Client) logRequestFailed(method, path string, err error, d time.Duration) {
-	msg := err.Error()
+// safeErrorMessage returns a log-safe message for a transport-layer error.
+// *url.Error.Error() embeds the full outgoing URL, including unredacted
+// api_key/api_secret/token query values, so a *url.Error anywhere in the
+// chain is unwrapped to its underlying cause instead of using Error()
+// directly. err may be the raw transport error or a *StreamError wrapping
+// it (via stackWrap) — errors.As/Unwrap see through either.
+func safeErrorMessage(err error) string {
 	var ue *url.Error
 	if errors.As(err, &ue) {
-		msg = ue.Err.Error()
+		return ue.Err.Error()
 	}
+	for {
+		u := errors.Unwrap(err)
+		if u == nil {
+			return err.Error()
+		}
+		err = u
+	}
+}
+
+// logRequestFailed logs a final (non-retried) transport-layer failure at
+// ERROR: retry disabled, attempts exhausted, or the failure was otherwise
+// ineligible for retry. err may be the raw transport error or the
+// *StreamError wrapping it; classification and message redaction work
+// either way (see safeErrorMessage).
+func (c *Client) logRequestFailed(method, path string, err error, d time.Duration) {
 	c.logger.Error("http.request.failed http.request.method=%s url.path=%s error.type=%s error.message=%q duration_ms=%d",
-		method, path, classifyTransportError(err), msg, d.Milliseconds())
+		method, path, classifyTransportError(err), safeErrorMessage(err), d.Milliseconds())
+}
+
+// logRetryScheduled logs a retryable failure at DEBUG before the loop backs
+// off and re-attempts. attempt is 1-indexed (the attempt number that just
+// failed). error.type — the closed transport-only classifier enum — is
+// included only when the failure is a transport error; a retried 429 carries
+// no error.type since rate-limiting isn't a transport failure.
+func (c *Client) logRetryScheduled(method, path string, err error, attempt int, delay time.Duration) {
+	msg := safeErrorMessage(err)
+	if !errors.Is(err, ErrTransport) {
+		c.logger.Debug("http.request.failed http.request.method=%s url.path=%s error.message=%q retry.attempt=%d backoff_ms=%d",
+			method, path, msg, attempt, delay.Milliseconds())
+		return
+	}
+	var se *StreamError
+	errors.As(err, &se)
+	c.logger.Debug("http.request.failed http.request.method=%s url.path=%s error.type=%s error.message=%q retry.attempt=%d backoff_ms=%d",
+		method, path, se.ErrorType, msg, attempt, delay.Milliseconds())
 }

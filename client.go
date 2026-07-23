@@ -54,6 +54,7 @@ type Client struct {
 	httpClientFromUser bool // true iff WithHTTPClient was used; gates transport build
 	logger             Logger
 	logBodies          bool // true iff WithLogBodies(true) was used; gates body fields on DEBUG events
+	retry              RetryConfig
 }
 
 func (c *Client) HttpClient() HttpClient {
