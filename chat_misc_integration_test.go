@@ -1413,6 +1413,12 @@ func TestChatAppFileUploadConfigIntegration(t *testing.T) {
 	client := initClient(t)
 	ctx := context.Background()
 
+	// Serialize against the other app-config mutators (see appConfigMu) so the
+	// read-back below is not clobbered by a concurrent UpdateApp. Registered
+	// before the restore cleanup so the unlock runs after it (Cleanup is LIFO).
+	appConfigMu.Lock()
+	t.Cleanup(appConfigMu.Unlock)
+
 	// Get current settings to restore later
 	getResp, err := client.GetApp(ctx, &GetAppRequest{})
 	require.NoError(t, err)
