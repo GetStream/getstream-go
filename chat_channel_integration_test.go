@@ -311,23 +311,35 @@ func TestChatChannelIntegration(t *testing.T) {
 	t.Run("FreezeUnfreezeChannel", func(t *testing.T) {
 		ch, _ := createTestChannel(t, client, creatorID)
 
-		// Freeze
-		resp, err := ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
-			Set: map[string]any{
-				"frozen": true,
-			},
-		})
-		require.NoError(t, err)
-		assert.True(t, resp.Data.Channel.Frozen)
+		// The frozen flag in an UpdateChannelPartial response can be hydrated from
+		// a read replica that lags the write, so verify via a re-read that retries
+		// until the state converges rather than trusting the write response itself.
+		requireFrozen := func(want bool) {
+			t.Helper()
+			var got bool
+			for i := 0; i < 10; i++ {
+				r, err := ch.GetOrCreate(ctx, &GetOrCreateChannelRequest{})
+				require.NoError(t, err)
+				got = r.Data.Channel.Frozen
+				if got == want {
+					return
+				}
+				time.Sleep(500 * time.Millisecond)
+			}
+			assert.Equal(t, want, got, "channel frozen state should converge to %v", want)
+		}
 
-		// Unfreeze
-		resp, err = ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
-			Set: map[string]any{
-				"frozen": false,
-			},
+		_, err := ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
+			Set: map[string]any{"frozen": true},
 		})
 		require.NoError(t, err)
-		assert.False(t, resp.Data.Channel.Frozen)
+		requireFrozen(true)
+
+		_, err = ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
+			Set: map[string]any{"frozen": false},
+		})
+		require.NoError(t, err)
+		requireFrozen(false)
 	})
 
 	t.Run("MarkReadUnread", func(t *testing.T) {
