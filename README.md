@@ -52,6 +52,18 @@ Four structured events are emitted: `client.initialized` (INFO, once at construc
 
 **Security:** these events never log HTTP headers (so `Authorization` is never written to logs), and known-secret values are always redacted regardless of logger: query parameters `api_key`, `api_secret`, and `token` become `<redacted>`, and top-level JSON body keys `api_secret`, `token`, and `password` become `<redacted>`. Request/response bodies are not logged by default. Opt in with `WithLogBodies(true)` if you need them for debugging, this logs a one-time WARN on construction because other sensitive data (message content, PII) may still appear in bodies even with the known-secret keys redacted.
 
+## 🔁 Retry
+
+Auto-retry is opt-in and off by default: the client performs exactly one attempt and surfaces errors unchanged unless you enable it with `WithRetry`:
+
+```go
+client, err := stream.NewClient(apiKey, apiSecret,
+    stream.WithRetry(stream.RetryConfig{Enabled: true, MaxAttempts: 3, MaxBackoff: 30 * time.Second}),
+)
+```
+
+`MaxAttempts` (default 3) is the total attempt budget including the initial request; `MaxBackoff` (default 30s) caps every wait between attempts, including `Retry-After` hints from the server. Only `GET`/`HEAD` requests are retried, and only on HTTP 429 (rate limited) or a transport-layer failure (connection reset, timeout, DNS, TLS) — never on other 4xx/5xx responses, never on writes, and never when the backend marks the error unrecoverable. Waits use exponential backoff with full jitter (base 1s) unless the server sent a `Retry-After` header, which takes priority (clamped to `MaxBackoff`). A retried attempt logs `http.request.failed` at DEBUG with a `retry.attempt` field; a final (non-retried) transport failure still logs it at ERROR as before.
+
 ## ✍️ Contributing
 
 We welcome code changes that improve this library or fix a problem, please make sure to follow all best practices and add tests if applicable before submitting a Pull Request on Github. We are very happy to merge your code in the official repository. Make sure to sign our [Contributor License Agreement (CLA)](https://docs.google.com/forms/d/e/1FAIpQLScFKsKkAJI7mhCr7K9rEIOpqIDThrWxuvxnwUq2XkHyG154vQ/viewform) first. See our [license file](./LICENSE) for more details.

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -506,8 +507,41 @@ func EncodeValueToQueryParam(value any) string {
 	}
 }
 
-// MakeRequest makes a generic HTTP request
+// MakeRequest makes a generic HTTP request, auto-retrying per the client's
+// opt-in RetryConfig (GET/HEAD on 429/transport errors only). Disabled by
+// default: exactly one attempt, errors surface unchanged.
 func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, method, path string, params url.Values, data *GRequest, response *GResponse, pathParams map[string]string) (*StreamResponse[GResponse], error) {
+	for attempt := 0; ; attempt++ {
+		start := time.Now()
+		result, err := makeRequestOnce(c, ctx, method, path, params, data, response, pathParams)
+		if err == nil {
+			return result, nil
+		}
+		if !c.shouldRetry(err, method, attempt) {
+			// Only transport failures ever reached http.request.failed before
+			// retry existed (4xx/5xx, including 429, log via
+			// http.response.received instead) — preserve that split here.
+			if errors.Is(err, ErrTransport) {
+				c.logRequestFailed(method, path, err, time.Since(start))
+			}
+			return result, err
+		}
+		delay := c.retryDelay(err, attempt)
+		c.logRetryScheduled(method, path, err, attempt+1, delay)
+		select {
+		case <-ctx.Done():
+			ctxErr := wrapTransportError(ctx.Err())
+			c.logRequestFailed(method, path, ctxErr, time.Since(start))
+			return nil, ctxErr
+		case <-time.After(delay):
+		}
+	}
+}
+
+// makeRequestOnce performs a single HTTP attempt: builds the request, sends
+// it, and parses the response. Callers (MakeRequest) own retry looping and
+// the http.request.failed emission for transport failures.
+func makeRequestOnce[GRequest any, GResponse any](c *Client, ctx context.Context, method, path string, params url.Values, data *GRequest, response *GResponse, pathParams map[string]string) (*StreamResponse[GResponse], error) {
 	r, err := newRequest(c, ctx, method, path, params, data, pathParams)
 	if err != nil {
 		return nil, err
@@ -527,14 +561,12 @@ func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, me
 	start := time.Now()
 	resp, err := c.httpClient.Do(r)
 	if err != nil {
-		c.logRequestFailed(method, path, err, time.Since(start))
 		return nil, wrapTransportError(err)
 	}
 	defer resp.Body.Close()
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		c.logRequestFailed(method, path, err, time.Since(start))
 		return nil, wrapTransportError(err)
 	}
 
