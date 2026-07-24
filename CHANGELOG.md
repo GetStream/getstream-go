@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.1.0](https://github.com/GetStream/getstream-go/compare/v5.0.0...v5.1.0) (2026-07-24)
+
+
+### Features
+
+* add opt-in retry for rate-limited and transport-failed requests ([#129](https://github.com/GetStream/getstream-go/issues/129)) ([a851a68](https://github.com/GetStream/getstream-go/commit/a851a68d2bf9418030ea8f11f737324696b6c24f))
+* emit structured log events and redact secrets from debug logs ([#128](https://github.com/GetStream/getstream-go/issues/128)) ([85bffd0](https://github.com/GetStream/getstream-go/commit/85bffd04db4ac8984cb541da0cc9b56b9dac30f7))
+
+
+### Bug Fixes
+
+* align go module path with the v5 major version ([#130](https://github.com/GetStream/getstream-go/issues/130)) ([e4b36ff](https://github.com/GetStream/getstream-go/commit/e4b36ffa6a05e81f83277c90f59d3cb8f20383e2))
+
 ## [5.0.0](https://github.com/GetStream/getstream-go/compare/v4.2.2...v5.0.0) (2026-07-15)
 
 
