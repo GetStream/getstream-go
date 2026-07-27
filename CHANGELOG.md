@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.1.1](https://github.com/GetStream/getstream-go/compare/v5.1.0...v5.1.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* v5 follow-ups: Version() prefix, migration guide, release major guard ([#134](https://github.com/GetStream/getstream-go/issues/134)) ([2f22261](https://github.com/GetStream/getstream-go/commit/2f2226123244c9fa3d27b595f798b8e3886d95d2))
+
+## [5.1.0](https://github.com/GetStream/getstream-go/compare/v4.2.2...v5.1.0) (2026-07-24)
+
+
+### Features
+
+* add opt-in retry for rate-limited and transport-failed requests ([#129](https://github.com/GetStream/getstream-go/issues/129)) ([a851a68](https://github.com/GetStream/getstream-go/commit/a851a68d2bf9418030ea8f11f737324696b6c24f))
+* emit structured log events and redact secrets from debug logs ([#128](https://github.com/GetStream/getstream-go/issues/128)) ([85bffd0](https://github.com/GetStream/getstream-go/commit/85bffd04db4ac8984cb541da0cc9b56b9dac30f7))
+
+
+### Bug Fixes
+
+* align go module path with the v5 major version ([#130](https://github.com/GetStream/getstream-go/issues/130)) ([e4b36ff](https://github.com/GetStream/getstream-go/commit/e4b36ffa6a05e81f83277c90f59d3cb8f20383e2))
+
+## 5.0.0 (2026-07-15)
+
+> Withdrawn. These changes shipped in 5.1.0. See [MIGRATION_v4_to_v5.md](MIGRATION_v4_to_v5.md).
+
+
+### ⚠ BREAKING CHANGES
+
+* add GetChannel endpoint (#123)
+
+### Features
+
+* add GetChannel endpoint ([#123](https://github.com/GetStream/getstream-go/issues/123)) ([070f2e1](https://github.com/GetStream/getstream-go/commit/070f2e143ca7410bd5a5e3f1a96c3d711ec3ff57))
+
 ### [4.2.2](https://github.com/GetStream/getstream-go/compare/v4.2.1...v4.2.2) (2026-06-30)
 
 
@@ -92,7 +125,7 @@ All notable changes to this project will be documented in this file. See [standa
 - `Event` (WebSocket envelope type) renamed to `WSEvent`. Base event type renamed from `BaseEvent` to `Event` (with field `type` instead of `T`).
 - Event composition changed from monolithic `*Preset` embeds to modular `Has*` types (`HasChannel`, `HasMessage`, `HasUserCommonFields`, etc.).
 - `Pager` renamed to `PagerResponse` and migrated from offset-based to cursor-based pagination (`next`/`prev` tokens).
-- Module path changed from `github.com/GetStream/getstream-go/v4` to `github.com/GetStream/getstream-go/v4`.
+- Module path changed from `github.com/GetStream/getstream-go/v5` to `github.com/GetStream/getstream-go/v5`.
 
 ### Added
 

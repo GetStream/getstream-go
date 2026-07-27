@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -15,40 +16,6 @@ import (
 	"strings"
 	"time"
 )
-
-// logRequest logs the details of an HTTP request
-func (c *Client) logRequest(req *http.Request) {
-	c.logger.Debug("---> %s %s", req.Method, req.URL.String())
-	c.logger.Debug("Host: %s", req.Host)
-	for key, values := range req.Header {
-		c.logger.Debug("%s: %s", key, strings.Join(values, ", "))
-	}
-	if req.Body == nil {
-		return
-	}
-	// Read via GetBody so the live body stays intact; only drain+restore when
-	// there's no GetBody (streaming bodies).
-	if req.GetBody != nil {
-		if rc, err := req.GetBody(); err == nil {
-			body, _ := io.ReadAll(rc)
-			rc.Close()
-			c.logger.Debug("\n%s", string(body))
-			return
-		}
-	}
-	body, _ := io.ReadAll(req.Body)
-	req.Body = io.NopCloser(bytes.NewReader(body))
-	c.logger.Debug("\n%s", string(body))
-}
-
-// logResponse logs the details of an HTTP response
-func (c *Client) logResponse(resp *http.Response, body []byte, duration time.Duration) {
-	c.logger.Debug("<--- %d %s (%s)", resp.StatusCode, http.StatusText(resp.StatusCode), duration)
-	for key, values := range resp.Header {
-		c.logger.Debug("%s: %s", key, strings.Join(values, ", "))
-	}
-	c.logger.Debug("\n%s", string(body))
-}
 
 // StreamError is the single concrete error type returned by the SDK.
 //
@@ -140,7 +107,6 @@ type StreamResponse[T any] struct {
 // envelope, or a sentinel-message StreamError when the body cannot be parsed.
 func parseResponse[GResponse any](c *Client, resp *http.Response, body []byte, result *GResponse) (*StreamResponse[GResponse], error) {
 	statusCode := resp.StatusCode
-	c.logger.Debug("Status Code: %d", statusCode)
 	if statusCode >= 399 {
 		return nil, buildAPIError(resp, body)
 	}
@@ -208,11 +174,8 @@ func (c *Client) requestURL(path string, values url.Values, pathParams map[strin
 	}
 
 	values.Add("api_key", c.apiKey)
-	c.logger.Debug("Query parameters: %v", values)
 	u.RawQuery = values.Encode()
-	url := u.String()
-	c.logger.Debug("Full URL: %s", url)
-	return url, nil
+	return u.String(), nil
 }
 
 // buildPath constructs a URL path with parameters, escaping them appropriately.
@@ -251,34 +214,25 @@ func newRequest[T any](c *Client, ctx context.Context, method, path string, para
 	// Do not set body if the method is GET
 	if method == http.MethodGet {
 		r.Body = nil
-		c.logger.Debug("GET request: No body set")
 		return r, nil
 	}
 
-	// Handle other methods with body
-	c.logger.Debug("Method: %s, Data: %#v (Type: %T)", method, data, data)
-
 	switch t := any(data).(type) {
 	case nil:
-		c.logger.Debug("Data is nil")
 		r.Body = nil
 	case io.ReadCloser:
-		c.logger.Debug("Data is io.ReadCloser")
 		r.Body = t
 	case io.Reader:
-		c.logger.Debug("Data is io.Reader")
 		r.Body = io.NopCloser(t)
 	case *UploadFileRequest, *UploadImageRequest, *UploadChannelFileRequest, *UploadChannelImageRequest:
 		return c.createMultipartRequest(r, t)
 	default:
-		c.logger.Debug("Data is of type %T, attempting to marshal to JSON", t)
 		b, err := json.Marshal(data)
 		if err != nil {
 			c.logger.Error("Error marshaling data: %+v, setting body to nil", err)
 			r.Body = nil
 		} else {
 			setRetryableBody(r, b)
-			c.logger.Debug("Request body set with JSON: %s", string(b))
 		}
 	}
 
@@ -553,14 +507,56 @@ func EncodeValueToQueryParam(value any) string {
 	}
 }
 
-// MakeRequest makes a generic HTTP request
+// MakeRequest makes a generic HTTP request, auto-retrying per the client's
+// opt-in RetryConfig (GET/HEAD on 429/transport errors only). Disabled by
+// default: exactly one attempt, errors surface unchanged.
 func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, method, path string, params url.Values, data *GRequest, response *GResponse, pathParams map[string]string) (*StreamResponse[GResponse], error) {
+	for attempt := 0; ; attempt++ {
+		start := time.Now()
+		result, err := makeRequestOnce(c, ctx, method, path, params, data, response, pathParams)
+		if err == nil {
+			return result, nil
+		}
+		if !c.shouldRetry(err, method, attempt) {
+			// Only transport failures ever reached http.request.failed before
+			// retry existed (4xx/5xx, including 429, log via
+			// http.response.received instead) — preserve that split here.
+			if errors.Is(err, ErrTransport) {
+				c.logRequestFailed(method, path, err, time.Since(start))
+			}
+			return result, err
+		}
+		delay := c.retryDelay(err, attempt)
+		c.logRetryScheduled(method, path, err, attempt+1, delay)
+		select {
+		case <-ctx.Done():
+			ctxErr := wrapTransportError(ctx.Err())
+			c.logRequestFailed(method, path, ctxErr, time.Since(start))
+			return nil, ctxErr
+		case <-time.After(delay):
+		}
+	}
+}
+
+// makeRequestOnce performs a single HTTP attempt: builds the request, sends
+// it, and parses the response. Callers (MakeRequest) own retry looping and
+// the http.request.failed emission for transport failures.
+func makeRequestOnce[GRequest any, GResponse any](c *Client, ctx context.Context, method, path string, params url.Values, data *GRequest, response *GResponse, pathParams map[string]string) (*StreamResponse[GResponse], error) {
 	r, err := newRequest(c, ctx, method, path, params, data, pathParams)
 	if err != nil {
 		return nil, err
 	}
 
-	c.logRequest(r)
+	// Only re-marshal on opt-in (WithLogBodies) so the default path does zero
+	// extra work. GET/HEAD never carry a body.
+	var reqBody []byte
+	if c.logBodies && data != nil && method != http.MethodGet && method != http.MethodHead {
+		reqBody, _ = json.Marshal(data)
+	}
+	// r.URL.Query() is the actual built query (includes the api_key requestURL
+	// injects), not the caller's params — params alone would log an empty
+	// query for the ~246 of 316 call sites that pass nil.
+	c.logRequestSent(method, path, r.URL.Query(), reqBody)
 
 	start := time.Now()
 	resp, err := c.httpClient.Do(r)
@@ -575,7 +571,7 @@ func MakeRequest[GRequest any, GResponse any](c *Client, ctx context.Context, me
 	}
 
 	duration := time.Since(start)
-	c.logResponse(resp, b, duration)
+	c.logResponseReceived(method, path, resp.StatusCode, len(b), duration, b)
 
 	return parseResponse(c, resp, b, response)
 }

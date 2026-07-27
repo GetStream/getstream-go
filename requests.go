@@ -15,6 +15,7 @@ type UpdateAppRequest struct {
 	DisablePermissionsChecks              *bool                           `json:"disable_permissions_checks,omitempty"`
 	EnableHookPayloadCompression          *bool                           `json:"enable_hook_payload_compression,omitempty"`
 	EnforceUniqueUsernames                *string                         `json:"enforce_unique_usernames,omitempty"`
+	FeedAuditLogsEnabled                  *bool                           `json:"feed_audit_logs_enabled,omitempty"`
 	FeedsModerationEnabled                *bool                           `json:"feeds_moderation_enabled,omitempty"`
 	FeedsV2Region                         *string                         `json:"feeds_v2_region,omitempty"`
 	GuestUserCreationDisabled             *bool                           `json:"guest_user_creation_disabled,omitempty"`
@@ -30,6 +31,7 @@ type UpdateAppRequest struct {
 	PermissionVersion                     *string                         `json:"permission_version,omitempty"`
 	RemindersInterval                     *int                            `json:"reminders_interval,omitempty"`
 	RemindersMaxMembers                   *int                            `json:"reminders_max_members,omitempty"`
+	RemindersMaxPerUser                   *int                            `json:"reminders_max_per_user,omitempty"`
 	RevokeTokensIssuedBefore              *Timestamp                      `json:"revoke_tokens_issued_before,omitempty"`
 	SnsKey                                *string                         `json:"sns_key,omitempty"`
 	SnsSecret                             *string                         `json:"sns_secret,omitempty"`
@@ -220,6 +222,12 @@ type GetOrCreateDistinctChannelRequest struct {
 }
 type DeleteChannelRequest struct {
 	HardDelete *bool `json:"-" query:"hard_delete"`
+}
+type GetChannelRequest struct {
+	State         *bool `json:"-" query:"state"`
+	MessagesLimit *int  `json:"-" query:"messages_limit"`
+	MembersLimit  *int  `json:"-" query:"members_limit"`
+	WatchersLimit *int  `json:"-" query:"watchers_limit"`
 }
 type UpdateChannelPartialRequest struct {
 	UserID *string        `json:"user_id,omitempty"`
@@ -972,7 +980,9 @@ type TrackActivityMetricsRequest struct {
 	User   *UserRequest                `json:"user,omitempty"`
 }
 type QueryActivitiesRequest struct {
-	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
+	Language        *string `json:"-" query:"language"`
+	TranslateText   *bool   `json:"-" query:"translate_text"`
+	EnrichOwnFields *bool   `json:"enrich_own_fields,omitempty"`
 	// When true, include both expired and non-expired activities in the result.
 	IncludeExpiredActivities *bool `json:"include_expired_activities,omitempty"`
 	IncludePrivateActivities *bool `json:"include_private_activities,omitempty"`
@@ -1049,6 +1059,8 @@ type AddActivityReactionRequest struct {
 	EnforceUnique *bool   `json:"enforce_unique,omitempty"`
 	SkipPush      *bool   `json:"skip_push,omitempty"`
 	UserID        *string `json:"user_id,omitempty"`
+	// Optional list of feeds to create a reference (share) activity of the original activity in. The reference activity's type mirrors the reaction type.
+	TargetFeeds []string `json:"target_feeds"`
 	// Custom data for the reaction
 	Custom map[string]any `json:"custom"`
 	User   *UserRequest   `json:"user,omitempty"`
@@ -1064,14 +1076,21 @@ type DeleteActivityReactionRequest struct {
 	DeleteNotificationActivity *bool   `json:"-" query:"delete_notification_activity"`
 	UserID                     *string `json:"-" query:"user_id"`
 }
+type QueryActivitySharesRequest struct {
+	Limit *int    `json:"-" query:"limit"`
+	Prev  *string `json:"-" query:"prev"`
+	Next  *string `json:"-" query:"next"`
+}
 type DeleteActivityRequest struct {
 	HardDelete                 *bool `json:"-" query:"hard_delete"`
 	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
 }
 type GetActivityRequest struct {
-	CommentSort  *string `json:"-" query:"comment_sort"`
-	CommentLimit *int    `json:"-" query:"comment_limit"`
-	UserID       *string `json:"-" query:"user_id"`
+	Language      *string `json:"-" query:"language"`
+	TranslateText *bool   `json:"-" query:"translate_text"`
+	CommentSort   *string `json:"-" query:"comment_sort"`
+	CommentLimit  *int    `json:"-" query:"comment_limit"`
+	UserID        *string `json:"-" query:"user_id"`
 }
 type UpdateActivityPartialRequest struct {
 	// Whether to copy custom data to the notification activity (only applies when handle_mention_notifications creates notifications) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
@@ -1143,6 +1162,10 @@ type RestoreActivityRequest struct {
 	UserID          *string      `json:"user_id,omitempty"`
 	User            *UserRequest `json:"user,omitempty"`
 }
+type TranslateActivityRequest struct {
+	// ISO 639-1 language code to translate to
+	Language string `json:"language"`
+}
 type QueryBookmarkFoldersRequest struct {
 	Limit *int    `json:"limit,omitempty"`
 	Next  *string `json:"next,omitempty"`
@@ -1163,6 +1186,8 @@ type UpdateBookmarkFolderRequest struct {
 	User   *UserRequest   `json:"user,omitempty"`
 }
 type QueryBookmarksRequest struct {
+	Language        *string `json:"-" query:"language"`
+	TranslateText   *bool   `json:"-" query:"translate_text"`
 	EnrichOwnFields *bool   `json:"enrich_own_fields,omitempty"`
 	Limit           *int    `json:"limit,omitempty"`
 	Next            *string `json:"next,omitempty"`
@@ -1209,16 +1234,18 @@ type QueryCollectionsRequest struct {
 	User   *UserRequest   `json:"user,omitempty"`
 }
 type GetCommentsRequest struct {
-	ObjectID     string  `json:"-" query:"object_id"`
-	ObjectType   string  `json:"-" query:"object_type"`
-	Depth        *int    `json:"-" query:"depth"`
-	Sort         *string `json:"-" query:"sort"`
-	RepliesLimit *int    `json:"-" query:"replies_limit"`
-	IDAround     *string `json:"-" query:"id_around"`
-	UserID       *string `json:"-" query:"user_id"`
-	Limit        *int    `json:"-" query:"limit"`
-	Prev         *string `json:"-" query:"prev"`
-	Next         *string `json:"-" query:"next"`
+	ObjectID      string  `json:"-" query:"object_id"`
+	ObjectType    string  `json:"-" query:"object_type"`
+	Depth         *int    `json:"-" query:"depth"`
+	Sort          *string `json:"-" query:"sort"`
+	RepliesLimit  *int    `json:"-" query:"replies_limit"`
+	IDAround      *string `json:"-" query:"id_around"`
+	Language      *string `json:"-" query:"language"`
+	TranslateText *bool   `json:"-" query:"translate_text"`
+	UserID        *string `json:"-" query:"user_id"`
+	Limit         *int    `json:"-" query:"limit"`
+	Prev          *string `json:"-" query:"prev"`
+	Next          *string `json:"-" query:"next"`
 }
 type AddCommentRequest struct {
 	// Text content of the comment
@@ -1255,6 +1282,8 @@ type AddCommentsBatchRequest struct {
 	Comments []AddCommentRequest `json:"comments"`
 }
 type QueryCommentsRequest struct {
+	Language      *string `json:"-" query:"language"`
+	TranslateText *bool   `json:"-" query:"translate_text"`
 	// Filter to apply to the query
 	Filter map[string]any `json:"filter"`
 	// Returns the comment with the specified ID along with surrounding comments for context
@@ -1310,7 +1339,9 @@ type DeleteCommentRequest struct {
 	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
 }
 type GetCommentRequest struct {
-	UserID *string `json:"-" query:"user_id"`
+	Language      *string `json:"-" query:"language"`
+	TranslateText *bool   `json:"-" query:"translate_text"`
+	UserID        *string `json:"-" query:"user_id"`
 }
 type UpdateCommentRequest struct {
 	// Updated text content of the comment
@@ -1365,6 +1396,8 @@ type AddCommentReactionRequest struct {
 	EnforceUnique *bool   `json:"enforce_unique,omitempty"`
 	SkipPush      *bool   `json:"skip_push,omitempty"`
 	UserID        *string `json:"user_id,omitempty"`
+	// Optional list of feeds to create a reference (share) activity of the commented-on activity in. The reference activity's type mirrors the reaction type.
+	TargetFeeds []string `json:"target_feeds"`
 	// Optional custom data to add to the reaction
 	Custom map[string]any `json:"custom"`
 	User   *UserRequest   `json:"user,omitempty"`
@@ -1381,18 +1414,24 @@ type DeleteCommentReactionRequest struct {
 	UserID                     *string `json:"-" query:"user_id"`
 }
 type GetCommentRepliesRequest struct {
-	Depth        *int    `json:"-" query:"depth"`
-	Sort         *string `json:"-" query:"sort"`
-	RepliesLimit *int    `json:"-" query:"replies_limit"`
-	IDAround     *string `json:"-" query:"id_around"`
-	UserID       *string `json:"-" query:"user_id"`
-	Limit        *int    `json:"-" query:"limit"`
-	Prev         *string `json:"-" query:"prev"`
-	Next         *string `json:"-" query:"next"`
+	Depth         *int    `json:"-" query:"depth"`
+	Sort          *string `json:"-" query:"sort"`
+	RepliesLimit  *int    `json:"-" query:"replies_limit"`
+	IDAround      *string `json:"-" query:"id_around"`
+	Language      *string `json:"-" query:"language"`
+	TranslateText *bool   `json:"-" query:"translate_text"`
+	UserID        *string `json:"-" query:"user_id"`
+	Limit         *int    `json:"-" query:"limit"`
+	Prev          *string `json:"-" query:"prev"`
+	Next          *string `json:"-" query:"next"`
 }
 type RestoreCommentRequest struct {
 	UserID *string      `json:"user_id,omitempty"`
 	User   *UserRequest `json:"user,omitempty"`
+}
+type TranslateCommentRequest struct {
+	// ISO 639-1 language code to translate to
+	Language string `json:"language"`
 }
 type ListFeedGroupsRequest struct {
 	IncludeSoftDeleted *bool `json:"-" query:"include_soft_deleted"`
@@ -1420,6 +1459,8 @@ type DeleteFeedRequest struct {
 	PurgeUserActivities *bool `json:"-" query:"purge_user_activities"`
 }
 type GetOrCreateFeedRequest struct {
+	Language                 *string                 `json:"-" query:"language"`
+	TranslateText            *bool                   `json:"-" query:"translate_text"`
 	IDAround                 *string                 `json:"id_around,omitempty"`
 	Limit                    *int                    `json:"limit,omitempty"`
 	Next                     *string                 `json:"next,omitempty"`
@@ -1513,6 +1554,8 @@ type RejectFeedMemberInviteRequest struct {
 	User   *UserRequest `json:"user,omitempty"`
 }
 type QueryPinnedActivitiesRequest struct {
+	Language        *string `json:"-" query:"language"`
+	TranslateText   *bool   `json:"-" query:"translate_text"`
 	EnrichOwnFields *bool   `json:"enrich_own_fields,omitempty"`
 	Limit           *int    `json:"limit,omitempty"`
 	Next            *string `json:"next,omitempty"`
@@ -2076,6 +2119,7 @@ type UpsertConfigRequest struct {
 	// Optional user ID to associate with the audit log entry
 	UserID                             *string                             `json:"user_id,omitempty"`
 	AWSRekognitionConfig               *AIImageConfig                      `json:"aws_rekognition_config,omitempty"`
+	AiAudioConfig                      *AIAudioConfigRequest               `json:"ai_audio_config,omitempty"`
 	AiImageConfig                      *AIImageConfig                      `json:"ai_image_config,omitempty"`
 	AiTextConfig                       *AITextConfig                       `json:"ai_text_config,omitempty"`
 	AiVideoConfig                      *AIVideoConfig                      `json:"ai_video_config,omitempty"`

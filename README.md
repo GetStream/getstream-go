@@ -25,6 +25,11 @@
 
 If you are currently using [`stream-chat-go`](https://github.com/GetStream/stream-chat-go), we have a detailed migration guide with side-by-side code examples for common Chat use cases. See the [Migration Guide](docs/migration-from-stream-chat-go/README.md).
 
+## Upgrading from an older major?
+
+- [v4 → v5](MIGRATION_v4_to_v5.md): new import path, four removed response fields, `CheckResponse` no longer comparable.
+- [v3 → v4](MIGRATION_v3_to_v4.md): OpenAPI-aligned type renaming.
+
 ## **Quick Links**
 
 - [Register](https://getstream.io/chat/trial/) to get an API key for Stream
@@ -43,6 +48,26 @@ Stream is free for most side and hobby projects. To qualify, your project/compan
 ## 😎 Repo Overview 😎
 
 This repo contains the Golang server-side SDK developed by the team and Stream community. For a feature overview please visit our [roadmap](https://github.com/GetStream/protocol/discussions/177).
+
+## 🪵 Logging
+
+The client accepts a custom logger via `WithLogger` (any type implementing the `Logger` interface: `Debug`/`Info`/`Warn`/`Error`). Without one, it falls back to a stderr logger at INFO level, so per-request DEBUG events are silent by default; inject a logger with DEBUG enabled to see them.
+
+Four structured events are emitted: `client.initialized` (INFO, once at construction, with SDK name/version and connection-pool settings), `http.request.sent` (DEBUG, before each request), `http.response.received` (DEBUG, after any response including 4xx/5xx, status codes are just data on this event), and `http.request.failed` (ERROR, transport-layer failures only, e.g. connection reset, timeout, DNS, TLS, when no HTTP response was received at all).
+
+**Security:** these events never log HTTP headers (so `Authorization` is never written to logs), and known-secret values are always redacted regardless of logger: query parameters `api_key`, `api_secret`, and `token` become `<redacted>`, and top-level JSON body keys `api_secret`, `token`, and `password` become `<redacted>`. Request/response bodies are not logged by default. Opt in with `WithLogBodies(true)` if you need them for debugging, this logs a one-time WARN on construction because other sensitive data (message content, PII) may still appear in bodies even with the known-secret keys redacted.
+
+## 🔁 Retry
+
+Auto-retry is opt-in and off by default: the client performs exactly one attempt and surfaces errors unchanged unless you enable it with `WithRetry`:
+
+```go
+client, err := stream.NewClient(apiKey, apiSecret,
+    stream.WithRetry(stream.RetryConfig{Enabled: true, MaxAttempts: 3, MaxBackoff: 30 * time.Second}),
+)
+```
+
+`MaxAttempts` (default 3) is the total attempt budget including the initial request; `MaxBackoff` (default 30s) caps every wait between attempts, including `Retry-After` hints from the server. Only `GET`/`HEAD` requests are retried, and only on HTTP 429 (rate limited) or a transport-layer failure (connection reset, timeout, DNS, TLS) — never on other 4xx/5xx responses, never on writes, and never when the backend marks the error unrecoverable. Waits use exponential backoff with full jitter (base 1s) unless the server sent a `Retry-After` header, which takes priority (clamped to `MaxBackoff`). A retried attempt logs `http.request.failed` at DEBUG with a `retry.attempt` field; a final (non-retried) transport failure still logs it at ERROR as before.
 
 ## ✍️ Contributing
 

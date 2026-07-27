@@ -53,6 +53,8 @@ type Client struct {
 	httpClient         HttpClient
 	httpClientFromUser bool // true iff WithHTTPClient was used; gates transport build
 	logger             Logger
+	logBodies          bool // true iff WithLogBodies(true) was used; gates body fields on DEBUG events
+	retry              RetryConfig
 }
 
 func (c *Client) HttpClient() HttpClient {
@@ -145,6 +147,14 @@ func WithBaseUrl(baseURL string) ClientOption {
 func WithLogger(logger Logger) ClientOption {
 	return func(c *Client) {
 		c.logger = logger
+	}
+}
+
+// WithLogBodies opts in to logging request/response bodies on the DEBUG
+// events. Known-secret body keys are still redacted. Off by default.
+func WithLogBodies(enabled bool) ClientOption {
+	return func(c *Client) {
+		c.logBodies = enabled
 	}
 }
 
@@ -270,16 +280,12 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 		client.authToken = token
 	}
 
-	if client.httpClientFromUser {
-		client.logger.Info("connection pool: user_http_client=true (5 knobs not applied)")
-	} else {
-		client.logger.Info(
-			"connection pool: max_conns_per_host=%d idle_timeout=%s connect_timeout=%s request_timeout=%s user_http_client=false",
-			client.maxConnsPerHost,
-			client.idleTimeout,
-			client.connectTimeout,
-			client.defaultTimeout,
-		)
+	client.logger.Info(
+		"client.initialized stream.sdk.name=getstream-go stream.sdk.version=%s stream.client.max_conns_per_host=%d stream.client.idle_timeout_seconds=%d stream.client.connect_timeout_seconds=%d stream.client.request_timeout_seconds=%d stream.client.gzip_enabled=%t stream.client.user_http_client=%t stream.client.log_bodies=%t",
+		versionName, client.maxConnsPerHost, int(client.idleTimeout.Seconds()), int(client.connectTimeout.Seconds()), int(client.defaultTimeout.Seconds()), true, client.httpClientFromUser, client.logBodies,
+	)
+	if client.logBodies {
+		client.logger.Warn("HTTP request/response bodies will be logged. Auth headers and known-secret fields are still redacted, but other sensitive data (messages, PII) may appear in logs. Disable for production.")
 	}
 
 	return client, nil

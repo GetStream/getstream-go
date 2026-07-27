@@ -8,13 +8,20 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
-	. "github.com/GetStream/getstream-go/v4"
+	. "github.com/GetStream/getstream-go/v5"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
+
+// appConfigMu serializes tests that mutate the shared, app-global upload config.
+// FileUploadConfig.SizeLimit has no omitempty, so any UpdateApp carrying a
+// FileUploadConfig rewrites size_limit; without this, parallel config tests
+// clobber each other mid-verify. Hold it across the whole set -> verify -> restore.
+var appConfigMu sync.Mutex
 
 // rateLimitClient wraps an HttpClient and automatically retries on 429 responses
 // with exponential backoff and jitter to avoid thundering herd.

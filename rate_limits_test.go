@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/GetStream/getstream-go/v4"
+	"github.com/GetStream/getstream-go/v5"
 	"github.com/stretchr/testify/assert"
 )
 

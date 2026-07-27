@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GetStream/getstream-go/v4"
+	"github.com/GetStream/getstream-go/v5"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -1942,6 +1942,12 @@ func test36BatchFeedOperations(t *testing.T, ctx context.Context, feedsClient *g
 }
 
 func testFileUploadIntegration(t *testing.T, ctx context.Context, client *getstream.Stream, testUserID string) {
+	// Serialize app-config mutation (see appConfigMu): this UpdateApp sends
+	// size_limit=0 and would clobber a concurrent config test's read-back.
+	// defer-unlock runs after the restore defer below (defers are LIFO).
+	appConfigMu.Lock()
+	defer appConfigMu.Unlock()
+
 	// Clear any file upload restrictions so we can upload .txt files
 	appResp, err := client.GetApp(ctx, &getstream.GetAppRequest{})
 	require.NoError(t, err, "Failed to get app config")

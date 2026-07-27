@@ -131,17 +131,21 @@ func TestNewRequest_StreamingReader_NoGetBody(t *testing.T) {
 	require.Equal(t, "raw", string(b))
 }
 
-// logRequest must not consume the live body or drop GetBody.
-func TestLogRequest_PreservesBodyAndGetBody(t *testing.T) {
-	client, _ := newClient("k", "s", WithBaseUrl("https://api.example.com"))
-	req, err := newRequest(client, context.Background(), http.MethodPost, "/v1/x", nil, &getBodyTestRequest{Foo: "bar"}, nil)
+// logRequestSent re-marshals the caller's data independently of req.Body, so
+// it must not consume the live body or drop GetBody.
+func TestLogRequestSent_PreservesBodyAndGetBody(t *testing.T) {
+	client, _ := newClient("k", "s", WithBaseUrl("https://api.example.com"), WithLogBodies(true))
+	data := &getBodyTestRequest{Foo: "bar"}
+	req, err := newRequest(client, context.Background(), http.MethodPost, "/v1/x", nil, data, nil)
 	require.NoError(t, err)
 
-	client.logRequest(req)
+	b, err := json.Marshal(data)
+	require.NoError(t, err)
+	client.logRequestSent(http.MethodPost, "/v1/x", nil, b)
 
 	body, err := io.ReadAll(req.Body)
 	require.NoError(t, err)
-	require.Equal(t, getBodyTestJSON, string(body), "logRequest must not consume the live body")
+	require.Equal(t, getBodyTestJSON, string(body), "logRequestSent must not consume the live body")
 
 	rc, err := req.GetBody()
 	require.NoError(t, err)

@@ -171,6 +171,18 @@ func (c *ChatClient) DeleteChannel(ctx context.Context, _type string, id string,
 	return res, err
 }
 
+// Returns a channel by its CID without creating it. Responds with 404 when the channel does not exist, so it doubles as an existence check. Pass state=true to also load messages, read state and watchers.
+func (c *ChatClient) GetChannel(ctx context.Context, _type string, id string, request *GetChannelRequest) (*StreamResponse[ChannelStateResponse], error) {
+	var result ChannelStateResponse
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, ChannelStateResponse](c.client, ctx, "GET", "/api/v2/chat/channels/{type}/{id}", params, nil, &result, pathParams)
+	return res, err
+}
+
 // Updates certain fields of the channel
 //
 // Sends events:

@@ -1,12 +1,13 @@
 package getstream
 
 const (
-	versionName = "v4.2.2"
+	versionName = "v5.1.1"
 )
 
-// Version returns the version of the library.
+// Version returns the version of the library. versionName is written by the release
+// workflow and already carries the leading "v".
 func Version() string {
-	return "v" + versionName
+	return versionName
 }
 
 func versionHeader() string {
