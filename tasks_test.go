@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/GetStream/getstream-go/v4"
+	. "github.com/GetStream/getstream-go/v5"
 )
 
 // scriptedHTTPClient returns a queued sequence of HTTP responses. Each
