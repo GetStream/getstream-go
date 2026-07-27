@@ -258,10 +258,10 @@ func main() {
 	resp, err := client.Chat().UpdateMessagePartial(ctx, "message-id",
 		&getstream.UpdateMessagePartialRequest{
 			Set: map[string]any{
-				"priority": "high",
-				"status":   "reviewed",
+				"text":   "New text",
+				"pinned": true,
 			},
-			Unset:  []string{"old_field"},
+			Unset:  []string{"attachments"},
 			UserID: getstream.PtrTo("user-123"),
 		})
 }
