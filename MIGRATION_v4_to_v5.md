@@ -4,9 +4,7 @@ v5 is a small release. The import path changes, four response fields that the AP
 
 ## Start at v5.1.0
 
-There is no v5.0.0. It was tagged while `go.mod` still declared the `/v4` module path, which Go rejects for a v2+ major, so it was never installable by anyone. The tag and its GitHub release have been removed rather than left as a version you appear to be missing. Everything it contained shipped in v5.1.0.
-
-`go get github.com/GetStream/getstream-go/v5` resolves to v5.1.0 or later.
+v5.1.0 is the first v5 release. v5.0.0 was withdrawn, and everything in it is included in v5.1.0.
 
 ## Installation
 
@@ -58,7 +56,7 @@ The singular `TriggeredRule *TriggeredRuleResponse` is still present and still p
 
 - `ChatClient.GetChannel(ctx, type, id, request)` and `Channels.Get(ctx, request)`: fetch channel state without a `GetOrCreate` write.
 - `CheckResponse.TriggeredRules`: all rules triggered by a moderation check, with their resolved actions.
-- `ModerationCallResponse`: the moderation call payload has its own type. The Video `CallResponse` is unchanged, despite what the withdrawn v5.0.0 release notes implied.
+- `ModerationCallResponse`: the moderation call payload has its own type. The Video `CallResponse` is unchanged.
 - Feeds translation: `TranslateActivity`, `TranslateComment`, `I18n` on activity and comment responses, plus `Language` and `TranslateText` parameters on the feeds read endpoints.
 - Activity shares: `QueryActivityShares`, `ShareResponse`, `FeedsShareResponse`.
 - `WithRetry(RetryConfig{...})`: opt-in retry for rate-limited and transport-failed requests (v5.1.0).

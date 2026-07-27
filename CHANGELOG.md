@@ -17,7 +17,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## 5.0.0 (2026-07-15)
 
-> Never released. The tag declared the `/v4` module path, so Go could not resolve it, and it has been removed. These changes shipped in 5.1.0. See [MIGRATION_v4_to_v5.md](MIGRATION_v4_to_v5.md).
+> Withdrawn. These changes shipped in 5.1.0. See [MIGRATION_v4_to_v5.md](MIGRATION_v4_to_v5.md).
 
 
 ### ⚠ BREAKING CHANGES
