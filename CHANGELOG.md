@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.1.1](https://github.com/GetStream/getstream-go/compare/v5.1.0...v5.1.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* v5 follow-ups: Version() prefix, migration guide, release major guard ([#134](https://github.com/GetStream/getstream-go/issues/134)) ([2f22261](https://github.com/GetStream/getstream-go/commit/2f2226123244c9fa3d27b595f798b8e3886d95d2))
+
 ## [5.1.0](https://github.com/GetStream/getstream-go/compare/v4.2.2...v5.1.0) (2026-07-24)
 
 
