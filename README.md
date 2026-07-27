@@ -25,6 +25,11 @@
 
 If you are currently using [`stream-chat-go`](https://github.com/GetStream/stream-chat-go), we have a detailed migration guide with side-by-side code examples for common Chat use cases. See the [Migration Guide](docs/migration-from-stream-chat-go/README.md).
 
+## Upgrading from an older major?
+
+- [v4 → v5](MIGRATION_v4_to_v5.md): new import path, four removed response fields, `CheckResponse` no longer comparable.
+- [v3 → v4](MIGRATION_v3_to_v4.md): OpenAPI-aligned type renaming.
+
 ## **Quick Links**
 
 - [Register](https://getstream.io/chat/trial/) to get an API key for Stream
