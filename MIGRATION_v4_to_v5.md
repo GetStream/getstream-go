@@ -2,16 +2,11 @@
 
 v5 is a small release. The import path changes, four response fields that the API no longer returns are gone, and `CheckResponse` can no longer be compared with `==`. Everything else is additive, so most codebases only need to update the import path.
 
-## Start at v5.1.0, not v5.0.0
+## Start at v5.1.0
 
-`v5.0.0` is not installable. Its `go.mod` still declared the `/v4` module path, which Go rejects for a v2+ major:
+There is no v5.0.0. It was tagged while `go.mod` still declared the `/v4` module path, which Go rejects for a v2+ major, so it was never installable by anyone. The tag and its GitHub release have been removed rather than left as a version you appear to be missing. Everything it contained shipped in v5.1.0.
 
-```
-go: github.com/GetStream/getstream-go/v5@v5.0.0: invalid version:
-    go.mod has non-.../v5 module path "github.com/GetStream/getstream-go/v4" at revision v5.0.0
-```
-
-`v5.1.0` is the first usable v5 release. `go get github.com/GetStream/getstream-go/v5` resolves to it (or later) automatically, so this only bites you if you pin `v5.0.0` explicitly.
+`go get github.com/GetStream/getstream-go/v5` resolves to v5.1.0 or later.
 
 ## Installation
 
@@ -63,6 +58,7 @@ The singular `TriggeredRule *TriggeredRuleResponse` is still present and still p
 
 - `ChatClient.GetChannel(ctx, type, id, request)` and `Channels.Get(ctx, request)`: fetch channel state without a `GetOrCreate` write.
 - `CheckResponse.TriggeredRules`: all rules triggered by a moderation check, with their resolved actions.
+- `ModerationCallResponse`: the moderation call payload has its own type. The Video `CallResponse` is unchanged, despite what the withdrawn v5.0.0 release notes implied.
 - Feeds translation: `TranslateActivity`, `TranslateComment`, `I18n` on activity and comment responses, plus `Language` and `TranslateText` parameters on the feeds read endpoints.
 - Activity shares: `QueryActivityShares`, `ShareResponse`, `FeedsShareResponse`.
 - `WithRetry(RetryConfig{...})`: opt-in retry for rate-limited and transport-failed requests (v5.1.0).
