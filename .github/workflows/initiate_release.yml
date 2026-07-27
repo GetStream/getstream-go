@@ -18,6 +18,27 @@ jobs:
         with:
           fetch-depth: 0 # gives the changelog generator access to all previous commits
 
+      # Go resolves a v2+ module only if go.mod carries the matching /vN suffix, so a major
+      # release tagged before the module path is migrated is unusable (see v5.0.0).
+      - name: Verify module path matches the requested major
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          requested="${VERSION#v}"
+          requested="${requested%%.*}"
+          module_path="$(sed -n 's/^module //p' go.mod)"
+          case "$module_path" in
+            */v[0-9]*) module_major="${module_path##*/v}" ;;
+            *) module_major=1 ;;
+          esac
+          expected="$requested"
+          [ "$expected" = "0" ] && expected=1
+          if [ "$module_major" != "$expected" ]; then
+            echo "::error::go.mod declares '$module_path' (major v$module_major) but the release is $VERSION."
+            echo "::error::Migrate go.mod and every self-import to .../v$requested first, then re-run this workflow."
+            exit 1
+          fi
+
       - name: Update CHANGELOG.md and version.go, then push release branch
         env:
           VERSION: ${{ github.event.inputs.version }}

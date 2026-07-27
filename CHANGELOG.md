@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [5.1.0](https://github.com/GetStream/getstream-go/compare/v5.0.0...v5.1.0) (2026-07-24)
+## [5.1.0](https://github.com/GetStream/getstream-go/compare/v4.2.2...v5.1.0) (2026-07-24)
 
 
 ### Features
@@ -15,7 +15,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 * align go module path with the v5 major version ([#130](https://github.com/GetStream/getstream-go/issues/130)) ([e4b36ff](https://github.com/GetStream/getstream-go/commit/e4b36ffa6a05e81f83277c90f59d3cb8f20383e2))
 
-## [5.0.0](https://github.com/GetStream/getstream-go/compare/v4.2.2...v5.0.0) (2026-07-15)
+## 5.0.0 (2026-07-15)
+
+> Withdrawn. These changes shipped in 5.1.0. See [MIGRATION_v4_to_v5.md](MIGRATION_v4_to_v5.md).
 
 
 ### ⚠ BREAKING CHANGES
