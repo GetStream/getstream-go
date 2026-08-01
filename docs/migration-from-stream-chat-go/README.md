@@ -77,7 +77,7 @@ func main() {
 | 2 | [Users](02-users.md) | Upsert, query, update, delete |
 | 3 | [Channels](03-channels.md) | Create, query, members, update |
 | 4 | [Messages and Reactions](04-messages-and-reactions.md) | Send, reply, react |
-| 5 | [Moderation](05-moderation.md) | Ban, mute, moderators |
+| 5 | [Moderation](05-moderation.md) | Ban, mute, moderators, user blocking, blocklists, flags, review queue |
 | 6 | [Devices](06-devices.md) | Push device management |
 
 ## Notes
