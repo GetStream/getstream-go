@@ -62,7 +62,10 @@ type UpdateAppRequest struct {
 	XiaomiConfig                          *XiaomiConfig                   `json:"xiaomi_config,omitempty"`
 }
 type ListBlockListsRequest struct {
-	Team *string `json:"-" query:"team"`
+	Team        *string `json:"-" query:"team"`
+	OwnerUserID *string `json:"-" query:"owner_user_id"`
+	Cursor      *string `json:"-" query:"cursor"`
+	Limit       *int    `json:"-" query:"limit"`
 }
 type CreateBlockListRequest struct {
 	// Block list name
@@ -73,12 +76,18 @@ type CreateBlockListRequest struct {
 	IsLeetCheckEnabled         *bool    `json:"is_leet_check_enabled,omitempty"`
 	IsPluralCheckEnabled       *bool    `json:"is_plural_check_enabled,omitempty"`
 	IsSubstringMatchingEnabled *bool    `json:"is_substring_matching_enabled,omitempty"`
+	OwnerUserID                *string  `json:"owner_user_id,omitempty"`
 	Team                       *string  `json:"team,omitempty"`
 	// Block list type. One of: regex, domain, domain_allowlist, email, email_allowlist, word
 	Type *string `json:"type,omitempty"`
 }
+type ImportBlockListRequest struct {
+	Items     []string `json:"items"`
+	ChunkSize *int     `json:"chunk_size,omitempty"`
+}
 type DeleteBlockListRequest struct {
-	Team *string `json:"-" query:"team"`
+	Team        *string `json:"-" query:"team"`
+	OwnerUserID *string `json:"-" query:"owner_user_id"`
 }
 type GetBlockListRequest struct {
 	Team *string `json:"-" query:"team"`
@@ -88,6 +97,7 @@ type UpdateBlockListRequest struct {
 	IsLeetCheckEnabled         *bool   `json:"is_leet_check_enabled,omitempty"`
 	IsPluralCheckEnabled       *bool   `json:"is_plural_check_enabled,omitempty"`
 	IsSubstringMatchingEnabled *bool   `json:"is_substring_matching_enabled,omitempty"`
+	OwnerUserID                *string `json:"owner_user_id,omitempty"`
 	Team                       *string `json:"team,omitempty"`
 	// List of words to block
 	Words []string `json:"words"`
@@ -1086,11 +1096,11 @@ type DeleteActivityRequest struct {
 	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
 }
 type GetActivityRequest struct {
-	Language      *string `json:"-" query:"language"`
-	TranslateText *bool   `json:"-" query:"translate_text"`
 	CommentSort   *string `json:"-" query:"comment_sort"`
 	CommentLimit  *int    `json:"-" query:"comment_limit"`
 	UserID        *string `json:"-" query:"user_id"`
+	Language      *string `json:"-" query:"language"`
+	TranslateText *bool   `json:"-" query:"translate_text"`
 }
 type UpdateActivityPartialRequest struct {
 	// Whether to copy custom data to the notification activity (only applies when handle_mention_notifications creates notifications) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
@@ -1339,9 +1349,9 @@ type DeleteCommentRequest struct {
 	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
 }
 type GetCommentRequest struct {
+	UserID        *string `json:"-" query:"user_id"`
 	Language      *string `json:"-" query:"language"`
 	TranslateText *bool   `json:"-" query:"translate_text"`
-	UserID        *string `json:"-" query:"user_id"`
 }
 type UpdateCommentRequest struct {
 	// Updated text content of the comment
@@ -1913,16 +1923,6 @@ type CreateImportV2TaskRequest struct {
 	Settings ImportV2TaskSettings `json:"settings"`
 	UserID   *string              `json:"user_id,omitempty"`
 	User     *UserRequest         `json:"user,omitempty"`
-}
-type DeleteImporterExternalStorageRequest struct {
-}
-type GetImporterExternalStorageRequest struct {
-}
-type UpsertImporterExternalStorageRequest struct {
-	Type  string                             `json:"type"`
-	AWSS3 *UpsertExternalStorageAWSS3Request `json:"aws_s3,omitempty"`
-}
-type ValidateImporterExternalStorageRequest struct {
 }
 type DeleteImportV2TaskRequest struct {
 }

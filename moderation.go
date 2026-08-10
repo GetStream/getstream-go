@@ -249,17 +249,23 @@ func (c *ModerationClient) UpsertModerationRule(ctx context.Context, request *Up
 }
 
 // Delete an existing moderation rule
-func (c *ModerationClient) DeleteModerationRule(ctx context.Context, request *DeleteModerationRuleRequest) (*StreamResponse[DeleteModerationRuleResponse], error) {
+func (c *ModerationClient) DeleteModerationRule(ctx context.Context, id string, request *DeleteModerationRuleRequest) (*StreamResponse[DeleteModerationRuleResponse], error) {
 	var result DeleteModerationRuleResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[any, DeleteModerationRuleResponse](c.client, ctx, "DELETE", "/api/v2/moderation/moderation_rule/{id}", params, nil, &result, nil)
+	res, err := MakeRequest[any, DeleteModerationRuleResponse](c.client, ctx, "DELETE", "/api/v2/moderation/moderation_rule/{id}", params, nil, &result, pathParams)
 	return res, err
 }
 
 // Get a specific moderation rule by ID
-func (c *ModerationClient) GetModerationRule(ctx context.Context, request *GetModerationRuleRequest) (*StreamResponse[GetModerationRuleResponse], error) {
+func (c *ModerationClient) GetModerationRule(ctx context.Context, id string, request *GetModerationRuleRequest) (*StreamResponse[GetModerationRuleResponse], error) {
 	var result GetModerationRuleResponse
-	res, err := MakeRequest[any, GetModerationRuleResponse](c.client, ctx, "GET", "/api/v2/moderation/moderation_rule/{id}", nil, nil, &result, nil)
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, GetModerationRuleResponse](c.client, ctx, "GET", "/api/v2/moderation/moderation_rule/{id}", nil, nil, &result, pathParams)
 	return res, err
 }
 

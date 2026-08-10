@@ -1209,14 +1209,17 @@ type BanActionRequestPayload struct {
 type BanInfoResponse struct {
 	// When the ban was created
 	CreatedAt Timestamp `json:"created_at"`
+	// The channel this ban applies to. Empty if this is an app-wide (global) ban rather than a per-channel ban.
+	ChannelCid *string `json:"channel_cid,omitempty"`
 	// When the ban expires
 	Expires *Timestamp `json:"expires,omitempty"`
 	// Reason for the ban
 	Reason *string `json:"reason,omitempty"`
 	// Whether this is a shadow ban
-	Shadow    *bool         `json:"shadow,omitempty"`
-	CreatedBy *UserResponse `json:"created_by,omitempty"`
-	User      *UserResponse `json:"user,omitempty"`
+	Shadow    *bool            `json:"shadow,omitempty"`
+	Channel   *ChannelMetadata `json:"channel,omitempty"`
+	CreatedBy *UserResponse    `json:"created_by,omitempty"`
+	User      *UserResponse    `json:"user,omitempty"`
 }
 
 type BanOptions struct {
@@ -1288,17 +1291,19 @@ type BlockListResponse struct {
 	// List of words to block
 	Words []string `json:"words"`
 	// Date/time of creation
-	CreatedAt *Timestamp `json:"created_at,omitempty"`
-	ID        *string    `json:"id,omitempty"`
-	Team      *string    `json:"team,omitempty"`
+	CreatedAt   *Timestamp `json:"created_at,omitempty"`
+	ID          *string    `json:"id,omitempty"`
+	OwnerUserID *string    `json:"owner_user_id,omitempty"`
+	Team        *string    `json:"team,omitempty"`
 	// Date/time of the last update
 	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 }
 
 type BlockListRule struct {
-	Action string  `json:"action"`
-	Name   *string `json:"name,omitempty"`
-	Team   *string `json:"team,omitempty"`
+	Action     string  `json:"action"`
+	Name       *string `json:"name,omitempty"`
+	OwnerScope *bool   `json:"owner_scope,omitempty"`
+	Team       *string `json:"team,omitempty"`
 }
 
 // BlockUserResponse is the payload for blocking a user.
@@ -2336,6 +2341,7 @@ type CallSettingsRequest struct {
 	Audio               *AudioSettingsRequest               `json:"audio,omitempty"`
 	Backstage           *BackstageSettingsRequest           `json:"backstage,omitempty"`
 	Broadcasting        *BroadcastSettingsRequest           `json:"broadcasting,omitempty"`
+	Encryption          *EncryptionSettingsRequest          `json:"encryption,omitempty"`
 	FrameRecording      *FrameRecordingSettingsRequest      `json:"frame_recording,omitempty"`
 	Geofencing          *GeofenceSettingsRequest            `json:"geofencing,omitempty"`
 	IndividualRecording *IndividualRecordingSettingsRequest `json:"individual_recording,omitempty"`
@@ -2355,6 +2361,7 @@ type CallSettingsResponse struct {
 	Audio               AudioSettingsResponse               `json:"audio"`
 	Backstage           BackstageSettingsResponse           `json:"backstage"`
 	Broadcasting        BroadcastSettingsResponse           `json:"broadcasting"`
+	Encryption          EncryptionSettingsResponse          `json:"encryption"`
 	FrameRecording      FrameRecordingSettingsResponse      `json:"frame_recording"`
 	Geofencing          GeofenceSettingsResponse            `json:"geofencing"`
 	IndividualRecording IndividualRecordingSettingsResponse `json:"individual_recording"`
@@ -3158,6 +3165,18 @@ type ChannelMessagesResponse struct {
 	// List of messages
 	Messages []MessageResponse `json:"messages"`
 	Channel  ChannelResponse   `json:"channel"`
+}
+
+type ChannelMetadata struct {
+	Cid           string         `json:"cid"`
+	ID            string         `json:"id"`
+	Type          string         `json:"type"`
+	Custom        map[string]any `json:"custom"`
+	LastMessageAt *Timestamp     `json:"last_message_at,omitempty"`
+	MemberCount   *int           `json:"member_count,omitempty"`
+	MessageCount  *int           `json:"message_count,omitempty"`
+	PushLevel     *string        `json:"push_level,omitempty"`
+	Team          *string        `json:"team,omitempty"`
 }
 
 type ChannelMute struct {
@@ -4884,6 +4903,17 @@ type EgressResponse struct {
 	RawRecording        *RawRecordingResponse        `json:"raw_recording,omitempty"`
 }
 
+type EncryptionSettingsRequest struct {
+	// if true, the call is created end-to-end encrypted
+	Enabled *bool `json:"enabled,omitempty"`
+}
+
+// EncryptionSettings is the payload for end-to-end encryption settings
+type EncryptionSettingsResponse struct {
+	// whether the call is end-to-end encrypted
+	Enabled bool `json:"enabled"`
+}
+
 // Response for ending a call
 type EndCallResponse struct {
 	// Duration of the request in milliseconds
@@ -6346,23 +6376,6 @@ type GetEdgesResponse struct {
 	Edges    []EdgeResponse `json:"edges"`
 }
 
-type GetExternalStorageAWSS3Response struct {
-	Bucket     string  `json:"bucket"`
-	Region     string  `json:"region"`
-	RoleArn    string  `json:"role_arn"`
-	PathPrefix *string `json:"path_prefix,omitempty"`
-}
-
-// Basic response information
-type GetExternalStorageResponse struct {
-	CreatedAt Timestamp `json:"created_at"`
-	// Duration of the request in milliseconds
-	Duration  string                           `json:"duration"`
-	UpdatedAt Timestamp                        `json:"updated_at"`
-	Type      string                           `json:"type"`
-	AWSS3     *GetExternalStorageAWSS3Response `json:"aws_s3,omitempty"`
-}
-
 type GetFeedGroupResponse struct {
 	Duration  string            `json:"duration"`
 	FeedGroup FeedGroupResponse `json:"feed_group"`
@@ -6725,6 +6738,18 @@ type HuaweiConfigFields struct {
 	Secret  *string `json:"secret,omitempty"`
 }
 
+type IPContentCountRuleParameters struct {
+	Threshold  *int    `json:"threshold,omitempty"`
+	TimeWindow *string `json:"time_window,omitempty"`
+}
+
+type IPFlagCountRuleParameters struct {
+	Severity   *string  `json:"severity,omitempty"`
+	Threshold  *int     `json:"threshold,omitempty"`
+	TimeWindow *string  `json:"time_window,omitempty"`
+	HarmLabels []string `json:"harm_labels,omitempty"`
+}
+
 type ImageContentParameters struct {
 	LabelOperator *string  `json:"label_operator,omitempty"`
 	MinConfidence *float64 `json:"min_confidence,omitempty"`
@@ -6783,6 +6808,13 @@ type Images struct {
 	Original               ImageData `json:"original"`
 }
 
+// Basic response information
+type ImportBlockListResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+	TaskID   string `json:"task_id"`
+}
+
 type ImportTask struct {
 	CreatedAt Timestamp           `json:"created_at"`
 	ID        string              `json:"id"`
@@ -6816,7 +6848,6 @@ type ImportV2TaskSettings struct {
 	Mode                  *string                 `json:"mode,omitempty"`
 	Path                  *string                 `json:"path,omitempty"`
 	SkipReferencesCheck   *bool                   `json:"skip_references_check,omitempty"`
-	Source                *string                 `json:"source,omitempty"`
 	UseImportTimeAsOpTime *bool                   `json:"use_import_time_as_op_time,omitempty"`
 	S3                    *ImportV2TaskSettingsS3 `json:"s3,omitempty"`
 }
@@ -7195,6 +7226,7 @@ type ListBlockListResponse struct {
 	// Duration of the request in milliseconds
 	Duration   string              `json:"duration"`
 	Blocklists []BlockListResponse `json:"blocklists"`
+	NextCursor *string             `json:"next_cursor,omitempty"`
 }
 
 // Response for ListCallType
@@ -10656,6 +10688,8 @@ type RuleBuilderCondition struct {
 	ContentFlagCountRuleParams       *FlagCountRuleParameters              `json:"content_flag_count_rule_params,omitempty"`
 	ImageContentParams               *ImageContentParameters               `json:"image_content_params,omitempty"`
 	ImageRuleParams                  *ImageRuleParameters                  `json:"image_rule_params,omitempty"`
+	IpContentCountRuleParams         *IPContentCountRuleParameters         `json:"ip_content_count_rule_params,omitempty"`
+	IpFlagCountRuleParams            *IPFlagCountRuleParameters            `json:"ip_flag_count_rule_params,omitempty"`
 	KeyframeOcrRuleParams            *KeyframeOCRRuleParameters            `json:"keyframe_ocr_rule_params,omitempty"`
 	KeyframeRuleParams               *KeyframeRuleParameters               `json:"keyframe_rule_params,omitempty"`
 	OcrContentParams                 *OCRContentParameters                 `json:"ocr_content_params,omitempty"`
@@ -12259,24 +12293,6 @@ type UpsertConfigResponse struct {
 	Config   *ConfigResponse `json:"config,omitempty"`
 }
 
-type UpsertExternalStorageAWSS3Request struct {
-	Bucket     string  `json:"bucket"`
-	Region     string  `json:"region"`
-	RoleArn    string  `json:"role_arn"`
-	PathPrefix *string `json:"path_prefix,omitempty"`
-}
-
-type UpsertExternalStorageRequest struct {
-	Type  string                             `json:"type"`
-	AWSS3 *UpsertExternalStorageAWSS3Request `json:"aws_s3,omitempty"`
-}
-
-// Basic response information
-type UpsertExternalStorageResponse struct {
-	// Duration of the request in milliseconds
-	Duration string `json:"duration"`
-}
-
 // Basic response information
 type UpsertModerationRuleResponse struct {
 	// Duration of the request in milliseconds
@@ -12866,12 +12882,6 @@ type UserUpdatedEvent struct {
 
 func (e *UserUpdatedEvent) GetEventType() string {
 	return e.Type
-}
-
-// Basic response information
-type ValidateExternalStorageResponse struct {
-	// Duration of the request in milliseconds
-	Duration string `json:"duration"`
 }
 
 type VelocityFilterConfig struct {

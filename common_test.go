@@ -37,6 +37,13 @@ func TestCommonCreateBlockList(t *testing.T) {
 	_, err = client.CreateBlockList(context.Background(), &getstream.CreateBlockListRequest{})
 	require.NoError(t, err)
 }
+func TestCommonImportBlockList(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.ImportBlockList(context.Background(), "", &getstream.ImportBlockListRequest{})
+	require.NoError(t, err)
+}
 func TestCommonDeleteBlockList(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -182,34 +189,6 @@ func TestCommonCreateImportV2Task(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.CreateImportV2Task(context.Background(), &getstream.CreateImportV2TaskRequest{})
-	require.NoError(t, err)
-}
-func TestCommonDeleteImporterExternalStorage(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.DeleteImporterExternalStorage(context.Background(), &getstream.DeleteImporterExternalStorageRequest{})
-	require.NoError(t, err)
-}
-func TestCommonGetImporterExternalStorage(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.GetImporterExternalStorage(context.Background(), &getstream.GetImporterExternalStorageRequest{})
-	require.NoError(t, err)
-}
-func TestCommonUpsertImporterExternalStorage(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.UpsertImporterExternalStorage(context.Background(), &getstream.UpsertImporterExternalStorageRequest{})
-	require.NoError(t, err)
-}
-func TestCommonValidateImporterExternalStorage(t *testing.T) {
-	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
-	require.NoError(t, err)
-
-	_, err = client.ValidateImporterExternalStorage(context.Background(), &getstream.ValidateImporterExternalStorageRequest{})
 	require.NoError(t, err)
 }
 func TestCommonDeleteImportV2Task(t *testing.T) {
