@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.2.0](https://github.com/GetStream/getstream-go/compare/v5.1.1...v5.2.0) (2026-08-12)
+
+
+### Bug Fixes
+
+* name the HTTP status when the error body is not JSON ([#137](https://github.com/GetStream/getstream-go/issues/137)) ([7f6ed96](https://github.com/GetStream/getstream-go/commit/7f6ed96b14499c3a9da86e5da3768bc20cdb9977))
+
 ### [5.1.1](https://github.com/GetStream/getstream-go/compare/v5.1.0...v5.1.1) (2026-07-27)
 
 
