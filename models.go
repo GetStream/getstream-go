@@ -8260,15 +8260,18 @@ func (e *ModerationMarkReviewedEvent) GetEventType() string {
 }
 
 type ModerationPayload struct {
-	Audios           []string          `json:"audios,omitempty"`
-	ImageOrderedKeys []string          `json:"image_ordered_keys,omitempty"`
-	Images           []string          `json:"images,omitempty"`
-	TextOrderedKeys  []string          `json:"text_ordered_keys,omitempty"`
-	Texts            []string          `json:"texts,omitempty"`
-	Videos           []string          `json:"videos,omitempty"`
-	Custom           map[string]any    `json:"custom,omitempty"`
-	ImageIds         map[string]string `json:"image_ids,omitempty"`
-	TextIds          map[string]string `json:"text_ids,omitempty"`
+	Audios           []string `json:"audios,omitempty"`
+	ImageOrderedKeys []string `json:"image_ordered_keys,omitempty"`
+	Images           []string `json:"images,omitempty"`
+	// OtherMedia carries media URLs from attachments outside the typed lists
+	// (custom attachment types like GIF pickers).
+	OtherMedia      []string          `json:"other_media,omitempty"`
+	TextOrderedKeys []string          `json:"text_ordered_keys,omitempty"`
+	Texts           []string          `json:"texts,omitempty"`
+	Videos          []string          `json:"videos,omitempty"`
+	Custom          map[string]any    `json:"custom,omitempty"`
+	ImageIds        map[string]string `json:"image_ids,omitempty"`
+	TextIds         map[string]string `json:"text_ids,omitempty"`
 }
 
 // Content payload for moderation
