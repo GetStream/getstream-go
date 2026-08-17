@@ -753,3 +753,11 @@ func (c *VideoClient) QueryAggregateCallStats(ctx context.Context, request *Quer
 	res, err := MakeRequest[QueryAggregateCallStatsRequest, QueryAggregateCallStatsResponse](c.client, ctx, "POST", "/api/v2/video/stats", nil, request, &result, nil)
 	return res, err
 }
+
+// Returns the app's per-broadcast daily digest bundle for one UTC day, with an explicit readiness status (ready, pending, failed, future_date, expired). Payload keys are only present when status is ready.
+func (c *VideoClient) GetDailyDigest(ctx context.Context, request *GetDailyDigestRequest) (*StreamResponse[GetDailyDigestResponse], error) {
+	var result GetDailyDigestResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetDailyDigestResponse](c.client, ctx, "GET", "/api/v2/video/stats/daily_digest", params, nil, &result, nil)
+	return res, err
+}

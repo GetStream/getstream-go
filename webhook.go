@@ -159,6 +159,7 @@ const (
 	EventTypeMessageUnblocked                   = "message.unblocked"
 	EventTypeMessageUndeleted                   = "message.undeleted"
 	EventTypeMessageUpdated                     = "message.updated"
+	EventTypeModerationAnalysisFailed           = "moderation.analysis.failed"
 	EventTypeModerationCustomAction             = "moderation.custom_action"
 	EventTypeModerationFlagged                  = "moderation.flagged"
 	EventTypeModerationImageAnalysisComplete    = "moderation.image_analysis.complete"
@@ -562,6 +563,8 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(MessageUndeletedEvent)
 	case "message.updated":
 		event = new(MessageUpdatedEvent)
+	case "moderation.analysis.failed":
+		event = new(ModerationAnalysisFailedEvent)
 	case "moderation.custom_action":
 		event = new(ModerationCustomActionEvent)
 	case "moderation.flagged":

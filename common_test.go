@@ -37,6 +37,13 @@ func TestCommonCreateBlockList(t *testing.T) {
 	_, err = client.CreateBlockList(context.Background(), &getstream.CreateBlockListRequest{})
 	require.NoError(t, err)
 }
+func TestCommonImportBlockList(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.ImportBlockList(context.Background(), "", &getstream.ImportBlockListRequest{})
+	require.NoError(t, err)
+}
 func TestCommonDeleteBlockList(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

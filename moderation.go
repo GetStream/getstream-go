@@ -249,17 +249,23 @@ func (c *ModerationClient) UpsertModerationRule(ctx context.Context, request *Up
 }
 
 // Delete an existing moderation rule
-func (c *ModerationClient) DeleteModerationRule(ctx context.Context, request *DeleteModerationRuleRequest) (*StreamResponse[DeleteModerationRuleResponse], error) {
+func (c *ModerationClient) DeleteModerationRule(ctx context.Context, id string, request *DeleteModerationRuleRequest) (*StreamResponse[DeleteModerationRuleResponse], error) {
 	var result DeleteModerationRuleResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
 	params := extractQueryParams(request)
-	res, err := MakeRequest[any, DeleteModerationRuleResponse](c.client, ctx, "DELETE", "/api/v2/moderation/moderation_rule/{id}", params, nil, &result, nil)
+	res, err := MakeRequest[any, DeleteModerationRuleResponse](c.client, ctx, "DELETE", "/api/v2/moderation/moderation_rule/{id}", params, nil, &result, pathParams)
 	return res, err
 }
 
 // Get a specific moderation rule by ID
-func (c *ModerationClient) GetModerationRule(ctx context.Context, request *GetModerationRuleRequest) (*StreamResponse[GetModerationRuleResponse], error) {
+func (c *ModerationClient) GetModerationRule(ctx context.Context, id string, request *GetModerationRuleRequest) (*StreamResponse[GetModerationRuleResponse], error) {
 	var result GetModerationRuleResponse
-	res, err := MakeRequest[any, GetModerationRuleResponse](c.client, ctx, "GET", "/api/v2/moderation/moderation_rule/{id}", nil, nil, &result, nil)
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, GetModerationRuleResponse](c.client, ctx, "GET", "/api/v2/moderation/moderation_rule/{id}", nil, nil, &result, pathParams)
 	return res, err
 }
 
@@ -277,9 +283,60 @@ func (c *ModerationClient) Mute(ctx context.Context, request *MuteRequest) (*Str
 	return res, err
 }
 
+func (c *ModerationClient) GetPolicyTestRun(ctx context.Context, id string, request *GetPolicyTestRunRequest) (*StreamResponse[PolicyTestRunResponse], error) {
+	var result PolicyTestRunResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, PolicyTestRunResponse](c.client, ctx, "GET", "/api/v2/moderation/policy_tests/runs/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+func (c *ModerationClient) ListPolicyTestSets(ctx context.Context, request *ListPolicyTestSetsRequest) (*StreamResponse[PolicyTestSetListResponse], error) {
+	var result PolicyTestSetListResponse
+	res, err := MakeRequest[any, PolicyTestSetListResponse](c.client, ctx, "GET", "/api/v2/moderation/policy_tests/sets", nil, nil, &result, nil)
+	return res, err
+}
+
+// Save a labeled set of messages that can be re-run against the moderation policy.
+func (c *ModerationClient) CreatePolicyTestSet(ctx context.Context, request *CreatePolicyTestSetRequest) (*StreamResponse[PolicyTestSetResponse], error) {
+	var result PolicyTestSetResponse
+	res, err := MakeRequest[CreatePolicyTestSetRequest, PolicyTestSetResponse](c.client, ctx, "POST", "/api/v2/moderation/policy_tests/sets", nil, request, &result, nil)
+	return res, err
+}
+
+func (c *ModerationClient) DeletePolicyTestSet(ctx context.Context, id string, request *DeletePolicyTestSetRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/moderation/policy_tests/sets/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+func (c *ModerationClient) GetPolicyTestSet(ctx context.Context, id string, request *GetPolicyTestSetRequest) (*StreamResponse[PolicyTestSetResponse], error) {
+	var result PolicyTestSetResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, PolicyTestSetResponse](c.client, ctx, "GET", "/api/v2/moderation/policy_tests/sets/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Enqueue a background run of the set against the saved live moderation config.
+func (c *ModerationClient) StartPolicyTestRun(ctx context.Context, id string, request *StartPolicyTestRunRequest) (*StreamResponse[PolicyTestRunResponse], error) {
+	var result PolicyTestRunResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, PolicyTestRunResponse](c.client, ctx, "POST", "/api/v2/moderation/policy_tests/sets/{id}/runs", nil, nil, &result, pathParams)
+	return res, err
+}
+
 func (c *ModerationClient) ListQueues(ctx context.Context, request *ListQueuesRequest) (*StreamResponse[ListQueuesResponse], error) {
 	var result ListQueuesResponse
-	res, err := MakeRequest[any, ListQueuesResponse](c.client, ctx, "GET", "/api/v2/moderation/queues", nil, nil, &result, nil)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, ListQueuesResponse](c.client, ctx, "GET", "/api/v2/moderation/queues", params, nil, &result, nil)
 	return res, err
 }
 
