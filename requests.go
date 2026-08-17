@@ -10,6 +10,7 @@ type UpdateAppRequest struct {
 	BeforeMessageSendHookUrl              *string                         `json:"before_message_send_hook_url,omitempty"`
 	CdnExpirationSeconds                  *int                            `json:"cdn_expiration_seconds,omitempty"`
 	ChannelHideMembersOnly                *bool                           `json:"channel_hide_members_only,omitempty"`
+	ChatPrimaryUseCase                    *string                         `json:"chat_primary_use_case,omitempty"`
 	CustomActionHandlerUrl                *string                         `json:"custom_action_handler_url,omitempty"`
 	DisableAuthChecks                     *bool                           `json:"disable_auth_checks,omitempty"`
 	DisablePermissionsChecks              *bool                           `json:"disable_permissions_checks,omitempty"`
@@ -21,6 +22,7 @@ type UpdateAppRequest struct {
 	GuestUserCreationDisabled             *bool                           `json:"guest_user_creation_disabled,omitempty"`
 	ImageModerationEnabled                *bool                           `json:"image_moderation_enabled,omitempty"`
 	MaxAggregatedActivitiesLength         *int                            `json:"max_aggregated_activities_length,omitempty"`
+	MemberCustomOnMessagesEnabled         *bool                           `json:"member_custom_on_messages_enabled,omitempty"`
 	MigratePermissionsToV2                *bool                           `json:"migrate_permissions_to_v2,omitempty"`
 	ModerationAnalyticsEnabled            *bool                           `json:"moderation_analytics_enabled,omitempty"`
 	ModerationEnabled                     *bool                           `json:"moderation_enabled,omitempty"`
@@ -62,7 +64,9 @@ type UpdateAppRequest struct {
 	XiaomiConfig                          *XiaomiConfig                   `json:"xiaomi_config,omitempty"`
 }
 type ListBlockListsRequest struct {
-	Team *string `json:"-" query:"team"`
+	Team   *string `json:"-" query:"team"`
+	Cursor *string `json:"-" query:"cursor"`
+	Limit  *int    `json:"-" query:"limit"`
 }
 type CreateBlockListRequest struct {
 	// Block list name
@@ -74,11 +78,18 @@ type CreateBlockListRequest struct {
 	IsPluralCheckEnabled       *bool    `json:"is_plural_check_enabled,omitempty"`
 	IsSubstringMatchingEnabled *bool    `json:"is_substring_matching_enabled,omitempty"`
 	Team                       *string  `json:"team,omitempty"`
+	UserID                     *string  `json:"user_id,omitempty"`
 	// Block list type. One of: regex, domain, domain_allowlist, email, email_allowlist, word
-	Type *string `json:"type,omitempty"`
+	Type *string      `json:"type,omitempty"`
+	User *UserRequest `json:"user,omitempty"`
+}
+type ImportBlockListRequest struct {
+	Items     []string `json:"items"`
+	ChunkSize *int     `json:"chunk_size,omitempty"`
 }
 type DeleteBlockListRequest struct {
-	Team *string `json:"-" query:"team"`
+	Team   *string `json:"-" query:"team"`
+	UserID *string `json:"-" query:"user_id"`
 }
 type GetBlockListRequest struct {
 	Team *string `json:"-" query:"team"`
@@ -89,8 +100,10 @@ type UpdateBlockListRequest struct {
 	IsPluralCheckEnabled       *bool   `json:"is_plural_check_enabled,omitempty"`
 	IsSubstringMatchingEnabled *bool   `json:"is_substring_matching_enabled,omitempty"`
 	Team                       *string `json:"team,omitempty"`
+	UserID                     *string `json:"user_id,omitempty"`
 	// List of words to block
-	Words []string `json:"words"`
+	Words []string     `json:"words"`
+	User  *UserRequest `json:"user,omitempty"`
 }
 type CreateCampaignRequest struct {
 	// The user ID of the sender
@@ -125,7 +138,8 @@ type QueryCampaignsRequest struct {
 	Prev      *string            `json:"prev,omitempty"`
 	UserLimit *int               `json:"user_limit,omitempty"`
 	Sort      []SortParamRequest `json:"sort"`
-	Filter    map[string]any     `json:"filter"`
+	// Filter to apply to the query
+	Filter map[string]any `json:"filter"`
 }
 type DeleteCampaignRequest struct {
 }
@@ -170,6 +184,8 @@ type QueryChannelsRequest struct {
 	// Whether to update channel state or not
 	State  *bool   `json:"state,omitempty"`
 	UserID *string `json:"user_id,omitempty"`
+	// Top-level keys of the message sender's channel-member custom data to include under member.custom (max 8 keys, 64 chars each)
+	MemberCustomInclude []string `json:"member_custom_include"`
 	// List of sort parameters
 	Sort []SortParamRequest `json:"sort"`
 	// Filter conditions to apply to the query
@@ -180,10 +196,11 @@ type QueryChannelsRequest struct {
 	User         *UserRequest   `json:"user,omitempty"`
 }
 type ChannelBatchUpdateRequest struct {
-	Operation string                      `json:"operation"`
-	Filter    map[string]any              `json:"filter"`
-	Members   []ChannelBatchMemberRequest `json:"members"`
-	Data      *ChannelDataUpdate          `json:"data,omitempty"`
+	Operation string `json:"operation"`
+	// Filter to apply to the query
+	Filter  map[string]any              `json:"filter"`
+	Members []ChannelBatchMemberRequest `json:"members"`
+	Data    *ChannelDataUpdate          `json:"data,omitempty"`
 }
 type DeleteChannelsRequest struct {
 	// All channels that should be deleted
@@ -213,12 +230,14 @@ type GetOrCreateDistinctChannelRequest struct {
 	// Whether this channel will be hidden for the user who created the channel or not
 	HideForCreator *bool `json:"hide_for_creator,omitempty"`
 	// Refresh channel state
-	State              *bool                    `json:"state,omitempty"`
-	ThreadUnreadCounts *bool                    `json:"thread_unread_counts,omitempty"`
-	Data               *ChannelInput            `json:"data,omitempty"`
-	Members            *PaginationParams        `json:"members,omitempty"`
-	Messages           *MessagePaginationParams `json:"messages,omitempty"`
-	Watchers           *PaginationParams        `json:"watchers,omitempty"`
+	State              *bool `json:"state,omitempty"`
+	ThreadUnreadCounts *bool `json:"thread_unread_counts,omitempty"`
+	// Top-level keys of the message sender's channel-member custom data to include under member.custom (max 8 keys, 64 chars each)
+	MemberCustomInclude []string                 `json:"member_custom_include"`
+	Data                *ChannelInput            `json:"data,omitempty"`
+	Members             *PaginationParams        `json:"members,omitempty"`
+	Messages            *MessagePaginationParams `json:"messages,omitempty"`
+	Watchers            *PaginationParams        `json:"watchers,omitempty"`
 }
 type DeleteChannelRequest struct {
 	HardDelete *bool `json:"-" query:"hard_delete"`
@@ -309,27 +328,34 @@ type UpdateMemberPartialRequest struct {
 	Set    map[string]any `json:"set"`
 }
 type SendMessageRequest struct {
-	Message                MessageRequest    `json:"message"`
-	ForceModeration        *bool             `json:"force_moderation,omitempty"`
-	KeepChannelHidden      *bool             `json:"keep_channel_hidden,omitempty"`
-	Pending                *bool             `json:"pending,omitempty"`
-	SkipEnrichUrl          *bool             `json:"skip_enrich_url,omitempty"`
-	SkipPush               *bool             `json:"skip_push,omitempty"`
-	PendingMessageMetadata map[string]string `json:"pending_message_metadata"`
+	Message         MessageRequest `json:"message"`
+	ForceModeration *bool          `json:"force_moderation,omitempty"`
+	// When true, the response includes channel_context: a slim channel object with cid, type, id and created_by
+	IncludeChannelContext *bool `json:"include_channel_context,omitempty"`
+	// When true, the response includes mentioned_members: for each mentioned user, whether that user is currently a channel member. Requires the ReadChannelMembers permission
+	IncludeMentionedMembers *bool             `json:"include_mentioned_members,omitempty"`
+	KeepChannelHidden       *bool             `json:"keep_channel_hidden,omitempty"`
+	Pending                 *bool             `json:"pending,omitempty"`
+	SkipEnrichUrl           *bool             `json:"skip_enrich_url,omitempty"`
+	SkipPush                *bool             `json:"skip_push,omitempty"`
+	PendingMessageMetadata  map[string]string `json:"pending_message_metadata"`
 }
 type GetManyMessagesRequest struct {
-	Ids []string `json:"-" query:"ids"`
+	Ids                 []string `json:"-" query:"ids"`
+	MemberCustomInclude []string `json:"-" query:"member_custom_include"`
 }
 type GetOrCreateChannelRequest struct {
 	// Whether this channel will be hidden for the user who created the channel or not
 	HideForCreator *bool `json:"hide_for_creator,omitempty"`
 	// Refresh channel state
-	State              *bool                    `json:"state,omitempty"`
-	ThreadUnreadCounts *bool                    `json:"thread_unread_counts,omitempty"`
-	Data               *ChannelInput            `json:"data,omitempty"`
-	Members            *PaginationParams        `json:"members,omitempty"`
-	Messages           *MessagePaginationParams `json:"messages,omitempty"`
-	Watchers           *PaginationParams        `json:"watchers,omitempty"`
+	State              *bool `json:"state,omitempty"`
+	ThreadUnreadCounts *bool `json:"thread_unread_counts,omitempty"`
+	// Top-level keys of the message sender's channel-member custom data to include under member.custom (max 8 keys, 64 chars each)
+	MemberCustomInclude []string                 `json:"member_custom_include"`
+	Data                *ChannelInput            `json:"data,omitempty"`
+	Members             *PaginationParams        `json:"members,omitempty"`
+	Messages            *MessagePaginationParams `json:"messages,omitempty"`
+	Watchers            *PaginationParams        `json:"watchers,omitempty"`
 }
 type MarkReadRequest struct {
 	// ID of the message that is considered last read by client
@@ -633,13 +659,14 @@ type CreateReminderRequest struct {
 	User     *UserRequest `json:"user,omitempty"`
 }
 type GetRepliesRequest struct {
-	Limit    *int               `json:"-" query:"limit"`
-	IDGte    *string            `json:"-" query:"id_gte"`
-	IDGt     *string            `json:"-" query:"id_gt"`
-	IDLte    *string            `json:"-" query:"id_lte"`
-	IDLt     *string            `json:"-" query:"id_lt"`
-	IDAround *string            `json:"-" query:"id_around"`
-	Sort     []SortParamRequest `json:"-" query:"sort"`
+	Limit               *int               `json:"-" query:"limit"`
+	IDGte               *string            `json:"-" query:"id_gte"`
+	IDGt                *string            `json:"-" query:"id_gt"`
+	IDLte               *string            `json:"-" query:"id_lte"`
+	IDLt                *string            `json:"-" query:"id_lt"`
+	IDAround            *string            `json:"-" query:"id_around"`
+	Sort                []SortParamRequest `json:"-" query:"sort"`
+	MemberCustomInclude []string           `json:"-" query:"member_custom_include"`
 }
 type QueryMessageFlagsRequest struct {
 	Payload *QueryMessageFlagsPayload `json:"-" query:"payload"`
@@ -1066,11 +1093,12 @@ type AddActivityReactionRequest struct {
 	User   *UserRequest   `json:"user,omitempty"`
 }
 type QueryActivityReactionsRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
+	Limit *int               `json:"limit,omitempty"`
+	Next  *string            `json:"next,omitempty"`
+	Prev  *string            `json:"prev,omitempty"`
+	Sort  []SortParamRequest `json:"sort"`
+	// Filters to apply to the query
+	Filter map[string]any `json:"filter"`
 }
 type DeleteActivityReactionRequest struct {
 	DeleteNotificationActivity *bool   `json:"-" query:"delete_notification_activity"`
@@ -1086,11 +1114,11 @@ type DeleteActivityRequest struct {
 	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
 }
 type GetActivityRequest struct {
-	Language      *string `json:"-" query:"language"`
-	TranslateText *bool   `json:"-" query:"translate_text"`
 	CommentSort   *string `json:"-" query:"comment_sort"`
 	CommentLimit  *int    `json:"-" query:"comment_limit"`
 	UserID        *string `json:"-" query:"user_id"`
+	Language      *string `json:"-" query:"language"`
+	TranslateText *bool   `json:"-" query:"translate_text"`
 }
 type UpdateActivityPartialRequest struct {
 	// Whether to copy custom data to the notification activity (only applies when handle_mention_notifications creates notifications) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
@@ -1339,9 +1367,9 @@ type DeleteCommentRequest struct {
 	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
 }
 type GetCommentRequest struct {
+	UserID        *string `json:"-" query:"user_id"`
 	Language      *string `json:"-" query:"language"`
 	TranslateText *bool   `json:"-" query:"translate_text"`
-	UserID        *string `json:"-" query:"user_id"`
 }
 type UpdateCommentRequest struct {
 	// Updated text content of the comment
@@ -1403,11 +1431,12 @@ type AddCommentReactionRequest struct {
 	User   *UserRequest   `json:"user,omitempty"`
 }
 type QueryCommentReactionsRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
+	Limit *int               `json:"limit,omitempty"`
+	Next  *string            `json:"next,omitempty"`
+	Prev  *string            `json:"prev,omitempty"`
+	Sort  []SortParamRequest `json:"sort"`
+	// Filters to apply to the query
+	Filter map[string]any `json:"filter"`
 }
 type DeleteCommentReactionRequest struct {
 	DeleteNotificationActivity *bool   `json:"-" query:"delete_notification_activity"`
@@ -1681,6 +1710,7 @@ type GetFeedsRateLimitsRequest struct {
 	Android    *bool   `json:"-" query:"android"`
 	Ios        *bool   `json:"-" query:"ios"`
 	Web        *bool   `json:"-" query:"web"`
+	Unity      *bool   `json:"-" query:"unity"`
 	ServerSide *bool   `json:"-" query:"server_side"`
 }
 type UpdateFollowRequest struct {
@@ -1921,6 +1951,7 @@ type GetImporterExternalStorageRequest struct {
 type UpsertImporterExternalStorageRequest struct {
 	Type  string                             `json:"type"`
 	AWSS3 *UpsertExternalStorageAWSS3Request `json:"aws_s3,omitempty"`
+	Gcs   *UpsertExternalStorageGCSRequest   `json:"gcs,omitempty"`
 }
 type ValidateImporterExternalStorageRequest struct {
 }
@@ -2198,11 +2229,12 @@ type GetFlagCountRequest struct {
 	EntityType *string `json:"entity_type,omitempty"`
 }
 type QueryModerationFlagsRequest struct {
-	Limit  *int               `json:"limit,omitempty"`
-	Next   *string            `json:"next,omitempty"`
-	Prev   *string            `json:"prev,omitempty"`
-	Sort   []SortParamRequest `json:"sort"`
-	Filter map[string]any     `json:"filter"`
+	Limit *int               `json:"limit,omitempty"`
+	Next  *string            `json:"next,omitempty"`
+	Prev  *string            `json:"prev,omitempty"`
+	Sort  []SortParamRequest `json:"sort"`
+	// Filter conditions for moderation flags
+	Filter map[string]any `json:"filter"`
 }
 type LabelsRequest struct {
 	// Content to moderate
@@ -2245,7 +2277,7 @@ type QueryModerationLogsRequest struct {
 type UpsertModerationRuleRequest struct {
 	// Unique rule name
 	Name string `json:"name"`
-	// Type of rule: user, content, or call
+	// Type of rule: user, content, call, or flood
 	RuleType string `json:"rule_type"`
 	// Duration before rule can trigger again (e.g. 24h, 7d)
 	CooldownPeriod *string `json:"cooldown_period,omitempty"`
@@ -2294,7 +2326,31 @@ type MuteRequest struct {
 	UserID  *string      `json:"user_id,omitempty"`
 	User    *UserRequest `json:"user,omitempty"`
 }
+type GetPolicyTestRunRequest struct {
+}
+type ListPolicyTestSetsRequest struct {
+}
+type CreatePolicyTestSetRequest struct {
+	// Display name; unique within an app
+	Name string `json:"name"`
+	// Moderation config key (default: app default)
+	ConfigKey *string `json:"config_key,omitempty"`
+	// Execution target: 'check' or 'labels'. Optional — defaults to 'labels' when the org has the labels API enabled, 'check' otherwise
+	Mode *string `json:"mode,omitempty"`
+	// Team scope for the config (optional)
+	Team *string `json:"team,omitempty"`
+	// Messages to test; capped at 1000. Mutually exclusive with seed
+	Rows []PolicyTestRow     `json:"rows"`
+	Seed *PolicyTestSeedSpec `json:"seed,omitempty"`
+}
+type DeletePolicyTestSetRequest struct {
+}
+type GetPolicyTestSetRequest struct {
+}
+type StartPolicyTestRunRequest struct {
+}
 type ListQueuesRequest struct {
+	UserID *string `json:"-" query:"user_id"`
 }
 type CreateQueueRequest struct {
 	Name        string           `json:"name"`
@@ -2353,31 +2409,32 @@ type UpsertSetupSessionRequest struct {
 	SetupData map[string]any `json:"setup_data"`
 }
 type SubmitActionRequest struct {
-	// Type of moderation action to perform. One of: mark_reviewed, delete_message, delete_activity, delete_comment, delete_reaction, ban, custom, unban, restore, delete_user, unblock, block, shadow_block, unmask, kick_user, end_call, escalate, de_escalate
+	// Type of moderation action to perform. One of: mark_reviewed, delete_message, delete_activity, delete_comment, delete_reaction, ban, custom, unban, restore, delete_user, delete_user_messages, unblock, block, shadow_block, unmask, kick_user, end_call, escalate, de_escalate
 	ActionType string `json:"action_type"`
 	// UUID of the appeal to act on (required for reject_appeal, optional for other actions)
 	AppealID *string `json:"appeal_id,omitempty"`
 	// UUID of the review queue item to act on
-	ItemID         *string                          `json:"item_id,omitempty"`
-	UserID         *string                          `json:"user_id,omitempty"`
-	Ban            *BanActionRequestPayload         `json:"ban,omitempty"`
-	Block          *BlockActionRequestPayload       `json:"block,omitempty"`
-	Bypass         *BypassActionRequest             `json:"bypass,omitempty"`
-	Custom         *CustomActionRequestPayload      `json:"custom,omitempty"`
-	DeleteActivity *DeleteActivityRequestPayload    `json:"delete_activity,omitempty"`
-	DeleteComment  *DeleteCommentRequestPayload     `json:"delete_comment,omitempty"`
-	DeleteMessage  *DeleteMessageRequestPayload     `json:"delete_message,omitempty"`
-	DeleteReaction *DeleteReactionRequestPayload    `json:"delete_reaction,omitempty"`
-	DeleteUser     *DeleteUserRequestPayload        `json:"delete_user,omitempty"`
-	Escalate       *EscalatePayload                 `json:"escalate,omitempty"`
-	Flag           *FlagRequest                     `json:"flag,omitempty"`
-	MarkReviewed   *MarkReviewedRequestPayload      `json:"mark_reviewed,omitempty"`
-	RejectAppeal   *RejectAppealRequestPayload      `json:"reject_appeal,omitempty"`
-	Restore        *RestoreActionRequestPayload     `json:"restore,omitempty"`
-	ShadowBlock    *ShadowBlockActionRequestPayload `json:"shadow_block,omitempty"`
-	Unban          *UnbanActionRequestPayload       `json:"unban,omitempty"`
-	Unblock        *UnblockActionRequestPayload     `json:"unblock,omitempty"`
-	User           *UserRequest                     `json:"user,omitempty"`
+	ItemID             *string                           `json:"item_id,omitempty"`
+	UserID             *string                           `json:"user_id,omitempty"`
+	Ban                *BanActionRequestPayload          `json:"ban,omitempty"`
+	Block              *BlockActionRequestPayload        `json:"block,omitempty"`
+	Bypass             *BypassActionRequest              `json:"bypass,omitempty"`
+	Custom             *CustomActionRequestPayload       `json:"custom,omitempty"`
+	DeleteActivity     *DeleteActivityRequestPayload     `json:"delete_activity,omitempty"`
+	DeleteComment      *DeleteCommentRequestPayload      `json:"delete_comment,omitempty"`
+	DeleteMessage      *DeleteMessageRequestPayload      `json:"delete_message,omitempty"`
+	DeleteReaction     *DeleteReactionRequestPayload     `json:"delete_reaction,omitempty"`
+	DeleteUser         *DeleteUserRequestPayload         `json:"delete_user,omitempty"`
+	DeleteUserMessages *DeleteUserMessagesRequestPayload `json:"delete_user_messages,omitempty"`
+	Escalate           *EscalatePayload                  `json:"escalate,omitempty"`
+	Flag               *FlagRequest                      `json:"flag,omitempty"`
+	MarkReviewed       *MarkReviewedRequestPayload       `json:"mark_reviewed,omitempty"`
+	RejectAppeal       *RejectAppealRequestPayload       `json:"reject_appeal,omitempty"`
+	Restore            *RestoreActionRequestPayload      `json:"restore,omitempty"`
+	ShadowBlock        *ShadowBlockActionRequestPayload  `json:"shadow_block,omitempty"`
+	Unban              *UnbanActionRequestPayload        `json:"unban,omitempty"`
+	Unblock            *UnblockActionRequestPayload      `json:"unblock,omitempty"`
+	User               *UserRequest                      `json:"user,omitempty"`
 }
 type SubmitModerationFeedbackRequest struct {
 	// The moderated content the moderator is providing feedback on
@@ -2438,8 +2495,9 @@ type CreatePollRequest struct {
 	UserID           *string           `json:"user_id,omitempty"`
 	VotingVisibility *string           `json:"voting_visibility,omitempty"`
 	Options          []PollOptionInput `json:"options"`
-	Custom           map[string]any    `json:"Custom"`
-	User             *UserRequest      `json:"user,omitempty"`
+	// Custom data for this object
+	Custom map[string]any `json:"custom"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type UpdatePollRequest struct {
 	// Poll ID
@@ -2463,8 +2521,9 @@ type UpdatePollRequest struct {
 	VotingVisibility *string `json:"voting_visibility,omitempty"`
 	// Poll options
 	Options []PollOptionRequest `json:"options"`
-	Custom  map[string]any      `json:"Custom"`
-	User    *UserRequest        `json:"user,omitempty"`
+	// Custom data for this object
+	Custom map[string]any `json:"custom"`
+	User   *UserRequest   `json:"user,omitempty"`
 }
 type QueryPollsRequest struct {
 	UserID *string `json:"-" query:"user_id"`
@@ -2492,25 +2551,26 @@ type UpdatePollPartialRequest struct {
 }
 type CreatePollOptionRequest struct {
 	// Option text
-	Text   string         `json:"text"`
-	UserID *string        `json:"user_id,omitempty"`
-	Custom map[string]any `json:"Custom"`
+	Text   string  `json:"text"`
+	UserID *string `json:"user_id,omitempty"`
+	// Custom data for this object
+	Custom map[string]any `json:"custom"`
 	User   *UserRequest   `json:"user,omitempty"`
 }
 type UpdatePollOptionRequest struct {
 	// Option ID
 	ID string `json:"id"`
 	// Option text
-	Text   string         `json:"text"`
-	UserID *string        `json:"user_id,omitempty"`
-	Custom map[string]any `json:"Custom"`
+	Text   string  `json:"text"`
+	UserID *string `json:"user_id,omitempty"`
+	// Custom data for this object
+	Custom map[string]any `json:"custom"`
 	User   *UserRequest   `json:"user,omitempty"`
 }
 type DeletePollOptionRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
 type GetPollOptionRequest struct {
-	UserID *string `json:"-" query:"user_id"`
 }
 type QueryPollVotesRequest struct {
 	UserID *string `json:"-" query:"user_id"`
@@ -2554,6 +2614,7 @@ type GetRateLimitsRequest struct {
 	Android    *bool   `json:"-" query:"android"`
 	Ios        *bool   `json:"-" query:"ios"`
 	Web        *bool   `json:"-" query:"web"`
+	Unity      *bool   `json:"-" query:"unity"`
 	Endpoints  *string `json:"-" query:"endpoints"`
 }
 type ListRolesRequest struct {

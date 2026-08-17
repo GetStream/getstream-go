@@ -823,6 +823,7 @@ type AppResponseFields struct {
 	ID                                    int                             `json:"id"`
 	ImageModerationEnabled                bool                            `json:"image_moderation_enabled"`
 	MaxAggregatedActivitiesLength         int                             `json:"max_aggregated_activities_length"`
+	MemberCustomOnMessagesEnabled         bool                            `json:"member_custom_on_messages_enabled"`
 	ModerationAudioCallModerationEnabled  bool                            `json:"moderation_audio_call_moderation_enabled"`
 	ModerationEnabled                     bool                            `json:"moderation_enabled"`
 	ModerationLlmConfigurabilityEnabled   bool                            `json:"moderation_llm_configurability_enabled"`
@@ -858,6 +859,7 @@ type AppResponseFields struct {
 	PushNotifications                     PushNotificationFields          `json:"push_notifications"`
 	BeforeMessageSendHookAttemptTimeoutMs *int                            `json:"before_message_send_hook_attempt_timeout_ms,omitempty"`
 	BeforeMessageSendHookUrl              *string                         `json:"before_message_send_hook_url,omitempty"`
+	ChatPrimaryUseCase                    *string                         `json:"chat_primary_use_case,omitempty"`
 	ModerationOnboardingComplete          *bool                           `json:"moderation_onboarding_complete,omitempty"`
 	ModerationS3ImageAccessRoleArn        *string                         `json:"moderation_s3_image_access_role_arn,omitempty"`
 	RevokeTokensIssuedBefore              *Timestamp                      `json:"revoke_tokens_issued_before,omitempty"`
@@ -1209,14 +1211,17 @@ type BanActionRequestPayload struct {
 type BanInfoResponse struct {
 	// When the ban was created
 	CreatedAt Timestamp `json:"created_at"`
+	// The channel this ban applies to. Empty if this is an app-wide (global) ban rather than a per-channel ban.
+	ChannelCid *string `json:"channel_cid,omitempty"`
 	// When the ban expires
 	Expires *Timestamp `json:"expires,omitempty"`
 	// Reason for the ban
 	Reason *string `json:"reason,omitempty"`
 	// Whether this is a shadow ban
-	Shadow    *bool         `json:"shadow,omitempty"`
-	CreatedBy *UserResponse `json:"created_by,omitempty"`
-	User      *UserResponse `json:"user,omitempty"`
+	Shadow    *bool            `json:"shadow,omitempty"`
+	Channel   *ChannelMetadata `json:"channel,omitempty"`
+	CreatedBy *UserResponse    `json:"created_by,omitempty"`
+	User      *UserResponse    `json:"user,omitempty"`
 }
 
 type BanOptions struct {
@@ -1288,9 +1293,10 @@ type BlockListResponse struct {
 	// List of words to block
 	Words []string `json:"words"`
 	// Date/time of creation
-	CreatedAt *Timestamp `json:"created_at,omitempty"`
-	ID        *string    `json:"id,omitempty"`
-	Team      *string    `json:"team,omitempty"`
+	CreatedAt   *Timestamp `json:"created_at,omitempty"`
+	ID          *string    `json:"id,omitempty"`
+	OwnerUserID *string    `json:"owner_user_id,omitempty"`
+	Team        *string    `json:"team,omitempty"`
 	// Date/time of the last update
 	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 }
@@ -2336,6 +2342,7 @@ type CallSettingsRequest struct {
 	Audio               *AudioSettingsRequest               `json:"audio,omitempty"`
 	Backstage           *BackstageSettingsRequest           `json:"backstage,omitempty"`
 	Broadcasting        *BroadcastSettingsRequest           `json:"broadcasting,omitempty"`
+	Encryption          *EncryptionSettingsRequest          `json:"encryption,omitempty"`
 	FrameRecording      *FrameRecordingSettingsRequest      `json:"frame_recording,omitempty"`
 	Geofencing          *GeofenceSettingsRequest            `json:"geofencing,omitempty"`
 	IndividualRecording *IndividualRecordingSettingsRequest `json:"individual_recording,omitempty"`
@@ -2355,6 +2362,7 @@ type CallSettingsResponse struct {
 	Audio               AudioSettingsResponse               `json:"audio"`
 	Backstage           BackstageSettingsResponse           `json:"backstage"`
 	Broadcasting        BroadcastSettingsResponse           `json:"broadcasting"`
+	Encryption          EncryptionSettingsResponse          `json:"encryption"`
 	FrameRecording      FrameRecordingSettingsResponse      `json:"frame_recording"`
 	Geofencing          GeofenceSettingsResponse            `json:"geofencing"`
 	IndividualRecording IndividualRecordingSettingsResponse `json:"individual_recording"`
@@ -2933,6 +2941,17 @@ type ChannelConfigWithInfo struct {
 	Grants                         map[string][]string `json:"grants,omitempty"`
 }
 
+// Slim channel object: identity plus creator
+type ChannelContextResponse struct {
+	// Channel CID (<type>:<id>)
+	Cid string `json:"cid"`
+	// Channel ID
+	ID string `json:"id"`
+	// Channel type
+	Type      string        `json:"type"`
+	CreatedBy *UserResponse `json:"created_by,omitempty"`
+}
+
 // Emitted when a channel is successfully created.
 type ChannelCreatedEvent struct {
 	// Date/time of creation
@@ -3035,12 +3054,14 @@ type ChannelGetOrCreateRequest struct {
 	// Whether this channel will be hidden for the user who created the channel or not
 	HideForCreator *bool `json:"hide_for_creator,omitempty"`
 	// Refresh channel state
-	State              *bool                    `json:"state,omitempty"`
-	ThreadUnreadCounts *bool                    `json:"thread_unread_counts,omitempty"`
-	Data               *ChannelInput            `json:"data,omitempty"`
-	Members            *PaginationParams        `json:"members,omitempty"`
-	Messages           *MessagePaginationParams `json:"messages,omitempty"`
-	Watchers           *PaginationParams        `json:"watchers,omitempty"`
+	State              *bool `json:"state,omitempty"`
+	ThreadUnreadCounts *bool `json:"thread_unread_counts,omitempty"`
+	// Top-level keys of the message sender's channel-member custom data to include under member.custom (max 8 keys, 64 chars each)
+	MemberCustomInclude []string                 `json:"member_custom_include,omitempty"`
+	Data                *ChannelInput            `json:"data,omitempty"`
+	Members             *PaginationParams        `json:"members,omitempty"`
+	Messages            *MessagePaginationParams `json:"messages,omitempty"`
+	Watchers            *PaginationParams        `json:"watchers,omitempty"`
 }
 
 // Emitted when a channel is successfully hidden.
@@ -3076,7 +3097,7 @@ func (e *ChannelHiddenEvent) GetEventType() string {
 type ChannelInput struct {
 	// Enable or disable auto translation
 	AutoTranslationEnabled *bool `json:"auto_translation_enabled,omitempty"`
-	// Switch auto translation language
+	// Language (or comma-separated list of languages) to translate to when auto translation is active
 	AutoTranslationLanguage *string `json:"auto_translation_language,omitempty"`
 	CreatedByID             *string `json:"created_by_id,omitempty"`
 	Disabled                *bool   `json:"disabled,omitempty"`
@@ -3106,6 +3127,15 @@ type ChannelInputRequest struct {
 	Custom                  map[string]any          `json:"custom,omitempty"`
 }
 
+type ChannelMemberPartialResponse struct {
+	// Role of the member in the channel
+	ChannelRole string `json:"channel_role"`
+	// Whether the user muted notifications for this channel
+	NotificationsMuted bool `json:"notifications_muted"`
+	// Channel-member custom fields projected via `member_custom_include`
+	Custom map[string]any `json:"custom,omitempty"`
+}
+
 type ChannelMemberRequest struct {
 	UserID string `json:"user_id"`
 	// Role of the member in the channel
@@ -3130,7 +3160,11 @@ type ChannelMemberResponse struct {
 	ArchivedAt *Timestamp     `json:"archived_at,omitempty"`
 	// Expiration date of the ban
 	BanExpires *Timestamp `json:"ban_expires,omitempty"`
-	DeletedAt  *Timestamp `json:"deleted_at,omitempty"`
+	// Whether the member's ban also applies to channels the channel's creator will create in the future (an active future channel ban by the creator targets this member)
+	BanFromFutureChannels *bool      `json:"ban_from_future_channels,omitempty"`
+	DeletedAt             *Timestamp `json:"deleted_at,omitempty"`
+	// Expiration date of the future channel ban; absent when the future channel ban is permanent
+	FutureChannelBanExpires *Timestamp `json:"future_channel_ban_expires,omitempty"`
 	// Date when invite was accepted
 	InviteAcceptedAt *Timestamp `json:"invite_accepted_at,omitempty"`
 	// Date when invite was rejected
@@ -3158,6 +3192,18 @@ type ChannelMessagesResponse struct {
 	// List of messages
 	Messages []MessageResponse `json:"messages"`
 	Channel  ChannelResponse   `json:"channel"`
+}
+
+type ChannelMetadata struct {
+	Cid           string         `json:"cid"`
+	ID            string         `json:"id"`
+	Type          string         `json:"type"`
+	Custom        map[string]any `json:"custom"`
+	LastMessageAt *Timestamp     `json:"last_message_at,omitempty"`
+	MemberCount   *int           `json:"member_count,omitempty"`
+	MessageCount  *int           `json:"message_count,omitempty"`
+	PushLevel     *string        `json:"push_level,omitempty"`
+	Team          *string        `json:"team,omitempty"`
 }
 
 type ChannelMute struct {
@@ -3265,7 +3311,7 @@ type ChannelResponse struct {
 	Custom map[string]any `json:"custom"`
 	// Whether auto translation is enabled or not
 	AutoTranslationEnabled *bool `json:"auto_translation_enabled,omitempty"`
-	// Language to translate to when auto translation is active
+	// Language (or comma-separated list of languages) to translate to when auto translation is active
 	AutoTranslationLanguage *string `json:"auto_translation_language,omitempty"`
 	// Whether this channel is blocked by current user or not
 	Blocked *bool `json:"blocked,omitempty"`
@@ -3587,7 +3633,7 @@ type ChatMessageResponse struct {
 	Draft                *ChatDraftResponse                    `json:"draft,omitempty"`
 	I18n                 map[string]string                     `json:"i18n,omitempty"`
 	ImageLabels          map[string][]string                   `json:"image_labels,omitempty"`
-	Member               *ChannelMemberResponse                `json:"member,omitempty"`
+	Member               *ChannelMemberPartialResponse         `json:"member,omitempty"`
 	Moderation           *ChatModerationV2Response             `json:"moderation,omitempty"`
 	PinnedBy             *UserResponse                         `json:"pinned_by,omitempty"`
 	Poll                 *PollResponseData                     `json:"poll,omitempty"`
@@ -3777,6 +3823,8 @@ type ClientEvent struct {
 	IceState *string `json:"ice_state,omitempty"`
 	// UUID generated by the client and shared across JoinInitiated and the join-lifecycle events (CoordinatorJoin, WSJoin, PeerConnectionConnect) of the same overall join attempt. Required on every join event except CoordinatorWS, which is reported before a join attempt is established.
 	JoinAttemptID *string `json:"join_attempt_id,omitempty"`
+	// Reason the client initiated the join. Optional on CoordinatorJoin events; empty when not provided.
+	JoinReason *string `json:"join_reason,omitempty"`
 	// Microphone permission status: INITIATED, FAILED, GRANTED, or NOT_INITIATED. Required on every MediaDevicePermission event.
 	MicrophonePermissionStatus *string `json:"microphone_permission_status,omitempty"`
 	// Resolution of a completed event: success or failure. Required on completed join events; forbidden on initiated join events.
@@ -4735,6 +4783,22 @@ type DeleteTranscriptionResponse struct {
 	Duration string `json:"duration"`
 }
 
+// Configuration for deleting all of a user's chat messages without banning them or deleting their account
+type DeleteUserMessagesRequestPayload struct {
+	// Message deletion mode: soft, pruning, or hard
+	DeleteMessages string `json:"delete_messages"`
+	// Optional: scope deletion to a single channel (alternative to app-wide deletion)
+	ChannelCid *string `json:"channel_cid,omitempty"`
+	// Whether to also delete the user's reactions on other users' messages
+	DeleteReactions *bool `json:"delete_reactions,omitempty"`
+	// ID of the user whose messages should be deleted (alternative to item_id)
+	EntityID *string `json:"entity_id,omitempty"`
+	// Type of the entity
+	EntityType *string `json:"entity_type,omitempty"`
+	// Reason for the deletion
+	Reason *string `json:"reason,omitempty"`
+}
+
 // Configuration for user deletion action
 type DeleteUserRequestPayload struct {
 	// Also delete all user conversations
@@ -4882,6 +4946,17 @@ type EgressResponse struct {
 	HLS                 *EgressHLSResponse           `json:"hls,omitempty"`
 	IndividualRecording *IndividualRecordingResponse `json:"individual_recording,omitempty"`
 	RawRecording        *RawRecordingResponse        `json:"raw_recording,omitempty"`
+}
+
+type EncryptionSettingsRequest struct {
+	// Encryption mode. One of: available, disabled, auto-on
+	Mode *string `json:"mode,omitempty"`
+}
+
+// EncryptionSettings is the payload for end-to-end encryption settings
+type EncryptionSettingsResponse struct {
+	// the resolved encryption mode for the call
+	Mode string `json:"mode"`
 }
 
 // Response for ending a call
@@ -5845,6 +5920,8 @@ type FilterConfigResponse struct {
 	ConfigKeys []string `json:"config_keys,omitempty"`
 	// The moderation_payload.custom keys the app has configured as review-queue filter chips (via moderation_dashboard_preferences.filterable_custom_keys). Discovery hint for the dashboard only — the filter accepts any custom key regardless of this list.
 	FilterableCustomKeys []string `json:"filterable_custom_keys,omitempty"`
+	// AI image moderation labels available as filter values, as a map of L1 label to its L2 sub-labels. Reflects the app's effective image taxonomy: custom Bodyguard taxonomy when enabled, otherwise the standard catalogue of the org's enabled image providers.
+	AiImageTaxonomy map[string][]string `json:"ai_image_taxonomy,omitempty"`
 }
 
 type FirebaseConfig struct {
@@ -5935,6 +6012,7 @@ type FlagUserOptions struct {
 }
 
 type FloodConfig struct {
+	Allowlist []string              `json:"allowlist,omitempty"`
 	Identical *FloodIdenticalConfig `json:"identical,omitempty"`
 	Similar   *FloodSimilarConfig   `json:"similar,omitempty"`
 }
@@ -5946,12 +6024,25 @@ type FloodIdenticalConfig struct {
 	TimeWindow *string `json:"time_window,omitempty"`
 }
 
+type FloodIdenticalRuleParameters struct {
+	Threshold  *int     `json:"threshold,omitempty"`
+	TimeWindow *string  `json:"time_window,omitempty"`
+	Allowlist  []string `json:"allowlist,omitempty"`
+}
+
 type FloodSimilarConfig struct {
 	Action             *string `json:"action,omitempty"`
 	Enabled            *bool   `json:"enabled,omitempty"`
 	SimilarityDistance *int    `json:"similarity_distance,omitempty"`
 	Threshold          *int    `json:"threshold,omitempty"`
 	TimeWindow         *string `json:"time_window,omitempty"`
+}
+
+type FloodSimilarRuleParameters struct {
+	SimilarityDistance *int     `json:"similarity_distance,omitempty"`
+	Threshold          *int     `json:"threshold,omitempty"`
+	TimeWindow         *string  `json:"time_window,omitempty"`
+	Allowlist          []string `json:"allowlist,omitempty"`
 }
 
 type FollowBatchResponse struct {
@@ -6353,6 +6444,12 @@ type GetExternalStorageAWSS3Response struct {
 	PathPrefix *string `json:"path_prefix,omitempty"`
 }
 
+type GetExternalStorageGCSResponse struct {
+	Bucket         string  `json:"bucket"`
+	CredentialsSet bool    `json:"credentials_set"`
+	PathPrefix     *string `json:"path_prefix,omitempty"`
+}
+
 // Basic response information
 type GetExternalStorageResponse struct {
 	CreatedAt Timestamp `json:"created_at"`
@@ -6361,6 +6458,7 @@ type GetExternalStorageResponse struct {
 	UpdatedAt Timestamp                        `json:"updated_at"`
 	Type      string                           `json:"type"`
 	AWSS3     *GetExternalStorageAWSS3Response `json:"aws_s3,omitempty"`
+	Gcs       *GetExternalStorageGCSResponse   `json:"gcs,omitempty"`
 }
 
 type GetFeedGroupResponse struct {
@@ -6386,6 +6484,8 @@ type GetFeedsRateLimitsResponse struct {
 	Ios map[string]LimitInfoResponse `json:"ios,omitempty"`
 	// Rate limits for server-side platform (endpoint name -> limit info)
 	ServerSide map[string]LimitInfoResponse `json:"server_side,omitempty"`
+	// Rate limits for Unity platform (endpoint name -> limit info)
+	Unity map[string]LimitInfoResponse `json:"unity,omitempty"`
 	// Rate limits for Web platform (endpoint name -> limit info)
 	Web map[string]LimitInfoResponse `json:"web,omitempty"`
 }
@@ -6554,6 +6654,8 @@ type GetRateLimitsResponse struct {
 	Ios map[string]LimitInfoResponse `json:"ios,omitempty"`
 	// Map of endpoint rate limits for the server-side platform
 	ServerSide map[string]LimitInfoResponse `json:"server_side,omitempty"`
+	// Map of endpoint rate limits for the Unity platform
+	Unity map[string]LimitInfoResponse `json:"unity,omitempty"`
 	// Map of endpoint rate limits for the web platform
 	Web map[string]LimitInfoResponse `json:"web,omitempty"`
 }
@@ -6725,6 +6827,18 @@ type HuaweiConfigFields struct {
 	Secret  *string `json:"secret,omitempty"`
 }
 
+type IPContentCountRuleParameters struct {
+	Threshold  *int    `json:"threshold,omitempty"`
+	TimeWindow *string `json:"time_window,omitempty"`
+}
+
+type IPFlagCountRuleParameters struct {
+	Severity   *string  `json:"severity,omitempty"`
+	Threshold  *int     `json:"threshold,omitempty"`
+	TimeWindow *string  `json:"time_window,omitempty"`
+	HarmLabels []string `json:"harm_labels,omitempty"`
+}
+
 type ImageContentParameters struct {
 	LabelOperator *string  `json:"label_operator,omitempty"`
 	MinConfidence *float64 `json:"min_confidence,omitempty"`
@@ -6783,6 +6897,13 @@ type Images struct {
 	Original               ImageData `json:"original"`
 }
 
+// Basic response information
+type ImportBlockListResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+	TaskID   string `json:"task_id"`
+}
+
 type ImportTask struct {
 	CreatedAt Timestamp           `json:"created_at"`
 	ID        string              `json:"id"`
@@ -6816,7 +6937,6 @@ type ImportV2TaskSettings struct {
 	Mode                  *string                 `json:"mode,omitempty"`
 	Path                  *string                 `json:"path,omitempty"`
 	SkipReferencesCheck   *bool                   `json:"skip_references_check,omitempty"`
-	Source                *string                 `json:"source,omitempty"`
 	UseImportTimeAsOpTime *bool                   `json:"use_import_time_as_op_time,omitempty"`
 	S3                    *ImportV2TaskSettingsS3 `json:"s3,omitempty"`
 }
@@ -7195,6 +7315,7 @@ type ListBlockListResponse struct {
 	// Duration of the request in milliseconds
 	Duration   string              `json:"duration"`
 	Blocklists []BlockListResponse `json:"blocklists"`
+	NextCursor *string             `json:"next_cursor,omitempty"`
 }
 
 // Response for ListCallType
@@ -7389,6 +7510,7 @@ type MatchedContent struct {
 	Confidence *float64 `json:"confidence,omitempty"`
 	// Text and OCR entries. Aggregate (max) Bodyguard severity level (`LOW` / `MEDIUM` / `HIGH` / `CRITICAL`). Absent on image-classification entries.
 	Severity *string `json:"severity,omitempty"`
+	Text     *string `json:"text,omitempty"`
 	// Image-classification entries (keyframe rule, Type=image) carry nested L1 → L2 classifications. Text entries (closed_caption rule, Type=text) carry flat label + severity. Resolved against the app's effective taxonomy on the image side.
 	Classifications []Classification `json:"classifications,omitempty"`
 	// OCR entries only (keyframe_ocr rule, Type=image). Bodyguard labels that fired against the keyframe's OCR-extracted text (e.g. `INSULT`, `HATE_SPEECH`). Distinct from `classifications` so consumers can route OCR matches separately from image-classification matches.
@@ -7666,7 +7788,7 @@ type MessageHistoryEntryResponse struct {
 	MessageUpdatedByID string         `json:"message_updated_by_id"`
 	Text               string         `json:"text"`
 	Attachments        []Attachment   `json:"attachments"`
-	Custom             map[string]any `json:"Custom"`
+	Custom             map[string]any `json:"custom"`
 }
 
 // Result of the message moderation
@@ -7736,7 +7858,8 @@ func (e *MessageNewEvent) GetEventType() string {
 }
 
 type MessageOptions struct {
-	IncludeThreadParticipants *bool `json:"include_thread_participants,omitempty"`
+	IncludeThreadParticipants *bool    `json:"include_thread_participants,omitempty"`
+	MemberCustomInclude       []string `json:"member_custom_include,omitempty"`
 }
 
 type MessagePaginationParams struct {
@@ -7917,7 +8040,7 @@ type MessageResponse struct {
 	I18n map[string]string `json:"i18n,omitempty"`
 	// Contains image moderation information
 	ImageLabels    map[string][]string               `json:"image_labels,omitempty"`
-	Member         *ChannelMemberResponse            `json:"member,omitempty"`
+	Member         *ChannelMemberPartialResponse     `json:"member,omitempty"`
 	Moderation     *ModerationV2Response             `json:"moderation,omitempty"`
 	PinnedBy       *UserResponse                     `json:"pinned_by,omitempty"`
 	Poll           *PollResponseData                 `json:"poll,omitempty"`
@@ -8093,7 +8216,7 @@ type MessageWithChannelResponse struct {
 	I18n map[string]string `json:"i18n,omitempty"`
 	// Contains image moderation information
 	ImageLabels    map[string][]string               `json:"image_labels,omitempty"`
-	Member         *ChannelMemberResponse            `json:"member,omitempty"`
+	Member         *ChannelMemberPartialResponse     `json:"member,omitempty"`
 	Moderation     *ModerationV2Response             `json:"moderation,omitempty"`
 	PinnedBy       *UserResponse                     `json:"pinned_by,omitempty"`
 	Poll           *PollResponseData                 `json:"poll,omitempty"`
@@ -8146,6 +8269,29 @@ type ModerationActionConfigResponse struct {
 	QueueType *string `json:"queue_type,omitempty"`
 	// Custom data for the action
 	Custom map[string]any `json:"custom,omitempty"`
+}
+
+// An /analyze call was acknowledged but its moderation could not be completed, so no verdict exists for the content. The content was NOT screened — treat it as unverified rather than clean, and re-submit if a verdict is required.
+type ModerationAnalysisFailedEvent struct {
+	CreatedAt Timestamp `json:"created_at"`
+	Type      string    `json:"type"`
+	// The moderation policy key the request targeted.
+	ConfigKey *string `json:"config_key,omitempty"`
+	// Echo of the `entity_creator_id` on the /analyze request.
+	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
+	// Echo of the `entity_id` on the /analyze request.
+	EntityID *string `json:"entity_id,omitempty"`
+	// Echo of the `entity_type` on the /analyze request.
+	EntityType *string    `json:"entity_type,omitempty"`
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
+	// Echo of the request's `content_ids`, keyed by text/image label. On keyframe and caption streams every request repeats the same entity_type/entity_id/entity_creator_id, so this is what identifies the specific submission that went unscreened.
+	ContentIds map[string]string `json:"content_ids,omitempty"`
+	// Echo of the `custom` metadata on the /analyze request.
+	Custom map[string]any `json:"custom,omitempty"`
+}
+
+func (e *ModerationAnalysisFailedEvent) GetEventType() string {
+	return e.Type
 }
 
 type ModerationBanResponse struct {
@@ -8328,6 +8474,7 @@ func (e *ModerationMarkReviewedEvent) GetEventType() string {
 }
 
 type ModerationPayload struct {
+	Media            *string           `json:"Media,omitempty"`
 	Audios           []string          `json:"audios,omitempty"`
 	ImageOrderedKeys []string          `json:"image_ordered_keys,omitempty"`
 	Images           []string          `json:"images,omitempty"`
@@ -9068,6 +9215,110 @@ type PolicyRequest struct {
 	Roles []string `json:"roles"`
 }
 
+type PolicyTestLabelDrift struct {
+	Changed int `json:"changed"`
+	Same    int `json:"same"`
+}
+
+type PolicyTestResult struct {
+	CreatedAt      Timestamp      `json:"created_at"`
+	ID             int            `json:"id"`
+	MessageText    string         `json:"message_text"`
+	RowIndex       int            `json:"row_index"`
+	RunID          string         `json:"run_id"`
+	Scored         bool           `json:"scored"`
+	ActualAction   *string        `json:"actual_action,omitempty"`
+	ExpectedAction *string        `json:"expected_action,omitempty"`
+	FailureReason  *string        `json:"failure_reason,omitempty"`
+	Passed         *bool          `json:"passed,omitempty"`
+	Severity       *string        `json:"severity,omitempty"`
+	ActualLabels   []string       `json:"actual_labels,omitempty"`
+	ExpectedLabels []string       `json:"expected_labels,omitempty"`
+	RawResponse    map[string]any `json:"raw_response,omitempty"`
+}
+
+type PolicyTestRow struct {
+	ContentType       *string  `json:"content_type,omitempty"`
+	Policy            *string  `json:"policy,omitempty"`
+	RecommendedAction *string  `json:"recommended_action,omitempty"`
+	Text              *string  `json:"text,omitempty"`
+	Labels            []string `json:"labels,omitempty"`
+}
+
+type PolicyTestRun struct {
+	ConfigKey       string                `json:"config_key"`
+	CreatedAt       Timestamp             `json:"created_at"`
+	ID              string                `json:"id"`
+	RowsCompleted   int                   `json:"rows_completed"`
+	RowsTotal       int                   `json:"rows_total"`
+	SetID           string                `json:"set_id"`
+	Status          string                `json:"status"`
+	TaskID          string                `json:"task_id"`
+	TriggeredBy     string                `json:"triggered_by"`
+	CompletedAt     *Timestamp            `json:"completed_at,omitempty"`
+	ConfigUpdatedAt *Timestamp            `json:"config_updated_at,omitempty"`
+	ErrorMessage    *string               `json:"error_message,omitempty"`
+	StartedAt       *Timestamp            `json:"started_at,omitempty"`
+	Metrics         *PolicyTestRunMetrics `json:"metrics,omitempty"`
+}
+
+type PolicyTestRunMetrics struct {
+	Mode    string                          `json:"mode"`
+	Totals  PolicyTestTotals                `json:"totals"`
+	ByLabel map[string]PolicyTestLabelDrift `json:"by_label,omitempty"`
+}
+
+type PolicyTestRunResponse struct {
+	Duration string `json:"duration"`
+	// Per-row results (only present once the run has finished)
+	Results []PolicyTestResult `json:"results,omitempty"`
+	Run     *PolicyTestRun     `json:"run,omitempty"`
+}
+
+type PolicyTestSeedSpec struct {
+	// How many rows to sample, newest first; capped at 1000
+	Limit int `json:"limit"`
+	// Sample only records carrying any of these labels; empty samples everything
+	Labels []string `json:"labels,omitempty"`
+}
+
+type PolicyTestSet struct {
+	ConfigKey string          `json:"config_key"`
+	CreatedAt Timestamp       `json:"created_at"`
+	CreatedBy string          `json:"created_by"`
+	ID        string          `json:"id"`
+	Mode      string          `json:"mode"`
+	Name      string          `json:"name"`
+	RowCount  int             `json:"row_count"`
+	UpdatedAt Timestamp       `json:"updated_at"`
+	Team      *string         `json:"team,omitempty"`
+	Rows      []PolicyTestRow `json:"rows,omitempty"`
+	LastRun   *PolicyTestRun  `json:"last_run,omitempty"`
+}
+
+type PolicyTestSetListResponse struct {
+	Duration string `json:"duration"`
+	// List of policy test sets for the app
+	Sets []PolicyTestSet `json:"sets"`
+}
+
+type PolicyTestSetResponse struct {
+	Duration string `json:"duration"`
+	// The set's baseline run (earliest completed run); later runs are scored against it. Absent until the first run completes
+	BaselineRunID *string `json:"baseline_run_id,omitempty"`
+	// Retained run history for this set, newest first
+	RecentRuns []PolicyTestRun `json:"recent_runs,omitempty"`
+	Set        *PolicyTestSet  `json:"set,omitempty"`
+}
+
+type PolicyTestTotals struct {
+	Failed   int `json:"failed"`
+	Passed   int `json:"passed"`
+	Rows     int `json:"rows"`
+	Scored   int `json:"scored"`
+	Unscored int `json:"unscored"`
+}
+
 type PollOptionInput struct {
 	Text   *string        `json:"text,omitempty"`
 	Custom map[string]any `json:"custom,omitempty"`
@@ -9687,11 +9938,13 @@ type QueryFollowsResponse struct {
 type QueryFutureChannelBansPayload struct {
 	// Whether to exclude expired bans or not
 	ExcludeExpiredBans *bool `json:"exclude_expired_bans,omitempty"`
+	// When true, the response includes the total number of bans matching the query filter (independent of limit and offset, capped at 100000)
+	IncludeTotal *bool `json:"include_total,omitempty"`
 	// Number of records to return
 	Limit *int `json:"limit,omitempty"`
 	// Number of records to offset
 	Offset *int `json:"offset,omitempty"`
-	// Filter by the target user ID. For server-side requests only.
+	// Filter by the target user ID. Server-side: returns all bans against this user. Client-side: narrows the authenticated user's own bans to this target.
 	TargetUserID *string      `json:"target_user_id,omitempty"`
 	UserID       *string      `json:"user_id,omitempty"`
 	User         *UserRequest `json:"user,omitempty"`
@@ -9702,6 +9955,8 @@ type QueryFutureChannelBansResponse struct {
 	Duration string `json:"duration"`
 	// List of found future channel bans
 	Bans []FutureChannelBanResponse `json:"bans"`
+	// Total number of bans matching the query filter, computed at query time and capped at 100000. Only present when include_total is set on the request; omitted when computing the total timed out
+	Total *int `json:"total,omitempty"`
 }
 
 type QueryLabelResultsResponse struct {
@@ -10654,8 +10909,12 @@ type RuleBuilderCondition struct {
 	ContentCustomPropertyCountParams *ContentCustomPropertyCountParameters `json:"content_custom_property_count_params,omitempty"`
 	ContentCustomPropertyParams      *ContentCustomPropertyParameters      `json:"content_custom_property_params,omitempty"`
 	ContentFlagCountRuleParams       *FlagCountRuleParameters              `json:"content_flag_count_rule_params,omitempty"`
+	FloodIdenticalParams             *FloodIdenticalRuleParameters         `json:"flood_identical_params,omitempty"`
+	FloodSimilarParams               *FloodSimilarRuleParameters           `json:"flood_similar_params,omitempty"`
 	ImageContentParams               *ImageContentParameters               `json:"image_content_params,omitempty"`
 	ImageRuleParams                  *ImageRuleParameters                  `json:"image_rule_params,omitempty"`
+	IpContentCountRuleParams         *IPContentCountRuleParameters         `json:"ip_content_count_rule_params,omitempty"`
+	IpFlagCountRuleParams            *IPFlagCountRuleParameters            `json:"ip_flag_count_rule_params,omitempty"`
 	KeyframeOcrRuleParams            *KeyframeOCRRuleParameters            `json:"keyframe_ocr_rule_params,omitempty"`
 	KeyframeRuleParams               *KeyframeRuleParameters               `json:"keyframe_rule_params,omitempty"`
 	OcrContentParams                 *OCRContentParameters                 `json:"ocr_content_params,omitempty"`
@@ -11021,7 +11280,7 @@ type SearchResultMessage struct {
 	Draft                *DraftResponse                    `json:"draft,omitempty"`
 	I18n                 map[string]string                 `json:"i18n,omitempty"`
 	ImageLabels          map[string][]string               `json:"image_labels,omitempty"`
-	Member               *ChannelMemberResponse            `json:"member,omitempty"`
+	Member               *ChannelMemberPartialResponse     `json:"member,omitempty"`
 	Moderation           *ModerationV2Response             `json:"moderation,omitempty"`
 	PinnedBy             *UserResponse                     `json:"pinned_by,omitempty"`
 	Poll                 *PollResponseData                 `json:"poll,omitempty"`
@@ -11102,8 +11361,11 @@ type SendClosedCaptionResponse struct {
 
 type SendMessageResponse struct {
 	// Duration of the request in milliseconds
-	Duration string          `json:"duration"`
-	Message  MessageResponse `json:"message"`
+	Duration       string                  `json:"duration"`
+	Message        MessageResponse         `json:"message"`
+	ChannelContext *ChannelContextResponse `json:"channel_context,omitempty"`
+	// Map of mentioned user ID to whether that user is currently an active channel member. Only set when include_mentioned_members was requested; omitted when the message has no mentions or the membership lookup failed
+	MentionedMembers map[string]bool `json:"mentioned_members,omitempty"`
 	// Pending message metadata
 	PendingMessageMetadata map[string]string `json:"pending_message_metadata,omitempty"`
 }
@@ -11481,7 +11743,6 @@ type TextRuleParameters struct {
 
 // Represents a user that is participating in a thread.
 type ThreadParticipant struct {
-	AppPk      int    `json:"app_pk"`
 	ChannelCid string `json:"channel_cid"`
 	// Date/time of creation
 	CreatedAt           Timestamp      `json:"created_at"`
@@ -11510,6 +11771,8 @@ type ThreadResponse struct {
 	ParentMessageID string `json:"parent_message_id"`
 	// Participant Count
 	ParticipantCount int `json:"participant_count"`
+	// Reply Count
+	ReplyCount int `json:"reply_count"`
 	// Title
 	Title string `json:"title"`
 	// Date/time of the last update
@@ -11520,8 +11783,6 @@ type ThreadResponse struct {
 	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 	// Last Message At
 	LastMessageAt *Timestamp `json:"last_message_at,omitempty"`
-	// Reply Count
-	ReplyCount *int `json:"reply_count,omitempty"`
 	// Thread Participants
 	ThreadParticipants []ThreadParticipant `json:"thread_participants,omitempty"`
 	Channel            *ChannelResponse    `json:"channel,omitempty"`
@@ -11542,6 +11803,8 @@ type ThreadStateResponse struct {
 	ParentMessageID string `json:"parent_message_id"`
 	// Participant Count
 	ParticipantCount int `json:"participant_count"`
+	// Reply Count
+	ReplyCount int `json:"reply_count"`
 	// Title
 	Title string `json:"title"`
 	// Date/time of the last update
@@ -11552,10 +11815,8 @@ type ThreadStateResponse struct {
 	// Deleted At
 	DeletedAt *Timestamp `json:"deleted_at,omitempty"`
 	// Last Message At
-	LastMessageAt *Timestamp `json:"last_message_at,omitempty"`
-	// Reply Count
-	ReplyCount *int                `json:"reply_count,omitempty"`
-	Read       []ReadStateResponse `json:"read,omitempty"`
+	LastMessageAt *Timestamp          `json:"last_message_at,omitempty"`
+	Read          []ReadStateResponse `json:"read,omitempty"`
 	// Thread Participants
 	ThreadParticipants []ThreadParticipant `json:"thread_participants,omitempty"`
 	Channel            *ChannelResponse    `json:"channel,omitempty"`
@@ -11752,6 +12013,8 @@ type UnbanActionRequestPayload struct {
 	DecisionReason *string `json:"decision_reason,omitempty"`
 	// Also remove the future channels ban for this user
 	RemoveFutureChannelsBan *bool `json:"remove_future_channels_ban,omitempty"`
+	// Optional: unban user directly without review item
+	TargetUserID *string `json:"target_user_id,omitempty"`
 }
 
 type UnbanResponse struct {
@@ -12266,9 +12529,16 @@ type UpsertExternalStorageAWSS3Request struct {
 	PathPrefix *string `json:"path_prefix,omitempty"`
 }
 
+type UpsertExternalStorageGCSRequest struct {
+	Bucket      string  `json:"bucket"`
+	Credentials string  `json:"credentials"`
+	PathPrefix  *string `json:"path_prefix,omitempty"`
+}
+
 type UpsertExternalStorageRequest struct {
 	Type  string                             `json:"type"`
 	AWSS3 *UpsertExternalStorageAWSS3Request `json:"aws_s3,omitempty"`
+	Gcs   *UpsertExternalStorageGCSRequest   `json:"gcs,omitempty"`
 }
 
 // Basic response information

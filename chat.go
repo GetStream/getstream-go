@@ -327,6 +327,7 @@ func (c *ChatClient) UpdateMemberPartial(ctx context.Context, _type string, id s
 // Sends new message to the specified channel
 //
 // Sends events:
+// - channel.visible
 // - message.new
 // - message.updated
 func (c *ChatClient) SendMessage(ctx context.Context, _type string, id string, request *SendMessageRequest) (*StreamResponse[SendMessageResponse], error) {

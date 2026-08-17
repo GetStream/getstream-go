@@ -34,6 +34,20 @@ func (c *Client) CreateBlockList(ctx context.Context, request *CreateBlockListRe
 	return res, err
 }
 
+// Enqueues an asynchronous bulk import of items into an existing blocklist.
+// Returns a task ID that can be polled via GET /tasks/{id} to observe progress.
+// AddItems is idempotent: items already present are skipped without error.
+// For lists exceeding the HTTP request-body cap, issue repeated import calls each
+// carrying a bounded slice of items — the task result accumulates correctly.
+func (c *Client) ImportBlockList(ctx context.Context, id string, request *ImportBlockListRequest) (*StreamResponse[ImportBlockListResponse], error) {
+	var result ImportBlockListResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[ImportBlockListRequest, ImportBlockListResponse](c, ctx, "POST", "/api/v2/blocklists/{id}/import", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Deletes previously created application blocklist
 func (c *Client) DeleteBlockList(ctx context.Context, name string, request *DeleteBlockListRequest) (*StreamResponse[Response], error) {
 	var result Response
@@ -215,14 +229,14 @@ func (c *Client) GetImporterExternalStorage(ctx context.Context, request *GetImp
 	return res, err
 }
 
-// Creates or updates the external storage configuration for the app. Currently only AWS S3 (via cross-account IAM role assumption) is supported.
+// Creates or updates the external storage configuration for the app. Supports AWS S3 (via cross-account IAM role assumption) and GCS (via service-account JSON credentials).
 func (c *Client) UpsertImporterExternalStorage(ctx context.Context, request *UpsertImporterExternalStorageRequest) (*StreamResponse[UpsertExternalStorageResponse], error) {
 	var result UpsertExternalStorageResponse
 	res, err := MakeRequest[UpsertImporterExternalStorageRequest, UpsertExternalStorageResponse](c, ctx, "PUT", "/api/v2/imports/v2/external-storage", nil, request, &result, nil)
 	return res, err
 }
 
-// Validates the configured external S3 storage by performing a live STS AssumeRole and S3 ListObjectsV2 check.
+// Validates the configured external storage. For AWS S3, performs a live STS AssumeRole and S3 ListObjectsV2 check. For GCS, performs a live bucket listing check using the configured service-account credentials.
 func (c *Client) ValidateImporterExternalStorage(ctx context.Context, request *ValidateImporterExternalStorageRequest) (*StreamResponse[ValidateExternalStorageResponse], error) {
 	var result ValidateExternalStorageResponse
 	res, err := MakeRequest[any, ValidateExternalStorageResponse](c, ctx, "POST", "/api/v2/imports/v2/external-storage/validate", nil, nil, &result, nil)
@@ -415,8 +429,7 @@ func (c *Client) GetPollOption(ctx context.Context, pollID string, optionID stri
 		"poll_id":   pollID,
 		"option_id": optionID,
 	}
-	params := extractQueryParams(request)
-	res, err := MakeRequest[any, PollOptionResponse](c, ctx, "GET", "/api/v2/polls/{poll_id}/options/{option_id}", params, nil, &result, pathParams)
+	res, err := MakeRequest[any, PollOptionResponse](c, ctx, "GET", "/api/v2/polls/{poll_id}/options/{option_id}", nil, nil, &result, pathParams)
 	return res, err
 }
 

@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v4"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,6 +35,13 @@ func TestCommonCreateBlockList(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.CreateBlockList(context.Background(), &getstream.CreateBlockListRequest{})
+	require.NoError(t, err)
+}
+func TestCommonImportBlockList(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.ImportBlockList(context.Background(), "", &getstream.ImportBlockListRequest{})
 	require.NoError(t, err)
 }
 func TestCommonDeleteBlockList(t *testing.T) {
