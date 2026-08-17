@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.3.0](https://github.com/GetStream/getstream-go/compare/v5.2.0...v5.3.0) (2026-08-17)
+
+
+### Features
+
+* regenerate from chat master (other_media on ModerationPayload) ([#141](https://github.com/GetStream/getstream-go/issues/141)) ([f81c07f](https://github.com/GetStream/getstream-go/commit/f81c07facc8df5ddbf6cbbdd1ef576b3d7b23893))
+
 ## [5.2.0](https://github.com/GetStream/getstream-go/compare/v5.1.1...v5.2.0) (2026-08-12)
 
 
