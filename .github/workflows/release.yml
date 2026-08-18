@@ -2,7 +2,9 @@ name: Release
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - '*.x'
   workflow_dispatch:
 
 permissions:
@@ -11,7 +13,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: release
+  group: release-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -26,6 +28,7 @@ jobs:
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+          target-branch: ${{ github.ref_name }}
           skip-github-release: true
 
       # Irreversible half is gated on this. Go resolves a v2+ module only if go.mod carries the
@@ -48,4 +51,5 @@ jobs:
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+          target-branch: ${{ github.ref_name }}
           skip-github-pull-request: true

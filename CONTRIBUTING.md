@@ -68,6 +68,18 @@ git commit --allow-empty -m "chore: republish as 5.3.1" -m "Release-As: 5.3.1"
 
 If direct pushes to `main` are blocked, merge a PR and type `Release-As: 5.3.1` into the **commit message box** in the squash dialog. That box is blank by default and the PR description is never copied into it, so a footer left in the description is silently dropped.
 
+### Hotfix while a release is pending
+
+`main`'s next release includes everything merged since the last tag, so when `main` carries something you are not ready to ship, you cannot cut a patch from it. Release from a maintenance branch instead. The workflow triggers on any `*.x` branch and releases against that branch, so nothing needs editing per hotfix.
+
+1. Branch from the last released tag and push it: `git switch -c 5.x v5.3.0 && git push -u origin 5.x`.
+2. If that tag predates release-please, copy `release-please-config.json` and `.release-please-manifest.json` onto the branch and set the manifest to that tag's version.
+3. Cherry-pick the `fix:` commit onto `5.x` and push.
+4. release-please opens a Release PR against `5.x`. Merge it to cut the patch.
+5. Forward-port the fix to `main`.
+
+The pending Release PR on `main` is untouched throughout.
+
 ### Major versions
 
 Go resolves a v2+ module only if `go.mod` carries the matching `/vN` suffix, and release-please does not rewrite it. The release is tagged at the Release PR's merge commit, so the migration must already be in that commit's history:
