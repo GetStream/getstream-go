@@ -77,6 +77,10 @@ func (c *Channels) GetManyMessages(ctx context.Context, request *GetManyMessages
 	return c.client.GetManyMessages(ctx, c.channelType, c.channelD, request)
 }
 
+func (c *Channels) GetPinnedMessages(ctx context.Context, request *GetPinnedMessagesRequest) (*StreamResponse[GetPinnedMessagesResponse], error) {
+	return c.client.GetPinnedMessages(ctx, c.channelType, c.channelD, request)
+}
+
 func (c *Channels) GetOrCreate(ctx context.Context, request *GetOrCreateChannelRequest) (*StreamResponse[ChannelStateResponse], error) {
 	return c.client.GetOrCreateChannel(ctx, c.channelType, c.channelD, request)
 }

@@ -360,6 +360,23 @@ type GetManyMessagesRequest struct {
 	Ids                 []string `json:"-" query:"ids"`
 	MemberCustomInclude []string `json:"-" query:"member_custom_include"`
 }
+type GetPinnedMessagesRequest struct {
+	Limit                 *int               `json:"-" query:"limit"`
+	Offset                *int               `json:"-" query:"offset"`
+	IDGte                 *string            `json:"-" query:"id_gte"`
+	IDGt                  *string            `json:"-" query:"id_gt"`
+	IDLte                 *string            `json:"-" query:"id_lte"`
+	IDLt                  *string            `json:"-" query:"id_lt"`
+	PinnedAtAfterOrEqual  *Timestamp         `json:"-" query:"pinned_at_after_or_equal"`
+	PinnedAtAfter         *Timestamp         `json:"-" query:"pinned_at_after"`
+	PinnedAtBeforeOrEqual *Timestamp         `json:"-" query:"pinned_at_before_or_equal"`
+	PinnedAtBefore        *Timestamp         `json:"-" query:"pinned_at_before"`
+	IDAround              *string            `json:"-" query:"id_around"`
+	PinnedAtAround        *Timestamp         `json:"-" query:"pinned_at_around"`
+	UserID                *string            `json:"-" query:"user_id"`
+	Sort                  []SortParamRequest `json:"-" query:"sort"`
+	MemberCustomInclude   []string           `json:"-" query:"member_custom_include"`
+}
 type GetOrCreateChannelRequest struct {
 	// Whether this channel will be hidden for the user who created the channel or not
 	HideForCreator *bool `json:"hide_for_creator,omitempty"`
@@ -494,6 +511,7 @@ type UpdateChannelTypeRequest struct {
 	CustomEvents                   *bool              `json:"custom_events,omitempty"`
 	DeliveryEvents                 *bool              `json:"delivery_events,omitempty"`
 	MarkMessagesPending            *bool              `json:"mark_messages_pending,omitempty"`
+	MessageRetention               *string            `json:"message_retention,omitempty"`
 	Mutes                          *bool              `json:"mutes,omitempty"`
 	PartitionSize                  *int               `json:"partition_size,omitempty"`
 	PartitionTtl                   *string            `json:"partition_ttl,omitempty"`
@@ -725,6 +743,34 @@ type UnmuteChannelRequest struct {
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }
+type GetPredefinedFiltersRequest struct {
+	IncludeStats *bool              `json:"-" query:"include_stats"`
+	Sort         []SortParamRequest `json:"-" query:"sort"`
+}
+type CreatePredefinedFilterRequest struct {
+	// The unique name of the predefined filter (alphanumeric, _, - only)
+	Name string `json:"name"`
+	// The operation this filter is for (e.g., QueryChannels)
+	Operation string `json:"operation"`
+	// Filter to apply to the query
+	Filter map[string]any `json:"filter"`
+	// The description of the predefined filter
+	Description *string          `json:"description,omitempty"`
+	Sort        []map[string]any `json:"sort"`
+}
+type DeletePredefinedFilterRequest struct {
+}
+type GetPredefinedFilterRequest struct {
+}
+type UpdatePredefinedFilterRequest struct {
+	// The operation this filter is for (e.g., QueryChannels)
+	Operation string `json:"operation"`
+	// Filter to apply to the query
+	Filter map[string]any `json:"filter"`
+	// The description of the predefined filter
+	Description *string          `json:"description,omitempty"`
+	Sort        []map[string]any `json:"sort"`
+}
 type QueryBannedUsersRequest struct {
 	Payload *QueryBannedUsersPayload `json:"-" query:"payload"`
 }
@@ -832,6 +878,8 @@ type QueryTeamUsageStatsRequest struct {
 	Next *string `json:"next,omitempty"`
 	// Start date in YYYY-MM-DD format. Used with end_date for custom date range. Returns daily breakdown.
 	StartDate *string `json:"start_date,omitempty"`
+	// Filter results to a single team ID. Empty string selects users not assigned to any team. Mutually exclusive with 'next'.
+	Team *string `json:"team,omitempty"`
 }
 type QueryThreadsRequest struct {
 	Limit       *int    `json:"limit,omitempty"`
@@ -1635,6 +1683,8 @@ type ChangeFeedVisibilityRequest struct {
 	// What to do with existing pending follows when loosening visibility from 'followers': auto_approve (default) or reject
 	PendingFollowsAction *string `json:"pending_follows_action,omitempty"`
 }
+type GetFeedCountsRequest struct {
+}
 type UpdateFeedMembersRequest struct {
 	// Type of update operation to perform. One of: upsert, remove, set
 	Operation string  `json:"operation"`
@@ -2173,11 +2223,11 @@ type BulkActionAppealsRequest struct {
 	MarkReviewed *MarkReviewedRequestPayload `json:"mark_reviewed,omitempty"`
 	// Configuration for rejecting an appeal
 	RejectAppeal *RejectAppealRequestPayload `json:"reject_appeal,omitempty"`
-	// Configuration for restore action
+	// Configuration for restore action. State-aware: reverses whichever of a delete, a block, or a shadow block currently applies to the content (including both a delete and a block/shadow block at once).
 	Restore *RestoreActionRequestPayload `json:"restore,omitempty"`
 	// Configuration for unban moderation action
 	Unban *UnbanActionRequestPayload `json:"unban,omitempty"`
-	// Configuration for unblock action
+	// Deprecated: use restore instead — it now also reverses a block or shadow block. Configuration for unblock action.
 	Unblock *UnblockActionRequestPayload `json:"unblock,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
@@ -2555,13 +2605,13 @@ type SubmitActionRequest struct {
 	MarkReviewed *MarkReviewedRequestPayload `json:"mark_reviewed,omitempty"`
 	// Configuration for rejecting an appeal
 	RejectAppeal *RejectAppealRequestPayload `json:"reject_appeal,omitempty"`
-	// Configuration for restore action
+	// Configuration for restore action. State-aware: reverses whichever of a delete, a block, or a shadow block currently applies to the content (including both a delete and a block/shadow block at once).
 	Restore *RestoreActionRequestPayload `json:"restore,omitempty"`
 	// Configuration for shadow block action
 	ShadowBlock *ShadowBlockActionRequestPayload `json:"shadow_block,omitempty"`
 	// Configuration for unban moderation action
 	Unban *UnbanActionRequestPayload `json:"unban,omitempty"`
-	// Configuration for unblock action
+	// Deprecated: use restore instead — it now also reverses a block or shadow block. Configuration for unblock action.
 	Unblock *UnblockActionRequestPayload `json:"unblock,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
@@ -2607,7 +2657,39 @@ type GetOGRequest struct {
 }
 type ListPermissionsRequest struct {
 }
+type CreatePermissionRequest struct {
+	// Action name this permission is for (e.g. SendMessage)
+	Action string `json:"action"`
+	// Unique permission ID
+	ID string `json:"id"`
+	// Name of the permission
+	Name string `json:"name"`
+	// MongoDB style condition which decides whether or not the permission is granted
+	Condition map[string]any `json:"condition"`
+	// Description of the permission
+	Description *string `json:"description,omitempty"`
+	// Whether this permission applies to resource owner or not
+	Owner *bool `json:"owner,omitempty"`
+	// Whether this permission applies to teammates (multi-tenancy mode only)
+	SameTeam *bool `json:"same_team,omitempty"`
+}
+type DeletePermissionRequest struct {
+}
 type GetPermissionRequest struct {
+}
+type UpdatePermissionRequest struct {
+	// Action name this permission is for (e.g. SendMessage)
+	Action string `json:"action"`
+	// Name of the permission
+	Name string `json:"name"`
+	// MongoDB style condition which decides whether or not the permission is granted
+	Condition map[string]any `json:"condition"`
+	// Description of the permission
+	Description *string `json:"description,omitempty"`
+	// Whether this permission applies to resource owner or not
+	Owner *bool `json:"owner,omitempty"`
+	// Whether this permission applies to teammates (multi-tenancy mode only)
+	SameTeam *bool `json:"same_team,omitempty"`
 }
 type CreatePollRequest struct {
 	// The name of the poll

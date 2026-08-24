@@ -198,6 +198,13 @@ func TestChatGetManyMessages(t *testing.T) {
 	_, err = client.Chat().GetManyMessages(context.Background(), "", "", &getstream.GetManyMessagesRequest{})
 	require.NoError(t, err)
 }
+func TestChatGetPinnedMessages(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().GetPinnedMessages(context.Background(), "", "", &getstream.GetPinnedMessagesRequest{})
+	require.NoError(t, err)
+}
 func TestChatGetOrCreateChannel(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -483,6 +490,41 @@ func TestChatUnmuteChannel(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Chat().UnmuteChannel(context.Background(), &getstream.UnmuteChannelRequest{})
+	require.NoError(t, err)
+}
+func TestChatGetPredefinedFilters(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().GetPredefinedFilters(context.Background(), &getstream.GetPredefinedFiltersRequest{})
+	require.NoError(t, err)
+}
+func TestChatCreatePredefinedFilter(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().CreatePredefinedFilter(context.Background(), &getstream.CreatePredefinedFilterRequest{})
+	require.NoError(t, err)
+}
+func TestChatDeletePredefinedFilter(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().DeletePredefinedFilter(context.Background(), "", &getstream.DeletePredefinedFilterRequest{})
+	require.NoError(t, err)
+}
+func TestChatGetPredefinedFilter(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().GetPredefinedFilter(context.Background(), "", &getstream.GetPredefinedFilterRequest{})
+	require.NoError(t, err)
+}
+func TestChatUpdatePredefinedFilter(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().UpdatePredefinedFilter(context.Background(), "", &getstream.UpdatePredefinedFilterRequest{})
 	require.NoError(t, err)
 }
 func TestChatQueryBannedUsers(t *testing.T) {
