@@ -47,12 +47,45 @@ You can read about conventional commits [here](https://www.conventionalcommits.o
 
 ## Release (for Stream developers)
 
-Releasing this package involves two GitHub Action steps:
+Releases are driven by [release-please](https://github.com/googleapis/release-please).
 
-- Kick off a job called `initiate_release` ([link](https://github.com/GetStream/stream-chat-go/actions/workflows/initiate_release.yml)).
+- Merge PRs to `main` with conventional-commit titles. The PR title becomes the commit subject and is what determines the next version, so a non-conventional title ships nothing.
+- release-please keeps a Release PR open with the version bump and the generated changelog. Review it.
+- The Release PR is opened by `github-actions[bot]`, so its CI runs are held at "action required" until someone clicks **Approve and run**, and it needs a code-owner approval like any other PR. If a later commit landed on `main`, click **Update branch** first.
+- Merge the Release PR. That creates the tag and the GitHub Release, and `proxy.golang.org` picks the tag up. There is no separate publish step.
 
-The job creates a pull request with the changelog. Check if it looks good.
+> **Pilot only:** `release-please-config.json` currently sets `"draft": true`, so merging the Release PR creates a *draft* GitHub Release and **no git tag**. Nothing reaches `proxy.golang.org` until someone publishes the draft. Remove `"draft": true` once the pilot is signed off.
 
-- Merge the pull request.
+Only `feat`, `fix`, `perf` and breaking changes produce a release (`revert` may also). A window of only `chore`, `ci`, `docs`, `test`, `refactor`, `style` or `build` commits produces no Release PR, which is intended.
 
-Once the PR is merged, it automatically kicks off another job which will create the tag and created a GitHub release.
+### Forcing a specific version
+
+Land a commit on `main` whose subject is conventional and whose body carries a `Release-As` footer. The footer also overrides the rule above, so it works even for a hidden commit type:
+
+```bash
+git commit --allow-empty -m "chore: republish as 5.3.1" -m "Release-As: 5.3.1"
+```
+
+If direct pushes to `main` are blocked, merge a PR and type `Release-As: 5.3.1` into the **commit message box** in the squash dialog. That box is blank by default and the PR description is never copied into it, so a footer left in the description is silently dropped.
+
+### Hotfix while a release is pending
+
+`main`'s next release includes everything merged since the last tag, so when `main` carries something you are not ready to ship, you cannot cut a patch from it. Release from a maintenance branch instead. The workflow triggers on any `*.x` branch and releases against that branch, so nothing needs editing per hotfix.
+
+1. Branch from the last released tag and push it: `git switch -c 5.x v5.3.0 && git push -u origin 5.x`.
+2. If that tag predates release-please, copy `release-please-config.json` and `.release-please-manifest.json` onto the branch and set the manifest to that tag's version.
+3. Cherry-pick the `fix:` commit onto `5.x` and push.
+4. release-please opens a Release PR against `5.x`. Merge it to cut the patch.
+5. Forward-port the fix to `main`.
+
+The pending Release PR on `main` is untouched throughout.
+
+### Major versions
+
+Go resolves a v2+ module only if `go.mod` carries the matching `/vN` suffix, and release-please does not rewrite it. The release is tagged at the Release PR's merge commit, so the migration must already be in that commit's history:
+
+1. Land the `feat!` change. release-please opens a Release PR for the next major.
+2. Migrate `go.mod` and every self-import to `/vN` in a separate PR and merge it to `main`. The Release workflow fails on those pushes while the two disagree, which is expected and blocks nothing else.
+3. Click **Update branch** on the major Release PR, then merge it. The tag is created against a tree that already has the migrated `go.mod`.
+
+Never merge a major Release PR before step 2. If that happens the tag is blocked, and the fix is manual: land the migration, remove the `autorelease: pending` label from the merged Release PR, then tag by hand at the migrated commit.

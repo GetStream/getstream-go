@@ -252,8 +252,11 @@ func TestBuildAPIError_UnparseableBodyPath(t *testing.T) {
 	if got.Code != 0 {
 		t.Errorf("Code = %d, want 0 for unparseable", got.Code)
 	}
-	if got.Message != "failed to parse error response" {
+	if got.Message != "failed to parse error response: unexpected server response code 500" {
 		t.Errorf("Message = %q, want canonical unparseable text", got.Message)
+	}
+	if got.StatusCode != http.StatusInternalServerError {
+		t.Errorf("StatusCode = %d, want the transport status preserved", got.StatusCode)
 	}
 	if got.RawResponseBody != body {
 		t.Errorf("RawResponseBody = %q, want raw body preserved", got.RawResponseBody)

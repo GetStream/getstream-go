@@ -1,33 +1,55 @@
 name: Release
 
 on:
-  pull_request:
-    types: [closed]
+  push:
     branches:
       - main
+      - '*.x'
+  workflow_dispatch:
 
 permissions:
   contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
-  Release:
+  release:
     name: 🚀 Release
-    if: github.event.pull_request.merged && startsWith(github.head_ref, 'release-')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/github-script@v6
+      # Reversible half: keep the Release PR current. Never gated.
+      - uses: googleapis/release-please-action@v4
         with:
-          script: |
-            // Getting the release version from the PR source branch
-            // Source branch looks like this: release-1.0.0
-            const version = context.payload.pull_request.head.ref.split('-')[1]
-            core.exportVariable('VERSION', version)
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          target-branch: ${{ github.ref_name }}
+          skip-github-release: true
 
-      - name: Create release on GitHub
-        uses: ncipollo/release-action@v1
+      # Irreversible half is gated on this. Go resolves a v2+ module only if go.mod carries the
+      # matching /vN suffix, and release-please never rewrites it, so a major stays a manual
+      # migration. proxy.golang.org caches a tag permanently, so this must hold before tagging.
+      - name: Verify go.mod major matches the version about to be tagged
+        run: |
+          version="$(jq -r '.["."]' .release-please-manifest.json)"
+          expected="${version%%.*}"
+          module_path="$(sed -n 's/^module //p' go.mod)"
+          module_major="$(printf '%s' "$module_path" | sed -n 's|.*/v\([0-9][0-9]*\)$|\1|p')"
+          [ -n "$module_major" ] || module_major=1
+          if [ "$module_major" != "$expected" ]; then
+            echo "::error::go.mod declares '$module_path' (major v$module_major) but the pending release is $version."
+            echo "::error::A major must be migrated on main BEFORE its Release PR merges. See CONTRIBUTING.md."
+            exit 1
+          fi
+
+      - uses: googleapis/release-please-action@v4
         with:
-          tag: ${{ env.VERSION }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          generateReleaseNotes: true
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          target-branch: ${{ github.ref_name }}
+          skip-github-pull-request: true

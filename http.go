@@ -131,8 +131,11 @@ func buildAPIError(resp *http.Response, body []byte) *StreamError {
 
 	if len(body) > 0 {
 		if err := json.Unmarshal(body, apiErr); err != nil {
+			// A failed Unmarshal can still have assigned fields before it errored,
+			// so restore the transport status rather than trust the partial parse.
+			apiErr.StatusCode = resp.StatusCode
 			apiErr.Code = 0
-			apiErr.Message = "failed to parse error response"
+			apiErr.Message = fmt.Sprintf("failed to parse error response: unexpected server response code %d", resp.StatusCode)
 			apiErr.ExceptionFields = map[string]string{}
 			apiErr.Unrecoverable = false
 			apiErr.cause = stackWrap(err, "parse api error response")

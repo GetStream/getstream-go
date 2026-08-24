@@ -485,3 +485,10 @@ func TestVideoQueryAggregateCallStats(t *testing.T) {
 	_, err = client.Video().QueryAggregateCallStats(context.Background(), &getstream.QueryAggregateCallStatsRequest{})
 	require.NoError(t, err)
 }
+func TestVideoGetDailyDigest(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().GetDailyDigest(context.Background(), &getstream.GetDailyDigestRequest{})
+	require.NoError(t, err)
+}

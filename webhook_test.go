@@ -214,6 +214,7 @@ func TestParseWebhookEvent(t *testing.T) {
 		{"parse message.unblocked", []byte(`{"type":"message.unblocked"}`), "message.unblocked", false},
 		{"parse message.undeleted", []byte(`{"type":"message.undeleted"}`), "message.undeleted", false},
 		{"parse message.updated", []byte(`{"type":"message.updated"}`), "message.updated", false},
+		{"parse moderation.analysis.failed", []byte(`{"type":"moderation.analysis.failed"}`), "moderation.analysis.failed", false},
 		{"parse moderation.custom_action", []byte(`{"type":"moderation.custom_action"}`), "moderation.custom_action", false},
 		{"parse moderation.flagged", []byte(`{"type":"moderation.flagged"}`), "moderation.flagged", false},
 		{"parse moderation.image_analysis.complete", []byte(`{"type":"moderation.image_analysis.complete"}`), "moderation.image_analysis.complete", false},

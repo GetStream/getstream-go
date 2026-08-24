@@ -171,7 +171,7 @@ func (c *ChatClient) DeleteChannel(ctx context.Context, _type string, id string,
 	return res, err
 }
 
-// Returns a channel by its CID without creating it. Responds with 404 when the channel does not exist, so it doubles as an existence check. Pass state=true to also load messages, read state and watchers.
+// Returns a channel by its CID without creating it. Responds with 404 when the channel does not exist, so it doubles as an existence check. Pass state=true to also load messages, read state and watchers, and the messages_id_* parameters to page those messages by message ID.
 func (c *ChatClient) GetChannel(ctx context.Context, _type string, id string, request *GetChannelRequest) (*StreamResponse[ChannelStateResponse], error) {
 	var result ChannelStateResponse
 	pathParams := map[string]string{
@@ -327,6 +327,7 @@ func (c *ChatClient) UpdateMemberPartial(ctx context.Context, _type string, id s
 // Sends new message to the specified channel
 //
 // Sends events:
+// - channel.visible
 // - message.new
 // - message.updated
 func (c *ChatClient) SendMessage(ctx context.Context, _type string, id string, request *SendMessageRequest) (*StreamResponse[SendMessageResponse], error) {
@@ -517,7 +518,7 @@ func (c *ChatClient) QueryDrafts(ctx context.Context, request *QueryDraftsReques
 	return res, err
 }
 
-// Exports channel data to JSON file
+// Exports channel data to a JSON or CSV file (CSV requires version=v2)
 func (c *ChatClient) ExportChannels(ctx context.Context, request *ExportChannelsRequest) (*StreamResponse[ExportChannelsResponse], error) {
 	var result ExportChannelsResponse
 	res, err := MakeRequest[ExportChannelsRequest, ExportChannelsResponse](c.client, ctx, "POST", "/api/v2/chat/export_channels", nil, request, &result, nil)
