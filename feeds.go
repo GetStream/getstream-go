@@ -45,6 +45,10 @@ func (c *Feeds) ChangeFeedVisibility(ctx context.Context, request *ChangeFeedVis
 	return c.client.ChangeFeedVisibility(ctx, c.feedType, c.feedID, request)
 }
 
+func (c *Feeds) GetFeedCounts(ctx context.Context, request *GetFeedCountsRequest) (*StreamResponse[GetFeedCountsResponse], error) {
+	return c.client.GetFeedCounts(ctx, c.feedType, c.feedID, request)
+}
+
 func (c *Feeds) UpdateFeedMembers(ctx context.Context, request *UpdateFeedMembersRequest) (*StreamResponse[UpdateFeedMembersResponse], error) {
 	return c.client.UpdateFeedMembers(ctx, c.feedType, c.feedID, request)
 }

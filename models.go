@@ -343,6 +343,10 @@ func (e *ActivityPinnedEvent) GetEventType() string {
 type ActivityProcessorConfig struct {
 	// Type of activity processor (required)
 	Type string `json:"type"`
+	// Minimum number of characters the activity text must have before this processor runs. 0 (the default) disables the check. Only applies to text_interest_tags.
+	MinTextLength *int `json:"min_text_length,omitempty"`
+	// Minimum number of words the activity text must have before this processor runs. 0 (the default) disables the check. Only applies to text_interest_tags. Words are whitespace-separated, so scripts written without word spacing (Chinese, Japanese, Thai) always count as 1 word regardless of length — use min_text_length for those.
+	MinWordCount *int `json:"min_word_count,omitempty"`
 }
 
 // Emitted when a reaction is added to an activity.
@@ -2972,6 +2976,7 @@ type ChannelConfig struct {
 	DeliveryEvents                 bool      `json:"delivery_events"`
 	MarkMessagesPending            bool      `json:"mark_messages_pending"`
 	MaxMessageLength               int       `json:"max_message_length"`
+	MessageRetention               string    `json:"message_retention"`
 	Mutes                          bool      `json:"mutes"`
 	Name                           string    `json:"name"`
 	Polls                          bool      `json:"polls"`
@@ -3045,6 +3050,7 @@ type ChannelConfigWithInfo struct {
 	DeliveryEvents                 bool               `json:"delivery_events"`
 	MarkMessagesPending            bool               `json:"mark_messages_pending"`
 	MaxMessageLength               int                `json:"max_message_length"`
+	MessageRetention               string             `json:"message_retention"`
 	Mutes                          bool               `json:"mutes"`
 	Name                           string             `json:"name"`
 	Polls                          bool               `json:"polls"`
@@ -3590,6 +3596,7 @@ type ChannelTypeConfig struct {
 	DeliveryEvents                 bool                `json:"delivery_events"`
 	MarkMessagesPending            bool                `json:"mark_messages_pending"`
 	MaxMessageLength               int                 `json:"max_message_length"`
+	MessageRetention               string              `json:"message_retention"`
 	Mutes                          bool                `json:"mutes"`
 	Name                           string              `json:"name"`
 	Polls                          bool                `json:"polls"`
@@ -3963,10 +3970,11 @@ type CheckSQSResponse struct {
 }
 
 type Classification struct {
-	Name               string           `json:"name"`
-	Confidence         *float64         `json:"confidence,omitempty"`
-	Severity           *string          `json:"severity,omitempty"`
-	Subclassifications []Classification `json:"subclassifications,omitempty"`
+	Name                string           `json:"name"`
+	Confidence          *float64         `json:"confidence,omitempty"`
+	Severity            *string          `json:"severity,omitempty"`
+	MatchedContributors []string         `json:"matched_contributors,omitempty"`
+	Subclassifications  []Classification `json:"subclassifications,omitempty"`
 }
 
 // A single client-side telemetry event. JoinInitiated is the top-level marker emitted when a user begins a join attempt and carries only join_attempt_id (no stage_id or coordinator_connect_id). When stage is CoordinatorJoin, CoordinatorWS, WSJoin, or PeerConnectionConnect the event reports a join-lifecycle attempt; initiation and completion of a stage attempt share the same stage_id. FirstAudioFrame and FirstVideoFrame report media readiness and only ever carry an initiated event. MediaDevicePermission reports the result of requesting screen-share, microphone, and camera permissions. Other stage values denote generic client events.
@@ -4446,6 +4454,7 @@ type CreateChannelTypeResponse struct {
 	Duration                       string              `json:"duration"`
 	MarkMessagesPending            bool                `json:"mark_messages_pending"`
 	MaxMessageLength               int                 `json:"max_message_length"`
+	MessageRetention               string              `json:"message_retention"`
 	Mutes                          bool                `json:"mutes"`
 	Name                           string              `json:"name"`
 	Polls                          bool                `json:"polls"`
@@ -4552,6 +4561,12 @@ type CreateImportV2TaskResponse struct {
 type CreateMembershipLevelResponse struct {
 	Duration        string                  `json:"duration"`
 	MembershipLevel MembershipLevelResponse `json:"membership_level"`
+}
+
+type CreatePredefinedFilterResponse struct {
+	// Duration of the request in milliseconds
+	Duration         string                    `json:"duration"`
+	PredefinedFilter *PredefinedFilterResponse `json:"predefined_filter,omitempty"`
 }
 
 // Basic response information
@@ -6602,6 +6617,7 @@ type GetChannelTypeResponse struct {
 	Duration                       string              `json:"duration"`
 	MarkMessagesPending            bool                `json:"mark_messages_pending"`
 	MaxMessageLength               int                 `json:"max_message_length"`
+	MessageRetention               string              `json:"message_retention"`
 	Mutes                          bool                `json:"mutes"`
 	Name                           string              `json:"name"`
 	Polls                          bool                `json:"polls"`
@@ -6733,6 +6749,16 @@ type GetExternalStorageResponse struct {
 	Type      string                           `json:"type"`
 	AWSS3     *GetExternalStorageAWSS3Response `json:"aws_s3,omitempty"`
 	Gcs       *GetExternalStorageGCSResponse   `json:"gcs,omitempty"`
+}
+
+type GetFeedCountsResponse struct {
+	// Number of activities in the feed
+	ActivityCount int `json:"activity_count"`
+	// Total number of comments on those activities, including nested replies
+	CommentCount int    `json:"comment_count"`
+	Duration     string `json:"duration"`
+	// Sum of activity_count and comment_count
+	TotalCount int `json:"total_count"`
 }
 
 type GetFeedGroupResponse struct {
@@ -6913,6 +6939,19 @@ type GetOrCreateUnfollowResponse struct {
 	Deleted  bool            `json:"deleted"`
 	Duration string          `json:"duration"`
 	Follow   *FollowResponse `json:"follow,omitempty"`
+}
+
+type GetPinnedMessagesResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+	// Messages
+	Messages []MessageResponse `json:"messages"`
+}
+
+type GetPredefinedFilterResponse struct {
+	// Duration of the request in milliseconds
+	Duration         string                    `json:"duration"`
+	PredefinedFilter *PredefinedFilterResponse `json:"predefined_filter,omitempty"`
 }
 
 // Basic response information
@@ -9465,6 +9504,18 @@ type Percentiles struct {
 	P95 *float64 `json:"p95,omitempty"`
 }
 
+type PerformanceAnalysisResponse struct {
+	AnalysisType        string     `json:"analysis_type"`
+	Score               string     `json:"score"`
+	IndexedFields       []string   `json:"indexed_fields"`
+	Recommendations     []string   `json:"recommendations"`
+	UnindexedFields     []string   `json:"unindexed_fields"`
+	UnindexedSortFields []string   `json:"unindexed_sort_fields"`
+	Warnings            []string   `json:"warnings"`
+	LastAnalyzed        *Timestamp `json:"last_analyzed,omitempty"`
+	ScanType            *string    `json:"scan_type,omitempty"`
+}
+
 type Permission struct {
 	// Action name this permission is for (e.g. SendMessage)
 	Action string `json:"action"`
@@ -9488,6 +9539,21 @@ type Permission struct {
 	Tags []string `json:"tags"`
 	// MongoDB style condition which decides whether or not the permission is granted
 	Condition map[string]any `json:"condition,omitempty"`
+}
+
+type PermissionRequest struct {
+	// Action name this permission is for (e.g. SendMessage)
+	Action string `json:"action"`
+	// Name of the permission
+	Name string `json:"name"`
+	// MongoDB style condition which decides whether or not the permission is granted
+	Condition map[string]any `json:"condition"`
+	// Description of the permission
+	Description *string `json:"description,omitempty"`
+	// Whether this permission applies to resource owner or not
+	Owner *bool `json:"owner,omitempty"`
+	// Whether this permission applies to teammates (multi-tenancy mode only)
+	SameTeam *bool `json:"same_team,omitempty"`
 }
 
 // This event is sent when a user requests access to a feature on a call,
@@ -9772,6 +9838,25 @@ type PoorTail struct {
 	HealthyPct     *float64    `json:"healthy_pct,omitempty"`
 }
 
+type PredefinedFilterResponse struct {
+	CreatedAt   Timestamp                      `json:"created_at"`
+	Name        string                         `json:"name"`
+	Operation   string                         `json:"operation"`
+	UpdatedAt   Timestamp                      `json:"updated_at"`
+	Filter      map[string]any                 `json:"filter"`
+	Description *string                        `json:"description,omitempty"`
+	QueryID     *int                           `json:"query_id,omitempty"`
+	Sort        []SortParam                    `json:"sort,omitempty"`
+	Performance *PerformanceAnalysisResponse   `json:"performance,omitempty"`
+	Stats       *PredefinedFilterStatsResponse `json:"stats,omitempty"`
+}
+
+type PredefinedFilterStatsResponse struct {
+	Calls        int        `json:"calls"`
+	MaxLatencyMs int        `json:"max_latency_ms"`
+	LastSeen     *Timestamp `json:"last_seen,omitempty"`
+}
+
 type PrivacySettingsResponse struct {
 	DeliveryReceipts *DeliveryReceiptsResponse `json:"delivery_receipts,omitempty"`
 	ReadReceipts     *ReadReceiptsResponse     `json:"read_receipts,omitempty"`
@@ -9846,7 +9931,7 @@ type PushConfig struct {
 type PushNotificationConfig struct {
 	// Whether push notifications are enabled for this feed group
 	EnablePush *bool `json:"enable_push,omitempty"`
-	// List of notification types that should trigger push notifications (e.g., follow, comment, reaction, comment_reaction, mention)
+	// Allowlist of notification types that may trigger push (e.g. follow, comment, reaction, comment_reaction, mention, or any custom activity.type). Empty or omitted means no types. Built-in notifications match notification_context.trigger.type; manually added notification activities match activity.type.
 	PushTypes []string `json:"push_types,omitempty"`
 }
 
@@ -10493,6 +10578,15 @@ type QueryPollsResponse struct {
 	Prev  *string            `json:"prev,omitempty"`
 }
 
+type QueryPredefinedFiltersResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+	// Predefined filters
+	PredefinedFilters []PredefinedFilterResponse `json:"predefined_filters"`
+	Next              *string                    `json:"next,omitempty"`
+	Prev              *string                    `json:"prev,omitempty"`
+}
+
 // Basic response information
 type QueryReactionsResponse struct {
 	// Duration of the request in milliseconds
@@ -11131,7 +11225,7 @@ type Response struct {
 	Duration string `json:"duration"`
 }
 
-// Configuration for restore action
+// Configuration for restore action. State-aware: reverses whichever of a delete, a block, or a shadow block currently applies to the content (including both a delete and a block/shadow block at once).
 type RestoreActionRequestPayload struct {
 	// Reason for the appeal decision
 	DecisionReason *string `json:"decision_reason,omitempty"`
@@ -11979,6 +12073,12 @@ type SipInboundCredentials struct {
 	UserCustomData map[string]any `json:"user_custom_data"`
 }
 
+type SortParam struct {
+	Direction int    `json:"direction"`
+	Field     string `json:"field"`
+	Type      string `json:"type"`
+}
+
 type SortParamRequest struct {
 	// Direction of sorting, 1 for Ascending, -1 for Descending, default is 1. One of: -1, 1
 	Direction *int `json:"direction,omitempty"`
@@ -12545,7 +12645,7 @@ type UnbanResponse struct {
 	Duration string `json:"duration"`
 }
 
-// Configuration for unblock action
+// Deprecated: use restore instead — it now also reverses a block or shadow block. Configuration for unblock action.
 type UnblockActionRequestPayload struct {
 	// Reason for the appeal decision
 	DecisionReason *string `json:"decision_reason,omitempty"`
@@ -12781,6 +12881,7 @@ type UpdateChannelTypeResponse struct {
 	Duration                       string              `json:"duration"`
 	MarkMessagesPending            bool                `json:"mark_messages_pending"`
 	MaxMessageLength               int                 `json:"max_message_length"`
+	MessageRetention               string              `json:"message_retention"`
 	Mutes                          bool                `json:"mutes"`
 	Name                           string              `json:"name"`
 	Polls                          bool                `json:"polls"`
@@ -12920,6 +13021,12 @@ type UpdateMessageResponse struct {
 	// Represents any chat message
 	Message                MessageResponse   `json:"message"`
 	PendingMessageMetadata map[string]string `json:"pending_message_metadata,omitempty"`
+}
+
+type UpdatePredefinedFilterResponse struct {
+	// Duration of the request in milliseconds
+	Duration         string                    `json:"duration"`
+	PredefinedFilter *PredefinedFilterResponse `json:"predefined_filter,omitempty"`
 }
 
 // Basic response information

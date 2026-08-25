@@ -616,6 +616,17 @@ func (c *FeedsClient) ChangeFeedVisibility(ctx context.Context, feedGroupID stri
 	return res, err
 }
 
+// Returns the number of activities in a feed, the total number of comments on those activities (including nested replies), and the sum of both. The comment total is cached for a few seconds on large feeds.
+func (c *FeedsClient) GetFeedCounts(ctx context.Context, feedGroupID string, feedID string, request *GetFeedCountsRequest) (*StreamResponse[GetFeedCountsResponse], error) {
+	var result GetFeedCountsResponse
+	pathParams := map[string]string{
+		"feed_group_id": feedGroupID,
+		"feed_id":       feedID,
+	}
+	res, err := MakeRequest[any, GetFeedCountsResponse](c.client, ctx, "GET", "/api/v2/feeds/feed_groups/{feed_group_id}/feeds/{feed_id}/counts", nil, nil, &result, pathParams)
+	return res, err
+}
+
 // Add, remove, or set members for a feed
 func (c *FeedsClient) UpdateFeedMembers(ctx context.Context, feedGroupID string, feedID string, request *UpdateFeedMembersRequest) (*StreamResponse[UpdateFeedMembersResponse], error) {
 	var result UpdateFeedMembersResponse

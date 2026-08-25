@@ -298,6 +298,23 @@ func (c *Client) ListPermissions(ctx context.Context, request *ListPermissionsRe
 	return res, err
 }
 
+// Creates permission
+func (c *Client) CreatePermission(ctx context.Context, request *CreatePermissionRequest) (*StreamResponse[Response], error) {
+	var result Response
+	res, err := MakeRequest[CreatePermissionRequest, Response](c, ctx, "POST", "/api/v2/permissions", nil, request, &result, nil)
+	return res, err
+}
+
+// Deletes custom permission
+func (c *Client) DeletePermission(ctx context.Context, id string, request *DeletePermissionRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, Response](c, ctx, "DELETE", "/api/v2/permissions/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
 // Gets custom permission
 func (c *Client) GetPermission(ctx context.Context, id string, request *GetPermissionRequest) (*StreamResponse[GetCustomPermissionResponse], error) {
 	var result GetCustomPermissionResponse
@@ -305,6 +322,16 @@ func (c *Client) GetPermission(ctx context.Context, id string, request *GetPermi
 		"id": id,
 	}
 	res, err := MakeRequest[any, GetCustomPermissionResponse](c, ctx, "GET", "/api/v2/permissions/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Updates custom permission
+func (c *Client) UpdatePermission(ctx context.Context, id string, request *UpdatePermissionRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[UpdatePermissionRequest, Response](c, ctx, "PUT", "/api/v2/permissions/{id}", nil, request, &result, pathParams)
 	return res, err
 }
 

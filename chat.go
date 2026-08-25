@@ -352,6 +352,18 @@ func (c *ChatClient) GetManyMessages(ctx context.Context, _type string, id strin
 	return res, err
 }
 
+// Returns pinned messages for the channel
+func (c *ChatClient) GetPinnedMessages(ctx context.Context, _type string, id string, request *GetPinnedMessagesRequest) (*StreamResponse[GetPinnedMessagesResponse], error) {
+	var result GetPinnedMessagesResponse
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetPinnedMessagesResponse](c.client, ctx, "GET", "/api/v2/chat/channels/{type}/{id}/pinned_messages", params, nil, &result, pathParams)
+	return res, err
+}
+
 // This Method creates a channel or returns an existing one with matching attributes
 //
 // Sends events:
@@ -822,6 +834,51 @@ func (c *ChatClient) UnmuteChannel(ctx context.Context, request *UnmuteChannelRe
 	return res, err
 }
 
+// Get all predefined filters with optional sorting by created_at, updated_at, name, or operation
+func (c *ChatClient) GetPredefinedFilters(ctx context.Context, request *GetPredefinedFiltersRequest) (*StreamResponse[QueryPredefinedFiltersResponse], error) {
+	var result QueryPredefinedFiltersResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, QueryPredefinedFiltersResponse](c.client, ctx, "GET", "/api/v2/chat/predefined_filters", params, nil, &result, nil)
+	return res, err
+}
+
+// Create a predefined filter that can be used in Query endpoints
+func (c *ChatClient) CreatePredefinedFilter(ctx context.Context, request *CreatePredefinedFilterRequest) (*StreamResponse[CreatePredefinedFilterResponse], error) {
+	var result CreatePredefinedFilterResponse
+	res, err := MakeRequest[CreatePredefinedFilterRequest, CreatePredefinedFilterResponse](c.client, ctx, "POST", "/api/v2/chat/predefined_filters", nil, request, &result, nil)
+	return res, err
+}
+
+// Delete a predefined filter by name
+func (c *ChatClient) DeletePredefinedFilter(ctx context.Context, name string, request *DeletePredefinedFilterRequest) (*StreamResponse[Response], error) {
+	var result Response
+	pathParams := map[string]string{
+		"name": name,
+	}
+	res, err := MakeRequest[any, Response](c.client, ctx, "DELETE", "/api/v2/chat/predefined_filters/{name}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Get a predefined filter by name
+func (c *ChatClient) GetPredefinedFilter(ctx context.Context, name string, request *GetPredefinedFilterRequest) (*StreamResponse[GetPredefinedFilterResponse], error) {
+	var result GetPredefinedFilterResponse
+	pathParams := map[string]string{
+		"name": name,
+	}
+	res, err := MakeRequest[any, GetPredefinedFilterResponse](c.client, ctx, "GET", "/api/v2/chat/predefined_filters/{name}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Update a predefined filter by name
+func (c *ChatClient) UpdatePredefinedFilter(ctx context.Context, name string, request *UpdatePredefinedFilterRequest) (*StreamResponse[UpdatePredefinedFilterResponse], error) {
+	var result UpdatePredefinedFilterResponse
+	pathParams := map[string]string{
+		"name": name,
+	}
+	res, err := MakeRequest[UpdatePredefinedFilterRequest, UpdatePredefinedFilterResponse](c.client, ctx, "PUT", "/api/v2/chat/predefined_filters/{name}", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Find and filter channel scoped or global user bans
 func (c *ChatClient) QueryBannedUsers(ctx context.Context, request *QueryBannedUsersRequest) (*StreamResponse[QueryBannedUsersResponse], error) {
 	var result QueryBannedUsersResponse
@@ -973,6 +1030,10 @@ func (c *ChatClient) QuerySegmentTargets(ctx context.Context, id string, request
 // - Use 'month' parameter (YYYY-MM format) for monthly aggregated values
 // - Use 'start_date'/'end_date' parameters (YYYY-MM-DD format) for daily breakdown
 // - If neither provided, defaults to current month (monthly mode)
+//
+// **Team Filter:**
+// - Use 'team' to return a single team's stats (empty string selects users not assigned to any team)
+// - Mutually exclusive with the 'next' pagination cursor
 //
 // This endpoint is server-side only.
 func (c *ChatClient) QueryTeamUsageStats(ctx context.Context, request *QueryTeamUsageStatsRequest) (*StreamResponse[QueryTeamUsageStatsResponse], error) {

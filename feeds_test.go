@@ -429,6 +429,13 @@ func TestFeedsChangeFeedVisibility(t *testing.T) {
 	_, err = client.Feeds().ChangeFeedVisibility(context.Background(), "", "", &getstream.ChangeFeedVisibilityRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsGetFeedCounts(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().GetFeedCounts(context.Background(), "", "", &getstream.GetFeedCountsRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsUpdateFeedMembers(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
