@@ -129,13 +129,21 @@ func TestChatChannelIntegration(t *testing.T) {
 		assert.Equal(t, "red", resp.Data.Channel.Custom["color"])
 
 		// Unset fields
-		resp, err = ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
+		_, err = ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
 			Unset: []string{"color"},
 		})
 		require.NoError(t, err)
-		require.NotNil(t, resp.Data.Channel)
-		_, hasColor := resp.Data.Channel.Custom["color"]
-		assert.False(t, hasColor, "color should be unset")
+
+		// The response can be hydrated from a read replica that has not observed
+		// the write yet, so re-read until the unset field disappears.
+		require.Eventually(t, func() bool {
+			resp, err := ch.GetOrCreate(ctx, &GetOrCreateChannelRequest{})
+			if err != nil || resp.Data.Channel == nil {
+				return false
+			}
+			_, hasColor := resp.Data.Channel.Custom["color"]
+			return !hasColor
+		}, 5*time.Second, 500*time.Millisecond, "color should be unset")
 	})
 
 	t.Run("DeleteChannel", func(t *testing.T) {
