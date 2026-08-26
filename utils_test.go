@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/GetStream/getstream-go/v5"
+	. "github.com/GetStream/getstream-go/v6"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )

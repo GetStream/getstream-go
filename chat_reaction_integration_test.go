@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	. "github.com/GetStream/getstream-go/v5"
+	. "github.com/GetStream/getstream-go/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

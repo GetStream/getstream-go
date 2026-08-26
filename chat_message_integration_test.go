@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/GetStream/getstream-go/v5"
+	. "github.com/GetStream/getstream-go/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -627,8 +627,8 @@ func TestChatMessageIntegration(t *testing.T) {
 			Data: &ChannelInput{
 				CreatedByID: PtrTo(memberUserID),
 				Members: []ChannelMemberRequest{
-					{UserID: memberUserID, ChannelRole: PtrTo("channel_member")},
-					{UserID: customRoleUserID, ChannelRole: PtrTo("channel_moderator")},
+					{UserID: PtrTo(memberUserID), ChannelRole: PtrTo("channel_member")},
+					{UserID: PtrTo(customRoleUserID), ChannelRole: PtrTo("channel_moderator")},
 				},
 			},
 		})

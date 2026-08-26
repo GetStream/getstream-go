@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/GetStream/getstream-go/v5"
+	. "github.com/GetStream/getstream-go/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -50,8 +50,8 @@ func TestChatChannelIntegration(t *testing.T) {
 
 	t.Run("CreateDistinctChannel", func(t *testing.T) {
 		members := []ChannelMemberRequest{
-			{UserID: creatorID},
-			{UserID: memberID1},
+			{UserID: PtrTo(creatorID)},
+			{UserID: PtrTo(memberID1)},
 		}
 
 		resp, err := client.Chat().GetOrCreateDistinctChannel(ctx, "messaging", &GetOrCreateDistinctChannelRequest{
@@ -208,8 +208,8 @@ func TestChatChannelIntegration(t *testing.T) {
 		// Add members
 		_, err := ch.Update(ctx, &UpdateChannelRequest{
 			AddMembers: []ChannelMemberRequest{
-				{UserID: memberID2},
-				{UserID: memberID3},
+				{UserID: PtrTo(memberID2)},
+				{UserID: PtrTo(memberID3)},
 			},
 		})
 		require.NoError(t, err)
@@ -260,11 +260,11 @@ func TestChatChannelIntegration(t *testing.T) {
 			Data: &ChannelInput{
 				CreatedByID: PtrTo(creatorID),
 				Members: []ChannelMemberRequest{
-					{UserID: creatorID},
+					{UserID: PtrTo(creatorID)},
 				},
 				Invites: []ChannelMemberRequest{
-					{UserID: memberID1},
-					{UserID: memberID2},
+					{UserID: PtrTo(memberID1)},
+					{UserID: PtrTo(memberID2)},
 				},
 			},
 		})
@@ -461,7 +461,7 @@ func TestChatChannelIntegration(t *testing.T) {
 		// Assign channel_moderator role to memberID1
 		_, err := ch.Update(ctx, &UpdateChannelRequest{
 			AssignRoles: []ChannelMemberRequest{
-				{UserID: memberID1, ChannelRole: PtrTo("channel_moderator")},
+				{UserID: PtrTo(memberID1), ChannelRole: PtrTo("channel_moderator")},
 			},
 		})
 		require.NoError(t, err)
@@ -669,8 +669,8 @@ func TestChatChannelIntegration(t *testing.T) {
 		// Add members with specific channel roles
 		_, err := ch.Update(ctx, &UpdateChannelRequest{
 			AddMembers: []ChannelMemberRequest{
-				{UserID: modUserID, ChannelRole: PtrTo("channel_moderator")},
-				{UserID: memberUserID2, ChannelRole: PtrTo("channel_member")},
+				{UserID: PtrTo(modUserID), ChannelRole: PtrTo("channel_moderator")},
+				{UserID: PtrTo(memberUserID2), ChannelRole: PtrTo("channel_member")},
 			},
 		})
 		require.NoError(t, err)
@@ -812,8 +812,8 @@ func TestChatChannelIntegration(t *testing.T) {
 			Data: &ChannelInput{
 				CreatedByID: PtrTo(creatorID),
 				Members: []ChannelMemberRequest{
-					{UserID: creatorID},
-					{UserID: memberID1},
+					{UserID: PtrTo(creatorID)},
+					{UserID: PtrTo(memberID1)},
 				},
 			},
 		})
