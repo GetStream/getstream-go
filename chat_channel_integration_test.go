@@ -126,7 +126,16 @@ func TestChatChannelIntegration(t *testing.T) {
 		})
 		require.NoError(t, err)
 		require.NotNil(t, resp.Data.Channel)
-		assert.Equal(t, "red", resp.Data.Channel.Custom["color"])
+
+		// Same read-replica caveat as the unset below: assert that the write
+		// applied by re-reading, not from the write response.
+		require.Eventually(t, func() bool {
+			resp, err := ch.GetOrCreate(ctx, &GetOrCreateChannelRequest{})
+			if err != nil || resp.Data.Channel == nil {
+				return false
+			}
+			return resp.Data.Channel.Custom["color"] == "red"
+		}, 5*time.Second, 500*time.Millisecond, "color should be set to red")
 
 		// Unset fields
 		_, err = ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
