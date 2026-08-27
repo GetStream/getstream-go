@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. Releases are automated by [release-please](https://github.com/googleapis/release-please); see [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## [5.4.0](https://github.com/GetStream/getstream-go/compare/v5.3.0...v5.4.0) (2026-08-27)
+
+
+### Features
+
+* regenerate from protocol v236.2.0 (pinned messages, predefined filters, permission writes, feed counts) ([#144](https://github.com/GetStream/getstream-go/issues/144)) ([eceb74b](https://github.com/GetStream/getstream-go/commit/eceb74b819e345f75bfdd686f180da042f595d79))
+
 ## [5.3.0](https://github.com/GetStream/getstream-go/compare/v5.2.0...v5.3.0) (2026-08-17)
 
 
