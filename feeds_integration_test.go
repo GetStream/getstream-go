@@ -306,10 +306,10 @@ func test02CreateActivity(t *testing.T, ctx context.Context, feedsClient *getstr
 		Feeds:  []string{feedIdentifier},
 		Text:   getstream.PtrTo("This is a test activity from Go SDK"),
 		UserID: &testUserID,
-		Custom: map[string]interface{}{
+		Custom: getstream.PtrTo(map[string]interface{}{
 			"test_field": "test_value",
 			"timestamp":  time.Now().Unix(),
-		},
+		}),
 	})
 	// snippet-end: AddActivity
 
@@ -339,17 +339,17 @@ func test02bCreateActivityWithAttachments(t *testing.T, ctx context.Context, fee
 		Feeds:  []string{feedIdentifier},
 		Text:   getstream.PtrTo("Look at this amazing view of NYC!"),
 		UserID: &testUserID,
-		Attachments: []getstream.Attachment{
+		Attachments: getstream.PtrTo([]getstream.Attachment{
 			{
 				ImageUrl: getstream.PtrTo("https://example.com/nyc-skyline.jpg"),
 				Type:     getstream.PtrTo("image"),
 				Title:    getstream.PtrTo("NYC Skyline"),
 			},
-		},
-		Custom: map[string]interface{}{
+		}),
+		Custom: getstream.PtrTo(map[string]interface{}{
 			"location": "New York City",
 			"camera":   "iPhone 15 Pro",
-		},
+		}),
 	})
 	// snippet-end: AddActivityWithImageAttachment
 
@@ -371,7 +371,7 @@ func test02cCreateVideoActivity(t *testing.T, ctx context.Context, feedsClient *
 		Feeds:  []string{feedIdentifier},
 		Text:   getstream.PtrTo("Check out this amazing video!"),
 		UserID: &testUserID,
-		Attachments: []getstream.Attachment{
+		Attachments: getstream.PtrTo([]getstream.Attachment{
 			{
 				AssetUrl: getstream.PtrTo("https://example.com/amazing-video.mp4"),
 				Type:     getstream.PtrTo("video"),
@@ -380,11 +380,11 @@ func test02cCreateVideoActivity(t *testing.T, ctx context.Context, feedsClient *
 					"duration": 120,
 				},
 			},
-		},
-		Custom: map[string]interface{}{
+		}),
+		Custom: getstream.PtrTo(map[string]interface{}{
 			"video_quality":    "4K",
 			"duration_seconds": 120,
-		},
+		}),
 	})
 	// snippet-end: AddVideoActivity
 
@@ -408,7 +408,7 @@ func test02dCreateStoryActivityWithExpiration(t *testing.T, ctx context.Context,
 		Text:      getstream.PtrTo("My daily story - expires tomorrow!"),
 		UserID:    &testUserID,
 		ExpiresAt: getstream.PtrTo(tomorrow.Format(time.RFC3339)),
-		Attachments: []getstream.Attachment{
+		Attachments: getstream.PtrTo([]getstream.Attachment{
 			{
 				ImageUrl: getstream.PtrTo("https://example.com/story-image.jpg"),
 				Type:     getstream.PtrTo("image"),
@@ -420,11 +420,11 @@ func test02dCreateStoryActivityWithExpiration(t *testing.T, ctx context.Context,
 					"duration": 15,
 				},
 			},
-		},
-		Custom: map[string]interface{}{
+		}),
+		Custom: getstream.PtrTo(map[string]interface{}{
 			"story_type":  "daily",
 			"auto_expire": true,
-		},
+		}),
 	})
 	// snippet-end: AddStoryActivityWithExpiration
 
@@ -447,10 +447,10 @@ func test02eCreateActivityMultipleFeeds(t *testing.T, ctx context.Context, feeds
 		Feeds:  []string{feedIdentifier1, feedIdentifier2},
 		Text:   getstream.PtrTo("This post appears in multiple feeds!"),
 		UserID: &testUserID,
-		Custom: map[string]interface{}{
+		Custom: getstream.PtrTo(map[string]interface{}{
 			"cross_posted": true,
 			"target_feeds": 2,
-		},
+		}),
 	})
 	// snippet-end: AddActivityToMultipleFeeds
 
@@ -468,9 +468,9 @@ func test03QueryActivities(t *testing.T, ctx context.Context, feedsClient *getst
 	// snippet-start: QueryActivities
 	response, err := feedsClient.QueryActivities(ctx, &getstream.QueryActivitiesRequest{
 		Limit: getstream.PtrTo(10),
-		Filter: map[string]interface{}{
+		Filter: getstream.PtrTo(map[string]interface{}{
 			"activity_type": "post",
-		},
+		}),
 	})
 	// snippet-end: QueryActivities
 
@@ -529,10 +529,10 @@ func test05UpdateActivity(t *testing.T, ctx context.Context, feedsClient *getstr
 	response, err := feedsClient.UpdateActivity(ctx, activityID, &getstream.UpdateActivityRequest{
 		Text:   getstream.PtrTo("Updated activity text from Go SDK"),
 		UserID: &testUserID, // Required for server-side auth
-		Custom: map[string]interface{}{
+		Custom: getstream.PtrTo(map[string]interface{}{
 			"updated":     true,
 			"update_time": time.Now().Unix(),
-		},
+		}),
 	})
 	// snippet-end: UpdateActivity
 
@@ -599,9 +599,9 @@ func test07QueryReactions(t *testing.T, ctx context.Context, feedsClient *getstr
 	// snippet-start: QueryActivityReactions
 	response, err := feedsClient.QueryActivityReactions(ctx, activityID, &getstream.QueryActivityReactionsRequest{
 		Limit: getstream.PtrTo(10),
-		Filter: map[string]interface{}{
+		Filter: getstream.PtrTo(map[string]interface{}{
 			"type": "like",
-		},
+		}),
 	})
 	// snippet-end: QueryActivityReactions
 	if err != nil {
@@ -781,9 +781,9 @@ func test12QueryBookmarks(t *testing.T, ctx context.Context, feedsClient *getstr
 	// snippet-start: QueryBookmarks
 	response, err := feedsClient.QueryBookmarks(ctx, &getstream.QueryBookmarksRequest{
 		Limit: getstream.PtrTo(10),
-		Filter: map[string]interface{}{
+		Filter: getstream.PtrTo(map[string]interface{}{
 			"user_id": testUserID,
-		},
+		}),
 	})
 	// snippet-end: QueryBookmarks
 
@@ -1170,7 +1170,7 @@ func test24CreatePoll(t *testing.T, ctx context.Context, client *getstream.Strea
 		Name:        "Poll",
 		Description: getstream.PtrTo(pollQuestion),
 		UserID:      &testUserID,
-		Options:     []getstream.PollOptionInput{{Text: getstream.PtrTo("Red")}, {Text: getstream.PtrTo("Blue")}},
+		Options:     getstream.PtrTo([]getstream.PollOptionInput{{Text: getstream.PtrTo("Red")}, {Text: getstream.PtrTo("Blue")}}),
 	})
 	if err != nil {
 		fmt.Printf("Poll creation skipped: %v\n", err)
@@ -1187,13 +1187,13 @@ func test24CreatePoll(t *testing.T, ctx context.Context, client *getstream.Strea
 		PollID: &pollID,
 		Text:   getstream.PtrTo(pollQuestion),
 		UserID: &testUserID,
-		Custom: map[string]interface{}{
+		Custom: getstream.PtrTo(map[string]interface{}{
 			"poll_name":                    pollQuestion,
 			"poll_description":             "Choose your favorite programming language from the options below",
 			"poll_options":                 []string{"PHP", "Python", "JavaScript", "Go"},
 			"allow_user_suggested_options": false,
 			"max_votes_allowed":            1,
-		},
+		}),
 	})
 	// snippet-end: CreatePoll
 
@@ -1213,7 +1213,7 @@ func test25VotePoll(t *testing.T, ctx context.Context, client *getstream.Stream,
 		Name:        "Favorite Color Poll",
 		Description: getstream.PtrTo("What is your favorite color?"),
 		UserID:      &testUserID,
-		Options:     []getstream.PollOptionInput{{Text: getstream.PtrTo("Red")}, {Text: getstream.PtrTo("Blue")}, {Text: getstream.PtrTo("Green")}},
+		Options:     getstream.PtrTo([]getstream.PollOptionInput{{Text: getstream.PtrTo("Red")}, {Text: getstream.PtrTo("Blue")}, {Text: getstream.PtrTo("Green")}}),
 	})
 	if err != nil {
 		fmt.Printf("Poll voting skipped: %v\n", err)
@@ -1231,12 +1231,12 @@ func test25VotePoll(t *testing.T, ctx context.Context, client *getstream.Stream,
 		Text:   getstream.PtrTo("Vote for your favorite color"),
 		UserID: &testUserID,
 		PollID: &pollID,
-		Custom: map[string]interface{}{
+		Custom: getstream.PtrTo(map[string]interface{}{
 			"poll_name":                    "What is your favorite color?",
 			"poll_description":             "Choose your favorite color from the options below",
 			"poll_options":                 []string{"Red", "Blue", "Green"},
 			"allow_user_suggested_options": false,
-		},
+		}),
 	})
 
 	assertResponseSuccess(t, createResponse, err, "create poll for voting")
@@ -1351,11 +1351,11 @@ func test28QueryActivitiesWithFilters(t *testing.T, ctx context.Context, feedsCl
 			Text:   getstream.PtrTo(fmt.Sprintf("Test %s activity for filtering", actType)),
 			UserID: &testUserID,
 			Feeds:  []string{feedIdentifier},
-			Custom: map[string]interface{}{
+			Custom: getstream.PtrTo(map[string]interface{}{
 				"category": actType,
 				"priority": 3,
 				"tags":     []string{actType, "test", "filter"},
-			},
+			}),
 		})
 
 		assertResponseSuccess(t, createResponse, err, fmt.Sprintf("create %s activity for filtering", actType))
@@ -1367,13 +1367,13 @@ func test28QueryActivitiesWithFilters(t *testing.T, ctx context.Context, feedsCl
 	// snippet-start: QueryActivitiesWithTypeFilter
 	response, err := feedsClient.QueryActivities(ctx, &getstream.QueryActivitiesRequest{
 		Limit: getstream.PtrTo(10),
-		Filter: map[string]interface{}{
+		Filter: getstream.PtrTo(map[string]interface{}{
 			"activity_type": "post",
 			"user_id":       testUserID,
-		},
-		Sort: []getstream.SortParamRequest{
+		}),
+		Sort: getstream.PtrTo([]getstream.SortParamRequest{
 			{Field: getstream.PtrTo("created_at"), Direction: getstream.PtrTo(-1)}, // newest first
-		},
+		}),
 	})
 	// snippet-end: QueryActivitiesWithTypeFilter
 
@@ -1387,10 +1387,10 @@ func test28QueryActivitiesWithFilters(t *testing.T, ctx context.Context, feedsCl
 	// snippet-start: QueryActivitiesWithCustomFilter
 	customFilterResponse, err := feedsClient.QueryActivities(ctx, &getstream.QueryActivitiesRequest{
 		Limit: getstream.PtrTo(10),
-		Filter: map[string]interface{}{
+		Filter: getstream.PtrTo(map[string]interface{}{
 			"custom.priority": map[string]interface{}{"$gte": 3}, // priority >= 3
 			"user_id":         testUserID,
-		},
+		}),
 	})
 	// snippet-end: QueryActivitiesWithCustomFilter
 
@@ -1425,9 +1425,9 @@ func test29GetFeedActivitiesWithPagination(t *testing.T, ctx context.Context, fe
 	// snippet-start: GetFeedActivitiesWithPagination
 	firstPageResponse, err := feedsClient.QueryActivities(ctx, &getstream.QueryActivitiesRequest{
 		Limit: getstream.PtrTo(3),
-		Filter: map[string]interface{}{
+		Filter: getstream.PtrTo(map[string]interface{}{
 			"user_id": testUserID,
-		},
+		}),
 	})
 	// snippet-end: GetFeedActivitiesWithPagination
 
@@ -1443,9 +1443,9 @@ func test29GetFeedActivitiesWithPagination(t *testing.T, ctx context.Context, fe
 		secondPageResponse, err := feedsClient.QueryActivities(ctx, &getstream.QueryActivitiesRequest{
 			Limit: getstream.PtrTo(3),
 			Next:  nextToken,
-			Filter: map[string]interface{}{
+			Filter: getstream.PtrTo(map[string]interface{}{
 				"user_id": testUserID,
-			},
+			}),
 		})
 		assertResponseSuccess(t, secondPageResponse, err, "get second page of feed activities")
 	} else {
@@ -1555,18 +1555,18 @@ func test32RealWorldUsageDemo(t *testing.T, ctx context.Context, feedsClient *ge
 		Text:   getstream.PtrTo("Just visited the most amazing coffee shop! ☕️"),
 		UserID: &testUserID,
 		Feeds:  []string{feedIdentifier},
-		Attachments: []getstream.Attachment{
+		Attachments: getstream.PtrTo([]getstream.Attachment{
 			{
 				ImageUrl: getstream.PtrTo("https://example.com/coffee-shop.jpg"),
 				Type:     getstream.PtrTo("image"),
 				Title:    getstream.PtrTo("Amazing Coffee Shop"),
 			},
-		},
-		Custom: map[string]interface{}{
+		}),
+		Custom: getstream.PtrTo(map[string]interface{}{
 			"location": "Downtown Coffee Co.",
 			"rating":   5,
 			"tags":     []string{"coffee", "food", "downtown"},
-		},
+		}),
 	})
 	assertResponseSuccess(t, postResponse, err, "create real-world post")
 
@@ -1646,9 +1646,9 @@ func test33FeedGroupCRUD(t *testing.T, ctx context.Context, feedsClient *getstre
 	createResponse, err := feedsClient.CreateFeedGroup(ctx, &getstream.CreateFeedGroupRequest{
 		ID:                feedGroupID,
 		DefaultVisibility: getstream.PtrTo("public"),
-		ActivityProcessors: []getstream.ActivityProcessorConfig{
+		ActivityProcessors: getstream.PtrTo([]getstream.ActivityProcessorConfig{
 			{Type: "dummy"},
-		},
+		}),
 	})
 	// snippet-end: CreateFeedGroup
 
@@ -1670,9 +1670,9 @@ func test33FeedGroupCRUD(t *testing.T, ctx context.Context, feedsClient *getstre
 	fmt.Println("\n✏️ Testing update feed group...")
 	// snippet-start: UpdateFeedGroup
 	updateResponse, err := feedsClient.UpdateFeedGroup(ctx, "feed_group_id", &getstream.UpdateFeedGroupRequest{
-		ActivityProcessors: []getstream.ActivityProcessorConfig{
+		ActivityProcessors: getstream.PtrTo([]getstream.ActivityProcessorConfig{
 			{Type: "dummy"},
-		},
+		}),
 		Aggregation: &getstream.AggregationConfig{
 			Format: getstream.PtrTo("time_based"),
 		},
@@ -1700,9 +1700,9 @@ func test33FeedGroupCRUD(t *testing.T, ctx context.Context, feedsClient *getstre
 	// snippet-start: GetOrCreateFeedGroupNew
 	newGetOrCreateResponse, err := feedsClient.GetOrCreateFeedGroup(ctx, newFeedGroupID, &getstream.GetOrCreateFeedGroupRequest{
 		DefaultVisibility: getstream.PtrTo("private"),
-		ActivityProcessors: []getstream.ActivityProcessorConfig{
+		ActivityProcessors: getstream.PtrTo([]getstream.ActivityProcessorConfig{
 			{Type: "dummy"},
-		},
+		}),
 	})
 	// snippet-end: GetOrCreateFeedGroupNew
 
@@ -1752,11 +1752,11 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	// snippet-start: CreateFeedView
 	createResponse, err := feedsClient.CreateFeedView(ctx, &getstream.CreateFeedViewRequest{
 		ID: feedViewID,
-		ActivitySelectors: []getstream.ActivitySelectorConfig{
+		ActivitySelectors: getstream.PtrTo([]getstream.ActivitySelectorConfig{
 			{
 				Type: "following",
 			},
-		},
+		}),
 		Aggregation: &getstream.AggregationConfig{
 			Format: getstream.PtrTo("time_based"),
 		},
@@ -1794,11 +1794,11 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	var updateResponse *getstream.StreamResponse[getstream.UpdateFeedViewResponse]
 	for i := 0; i < 5; i++ {
 		updateResponse, err = feedsClient.UpdateFeedView(ctx, feedViewID, &getstream.UpdateFeedViewRequest{
-			ActivitySelectors: []getstream.ActivitySelectorConfig{
+			ActivitySelectors: getstream.PtrTo([]getstream.ActivitySelectorConfig{
 				{
 					Type: "following",
 				},
-			},
+			}),
 			Aggregation: &getstream.AggregationConfig{
 				Format: getstream.PtrTo("verb"),
 			},
@@ -1821,9 +1821,9 @@ func test34FeedViewCRUD(t *testing.T, ctx context.Context, feedsClient *getstrea
 	fmt.Println("\n🔄 Testing get or create feed view (existing)...")
 	// snippet-start: GetOrCreateFeedViewExisting
 	getOrCreateResponse, err := feedsClient.GetOrCreateFeedView(ctx, feedViewID, &getstream.GetOrCreateFeedViewRequest{
-		ActivitySelectors: []getstream.ActivitySelectorConfig{
+		ActivitySelectors: getstream.PtrTo([]getstream.ActivitySelectorConfig{
 			{Type: "following"},
-		},
+		}),
 	})
 	// snippet-end: GetOrCreateFeedViewExisting
 
@@ -1860,9 +1860,9 @@ func test36BatchFeedOperations(t *testing.T, ctx context.Context, feedsClient *g
 	_, err := feedsClient.CreateFeedGroup(ctx, &getstream.CreateFeedGroupRequest{
 		ID:                batchFeedGroupID,
 		DefaultVisibility: getstream.PtrTo("public"),
-		ActivityProcessors: []getstream.ActivityProcessorConfig{
+		ActivityProcessors: getstream.PtrTo([]getstream.ActivityProcessorConfig{
 			{Type: "default"},
-		},
+		}),
 	})
 	assertResponseSuccess(t, nil, err, "create batch feed group")
 
@@ -1897,10 +1897,10 @@ func test36BatchFeedOperations(t *testing.T, ctx context.Context, feedsClient *g
 	fmt.Println("\n🔍 Testing query of batch-created feeds...")
 	// snippet-start: QueryBatchCreatedFeeds
 	queryBatchResponse, err := feedsClient.QueryFeeds(ctx, &getstream.QueryFeedsRequest{
-		Filter: map[string]interface{}{
+		Filter: getstream.PtrTo(map[string]interface{}{
 			"feed_group_id": batchFeedGroupID,
 			"user_id":       testUserID,
-		},
+		}),
 		Limit: getstream.PtrTo(10),
 	})
 	// snippet-end: QueryBatchCreatedFeeds
@@ -1919,10 +1919,10 @@ func test36BatchFeedOperations(t *testing.T, ctx context.Context, feedsClient *g
 			Feeds:  []string{feedIdentifier},
 			Text:   getstream.PtrTo(fmt.Sprintf("Test activity for batch feed %d", i)),
 			UserID: &testUserID,
-			Custom: map[string]interface{}{
+			Custom: getstream.PtrTo(map[string]interface{}{
 				"batch_feed_test": true,
 				"feed_number":     i,
-			},
+			}),
 		})
 		// snippet-end: AddActivityToBatchFeed
 
@@ -2034,10 +2034,10 @@ func testImageUploadIntegration(t *testing.T, ctx context.Context, client *getst
 	// Upload image with upload sizes
 	uploadReq := &getstream.UploadImageRequest{
 		File: getstream.PtrTo(tmpFile.Name()),
-		UploadSizes: []getstream.ImageSize{
+		UploadSizes: getstream.PtrTo([]getstream.ImageSize{
 			{Width: getstream.PtrTo(100), Height: getstream.PtrTo(100)},
 			{Width: getstream.PtrTo(300), Height: getstream.PtrTo(200)},
-		},
+		}),
 		User: &getstream.OnlyUserID{
 			ID: testUserID,
 		},

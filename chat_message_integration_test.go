@@ -78,10 +78,10 @@ func TestChatMessageIntegration(t *testing.T) {
 
 		// Set custom field
 		resp, err := client.Chat().UpdateMessagePartial(ctx, msgID, &UpdateMessagePartialRequest{
-			Set: map[string]any{
+			Set: PtrTo(map[string]any{
 				"priority": "high",
 				"status":   "reviewed",
-			},
+			}),
 			UserID: PtrTo(userID),
 		})
 		require.NoError(t, err)
@@ -89,7 +89,7 @@ func TestChatMessageIntegration(t *testing.T) {
 
 		// Unset custom field
 		resp, err = client.Chat().UpdateMessagePartial(ctx, msgID, &UpdateMessagePartialRequest{
-			Unset:  []string{"status"},
+			Unset:  PtrTo([]string{"status"}),
 			UserID: PtrTo(userID),
 		})
 		require.NoError(t, err)
@@ -134,9 +134,9 @@ func TestChatMessageIntegration(t *testing.T) {
 
 		// Unpin via update
 		resp, err := client.Chat().UpdateMessagePartial(ctx, msgID, &UpdateMessagePartialRequest{
-			Set: map[string]any{
+			Set: PtrTo(map[string]any{
 				"pinned": false,
-			},
+			}),
 			UserID: PtrTo(userID),
 		})
 		require.NoError(t, err)
@@ -284,7 +284,7 @@ func TestChatMessageIntegration(t *testing.T) {
 			Filter: map[string]any{
 				"message_id": msgID,
 			},
-			Sort: []SortParamRequest{},
+			Sort: PtrTo([]SortParamRequest{}),
 		})
 		if err != nil {
 			errStr := err.Error()
@@ -342,9 +342,9 @@ func TestChatMessageIntegration(t *testing.T) {
 			Filter: map[string]any{
 				"message_id": msgID,
 			},
-			Sort: []SortParamRequest{
+			Sort: PtrTo([]SortParamRequest{
 				{Field: PtrTo("message_updated_at"), Direction: PtrTo(1)},
-			},
+			}),
 		})
 		if err != nil {
 			errStr := err.Error()
@@ -403,9 +403,9 @@ func TestChatMessageIntegration(t *testing.T) {
 
 		// Query channels — the channel should still be hidden
 		qResp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
-			FilterConditions: map[string]any{
+			FilterConditions: PtrTo(map[string]any{
 				"cid": cid,
-			},
+			}),
 			UserID: PtrTo(userID),
 		})
 		require.NoError(t, err)
@@ -486,10 +486,10 @@ func TestChatMessageIntegration(t *testing.T) {
 		now := time.Now()
 		expiry := now.Add(3 * time.Second)
 		pinResp, err := client.Chat().UpdateMessagePartial(ctx, msgID, &UpdateMessagePartialRequest{
-			Set: map[string]any{
+			Set: PtrTo(map[string]any{
 				"pinned":      true,
 				"pin_expires": expiry.Format(time.RFC3339),
-			},
+			}),
 			UserID: PtrTo(userID),
 		})
 		require.NoError(t, err)

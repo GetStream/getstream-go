@@ -310,8 +310,8 @@ func (c *Client) createMultipartRequest(r *http.Request, data any) (*http.Reques
 		}
 
 		// Add upload_sizes field if present
-		if req.UploadSizes != nil && len(req.UploadSizes) > 0 {
-			uploadSizesJSON, err := json.Marshal(req.UploadSizes)
+		if req.UploadSizes != nil && len(*req.UploadSizes) > 0 {
+			uploadSizesJSON, err := json.Marshal(*req.UploadSizes)
 			if err != nil {
 				return nil, stackWrap(err, "failed to marshal upload_sizes")
 			}
@@ -366,8 +366,8 @@ func (c *Client) createMultipartRequest(r *http.Request, data any) (*http.Reques
 		}
 
 		// Add upload_sizes field if present
-		if req.UploadSizes != nil && len(req.UploadSizes) > 0 {
-			uploadSizesJSON, err := json.Marshal(req.UploadSizes)
+		if req.UploadSizes != nil && len(*req.UploadSizes) > 0 {
+			uploadSizesJSON, err := json.Marshal(*req.UploadSizes)
 			if err != nil {
 				return nil, stackWrap(err, "failed to marshal upload_sizes")
 			}
