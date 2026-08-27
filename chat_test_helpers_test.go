@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/GetStream/getstream-go/v5"
+	. "github.com/GetStream/getstream-go/v6"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
@@ -192,7 +192,7 @@ func createTestChannelWithMembers(t *testing.T, client *Stream, creatorID string
 
 	members := make([]ChannelMemberRequest, len(memberIDs))
 	for i, id := range memberIDs {
-		members[i] = ChannelMemberRequest{UserID: id}
+		members[i] = ChannelMemberRequest{UserID: PtrTo(id)}
 	}
 
 	_, err := ch.GetOrCreate(ctx, &GetOrCreateChannelRequest{

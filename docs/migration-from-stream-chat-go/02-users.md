@@ -1,6 +1,6 @@
 # Users
 
-This guide shows how to migrate user operations from `github.com/GetStream/stream-chat-go/v8` to `github.com/GetStream/getstream-go/v5`.
+This guide shows how to migrate user operations from `github.com/GetStream/stream-chat-go/v8` to `github.com/GetStream/getstream-go/v6`.
 
 ## Upsert a Single User
 
@@ -40,7 +40,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func main() {
@@ -103,7 +103,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func main() {
@@ -162,7 +162,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func main() {
@@ -225,7 +225,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func main() {
@@ -283,7 +283,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func main() {
@@ -331,7 +331,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func main() {

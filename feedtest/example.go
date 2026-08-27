@@ -4,7 +4,7 @@ import (
 	"context"
 	"math/rand"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func getRandomString(length int) string {

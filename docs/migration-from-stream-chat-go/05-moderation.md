@@ -1,6 +1,6 @@
 # Moderation
 
-This guide shows how to migrate moderation operations from `github.com/GetStream/stream-chat-go/v8` to `github.com/GetStream/getstream-go/v5`.
+This guide shows how to migrate moderation operations from `github.com/GetStream/stream-chat-go/v8` to `github.com/GetStream/getstream-go/v6`.
 
 ## Add Moderators
 
@@ -32,7 +32,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func main() {
@@ -81,7 +81,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func main() {
@@ -133,7 +133,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func main() {
@@ -187,7 +187,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func main() {
@@ -245,7 +245,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func main() {
@@ -309,7 +309,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func main() {
@@ -361,7 +361,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func main() {
@@ -411,7 +411,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v5"
+	"github.com/GetStream/getstream-go/v6"
 )
 
 func main() {

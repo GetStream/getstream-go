@@ -3287,12 +3287,11 @@ type ChannelMemberPartialResponse struct {
 }
 
 type ChannelMemberRequest struct {
-	UserID string `json:"user_id"`
 	// Role of the member in the channel
-	ChannelRole *string        `json:"channel_role,omitempty"`
-	Custom      map[string]any `json:"custom,omitempty"`
-	// User response object
-	User *UserResponse `json:"user,omitempty"`
+	ChannelRole *string            `json:"channel_role,omitempty"`
+	UserID      *string            `json:"user_id,omitempty"`
+	Custom      map[string]any     `json:"custom,omitempty"`
+	User        *MemberUserRequest `json:"user,omitempty"`
 }
 
 type ChannelMemberResponse struct {
@@ -7979,6 +7978,19 @@ func (e *MemberUpdatedEvent) GetEventType() string {
 	return e.Type
 }
 
+type MemberUserRequest struct {
+	ID              string                   `json:"id"`
+	Image           *string                  `json:"image,omitempty"`
+	Invisible       *bool                    `json:"invisible,omitempty"`
+	Language        *string                  `json:"language,omitempty"`
+	Name            *string                  `json:"name,omitempty"`
+	Role            *string                  `json:"role,omitempty"`
+	Teams           []string                 `json:"teams,omitempty"`
+	Custom          map[string]any           `json:"custom,omitempty"`
+	PrivacySettings *PrivacySettingsResponse `json:"privacy_settings,omitempty"`
+	TeamsRole       map[string]string        `json:"teams_role,omitempty"`
+}
+
 type MembersResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -9768,26 +9780,27 @@ type PollResponse struct {
 }
 
 type PollResponseData struct {
-	AllowAnswers              bool                              `json:"allow_answers"`
-	AllowUserSuggestedOptions bool                              `json:"allow_user_suggested_options"`
-	AnswersCount              int                               `json:"answers_count"`
-	CreatedAt                 Timestamp                         `json:"created_at"`
-	CreatedByID               string                            `json:"created_by_id"`
-	Description               string                            `json:"description"`
-	EnforceUniqueVote         bool                              `json:"enforce_unique_vote"`
-	ID                        string                            `json:"id"`
-	Name                      string                            `json:"name"`
-	UpdatedAt                 Timestamp                         `json:"updated_at"`
-	VoteCount                 int                               `json:"vote_count"`
-	VotingVisibility          string                            `json:"voting_visibility"`
-	LatestAnswers             []PollVoteResponseData            `json:"latest_answers"`
-	Options                   []PollOptionResponseData          `json:"options"`
-	OwnVotes                  []PollVoteResponseData            `json:"own_votes"`
-	Custom                    map[string]any                    `json:"custom"`
-	LatestVotesByOption       map[string][]PollVoteResponseData `json:"latest_votes_by_option"`
-	VoteCountsByOption        map[string]int                    `json:"vote_counts_by_option"`
-	IsClosed                  *bool                             `json:"is_closed,omitempty"`
-	MaxVotesAllowed           *int                              `json:"max_votes_allowed,omitempty"`
+	AllowAnswers              bool      `json:"allow_answers"`
+	AllowUserSuggestedOptions bool      `json:"allow_user_suggested_options"`
+	AnswersCount              int       `json:"answers_count"`
+	CreatedAt                 Timestamp `json:"created_at"`
+	CreatedByID               string    `json:"created_by_id"`
+	Description               string    `json:"description"`
+	EnforceUniqueVote         bool      `json:"enforce_unique_vote"`
+	ID                        string    `json:"id"`
+	Name                      string    `json:"name"`
+	UpdatedAt                 Timestamp `json:"updated_at"`
+	VoteCount                 int       `json:"vote_count"`
+	// Voting visibility of the poll
+	VotingVisibility    string                            `json:"voting_visibility"`
+	LatestAnswers       []PollVoteResponseData            `json:"latest_answers"`
+	Options             []PollOptionResponseData          `json:"options"`
+	OwnVotes            []PollVoteResponseData            `json:"own_votes"`
+	Custom              map[string]any                    `json:"custom"`
+	LatestVotesByOption map[string][]PollVoteResponseData `json:"latest_votes_by_option"`
+	VoteCountsByOption  map[string]int                    `json:"vote_counts_by_option"`
+	IsClosed            *bool                             `json:"is_closed,omitempty"`
+	MaxVotesAllowed     *int                              `json:"max_votes_allowed,omitempty"`
 	// User response object
 	CreatedBy *UserResponse `json:"created_by,omitempty"`
 }
@@ -10456,16 +10469,16 @@ type QueryLabelResultsResponse struct {
 }
 
 type QueryMembersPayload struct {
-	Type string `json:"type"`
-	// Filter conditions to apply to the query
-	FilterConditions map[string]any         `json:"filter_conditions"`
-	ID               *string                `json:"id,omitempty"`
-	Limit            *int                   `json:"limit,omitempty"`
-	Offset           *int                   `json:"offset,omitempty"`
-	UserID           *string                `json:"user_id,omitempty"`
-	Members          []ChannelMemberRequest `json:"members,omitempty"`
+	Type    string                 `json:"type"`
+	ID      *string                `json:"id,omitempty"`
+	Limit   *int                   `json:"limit,omitempty"`
+	Offset  *int                   `json:"offset,omitempty"`
+	UserID  *string                `json:"user_id,omitempty"`
+	Members []ChannelMemberRequest `json:"members,omitempty"`
 	// Array of sort parameters
 	Sort []SortParamRequest `json:"sort,omitempty"`
+	// Filter conditions to apply to the query
+	FilterConditions map[string]any `json:"filter_conditions,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }
@@ -11049,14 +11062,14 @@ type ReminderCreatedEvent struct {
 	// The ID of the message for which the reminder was created
 	MessageID string `json:"message_id"`
 	// The ID of the user for whom the reminder was created
-	UserID string         `json:"user_id"`
-	Custom map[string]any `json:"custom"`
+	UserID   string               `json:"user_id"`
+	Custom   map[string]any       `json:"custom"`
+	Reminder ReminderResponseData `json:"reminder"`
 	// The type of event: "reminder.created" in this case
 	Type string `json:"type"`
 	// The ID of the parent message, if the reminder is for a thread message
-	ParentID   *string               `json:"parent_id,omitempty"`
-	ReceivedAt *Timestamp            `json:"received_at,omitempty"`
-	Reminder   *ReminderResponseData `json:"reminder,omitempty"`
+	ParentID   *string    `json:"parent_id,omitempty"`
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
 }
 
 func (e *ReminderCreatedEvent) GetEventType() string {
@@ -11072,14 +11085,14 @@ type ReminderDeletedEvent struct {
 	// The ID of the message for which the reminder was created
 	MessageID string `json:"message_id"`
 	// The ID of the user for whom the reminder was created
-	UserID string         `json:"user_id"`
-	Custom map[string]any `json:"custom"`
+	UserID   string               `json:"user_id"`
+	Custom   map[string]any       `json:"custom"`
+	Reminder ReminderResponseData `json:"reminder"`
 	// The type of event: "reminder.deleted" in this case
 	Type string `json:"type"`
 	// The ID of the parent message, if the reminder is for a thread message
-	ParentID   *string               `json:"parent_id,omitempty"`
-	ReceivedAt *Timestamp            `json:"received_at,omitempty"`
-	Reminder   *ReminderResponseData `json:"reminder,omitempty"`
+	ParentID   *string    `json:"parent_id,omitempty"`
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
 }
 
 func (e *ReminderDeletedEvent) GetEventType() string {
@@ -11095,13 +11108,13 @@ type ReminderNotificationEvent struct {
 	// The ID of the message for which the reminder was created
 	MessageID string `json:"message_id"`
 	// The ID of the user for whom the reminder was created
-	UserID string         `json:"user_id"`
-	Custom map[string]any `json:"custom"`
+	UserID   string               `json:"user_id"`
+	Custom   map[string]any       `json:"custom"`
+	Reminder ReminderResponseData `json:"reminder"`
 	// The type of event: "notification.reminder_due" in this case
-	Type       string                `json:"type"`
-	ParentID   *string               `json:"parent_id,omitempty"`
-	ReceivedAt *Timestamp            `json:"received_at,omitempty"`
-	Reminder   *ReminderResponseData `json:"reminder,omitempty"`
+	Type       string     `json:"type"`
+	ParentID   *string    `json:"parent_id,omitempty"`
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
 }
 
 func (e *ReminderNotificationEvent) GetEventType() string {
@@ -11132,14 +11145,14 @@ type ReminderUpdatedEvent struct {
 	// The ID of the message for which the reminder was created
 	MessageID string `json:"message_id"`
 	// The ID of the user for whom the reminder was created
-	UserID string         `json:"user_id"`
-	Custom map[string]any `json:"custom"`
+	UserID   string               `json:"user_id"`
+	Custom   map[string]any       `json:"custom"`
+	Reminder ReminderResponseData `json:"reminder"`
 	// The type of event: "reminder.updated" in this case
 	Type string `json:"type"`
 	// The ID of the parent message, if the reminder is for a thread message
-	ParentID   *string               `json:"parent_id,omitempty"`
-	ReceivedAt *Timestamp            `json:"received_at,omitempty"`
-	Reminder   *ReminderResponseData `json:"reminder,omitempty"`
+	ParentID   *string    `json:"parent_id,omitempty"`
+	ReceivedAt *Timestamp `json:"received_at,omitempty"`
 }
 
 func (e *ReminderUpdatedEvent) GetEventType() string {
