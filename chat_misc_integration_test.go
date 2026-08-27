@@ -104,7 +104,7 @@ func TestChatBlocklistIntegration(t *testing.T) {
 
 	t.Run("UpdateBlockList", func(t *testing.T) {
 		_, err := client.UpdateBlockList(ctx, blocklistName, &UpdateBlockListRequest{
-			Words: []string{"badword1", "badword2", "badword3", "badword4"},
+			Words: PtrTo([]string{"badword1", "badword2", "badword3", "badword4"}),
 		})
 		require.NoError(t, err)
 
@@ -391,11 +391,11 @@ func TestChatThreadIntegration(t *testing.T) {
 		// (same approach as stream-chat-go)
 		resp, err := client.Chat().QueryThreads(ctx, &QueryThreadsRequest{
 			UserID: PtrTo(userID),
-			Filter: map[string]any{
+			Filter: PtrTo(map[string]any{
 				"channel_cid": map[string]any{
 					"$eq": channelCID,
 				},
-			},
+			}),
 		})
 		require.NoError(t, err)
 		require.NotEmpty(t, resp.Data.Threads, "Should have at least one thread")
@@ -435,14 +435,14 @@ func TestChatThreadIntegration(t *testing.T) {
 		// First page: limit=1, ascending sort
 		resp, err := client.Chat().QueryThreads(ctx, &QueryThreadsRequest{
 			UserID: PtrTo(userID),
-			Filter: map[string]any{
+			Filter: PtrTo(map[string]any{
 				"channel_cid": map[string]any{
 					"$eq": channelCID,
 				},
-			},
-			Sort: []SortParamRequest{
+			}),
+			Sort: PtrTo([]SortParamRequest{
 				{Field: PtrTo("created_at"), Direction: PtrTo(1)},
-			},
+			}),
 			Limit: PtrTo(1),
 		})
 		require.NoError(t, err)
@@ -454,14 +454,14 @@ func TestChatThreadIntegration(t *testing.T) {
 
 		resp2, err := client.Chat().QueryThreads(ctx, &QueryThreadsRequest{
 			UserID: PtrTo(userID),
-			Filter: map[string]any{
+			Filter: PtrTo(map[string]any{
 				"channel_cid": map[string]any{
 					"$eq": channelCID,
 				},
-			},
-			Sort: []SortParamRequest{
+			}),
+			Sort: PtrTo([]SortParamRequest{
 				{Field: PtrTo("created_at"), Direction: PtrTo(1)},
-			},
+			}),
 			Limit: PtrTo(1),
 			Next:  resp.Data.Next,
 		})
@@ -1116,10 +1116,10 @@ func TestChatReminderIntegration(t *testing.T) {
 		// Query reminders for the user
 		qResp, err := client.Chat().QueryReminders(ctx, &QueryRemindersRequest{
 			UserID: PtrTo(userID),
-			Filter: map[string]any{
+			Filter: PtrTo(map[string]any{
 				"message_id": msgID,
-			},
-			Sort: []SortParamRequest{},
+			}),
+			Sort: PtrTo([]SortParamRequest{}),
 		})
 		require.NoError(t, err)
 		require.NotEmpty(t, qResp.Data.Reminders, "Should find the reminder")
@@ -1151,9 +1151,9 @@ func TestChatDeliveryReceiptsIntegration(t *testing.T) {
 	// Mark message 1 as delivered for user 2
 	resp1, err := client.Chat().MarkDelivered(ctx, &MarkDeliveredRequest{
 		UserID: PtrTo(userID2),
-		LatestDeliveredMessages: []DeliveredMessagePayload{
+		LatestDeliveredMessages: PtrTo([]DeliveredMessagePayload{
 			{Cid: PtrTo(cid), ID: PtrTo(msgID1)},
-		},
+		}),
 	})
 	require.NoError(t, err)
 	require.NotNil(t, resp1)
@@ -1161,9 +1161,9 @@ func TestChatDeliveryReceiptsIntegration(t *testing.T) {
 	// Mark message 2 as delivered for user 2
 	resp2, err := client.Chat().MarkDelivered(ctx, &MarkDeliveredRequest{
 		UserID: PtrTo(userID2),
-		LatestDeliveredMessages: []DeliveredMessagePayload{
+		LatestDeliveredMessages: PtrTo([]DeliveredMessagePayload{
 			{Cid: PtrTo(cid), ID: PtrTo(msgID2)},
-		},
+		}),
 	})
 	require.NoError(t, err)
 	require.NotNil(t, resp2)
@@ -1171,9 +1171,9 @@ func TestChatDeliveryReceiptsIntegration(t *testing.T) {
 	// Mark message 1 as delivered for user 3
 	resp3, err := client.Chat().MarkDelivered(ctx, &MarkDeliveredRequest{
 		UserID: PtrTo(userID3),
-		LatestDeliveredMessages: []DeliveredMessagePayload{
+		LatestDeliveredMessages: PtrTo([]DeliveredMessagePayload{
 			{Cid: PtrTo(cid), ID: PtrTo(msgID1)},
-		},
+		}),
 	})
 	require.NoError(t, err)
 	require.NotNil(t, resp3)
@@ -1181,9 +1181,9 @@ func TestChatDeliveryReceiptsIntegration(t *testing.T) {
 	// Mark message 2 as delivered for user 3
 	resp4, err := client.Chat().MarkDelivered(ctx, &MarkDeliveredRequest{
 		UserID: PtrTo(userID3),
-		LatestDeliveredMessages: []DeliveredMessagePayload{
+		LatestDeliveredMessages: PtrTo([]DeliveredMessagePayload{
 			{Cid: PtrTo(cid), ID: PtrTo(msgID2)},
-		},
+		}),
 	})
 	require.NoError(t, err)
 	require.NotNil(t, resp4)
@@ -1237,11 +1237,11 @@ func TestChatLiveLocationIntegration(t *testing.T) {
 
 	// Enable shared_locations on the channel via partial update config override
 	_, err = ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
-		Set: map[string]any{
+		Set: PtrTo(map[string]any{
 			"config_overrides": map[string]any{
 				"shared_locations": true,
 			},
-		},
+		}),
 	})
 	if err != nil {
 		if strings.Contains(err.Error(), "shared_locations") || strings.Contains(err.Error(), "not supported") || strings.Contains(err.Error(), "not enabled") {
@@ -1479,7 +1479,7 @@ func TestChatEventHooksIntegration(t *testing.T) {
 
 	t.Cleanup(func() {
 		_, _ = client.UpdateApp(context.Background(), &UpdateAppRequest{
-			EventHooks: originalHooks,
+			EventHooks: PtrTo(originalHooks),
 		})
 	})
 
@@ -1493,7 +1493,7 @@ func TestChatEventHooksIntegration(t *testing.T) {
 			},
 		}
 		_, err := client.UpdateApp(ctx, &UpdateAppRequest{
-			EventHooks: hooks,
+			EventHooks: PtrTo(hooks),
 		})
 		require.NoError(t, err)
 
@@ -1524,7 +1524,7 @@ func TestChatEventHooksIntegration(t *testing.T) {
 			},
 		}
 		_, err := client.UpdateApp(ctx, &UpdateAppRequest{
-			EventHooks: hooks,
+			EventHooks: PtrTo(hooks),
 		})
 		require.NoError(t, err)
 	})
@@ -1543,7 +1543,7 @@ func TestChatEventHooksIntegration(t *testing.T) {
 			},
 		}
 		_, err := client.UpdateApp(ctx, &UpdateAppRequest{
-			EventHooks: hooks,
+			EventHooks: PtrTo(hooks),
 		})
 		require.NoError(t, err)
 	})
@@ -1562,7 +1562,7 @@ func TestChatEventHooksIntegration(t *testing.T) {
 			},
 		}
 		_, err := client.UpdateApp(ctx, &UpdateAppRequest{
-			EventHooks: hooks,
+			EventHooks: PtrTo(hooks),
 		})
 		require.NoError(t, err)
 	})
@@ -1570,7 +1570,7 @@ func TestChatEventHooksIntegration(t *testing.T) {
 	t.Run("ClearEventHooks", func(t *testing.T) {
 		// Clear all hooks
 		_, err := client.UpdateApp(ctx, &UpdateAppRequest{
-			EventHooks: []EventHook{},
+			EventHooks: PtrTo([]EventHook{}),
 		})
 		require.NoError(t, err)
 
@@ -1938,7 +1938,7 @@ func TestChatSegmentCampaignIntegration(t *testing.T) {
 	// Create a campaign targeting the segment, then start and stop it.
 	campaignResp, err := client.Chat().CreateCampaign(ctx, &CreateCampaignRequest{
 		SenderID:        senderID,
-		SegmentIds:      []string{segmentID},
+		SegmentIds:      PtrTo([]string{segmentID}),
 		CreateChannels:  PtrTo(true),
 		MessageTemplate: CampaignMessageTemplate{Text: "hello from integration test"},
 		// channel_template is required by the backend when create_channels is true.

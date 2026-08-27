@@ -60,7 +60,7 @@ func TestUserGroupIntegration(t *testing.T) {
 		createResp, err := client.CreateUserGroup(ctx, &CreateUserGroupRequest{
 			ID:        PtrTo(groupID),
 			Name:      "Group With Members " + groupID,
-			MemberIds: userIDs,
+			MemberIds: PtrTo(userIDs),
 		})
 		if err != nil && strings.Contains(err.Error(), "Not Found") {
 			t.Skip("User groups feature not available for this app")
@@ -205,7 +205,7 @@ func TestUserGroupIntegration(t *testing.T) {
 		_, err := client.CreateUserGroup(ctx, &CreateUserGroupRequest{
 			ID:        PtrTo(groupID),
 			Name:      "Member Management Group " + groupID,
-			MemberIds: userIDs[:1],
+			MemberIds: PtrTo(userIDs[:1]),
 		})
 		if err != nil && strings.Contains(err.Error(), "Not Found") {
 			t.Skip("User groups feature not available for this app")
@@ -242,7 +242,7 @@ func TestUserGroupIntegration(t *testing.T) {
 		_, err := client.CreateUserGroup(ctx, &CreateUserGroupRequest{
 			ID:        PtrTo(groupID),
 			Name:      "Remove Members Group " + groupID,
-			MemberIds: userIDs,
+			MemberIds: PtrTo(userIDs),
 		})
 		if err != nil && strings.Contains(err.Error(), "Not Found") {
 			t.Skip("User groups feature not available for this app")

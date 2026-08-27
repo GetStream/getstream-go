@@ -27,11 +27,11 @@ func TestChatPollsIntegration(t *testing.T) {
 			Description:       PtrTo("Pick your favorite color"),
 			EnforceUniqueVote: PtrTo(true),
 			UserID:            PtrTo(userID),
-			Options: []PollOptionInput{
+			Options: PtrTo([]PollOptionInput{
 				{Text: PtrTo("Red")},
 				{Text: PtrTo("Blue")},
 				{Text: PtrTo("Green")},
-			},
+			}),
 		})
 		require.NoError(t, err)
 		pollID := createResp.Data.Poll.ID
@@ -70,10 +70,10 @@ func TestChatPollsIntegration(t *testing.T) {
 		createResp, err := client.CreatePoll(ctx, &CreatePollRequest{
 			Name:   "Query test poll " + randomString(8),
 			UserID: PtrTo(userID),
-			Options: []PollOptionInput{
+			Options: PtrTo([]PollOptionInput{
 				{Text: PtrTo("Option A")},
 				{Text: PtrTo("Option B")},
-			},
+			}),
 		})
 		require.NoError(t, err)
 		pollID := createResp.Data.Poll.ID
@@ -85,9 +85,9 @@ func TestChatPollsIntegration(t *testing.T) {
 		// Query polls (server-side auth requires user_id)
 		qResp, err := client.QueryPolls(ctx, &QueryPollsRequest{
 			UserID: PtrTo(userID),
-			Filter: map[string]any{
+			Filter: PtrTo(map[string]any{
 				"id": pollID,
-			},
+			}),
 		})
 		require.NoError(t, err)
 		require.NotEmpty(t, qResp.Data.Polls)
@@ -100,10 +100,10 @@ func TestChatPollsIntegration(t *testing.T) {
 			Name:              "Vote test poll",
 			EnforceUniqueVote: PtrTo(true),
 			UserID:            PtrTo(userID),
-			Options: []PollOptionInput{
+			Options: PtrTo([]PollOptionInput{
 				{Text: PtrTo("Yes")},
 				{Text: PtrTo("No")},
-			},
+			}),
 		})
 		require.NoError(t, err)
 		pollID := createResp.Data.Poll.ID

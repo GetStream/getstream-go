@@ -136,9 +136,9 @@ func TestModerationQueryReviewQueueWithFilter(t *testing.T) {
 
 	// snippet-start: QueryReviewQueueWithFilter
 	request := &getstream.QueryReviewQueueRequest{
-		Filter: map[string]interface{}{
+		Filter: getstream.PtrTo(map[string]interface{}{
 			"status": "pending",
-		},
+		}),
 		Limit: getstream.PtrTo(25),
 	}
 

@@ -30,9 +30,9 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Verify channel exists by querying
 		resp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
-			FilterConditions: map[string]any{
+			FilterConditions: PtrTo(map[string]any{
 				"id": channelID,
-			},
+			}),
 		})
 		require.NoError(t, err)
 		require.NotEmpty(t, resp.Data.Channels)
@@ -85,10 +85,10 @@ func TestChatChannelIntegration(t *testing.T) {
 		_, channelID := createTestChannel(t, client, creatorID)
 
 		resp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
-			FilterConditions: map[string]any{
+			FilterConditions: PtrTo(map[string]any{
 				"type": "messaging",
 				"id":   channelID,
-			},
+			}),
 		})
 		require.NoError(t, err)
 		require.NotEmpty(t, resp.Data.Channels)
@@ -119,10 +119,10 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Set fields
 		resp, err := ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
-			Set: map[string]any{
+			Set: PtrTo(map[string]any{
 				"color":       "red",
 				"description": "A test channel",
-			},
+			}),
 		})
 		require.NoError(t, err)
 		require.NotNil(t, resp.Data.Channel)
@@ -139,7 +139,7 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Unset fields
 		_, err = ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
-			Unset: []string{"color"},
+			Unset: PtrTo([]string{"color"}),
 		})
 		require.NoError(t, err)
 
@@ -207,10 +207,10 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Add members
 		_, err := ch.Update(ctx, &UpdateChannelRequest{
-			AddMembers: []ChannelMemberRequest{
+			AddMembers: PtrTo([]ChannelMemberRequest{
 				{UserID: PtrTo(memberID2)},
 				{UserID: PtrTo(memberID3)},
-			},
+			}),
 		})
 		require.NoError(t, err)
 
@@ -221,7 +221,7 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Remove a member
 		_, err = ch.Update(ctx, &UpdateChannelRequest{
-			RemoveMembers: []string{memberID3},
+			RemoveMembers: PtrTo([]string{memberID3}),
 		})
 		require.NoError(t, err)
 
@@ -347,13 +347,13 @@ func TestChatChannelIntegration(t *testing.T) {
 		}
 
 		_, err := ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
-			Set: map[string]any{"frozen": true},
+			Set: PtrTo(map[string]any{"frozen": true}),
 		})
 		require.NoError(t, err)
 		requireFrozen(true)
 
 		_, err = ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
-			Set: map[string]any{"frozen": false},
+			Set: PtrTo(map[string]any{"frozen": false}),
 		})
 		require.NoError(t, err)
 		requireFrozen(false)
@@ -385,7 +385,7 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Mute the channel for memberID1
 		muteResp, err := client.Chat().MuteChannel(ctx, &MuteChannelRequest{
-			ChannelCids: []string{cid},
+			ChannelCids: PtrTo([]string{cid}),
 			UserID:      PtrTo(memberID1),
 		})
 		require.NoError(t, err)
@@ -400,10 +400,10 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Verify via QueryChannels with muted=true and cid filter
 		qResp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
-			FilterConditions: map[string]any{
+			FilterConditions: PtrTo(map[string]any{
 				"muted": true,
 				"cid":   cid,
-			},
+			}),
 			UserID: PtrTo(memberID1),
 		})
 		require.NoError(t, err)
@@ -412,17 +412,17 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Unmute the channel
 		_, err = client.Chat().UnmuteChannel(ctx, &UnmuteChannelRequest{
-			ChannelCids: []string{cid},
+			ChannelCids: PtrTo([]string{cid}),
 			UserID:      PtrTo(memberID1),
 		})
 		require.NoError(t, err)
 
 		// Verify unmute via query with muted=false (like stream-chat-go does)
 		qResp, err = client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
-			FilterConditions: map[string]any{
+			FilterConditions: PtrTo(map[string]any{
 				"muted": false,
 				"cid":   cid,
-			},
+			}),
 			UserID: PtrTo(memberID1),
 		})
 		require.NoError(t, err)
@@ -435,10 +435,10 @@ func TestChatChannelIntegration(t *testing.T) {
 		// Set custom fields on member
 		resp, err := ch.UpdateMemberPartial(ctx, &UpdateMemberPartialRequest{
 			UserID: PtrTo(memberID1),
-			Set: map[string]any{
+			Set: PtrTo(map[string]any{
 				"role_label": "moderator",
 				"score":      42,
-			},
+			}),
 		})
 		require.NoError(t, err)
 		require.NotNil(t, resp.Data.ChannelMember)
@@ -447,7 +447,7 @@ func TestChatChannelIntegration(t *testing.T) {
 		// Unset a custom field
 		resp, err = ch.UpdateMemberPartial(ctx, &UpdateMemberPartialRequest{
 			UserID: PtrTo(memberID1),
-			Unset:  []string{"score"},
+			Unset:  PtrTo([]string{"score"}),
 		})
 		require.NoError(t, err)
 		require.NotNil(t, resp.Data.ChannelMember)
@@ -460,9 +460,9 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Assign channel_moderator role to memberID1
 		_, err := ch.Update(ctx, &UpdateChannelRequest{
-			AssignRoles: []ChannelMemberRequest{
+			AssignRoles: PtrTo([]ChannelMemberRequest{
 				{UserID: PtrTo(memberID1), ChannelRole: PtrTo("channel_moderator")},
-			},
+			}),
 		})
 		require.NoError(t, err)
 
@@ -486,7 +486,7 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Add moderator using UpdateChannel with AddModerators
 		_, err := ch.Update(ctx, &UpdateChannelRequest{
-			AddModerators: []string{memberID1},
+			AddModerators: PtrTo([]string{memberID1}),
 		})
 		require.NoError(t, err)
 
@@ -506,7 +506,7 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Demote moderator back to member
 		_, err = ch.Update(ctx, &UpdateChannelRequest{
-			DemoteModerators: []string{memberID1},
+			DemoteModerators: PtrTo([]string{memberID1}),
 		})
 		require.NoError(t, err)
 
@@ -574,18 +574,18 @@ func TestChatChannelIntegration(t *testing.T) {
 		// Pin channel for memberID1 via UpdateMemberPartial
 		_, err := ch.UpdateMemberPartial(ctx, &UpdateMemberPartialRequest{
 			UserID: PtrTo(memberID1),
-			Set: map[string]any{
+			Set: PtrTo(map[string]any{
 				"pinned": true,
-			},
+			}),
 		})
 		require.NoError(t, err)
 
 		// Verify via QueryChannels with pinned filter
 		qResp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
-			FilterConditions: map[string]any{
+			FilterConditions: PtrTo(map[string]any{
 				"pinned": true,
 				"cid":    "messaging:" + channelID,
-			},
+			}),
 			UserID: PtrTo(memberID1),
 		})
 		require.NoError(t, err)
@@ -595,18 +595,18 @@ func TestChatChannelIntegration(t *testing.T) {
 		// Unpin
 		_, err = ch.UpdateMemberPartial(ctx, &UpdateMemberPartialRequest{
 			UserID: PtrTo(memberID1),
-			Set: map[string]any{
+			Set: PtrTo(map[string]any{
 				"pinned": false,
-			},
+			}),
 		})
 		require.NoError(t, err)
 
 		// Verify unpinned
 		qResp, err = client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
-			FilterConditions: map[string]any{
+			FilterConditions: PtrTo(map[string]any{
 				"pinned": false,
 				"cid":    "messaging:" + channelID,
-			},
+			}),
 			UserID: PtrTo(memberID1),
 		})
 		require.NoError(t, err)
@@ -619,18 +619,18 @@ func TestChatChannelIntegration(t *testing.T) {
 		// Archive channel for memberID1 via UpdateMemberPartial
 		_, err := ch.UpdateMemberPartial(ctx, &UpdateMemberPartialRequest{
 			UserID: PtrTo(memberID1),
-			Set: map[string]any{
+			Set: PtrTo(map[string]any{
 				"archived": true,
-			},
+			}),
 		})
 		require.NoError(t, err)
 
 		// Verify via QueryChannels with archived filter
 		qResp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
-			FilterConditions: map[string]any{
+			FilterConditions: PtrTo(map[string]any{
 				"archived": true,
 				"cid":      "messaging:" + channelID,
-			},
+			}),
 			UserID: PtrTo(memberID1),
 		})
 		require.NoError(t, err)
@@ -640,18 +640,18 @@ func TestChatChannelIntegration(t *testing.T) {
 		// Unarchive
 		_, err = ch.UpdateMemberPartial(ctx, &UpdateMemberPartialRequest{
 			UserID: PtrTo(memberID1),
-			Set: map[string]any{
+			Set: PtrTo(map[string]any{
 				"archived": false,
-			},
+			}),
 		})
 		require.NoError(t, err)
 
 		// Verify unarchived
 		qResp, err = client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
-			FilterConditions: map[string]any{
+			FilterConditions: PtrTo(map[string]any{
 				"archived": false,
 				"cid":      "messaging:" + channelID,
-			},
+			}),
 			UserID: PtrTo(memberID1),
 		})
 		require.NoError(t, err)
@@ -668,10 +668,10 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Add members with specific channel roles
 		_, err := ch.Update(ctx, &UpdateChannelRequest{
-			AddMembers: []ChannelMemberRequest{
+			AddMembers: PtrTo([]ChannelMemberRequest{
 				{UserID: PtrTo(modUserID), ChannelRole: PtrTo("channel_moderator")},
 				{UserID: PtrTo(memberUserID2), ChannelRole: PtrTo("channel_member")},
-			},
+			}),
 		})
 		require.NoError(t, err)
 
@@ -703,9 +703,9 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Query the channel to get message count
 		qResp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
-			FilterConditions: map[string]any{
+			FilterConditions: PtrTo(map[string]any{
 				"cid": "messaging:" + channelID,
-			},
+			}),
 			UserID: PtrTo(creatorID),
 		})
 		require.NoError(t, err)
@@ -736,7 +736,7 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Add filter tags
 		_, err := ch.Update(ctx, &UpdateChannelRequest{
-			AddFilterTags: []string{"sports", "news"},
+			AddFilterTags: PtrTo([]string{"sports", "news"}),
 		})
 		require.NoError(t, err)
 
@@ -747,7 +747,7 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Remove filter tags
 		_, err = ch.Update(ctx, &UpdateChannelRequest{
-			RemoveFilterTags: []string{"sports"},
+			RemoveFilterTags: PtrTo([]string{"sports"}),
 		})
 		require.NoError(t, err)
 	})
@@ -757,11 +757,11 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Disable count_messages via config_overrides partial update
 		_, err := ch.UpdateChannelPartial(ctx, &UpdateChannelPartialRequest{
-			Set: map[string]any{
+			Set: PtrTo(map[string]any{
 				"config_overrides": map[string]any{
 					"count_messages": false,
 				},
-			},
+			}),
 		})
 		require.NoError(t, err)
 
@@ -770,9 +770,9 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Query the channel — MessageCount should be nil when disabled
 		qResp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
-			FilterConditions: map[string]any{
+			FilterConditions: PtrTo(map[string]any{
 				"cid": "messaging:" + channelID,
-			},
+			}),
 			UserID: PtrTo(creatorID),
 		})
 		require.NoError(t, err)
@@ -827,9 +827,9 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		// Channel should be hidden for creator — querying without show_hidden should not find it
 		qResp, err := client.Chat().QueryChannels(ctx, &QueryChannelsRequest{
-			FilterConditions: map[string]any{
+			FilterConditions: PtrTo(map[string]any{
 				"cid": "messaging:" + channelID,
-			},
+			}),
 			UserID: PtrTo(creatorID),
 		})
 		require.NoError(t, err)

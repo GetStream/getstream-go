@@ -108,10 +108,10 @@ func TestCreateCall(t *testing.T) {
 		// Call members need to be existing users (use `client.UpdateUsers` for that)
 		// You can also update the role of existing members
 		response, err := call.UpdateCallMembers(ctx, &getstream.UpdateCallMembersRequest{
-			UpdateMembers: []getstream.MemberRequest{
+			UpdateMembers: getstream.PtrTo([]getstream.MemberRequest{
 				{UserID: "sara"},
 				{UserID: "emily", Role: getstream.PtrTo("admin")},
-			},
+			}),
 		})
 		require.NoError(t, err)
 		require.NotEmpty(t, response)
@@ -120,9 +120,9 @@ func TestCreateCall(t *testing.T) {
 	// call members remove example:
 	{
 		response, err := call.UpdateCallMembers(ctx, &getstream.UpdateCallMembersRequest{
-			RemoveMembers: []string{
+			RemoveMembers: getstream.PtrTo([]string{
 				"sara",
-			},
+			}),
 		})
 		require.NoError(t, err)
 		require.NotEmpty(t, response)
@@ -132,7 +132,7 @@ func TestCreateCall(t *testing.T) {
 	{
 		// update some custom data for this call
 		response, err := call.Update(ctx, &getstream.UpdateCallRequest{
-			Custom: map[string]any{"color": "red"},
+			Custom: getstream.PtrTo(map[string]any{"color": "red"}),
 		})
 
 		// update settings for this call

@@ -136,7 +136,7 @@ func setup(t *testing.T, rm *ResourceManager, createCallType bool) (*Stream, *Ca
 		}
 
 		response, err := client.Video().CreateCallType(ctx, &CreateCallTypeRequest{
-			Grants:               grants,
+			Grants:               PtrTo(grants),
 			Name:                 callTypeName,
 			Settings:             callSettings,
 			NotificationSettings: notificationSettings,
@@ -346,7 +346,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 					Enabled: PtrTo(true),
 				},
 			},
-			Grants: grants,
+			Grants: PtrTo(grants),
 		})
 
 		assert.NoError(t, err)
@@ -604,7 +604,7 @@ func TestSendCustomEvent(t *testing.T) {
 	}
 	sendEventRequest := SendCallEventRequest{
 		UserID: &user.ID,
-		Custom: customEvent,
+		Custom: PtrTo(customEvent),
 	}
 	_, err = call.SendCallEvent(ctx, &sendEventRequest)
 	assert.NoError(t, err)
@@ -661,7 +661,7 @@ func TestVideoExamplesAdditional(t *testing.T) {
 
 		_, err = call.MuteUsers(ctx, &MuteUsersRequest{
 			MutedByID:        &userID,
-			UserIds:          []string{alice.ID, bob.ID},
+			UserIds:          PtrTo([]string{alice.ID, bob.ID}),
 			Audio:            PtrTo(true),
 			Video:            PtrTo(true),
 			Screenshare:      PtrTo(true),
@@ -685,13 +685,13 @@ func TestVideoExamplesAdditional(t *testing.T) {
 
 		_, err = call.UpdateUserPermissions(ctx, &UpdateUserPermissionsRequest{
 			UserID:            alice.ID,
-			RevokePermissions: []string{SEND_AUDIO.String()},
+			RevokePermissions: PtrTo([]string{SEND_AUDIO.String()}),
 		})
 		assert.NoError(t, err)
 
 		_, err = call.UpdateUserPermissions(ctx, &UpdateUserPermissionsRequest{
 			UserID:           alice.ID,
-			GrantPermissions: []string{SEND_AUDIO.String()},
+			GrantPermissions: PtrTo([]string{SEND_AUDIO.String()}),
 		})
 		assert.NoError(t, err)
 	})
@@ -910,10 +910,10 @@ func TestTeams(t *testing.T) {
 	}
 
 	callsResponse, err := client.Video().QueryCalls(ctx, &QueryCallsRequest{
-		FilterConditions: map[string]interface{}{
+		FilterConditions: PtrTo(map[string]interface{}{
 			"id":   callID,
 			"team": map[string]interface{}{"$eq": "blue"},
-		},
+		}),
 	})
 	require.NoError(t, err)
 	assert.Greater(t, len(callsResponse.Data.Calls), 0)
