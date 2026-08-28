@@ -3,8 +3,7 @@
   "packages": {
     ".": {
       "release-type": "go",
-      "extra-files": ["version.go"],
-      "draft": true
+      "extra-files": ["version.go"]
     }
   }
 }

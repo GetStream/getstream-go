@@ -51,10 +51,8 @@ Releases are driven by [release-please](https://github.com/googleapis/release-pl
 
 - Merge PRs to `main` with conventional-commit titles. The PR title becomes the commit subject and is what determines the next version, so a non-conventional title ships nothing.
 - release-please keeps a Release PR open with the version bump and the generated changelog. Review it.
-- The Release PR is opened by `github-actions[bot]`, so its CI runs are held at "action required" until someone clicks **Approve and run**, and it needs a code-owner approval like any other PR. If a later commit landed on `main`, click **Update branch** first.
+- The Release PR is opened by `github-actions[bot]`, so its CI runs are held at "action required". If the PR is behind `main`, clicking **Update branch** also releases them, because that commit is attributed to you; otherwise click **Approve and run**. It needs a code-owner approval like any other PR.
 - Merge the Release PR. That creates the tag and the GitHub Release, and `proxy.golang.org` picks the tag up. There is no separate publish step.
-
-> **Pilot only:** `release-please-config.json` currently sets `"draft": true`, so merging the Release PR creates a *draft* GitHub Release and **no git tag**. Nothing reaches `proxy.golang.org` until someone publishes the draft. Remove `"draft": true` once the pilot is signed off.
 
 Only `feat`, `fix`, `perf` and breaking changes produce a release (`revert` may also). A window of only `chore`, `ci`, `docs`, `test`, `refactor`, `style` or `build` commits produces no Release PR, which is intended.
 
