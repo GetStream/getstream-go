@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. Releases are automated by [release-please](https://github.com/googleapis/release-please); see [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## [6.0.0](https://github.com/GetStream/getstream-go/compare/v5.4.0...v6.0.0) (2026-08-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* pointerize optional arrays and maps on request types ([#151](https://github.com/GetStream/getstream-go/issues/151))
+* regenerate from protocol v237.1.3 and move the module to /v6 ([#147](https://github.com/GetStream/getstream-go/issues/147))
+
+### Features
+
+* pointerize optional arrays and maps on request types ([#151](https://github.com/GetStream/getstream-go/issues/151)) ([5f2b12f](https://github.com/GetStream/getstream-go/commit/5f2b12fa1a8a9f7e93c3d673c524c85577644a9e))
+* regenerate from protocol v237.1.3 and move the module to /v6 ([#147](https://github.com/GetStream/getstream-go/issues/147)) ([dcaa874](https://github.com/GetStream/getstream-go/commit/dcaa8747aa2bcbf11b79977d1b6ad259648035d6))
+
 ## [5.4.0](https://github.com/GetStream/getstream-go/compare/v5.3.0...v5.4.0) (2026-08-27)
 
 
