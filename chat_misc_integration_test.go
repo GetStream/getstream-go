@@ -1048,9 +1048,9 @@ func TestChatReminderIntegration(t *testing.T) {
 			}
 			require.NoError(t, err)
 		}
-		assert.Equal(t, msgID, createResp.Data.MessageID)
-		assert.Equal(t, userID, createResp.Data.UserID)
-		assert.NotNil(t, createResp.Data.RemindAt, "RemindAt should be set")
+		assert.Equal(t, msgID, createResp.Data.Reminder.MessageID)
+		assert.Equal(t, userID, createResp.Data.Reminder.UserID)
+		assert.NotNil(t, createResp.Data.Reminder.RemindAt, "RemindAt should be set")
 
 		// Delete the reminder
 		_, err = client.Chat().DeleteReminder(ctx, msgID, &DeleteReminderRequest{
