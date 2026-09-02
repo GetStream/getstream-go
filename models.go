@@ -35,9 +35,22 @@ type AITextConfig struct {
 }
 
 type AIVideoConfig struct {
+	Async    *bool                `json:"async,omitempty"`
+	Enabled  *bool                `json:"enabled,omitempty"`
+	Provider *string              `json:"provider,omitempty"`
+	Rules    []AWSRekognitionRule `json:"rules,omitempty"`
+}
+
+type AIVideoConfigRequest struct {
 	Async   *bool                `json:"async,omitempty"`
 	Enabled *bool                `json:"enabled,omitempty"`
 	Rules   []AWSRekognitionRule `json:"rules,omitempty"`
+}
+
+type AIVideoConfigResponse struct {
+	Enabled bool                 `json:"enabled"`
+	Rules   []AWSRekognitionRule `json:"rules"`
+	Async   *bool                `json:"async,omitempty"`
 }
 
 type APIError struct {
@@ -802,7 +815,7 @@ type AnalyzeImageField struct {
 
 type AnalyzeResponse struct {
 	Duration string `json:"duration"`
-	// Always `complete` — /analyze is sync-only and the full verdict is in the response.
+	// `complete` (all fields screened), `partial` (mix of verdicts and per-field errors), or `pending` (async).
 	Status string `json:"status"`
 	// Per-image moderation verdicts keyed by caller label.
 	Images map[string]AnalyzeImageField `json:"images,omitempty"`
@@ -840,9 +853,12 @@ type AppResponseFields struct {
 	ID                                    int                             `json:"id"`
 	ImageModerationEnabled                bool                            `json:"image_moderation_enabled"`
 	MaxAggregatedActivitiesLength         int                             `json:"max_aggregated_activities_length"`
+	MemberCustomOnMentionedUsersEnabled   bool                            `json:"member_custom_on_mentioned_users_enabled"`
 	MemberCustomOnMessagesEnabled         bool                            `json:"member_custom_on_messages_enabled"`
+	MemberCustomOnTypingEventsEnabled     bool                            `json:"member_custom_on_typing_events_enabled"`
 	ModerationAudioCallModerationEnabled  bool                            `json:"moderation_audio_call_moderation_enabled"`
 	ModerationEnabled                     bool                            `json:"moderation_enabled"`
+	ModerationKeyframeVideoEnabled        bool                            `json:"moderation_keyframe_video_enabled"`
 	ModerationLlmConfigurabilityEnabled   bool                            `json:"moderation_llm_configurability_enabled"`
 	ModerationMultitenantBlocklistEnabled bool                            `json:"moderation_multitenant_blocklist_enabled"`
 	ModerationVideoCallModerationEnabled  bool                            `json:"moderation_video_call_moderation_enabled"`
@@ -4362,7 +4378,7 @@ type ConfigResponse struct {
 	// Available L2 subclassifications per L1 image moderation label, based on the active provider
 	AiImageSubclassifications          map[string][]string                 `json:"ai_image_subclassifications,omitempty"`
 	AiTextConfig                       *AITextConfig                       `json:"ai_text_config,omitempty"`
-	AiVideoConfig                      *AIVideoConfig                      `json:"ai_video_config,omitempty"`
+	AiVideoConfig                      *AIVideoConfigResponse              `json:"ai_video_config,omitempty"`
 	AutomodPlatformCircumventionConfig *AutomodPlatformCircumventionConfig `json:"automod_platform_circumvention_config,omitempty"`
 	AutomodSemanticFiltersConfig       *AutomodSemanticFiltersConfig       `json:"automod_semantic_filters_config,omitempty"`
 	AutomodToxicityConfig              *AutomodToxicityConfig              `json:"automod_toxicity_config,omitempty"`
@@ -4566,6 +4582,13 @@ type CreatePredefinedFilterResponse struct {
 	// Duration of the request in milliseconds
 	Duration         string                    `json:"duration"`
 	PredefinedFilter *PredefinedFilterResponse `json:"predefined_filter,omitempty"`
+}
+
+// Basic response information
+type CreateReminderResponse struct {
+	// Duration of the request in milliseconds
+	Duration string               `json:"duration"`
+	Reminder ReminderResponseData `json:"reminder"`
 }
 
 // Basic response information
@@ -5514,23 +5537,24 @@ func (e *FeedDeletedEvent) GetEventType() string {
 }
 
 type FeedGroup struct {
-	AggregationVersion int                       `json:"aggregation_version"`
-	AppPk              int                       `json:"app_pk"`
-	CreatedAt          Timestamp                 `json:"created_at"`
-	DefaultVisibility  string                    `json:"default_visibility"`
-	GroupID            string                    `json:"group_id"`
-	UpdatedAt          Timestamp                 `json:"updated_at"`
-	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors"`
-	ActivitySelectors  []ActivitySelectorConfig  `json:"activity_selectors"`
-	Custom             map[string]any            `json:"custom"`
-	DeletedAt          *Timestamp                `json:"deleted_at,omitempty"`
-	LastFeedGetAt      *Timestamp                `json:"last_feed_get_at,omitempty"`
-	ActivityFilter     *ActivityFilterConfig     `json:"activity_filter,omitempty"`
-	Aggregation        *AggregationConfig        `json:"aggregation,omitempty"`
-	Notification       *NotificationConfig       `json:"notification,omitempty"`
-	PushNotification   *PushNotificationConfig   `json:"push_notification,omitempty"`
-	Ranking            *RankingConfig            `json:"ranking,omitempty"`
-	Stories            *StoriesConfig            `json:"stories,omitempty"`
+	AggregationVersion  int                       `json:"aggregation_version"`
+	AppPk               int                       `json:"app_pk"`
+	CreatedAt           Timestamp                 `json:"created_at"`
+	DefaultFollowerRole string                    `json:"default_follower_role"`
+	DefaultVisibility   string                    `json:"default_visibility"`
+	GroupID             string                    `json:"group_id"`
+	UpdatedAt           Timestamp                 `json:"updated_at"`
+	ActivityProcessors  []ActivityProcessorConfig `json:"activity_processors"`
+	ActivitySelectors   []ActivitySelectorConfig  `json:"activity_selectors"`
+	Custom              map[string]any            `json:"custom"`
+	DeletedAt           *Timestamp                `json:"deleted_at,omitempty"`
+	LastFeedGetAt       *Timestamp                `json:"last_feed_get_at,omitempty"`
+	ActivityFilter      *ActivityFilterConfig     `json:"activity_filter,omitempty"`
+	Aggregation         *AggregationConfig        `json:"aggregation,omitempty"`
+	Notification        *NotificationConfig       `json:"notification,omitempty"`
+	PushNotification    *PushNotificationConfig   `json:"push_notification,omitempty"`
+	Ranking             *RankingConfig            `json:"ranking,omitempty"`
+	Stories             *StoriesConfig            `json:"stories,omitempty"`
 }
 
 // Emitted when a feed group is changed.
@@ -5576,6 +5600,8 @@ type FeedGroupResponse struct {
 	ID string `json:"id"`
 	// When the feed group was last updated
 	UpdatedAt Timestamp `json:"updated_at"`
+	// Role new followers of feeds in this group are given. One of: feed_follower, feed_member_viewer. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
+	DefaultFollowerRole *string `json:"default_follower_role,omitempty"`
 	// Default visibility for activities. One of: public, visible, followers, members, private
 	DefaultVisibility *string    `json:"default_visibility,omitempty"`
 	DeletedAt         *Timestamp `json:"deleted_at,omitempty"`
@@ -6356,7 +6382,7 @@ func (e *FollowDeletedEvent) GetEventType() string {
 type FollowResponse struct {
 	// When the follow relationship was created
 	CreatedAt Timestamp `json:"created_at"`
-	// Role of the follower (source user) in the follow relationship
+	// Role of the follower (source user) in the follow relationship, as stored. A value outside the allowed set is reported as stored but evaluated as 'feed_follower'.
 	FollowerRole string `json:"follower_role"`
 	// Push preference for notifications. One of: all, none
 	PushPreference string `json:"push_preference"`
@@ -8406,7 +8432,9 @@ type MessageResponse struct {
 	// Contains image moderation information
 	ImageLabels map[string][]string           `json:"image_labels,omitempty"`
 	Member      *ChannelMemberPartialResponse `json:"member,omitempty"`
-	Moderation  *ModerationV2Response         `json:"moderation,omitempty"`
+	// Channel member data for the users mentioned in the message, keyed by user id. Only present when the app has member custom on mentioned users enabled, and only for the first two mentioned users of each message
+	MentionedChannelMembers map[string]ChannelMemberPartialResponse `json:"mentioned_channel_members,omitempty"`
+	Moderation              *ModerationV2Response                   `json:"moderation,omitempty"`
 	// User response object
 	PinnedBy *UserResponse     `json:"pinned_by,omitempty"`
 	Poll     *PollResponseData `json:"poll,omitempty"`
@@ -8589,7 +8617,9 @@ type MessageWithChannelResponse struct {
 	// Contains image moderation information
 	ImageLabels map[string][]string           `json:"image_labels,omitempty"`
 	Member      *ChannelMemberPartialResponse `json:"member,omitempty"`
-	Moderation  *ModerationV2Response         `json:"moderation,omitempty"`
+	// Channel member data for the users mentioned in the message, keyed by user id. Only present when the app has member custom on mentioned users enabled, and only for the first two mentioned users of each message
+	MentionedChannelMembers map[string]ChannelMemberPartialResponse `json:"mentioned_channel_members,omitempty"`
+	Moderation              *ModerationV2Response                   `json:"moderation,omitempty"`
 	// User response object
 	PinnedBy *UserResponse     `json:"pinned_by,omitempty"`
 	Poll     *PollResponseData `json:"poll,omitempty"`
@@ -8783,18 +8813,19 @@ type ModerationDashboardPreferences struct {
 }
 
 type ModerationFlagResponse struct {
-	CreatedAt         Timestamp        `json:"created_at"`
-	EntityID          string           `json:"entity_id"`
-	EntityType        string           `json:"entity_type"`
-	UpdatedAt         Timestamp        `json:"updated_at"`
-	UserID            string           `json:"user_id"`
-	Type              string           `json:"type"`
-	Result            []map[string]any `json:"result"`
-	EntityCreatorID   *string          `json:"entity_creator_id,omitempty"`
-	Reason            *string          `json:"reason,omitempty"`
-	ReviewQueueItemID *string          `json:"review_queue_item_id,omitempty"`
-	Labels            []string         `json:"labels,omitempty"`
-	Custom            map[string]any   `json:"custom,omitempty"`
+	CreatedAt          Timestamp        `json:"created_at"`
+	EntityID           string           `json:"entity_id"`
+	EntityType         string           `json:"entity_type"`
+	UpdatedAt          Timestamp        `json:"updated_at"`
+	UserID             string           `json:"user_id"`
+	Type               string           `json:"type"`
+	Result             []map[string]any `json:"result"`
+	ContentPublishedAt *Timestamp       `json:"content_published_at,omitempty"`
+	EntityCreatorID    *string          `json:"entity_creator_id,omitempty"`
+	Reason             *string          `json:"reason,omitempty"`
+	ReviewQueueItemID  *string          `json:"review_queue_item_id,omitempty"`
+	Labels             []string         `json:"labels,omitempty"`
+	Custom             map[string]any   `json:"custom,omitempty"`
 	// Content payload for moderation
 	ModerationPayload *ModerationPayloadResponse `json:"moderation_payload,omitempty"`
 	ReviewQueueItem   *ReviewQueueItemResponse   `json:"review_queue_item,omitempty"`
@@ -11828,12 +11859,13 @@ type SearchResultMessage struct {
 	MentionedRoles       []string            `json:"mentioned_roles,omitempty"`
 	ThreadParticipants   []UserResponse      `json:"thread_participants,omitempty"`
 	// Represents channel in chat
-	Channel     *ChannelResponse              `json:"channel,omitempty"`
-	Draft       *DraftResponse                `json:"draft,omitempty"`
-	I18n        map[string]string             `json:"i18n,omitempty"`
-	ImageLabels map[string][]string           `json:"image_labels,omitempty"`
-	Member      *ChannelMemberPartialResponse `json:"member,omitempty"`
-	Moderation  *ModerationV2Response         `json:"moderation,omitempty"`
+	Channel                 *ChannelResponse                        `json:"channel,omitempty"`
+	Draft                   *DraftResponse                          `json:"draft,omitempty"`
+	I18n                    map[string]string                       `json:"i18n,omitempty"`
+	ImageLabels             map[string][]string                     `json:"image_labels,omitempty"`
+	Member                  *ChannelMemberPartialResponse           `json:"member,omitempty"`
+	MentionedChannelMembers map[string]ChannelMemberPartialResponse `json:"mentioned_channel_members,omitempty"`
+	Moderation              *ModerationV2Response                   `json:"moderation,omitempty"`
 	// User response object
 	PinnedBy *UserResponse     `json:"pinned_by,omitempty"`
 	Poll     *PollResponseData `json:"poll,omitempty"`
@@ -12608,6 +12640,14 @@ type TranslateCommentResponse struct {
 	// Duration of the request in milliseconds
 	Duration string          `json:"duration"`
 	Comment  CommentResponse `json:"comment"`
+}
+
+// Basic response information
+type TranslateMessageResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+	// Represents any chat message
+	Message MessageResponse `json:"message"`
 }
 
 type TranslationSettings struct {

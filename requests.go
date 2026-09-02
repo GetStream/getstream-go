@@ -22,7 +22,9 @@ type UpdateAppRequest struct {
 	GuestUserCreationDisabled             *bool                           `json:"guest_user_creation_disabled,omitempty"`
 	ImageModerationEnabled                *bool                           `json:"image_moderation_enabled,omitempty"`
 	MaxAggregatedActivitiesLength         *int                            `json:"max_aggregated_activities_length,omitempty"`
+	MemberCustomOnMentionedUsersEnabled   *bool                           `json:"member_custom_on_mentioned_users_enabled,omitempty"`
 	MemberCustomOnMessagesEnabled         *bool                           `json:"member_custom_on_messages_enabled,omitempty"`
+	MemberCustomOnTypingEventsEnabled     *bool                           `json:"member_custom_on_typing_events_enabled,omitempty"`
 	MigratePermissionsToV2                *bool                           `json:"migrate_permissions_to_v2,omitempty"`
 	ModerationAnalyticsEnabled            *bool                           `json:"moderation_analytics_enabled,omitempty"`
 	ModerationEnabled                     *bool                           `json:"moderation_enabled,omitempty"`
@@ -201,9 +203,13 @@ type QueryChannelsRequest struct {
 type ChannelBatchUpdateRequest struct {
 	Operation string `json:"operation"`
 	// Filter to apply to the query
-	Filter  map[string]any               `json:"filter"`
-	Members *[]ChannelBatchMemberRequest `json:"members,omitempty"`
-	Data    *ChannelDataUpdate           `json:"data,omitempty"`
+	Filter map[string]any `json:"filter"`
+	// `updateData` only. Deletes these keys from each channel's existing custom object, leaving every other custom key untouched. Keys are dot-paths; deleting a key that does not exist is a no-op. Cannot be combined with `data.custom`
+	CustomUnset *[]string                    `json:"custom_unset,omitempty"`
+	Members     *[]ChannelBatchMemberRequest `json:"members,omitempty"`
+	// `updateData` only. Merges these keys into each channel's existing custom object, leaving every other custom key untouched. Keys are dot-paths, so `a.b` sets key `b` inside object `a` (the parent object must already exist). Cannot be combined with `data.custom`
+	CustomSet *map[string]any    `json:"custom_set,omitempty"`
+	Data      *ChannelDataUpdate `json:"data,omitempty"`
 }
 type DeleteChannelsRequest struct {
 	// All channels that should be deleted
@@ -1590,6 +1596,8 @@ type ListFeedGroupsRequest struct {
 type CreateFeedGroupRequest struct {
 	// Unique identifier for the feed group
 	ID string `json:"id"`
+	// Role new followers of feeds in this group are given. One of: feed_follower, feed_member_viewer. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
+	DefaultFollowerRole *string `json:"default_follower_role,omitempty"`
 	// Default visibility for the feed group, can be 'public', 'visible', 'followers', 'members', or 'private'. Defaults to 'visible' if not provided.
 	DefaultVisibility *string `json:"default_visibility,omitempty"`
 	// Configuration for activity processors
@@ -1738,6 +1746,8 @@ type GetFeedGroupRequest struct {
 	IncludeSoftDeleted *bool `json:"-" query:"include_soft_deleted"`
 }
 type GetOrCreateFeedGroupRequest struct {
+	// Role new followers of feeds in this group are given. One of: feed_follower, feed_member_viewer. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
+	DefaultFollowerRole *string `json:"default_follower_role,omitempty"`
 	// Default visibility for the feed group, can be 'public', 'visible', 'followers', 'members', or 'private'. Defaults to 'visible' if not provided.
 	DefaultVisibility *string `json:"default_visibility,omitempty"`
 	// Configuration for activity processors
@@ -1754,6 +1764,9 @@ type GetOrCreateFeedGroupRequest struct {
 	Stories          *StoriesConfig          `json:"stories,omitempty"`
 }
 type UpdateFeedGroupRequest struct {
+	// Role new followers of feeds in this group are given. One of: feed_follower, feed_member_viewer. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
+	DefaultFollowerRole *string `json:"default_follower_role,omitempty"`
+	// Default visibility for the feed group. One of: public, visible, followers, members, private
 	DefaultVisibility *string `json:"default_visibility,omitempty"`
 	// Configuration for activity processors
 	ActivityProcessors *[]ActivityProcessorConfig `json:"activity_processors,omitempty"`
@@ -1805,6 +1818,8 @@ type UpdateFeedVisibilityRequest struct {
 type CreateFeedsBatchRequest struct {
 	// List of feeds to create
 	Feeds []FeedRequest `json:"feeds"`
+	// Server-side only. If true, auto-creates users referenced by feeds[].created_by_id that don't already exist. Default: false.
+	CreateUsers *bool `json:"create_users,omitempty"`
 	// If true, enriches the created feeds with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 }
@@ -1860,8 +1875,9 @@ type UpdateFollowRequest struct {
 	// If true, auto-creates users referenced by the source and target FIDs when they don't already exist. Server-side only. Defaults to false. Use directly on single follow endpoints (Follow, GetOrCreateFollow). On batch endpoints (FollowBatch, GetOrCreateFollows), use the top-level create_users field; per-item follows[i].create_users is rejected.
 	CreateUsers *bool `json:"create_users,omitempty"`
 	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
-	EnrichOwnFields *bool   `json:"enrich_own_fields,omitempty"`
-	FollowerRole    *string `json:"follower_role,omitempty"`
+	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
+	// Optional role for the follower in the follow relationship. Server-side only, and one of 'feed_follower' (the default) or 'feed_member_viewer'.
+	FollowerRole *string `json:"follower_role,omitempty"`
 	// Push preference for the follow relationship
 	PushPreference *string `json:"push_preference,omitempty"`
 	// Whether to skip push for this follow
@@ -1901,7 +1917,7 @@ type AcceptFollowRequest struct {
 	Source string `json:"source"`
 	// Fully qualified ID of the target feed
 	Target string `json:"target"`
-	// Optional role for the follower in the follow relationship
+	// Optional role for the follower in the follow relationship. Server-side only, and one of 'feed_follower' (the default) or 'feed_member_viewer'.
 	FollowerRole *string `json:"follower_role,omitempty"`
 }
 type FollowBatchRequest struct {
@@ -2301,7 +2317,7 @@ type UpsertConfigRequest struct {
 	AiAudioConfig                      *AIAudioConfigRequest               `json:"ai_audio_config,omitempty"`
 	AiImageConfig                      *AIImageConfig                      `json:"ai_image_config,omitempty"`
 	AiTextConfig                       *AITextConfig                       `json:"ai_text_config,omitempty"`
-	AiVideoConfig                      *AIVideoConfig                      `json:"ai_video_config,omitempty"`
+	AiVideoConfig                      *AIVideoConfigRequest               `json:"ai_video_config,omitempty"`
 	AutomodPlatformCircumventionConfig *AutomodPlatformCircumventionConfig `json:"automod_platform_circumvention_config,omitempty"`
 	AutomodSemanticFiltersConfig       *AutomodSemanticFiltersConfig       `json:"automod_semantic_filters_config,omitempty"`
 	AutomodToxicityConfig              *AutomodToxicityConfig              `json:"automod_toxicity_config,omitempty"`
@@ -2640,7 +2656,8 @@ type UnbanRequest struct {
 	TargetUserID string  `json:"-" query:"target_user_id"`
 	ChannelCid   *string `json:"-" query:"channel_cid"`
 	CreatedBy    *string `json:"-" query:"created_by"`
-	// ID of the user performing the unban
+	// ID of the user performing the unban Deprecated: not used by the unban flow
+	// Deprecated: this field is deprecated.
 	UnbannedByID *string `json:"unbanned_by_id,omitempty"`
 	// User request object
 	UnbannedBy *UserRequest `json:"unbanned_by,omitempty"`
@@ -3434,6 +3451,6 @@ type QueryAggregateCallStatsRequest struct {
 	ReportTypes *[]string `json:"report_types,omitempty"`
 }
 type GetDailyDigestRequest struct {
-	Date  *string `json:"-" query:"date"`
-	AppID *string `json:"-" query:"app_id"`
+	Date        *string `json:"-" query:"date"`
+	TargetAppID *string `json:"-" query:"target_app_id"`
 }
