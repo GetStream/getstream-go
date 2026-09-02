@@ -697,12 +697,12 @@ func (c *ChatClient) QueryReactions(ctx context.Context, id string, request *Que
 //
 // Sends events:
 // - message.updated
-func (c *ChatClient) TranslateMessage(ctx context.Context, id string, request *TranslateMessageRequest) (*StreamResponse[MessageActionResponse], error) {
-	var result MessageActionResponse
+func (c *ChatClient) TranslateMessage(ctx context.Context, id string, request *TranslateMessageRequest) (*StreamResponse[TranslateMessageResponse], error) {
+	var result TranslateMessageResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[TranslateMessageRequest, MessageActionResponse](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/translate", nil, request, &result, pathParams)
+	res, err := MakeRequest[TranslateMessageRequest, TranslateMessageResponse](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/translate", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -786,12 +786,12 @@ func (c *ChatClient) UpdateReminder(ctx context.Context, messageID string, reque
 //
 // Sends events:
 // - reminder.created
-func (c *ChatClient) CreateReminder(ctx context.Context, messageID string, request *CreateReminderRequest) (*StreamResponse[ReminderResponseData], error) {
-	var result ReminderResponseData
+func (c *ChatClient) CreateReminder(ctx context.Context, messageID string, request *CreateReminderRequest) (*StreamResponse[CreateReminderResponse], error) {
+	var result CreateReminderResponse
 	pathParams := map[string]string{
 		"message_id": messageID,
 	}
-	res, err := MakeRequest[CreateReminderRequest, ReminderResponseData](c.client, ctx, "POST", "/api/v2/chat/messages/{message_id}/reminders", nil, request, &result, pathParams)
+	res, err := MakeRequest[CreateReminderRequest, CreateReminderResponse](c.client, ctx, "POST", "/api/v2/chat/messages/{message_id}/reminders", nil, request, &result, pathParams)
 	return res, err
 }
 

@@ -746,7 +746,7 @@ func (c *FeedsClient) UpdateFeedGroup(ctx context.Context, id string, request *U
 	return res, err
 }
 
-// List all feed views for a feed group
+// List persisted feed views for the application.
 func (c *FeedsClient) ListFeedViews(ctx context.Context, request *ListFeedViewsRequest) (*StreamResponse[ListFeedViewsResponse], error) {
 	var result ListFeedViewsResponse
 	res, err := MakeRequest[any, ListFeedViewsResponse](c.client, ctx, "GET", "/api/v2/feeds/feed_views", nil, nil, &result, nil)
@@ -878,7 +878,7 @@ func (c *FeedsClient) Follow(ctx context.Context, request *FollowRequest) (*Stre
 	return res, err
 }
 
-// Accepts a pending follow request
+// Accepts a pending follow request. Follower role can only be set via server-side requests.
 func (c *FeedsClient) AcceptFollow(ctx context.Context, request *AcceptFollowRequest) (*StreamResponse[AcceptFollowResponse], error) {
 	var result AcceptFollowResponse
 	res, err := MakeRequest[AcceptFollowRequest, AcceptFollowResponse](c.client, ctx, "POST", "/api/v2/feeds/follows/accept", nil, request, &result, nil)
