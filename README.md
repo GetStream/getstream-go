@@ -27,6 +27,8 @@ If you are currently using [`stream-chat-go`](https://github.com/GetStream/strea
 
 ## Upgrading from an older major?
 
+- [v6 → v7](MIGRATION_v6_to_v7.md): new import path; CreateReminder returns CreateReminderResponse.
+
 - [v4 → v5](MIGRATION_v4_to_v5.md): new import path, four removed response fields, `CheckResponse` no longer comparable.
 - [v3 → v4](MIGRATION_v3_to_v4.md): OpenAPI-aligned type renaming.
 

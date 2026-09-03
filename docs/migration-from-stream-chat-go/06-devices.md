@@ -1,6 +1,6 @@
 # Devices
 
-This guide shows how to migrate device (push notification) operations from `github.com/GetStream/stream-chat-go/v8` to `github.com/GetStream/getstream-go/v6`.
+This guide shows how to migrate device (push notification) operations from `github.com/GetStream/stream-chat-go/v8` to `github.com/GetStream/getstream-go/v7`.
 
 ## Add a Device
 
@@ -35,7 +35,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v6"
+	"github.com/GetStream/getstream-go/v7"
 )
 
 func main() {
@@ -89,7 +89,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v6"
+	"github.com/GetStream/getstream-go/v7"
 )
 
 func main() {
@@ -137,7 +137,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v6"
+	"github.com/GetStream/getstream-go/v7"
 )
 
 func main() {
@@ -185,7 +185,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v6"
+	"github.com/GetStream/getstream-go/v7"
 )
 
 func main() {
