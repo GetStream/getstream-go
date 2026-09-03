@@ -17,7 +17,7 @@ go get github.com/GetStream/getstream-go/v7
 ```
 
 **Key changes:**
-- Module path changed from `stream-chat-go/v8` to `getstream-go/v6`
+- Module path changed from `stream-chat-go/v8` to `getstream-go/v7`
 
 ## Client Initialization
 
