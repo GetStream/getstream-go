@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. Releases are automated by [release-please](https://github.com/googleapis/release-please); see [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## [7.0.0](https://github.com/GetStream/getstream-go/compare/v6.0.0...v7.0.0) (2026-09-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* `CreateReminder` returns `*StreamResponse[CreateReminderResponse]`; reminder fields moved to `.Data.Reminder` ([#153](https://github.com/GetStream/getstream-go/issues/153))
+* `TranslateMessage` returns `*StreamResponse[TranslateMessageResponse]` instead of `MessageActionResponse` ([#153](https://github.com/GetStream/getstream-go/issues/153))
+* `UpsertConfigRequest.AiVideoConfig` is `*AIVideoConfigRequest` instead of `*AIVideoConfig` ([#153](https://github.com/GetStream/getstream-go/issues/153))
+* `GetDailyDigestRequest.AppID` is renamed to `TargetAppID` ([#153](https://github.com/GetStream/getstream-go/issues/153))
+* import path changes from `github.com/GetStream/getstream-go/v6` to `github.com/GetStream/getstream-go/v7` ([#155](https://github.com/GetStream/getstream-go/issues/155))
+
+### Features
+
+* [FEEDS-1830] regenerate OpenAPI client ([#153](https://github.com/GetStream/getstream-go/issues/153)) ([cb5db43](https://github.com/GetStream/getstream-go/commit/cb5db43d72f0501cddd22abd79a49753299e2a4d))
+
 ## [6.0.0](https://github.com/GetStream/getstream-go/compare/v5.4.0...v6.0.0) (2026-08-27)
 
 
