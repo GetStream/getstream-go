@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file. Releases are automated by [release-please](https://github.com/googleapis/release-please); see [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## [8.0.0](https://github.com/GetStream/getstream-go/compare/v7.0.0...v8.0.0) (2026-09-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* [FEEDS-1830] regenerate OpenAPI client ([#153](https://github.com/GetStream/getstream-go/issues/153))
+* pointerize optional arrays and maps on request types ([#151](https://github.com/GetStream/getstream-go/issues/151))
+* regenerate from protocol v237.1.3 and move the module to /v6 ([#147](https://github.com/GetStream/getstream-go/issues/147))
+* add GetChannel endpoint ([#123](https://github.com/GetStream/getstream-go/issues/123))
+
+### Features
+
+* [CHA-2958] standardize error handling ([#112](https://github.com/GetStream/getstream-go/issues/112)) ([fcd20e7](https://github.com/GetStream/getstream-go/commit/fcd20e7beeb240527adac2face785fe944237720))
+* [FEEDS-1830] regenerate OpenAPI client ([#153](https://github.com/GetStream/getstream-go/issues/153)) ([cb5db43](https://github.com/GetStream/getstream-go/commit/cb5db43d72f0501cddd22abd79a49753299e2a4d))
+* [VID-270]: stats external API: GetCallReport ([3d5f75d](https://github.com/GetStream/getstream-go/commit/3d5f75d4b5908dfd9f7f34aed174a76773b2fde0))
+* add bookmark for comments ([#97](https://github.com/GetStream/getstream-go/issues/97)) ([7e41662](https://github.com/GetStream/getstream-go/commit/7e41662f20af4df9bf30040da2448c44d594b8e8))
+* add GetChannel endpoint ([#123](https://github.com/GetStream/getstream-go/issues/123)) ([070f2e1](https://github.com/GetStream/getstream-go/commit/070f2e143ca7410bd5a5e3f1a96c3d711ec3ff57))
+* add opt-in retry for rate-limited and transport-failed requests ([#129](https://github.com/GetStream/getstream-go/issues/129)) ([a851a68](https://github.com/GetStream/getstream-go/commit/a851a68d2bf9418030ea8f11f737324696b6c24f))
+* add segment management methods to ChatClient ([#114](https://github.com/GetStream/getstream-go/issues/114)) ([566815e](https://github.com/GetStream/getstream-go/commit/566815e6f5c5aa9fcd447d10f140df9d6e6e6677))
+* add SendClosedCaption + other updates ([#45](https://github.com/GetStream/getstream-go/issues/45)) ([21e8050](https://github.com/GetStream/getstream-go/commit/21e8050fbffe283fe50b3b3dab562c3ff2511461))
+* emit structured log events and redact secrets from debug logs ([#128](https://github.com/GetStream/getstream-go/issues/128)) ([85bffd0](https://github.com/GetStream/getstream-go/commit/85bffd04db4ac8984cb541da0cc9b56b9dac30f7))
+* pointerize optional arrays and maps on request types ([#151](https://github.com/GetStream/getstream-go/issues/151)) ([5f2b12f](https://github.com/GetStream/getstream-go/commit/5f2b12fa1a8a9f7e93c3d673c524c85577644a9e))
+* regenerate from chat master (other_media on ModerationPayload) ([#141](https://github.com/GetStream/getstream-go/issues/141)) ([f81c07f](https://github.com/GetStream/getstream-go/commit/f81c07facc8df5ddbf6cbbdd1ef576b3d7b23893))
+* regenerate from latest OpenAPI spec, keep only retention runs test ([5d543c4](https://github.com/GetStream/getstream-go/commit/5d543c48dc4b14fb3d95f538031f0e3029c2618c))
+* regenerate from protocol v236.2.0 (pinned messages, predefined filters, permission writes, feed counts) ([#144](https://github.com/GetStream/getstream-go/issues/144)) ([eceb74b](https://github.com/GetStream/getstream-go/commit/eceb74b819e345f75bfdd686f180da042f595d79))
+* regenerate from protocol v237.1.3 and move the module to /v6 ([#147](https://github.com/GetStream/getstream-go/issues/147)) ([dcaa874](https://github.com/GetStream/getstream-go/commit/dcaa8747aa2bcbf11b79977d1b6ad259648035d6))
+* Update OpenAPI specs ([#120](https://github.com/GetStream/getstream-go/issues/120)) ([eb3092b](https://github.com/GetStream/getstream-go/commit/eb3092b6990dc33bb45e1107cdde8febc1559c55))
+* update opnepai specs ([8adf2d7](https://github.com/GetStream/getstream-go/commit/8adf2d7dba9238129c566d6c1bb7836b86298633))
+* update opnepai specs ([3f28e35](https://github.com/GetStream/getstream-go/commit/3f28e35d9eb9c193222724e748f92e41d29e2f4c))
+
+
+### Bug Fixes
+
+* add omitempty on pointer types ([#87](https://github.com/GetStream/getstream-go/issues/87)) ([e98f4c9](https://github.com/GetStream/getstream-go/commit/e98f4c9b020dc854b53a728297a8674713da0d16))
+* align go module path with the v5 major version ([#130](https://github.com/GetStream/getstream-go/issues/130)) ([e4b36ff](https://github.com/GetStream/getstream-go/commit/e4b36ffa6a05e81f83277c90f59d3cb8f20383e2))
+* name the HTTP status when the error body is not JSON ([#137](https://github.com/GetStream/getstream-go/issues/137)) ([7f6ed96](https://github.com/GetStream/getstream-go/commit/7f6ed96b14499c3a9da86e5da3768bc20cdb9977))
+* skip retention tests when endpoints unavailable (404) ([faff5e6](https://github.com/GetStream/getstream-go/commit/faff5e66c79c1f30a7adddefa8d59c7ad1c25bbb))
+* v5 follow-ups: Version() prefix, migration guide, release major guard ([#134](https://github.com/GetStream/getstream-go/issues/134)) ([2f22261](https://github.com/GetStream/getstream-go/commit/2f2226123244c9fa3d27b595f798b8e3886d95d2))
+
 ## [7.0.0](https://github.com/GetStream/getstream-go/compare/v6.0.0...v7.0.0) (2026-09-02)
 
 
