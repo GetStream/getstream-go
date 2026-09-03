@@ -1,6 +1,6 @@
 # Setup and Authentication
 
-This guide shows how to migrate setup and authentication code from `github.com/GetStream/stream-chat-go/v8` to `github.com/GetStream/getstream-go/v6`.
+This guide shows how to migrate setup and authentication code from `github.com/GetStream/stream-chat-go/v8` to `github.com/GetStream/getstream-go/v7`.
 
 ## Installation
 
@@ -13,7 +13,7 @@ go get github.com/GetStream/stream-chat-go/v8
 **After (getstream-go):**
 
 ```bash
-go get github.com/GetStream/getstream-go/v6
+go get github.com/GetStream/getstream-go/v7
 ```
 
 **Key changes:**
@@ -52,7 +52,7 @@ package main
 import (
 	"time"
 
-	"github.com/GetStream/getstream-go/v6"
+	"github.com/GetStream/getstream-go/v7"
 )
 
 func main() {
@@ -94,7 +94,7 @@ func main() {
 package main
 
 import (
-	"github.com/GetStream/getstream-go/v6"
+	"github.com/GetStream/getstream-go/v7"
 )
 
 func main() {
@@ -136,7 +136,7 @@ package main
 import (
 	"time"
 
-	"github.com/GetStream/getstream-go/v6"
+	"github.com/GetStream/getstream-go/v7"
 )
 
 func main() {

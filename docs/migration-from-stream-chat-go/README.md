@@ -11,7 +11,7 @@
 
 | Aspect | stream-chat-go | getstream-go |
 |--------|----------------|--------------|
-| Import | `github.com/GetStream/stream-chat-go/v8` | `github.com/GetStream/getstream-go/v6` |
+| Import | `github.com/GetStream/stream-chat-go/v8` | `github.com/GetStream/getstream-go/v7` |
 | Env vars | `STREAM_KEY`, `STREAM_SECRET` | `STREAM_API_KEY`, `STREAM_API_SECRET` |
 | Client init | `stream.NewClient(key, secret)` | `getstream.NewClient(key, secret)` |
 | Sub-clients | All methods on root client | `client.Chat()`, `client.Moderation()`, `client.Video()` |
@@ -52,7 +52,7 @@ package main
 import (
 	"context"
 
-	"github.com/GetStream/getstream-go/v6"
+	"github.com/GetStream/getstream-go/v7"
 )
 
 func main() {
