@@ -31,21 +31,34 @@ jobs:
           target-branch: ${{ github.ref_name }}
           skip-github-release: true
 
-      # Irreversible half is gated on this. Go resolves a v2+ module only if go.mod carries the
-      # matching /vN suffix, and release-please never rewrites it, so a major stays a manual
-      # migration. proxy.golang.org caches a tag permanently, so this must hold before tagging.
-      - name: Verify go.mod major matches the version about to be tagged
+      # The tag is created at the merged Release PR's merge commit, not at this branch's tip,
+      # so the check has to read that commit. Go resolves a v2+ module only if go.mod carries
+      # the matching /vN suffix, release-please never rewrites it, and proxy.golang.org caches
+      # a tag permanently, so a mismatch here would publish an uninstallable major.
+      - name: Verify go.mod major matches the release about to be tagged
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          version="$(jq -r '.["."]' .release-please-manifest.json)"
+          sha="$(gh api "repos/${GITHUB_REPOSITORY}/pulls?state=closed&base=${GITHUB_REF_NAME}&sort=updated&direction=desc&per_page=50" \
+            --jq '[.[] | select(.merged_at != null and ([.labels[].name] | index("autorelease: pending")))] | .[0].merge_commit_sha // empty')"
+          if [ -z "$sha" ]; then
+            echo "No pending release to tag."
+            exit 0
+          fi
+          at_sha() {
+            gh api "repos/${GITHUB_REPOSITORY}/contents/$1?ref=$sha" -H "Accept: application/vnd.github.raw"
+          }
+          version="$(at_sha .release-please-manifest.json | jq -r '.["."]')"
           expected="${version%%.*}"
-          module_path="$(sed -n 's/^module //p' go.mod)"
+          module_path="$(at_sha go.mod | sed -n 's/^module //p')"
           module_major="$(printf '%s' "$module_path" | sed -n 's|.*/v\([0-9][0-9]*\)$|\1|p')"
           [ -n "$module_major" ] || module_major=1
           if [ "$module_major" != "$expected" ]; then
-            echo "::error::go.mod declares '$module_path' (major v$module_major) but the pending release is $version."
-            echo "::error::A major must be migrated on main BEFORE its Release PR merges. See CONTRIBUTING.md."
+            echo "::error::Release $version would be tagged at $sha, where go.mod declares '$module_path' (major v$module_major)."
+            echo "::error::That tag would be uninstallable and permanent. Migrate go.mod and every self-import to /v$expected BEFORE merging the major Release PR. See CONTRIBUTING.md."
             exit 1
           fi
+          echo "Release $version will be tagged at $sha, where go.mod is $module_path."
 
       - uses: googleapis/release-please-action@v4
         with:
