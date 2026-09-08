@@ -51,12 +51,12 @@ func (c *ChatClient) GetCampaign(ctx context.Context, id string, request *GetCam
 }
 
 // Updates a campaign
-func (c *ChatClient) UpdateCampaign(ctx context.Context, id string, request *UpdateCampaignRequest) (*StreamResponse[CampaignResponse], error) {
-	var result CampaignResponse
+func (c *ChatClient) UpdateCampaign(ctx context.Context, id string, request *UpdateCampaignRequest) (*StreamResponse[UpdateCampaignResponse], error) {
+	var result UpdateCampaignResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[UpdateCampaignRequest, CampaignResponse](c.client, ctx, "PUT", "/api/v2/chat/campaigns/{id}", nil, request, &result, pathParams)
+	res, err := MakeRequest[UpdateCampaignRequest, UpdateCampaignResponse](c.client, ctx, "PUT", "/api/v2/chat/campaigns/{id}", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -71,12 +71,12 @@ func (c *ChatClient) StartCampaign(ctx context.Context, id string, request *Star
 }
 
 // Stops a campaign
-func (c *ChatClient) StopCampaign(ctx context.Context, id string, request *StopCampaignRequest) (*StreamResponse[CampaignResponse], error) {
-	var result CampaignResponse
+func (c *ChatClient) StopCampaign(ctx context.Context, id string, request *StopCampaignRequest) (*StreamResponse[StopCampaignResponse], error) {
+	var result StopCampaignResponse
 	pathParams := map[string]string{
 		"id": id,
 	}
-	res, err := MakeRequest[StopCampaignRequest, CampaignResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns/{id}/stop", nil, request, &result, pathParams)
+	res, err := MakeRequest[StopCampaignRequest, StopCampaignResponse](c.client, ctx, "POST", "/api/v2/chat/campaigns/{id}/stop", nil, request, &result, pathParams)
 	return res, err
 }
 

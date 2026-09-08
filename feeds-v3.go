@@ -61,7 +61,7 @@ func (c *FeedsClient) QueryActivities(ctx context.Context, request *QueryActivit
 	return res, err
 }
 
-// Returns a single user's reactions across a set of activity IDs, without activity payloads
+// Returns a single user's activity reactions, optionally scoped to a set of activity IDs, without activity payloads
 func (c *FeedsClient) BatchQueryActivityReactions(ctx context.Context, request *BatchQueryActivityReactionsRequest) (*StreamResponse[BatchQueryActivityReactionsResponse], error) {
 	var result BatchQueryActivityReactionsResponse
 	res, err := MakeRequest[BatchQueryActivityReactionsRequest, BatchQueryActivityReactionsResponse](c.client, ctx, "POST", "/api/v2/feeds/activities/reactions/query", nil, request, &result, nil)
@@ -369,7 +369,7 @@ func (c *FeedsClient) QueryComments(ctx context.Context, request *QueryCommentsR
 	return res, err
 }
 
-// Returns a single user's reactions across a set of comment IDs, without comment payloads
+// Returns a single user's comment reactions, optionally scoped to a set of comment IDs, without comment payloads
 func (c *FeedsClient) BatchQueryCommentReactions(ctx context.Context, request *BatchQueryCommentReactionsRequest) (*StreamResponse[BatchQueryCommentReactionsResponse], error) {
 	var result BatchQueryCommentReactionsResponse
 	res, err := MakeRequest[BatchQueryCommentReactionsRequest, BatchQueryCommentReactionsResponse](c.client, ctx, "POST", "/api/v2/feeds/comments/reactions/query", nil, request, &result, nil)

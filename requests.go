@@ -214,8 +214,10 @@ type ChannelBatchUpdateRequest struct {
 type DeleteChannelsRequest struct {
 	// All channels that should be deleted
 	Cids []string `json:"cids"`
-	// Specify if channels and all ressources should be hard deleted
+	// Server-side only. When true, the channels and all their resources are permanently deleted instead of soft-deleted.
 	HardDelete *bool `json:"hard_delete,omitempty"`
+	// Server-side only. When true, the soft delete preserves message history instead of hiding it, so a later recreation of any of these channel IDs restores the full history. Only supported for distinct channels. Cannot be combined with hard_delete.
+	SkipTruncate *bool `json:"skip_truncate,omitempty"`
 }
 type MarkDeliveredRequest struct {
 	UserID                  *string                    `json:"-" query:"user_id"`
@@ -251,7 +253,8 @@ type GetOrCreateDistinctChannelRequest struct {
 	Watchers            *PaginationParams        `json:"watchers,omitempty"`
 }
 type DeleteChannelRequest struct {
-	HardDelete *bool `json:"-" query:"hard_delete"`
+	HardDelete   *bool `json:"-" query:"hard_delete"`
+	SkipTruncate *bool `json:"-" query:"skip_truncate"`
 }
 type GetChannelRequest struct {
 	State            *bool   `json:"-" query:"state"`
@@ -507,9 +510,8 @@ type DeleteChannelTypeRequest struct {
 type GetChannelTypeRequest struct {
 }
 type UpdateChannelTypeRequest struct {
-	Automod                        string              `json:"automod"`
-	AutomodBehavior                string              `json:"automod_behavior"`
-	MaxMessageLength               int                 `json:"max_message_length"`
+	Automod                        *string             `json:"automod,omitempty"`
+	AutomodBehavior                *string             `json:"automod_behavior,omitempty"`
 	Blocklist                      *string             `json:"blocklist,omitempty"`
 	BlocklistBehavior              *string             `json:"blocklist_behavior,omitempty"`
 	ConnectEvents                  *bool               `json:"connect_events,omitempty"`
@@ -517,6 +519,7 @@ type UpdateChannelTypeRequest struct {
 	CustomEvents                   *bool               `json:"custom_events,omitempty"`
 	DeliveryEvents                 *bool               `json:"delivery_events,omitempty"`
 	MarkMessagesPending            *bool               `json:"mark_messages_pending,omitempty"`
+	MaxMessageLength               *int                `json:"max_message_length,omitempty"`
 	MessageRetention               *string             `json:"message_retention,omitempty"`
 	Mutes                          *bool               `json:"mutes,omitempty"`
 	PartitionSize                  *int                `json:"partition_size,omitempty"`
@@ -1132,15 +1135,15 @@ type QueryActivitiesRequest struct {
 	User *UserRequest `json:"user,omitempty"`
 }
 type BatchQueryActivityReactionsRequest struct {
-	// Activity IDs to fetch the user's reactions for (max 100)
-	ActivityIds []string `json:"activity_ids"`
-	Limit       *int     `json:"limit,omitempty"`
-	Next        *string  `json:"next,omitempty"`
-	Prev        *string  `json:"prev,omitempty"`
+	Limit *int    `json:"limit,omitempty"`
+	Next  *string `json:"next,omitempty"`
+	Prev  *string `json:"prev,omitempty"`
 	// Server-side only. The user whose reactions to fetch; defaults to the authenticated user for client-side requests
-	UserID *string             `json:"user_id,omitempty"`
-	Sort   *[]SortParamRequest `json:"sort,omitempty"`
-	// Optional filter on reaction_type or created_at
+	UserID *string `json:"user_id,omitempty"`
+	// Activity IDs to fetch the user's reactions for (max 100). Omit to page over all of the user's activity reactions
+	ActivityIds *[]string           `json:"activity_ids,omitempty"`
+	Sort        *[]SortParamRequest `json:"sort,omitempty"`
+	// Optional filter on reaction_type or created_at. To restrict by activity, prefer activity_ids over filter.activity_id: activity_ids is capped at 100 and served by the per-activity index, and filter.activity_id is rejected when activity_ids is omitted
 	Filter *map[string]any `json:"filter,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
@@ -1447,15 +1450,15 @@ type QueryCommentsRequest struct {
 	User *UserRequest `json:"user,omitempty"`
 }
 type BatchQueryCommentReactionsRequest struct {
-	// Comment IDs to fetch the user's reactions for (max 100)
-	CommentIds []string `json:"comment_ids"`
-	Limit      *int     `json:"limit,omitempty"`
-	Next       *string  `json:"next,omitempty"`
-	Prev       *string  `json:"prev,omitempty"`
+	Limit *int    `json:"limit,omitempty"`
+	Next  *string `json:"next,omitempty"`
+	Prev  *string `json:"prev,omitempty"`
 	// Server-side only. The user whose reactions to fetch; defaults to the authenticated user for client-side requests
-	UserID *string             `json:"user_id,omitempty"`
-	Sort   *[]SortParamRequest `json:"sort,omitempty"`
-	// Optional filter on reaction_type or created_at
+	UserID *string `json:"user_id,omitempty"`
+	// Comment IDs to fetch the user's reactions for (max 100). Omit to page over all of the user's comment reactions
+	CommentIds *[]string           `json:"comment_ids,omitempty"`
+	Sort       *[]SortParamRequest `json:"sort,omitempty"`
+	// Optional filter on reaction_type or created_at. To restrict by comment, prefer comment_ids over filter.comment_id: comment_ids is capped at 100 and served by the per-comment index, and filter.comment_id is rejected when comment_ids is omitted
 	Filter *map[string]any `json:"filter,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
@@ -1596,16 +1599,18 @@ type ListFeedGroupsRequest struct {
 type CreateFeedGroupRequest struct {
 	// Unique identifier for the feed group
 	ID string `json:"id"`
-	// Role new followers of feeds in this group are given. One of: feed_follower, feed_member_viewer. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
+	// Role new followers of feeds in this group are given. Either a built-in (feed_follower, feed_member_viewer) or any role your app has defined. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
 	DefaultFollowerRole *string `json:"default_follower_role,omitempty"`
 	// Default visibility for the feed group, can be 'public', 'visible', 'followers', 'members', or 'private'. Defaults to 'visible' if not provided.
 	DefaultVisibility *string `json:"default_visibility,omitempty"`
 	// Configuration for activity processors
 	ActivityProcessors *[]ActivityProcessorConfig `json:"activity_processors,omitempty"`
 	// Configuration for activity selectors
-	ActivitySelectors *[]ActivitySelectorConfig `json:"activity_selectors,omitempty"`
-	ActivityFilter    *ActivityFilterConfig     `json:"activity_filter,omitempty"`
-	Aggregation       *AggregationConfig        `json:"aggregation,omitempty"`
+	ActivitySelectors  *[]ActivitySelectorConfig `json:"activity_selectors,omitempty"`
+	ActivityFilter     *ActivityFilterConfig     `json:"activity_filter,omitempty"`
+	ActivityMarks      *ActivityMarksConfig      `json:"activity_marks,omitempty"`
+	ActivityProcessing *ActivityProcessingConfig `json:"activity_processing,omitempty"`
+	Aggregation        *AggregationConfig        `json:"aggregation,omitempty"`
 	// Custom data for the feed group
 	Custom           *map[string]any         `json:"custom,omitempty"`
 	Notification     *NotificationConfig     `json:"notification,omitempty"`
@@ -1746,16 +1751,18 @@ type GetFeedGroupRequest struct {
 	IncludeSoftDeleted *bool `json:"-" query:"include_soft_deleted"`
 }
 type GetOrCreateFeedGroupRequest struct {
-	// Role new followers of feeds in this group are given. One of: feed_follower, feed_member_viewer. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
+	// Role new followers of feeds in this group are given. Either a built-in (feed_follower, feed_member_viewer) or any role your app has defined. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
 	DefaultFollowerRole *string `json:"default_follower_role,omitempty"`
 	// Default visibility for the feed group, can be 'public', 'visible', 'followers', 'members', or 'private'. Defaults to 'visible' if not provided.
 	DefaultVisibility *string `json:"default_visibility,omitempty"`
 	// Configuration for activity processors
 	ActivityProcessors *[]ActivityProcessorConfig `json:"activity_processors,omitempty"`
 	// Configuration for activity selectors
-	ActivitySelectors *[]ActivitySelectorConfig `json:"activity_selectors,omitempty"`
-	ActivityFilter    *ActivityFilterConfig     `json:"activity_filter,omitempty"`
-	Aggregation       *AggregationConfig        `json:"aggregation,omitempty"`
+	ActivitySelectors  *[]ActivitySelectorConfig `json:"activity_selectors,omitempty"`
+	ActivityFilter     *ActivityFilterConfig     `json:"activity_filter,omitempty"`
+	ActivityMarks      *ActivityMarksConfig      `json:"activity_marks,omitempty"`
+	ActivityProcessing *ActivityProcessingConfig `json:"activity_processing,omitempty"`
+	Aggregation        *AggregationConfig        `json:"aggregation,omitempty"`
 	// Custom data for the feed group
 	Custom           *map[string]any         `json:"custom,omitempty"`
 	Notification     *NotificationConfig     `json:"notification,omitempty"`
@@ -1764,16 +1771,18 @@ type GetOrCreateFeedGroupRequest struct {
 	Stories          *StoriesConfig          `json:"stories,omitempty"`
 }
 type UpdateFeedGroupRequest struct {
-	// Role new followers of feeds in this group are given. One of: feed_follower, feed_member_viewer. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
+	// Role new followers of feeds in this group are given. Either a built-in (feed_follower, feed_member_viewer) or any role your app has defined. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
 	DefaultFollowerRole *string `json:"default_follower_role,omitempty"`
 	// Default visibility for the feed group. One of: public, visible, followers, members, private
 	DefaultVisibility *string `json:"default_visibility,omitempty"`
 	// Configuration for activity processors
 	ActivityProcessors *[]ActivityProcessorConfig `json:"activity_processors,omitempty"`
 	// Configuration for activity selectors
-	ActivitySelectors *[]ActivitySelectorConfig `json:"activity_selectors,omitempty"`
-	ActivityFilter    *ActivityFilterConfig     `json:"activity_filter,omitempty"`
-	Aggregation       *AggregationConfig        `json:"aggregation,omitempty"`
+	ActivitySelectors  *[]ActivitySelectorConfig `json:"activity_selectors,omitempty"`
+	ActivityFilter     *ActivityFilterConfig     `json:"activity_filter,omitempty"`
+	ActivityMarks      *ActivityMarksConfig      `json:"activity_marks,omitempty"`
+	ActivityProcessing *ActivityProcessingConfig `json:"activity_processing,omitempty"`
+	Aggregation        *AggregationConfig        `json:"aggregation,omitempty"`
 	// Custom data for the feed group
 	Custom           *map[string]any         `json:"custom,omitempty"`
 	Notification     *NotificationConfig     `json:"notification,omitempty"`
@@ -1853,12 +1862,14 @@ type QueryFeedsRequest struct {
 	Filter *map[string]any `json:"filter,omitempty"`
 }
 type GetFeedsRateLimitsRequest struct {
-	Endpoints  *string `json:"-" query:"endpoints"`
-	Android    *bool   `json:"-" query:"android"`
-	Ios        *bool   `json:"-" query:"ios"`
-	Web        *bool   `json:"-" query:"web"`
-	Unity      *bool   `json:"-" query:"unity"`
-	ServerSide *bool   `json:"-" query:"server_side"`
+	Endpoints    *string `json:"-" query:"endpoints"`
+	Android      *bool   `json:"-" query:"android"`
+	Ios          *bool   `json:"-" query:"ios"`
+	Web          *bool   `json:"-" query:"web"`
+	Unity        *bool   `json:"-" query:"unity"`
+	UnityDesktop *bool   `json:"-" query:"unity_desktop"`
+	UnityConsole *bool   `json:"-" query:"unity_console"`
+	ServerSide   *bool   `json:"-" query:"server_side"`
 }
 type UpdateFollowRequest struct {
 	// Fully qualified ID of the source feed
@@ -1876,7 +1887,7 @@ type UpdateFollowRequest struct {
 	CreateUsers *bool `json:"create_users,omitempty"`
 	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
-	// Optional role for the follower in the follow relationship. Server-side only, and one of 'feed_follower' (the default) or 'feed_member_viewer'.
+	// Optional role for the follower in the follow relationship. Server-side only. Either a built-in ('feed_follower' (the default) or 'feed_member_viewer') or any role your app has defined; grants are not inspected.
 	FollowerRole *string `json:"follower_role,omitempty"`
 	// Push preference for the follow relationship
 	PushPreference *string `json:"push_preference,omitempty"`
@@ -1917,7 +1928,7 @@ type AcceptFollowRequest struct {
 	Source string `json:"source"`
 	// Fully qualified ID of the target feed
 	Target string `json:"target"`
-	// Optional role for the follower in the follow relationship. Server-side only, and one of 'feed_follower' (the default) or 'feed_member_viewer'.
+	// Optional role for the follower in the follow relationship. Server-side only. Either a built-in ('feed_follower' (the default) or 'feed_member_viewer') or any role your app has defined; grants are not inspected.
 	FollowerRole *string `json:"follower_role,omitempty"`
 }
 type FollowBatchRequest struct {
@@ -2846,12 +2857,14 @@ type UpsertPushTemplateRequest struct {
 	Template *string `json:"template,omitempty"`
 }
 type GetRateLimitsRequest struct {
-	ServerSide *bool   `json:"-" query:"server_side"`
-	Android    *bool   `json:"-" query:"android"`
-	Ios        *bool   `json:"-" query:"ios"`
-	Web        *bool   `json:"-" query:"web"`
-	Unity      *bool   `json:"-" query:"unity"`
-	Endpoints  *string `json:"-" query:"endpoints"`
+	ServerSide   *bool   `json:"-" query:"server_side"`
+	Android      *bool   `json:"-" query:"android"`
+	Ios          *bool   `json:"-" query:"ios"`
+	Web          *bool   `json:"-" query:"web"`
+	Unity        *bool   `json:"-" query:"unity"`
+	UnityDesktop *bool   `json:"-" query:"unity_desktop"`
+	UnityConsole *bool   `json:"-" query:"unity_console"`
+	Endpoints    *string `json:"-" query:"endpoints"`
 }
 type ListRolesRequest struct {
 }
