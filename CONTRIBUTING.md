@@ -83,7 +83,9 @@ The pending Release PR on `main` is untouched throughout.
 Go resolves a v2+ module only if `go.mod` carries the matching `/vN` suffix, and release-please does not rewrite it. The release is tagged at the Release PR's merge commit, so the migration must already be in that commit's history:
 
 1. Land the `feat!` change. release-please opens a Release PR for the next major.
-2. Migrate `go.mod` and every self-import to `/vN` in a separate PR and merge it to `main`. The Release workflow fails on those pushes while the two disagree, which is expected and blocks nothing else.
+2. Migrate `go.mod` and every self-import to `/vN` in a separate PR and merge it to `main`. Nothing goes red in the meantime, because the guard only inspects a release that is actually pending.
 3. Click **Update branch** on the major Release PR, then merge it. The tag is created against a tree that already has the migrated `go.mod`.
 
-Never merge a major Release PR before step 2. If that happens the tag is blocked, and the fix is manual: land the migration, remove the `autorelease: pending` label from the merged Release PR, then tag by hand at the migrated commit.
+Never merge a major Release PR before step 2. The guard reads `go.mod` at the commit it is about to tag, which is the Release PR's merge commit, so if that commit predates the migration the tag is refused and stays refused, no matter what lands on `main` afterwards. Recovery is manual: land the migration, remove the `autorelease: pending` label from the merged Release PR so release-please stops trying, then create the release by hand at the migrated commit.
+
+Do that recovery only when no Release workflow run is in flight, and re-run the workflow afterwards. Creating a release by hand mid-run means the run computes its next Release PR without seeing it, and proposes a version from a stale base.
