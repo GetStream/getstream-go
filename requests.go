@@ -204,6 +204,8 @@ type ChannelBatchUpdateRequest struct {
 	Operation string `json:"operation"`
 	// Filter to apply to the query
 	Filter map[string]any `json:"filter"`
+	// Required with the `addMembersHideHistory` operation, and rejected with every other operation including `addMembers`. Hides each matched channel's history before this time from the members the operation adds. Members that already belong to a matched channel are never affected. Must be in RFC3339 format (e.g., "2024-01-01T10:00:00Z") and in the past.
+	HideHistoryBefore *Timestamp `json:"hide_history_before,omitempty"`
 	// `updateData` only. Deletes these keys from each channel's existing custom object, leaving every other custom key untouched. Keys are dot-paths; deleting a key that does not exist is a no-op. Cannot be combined with `data.custom`
 	CustomUnset *[]string                    `json:"custom_unset,omitempty"`
 	Members     *[]ChannelBatchMemberRequest `json:"members,omitempty"`
@@ -214,8 +216,10 @@ type ChannelBatchUpdateRequest struct {
 type DeleteChannelsRequest struct {
 	// All channels that should be deleted
 	Cids []string `json:"cids"`
-	// Specify if channels and all ressources should be hard deleted
+	// Server-side only. When true, the channels and all their resources are permanently deleted instead of soft-deleted.
 	HardDelete *bool `json:"hard_delete,omitempty"`
+	// Server-side only. When true, the soft delete preserves message history instead of hiding it, so a later recreation of any of these channel IDs restores the full history. Only supported for distinct channels. Cannot be combined with hard_delete.
+	SkipTruncate *bool `json:"skip_truncate,omitempty"`
 }
 type MarkDeliveredRequest struct {
 	UserID                  *string                    `json:"-" query:"user_id"`
@@ -251,7 +255,8 @@ type GetOrCreateDistinctChannelRequest struct {
 	Watchers            *PaginationParams        `json:"watchers,omitempty"`
 }
 type DeleteChannelRequest struct {
-	HardDelete *bool `json:"-" query:"hard_delete"`
+	HardDelete   *bool `json:"-" query:"hard_delete"`
+	SkipTruncate *bool `json:"-" query:"skip_truncate"`
 }
 type GetChannelRequest struct {
 	State            *bool   `json:"-" query:"state"`
@@ -1596,16 +1601,18 @@ type ListFeedGroupsRequest struct {
 type CreateFeedGroupRequest struct {
 	// Unique identifier for the feed group
 	ID string `json:"id"`
-	// Role new followers of feeds in this group are given. One of: feed_follower, feed_member_viewer. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
+	// Role new followers of feeds in this group are given. Either a built-in (feed_follower, feed_member_viewer) or any role your app has defined. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
 	DefaultFollowerRole *string `json:"default_follower_role,omitempty"`
 	// Default visibility for the feed group, can be 'public', 'visible', 'followers', 'members', or 'private'. Defaults to 'visible' if not provided.
 	DefaultVisibility *string `json:"default_visibility,omitempty"`
 	// Configuration for activity processors
 	ActivityProcessors *[]ActivityProcessorConfig `json:"activity_processors,omitempty"`
 	// Configuration for activity selectors
-	ActivitySelectors *[]ActivitySelectorConfig `json:"activity_selectors,omitempty"`
-	ActivityFilter    *ActivityFilterConfig     `json:"activity_filter,omitempty"`
-	Aggregation       *AggregationConfig        `json:"aggregation,omitempty"`
+	ActivitySelectors  *[]ActivitySelectorConfig `json:"activity_selectors,omitempty"`
+	ActivityFilter     *ActivityFilterConfig     `json:"activity_filter,omitempty"`
+	ActivityMarks      *ActivityMarksConfig      `json:"activity_marks,omitempty"`
+	ActivityProcessing *ActivityProcessingConfig `json:"activity_processing,omitempty"`
+	Aggregation        *AggregationConfig        `json:"aggregation,omitempty"`
 	// Custom data for the feed group
 	Custom           *map[string]any         `json:"custom,omitempty"`
 	Notification     *NotificationConfig     `json:"notification,omitempty"`
@@ -1746,16 +1753,18 @@ type GetFeedGroupRequest struct {
 	IncludeSoftDeleted *bool `json:"-" query:"include_soft_deleted"`
 }
 type GetOrCreateFeedGroupRequest struct {
-	// Role new followers of feeds in this group are given. One of: feed_follower, feed_member_viewer. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
+	// Role new followers of feeds in this group are given. Either a built-in (feed_follower, feed_member_viewer) or any role your app has defined. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
 	DefaultFollowerRole *string `json:"default_follower_role,omitempty"`
 	// Default visibility for the feed group, can be 'public', 'visible', 'followers', 'members', or 'private'. Defaults to 'visible' if not provided.
 	DefaultVisibility *string `json:"default_visibility,omitempty"`
 	// Configuration for activity processors
 	ActivityProcessors *[]ActivityProcessorConfig `json:"activity_processors,omitempty"`
 	// Configuration for activity selectors
-	ActivitySelectors *[]ActivitySelectorConfig `json:"activity_selectors,omitempty"`
-	ActivityFilter    *ActivityFilterConfig     `json:"activity_filter,omitempty"`
-	Aggregation       *AggregationConfig        `json:"aggregation,omitempty"`
+	ActivitySelectors  *[]ActivitySelectorConfig `json:"activity_selectors,omitempty"`
+	ActivityFilter     *ActivityFilterConfig     `json:"activity_filter,omitempty"`
+	ActivityMarks      *ActivityMarksConfig      `json:"activity_marks,omitempty"`
+	ActivityProcessing *ActivityProcessingConfig `json:"activity_processing,omitempty"`
+	Aggregation        *AggregationConfig        `json:"aggregation,omitempty"`
 	// Custom data for the feed group
 	Custom           *map[string]any         `json:"custom,omitempty"`
 	Notification     *NotificationConfig     `json:"notification,omitempty"`
@@ -1764,16 +1773,18 @@ type GetOrCreateFeedGroupRequest struct {
 	Stories          *StoriesConfig          `json:"stories,omitempty"`
 }
 type UpdateFeedGroupRequest struct {
-	// Role new followers of feeds in this group are given. One of: feed_follower, feed_member_viewer. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
+	// Role new followers of feeds in this group are given. Either a built-in (feed_follower, feed_member_viewer) or any role your app has defined. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
 	DefaultFollowerRole *string `json:"default_follower_role,omitempty"`
 	// Default visibility for the feed group. One of: public, visible, followers, members, private
 	DefaultVisibility *string `json:"default_visibility,omitempty"`
 	// Configuration for activity processors
 	ActivityProcessors *[]ActivityProcessorConfig `json:"activity_processors,omitempty"`
 	// Configuration for activity selectors
-	ActivitySelectors *[]ActivitySelectorConfig `json:"activity_selectors,omitempty"`
-	ActivityFilter    *ActivityFilterConfig     `json:"activity_filter,omitempty"`
-	Aggregation       *AggregationConfig        `json:"aggregation,omitempty"`
+	ActivitySelectors  *[]ActivitySelectorConfig `json:"activity_selectors,omitempty"`
+	ActivityFilter     *ActivityFilterConfig     `json:"activity_filter,omitempty"`
+	ActivityMarks      *ActivityMarksConfig      `json:"activity_marks,omitempty"`
+	ActivityProcessing *ActivityProcessingConfig `json:"activity_processing,omitempty"`
+	Aggregation        *AggregationConfig        `json:"aggregation,omitempty"`
 	// Custom data for the feed group
 	Custom           *map[string]any         `json:"custom,omitempty"`
 	Notification     *NotificationConfig     `json:"notification,omitempty"`
@@ -1853,12 +1864,14 @@ type QueryFeedsRequest struct {
 	Filter *map[string]any `json:"filter,omitempty"`
 }
 type GetFeedsRateLimitsRequest struct {
-	Endpoints  *string `json:"-" query:"endpoints"`
-	Android    *bool   `json:"-" query:"android"`
-	Ios        *bool   `json:"-" query:"ios"`
-	Web        *bool   `json:"-" query:"web"`
-	Unity      *bool   `json:"-" query:"unity"`
-	ServerSide *bool   `json:"-" query:"server_side"`
+	Endpoints    *string `json:"-" query:"endpoints"`
+	Android      *bool   `json:"-" query:"android"`
+	Ios          *bool   `json:"-" query:"ios"`
+	Web          *bool   `json:"-" query:"web"`
+	Unity        *bool   `json:"-" query:"unity"`
+	UnityDesktop *bool   `json:"-" query:"unity_desktop"`
+	UnityConsole *bool   `json:"-" query:"unity_console"`
+	ServerSide   *bool   `json:"-" query:"server_side"`
 }
 type UpdateFollowRequest struct {
 	// Fully qualified ID of the source feed
@@ -1876,7 +1889,7 @@ type UpdateFollowRequest struct {
 	CreateUsers *bool `json:"create_users,omitempty"`
 	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
-	// Optional role for the follower in the follow relationship. Server-side only, and one of 'feed_follower' (the default) or 'feed_member_viewer'.
+	// Optional role for the follower in the follow relationship. Server-side only. Either a built-in ('feed_follower' (the default) or 'feed_member_viewer') or any role your app has defined; grants are not inspected.
 	FollowerRole *string `json:"follower_role,omitempty"`
 	// Push preference for the follow relationship
 	PushPreference *string `json:"push_preference,omitempty"`
@@ -1917,7 +1930,7 @@ type AcceptFollowRequest struct {
 	Source string `json:"source"`
 	// Fully qualified ID of the target feed
 	Target string `json:"target"`
-	// Optional role for the follower in the follow relationship. Server-side only, and one of 'feed_follower' (the default) or 'feed_member_viewer'.
+	// Optional role for the follower in the follow relationship. Server-side only. Either a built-in ('feed_follower' (the default) or 'feed_member_viewer') or any role your app has defined; grants are not inspected.
 	FollowerRole *string `json:"follower_role,omitempty"`
 }
 type FollowBatchRequest struct {
@@ -2846,12 +2859,14 @@ type UpsertPushTemplateRequest struct {
 	Template *string `json:"template,omitempty"`
 }
 type GetRateLimitsRequest struct {
-	ServerSide *bool   `json:"-" query:"server_side"`
-	Android    *bool   `json:"-" query:"android"`
-	Ios        *bool   `json:"-" query:"ios"`
-	Web        *bool   `json:"-" query:"web"`
-	Unity      *bool   `json:"-" query:"unity"`
-	Endpoints  *string `json:"-" query:"endpoints"`
+	ServerSide   *bool   `json:"-" query:"server_side"`
+	Android      *bool   `json:"-" query:"android"`
+	Ios          *bool   `json:"-" query:"ios"`
+	Web          *bool   `json:"-" query:"web"`
+	Unity        *bool   `json:"-" query:"unity"`
+	UnityDesktop *bool   `json:"-" query:"unity_desktop"`
+	UnityConsole *bool   `json:"-" query:"unity_console"`
+	Endpoints    *string `json:"-" query:"endpoints"`
 }
 type ListRolesRequest struct {
 }
