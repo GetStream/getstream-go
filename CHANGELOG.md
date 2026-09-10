@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. Releases are automated by [release-please](https://github.com/googleapis/release-please); see [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## [7.1.0](https://github.com/GetStream/getstream-go/compare/v7.0.0...v7.1.0) (2026-09-10)
+
+
+### Features
+
+* [FEEDS-1763.1] regenerate OpenAPI client ([#159](https://github.com/GetStream/getstream-go/issues/159)) ([2557858](https://github.com/GetStream/getstream-go/commit/25578587ab95b1b3832fecdfce1e9b7cebd2ba1b))
+
 ## [7.0.0](https://github.com/GetStream/getstream-go/compare/v6.0.0...v7.0.0) (2026-09-02)
 
 
