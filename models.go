@@ -322,6 +322,13 @@ func (e *ActivityMarkEvent) GetEventType() string {
 	return e.Type
 }
 
+type ActivityMarksConfig struct {
+	// Whether to return per-activity read status on content feeds
+	TrackRead *bool `json:"track_read,omitempty"`
+	// Whether to return per-activity seen status on content feeds
+	TrackSeen *bool `json:"track_seen,omitempty"`
+}
+
 type ActivityPinResponse struct {
 	// When the pin was created
 	CreatedAt Timestamp `json:"created_at"`
@@ -351,6 +358,15 @@ type ActivityPinnedEvent struct {
 
 func (e *ActivityPinnedEvent) GetEventType() string {
 	return e.Type
+}
+
+type ActivityProcessingConfig struct {
+	// When true, this feed group's allowed_tags is given to the model as a constrained vocabulary so it maps its own wording onto a configured tag instead of that output being discarded. Improves how often a tag is produced, at the cost of sending the list on every request. Scoped to this group's own list: leaving it false keeps this group's tags out of the request even when another feed group on the same activity sets it true. Requires allowed_tags. Off by default.
+	SendAllowedTagsToAi *bool `json:"send_allowed_tags_to_ai,omitempty"`
+	// When set, the LLM activity processors may only write interest tags from this list. By default the model is not told about the list, so a tag is only written when the model happens to produce that exact word after lower-casing and trimming, which for any vocabulary is often not the case; set send_allowed_tags_to_ai to have the model choose from the list instead. Mutually exclusive with blocked_tags.
+	AllowedTags []string `json:"allowed_tags,omitempty"`
+	// Interest tags the LLM activity processors are never allowed to write. Mutually exclusive with allowed_tags.
+	BlockedTags []string `json:"blocked_tags,omitempty"`
 }
 
 type ActivityProcessorConfig struct {
@@ -609,7 +625,8 @@ type ActivitySelectorConfig struct {
 	// Minimum popularity threshold. For the 'popular' selector, omit to use the default (5); values below 1 are rejected
 	MinPopularity *int `json:"min_popularity,omitempty"`
 	// Sort parameters for activity selection
-	Sort []SortParamRequest `json:"sort,omitempty"`
+	Sort       []SortParamRequest `json:"sort,omitempty"`
+	FeedGroups *FeedGroupScope    `json:"feed_groups,omitempty"`
 	// Filter for activity selection
 	Filter map[string]any `json:"filter,omitempty"`
 	Params map[string]any `json:"params,omitempty"`
@@ -625,7 +642,8 @@ type ActivitySelectorConfigResponse struct {
 	// Minimum popularity threshold. For the 'popular' selector, values below 1 are normalized to the default (5) at read time.
 	MinPopularity *int `json:"min_popularity,omitempty"`
 	// Sort parameters for activity selection
-	Sort []SortParamRequest `json:"sort,omitempty"`
+	Sort       []SortParamRequest `json:"sort,omitempty"`
+	FeedGroups *FeedGroupScope    `json:"feed_groups,omitempty"`
 	// Filter for activity selection
 	Filter map[string]any `json:"filter,omitempty"`
 	// Generic params for selector-specific configuration
@@ -5600,7 +5618,7 @@ type FeedGroupResponse struct {
 	ID string `json:"id"`
 	// When the feed group was last updated
 	UpdatedAt Timestamp `json:"updated_at"`
-	// Role new followers of feeds in this group are given. One of: feed_follower, feed_member_viewer. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
+	// Role new followers of feeds in this group are given. Either a built-in (feed_follower, feed_member_viewer) or any role your app has defined. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
 	DefaultFollowerRole *string `json:"default_follower_role,omitempty"`
 	// Default visibility for activities. One of: public, visible, followers, members, private
 	DefaultVisibility *string    `json:"default_visibility,omitempty"`
@@ -5608,9 +5626,11 @@ type FeedGroupResponse struct {
 	// Configuration for activity processors
 	ActivityProcessors []ActivityProcessorConfig `json:"activity_processors,omitempty"`
 	// Configuration for activity selectors
-	ActivitySelectors []ActivitySelectorConfigResponse `json:"activity_selectors,omitempty"`
-	ActivityFilter    *ActivityFilterConfig            `json:"activity_filter,omitempty"`
-	Aggregation       *AggregationConfig               `json:"aggregation,omitempty"`
+	ActivitySelectors  []ActivitySelectorConfigResponse `json:"activity_selectors,omitempty"`
+	ActivityFilter     *ActivityFilterConfig            `json:"activity_filter,omitempty"`
+	ActivityMarks      *ActivityMarksConfig             `json:"activity_marks,omitempty"`
+	ActivityProcessing *ActivityProcessingConfig        `json:"activity_processing,omitempty"`
+	Aggregation        *AggregationConfig               `json:"aggregation,omitempty"`
 	// Custom data for the feed group
 	Custom           map[string]any          `json:"custom,omitempty"`
 	Notification     *NotificationConfig     `json:"notification,omitempty"`
@@ -5635,6 +5655,13 @@ type FeedGroupRestoredEvent struct {
 
 func (e *FeedGroupRestoredEvent) GetEventType() string {
 	return e.Type
+}
+
+type FeedGroupScope struct {
+	// Select activities from every feed group except these. An activity cross-posted to an excluded and a non-excluded group is still selected. Mutually exclusive with include
+	Exclude []string `json:"exclude,omitempty"`
+	// Select only activities that live in a feed belonging to one of these feed groups. Mutually exclusive with exclude
+	Include []string `json:"include,omitempty"`
 }
 
 type FeedInput struct {
@@ -6382,7 +6409,7 @@ func (e *FollowDeletedEvent) GetEventType() string {
 type FollowResponse struct {
 	// When the follow relationship was created
 	CreatedAt Timestamp `json:"created_at"`
-	// Role of the follower (source user) in the follow relationship, as stored. A value outside the allowed set is reported as stored but evaluated as 'feed_follower'.
+	// Role of the follower (source user) in the follow relationship, as stored. A reserved name, or a role your app no longer defines, is reported as stored but evaluated as 'feed_follower'.
 	FollowerRole string `json:"follower_role"`
 	// Push preference for notifications. One of: all, none
 	PushPreference string `json:"push_preference"`
@@ -6811,6 +6838,10 @@ type GetFeedsRateLimitsResponse struct {
 	ServerSide map[string]LimitInfoResponse `json:"server_side,omitempty"`
 	// Rate limits for Unity platform (endpoint name -> limit info)
 	Unity map[string]LimitInfoResponse `json:"unity,omitempty"`
+	// Rate limits for Unity console platform (endpoint name -> limit info)
+	UnityConsole map[string]LimitInfoResponse `json:"unity_console,omitempty"`
+	// Rate limits for Unity desktop platform (endpoint name -> limit info)
+	UnityDesktop map[string]LimitInfoResponse `json:"unity_desktop,omitempty"`
 	// Rate limits for Web platform (endpoint name -> limit info)
 	Web map[string]LimitInfoResponse `json:"web,omitempty"`
 }
@@ -6996,6 +7027,10 @@ type GetRateLimitsResponse struct {
 	ServerSide map[string]LimitInfoResponse `json:"server_side,omitempty"`
 	// Map of endpoint rate limits for the Unity platform
 	Unity map[string]LimitInfoResponse `json:"unity,omitempty"`
+	// Map of endpoint rate limits for the Unity console platform
+	UnityConsole map[string]LimitInfoResponse `json:"unity_console,omitempty"`
+	// Map of endpoint rate limits for the Unity desktop platform
+	UnityDesktop map[string]LimitInfoResponse `json:"unity_desktop,omitempty"`
 	// Map of endpoint rate limits for the web platform
 	Web map[string]LimitInfoResponse `json:"web,omitempty"`
 }
@@ -8801,6 +8836,7 @@ type ModerationDashboardPreferences struct {
 	CustomViewsEnabled             *bool                      `json:"custom_views_enabled,omitempty"`
 	DisableAuditLogs               *bool                      `json:"disable_audit_logs,omitempty"`
 	DisableFlaggingReviewedEntity  *bool                      `json:"disable_flagging_reviewed_entity,omitempty"`
+	EnforceShadowServerSide        *bool                      `json:"enforce_shadow_server_side,omitempty"`
 	EscalationQueueEnabled         *bool                      `json:"escalation_queue_enabled,omitempty"`
 	FlagUserOnFlaggedContent       *bool                      `json:"flag_user_on_flagged_content,omitempty"`
 	IncludeAttachmentPayload       *bool                      `json:"include_attachment_payload,omitempty"`
@@ -9409,6 +9445,10 @@ type PagerResponse struct {
 }
 
 type PaginationParams struct {
+	IDGt   *int `json:"id_gt,omitempty"`
+	IDGte  *int `json:"id_gte,omitempty"`
+	IDLt   *int `json:"id_lt,omitempty"`
+	IDLte  *int `json:"id_lte,omitempty"`
 	Limit  *int `json:"limit,omitempty"`
 	Offset *int `json:"offset,omitempty"`
 }
@@ -10205,7 +10245,11 @@ type QueryAppealsResponse struct {
 
 type QueryBannedUsersPayload struct {
 	// Filter conditions to apply to the query
-	FilterConditions map[string]any `json:"filter_conditions"`
+	FilterConditions       map[string]any `json:"filter_conditions"`
+	CreatedAtAfter         *Timestamp     `json:"created_at_after,omitempty"`
+	CreatedAtAfterOrEqual  *Timestamp     `json:"created_at_after_or_equal,omitempty"`
+	CreatedAtBefore        *Timestamp     `json:"created_at_before,omitempty"`
+	CreatedAtBeforeOrEqual *Timestamp     `json:"created_at_before_or_equal,omitempty"`
 	// Whether to exclude expired bans or not
 	ExcludeExpiredBans *bool `json:"exclude_expired_bans,omitempty"`
 	// Number of records to return
@@ -10467,6 +10511,10 @@ type QueryFollowsResponse struct {
 }
 
 type QueryFutureChannelBansPayload struct {
+	CreatedAtAfter         *Timestamp `json:"created_at_after,omitempty"`
+	CreatedAtAfterOrEqual  *Timestamp `json:"created_at_after_or_equal,omitempty"`
+	CreatedAtBefore        *Timestamp `json:"created_at_before,omitempty"`
+	CreatedAtBeforeOrEqual *Timestamp `json:"created_at_before_or_equal,omitempty"`
 	// Whether to exclude expired bans or not
 	ExcludeExpiredBans *bool `json:"exclude_expired_bans,omitempty"`
 	// When true, the response includes the total number of bans matching the query filter (independent of limit and offset, capped at 100000)
@@ -10500,12 +10548,20 @@ type QueryLabelResultsResponse struct {
 }
 
 type QueryMembersPayload struct {
-	Type    string                 `json:"type"`
-	ID      *string                `json:"id,omitempty"`
-	Limit   *int                   `json:"limit,omitempty"`
-	Offset  *int                   `json:"offset,omitempty"`
-	UserID  *string                `json:"user_id,omitempty"`
-	Members []ChannelMemberRequest `json:"members,omitempty"`
+	Type                   string                 `json:"type"`
+	CreatedAtAfter         *Timestamp             `json:"created_at_after,omitempty"`
+	CreatedAtAfterOrEqual  *Timestamp             `json:"created_at_after_or_equal,omitempty"`
+	CreatedAtBefore        *Timestamp             `json:"created_at_before,omitempty"`
+	CreatedAtBeforeOrEqual *Timestamp             `json:"created_at_before_or_equal,omitempty"`
+	ID                     *string                `json:"id,omitempty"`
+	Limit                  *int                   `json:"limit,omitempty"`
+	Offset                 *int                   `json:"offset,omitempty"`
+	UserID                 *string                `json:"user_id,omitempty"`
+	UserIDGt               *string                `json:"user_id_gt,omitempty"`
+	UserIDGte              *string                `json:"user_id_gte,omitempty"`
+	UserIDLt               *string                `json:"user_id_lt,omitempty"`
+	UserIDLte              *string                `json:"user_id_lte,omitempty"`
+	Members                []ChannelMemberRequest `json:"members,omitempty"`
 	// Array of sort parameters
 	Sort []SortParamRequest `json:"sort,omitempty"`
 	// Filter conditions to apply to the query
@@ -10721,6 +10777,10 @@ type QueryUserFeedbackResponse struct {
 type QueryUsersPayload struct {
 	// Filter conditions to apply to the query
 	FilterConditions        map[string]any `json:"filter_conditions"`
+	IDGt                    *string        `json:"id_gt,omitempty"`
+	IDGte                   *string        `json:"id_gte,omitempty"`
+	IDLt                    *string        `json:"id_lt,omitempty"`
+	IDLte                   *string        `json:"id_lte,omitempty"`
 	IncludeDeactivatedUsers *bool          `json:"include_deactivated_users,omitempty"`
 	Limit                   *int           `json:"limit,omitempty"`
 	Offset                  *int           `json:"offset,omitempty"`
@@ -11356,7 +11416,9 @@ type ReviewQueueItemResponse struct {
 	Languages []string `json:"languages"`
 	// When the review was completed
 	CompletedAt *Timestamp `json:"completed_at,omitempty"`
-	ConfigKey   *string    `json:"config_key,omitempty"`
+	// Highest per-label confidence (0-1) any provider reported across the item's flags; absent when no flag carried one
+	ConfidenceScore *float64 `json:"confidence_score,omitempty"`
+	ConfigKey       *string  `json:"config_key,omitempty"`
 	// ID of who created the entity
 	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
 	// When the item was escalated
@@ -11487,6 +11549,7 @@ type RuleBuilderCondition struct {
 	UserCustomPropertyParams         *UserCustomPropertyParameters         `json:"user_custom_property_params,omitempty"`
 	UserFlagCountRuleParams          *FlagCountRuleParameters              `json:"user_flag_count_rule_params,omitempty"`
 	UserIdenticalContentCountParams  *UserIdenticalContentCountParameters  `json:"user_identical_content_count_params,omitempty"`
+	UserReactionCountParams          *UserReactionCountRuleParameters      `json:"user_reaction_count_params,omitempty"`
 	UserRoleParams                   *UserRoleParameters                   `json:"user_role_params,omitempty"`
 	UserRuleParams                   *UserRuleParameters                   `json:"user_rule_params,omitempty"`
 	VideoContentParams               *VideoContentParameters               `json:"video_content_params,omitempty"`
@@ -11515,8 +11578,9 @@ type RuleBuilderRule struct {
 }
 
 type RunStats struct {
-	ChannelsDeleted *int `json:"channels_deleted,omitempty"`
-	MessagesDeleted *int `json:"messages_deleted,omitempty"`
+	ActivitiesDeleted *int `json:"activities_deleted,omitempty"`
+	ChannelsDeleted   *int `json:"channels_deleted,omitempty"`
+	MessagesDeleted   *int `json:"messages_deleted,omitempty"`
 }
 
 // Config for creating Amazon S3 storage.
@@ -13136,7 +13200,9 @@ type UpdateUserPermissionsResponse struct {
 
 type UpdateUsersResponse struct {
 	// Duration of the request in milliseconds
-	Duration                 string `json:"duration"`
+	Duration string `json:"duration"`
+	// Deprecated: always empty. Removing a user from a team no longer deletes their memberships in that team's channels, so there is no task to poll
+	// Deprecated: this field is deprecated.
 	MembershipDeletionTaskID string `json:"membership_deletion_task_id"`
 	// Object containing users
 	Users map[string]FullUserResponse `json:"users"`
@@ -13626,6 +13692,11 @@ type UserRatingReportResponse struct {
 	Count   int     `json:"count"`
 }
 
+type UserReactionCountRuleParameters struct {
+	Threshold  *int    `json:"threshold,omitempty"`
+	TimeWindow *string `json:"time_window,omitempty"`
+}
+
 // This event is sent when a user gets reactivated. The event contains information about the user that was reactivated.
 type UserReactivatedEvent struct {
 	// Date/time of creation
@@ -14005,6 +14076,12 @@ type WebhookFailoverConfig struct {
 	GcsBucket      *string `json:"gcs_bucket,omitempty"`
 	GcsCredentials *string `json:"gcs_credentials,omitempty"`
 	GcsPath        *string `json:"gcs_path,omitempty"`
+	S3APIKey       *string `json:"s3_api_key,omitempty"`
+	S3Bucket       *string `json:"s3_bucket,omitempty"`
+	S3Path         *string `json:"s3_path,omitempty"`
+	S3Region       *string `json:"s3_region,omitempty"`
+	S3RoleArn      *string `json:"s3_role_arn,omitempty"`
+	S3Secret       *string `json:"s3_secret,omitempty"`
 	Type           *string `json:"type,omitempty"`
 }
 
