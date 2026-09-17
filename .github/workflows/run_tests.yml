@@ -17,8 +17,12 @@ concurrency:
 permissions:
   contents: read
 
+# Release PRs only bump the version and rewrite the changelog, and every commit in one
+# already passed this suite on its own PR. The guard sits on each job, not on the caller,
+# so a skipped job still reports success to a required status check.
 jobs:
   test-build:
+    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
     name: 👷 Test & Build ${{ matrix.goVer }}${{ matrix.label }}
     environment: feeds-enabled-shard
     runs-on: ubuntu-latest
