@@ -2,20 +2,12 @@ name: build
 
 on:
   pull_request:
-    # `labeled` is here only so the `run-tests` escape hatch in run_tests.yml can fire at
-    # all. The default activity types are opened, synchronize and reopened, so without it
-    # applying the label starts no run and the hatch silently does nothing.
-    types: [opened, synchronize, reopened, labeled]
     branches:
       - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
-  # A labeled event lands in the same group as the synchronize it may be racing, and
-  # concurrency is resolved when the run is queued, before the ci job's `if:` runs, so a
-  # skipped job does not release the slot. Without this, adding any label to a PR cancels
-  # an in-flight suite and replaces it with a run that tests nothing. A push still cancels.
-  cancel-in-progress: ${{ github.event.action != 'labeled' }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -24,16 +16,16 @@ jobs:
   # Keep this job id: it prefixes every check name that calling through a reusable workflow
   # produces, so renaming it renames the checks.
   ci:
-    # Every other label has to be ignored, or release-please stamping `autorelease: pending`
-    # on each merged PR would fire the whole six-leg suite against the shared Stream app.
-    if: github.event.action != 'labeled' || github.event.label.name == 'run-tests'
     uses: ./.github/workflows/run_tests.yml
     secrets: inherit
 
-  # The one context main requires for the suite. Requiring the matrix legs by name instead
+  # The context to require on main for the suite. Requiring the matrix legs by name instead
   # would block every Release PR, because a job-level `if:` is evaluated before the matrix
   # expands and a skipped job yields one check run rather than six. This job is not a matrix,
-  # so it reports either way, and `skipped` counts as satisfied.
+  # so it reports either way, and `skipped` counts as satisfied, which is what lets a Release
+  # PR through. Only a real run of this workflow can republish it, which is why the run-tests
+  # escape hatch lives in label_tests.yml: a label event reaching here would republish the
+  # context having tested nothing, turning a red gate green.
   tests-passed:
     name: 👷 Tests
     needs: ci
