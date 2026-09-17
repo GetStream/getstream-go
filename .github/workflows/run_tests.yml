@@ -18,11 +18,14 @@ permissions:
   contents: read
 
 env:
-  # True only for a Release PR opened by release-please itself. Keying on the branch name
-  # alone would let any PR, a fork's included, name its branch release-please--x and skip
-  # every required check, which branch protection then counts as satisfied.
+  # True only for a Release PR opened by release-please and last pushed by it. Keying on the
+  # branch name alone would let any PR, a fork's included, name its branch release-please--x
+  # and skip every required check, which branch protection then counts as satisfied. The
+  # github.actor clause is the pusher rather than the PR author, so a human commit pushed
+  # onto the Release PR is tested like any other instead of riding the skip into main.
   RELEASE_PR: >-
-    ${{ github.event.pull_request.user.login == 'github-actions[bot]'
+    ${{ github.actor == 'github-actions[bot]'
+    && github.event.pull_request.user.login == 'github-actions[bot]'
     && github.event.pull_request.head.repo.full_name == github.repository
     && startsWith(github.head_ref, 'release-please--') }}
 
