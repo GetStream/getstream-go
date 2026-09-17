@@ -17,24 +17,30 @@ concurrency:
 permissions:
   contents: read
 
-# This job skips on a Release PR. release-please only bumps the version and rewrites the
-# changelog, and every source commit in one already passed this suite on the PR it came
-# from, so the only thing running it again can do is fail on a flaky integration test and
-# hold up a release. The guard sits on the job rather than on the calling job in ci.yml,
-# because a job skipped by `if:` reports success and satisfies a required status check,
-# while a reusable workflow that is never called produces no check at all. It tests the
-# author as well as the branch name: on its own, the name would let any PR, a fork's
-# included, call its branch release-please--x and skip every required check, which branch
-# protection counts as met. github.actor is the pusher rather than the PR author, so a
-# human commit pushed onto the Release PR is tested like any other commit.
-#
-# lint.yml and reviewdog.yml stay unguarded on purpose: golangci-lint compiles the package,
-# so they are the only check on release-please's rewrite of version.go.
+# If main ever requires the matrix legs of test-build by name again, this guard must move
+# back to the steps. A job-level `if:` is evaluated before the matrix expands, which is why
+# the matrix context is not available there, so a skipped job produces ONE check run and not
+# six, and those six required contexts would never appear: every Release PR would block
+# forever. main currently requires only the PR-title check, which is what makes the
+# job-level form safe. Keep the guard on the job rather than on the calling job in ci.yml
+# either way, because a job skipped by `if:` reports success and satisfies a required status
+# check, while a reusable workflow that is never called produces no check at all.
 jobs:
   test-build:
+    # Skip a Release PR that release-please opened on a branch in this repository. The three
+    # clauses are all needed: the PR author cannot be forged, but on its own the branch name
+    # would let any PR, a fork's included, call itself release-please--x and skip everything.
+    #
+    # github.actor is deliberately not a clause. CONTRIBUTING tells maintainers to click
+    # Update branch, which attributes that merge commit to them, so keying on the pusher
+    # would mean the skip never fires on the documented release path. The cost is that a
+    # human commit pushed onto a Release PR is not tested here. release.yml runs this same
+    # workflow against the merge commit before it tags, and that is what gates the release.
+    #
+    # Label a Release PR `run-tests` to force the suite to run anyway.
     if: >-
-      ${{ !(github.actor == 'github-actions[bot]'
-      && github.event.pull_request.user.login == 'github-actions[bot]'
+      ${{ contains(github.event.pull_request.labels.*.name, 'run-tests')
+      || !(github.event.pull_request.user.login == 'github-actions[bot]'
       && github.event.pull_request.head.repo.full_name == github.repository
       && startsWith(github.head_ref, 'release-please--')) }}
     name: 👷 Test & Build ${{ matrix.goVer }}${{ matrix.label }}
