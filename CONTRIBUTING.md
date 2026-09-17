@@ -52,7 +52,8 @@ Releases are driven by [release-please](https://github.com/googleapis/release-pl
 - Merge PRs to `main` with conventional-commit titles. The PR title becomes the commit subject and is what determines the next version, so a non-conventional title ships nothing.
 - release-please keeps a Release PR open with the version bump and the generated changelog. Review it.
 - The Release PR is opened by `github-actions[bot]`, so its CI runs are held at "action required". If the PR is behind `main`, clicking **Update branch** also releases them, because that commit is attributed to you; otherwise click **Approve and run**. It needs a code-owner approval like any other PR.
-- Merge the Release PR. That creates the tag and the GitHub Release, and `proxy.golang.org` picks the tag up. There is no separate publish step.
+- The test suite does not run on a Release PR, whichever of those two paths you take. A Release PR only bumps the version and rewrites the changelog, and every commit in it already passed on the PR it came from, so all it can do is fail on the shared integration app and stall the release. `Lint`, `reviewdog`, CodeQL and the PR-title check still run. Label the PR `run-tests` if you want the suite anyway.
+- Merge the Release PR. That creates the tag and the GitHub Release, and `proxy.golang.org` picks the tag up. There is no separate publish step. The suite does run before the tag: `release.yml` calls it on the merge commit, and a failure there leaves `autorelease: pending` set and needs the manual recovery below.
 
 Only `feat`, `fix`, `perf` and breaking changes produce a release (`revert` may also). A window of only `chore`, `ci`, `docs`, `test`, `refactor`, `style` or `build` commits produces no Release PR, which is intended.
 

@@ -17,26 +17,32 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  # True only for a Release PR opened by release-please and last pushed by it. Keying on the
-  # branch name alone would let any PR, a fork's included, name its branch release-please--x
-  # and skip every required check, which branch protection then counts as satisfied. The
-  # github.actor clause is the pusher rather than the PR author, so a human commit pushed
-  # onto the Release PR is tested like any other instead of riding the skip into main.
-  RELEASE_PR: >-
-    ${{ github.actor == 'github-actions[bot]'
-    && github.event.pull_request.user.login == 'github-actions[bot]'
-    && github.event.pull_request.head.repo.full_name == github.repository
-    && startsWith(github.head_ref, 'release-please--') }}
-
-# The guard sits on the steps here rather than on the job, unlike the other five SDKs. main
-# requires the six matrix legs of test-build by name, and a job-level `if:` is evaluated
-# before the matrix expands, which is why the matrix context is not available there. A
-# skipped job would produce one check run instead of six, so those required contexts would
-# never appear and the Release PR would sit blocked forever. Guarding the steps keeps every
-# leg reporting while the 20-minute integration leg is the part that goes away.
+# If main ever requires the matrix legs of test-build by name again, this guard must move
+# back to the steps. A job-level `if:` is evaluated before the matrix expands, which is why
+# the matrix context is not available there, so a skipped job produces ONE check run and not
+# six, and those six required contexts would never appear: every Release PR would block
+# forever. main currently requires only the PR-title check, which is what makes the
+# job-level form safe. Keep the guard on the job rather than on the calling job in ci.yml
+# either way, because a job skipped by `if:` reports success and satisfies a required status
+# check, while a reusable workflow that is never called produces no check at all.
 jobs:
   test-build:
+    # Skip a Release PR that release-please opened on a branch in this repository. The three
+    # clauses are all needed: the PR author cannot be forged, but on its own the branch name
+    # would let any PR, a fork's included, call itself release-please--x and skip everything.
+    #
+    # github.actor is deliberately not a clause. CONTRIBUTING tells maintainers to click
+    # Update branch, which attributes that merge commit to them, so keying on the pusher
+    # would mean the skip never fires on the documented release path. The cost is that a
+    # human commit pushed onto a Release PR is not tested here. release.yml runs this same
+    # workflow against the merge commit before it tags, and that is what gates the release.
+    #
+    # Label a Release PR `run-tests` to force the suite to run anyway.
+    if: >-
+      ${{ contains(github.event.pull_request.labels.*.name, 'run-tests')
+      || !(github.event.pull_request.user.login == 'github-actions[bot]'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && startsWith(github.head_ref, 'release-please--')) }}
     name: 👷 Test & Build ${{ matrix.goVer }}${{ matrix.label }}
     environment: feeds-enabled-shard
     runs-on: ubuntu-latest
@@ -57,7 +63,7 @@ jobs:
           go-version: ${{ matrix.goVer }}
 
       - name: Unit tests via ${{ matrix.goVer }}
-        if: matrix.goVer != '1.19' && env.RELEASE_PR != 'true'
+        if: matrix.goVer != '1.19'
         env:
           STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
           STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
@@ -65,7 +71,7 @@ jobs:
         run: go test -short -v -race ./...
 
       - name: Integration tests via ${{ matrix.goVer }}
-        if: matrix.goVer == '1.19' && env.RELEASE_PR != 'true'
+        if: matrix.goVer == '1.19'
         env:
           STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
           STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
@@ -75,7 +81,7 @@ jobs:
           go tool cover -func=cover.out
 
       - name: Upload coverage to Codecov
-        if: matrix.goVer == '1.19' && env.RELEASE_PR != 'true'
+        if: matrix.goVer == '1.19'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

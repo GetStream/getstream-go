@@ -1,0 +1,26 @@
+name: label-tests
+
+# The escape hatch for a Release PR, which build skips. It lives in its own workflow rather
+# than as a `labeled` trigger on build, because types: cannot filter by label name, so every
+# label would start a build run, and that run republishes the 👷 Tests context having run
+# nothing. A red gate would go green the moment anyone added a label.
+on:
+  pull_request:
+    types: [labeled]
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Job id `forced` keeps these check names off `ci / …`, so they never stand in for the
+  # build run's own checks.
+  forced:
+    if: github.event.label.name == 'run-tests'
+    uses: ./.github/workflows/run_tests.yml
+    secrets: inherit

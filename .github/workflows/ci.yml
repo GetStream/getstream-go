@@ -13,8 +13,30 @@ permissions:
   contents: read
 
 jobs:
-  # Keep this job id: main requires the matrix checks by name, and calling through a
-  # reusable workflow prefixes each with it.
+  # Keep this job id: it prefixes every check name that calling through a reusable workflow
+  # produces, so renaming it renames the checks.
   ci:
     uses: ./.github/workflows/run_tests.yml
     secrets: inherit
+
+  # The context to require on main for the suite. Requiring the matrix legs by name instead
+  # would block every Release PR, because a job-level `if:` is evaluated before the matrix
+  # expands and a skipped job yields one check run rather than six. This job is not a matrix,
+  # so it reports either way, and `skipped` counts as satisfied, which is what lets a Release
+  # PR through. Only a real run of this workflow can republish it, which is why the run-tests
+  # escape hatch lives in label_tests.yml: a label event reaching here would republish the
+  # context having tested nothing, turning a red gate green.
+  tests-passed:
+    name: 👷 Tests
+    needs: ci
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the test job
+        env:
+          RESULT: ${{ needs.ci.result }}
+        run: |
+          case "$RESULT" in
+            success|skipped) echo "test job: $RESULT" ;;
+            *) echo "::error::test job reported $RESULT"; exit 1 ;;
+          esac
