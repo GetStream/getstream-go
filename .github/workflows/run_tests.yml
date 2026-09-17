@@ -17,26 +17,26 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  # True only for a Release PR opened by release-please and last pushed by it. Keying on the
-  # branch name alone would let any PR, a fork's included, name its branch release-please--x
-  # and skip every required check, which branch protection then counts as satisfied. The
-  # github.actor clause is the pusher rather than the PR author, so a human commit pushed
-  # onto the Release PR is tested like any other instead of riding the skip into main.
-  RELEASE_PR: >-
-    ${{ github.actor == 'github-actions[bot]'
-    && github.event.pull_request.user.login == 'github-actions[bot]'
-    && github.event.pull_request.head.repo.full_name == github.repository
-    && startsWith(github.head_ref, 'release-please--') }}
-
-# The guard sits on the steps here rather than on the job, unlike the other five SDKs. main
-# requires the six matrix legs of test-build by name, and a job-level `if:` is evaluated
-# before the matrix expands, which is why the matrix context is not available there. A
-# skipped job would produce one check run instead of six, so those required contexts would
-# never appear and the Release PR would sit blocked forever. Guarding the steps keeps every
-# leg reporting while the 20-minute integration leg is the part that goes away.
+# This job skips on a Release PR. release-please only bumps the version and rewrites the
+# changelog, and every source commit in one already passed this suite on the PR it came
+# from, so the only thing running it again can do is fail on a flaky integration test and
+# hold up a release. The guard sits on the job rather than on the calling job in ci.yml,
+# because a job skipped by `if:` reports success and satisfies a required status check,
+# while a reusable workflow that is never called produces no check at all. It tests the
+# author as well as the branch name: on its own, the name would let any PR, a fork's
+# included, call its branch release-please--x and skip every required check, which branch
+# protection counts as met. github.actor is the pusher rather than the PR author, so a
+# human commit pushed onto the Release PR is tested like any other commit.
+#
+# lint.yml and reviewdog.yml stay unguarded on purpose: golangci-lint compiles the package,
+# so they are the only check on release-please's rewrite of version.go.
 jobs:
   test-build:
+    if: >-
+      ${{ !(github.actor == 'github-actions[bot]'
+      && github.event.pull_request.user.login == 'github-actions[bot]'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && startsWith(github.head_ref, 'release-please--')) }}
     name: 👷 Test & Build ${{ matrix.goVer }}${{ matrix.label }}
     environment: feeds-enabled-shard
     runs-on: ubuntu-latest
@@ -57,7 +57,7 @@ jobs:
           go-version: ${{ matrix.goVer }}
 
       - name: Unit tests via ${{ matrix.goVer }}
-        if: matrix.goVer != '1.19' && env.RELEASE_PR != 'true'
+        if: matrix.goVer != '1.19'
         env:
           STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
           STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
@@ -65,7 +65,7 @@ jobs:
         run: go test -short -v -race ./...
 
       - name: Integration tests via ${{ matrix.goVer }}
-        if: matrix.goVer == '1.19' && env.RELEASE_PR != 'true'
+        if: matrix.goVer == '1.19'
         env:
           STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
           STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
@@ -75,7 +75,7 @@ jobs:
           go tool cover -func=cover.out
 
       - name: Upload coverage to Codecov
-        if: matrix.goVer == '1.19' && env.RELEASE_PR != 'true'
+        if: matrix.goVer == '1.19'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
