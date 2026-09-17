@@ -2,6 +2,10 @@ name: build
 
 on:
   pull_request:
+    # `labeled` is here only so the `run-tests` escape hatch in run_tests.yml can fire at
+    # all. The default activity types are opened, synchronize and reopened, so without it
+    # applying the label starts no run and the hatch silently does nothing.
+    types: [opened, synchronize, reopened, labeled]
     branches:
       - main
 
@@ -13,8 +17,11 @@ permissions:
   contents: read
 
 jobs:
-  # Keep this job id: main requires the matrix checks by name, and calling through a
-  # reusable workflow prefixes each with it.
+  # Keep this job id: it prefixes every check name that calling through a reusable workflow
+  # produces, so renaming it renames the checks.
   ci:
+    # Every other label has to be ignored, or release-please stamping `autorelease: pending`
+    # on each merged PR would fire the whole six-leg suite against the shared Stream app.
+    if: github.event.action != 'labeled' || github.event.label.name == 'run-tests'
     uses: ./.github/workflows/run_tests.yml
     secrets: inherit
