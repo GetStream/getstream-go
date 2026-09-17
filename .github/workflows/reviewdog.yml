@@ -10,12 +10,8 @@ permissions:
   contents: read
   pull-requests: write
 
-# Release PRs only bump the version and rewrite the changelog, so there is nothing here
-# that has not already passed on the PR it came from. Skipping by `if:` still reports
-# success, so a required status check stays satisfied.
 jobs:
   reviewdog:
-    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
     name: 🐶 Reviewdog
     runs-on: ubuntu-latest
     steps:

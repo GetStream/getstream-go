@@ -17,12 +17,23 @@ concurrency:
 permissions:
   contents: read
 
-# Release PRs only bump the version and rewrite the changelog, and every commit in one
-# already passed this suite on its own PR. The guard sits on each job, not on the caller,
-# so a skipped job still reports success to a required status check.
+env:
+  # True only for a Release PR opened by release-please itself. Keying on the branch name
+  # alone would let any PR, a fork's included, name its branch release-please--x and skip
+  # every required check, which branch protection then counts as satisfied.
+  RELEASE_PR: >-
+    ${{ github.event.pull_request.user.login == 'github-actions[bot]'
+    && github.event.pull_request.head.repo.full_name == github.repository
+    && startsWith(github.head_ref, 'release-please--') }}
+
+# The guard sits on the steps here rather than on the job, unlike the other five SDKs. main
+# requires the six matrix legs of test-build by name, and a job-level `if:` is evaluated
+# before the matrix expands, which is why the matrix context is not available there. A
+# skipped job would produce one check run instead of six, so those required contexts would
+# never appear and the Release PR would sit blocked forever. Guarding the steps keeps every
+# leg reporting while the 20-minute integration leg is the part that goes away.
 jobs:
   test-build:
-    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
     name: 👷 Test & Build ${{ matrix.goVer }}${{ matrix.label }}
     environment: feeds-enabled-shard
     runs-on: ubuntu-latest
@@ -43,7 +54,7 @@ jobs:
           go-version: ${{ matrix.goVer }}
 
       - name: Unit tests via ${{ matrix.goVer }}
-        if: matrix.goVer != '1.19'
+        if: matrix.goVer != '1.19' && env.RELEASE_PR != 'true'
         env:
           STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
           STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
@@ -51,7 +62,7 @@ jobs:
         run: go test -short -v -race ./...
 
       - name: Integration tests via ${{ matrix.goVer }}
-        if: matrix.goVer == '1.19'
+        if: matrix.goVer == '1.19' && env.RELEASE_PR != 'true'
         env:
           STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
           STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
@@ -61,7 +72,7 @@ jobs:
           go tool cover -func=cover.out
 
       - name: Upload coverage to Codecov
-        if: matrix.goVer == '1.19'
+        if: matrix.goVer == '1.19' && env.RELEASE_PR != 'true'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
