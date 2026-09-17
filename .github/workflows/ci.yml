@@ -11,7 +11,11 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
-  cancel-in-progress: true
+  # A labeled event lands in the same group as the synchronize it may be racing, and
+  # concurrency is resolved when the run is queued, before the ci job's `if:` runs, so a
+  # skipped job does not release the slot. Without this, adding any label to a PR cancels
+  # an in-flight suite and replaces it with a run that tests nothing. A push still cancels.
+  cancel-in-progress: ${{ github.event.action != 'labeled' }}
 
 permissions:
   contents: read
@@ -25,3 +29,22 @@ jobs:
     if: github.event.action != 'labeled' || github.event.label.name == 'run-tests'
     uses: ./.github/workflows/run_tests.yml
     secrets: inherit
+
+  # The one context main requires for the suite. Requiring the matrix legs by name instead
+  # would block every Release PR, because a job-level `if:` is evaluated before the matrix
+  # expands and a skipped job yields one check run rather than six. This job is not a matrix,
+  # so it reports either way, and `skipped` counts as satisfied.
+  tests-passed:
+    name: 👷 Tests
+    needs: ci
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the test job
+        env:
+          RESULT: ${{ needs.ci.result }}
+        run: |
+          case "$RESULT" in
+            success|skipped) echo "test job: $RESULT" ;;
+            *) echo "::error::test job reported $RESULT"; exit 1 ;;
+          esac
