@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. Releases are automated by [release-please](https://github.com/googleapis/release-please); see [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## [7.1.1](https://github.com/GetStream/getstream-go/compare/v7.1.0...v7.1.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* **ci:** run the suite before tagging a release ([#162](https://github.com/GetStream/getstream-go/issues/162)) ([3594ac9](https://github.com/GetStream/getstream-go/commit/3594ac94a70bd0b79b2a3cdff607f7c98b908ceb))
+
 ## [7.1.0](https://github.com/GetStream/getstream-go/compare/v7.0.0...v7.1.0) (2026-09-10)
 
 
