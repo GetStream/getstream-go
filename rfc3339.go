@@ -21,12 +21,21 @@ func (t *Timestamp) UnmarshalJSON(data []byte) error {
 	if strData == "null" {
 		return nil
 	}
-
+	// NEW: Try to parse as a JSON string (RFC3339 / ISO8601) first.
+	// JSON strings are wrapped in double quotes.
+	if len(data) >= 2 && data[0] == '"' && data[len(data)-1] == '"' {
+		var parsed time.Time
+		if err := json.Unmarshal(data, &parsed); err != nil {
+			return fmt.Errorf("failed to parse timestamp string: %w", err)
+		}
+		t.Time = &parsed
+		return nil
+	}
+	// FALLBACK: Parse as Unix nanoseconds (integer) as it did originally
 	ns, err := strconv.ParseInt(strData, 10, 64)
 	if err != nil {
 		return fmt.Errorf("failed to parse timestamp: %w", err)
 	}
-
 	utcT := time.Unix(0, ns).UTC()
 	t.Time = &utcT
 	return nil
