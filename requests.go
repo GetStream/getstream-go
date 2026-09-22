@@ -206,6 +206,8 @@ type ChannelBatchUpdateRequest struct {
 	Filter map[string]any `json:"filter"`
 	// Required with the `addMembersHideHistory` operation, and rejected with every other operation including `addMembers`. Hides each matched channel's history before this time from the members the operation adds. Members that already belong to a matched channel are never affected. Must be in RFC3339 format (e.g., "2024-01-01T10:00:00Z") and in the past.
 	HideHistoryBefore *Timestamp `json:"hide_history_before,omitempty"`
+	// For updateData only. Requires a root cids $eq or $in filter with at most 100 CIDs and no root $or/$and. Split larger selections into requests of at most 100 CIDs. A success_channels_count response means the database update completed; a task_id response means it was queued and must be polled, including on older API nodes.
+	Synchronous *bool `json:"synchronous,omitempty"`
 	// `updateData` only. Deletes these keys from each channel's existing custom object, leaving every other custom key untouched. Keys are dot-paths; deleting a key that does not exist is a no-op. Cannot be combined with `data.custom`
 	CustomUnset *[]string                    `json:"custom_unset,omitempty"`
 	Members     *[]ChannelBatchMemberRequest `json:"members,omitempty"`
@@ -1230,11 +1232,12 @@ type DeleteActivityRequest struct {
 	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
 }
 type GetActivityRequest struct {
-	CommentSort   *string `json:"-" query:"comment_sort"`
-	CommentLimit  *int    `json:"-" query:"comment_limit"`
-	UserID        *string `json:"-" query:"user_id"`
-	Language      *string `json:"-" query:"language"`
-	TranslateText *bool   `json:"-" query:"translate_text"`
+	CommentSort       *string `json:"-" query:"comment_sort"`
+	CommentLimit      *int    `json:"-" query:"comment_limit"`
+	SkipOwnFollowings *bool   `json:"-" query:"skip_own_followings"`
+	UserID            *string `json:"-" query:"user_id"`
+	Language          *string `json:"-" query:"language"`
+	TranslateText     *bool   `json:"-" query:"translate_text"`
 }
 type UpdateActivityPartialRequest struct {
 	// Whether to copy custom data to the notification activity (only applies when handle_mention_notifications creates notifications) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
@@ -2080,8 +2083,15 @@ type DeleteFeedUserDataRequest struct {
 }
 type ExportFeedUserDataRequest struct {
 }
+type DeleteUserInterestsRequest struct {
+	Tags []string `json:"-" query:"tags"`
+}
 type GetUserInterestsRequest struct {
 	Limit *int `json:"-" query:"limit"`
+}
+type UpsertUserInterestsRequest struct {
+	// Interest tags to add or update (1-50)
+	Interests []UserInterestRequest `json:"interests"`
 }
 type CreateGuestRequest struct {
 	// User request object
@@ -2197,6 +2207,8 @@ type AnalyzeRequest struct {
 	ConfigKey *string `json:"config_key,omitempty"`
 	// Original timestamp when the content was produced. Used as the `published_at` timestamp on per-content log entries that surface in `matched_contents` on aggregation-rule webhooks.
 	ContentPublishedAt *Timestamp `json:"content_published_at,omitempty"`
+	// ISO 3166-1 alpha-2 country the content is aimed at (e.g. US, DE). Forwarded to the AI text provider as country context so it can resolve words whose meaning changes between countries.
+	CountryCode *string `json:"country_code,omitempty"`
 	// ID of the user who created the content. Required with entity_type + entity_id; omit all three for stateless mode.
 	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
 	// Caller-supplied content identifier. Required with entity_type + entity_creator_id; omit all three for stateless mode.
@@ -2220,6 +2232,8 @@ type AppealRequest struct {
 	EntityID string `json:"entity_id"`
 	// Type of entity being appealed (e.g., message, user)
 	EntityType string `json:"entity_type"`
+	// CID of the channel ban being appealed. Only used when entity_type is stream:user; omit to appeal the global ban.
+	ChannelCid *string `json:"channel_cid,omitempty"`
 	// ID of the review queue item (flagged message) that triggered the ban. Applicable only for user ban appeals.
 	ReviewQueueItemID *string `json:"review_queue_item_id,omitempty"`
 	UserID            *string `json:"user_id,omitempty"`
@@ -2303,6 +2317,8 @@ type CheckRequest struct {
 	ConfigTeam *string `json:"config_team,omitempty"`
 	// Original timestamp when the content was produced (for correlating flagged content with source video timeline)
 	ContentPublishedAt *Timestamp `json:"content_published_at,omitempty"`
+	// ISO 3166-1 alpha-2 country the content is aimed at (e.g. US, DE), used as country context by AI text providers
+	CountryCode *string `json:"country_code,omitempty"`
 	// Whether to run moderation in test mode
 	TestMode          *bool              `json:"test_mode,omitempty"`
 	UserID            *string            `json:"user_id,omitempty"`
@@ -2430,7 +2446,7 @@ type LabelsRequest struct {
 	ContentType *string `json:"content_type,omitempty"`
 	// When true, run moderation and return labels without persisting the result. Useful for one-off checks (e.g. UI testers) that should not be recorded in the stored history.
 	DryRun *bool `json:"dry_run,omitempty"`
-	// Optional moderation policy key (max 128 chars). For username moderation, set this to a policy whose key starts with 'username:' (e.g. 'username:default') to opt into the low-latency fast-path: blocklists (customer + Stream-managed defaults) short-circuit the LLM, and the LLM fallback uses gpt-4.1-nano with a 24h Valkey verdict cache. Without a 'username:' prefix the request falls through to the standard Bodyguard Analyze v1 username path.
+	// Optional moderation policy key (max 128 chars). For username moderation, set this to a policy whose key starts with 'username:' (e.g. 'username:default') to opt into the low-latency fast-path: blocklists (customer + Stream-managed defaults) short-circuit the LLM, and the LLM fallback uses gpt-4o-mini (overridable via moderation_settings.llm_username_model) with a 24h Valkey verdict cache. Without a 'username:' prefix the request falls through to the standard Bodyguard Analyze v1 username path.
 	Policy *string `json:"policy,omitempty"`
 	// Optional customer-supplied user identifier for the content author (max 256 chars). Enables filtering stored results by user_id.
 	UserID *string `json:"user_id,omitempty"`
@@ -2820,6 +2836,7 @@ type DeletePollOptionRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
 type GetPollOptionRequest struct {
+	UserID *string `json:"-" query:"user_id"`
 }
 type QueryPollVotesRequest struct {
 	UserID *string `json:"-" query:"user_id"`
@@ -3217,6 +3234,8 @@ type RingCallRequest struct {
 	Video *bool `json:"video,omitempty"`
 	// Members that should receive the ring. If no ids are provided, all call members who are not already in the call will receive ring notifications.
 	MembersIds *[]string `json:"members_ids,omitempty"`
+	// Opaque context stored on the ring attempt; refs and IDs only
+	Custom *map[string]any `json:"custom,omitempty"`
 }
 type StartRTMPBroadcastsRequest struct {
 	// List of broadcasts to start

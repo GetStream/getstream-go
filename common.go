@@ -456,7 +456,8 @@ func (c *Client) GetPollOption(ctx context.Context, pollID string, optionID stri
 		"poll_id":   pollID,
 		"option_id": optionID,
 	}
-	res, err := MakeRequest[any, PollOptionResponse](c, ctx, "GET", "/api/v2/polls/{poll_id}/options/{option_id}", nil, nil, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, PollOptionResponse](c, ctx, "GET", "/api/v2/polls/{poll_id}/options/{option_id}", params, nil, &result, pathParams)
 	return res, err
 }
 

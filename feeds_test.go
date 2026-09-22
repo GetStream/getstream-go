@@ -751,10 +751,24 @@ func TestFeedsExportFeedUserData(t *testing.T) {
 	_, err = client.Feeds().ExportFeedUserData(context.Background(), "", &getstream.ExportFeedUserDataRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsDeleteUserInterests(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().DeleteUserInterests(context.Background(), "", &getstream.DeleteUserInterestsRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsGetUserInterests(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
 	_, err = client.Feeds().GetUserInterests(context.Background(), "", &getstream.GetUserInterestsRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsUpsertUserInterests(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().UpsertUserInterests(context.Background(), "", &getstream.UpsertUserInterestsRequest{})
 	require.NoError(t, err)
 }

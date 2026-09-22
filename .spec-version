@@ -1,2 +1,2 @@
-spec: chat-master-a0141d8f (#16794 local; protocol latest still openapi-v238.0.1)
-generator: chat v238.0.1-17-ga0141d8f6f
+spec: openapi-v239.9.0
+generator: chat v239.4.3-7-g75f7ffddff

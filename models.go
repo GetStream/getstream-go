@@ -35,10 +35,9 @@ type AITextConfig struct {
 }
 
 type AIVideoConfig struct {
-	Async    *bool                `json:"async,omitempty"`
-	Enabled  *bool                `json:"enabled,omitempty"`
-	Provider *string              `json:"provider,omitempty"`
-	Rules    []AWSRekognitionRule `json:"rules,omitempty"`
+	Async   *bool                `json:"async,omitempty"`
+	Enabled *bool                `json:"enabled,omitempty"`
+	Rules   []AWSRekognitionRule `json:"rules,omitempty"`
 }
 
 type AIVideoConfigRequest struct {
@@ -705,8 +704,12 @@ type AddCommentBookmarkResponse struct {
 }
 
 type AddCommentReactionResponse struct {
+	// The change this write made to the number of reactions the user holds on this target: 1 when outcome is 'created', 0 when it is 'replaced' or 'unchanged'. These endpoints never return -1; a successful delete-reaction call is what decrements the count. With enforce_unique this is the delta of the user's reaction on the target; without it, the delta of reactions of this type.
+	CounterDelta int `json:"counter_delta"`
 	// Duration of the request
-	Duration string                `json:"duration"`
+	Duration string `json:"duration"`
+	// What this write did to the user's reaction on this target. One of: created, replaced, unchanged. 'created' means a new reaction was written and nothing was replaced; 'replaced' means enforce_unique removed one or more of the user's other reaction types; 'unchanged' means the user already held this reaction type (its custom data may still have been updated). Without enforce_unique a user can hold several reaction types on one target, so 'created' then means 'this reaction type was newly added', not 'the user's first reaction on this target'.
+	Outcome  string                `json:"outcome"`
 	Comment  CommentResponse       `json:"comment"`
 	Reaction FeedsReactionResponse `json:"reaction"`
 	// Whether notification creation was accepted for asynchronous processing
@@ -715,8 +718,10 @@ type AddCommentReactionResponse struct {
 	// Deprecated: this field is deprecated.
 	NotificationCreated *bool `json:"notification_created,omitempty"`
 	// ID of the async notification-creation task; poll GET /tasks/{id} for its status
-	NotificationTaskID *string           `json:"notification_task_id,omitempty"`
-	ReferenceActivity  *ActivityResponse `json:"reference_activity,omitempty"`
+	NotificationTaskID *string `json:"notification_task_id,omitempty"`
+	// The reaction type this write replaced, or null when nothing was replaced. Non-null exactly when outcome is 'replaced'. If enforce_unique removed several reactions — possible only for data created before enforce_unique was adopted — this is the most recently created one.
+	PreviousReactionType *string           `json:"previous_reaction_type,omitempty"`
+	ReferenceActivity    *ActivityResponse `json:"reference_activity,omitempty"`
 }
 
 type AddCommentResponse struct {
@@ -764,7 +769,11 @@ type AddReactionRequest struct {
 }
 
 type AddReactionResponse struct {
-	Duration string                `json:"duration"`
+	// The change this write made to the number of reactions the user holds on this target: 1 when outcome is 'created', 0 when it is 'replaced' or 'unchanged'. These endpoints never return -1; a successful delete-reaction call is what decrements the count. With enforce_unique this is the delta of the user's reaction on the target; without it, the delta of reactions of this type.
+	CounterDelta int    `json:"counter_delta"`
+	Duration     string `json:"duration"`
+	// What this write did to the user's reaction on this target. One of: created, replaced, unchanged. 'created' means a new reaction was written and nothing was replaced; 'replaced' means enforce_unique removed one or more of the user's other reaction types; 'unchanged' means the user already held this reaction type (its custom data may still have been updated). Without enforce_unique a user can hold several reaction types on one target, so 'created' then means 'this reaction type was newly added', not 'the user's first reaction on this target'.
+	Outcome  string                `json:"outcome"`
 	Activity ActivityResponse      `json:"activity"`
 	Reaction FeedsReactionResponse `json:"reaction"`
 	// Whether notification creation was accepted for asynchronous processing
@@ -773,8 +782,10 @@ type AddReactionResponse struct {
 	// Deprecated: this field is deprecated.
 	NotificationCreated *bool `json:"notification_created,omitempty"`
 	// ID of the async notification-creation task; poll GET /tasks/{id} for its status
-	NotificationTaskID *string           `json:"notification_task_id,omitempty"`
-	ReferenceActivity  *ActivityResponse `json:"reference_activity,omitempty"`
+	NotificationTaskID *string `json:"notification_task_id,omitempty"`
+	// The reaction type this write replaced, or null when nothing was replaced. Non-null exactly when outcome is 'replaced'. If enforce_unique removed several reactions — possible only for data created before enforce_unique was adopted — this is the most recently created one.
+	PreviousReactionType *string           `json:"previous_reaction_type,omitempty"`
+	ReferenceActivity    *ActivityResponse `json:"reference_activity,omitempty"`
 }
 
 // Response for adding members to a user group
@@ -812,6 +823,8 @@ type AggregationConfig struct {
 	ActivitiesSort *string `json:"activities_sort,omitempty"`
 	// Format for activity aggregation
 	Format *string `json:"format,omitempty"`
+	// Maximum number of activities kept in each aggregated group. Omit to use the default of 100. Must be between 1 and 100 when set.
+	GroupSize *int `json:"group_size,omitempty"`
 	// Strategy for computing aggregated group scores from member activity scores when ranking is enabled. Valid values: sum, max, avg
 	ScoreStrategy *string `json:"score_strategy,omitempty"`
 }
@@ -860,6 +873,7 @@ type AppResponseFields struct {
 	AllowMultiUserDevices                 bool                            `json:"allow_multi_user_devices"`
 	AsyncUrlEnrichEnabled                 bool                            `json:"async_url_enrich_enabled"`
 	AutoTranslationEnabled                bool                            `json:"auto_translation_enabled"`
+	BeforeMessageSendHookSystemMessages   bool                            `json:"before_message_send_hook_system_messages"`
 	CampaignEnabled                       bool                            `json:"campaign_enabled"`
 	CdnExpirationSeconds                  int                             `json:"cdn_expiration_seconds"`
 	CustomActionHandlerUrl                string                          `json:"custom_action_handler_url"`
@@ -965,7 +979,9 @@ type AppealItemResponse struct {
 	UpdatedAt Timestamp `json:"updated_at"`
 	// Text severity level assigned by the AI provider
 	AiTextSeverity *string `json:"ai_text_severity,omitempty"`
-	// CID of the channel the entity belongs to, if applicable
+	// Detected language of the appeal_reason text itself
+	AppealReasonLanguage *string `json:"appeal_reason_language,omitempty"`
+	// CID of the channel the entity belongs to (content appeals), or of the channel ban being appealed (stream:user appeals). Empty for a global ban appeal.
 	ChannelCid *string `json:"channel_cid,omitempty"`
 	// Moderation policy key that was applied
 	ConfigKey *string `json:"config_key,omitempty"`
@@ -986,10 +1002,12 @@ type AppealItemResponse struct {
 	// Types of flags applied to the entity (e.g. user_report, bodyguard)
 	FlagTypes []string `json:"flag_types,omitempty"`
 	// Per-provider flag records explaining why the action was taken
-	Flags                    []ModerationFlagResponse `json:"flags,omitempty"`
-	EntityContent            *ModerationPayload       `json:"entity_content,omitempty"`
-	ModerationAction         *ActionLogResponse       `json:"moderation_action,omitempty"`
-	OriginalModerationAction *ActionLogResponse       `json:"original_moderation_action,omitempty"`
+	Flags []ModerationFlagResponse `json:"flags,omitempty"`
+	// Detected languages in the content
+	Languages                []string           `json:"languages,omitempty"`
+	EntityContent            *ModerationPayload `json:"entity_content,omitempty"`
+	ModerationAction         *ActionLogResponse `json:"moderation_action,omitempty"`
+	OriginalModerationAction *ActionLogResponse `json:"original_moderation_action,omitempty"`
 	// User response object
 	User *UserResponse `json:"user,omitempty"`
 }
@@ -2325,6 +2343,8 @@ type CallRingEvent struct {
 	User UserResponse `json:"user"`
 	// The type of event: "call.notification" in this case
 	Type string `json:"type"`
+	// Identifies this ring of the call session
+	RingID *string `json:"ring_id,omitempty"`
 }
 
 func (e *CallRingEvent) GetEventType() string {
@@ -2993,11 +3013,12 @@ func (e *ChannelBatchStartedEvent) GetEventType() string {
 	return e.Type
 }
 
-// Basic response information
 type ChannelBatchUpdateResponse struct {
-	// Duration of the request in milliseconds
-	Duration string  `json:"duration"`
-	TaskID   *string `json:"task_id,omitempty"`
+	Duration string `json:"duration"`
+	// Positive count of channels selected for a completed synchronous database update, not an affected-row count. Concurrent deletion may reduce the rows written. task_id is absent.
+	SuccessChannelsCount *int `json:"success_channels_count,omitempty"`
+	// Present for asynchronous updates. Poll this task even if synchronous was requested: an older API node may have queued the update.
+	TaskID *string `json:"task_id,omitempty"`
 }
 
 type ChannelConfig struct {
@@ -4050,6 +4071,8 @@ type ClientEvent struct {
 	SdkVersion *string `json:"sdk_version,omitempty"`
 	// Identifier of the SFU the client was attempting to connect to. Required on WSJoin and PeerConnectionConnect failure, and on FirstAudioFrame and FirstVideoFrame.
 	SfuID *string `json:"sfu_id,omitempty"`
+	// Source of the coordinator join. Optional on CoordinatorJoin events; omitted when not provided.
+	Source *string `json:"source,omitempty"`
 	// Discriminator identifying the event kind. JoinInitiated marks the start of a join attempt; join-lifecycle events use CoordinatorJoin, CoordinatorWS, WSJoin, or PeerConnectionConnect; media-readiness events use FirstAudioFrame or FirstVideoFrame; MediaDevicePermission reports device permission results; other values denote generic client events.
 	Stage *string `json:"stage,omitempty"`
 	// UUID generated by the client at initiation. Identical on the matching completion event. Absent on JoinInitiated.
@@ -5039,6 +5062,13 @@ type DeleteTranscriptionResponse struct {
 	Duration string `json:"duration"`
 }
 
+// The user's remaining interest tags, ordered by descending weight, then manually set tags before computed ones, then descending count, then ascending tag name
+type DeleteUserInterestsResponse struct {
+	Duration string `json:"duration"`
+	// Interest tags still set on the user
+	Interests []InterestTagResponse `json:"interests"`
+}
+
 // Configuration for deleting all of a user's chat messages without banning them or deleting their account
 type DeleteUserMessagesRequestPayload struct {
 	// Message deletion mode: soft, pruning, or hard
@@ -5418,6 +5448,7 @@ type EventHook struct {
 	SnsSecret                          *string                        `json:"sns_secret,omitempty"`
 	SnsTopicArn                        *string                        `json:"sns_topic_arn,omitempty"`
 	SqsAuthType                        *string                        `json:"sqs_auth_type,omitempty"`
+	SqsEventBasedMessageGroupIDEnabled *bool                          `json:"sqs_event_based_message_group_id_enabled,omitempty"`
 	SqsKey                             *string                        `json:"sqs_key,omitempty"`
 	SqsQueueUrl                        *string                        `json:"sqs_queue_url,omitempty"`
 	SqsRegion                          *string                        `json:"sqs_region,omitempty"`
@@ -6233,6 +6264,8 @@ type FilterConfigResponse struct {
 	ConfigKeys []string `json:"config_keys,omitempty"`
 	// The moderation_payload.custom keys the app has configured as review-queue filter chips (via moderation_dashboard_preferences.filterable_custom_keys). Discovery hint for the dashboard only — the filter accepts any custom key regardless of this list.
 	FilterableCustomKeys []string `json:"filterable_custom_keys,omitempty"`
+	// Names of the app's moderation rules, available as filter values on the `label` field when filtering rule-flagged content. Includes disabled rules, since items flagged before a rule was turned off still carry its name; excludes deleted ones. Scoped to the caller's teams on a multi-tenant app. Capped at 30 names, ordered by name, so an app above that cap is listed partially.
+	RuleNames []string `json:"rule_names,omitempty"`
 	// AI image moderation labels available as filter values, as a map of L1 label to its L2 sub-labels. Reflects the app's effective image taxonomy: custom Bodyguard taxonomy when enabled, otherwise the standard catalogue of the org's enabled image providers.
 	AiImageTaxonomy map[string][]string `json:"ai_image_taxonomy,omitempty"`
 }
@@ -6344,9 +6377,11 @@ type FloodIdenticalConfig struct {
 }
 
 type FloodIdenticalRuleParameters struct {
-	Threshold  *int     `json:"threshold,omitempty"`
-	TimeWindow *string  `json:"time_window,omitempty"`
-	Allowlist  []string `json:"allowlist,omitempty"`
+	MinTextLength    *int     `json:"min_text_length,omitempty"`
+	Threshold        *int     `json:"threshold,omitempty"`
+	TimeWindow       *string  `json:"time_window,omitempty"`
+	TrackAcrossUsers *bool    `json:"track_across_users,omitempty"`
+	Allowlist        []string `json:"allowlist,omitempty"`
 }
 
 type FloodSimilarConfig struct {
@@ -7104,10 +7139,10 @@ type GetUserGroupResponse struct {
 	UserGroup *UserGroupResponse `json:"user_group,omitempty"`
 }
 
-// User's computed interest tags ordered by descending count, then ascending tag name
+// User's interest tags ordered by descending weight, then manually set tags before computed ones, then descending count, then ascending tag name
 type GetUserInterestsResponse struct {
 	Duration string `json:"duration"`
-	// Top-N interest tags sorted by descending count, then alphabetically by tag
+	// Interest tags sorted by descending weight, then manually set tags before computed ones, then descending count, then alphabetically by tag
 	Interests []InterestTagResponse `json:"interests"`
 }
 
@@ -7509,12 +7544,16 @@ type InsertActionLogResponse struct {
 	Duration string `json:"duration"`
 }
 
-// An interest tag with the number of distinct activities the user reacted to that carried it
+// An interest tag of a user with its ranking weight and, for computed tags, how many distinct reacted-to activities carried it
 type InterestTagResponse struct {
-	// Number of distinct reacted-to activities tagged with this value
+	// Lifetime number of distinct reacted-to activities tagged with this value, without decay; 0 for manually set tags
 	Count int `json:"count"`
+	// How the tag was set: computed (from the user's reactions) or manual (through the API)
+	Source string `json:"source"`
 	// The interest tag value
 	Tag string `json:"tag"`
+	// Ranking weight between -1.0 and 1.0. Computed tags carry a recency-decayed weight in (0, 1.0]: the user's strongest tag is 1.0 and every other a proportional share
+	Weight float64 `json:"weight"`
 }
 
 type JoinCallAPIMetrics struct {
@@ -8834,6 +8873,7 @@ type ModerationDashboardPreferences struct {
 	AsyncReviewQueueUpsert         *bool                      `json:"async_review_queue_upsert,omitempty"`
 	BlockForeignCdnAttachments     *bool                      `json:"block_foreign_cdn_attachments,omitempty"`
 	CustomViewsEnabled             *bool                      `json:"custom_views_enabled,omitempty"`
+	DisableActionLogs              *bool                      `json:"disable_action_logs,omitempty"`
 	DisableAuditLogs               *bool                      `json:"disable_audit_logs,omitempty"`
 	DisableFlaggingReviewedEntity  *bool                      `json:"disable_flagging_reviewed_entity,omitempty"`
 	EnforceShadowServerSide        *bool                      `json:"enforce_shadow_server_side,omitempty"`
@@ -8928,6 +8968,7 @@ func (e *ModerationMarkReviewedEvent) GetEventType() string {
 }
 
 type ModerationPayload struct {
+	CountryCode      *string           `json:"country_code,omitempty"`
 	Audios           []string          `json:"audios,omitempty"`
 	ImageOrderedKeys []string          `json:"image_ordered_keys,omitempty"`
 	Images           []string          `json:"images,omitempty"`
@@ -9839,9 +9880,10 @@ type PollOptionResponse struct {
 }
 
 type PollOptionResponseData struct {
-	ID     string         `json:"id"`
-	Text   string         `json:"text"`
-	Custom map[string]any `json:"custom"`
+	ID       string            `json:"id"`
+	Text     string            `json:"text"`
+	Custom   map[string]any    `json:"custom"`
+	TextI18n map[string]string `json:"text_i18n,omitempty"`
 }
 
 type PollResponse struct {
@@ -9873,7 +9915,9 @@ type PollResponseData struct {
 	IsClosed            *bool                             `json:"is_closed,omitempty"`
 	MaxVotesAllowed     *int                              `json:"max_votes_allowed,omitempty"`
 	// User response object
-	CreatedBy *UserResponse `json:"created_by,omitempty"`
+	CreatedBy       *UserResponse     `json:"created_by,omitempty"`
+	DescriptionI18n map[string]string `json:"description_i18n,omitempty"`
+	NameI18n        map[string]string `json:"name_i18n,omitempty"`
 }
 
 type PollVoteResponse struct {
@@ -9884,14 +9928,15 @@ type PollVoteResponse struct {
 }
 
 type PollVoteResponseData struct {
-	CreatedAt  Timestamp `json:"created_at"`
-	ID         string    `json:"id"`
-	OptionID   string    `json:"option_id"`
-	PollID     string    `json:"poll_id"`
-	UpdatedAt  Timestamp `json:"updated_at"`
-	AnswerText *string   `json:"answer_text,omitempty"`
-	IsAnswer   *bool     `json:"is_answer,omitempty"`
-	UserID     *string   `json:"user_id,omitempty"`
+	CreatedAt      Timestamp         `json:"created_at"`
+	ID             string            `json:"id"`
+	OptionID       string            `json:"option_id"`
+	PollID         string            `json:"poll_id"`
+	UpdatedAt      Timestamp         `json:"updated_at"`
+	AnswerText     *string           `json:"answer_text,omitempty"`
+	IsAnswer       *bool             `json:"is_answer,omitempty"`
+	UserID         *string           `json:"user_id,omitempty"`
+	AnswerTextI18n map[string]string `json:"answer_text_i18n,omitempty"`
 	// User response object
 	User *UserResponse `json:"user,omitempty"`
 }
@@ -11477,6 +11522,8 @@ type RingCallResponse struct {
 	Duration string `json:"duration"`
 	// List of members ringing notification was sent to
 	MembersIds []string `json:"members_ids"`
+	// The ring this call created, for correlating the accept, reject and missed outcomes that follow
+	RingID *string `json:"ring_id,omitempty"`
 }
 
 type RingSettings struct {
@@ -11549,6 +11596,7 @@ type RuleBuilderCondition struct {
 	UserCustomPropertyParams         *UserCustomPropertyParameters         `json:"user_custom_property_params,omitempty"`
 	UserFlagCountRuleParams          *FlagCountRuleParameters              `json:"user_flag_count_rule_params,omitempty"`
 	UserIdenticalContentCountParams  *UserIdenticalContentCountParameters  `json:"user_identical_content_count_params,omitempty"`
+	UserIdenticalImageCountParams    *UserIdenticalImageCountParameters    `json:"user_identical_image_count_params,omitempty"`
 	UserReactionCountParams          *UserReactionCountRuleParameters      `json:"user_reaction_count_params,omitempty"`
 	UserRoleParams                   *UserRoleParameters                   `json:"user_role_params,omitempty"`
 	UserRuleParams                   *UserRuleParameters                   `json:"user_rule_params,omitempty"`
@@ -13371,6 +13419,13 @@ type UpsertSetupSessionResponse struct {
 	SetupSession *SetupSession `json:"setup_session,omitempty"`
 }
 
+// The user's interest tags after the write, ordered by descending weight, then manually set tags before computed ones, then descending count, then ascending tag name
+type UpsertUserInterestsResponse struct {
+	Duration string `json:"duration"`
+	// All interest tags of the user after the write
+	Interests []InterestTagResponse `json:"interests"`
+}
+
 type User struct {
 	ID   string         `json:"id"`
 	Data map[string]any `json:"data,omitempty"`
@@ -13631,6 +13686,21 @@ type UserIdenticalContentCountParameters struct {
 	TimeWindow *string `json:"time_window,omitempty"`
 }
 
+type UserIdenticalImageCountParameters struct {
+	Match              *string `json:"match,omitempty"`
+	SimilarityDistance *int    `json:"similarity_distance,omitempty"`
+	Threshold          *int    `json:"threshold,omitempty"`
+	TimeWindow         *string `json:"time_window,omitempty"`
+}
+
+// An interest tag to set on a user with its ranking weight
+type UserInterestRequest struct {
+	// The interest tag; trimmed and lower-cased like activity interest_tags
+	Tag string `json:"tag"`
+	// Ranking weight between -1.0 (dislike) and 1.0 (like). Defaults to 1.0
+	Weight *float64 `json:"weight,omitempty"`
+}
+
 // This event is sent when a user's message get deleted. The event contains information about the user whose messages got deleted.
 type UserMessagesDeletedEvent struct {
 	// Date/time of creation
@@ -13693,6 +13763,7 @@ type UserRatingReportResponse struct {
 }
 
 type UserReactionCountRuleParameters struct {
+	Count      *string `json:"count,omitempty"`
 	Threshold  *int    `json:"threshold,omitempty"`
 	TimeWindow *string `json:"time_window,omitempty"`
 }
