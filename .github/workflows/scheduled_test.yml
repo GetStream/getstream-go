@@ -19,10 +19,12 @@ jobs:
   # only to whoever last edited the cron. Not failure(): a job that hits timeout-minutes
   # concludes `cancelled`, and a hung run must report too. Default branch only: a manual
   # dispatch on a feature branch must not touch main's issue.
+  # A schedule event carries no repository in its payload, so it passes by event name; it
+  # always runs on the default branch anyway.
   report:
     name: Report a red run
     needs: integration
-    if: ${{ !cancelled() && needs.integration.result != 'success' && github.ref_name == github.event.repository.default_branch }}
+    if: ${{ !cancelled() && needs.integration.result != 'success' && (github.event_name == 'schedule' || github.ref_name == github.event.repository.default_branch) }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
