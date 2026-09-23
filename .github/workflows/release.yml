@@ -39,11 +39,7 @@ jobs:
           target-branch: ${{ github.ref_name }}
           skip-github-release: true
 
-  # The tag is irreversible and, for Go, permanent: proxy.golang.org caches it forever.
-  # So the suite has to run before it, which means knowing a release is pending before
-  # the suite starts. The tag lands on the merged Release PR's merge commit while the
-  # suite runs on this workflow's own commit, so `ready` also requires those to be the
-  # same commit. They are, on the path that matters: the push of that merge.
+  # The tag is irreversible and, for Go, permanent: proxy.golang.org caches it forever, so they run only on the push that merged the Release PR: `ready` requires the pending release's merge commit to be this run's commit. No test run gates them, because the Release PR adds only the version bump and changelog to an already-tested default branch.
   detect:
     name: Detect pending release
     if: github.ref_name == 'main' || endsWith(github.ref_name, '.x')
@@ -178,18 +174,10 @@ jobs:
           fi
           echo "Release $version will be tagged at $SHA, where go.mod is $module_path."
 
-  tests:
-    name: Tests
-    needs: detect
-    if: needs.detect.outputs.ready == 'true'
-    uses: ./.github/workflows/run_tests.yml
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
   # Irreversible half.
   release:
     name: 🚀 Tag and release
-    needs: [detect, tests]
+    needs: detect
     if: needs.detect.outputs.ready == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5

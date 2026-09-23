@@ -14,7 +14,7 @@ CI follows the same split:
 | --- | --- | --- |
 | Pull request | `go test -short` on Go 1.19 to 1.24 | yes, `🧪 Tests` |
 | Daily at 14:00 UTC | the full suite on Go 1.24 | no, a red run opens an issue |
-| Push to `main` with a release pending | the unit lane | yes, it gates the tag |
+| Release PR merged | nothing, it tags and publishes | no |
 
 The full suite requires at least two environment variables: `STREAM_API_KEY` and `STREAM_API_SECRET`. There are multiple ways to provide that:
 - simply set it in your current shell (`export STREAM_API_KEY=xyz`)
@@ -63,7 +63,7 @@ Releases are driven by [release-please](https://github.com/googleapis/release-pl
 - release-please keeps a Release PR open with the version bump and the generated changelog. Review it.
 - The Release PR is opened by `github-actions[bot]`, so its CI runs are held at "action required". If the PR is behind `main`, clicking **Update branch** also releases them, because that commit is attributed to you; otherwise click **Approve and run**. It needs a code-owner approval like any other PR.
 - The unit lane does not run on a Release PR, whichever of those two paths you take, and `🧪 Tests` still reports satisfied. A Release PR only bumps the version and rewrites the changelog. `Lint`, `reviewdog`, CodeQL and the PR-title check still run. Label the PR `run-tests` if you want the unit lane anyway.
-- Merge the Release PR. That creates the tag and the GitHub Release, and `proxy.golang.org` picks the tag up. There is no separate publish step. The unit lane does run before the tag: `release.yml` calls it on the merge commit, and a failure there leaves `autorelease: pending` set and needs the manual recovery below. Integration tests are advisory and gate none of it.
+- Merge the Release PR. That creates the tag and the GitHub Release, and `proxy.golang.org` picks the tag up. There is no separate publish step and no further test run: the Release PR adds only the version bump and changelog to an already-tested `main`. Integration tests are advisory and gate none of it.
 
 Only `feat`, `fix`, `perf` and breaking changes produce a release (`revert` may also). A window of only `chore`, `ci`, `docs`, `test`, `refactor`, `style` or `build` commits produces no Release PR, which is intended.
 
