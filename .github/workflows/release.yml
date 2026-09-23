@@ -183,6 +183,8 @@ jobs:
     needs: detect
     if: needs.detect.outputs.ready == 'true'
     uses: ./.github/workflows/run_tests.yml
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   # Irreversible half.
   release:

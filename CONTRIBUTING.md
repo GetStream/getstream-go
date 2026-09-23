@@ -16,8 +16,8 @@ CI follows the same split:
 | Daily at 14:00 UTC | the full suite on Go 1.24 | no, a red run opens an issue |
 | Push to `main` with a release pending | the unit lane | yes, it gates the tag |
 
-The full suite requires at least two environment variables: `STREAM_KEY` and `STREAM_SECRET`. There are multiple ways to provide that:
-- simply set it in your current shell (`export STREAM_KEY=xyz`)
+The full suite requires at least two environment variables: `STREAM_API_KEY` and `STREAM_API_SECRET`. There are multiple ways to provide that:
+- simply set it in your current shell (`export STREAM_API_KEY=xyz`)
 - you could use [direnv](https://direnv.net/)
 - if you debug the tests in VS Code, you can set up an env file there as well: `"go.testEnvFile": "${workspaceFolder}/.env"`.
 
