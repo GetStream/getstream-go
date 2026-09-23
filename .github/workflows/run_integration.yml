@@ -1,0 +1,39 @@
+name: _run-integration
+
+on:
+  workflow_call:
+    secrets:
+      STREAM_API_SECRET:
+        # Lives in the feeds-enabled-shard environment, not at repo level, so it is not
+        # inheritable at call time; the job resolves it by declaring that environment below.
+        required: false
+
+concurrency:
+  # Repository-wide, on purpose. The contended resource is the Stream app, not the branch.
+  # Not cancel-in-progress: a half-run leaves users and channels behind.
+  group: run-integration
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: 🧪 Integration tests
+    environment: feeds-enabled-shard
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go 1.24
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Integration tests
+        env:
+          STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
+          STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
+          STREAM_API_SECRET: ${{ secrets.STREAM_API_SECRET }}
+        run: go test -v -race -parallel 16 -timeout 20m ./...

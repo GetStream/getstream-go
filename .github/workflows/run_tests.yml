@@ -3,10 +3,6 @@ name: _run-tests
 on:
   workflow_call:
     secrets:
-      STREAM_API_SECRET:
-        # Lives in the feeds-enabled-shard environment, not at repo level, so it is not
-        # inheritable at call time; the job resolves it by declaring that environment below.
-        required: false
       CODECOV_TOKEN:
         required: false
 
@@ -17,43 +13,18 @@ concurrency:
 permissions:
   contents: read
 
-# If main ever requires the matrix legs of test-build by name again, this guard must move
-# back to the steps. A job-level `if:` is evaluated before the matrix expands, which is why
-# the matrix context is not available there, so a skipped job produces ONE check run and not
-# six, and those six required contexts would never appear: every Release PR would block
-# forever. main currently requires only the PR-title check, which is what makes the
-# job-level form safe. Keep the guard on the job rather than on the calling job in ci.yml
-# either way, because a job skipped by `if:` reports success and satisfies a required status
-# check, while a reusable workflow that is never called produces no check at all.
+# The unit lane declares no environment and receives no Stream credentials. Keep it that
+# way: a fork PR gets no secrets and still goes green, and a live test added without
+# skipIfShort fails here instead of passing against a live Stream app.
 jobs:
   test-build:
-    # Skip a Release PR that release-please opened on a branch in this repository. The three
-    # clauses are all needed: the PR author cannot be forged, but on its own the branch name
-    # would let any PR, a fork's included, call itself release-please--x and skip everything.
-    #
-    # github.actor is deliberately not a clause. CONTRIBUTING tells maintainers to click
-    # Update branch, which attributes that merge commit to them, so keying on the pusher
-    # would mean the skip never fires on the documented release path. The cost is that a
-    # human commit pushed onto a Release PR is not tested here. release.yml runs this same
-    # workflow against the merge commit before it tags, and that is what gates the release.
-    #
-    # Label a Release PR `run-tests` to force the suite to run anyway.
-    if: >-
-      ${{ contains(github.event.pull_request.labels.*.name, 'run-tests')
-      || !(github.event.pull_request.user.login == 'github-actions[bot]'
-      && github.event.pull_request.head.repo.full_name == github.repository
-      && startsWith(github.head_ref, 'release-please--')) }}
-    name: 👷 Test & Build ${{ matrix.goVer }}${{ matrix.label }}
-    environment: feeds-enabled-shard
+    name: 🧪 Test & Build ${{ matrix.goVer }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
-      max-parallel: 3
       fail-fast: false
       matrix:
         goVer: ['1.19', '1.20', '1.21', '1.22', '1.23', '1.24']
-        include:
-          - goVer: '1.19'
-            label: ' & Integration'
     steps:
       - uses: actions/checkout@v4
 
@@ -63,22 +34,7 @@ jobs:
           go-version: ${{ matrix.goVer }}
 
       - name: Unit tests via ${{ matrix.goVer }}
-        if: matrix.goVer != '1.19'
-        env:
-          STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
-          STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
-          STREAM_API_SECRET: ${{ secrets.STREAM_API_SECRET }}
-        run: go test -short -v -race ./...
-
-      - name: Integration tests via ${{ matrix.goVer }}
-        if: matrix.goVer == '1.19'
-        env:
-          STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
-          STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
-          STREAM_API_SECRET: ${{ secrets.STREAM_API_SECRET }}
-        run: |
-          go test -coverprofile cover.out -v -race -parallel 16 -timeout 20m ./...
-          go tool cover -func=cover.out
+        run: go test -short -v -race -coverprofile cover.out ./...
 
       - name: Upload coverage to Codecov
         if: matrix.goVer == '1.19'
