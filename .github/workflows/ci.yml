@@ -5,38 +5,73 @@ on:
     branches:
       - main
 
+# Needed at this level, not only in run_tests.yml: cancelling the reusable workflow's job
+# does not cancel this run, so tests-passed would still run, read `cancelled` and publish a
+# red aggregator for a push that has already been superseded. Keyed on the PR number because
+# head_ref is the bare branch name and collides across forks.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  # Keep this job id: it prefixes every check name that calling through a reusable workflow
-  # produces, so renaming it renames the checks.
+  # Skipped on a Release PR: it only bumps the version and rewrites the changelog. Not
+  # keyed on github.actor, which is the pusher: clicking Update branch reattributes the
+  # merge commit to whoever clicked, and the skip would stop firing on the documented
+  # release path. The author and head repo clauses are what make it unforgeable; the branch
+  # name on its own would let any PR, a fork's included, call its branch release-please--x.
+  # Label a Release PR `run-tests` to force the lane anyway.
+  #
+  # Keep this job id: it prefixes every check name the reusable workflow produces.
   ci:
+    if: >-
+      ${{ contains(github.event.pull_request.labels.*.name, 'run-tests')
+      || !(github.event.pull_request.user.login == 'github-actions[bot]'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && startsWith(github.head_ref, 'release-please--')) }}
     uses: ./.github/workflows/run_tests.yml
-    secrets: inherit
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  # The context to require on main for the suite. Requiring the matrix legs by name instead
-  # would block every Release PR, because a job-level `if:` is evaluated before the matrix
-  # expands and a skipped job yields one check run rather than six. This job is not a matrix,
-  # so it reports either way, and `skipped` counts as satisfied, which is what lets a Release
-  # PR through. Only a real run of this workflow can republish it, which is why the run-tests
-  # escape hatch lives in label_tests.yml: a label event reaching here would republish the
-  # context having tested nothing, turning a red gate green.
+  # The one required status check on main. A matrix job skipped by `if:` publishes a single
+  # check run with the template unexpanded, so per-leg contexts could never be satisfied on a
+  # Release PR; this job carries no matrix for that reason. `skipped` is accepted only on a
+  # Release PR, repeated here because Actions cannot share an expression. `!cancelled()`
+  # rather than `always()`: a cancelled run must stay red, not report a pass. Only a real run
+  # of this workflow can republish it, which is why the run-tests escape hatch lives in
+  # label_tests.yml: a label event reaching here would republish the context having tested
+  # nothing, turning a red gate green.
   tests-passed:
-    name: 👷 Tests
+    name: 🧪 Tests
     needs: ci
-    if: always()
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: Check the test job
+      - name: Check the unit lane
         env:
           RESULT: ${{ needs.ci.result }}
+          RELEASE_PR: >-
+            ${{ github.event.pull_request.user.login == 'github-actions[bot]'
+            && github.event.pull_request.head.repo.full_name == github.repository
+            && startsWith(github.head_ref, 'release-please--') }}
         run: |
           case "$RESULT" in
-            success|skipped) echo "test job: $RESULT" ;;
-            *) echo "::error::test job reported $RESULT"; exit 1 ;;
+            success)
+              echo "unit lane passed"
+              ;;
+            skipped)
+              if [ "$RELEASE_PR" = "true" ]; then
+                echo "release pr: unit lane skipped by design"
+              else
+                echo "::error::the unit lane was skipped on a PR that is not a Release PR"
+                exit 1
+              fi
+              ;;
+            *)
+              echo "::error::unit lane reported $RESULT"
+              exit 1
+              ;;
           esac
