@@ -23,29 +23,94 @@ jobs:
   # release path. The author and head repo clauses are what make it unforgeable; the branch
   # name on its own would let any PR, a fork's included, call its branch release-please--x.
   # Label a Release PR `run-tests` to force the lane anyway.
-  #
+  # The skip also requires the diff to be only what release-please writes: the changelog, the manifest, and in each version file nothing but the version line. A hand-pushed code or dependency change, an unexpected file or a failed lookup runs the unit lane.
+  release-only:
+    if: >-
+      ${{ github.event.pull_request.user.login == 'github-actions[bot]'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && startsWith(github.head_ref, 'release-please--') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      skip: ${{ steps.files.outputs.skip }}
+    steps:
+      - id: files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          VERSION_FILES: version.go
+        run: |
+          export FILES="$RUNNER_TEMP/pr-files.jsonl"
+          if ! gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR}/files" --paginate --jq '.[] | @json' > "$FILES"; then
+            echo "::warning::Could not list this PR's files; running the unit lane."
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          python3 - <<'PY'
+          import json, os, re
+
+          files = [json.loads(line) for line in open(os.environ["FILES"]) if line.strip()]
+          version_files = set(os.environ["VERSION_FILES"].split())
+          free = {"CHANGELOG.md", ".release-please-manifest.json"}
+          version_token = re.compile(r"v?\d+(?:\.\d+)+(?:-[0-9A-Za-z.]+)?")
+
+
+          def lines(f, sign):
+              return [l[1:] for l in (f.get("patch") or "").split("\n") if l.startswith(sign)]
+
+
+          def decide():
+              manifest = next((f for f in files if f["filename"] == ".release-please-manifest.json"), None)
+              new = re.findall(r'"\.":\s*"([^"]+)"', "\n".join(lines(manifest, "+"))) if manifest else []
+              if len(new) != 1:
+                  return "the manifest diff is not a single version bump"
+              has_new = re.compile(r"(?<![\w.])v?" + re.escape(new[0]) + r"(?![\w.])")
+              for f in files:
+                  name = f["filename"]
+                  if name in free:
+                      continue
+                  if name not in version_files:
+                      return f"{name} is not a file release-please writes"
+                  if f.get("patch") is None:
+                      return f"GitHub returned no diff for {name}"
+                  added, removed = lines(f, "+"), lines(f, "-")
+                  stray = next((l for l in added if not has_new.search(l)), None)
+                  if stray is not None:
+                      return f"{name} adds a line without the new version: {stray.strip()[:120]}"
+                  # Masking versions, what was removed must be exactly what was added back.
+                  if sorted(version_token.sub("V", l) for l in removed) != sorted(version_token.sub("V", l) for l in added):
+                      return f"{name} changes more than its version line"
+              return None
+
+
+          reason = decide()
+          with open(os.environ.get("GITHUB_OUTPUT", "/dev/stdout"), "a") as out:
+              out.write(f"skip={'false' if reason else 'true'}\n")
+          if reason:
+              print(f"::notice::Running the unit lane: {reason}")
+          PY
+
   # Keep this job id: it prefixes every check name the reusable workflow produces.
   ci:
-    if: >-
-      ${{ contains(github.event.pull_request.labels.*.name, 'run-tests')
-      || !(github.event.pull_request.user.login == 'github-actions[bot]'
-      && github.event.pull_request.head.repo.full_name == github.repository
-      && startsWith(github.head_ref, 'release-please--')) }}
+    needs: release-only
+    if: ${{ !cancelled() && (contains(github.event.pull_request.labels.*.name, 'run-tests') || needs.release-only.outputs.skip != 'true') }}
     uses: ./.github/workflows/run_tests.yml
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   # The one required status check on main. A matrix job skipped by `if:` publishes a single
   # check run with the template unexpanded, so per-leg contexts could never be satisfied on a
-  # Release PR; this job carries no matrix for that reason. `skipped` is accepted only on a
-  # Release PR, repeated here because Actions cannot share an expression. `!cancelled()`
+  # Release PR; this job carries no matrix for that reason. `skipped` is accepted only when release-only confirmed a release-please-only diff. `!cancelled()`
   # rather than `always()`: a cancelled run must stay red, not report a pass. Only a real run
   # of this workflow can republish it, which is why the run-tests escape hatch lives in
   # label_tests.yml: a label event reaching here would republish the context having tested
   # nothing, turning a red gate green.
   tests-passed:
     name: 🧪 Tests
-    needs: ci
+    needs: [release-only, ci]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -53,20 +118,17 @@ jobs:
       - name: Check the unit lane
         env:
           RESULT: ${{ needs.ci.result }}
-          RELEASE_PR: >-
-            ${{ github.event.pull_request.user.login == 'github-actions[bot]'
-            && github.event.pull_request.head.repo.full_name == github.repository
-            && startsWith(github.head_ref, 'release-please--') }}
+          SKIP: ${{ needs.release-only.outputs.skip }}
         run: |
           case "$RESULT" in
             success)
               echo "unit lane passed"
               ;;
             skipped)
-              if [ "$RELEASE_PR" = "true" ]; then
+              if [ "$SKIP" = "true" ]; then
                 echo "release pr: unit lane skipped by design"
               else
-                echo "::error::the unit lane was skipped on a PR that is not a Release PR"
+                echo "::error::the unit lane was skipped without release-only confirming a release-please-only diff"
                 exit 1
               fi
               ;;
