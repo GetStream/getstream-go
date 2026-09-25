@@ -30,7 +30,7 @@ SPEC_FILE="$SPEC_DIR/serverside-api.yaml"
 curl -fsSL -o "$SPEC_FILE" "https://raw.githubusercontent.com/GetStream/protocol/${SPEC_TAG}/openapi/v2/serverside-api.yaml"
 
 # cd in API repo, build the generator and then generate code from the release spec
-( cd $SOURCE_PATH ; make -C projects/chat-manager build ; ./build/chat-manager openapi generate-client --language go-serverside --spec "$SPEC_FILE" --output $DST_PATH ; ./build/chat-manager openapi generate-webhook-fixtures --output $DST_PATH/tests/fixtures/webhooks --time-format=unix-ns )
+( cd $SOURCE_PATH ; make -C tools/openapi build ; ./build/openapi generate-client --language go-serverside --spec "$SPEC_FILE" --output $DST_PATH ; ./build/openapi generate-webhook-fixtures --output $DST_PATH/tests/fixtures/webhooks --time-format=unix-ns )
 
 printf 'spec: %s\ngenerator: chat %s\n' "$SPEC_TAG" "$(git -C $SOURCE_PATH describe --tags --always)" > "$DST_PATH/.spec-version"
 
