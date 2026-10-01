@@ -209,6 +209,7 @@ func buildDefaultHTTPClient(requestTimeout time.Duration, maxConnsPerHost int, i
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.MaxConnsPerHost = maxConnsPerHost
 	transport.MaxIdleConnsPerHost = maxConnsPerHost
+	transport.MaxIdleConns = 0 // DefaultTransport's global 100 would otherwise cap the per-host idle pool
 	transport.IdleConnTimeout = idleTimeout
 	transport.DialContext = (&net.Dialer{
 		Timeout:   connectTimeout,

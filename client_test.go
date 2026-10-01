@@ -214,6 +214,7 @@ func TestClientDefaultTransportConfig(t *testing.T) {
 	require.True(t, ok, "default transport must be *http.Transport, not nil")
 	assert.Equal(t, 100, tr.MaxConnsPerHost, "default MaxConnsPerHost = 100")
 	assert.Equal(t, 100, tr.MaxIdleConnsPerHost, "default MaxIdleConnsPerHost = 100")
+	assert.Equal(t, 0, tr.MaxIdleConns, "no global idle cap below the per-host one")
 	assert.Equal(t, 55*time.Second, tr.IdleConnTimeout, "default IdleTimeout = 55s")
 	assert.False(t, tr.DisableKeepAlives, "KeepAlive invariant")
 }
