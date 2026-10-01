@@ -212,8 +212,9 @@ func TestClientDefaultTransportConfig(t *testing.T) {
 
 	tr, ok := httpClient.Transport.(*http.Transport)
 	require.True(t, ok, "default transport must be *http.Transport, not nil")
-	assert.Equal(t, 5, tr.MaxConnsPerHost, "default MaxConnsPerHost = 5")
-	assert.Equal(t, 5, tr.MaxIdleConnsPerHost, "default MaxIdleConnsPerHost = 5")
+	assert.Equal(t, 100, tr.MaxConnsPerHost, "default MaxConnsPerHost = 100")
+	assert.Equal(t, 100, tr.MaxIdleConnsPerHost, "default MaxIdleConnsPerHost = 100")
+	assert.Equal(t, 0, tr.MaxIdleConns, "no global idle cap below the per-host one")
 	assert.Equal(t, 55*time.Second, tr.IdleConnTimeout, "default IdleTimeout = 55s")
 	assert.False(t, tr.DisableKeepAlives, "KeepAlive invariant")
 }
@@ -257,7 +258,7 @@ func TestClientInfoLogOnConstruction(t *testing.T) {
 	got := cap.infos[0]
 	assert.Contains(t, got, "client.initialized")
 	assert.Contains(t, got, "stream.sdk.name=getstream-go")
-	assert.Contains(t, got, "stream.client.max_conns_per_host=5")
+	assert.Contains(t, got, "stream.client.max_conns_per_host=100")
 	assert.Contains(t, got, "stream.client.idle_timeout_seconds=55")
 	assert.Contains(t, got, "stream.client.connect_timeout_seconds=10")
 	assert.Contains(t, got, "stream.client.request_timeout_seconds=30")

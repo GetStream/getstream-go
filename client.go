@@ -25,8 +25,8 @@ const (
 
 	// defaultRequestTimeout is the default per-request timeout (was 6s prior to v4.2.0).
 	defaultRequestTimeout = 30 * time.Second
-	// defaultMaxConnsPerHost caps concurrent TCP connections per host.
-	defaultMaxConnsPerHost = 5
+	// defaultMaxConnsPerHost caps concurrent TCP connections per host and sizes the idle pool; extra requests wait for a free connection.
+	defaultMaxConnsPerHost = 100
 	// defaultIdleTimeout sits below the typical 60s LB idle timeout with a 5s safety margin.
 	defaultIdleTimeout = 55 * time.Second
 	// defaultConnectTimeout caps TCP + TLS handshake duration.
@@ -105,7 +105,7 @@ func WithTimeout(t time.Duration) ClientOption {
 	}
 }
 
-// WithMaxConnsPerHost caps concurrent TCP connections per host. Default: 5.
+// WithMaxConnsPerHost caps concurrent TCP connections per host, which is also the number of idle connections kept for reuse. Default: 100.
 // Ignored when WithHTTPClient is set.
 func WithMaxConnsPerHost(n int) ClientOption {
 	return func(c *Client) {
@@ -209,6 +209,7 @@ func buildDefaultHTTPClient(requestTimeout time.Duration, maxConnsPerHost int, i
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.MaxConnsPerHost = maxConnsPerHost
 	transport.MaxIdleConnsPerHost = maxConnsPerHost
+	transport.MaxIdleConns = 0 // DefaultTransport's global 100 would otherwise cap the per-host idle pool
 	transport.IdleConnTimeout = idleTimeout
 	transport.DialContext = (&net.Dialer{
 		Timeout:   connectTimeout,
