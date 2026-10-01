@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. Releases are automated by [release-please](https://github.com/googleapis/release-please); see [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## [7.1.1](https://github.com/GetStream/getstream-go/compare/v7.1.0...v7.1.1) (2026-10-01)
+
+
+### Performance Improvements
+
+* raise the default connection pool size from 5 to 100 ([#173](https://github.com/GetStream/getstream-go/issues/173)) ([93d769a](https://github.com/GetStream/getstream-go/commit/93d769abcbc9f35784887356c92bdc6ebc5cacaf))
+
 ## [7.1.0](https://github.com/GetStream/getstream-go/compare/v7.0.0...v7.1.0) (2026-09-10)
 
 
