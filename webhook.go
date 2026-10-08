@@ -63,6 +63,7 @@ const (
 	EventTypeCallRecordingStopped               = "call.recording_stopped"
 	EventTypeCallRejected                       = "call.rejected"
 	EventTypeCallRing                           = "call.ring"
+	EventTypeCallRingSettled                    = "call.ring_settled"
 	EventTypeCallRTMPBroadcastFailed            = "call.rtmp_broadcast_failed"
 	EventTypeCallRTMPBroadcastStarted           = "call.rtmp_broadcast_started"
 	EventTypeCallRTMPBroadcastStopped           = "call.rtmp_broadcast_stopped"
@@ -100,6 +101,8 @@ const (
 	EventTypeExportBulkImageModerationSuccess   = "export.bulk_image_moderation.success"
 	EventTypeExportChannelsError                = "export.channels.error"
 	EventTypeExportChannelsSuccess              = "export.channels.success"
+	EventTypeExportLabelResultsError            = "export.label_results.error"
+	EventTypeExportLabelResultsSuccess          = "export.label_results.success"
 	EventTypeExportModerationLogsError          = "export.moderation_logs.error"
 	EventTypeExportModerationLogsSuccess        = "export.moderation_logs.success"
 	EventTypeExportReviewQueueError             = "export.review_queue.error"
@@ -125,6 +128,7 @@ const (
 	EventTypeFeedsBookmarkFolderUpdated         = "feeds.bookmark_folder.updated"
 	EventTypeFeedsCommentAdded                  = "feeds.comment.added"
 	EventTypeFeedsCommentDeleted                = "feeds.comment.deleted"
+	EventTypeFeedsCommentFeedback               = "feeds.comment.feedback"
 	EventTypeFeedsCommentReactionAdded          = "feeds.comment.reaction.added"
 	EventTypeFeedsCommentReactionDeleted        = "feeds.comment.reaction.deleted"
 	EventTypeFeedsCommentReactionUpdated        = "feeds.comment.reaction.updated"
@@ -145,6 +149,8 @@ const (
 	EventTypeFeedsNotificationFeedUpdated       = "feeds.notification_feed.updated"
 	EventTypeFeedsStoriesFeedUpdated            = "feeds.stories_feed.updated"
 	EventTypeFlagUpdated                        = "flag.updated"
+	EventTypeImportError                        = "import.error"
+	EventTypeImportSuccess                      = "import.success"
 	EventTypeIngressError                       = "ingress.error"
 	EventTypeIngressStarted                     = "ingress.started"
 	EventTypeIngressStopped                     = "ingress.stopped"
@@ -163,6 +169,7 @@ const (
 	EventTypeModerationCustomAction             = "moderation.custom_action"
 	EventTypeModerationFlagged                  = "moderation.flagged"
 	EventTypeModerationImageAnalysisComplete    = "moderation.image_analysis.complete"
+	EventTypeModerationIntentDetected           = "moderation.intent_detected"
 	EventTypeModerationMarkReviewed             = "moderation.mark_reviewed"
 	EventTypeModerationTextAnalysisComplete     = "moderation.text_analysis.complete"
 	EventTypeModerationCheckCompleted           = "moderation_check.completed"
@@ -371,6 +378,8 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(CallRejectedEvent)
 	case "call.ring":
 		event = new(CallRingEvent)
+	case "call.ring_settled":
+		event = new(CallRingSettledEvent)
 	case "call.rtmp_broadcast_failed":
 		event = new(CallRtmpBroadcastFailedEvent)
 	case "call.rtmp_broadcast_started":
@@ -445,6 +454,10 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(AsyncExportErrorEvent)
 	case "export.channels.success":
 		event = new(AsyncExportChannelsEvent)
+	case "export.label_results.error":
+		event = new(AsyncExportErrorEvent)
+	case "export.label_results.success":
+		event = new(AsyncExportLabelResultsEvent)
 	case "export.moderation_logs.error":
 		event = new(AsyncExportErrorEvent)
 	case "export.moderation_logs.success":
@@ -495,6 +508,8 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(CommentAddedEvent)
 	case "feeds.comment.deleted":
 		event = new(CommentDeletedEvent)
+	case "feeds.comment.feedback":
+		event = new(CommentFeedbackEvent)
 	case "feeds.comment.reaction.added":
 		event = new(CommentReactionAddedEvent)
 	case "feeds.comment.reaction.deleted":
@@ -535,6 +550,10 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(StoriesFeedUpdatedEvent)
 	case "flag.updated":
 		event = new(FlagUpdatedEvent)
+	case "import.error":
+		event = new(AsyncImportErrorEvent)
+	case "import.success":
+		event = new(AsyncImportSuccessEvent)
 	case "ingress.error":
 		event = new(IngressErrorEvent)
 	case "ingress.started":
@@ -571,6 +590,8 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(ModerationFlaggedEvent)
 	case "moderation.image_analysis.complete":
 		event = new(ModerationImageAnalysisCompleteEvent)
+	case "moderation.intent_detected":
+		event = new(IntentDetectedEvent)
 	case "moderation.mark_reviewed":
 		event = new(ModerationMarkReviewedEvent)
 	case "moderation.text_analysis.complete":
