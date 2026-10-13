@@ -30,6 +30,13 @@ func TestVideoQueryCallMembers(t *testing.T) {
 	_, err = client.Video().QueryCallMembers(context.Background(), &getstream.QueryCallMembersRequest{})
 	require.NoError(t, err)
 }
+func TestVideoQueryCallRingAttempts(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Video().QueryCallRingAttempts(context.Background(), &getstream.QueryCallRingAttemptsRequest{})
+	require.NoError(t, err)
+}
 func TestVideoQueryCallStats(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

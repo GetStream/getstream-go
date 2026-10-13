@@ -65,6 +65,13 @@ func TestCommonUpdateBlockList(t *testing.T) {
 	_, err = client.UpdateBlockList(context.Background(), "", &getstream.UpdateBlockListRequest{})
 	require.NoError(t, err)
 }
+func TestCommonCheckGCPPubSub(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.CheckGCPPubSub(context.Background(), &getstream.CheckGCPPubSubRequest{})
+	require.NoError(t, err)
+}
 func TestCommonCheckPush(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
