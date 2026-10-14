@@ -33,6 +33,10 @@ func (c *Channels) Update(ctx context.Context, request *UpdateChannelRequest) (*
 	return c.client.UpdateChannel(ctx, c.channelType, c.channelD, request)
 }
 
+func (c *Channels) QueryChannelBans(ctx context.Context, request *QueryChannelBansRequest) (*StreamResponse[QueryChannelBansResponse], error) {
+	return c.client.QueryChannelBans(ctx, c.channelType, c.channelD, request)
+}
+
 func (c *Channels) DeleteDraft(ctx context.Context, request *DeleteDraftRequest) (*StreamResponse[Response], error) {
 	return c.client.DeleteDraft(ctx, c.channelType, c.channelD, request)
 }
