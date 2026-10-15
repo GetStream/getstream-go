@@ -63,6 +63,7 @@ const (
 	EventTypeCallRecordingStopped               = "call.recording_stopped"
 	EventTypeCallRejected                       = "call.rejected"
 	EventTypeCallRing                           = "call.ring"
+	EventTypeCallRingSettled                    = "call.ring_settled"
 	EventTypeCallRTMPBroadcastFailed            = "call.rtmp_broadcast_failed"
 	EventTypeCallRTMPBroadcastStarted           = "call.rtmp_broadcast_started"
 	EventTypeCallRTMPBroadcastStopped           = "call.rtmp_broadcast_stopped"
@@ -100,6 +101,8 @@ const (
 	EventTypeExportBulkImageModerationSuccess   = "export.bulk_image_moderation.success"
 	EventTypeExportChannelsError                = "export.channels.error"
 	EventTypeExportChannelsSuccess              = "export.channels.success"
+	EventTypeExportLabelResultsError            = "export.label_results.error"
+	EventTypeExportLabelResultsSuccess          = "export.label_results.success"
 	EventTypeExportModerationLogsError          = "export.moderation_logs.error"
 	EventTypeExportModerationLogsSuccess        = "export.moderation_logs.success"
 	EventTypeExportReviewQueueError             = "export.review_queue.error"
@@ -125,6 +128,7 @@ const (
 	EventTypeFeedsBookmarkFolderUpdated         = "feeds.bookmark_folder.updated"
 	EventTypeFeedsCommentAdded                  = "feeds.comment.added"
 	EventTypeFeedsCommentDeleted                = "feeds.comment.deleted"
+	EventTypeFeedsCommentFeedback               = "feeds.comment.feedback"
 	EventTypeFeedsCommentReactionAdded          = "feeds.comment.reaction.added"
 	EventTypeFeedsCommentReactionDeleted        = "feeds.comment.reaction.deleted"
 	EventTypeFeedsCommentReactionUpdated        = "feeds.comment.reaction.updated"
@@ -145,6 +149,8 @@ const (
 	EventTypeFeedsNotificationFeedUpdated       = "feeds.notification_feed.updated"
 	EventTypeFeedsStoriesFeedUpdated            = "feeds.stories_feed.updated"
 	EventTypeFlagUpdated                        = "flag.updated"
+	EventTypeImportError                        = "import.error"
+	EventTypeImportSuccess                      = "import.success"
 	EventTypeIngressError                       = "ingress.error"
 	EventTypeIngressStarted                     = "ingress.started"
 	EventTypeIngressStopped                     = "ingress.stopped"
@@ -170,6 +176,12 @@ const (
 	EventTypeNotificationMarkUnread             = "notification.mark_unread"
 	EventTypeNotificationReminderDue            = "notification.reminder_due"
 	EventTypeNotificationThreadMessageNew       = "notification.thread_message_new"
+	EventTypePollClosed                         = "poll.closed"
+	EventTypePollDeleted                        = "poll.deleted"
+	EventTypePollUpdated                        = "poll.updated"
+	EventTypePollVoteCasted                     = "poll.vote_casted"
+	EventTypePollVoteChanged                    = "poll.vote_changed"
+	EventTypePollVoteRemoved                    = "poll.vote_removed"
 	EventTypeReactionDeleted                    = "reaction.deleted"
 	EventTypeReactionNew                        = "reaction.new"
 	EventTypeReactionUpdated                    = "reaction.updated"
@@ -178,6 +190,8 @@ const (
 	EventTypeReminderUpdated                    = "reminder.updated"
 	EventTypeReviewQueueItemNew                 = "review_queue_item.new"
 	EventTypeReviewQueueItemUpdated             = "review_queue_item.updated"
+	EventTypeScheduledMessageFailed             = "scheduled_message.failed"
+	EventTypeScheduledMessageSent               = "scheduled_message.sent"
 	EventTypeThreadUpdated                      = "thread.updated"
 	EventTypeUserBanned                         = "user.banned"
 	EventTypeUserDeactivated                    = "user.deactivated"
@@ -371,6 +385,8 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(CallRejectedEvent)
 	case "call.ring":
 		event = new(CallRingEvent)
+	case "call.ring_settled":
+		event = new(CallRingSettledEvent)
 	case "call.rtmp_broadcast_failed":
 		event = new(CallRtmpBroadcastFailedEvent)
 	case "call.rtmp_broadcast_started":
@@ -445,6 +461,10 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(AsyncExportErrorEvent)
 	case "export.channels.success":
 		event = new(AsyncExportChannelsEvent)
+	case "export.label_results.error":
+		event = new(AsyncExportErrorEvent)
+	case "export.label_results.success":
+		event = new(AsyncExportLabelResultsEvent)
 	case "export.moderation_logs.error":
 		event = new(AsyncExportErrorEvent)
 	case "export.moderation_logs.success":
@@ -495,6 +515,8 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(CommentAddedEvent)
 	case "feeds.comment.deleted":
 		event = new(CommentDeletedEvent)
+	case "feeds.comment.feedback":
+		event = new(CommentFeedbackEvent)
 	case "feeds.comment.reaction.added":
 		event = new(CommentReactionAddedEvent)
 	case "feeds.comment.reaction.deleted":
@@ -535,6 +557,10 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(StoriesFeedUpdatedEvent)
 	case "flag.updated":
 		event = new(FlagUpdatedEvent)
+	case "import.error":
+		event = new(AsyncImportErrorEvent)
+	case "import.success":
+		event = new(AsyncImportSuccessEvent)
 	case "ingress.error":
 		event = new(IngressErrorEvent)
 	case "ingress.started":
@@ -585,6 +611,18 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(ReminderNotificationEvent)
 	case "notification.thread_message_new":
 		event = new(NotificationThreadMessageNewEvent)
+	case "poll.closed":
+		event = new(PollClosedEvent)
+	case "poll.deleted":
+		event = new(PollDeletedEvent)
+	case "poll.updated":
+		event = new(PollUpdatedEvent)
+	case "poll.vote_casted":
+		event = new(PollVoteCastedEvent)
+	case "poll.vote_changed":
+		event = new(PollVoteChangedEvent)
+	case "poll.vote_removed":
+		event = new(PollVoteRemovedEvent)
 	case "reaction.deleted":
 		event = new(ReactionDeletedEvent)
 	case "reaction.new":
@@ -601,6 +639,10 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(ReviewQueueItemNewEvent)
 	case "review_queue_item.updated":
 		event = new(ReviewQueueItemUpdatedEvent)
+	case "scheduled_message.failed":
+		event = new(ScheduledMessageFailedEvent)
+	case "scheduled_message.sent":
+		event = new(ScheduledMessageSentEvent)
 	case "thread.updated":
 		event = new(ThreadUpdatedEvent)
 	case "user.banned":

@@ -87,7 +87,7 @@ func (c *ChatClient) QueryChannels(ctx context.Context, request *QueryChannelsRe
 	return res, err
 }
 
-// Update channels in batch
+// Update channels in batch. By default returns task_id for an asynchronous task. With synchronous: true, updateData accepts at most 100 explicit CIDs and returns a positive success_channels_count of channels selected for update after the database write completes, without task_id. Always poll a returned task_id, including when an older node ignores synchronous.
 //
 // Sends events:
 // - channel.frozen
@@ -215,6 +215,17 @@ func (c *ChatClient) UpdateChannel(ctx context.Context, _type string, id string,
 	return res, err
 }
 
+// Lists the users banned from a channel, by a ban on the channel or by a future channel ban issued by the channel's creator, with one entry per user
+func (c *ChatClient) QueryChannelBans(ctx context.Context, _type string, id string, request *QueryChannelBansRequest) (*StreamResponse[QueryChannelBansResponse], error) {
+	var result QueryChannelBansResponse
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	res, err := MakeRequest[QueryChannelBansRequest, QueryChannelBansResponse](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/bans/query", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Deletes a draft
 //
 // Sends events:
@@ -330,6 +341,7 @@ func (c *ChatClient) UpdateMemberPartial(ctx context.Context, _type string, id s
 // - channel.visible
 // - message.new
 // - message.updated
+// - scheduled_message.created
 func (c *ChatClient) SendMessage(ctx context.Context, _type string, id string, request *SendMessageRequest) (*StreamResponse[SendMessageResponse], error) {
 	var result SendMessageResponse
 	pathParams := map[string]string{
@@ -769,7 +781,7 @@ func (c *ChatClient) DeleteReminder(ctx context.Context, messageID string, reque
 	return res, err
 }
 
-// Updates an existing reminder
+// Updates an existing reminder. remind_at and expires_at are both replaced on every call: omitting either one clears it
 //
 // Sends events:
 // - reminder.updated
@@ -782,7 +794,7 @@ func (c *ChatClient) UpdateReminder(ctx context.Context, messageID string, reque
 	return res, err
 }
 
-// Creates a new reminder
+// Creates a new reminder. An optional expires_at hides the reminder from every read once it passes and stops it counting against the per-user reminder cap
 //
 // Sends events:
 // - reminder.created
@@ -927,6 +939,52 @@ func (c *ChatClient) DeleteRetentionPolicy(ctx context.Context, request *DeleteR
 func (c *ChatClient) GetRetentionPolicyRuns(ctx context.Context, request *GetRetentionPolicyRunsRequest) (*StreamResponse[GetRetentionPolicyRunsResponse], error) {
 	var result GetRetentionPolicyRunsResponse
 	res, err := MakeRequest[GetRetentionPolicyRunsRequest, GetRetentionPolicyRunsResponse](c.client, ctx, "POST", "/api/v2/chat/retention_policy/runs", nil, request, &result, nil)
+	return res, err
+}
+
+// Lists the scheduled messages of one user across channels: pending ones first, then failed ones, each by scheduled_at. Client-side requests return the caller's own; server-side requests require user_id
+func (c *ChatClient) QueryScheduledMessages(ctx context.Context, request *QueryScheduledMessagesRequest) (*StreamResponse[QueryScheduledMessagesResponse], error) {
+	var result QueryScheduledMessagesResponse
+	res, err := MakeRequest[QueryScheduledMessagesRequest, QueryScheduledMessagesResponse](c.client, ctx, "POST", "/api/v2/chat/scheduled_messages/query", nil, request, &result, nil)
+	return res, err
+}
+
+// Cancels a scheduled message so it is never sent, or removes a failed one. Returns 409 while the message is being sent
+//
+// Sends events:
+// - scheduled_message.deleted
+func (c *ChatClient) DeleteScheduledMessage(ctx context.Context, id string, request *DeleteScheduledMessageRequest) (*StreamResponse[DeleteScheduledMessageResponse], error) {
+	var result DeleteScheduledMessageResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, DeleteScheduledMessageResponse](c.client, ctx, "DELETE", "/api/v2/chat/scheduled_messages/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Replaces the message and/or the send time of a scheduled message. The scheduling checks run again, and the message is then sent, under the caller's auth mode. A request that changes only scheduled_at keeps the auth mode the message was scheduled with. Returns 409 while the message is being sent
+//
+// Sends events:
+// - scheduled_message.updated
+func (c *ChatClient) UpdateScheduledMessage(ctx context.Context, id string, request *UpdateScheduledMessageRequest) (*StreamResponse[UpdateScheduledMessageResponse], error) {
+	var result UpdateScheduledMessageResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[UpdateScheduledMessageRequest, UpdateScheduledMessageResponse](c.client, ctx, "PATCH", "/api/v2/chat/scheduled_messages/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Moves the send time of a scheduled message to now and queues the send. Every send check runs when it is sent. Returns 409 while the message is being sent
+//
+// Sends events:
+// - scheduled_message.updated
+func (c *ChatClient) SendScheduledMessageNow(ctx context.Context, id string, request *SendScheduledMessageNowRequest) (*StreamResponse[SendScheduledMessageNowResponse], error) {
+	var result SendScheduledMessageNowResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[SendScheduledMessageNowRequest, SendScheduledMessageNowResponse](c.client, ctx, "POST", "/api/v2/chat/scheduled_messages/{id}/send_now", nil, request, &result, pathParams)
 	return res, err
 }
 
