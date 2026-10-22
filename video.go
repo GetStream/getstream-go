@@ -36,6 +36,13 @@ func (c *VideoClient) QueryCallMembers(ctx context.Context, request *QueryCallMe
 	return res, err
 }
 
+// Returns a call's ring attempts, newest first. A session can be rung more than once, and the session-level accepted_by / rejected_by / missed_by maps flatten every ring together; an attempt says which ring a user acted on, which devices it reached, and who settled it and why. Pass call_session_id to limit the read to one session.
+func (c *VideoClient) QueryCallRingAttempts(ctx context.Context, request *QueryCallRingAttemptsRequest) (*StreamResponse[QueryCallRingAttemptsResponse], error) {
+	var result QueryCallRingAttemptsResponse
+	res, err := MakeRequest[QueryCallRingAttemptsRequest, QueryCallRingAttemptsResponse](c.client, ctx, "POST", "/api/v2/video/call/ring_attempts", nil, request, &result, nil)
+	return res, err
+}
+
 func (c *VideoClient) QueryCallStats(ctx context.Context, request *QueryCallStatsRequest) (*StreamResponse[QueryCallStatsResponse], error) {
 	var result QueryCallStatsResponse
 	res, err := MakeRequest[QueryCallStatsRequest, QueryCallStatsResponse](c.client, ctx, "POST", "/api/v2/video/call/stats", nil, request, &result, nil)
