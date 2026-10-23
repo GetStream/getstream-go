@@ -118,6 +118,7 @@ func TestParseWebhookEvent(t *testing.T) {
 		{"parse call.recording_stopped", []byte(`{"type":"call.recording_stopped"}`), "call.recording_stopped", false},
 		{"parse call.rejected", []byte(`{"type":"call.rejected"}`), "call.rejected", false},
 		{"parse call.ring", []byte(`{"type":"call.ring"}`), "call.ring", false},
+		{"parse call.ring_settled", []byte(`{"type":"call.ring_settled"}`), "call.ring_settled", false},
 		{"parse call.rtmp_broadcast_failed", []byte(`{"type":"call.rtmp_broadcast_failed"}`), "call.rtmp_broadcast_failed", false},
 		{"parse call.rtmp_broadcast_started", []byte(`{"type":"call.rtmp_broadcast_started"}`), "call.rtmp_broadcast_started", false},
 		{"parse call.rtmp_broadcast_stopped", []byte(`{"type":"call.rtmp_broadcast_stopped"}`), "call.rtmp_broadcast_stopped", false},
@@ -155,6 +156,8 @@ func TestParseWebhookEvent(t *testing.T) {
 		{"parse export.bulk_image_moderation.success", []byte(`{"type":"export.bulk_image_moderation.success"}`), "export.bulk_image_moderation.success", false},
 		{"parse export.channels.error", []byte(`{"type":"export.channels.error"}`), "export.channels.error", false},
 		{"parse export.channels.success", []byte(`{"type":"export.channels.success"}`), "export.channels.success", false},
+		{"parse export.label_results.error", []byte(`{"type":"export.label_results.error"}`), "export.label_results.error", false},
+		{"parse export.label_results.success", []byte(`{"type":"export.label_results.success"}`), "export.label_results.success", false},
 		{"parse export.moderation_logs.error", []byte(`{"type":"export.moderation_logs.error"}`), "export.moderation_logs.error", false},
 		{"parse export.moderation_logs.success", []byte(`{"type":"export.moderation_logs.success"}`), "export.moderation_logs.success", false},
 		{"parse export.review_queue.error", []byte(`{"type":"export.review_queue.error"}`), "export.review_queue.error", false},
@@ -180,6 +183,7 @@ func TestParseWebhookEvent(t *testing.T) {
 		{"parse feeds.bookmark_folder.updated", []byte(`{"type":"feeds.bookmark_folder.updated"}`), "feeds.bookmark_folder.updated", false},
 		{"parse feeds.comment.added", []byte(`{"type":"feeds.comment.added"}`), "feeds.comment.added", false},
 		{"parse feeds.comment.deleted", []byte(`{"type":"feeds.comment.deleted"}`), "feeds.comment.deleted", false},
+		{"parse feeds.comment.feedback", []byte(`{"type":"feeds.comment.feedback"}`), "feeds.comment.feedback", false},
 		{"parse feeds.comment.reaction.added", []byte(`{"type":"feeds.comment.reaction.added"}`), "feeds.comment.reaction.added", false},
 		{"parse feeds.comment.reaction.deleted", []byte(`{"type":"feeds.comment.reaction.deleted"}`), "feeds.comment.reaction.deleted", false},
 		{"parse feeds.comment.reaction.updated", []byte(`{"type":"feeds.comment.reaction.updated"}`), "feeds.comment.reaction.updated", false},
@@ -200,6 +204,8 @@ func TestParseWebhookEvent(t *testing.T) {
 		{"parse feeds.notification_feed.updated", []byte(`{"type":"feeds.notification_feed.updated"}`), "feeds.notification_feed.updated", false},
 		{"parse feeds.stories_feed.updated", []byte(`{"type":"feeds.stories_feed.updated"}`), "feeds.stories_feed.updated", false},
 		{"parse flag.updated", []byte(`{"type":"flag.updated"}`), "flag.updated", false},
+		{"parse import.error", []byte(`{"type":"import.error"}`), "import.error", false},
+		{"parse import.success", []byte(`{"type":"import.success"}`), "import.success", false},
 		{"parse ingress.error", []byte(`{"type":"ingress.error"}`), "ingress.error", false},
 		{"parse ingress.started", []byte(`{"type":"ingress.started"}`), "ingress.started", false},
 		{"parse ingress.stopped", []byte(`{"type":"ingress.stopped"}`), "ingress.stopped", false},
@@ -225,6 +231,12 @@ func TestParseWebhookEvent(t *testing.T) {
 		{"parse notification.mark_unread", []byte(`{"type":"notification.mark_unread"}`), "notification.mark_unread", false},
 		{"parse notification.reminder_due", []byte(`{"type":"notification.reminder_due"}`), "notification.reminder_due", false},
 		{"parse notification.thread_message_new", []byte(`{"type":"notification.thread_message_new"}`), "notification.thread_message_new", false},
+		{"parse poll.closed", []byte(`{"type":"poll.closed"}`), "poll.closed", false},
+		{"parse poll.deleted", []byte(`{"type":"poll.deleted"}`), "poll.deleted", false},
+		{"parse poll.updated", []byte(`{"type":"poll.updated"}`), "poll.updated", false},
+		{"parse poll.vote_casted", []byte(`{"type":"poll.vote_casted"}`), "poll.vote_casted", false},
+		{"parse poll.vote_changed", []byte(`{"type":"poll.vote_changed"}`), "poll.vote_changed", false},
+		{"parse poll.vote_removed", []byte(`{"type":"poll.vote_removed"}`), "poll.vote_removed", false},
 		{"parse reaction.deleted", []byte(`{"type":"reaction.deleted"}`), "reaction.deleted", false},
 		{"parse reaction.new", []byte(`{"type":"reaction.new"}`), "reaction.new", false},
 		{"parse reaction.updated", []byte(`{"type":"reaction.updated"}`), "reaction.updated", false},
@@ -233,6 +245,8 @@ func TestParseWebhookEvent(t *testing.T) {
 		{"parse reminder.updated", []byte(`{"type":"reminder.updated"}`), "reminder.updated", false},
 		{"parse review_queue_item.new", []byte(`{"type":"review_queue_item.new"}`), "review_queue_item.new", false},
 		{"parse review_queue_item.updated", []byte(`{"type":"review_queue_item.updated"}`), "review_queue_item.updated", false},
+		{"parse scheduled_message.failed", []byte(`{"type":"scheduled_message.failed"}`), "scheduled_message.failed", false},
+		{"parse scheduled_message.sent", []byte(`{"type":"scheduled_message.sent"}`), "scheduled_message.sent", false},
 		{"parse thread.updated", []byte(`{"type":"thread.updated"}`), "thread.updated", false},
 		{"parse user.banned", []byte(`{"type":"user.banned"}`), "user.banned", false},
 		{"parse user.deactivated", []byte(`{"type":"user.deactivated"}`), "user.deactivated", false},
@@ -362,7 +376,7 @@ func TestWebhookMiddleware_BadSignature(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// Conformance fixture suite (CHA-2961). Generated by chat-manager openapi
+// Conformance fixture suite (CHA-2961). Generated by build/openapi
 // generate-webhook-fixtures and copied into tests/fixtures/webhooks/ at
 // codegen time.
 // ---------------------------------------------------------------------------

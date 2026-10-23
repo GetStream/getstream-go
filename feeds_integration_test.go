@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GetStream/getstream-go/v7"
+	"github.com/GetStream/getstream-go/v8"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -1645,7 +1645,7 @@ func test33FeedGroupCRUD(t *testing.T, ctx context.Context, feedsClient *getstre
 	// snippet-start: CreateFeedGroup
 	createResponse, err := feedsClient.CreateFeedGroup(ctx, &getstream.CreateFeedGroupRequest{
 		ID:                feedGroupID,
-		DefaultVisibility: getstream.PtrTo("public"),
+		DefaultVisibility: getstream.PtrTo(getstream.FeedVisibilityPublic),
 		ActivityProcessors: getstream.PtrTo([]getstream.ActivityProcessorConfig{
 			{Type: "dummy"},
 		}),
@@ -1686,7 +1686,7 @@ func test33FeedGroupCRUD(t *testing.T, ctx context.Context, feedsClient *getstre
 	fmt.Println("\n🔄 Testing get or create feed group (existing)...")
 	// snippet-start: GetOrCreateFeedGroupExisting
 	getOrCreateResponse, err := feedsClient.GetOrCreateFeedGroup(ctx, "feed_group_id", &getstream.GetOrCreateFeedGroupRequest{
-		DefaultVisibility: getstream.PtrTo("public"),
+		DefaultVisibility: getstream.PtrTo(getstream.FeedVisibilityPublic),
 	})
 	// snippet-end: GetOrCreateFeedGroupExisting
 
@@ -1699,7 +1699,7 @@ func test33FeedGroupCRUD(t *testing.T, ctx context.Context, feedsClient *getstre
 	fmt.Println("\n🆕 Testing get or create feed group (new)...")
 	// snippet-start: GetOrCreateFeedGroupNew
 	newGetOrCreateResponse, err := feedsClient.GetOrCreateFeedGroup(ctx, newFeedGroupID, &getstream.GetOrCreateFeedGroupRequest{
-		DefaultVisibility: getstream.PtrTo("private"),
+		DefaultVisibility: getstream.PtrTo(getstream.FeedVisibilityPrivate),
 		ActivityProcessors: getstream.PtrTo([]getstream.ActivityProcessorConfig{
 			{Type: "dummy"},
 		}),
@@ -1859,7 +1859,7 @@ func test36BatchFeedOperations(t *testing.T, ctx context.Context, feedsClient *g
 	fmt.Println("\n➕ Creating feed group for batch operations...")
 	_, err := feedsClient.CreateFeedGroup(ctx, &getstream.CreateFeedGroupRequest{
 		ID:                batchFeedGroupID,
-		DefaultVisibility: getstream.PtrTo("public"),
+		DefaultVisibility: getstream.PtrTo(getstream.FeedVisibilityPublic),
 		ActivityProcessors: getstream.PtrTo([]getstream.ActivityProcessorConfig{
 			{Type: "default"},
 		}),

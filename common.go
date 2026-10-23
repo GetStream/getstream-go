@@ -80,6 +80,13 @@ func (c *Client) UpdateBlockList(ctx context.Context, name string, request *Upda
 	return res, err
 }
 
+// Validates that Stream can publish to a customer-owned GCP Pub/Sub topic
+func (c *Client) CheckGCPPubSub(ctx context.Context, request *CheckGCPPubSubRequest) (*StreamResponse[CheckGCPPubSubResponse], error) {
+	var result CheckGCPPubSubResponse
+	res, err := MakeRequest[CheckGCPPubSubRequest, CheckGCPPubSubResponse](c, ctx, "POST", "/api/v2/check_gcp_pubsub", nil, request, &result, nil)
+	return res, err
+}
+
 // Sends a test message via push, this is a test endpoint to verify your push settings
 func (c *Client) CheckPush(ctx context.Context, request *CheckPushRequest) (*StreamResponse[CheckPushResponse], error) {
 	var result CheckPushResponse
@@ -456,7 +463,8 @@ func (c *Client) GetPollOption(ctx context.Context, pollID string, optionID stri
 		"poll_id":   pollID,
 		"option_id": optionID,
 	}
-	res, err := MakeRequest[any, PollOptionResponse](c, ctx, "GET", "/api/v2/polls/{poll_id}/options/{option_id}", nil, nil, &result, pathParams)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, PollOptionResponse](c, ctx, "GET", "/api/v2/polls/{poll_id}/options/{option_id}", params, nil, &result, pathParams)
 	return res, err
 }
 

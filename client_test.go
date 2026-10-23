@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/GetStream/getstream-go/v7"
+	. "github.com/GetStream/getstream-go/v8"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -106,13 +106,13 @@ func setup(t *testing.T, rm *ResourceManager, createCallType bool) (*Stream, *Ca
 
 		grants := map[string][]string{
 			"admin": {
-				SEND_AUDIO.String(),
-				SEND_VIDEO.String(),
-				MUTE_USERS.String(),
+				OwnCapabilitySendAudio.String(),
+				OwnCapabilitySendVideo.String(),
+				OwnCapabilityMuteUsers.String(),
 			},
 			"user": {
-				SEND_AUDIO.String(),
-				SEND_VIDEO.String(),
+				OwnCapabilitySendAudio.String(),
+				OwnCapabilitySendVideo.String(),
 			},
 		}
 
@@ -332,7 +332,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 	t.Run("Update Call Type Settings", func(t *testing.T) {
 		ctx := context.Background()
 		grants := map[string][]string{
-			"host": {JOIN_BACKSTAGE.String()},
+			"host": {OwnCapabilityJoinBackstage.String()},
 		}
 		response, err := client.Video().UpdateCallType(ctx, callTypeName, &UpdateCallTypeRequest{
 			Settings: &CallSettingsRequest{
@@ -355,7 +355,7 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 		assert.Equal(t, "earpiece", response.Data.Settings.Audio.DefaultDevice)
 		assert.Equal(t, "disabled", response.Data.Settings.Recording.Mode)
 		assert.True(t, response.Data.Settings.Backstage.Enabled)
-		assert.Equal(t, []string{JOIN_BACKSTAGE.String()}, response.Data.Grants["host"])
+		assert.Equal(t, []string{OwnCapabilityJoinBackstage.String()}, response.Data.Grants["host"])
 	})
 
 	t.Run("Update Layout Options", func(t *testing.T) {
@@ -686,13 +686,13 @@ func TestVideoExamplesAdditional(t *testing.T) {
 
 		_, err = call.UpdateUserPermissions(ctx, &UpdateUserPermissionsRequest{
 			UserID:            alice.ID,
-			RevokePermissions: PtrTo([]string{SEND_AUDIO.String()}),
+			RevokePermissions: PtrTo([]string{OwnCapabilitySendAudio.String()}),
 		})
 		assert.NoError(t, err)
 
 		_, err = call.UpdateUserPermissions(ctx, &UpdateUserPermissionsRequest{
 			UserID:           alice.ID,
-			GrantPermissions: PtrTo([]string{SEND_AUDIO.String()}),
+			GrantPermissions: PtrTo([]string{OwnCapabilitySendAudio.String()}),
 		})
 		assert.NoError(t, err)
 	})

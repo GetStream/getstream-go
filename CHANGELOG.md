@@ -25,7 +25,7 @@ All notable changes to this project will be documented in this file. Releases ar
 * `TranslateMessage` returns `*StreamResponse[TranslateMessageResponse]` instead of `MessageActionResponse` ([#153](https://github.com/GetStream/getstream-go/issues/153))
 * `UpsertConfigRequest.AiVideoConfig` is `*AIVideoConfigRequest` instead of `*AIVideoConfig` ([#153](https://github.com/GetStream/getstream-go/issues/153))
 * `GetDailyDigestRequest.AppID` is renamed to `TargetAppID` ([#153](https://github.com/GetStream/getstream-go/issues/153))
-* import path changes from `github.com/GetStream/getstream-go/v6` to `github.com/GetStream/getstream-go/v7` ([#155](https://github.com/GetStream/getstream-go/issues/155))
+* import path changes from `github.com/GetStream/getstream-go/v6` to `github.com/GetStream/getstream-go/v8` ([#155](https://github.com/GetStream/getstream-go/issues/155))
 
 ### Features
 

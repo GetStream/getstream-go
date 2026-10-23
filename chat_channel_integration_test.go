@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/GetStream/getstream-go/v7"
+	. "github.com/GetStream/getstream-go/v8"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -230,7 +230,7 @@ func TestChatChannelIntegration(t *testing.T) {
 		require.NoError(t, err)
 		memberFound := false
 		for _, m := range resp.Data.Members {
-			if m.UserID != nil && *m.UserID == memberID3 {
+			if m.UserID == memberID3 {
 				memberFound = true
 			}
 		}
@@ -687,8 +687,8 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		roleMap := make(map[string]string)
 		for _, m := range membersResp.Data.Members {
-			if m.UserID != nil {
-				roleMap[*m.UserID] = m.ChannelRole
+			if m.UserID != "" {
+				roleMap[m.UserID] = m.ChannelRole
 			}
 		}
 		assert.Equal(t, "channel_moderator", roleMap[modUserID], "First user should be channel_moderator")

@@ -5,12 +5,12 @@ v7 changes the module path. `CreateReminder` now returns `CreateReminderResponse
 ## Module path
 
 ```bash
-go get github.com/GetStream/getstream-go/v7
+go get github.com/GetStream/getstream-go/v8
 ```
 
 ```go
 - import "github.com/GetStream/getstream-go/v6"
-+ import "github.com/GetStream/getstream-go/v7"
++ import "github.com/GetStream/getstream-go/v8"
 ```
 
 ## CreateReminder wrapper

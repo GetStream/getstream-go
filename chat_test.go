@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/GetStream/getstream-go/v7"
+	"github.com/GetStream/getstream-go/v8"
 	"github.com/stretchr/testify/require"
 )
 
@@ -133,6 +133,13 @@ func TestChatUpdateChannel(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Chat().UpdateChannel(context.Background(), "", "", &getstream.UpdateChannelRequest{})
+	require.NoError(t, err)
+}
+func TestChatQueryChannelBans(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().QueryChannelBans(context.Background(), "", "", &getstream.QueryChannelBansRequest{})
 	require.NoError(t, err)
 }
 func TestChatDeleteDraft(t *testing.T) {
@@ -574,6 +581,34 @@ func TestChatGetRetentionPolicyRuns(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Chat().GetRetentionPolicyRuns(context.Background(), &getstream.GetRetentionPolicyRunsRequest{})
+	require.NoError(t, err)
+}
+func TestChatQueryScheduledMessages(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().QueryScheduledMessages(context.Background(), &getstream.QueryScheduledMessagesRequest{})
+	require.NoError(t, err)
+}
+func TestChatDeleteScheduledMessage(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().DeleteScheduledMessage(context.Background(), "", &getstream.DeleteScheduledMessageRequest{})
+	require.NoError(t, err)
+}
+func TestChatUpdateScheduledMessage(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().UpdateScheduledMessage(context.Background(), "", &getstream.UpdateScheduledMessageRequest{})
+	require.NoError(t, err)
+}
+func TestChatSendScheduledMessageNow(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().SendScheduledMessageNow(context.Background(), "", &getstream.SendScheduledMessageNowRequest{})
 	require.NoError(t, err)
 }
 func TestChatSearch(t *testing.T) {

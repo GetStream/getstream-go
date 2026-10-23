@@ -210,7 +210,7 @@ func (c *FeedsClient) GetActivity(ctx context.Context, id string, request *GetAc
 	return res, err
 }
 
-// Updates certain fields of the activity. Use 'set' to update specific fields and 'unset' to remove fields. This allows you to update only the fields you need without replacing the entire activity. Useful for updating reply restrictions ('restrict_replies'), mentioned users, or custom data.
+// Updates certain fields of the activity. Use 'set' to update specific fields and 'unset' to remove fields. This allows you to update only the fields you need without replacing the entire activity. Useful for updating reply restrictions ('restrict_replies'), mentioned users, or custom data. Changing `feeds` is a placement change (add/delete on those feeds), not an activity content update.
 //
 // Sends events:
 // - feeds.activity.updated
@@ -223,7 +223,7 @@ func (c *FeedsClient) UpdateActivityPartial(ctx context.Context, id string, requ
 	return res, err
 }
 
-// Replaces an activity with the provided data. Use this to update text, attachments, reply restrictions ('restrict_replies'), mentioned users, and other activity fields. Note: This is a full update - any fields not provided will be cleared.
+// Replaces an activity with the provided data. Use this to update text, attachments, reply restrictions ('restrict_replies'), mentioned users, and other activity fields. Note: This is a full update - any fields not provided will be cleared. Changing `feeds` is a placement change (add/delete on those feeds), not an activity content update.
 //
 // Sends events:
 // - feeds.activity.updated
@@ -436,6 +436,16 @@ func (c *FeedsClient) UpdateComment(ctx context.Context, id string, request *Upd
 		"id": id,
 	}
 	res, err := MakeRequest[UpdateCommentRequest, UpdateCommentResponse](c.client, ctx, "PATCH", "/api/v2/feeds/comments/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Hide or unhide a comment for the current user
+func (c *FeedsClient) CommentFeedback(ctx context.Context, id string, request *CommentFeedbackRequest) (*StreamResponse[CommentFeedbackResponse], error) {
+	var result CommentFeedbackResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[CommentFeedbackRequest, CommentFeedbackResponse](c.client, ctx, "POST", "/api/v2/feeds/comments/{id}/feedback", nil, request, &result, pathParams)
 	return res, err
 }
 
@@ -899,7 +909,7 @@ func (c *FeedsClient) GetOrCreateFollows(ctx context.Context, request *GetOrCrea
 	return res, err
 }
 
-// Query follows based on filters with pagination and sorting options
+// Query follows based on filters with pagination and sorting options. Server-side callers may set include_group_counts to also receive accepted following counts keyed by followed feed group. Requires exactly one source_feed / source_fid string equality. HTTP 400 if target_feed appears, if two source FIDs are given, or if $in / $or / $nor mentions those keys.
 func (c *FeedsClient) QueryFollows(ctx context.Context, request *QueryFollowsRequest) (*StreamResponse[QueryFollowsResponse], error) {
 	var result QueryFollowsResponse
 	res, err := MakeRequest[QueryFollowsRequest, QueryFollowsResponse](c.client, ctx, "POST", "/api/v2/feeds/follows/query", nil, request, &result, nil)
@@ -966,6 +976,34 @@ func (c *FeedsClient) UpdateMembershipLevel(ctx context.Context, id string, requ
 	return res, err
 }
 
+// Returns the feeds retention policies configured for the app. Server-side only.
+func (c *FeedsClient) FeedsGetRetentionPolicy(ctx context.Context, request *FeedsGetRetentionPolicyRequest) (*StreamResponse[GetFeedsRetentionPolicyResponse], error) {
+	var result GetFeedsRetentionPolicyResponse
+	res, err := MakeRequest[any, GetFeedsRetentionPolicyResponse](c.client, ctx, "GET", "/api/v2/feeds/retention_policy", nil, nil, &result, nil)
+	return res, err
+}
+
+// Creates or updates a feeds retention policy for the app (an app may have multiple, each scoped to feed groups). Server-side only.
+func (c *FeedsClient) FeedsSetRetentionPolicy(ctx context.Context, request *FeedsSetRetentionPolicyRequest) (*StreamResponse[SetFeedsRetentionPolicyResponse], error) {
+	var result SetFeedsRetentionPolicyResponse
+	res, err := MakeRequest[FeedsSetRetentionPolicyRequest, SetFeedsRetentionPolicyResponse](c.client, ctx, "POST", "/api/v2/feeds/retention_policy", nil, request, &result, nil)
+	return res, err
+}
+
+// Removes the named feeds retention policy for the app (an app may hold several). Server-side only.
+func (c *FeedsClient) FeedsDeleteRetentionPolicy(ctx context.Context, request *FeedsDeleteRetentionPolicyRequest) (*StreamResponse[DeleteFeedsRetentionPolicyResponse], error) {
+	var result DeleteFeedsRetentionPolicyResponse
+	res, err := MakeRequest[FeedsDeleteRetentionPolicyRequest, DeleteFeedsRetentionPolicyResponse](c.client, ctx, "POST", "/api/v2/feeds/retention_policy/delete", nil, request, &result, nil)
+	return res, err
+}
+
+// Returns filtered and sorted feeds retention cleanup run history for the app. Supports filter_conditions on 'policy' and 'date' fields. Server-side only.
+func (c *FeedsClient) FeedsGetRetentionPolicyRuns(ctx context.Context, request *FeedsGetRetentionPolicyRunsRequest) (*StreamResponse[GetFeedsRetentionPolicyRunsResponse], error) {
+	var result GetFeedsRetentionPolicyRunsResponse
+	res, err := MakeRequest[FeedsGetRetentionPolicyRunsRequest, GetFeedsRetentionPolicyRunsResponse](c.client, ctx, "POST", "/api/v2/feeds/retention_policy/runs", nil, request, &result, nil)
+	return res, err
+}
+
 // Queries revision history for activities and comments
 func (c *FeedsClient) QueryRevisionHistory(ctx context.Context, request *QueryRevisionHistoryRequest) (*StreamResponse[QueryRevisionHistoryResponse], error) {
 	var result QueryRevisionHistoryResponse
@@ -1023,7 +1061,18 @@ func (c *FeedsClient) ExportFeedUserData(ctx context.Context, userID string, req
 	return res, err
 }
 
-// Returns the user's most common interest tags ranked by the number of distinct activities they reacted to that carried each tag. Client-side callers may only read their own interests; server-side callers may fetch any user. Results are sorted by descending count, then alphabetically by tag.
+// Removes the given interest tags from a user, whether they were set manually or computed from reactions. A removed computed tag returns on the next recomputation if the user's reactions still support it; to keep a tag out of ranking for good, set it with a weight of 0 or below instead. Client-side callers may only manage their own interests; server-side callers may manage any user. Returns the user's remaining interests.
+func (c *FeedsClient) DeleteUserInterests(ctx context.Context, userID string, request *DeleteUserInterestsRequest) (*StreamResponse[DeleteUserInterestsResponse], error) {
+	var result DeleteUserInterestsResponse
+	pathParams := map[string]string{
+		"user_id": userID,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, DeleteUserInterestsResponse](c.client, ctx, "DELETE", "/api/v2/feeds/users/{user_id}/interests", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Returns the user's interest tags with their ranking weights: tags computed from the activities the user reacted to and tags set manually through the API. Client-side callers may only read their own interests; server-side callers may fetch any user. Results are sorted by descending weight, then manually set tags before computed ones, then descending count, then alphabetically by tag.
 func (c *FeedsClient) GetUserInterests(ctx context.Context, userID string, request *GetUserInterestsRequest) (*StreamResponse[GetUserInterestsResponse], error) {
 	var result GetUserInterestsResponse
 	pathParams := map[string]string{
@@ -1031,5 +1080,15 @@ func (c *FeedsClient) GetUserInterests(ctx context.Context, userID string, reque
 	}
 	params := extractQueryParams(request)
 	res, err := MakeRequest[any, GetUserInterestsResponse](c.client, ctx, "GET", "/api/v2/feeds/users/{user_id}/interests", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Adds or updates interest tags on a user with explicit ranking weights. Tags set this way rank above the tags computed from the user's reactions at equal weight and are never overwritten by them. Client-side callers may only manage their own interests; server-side callers may manage any user. Returns the user's full interest list after the write.
+func (c *FeedsClient) UpsertUserInterests(ctx context.Context, userID string, request *UpsertUserInterestsRequest) (*StreamResponse[UpsertUserInterestsResponse], error) {
+	var result UpsertUserInterestsResponse
+	pathParams := map[string]string{
+		"user_id": userID,
+	}
+	res, err := MakeRequest[UpsertUserInterestsRequest, UpsertUserInterestsResponse](c.client, ctx, "PUT", "/api/v2/feeds/users/{user_id}/interests", nil, request, &result, pathParams)
 	return res, err
 }
