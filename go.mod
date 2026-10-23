@@ -1,4 +1,4 @@
-module github.com/GetStream/getstream-go/v7
+module github.com/GetStream/getstream-go/v8
 
 go 1.19
 
