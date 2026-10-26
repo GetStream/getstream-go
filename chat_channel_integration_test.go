@@ -230,7 +230,7 @@ func TestChatChannelIntegration(t *testing.T) {
 		require.NoError(t, err)
 		memberFound := false
 		for _, m := range resp.Data.Members {
-			if m.UserID != nil && *m.UserID == memberID3 {
+			if m.UserID == memberID3 {
 				memberFound = true
 			}
 		}
@@ -687,9 +687,7 @@ func TestChatChannelIntegration(t *testing.T) {
 
 		roleMap := make(map[string]string)
 		for _, m := range membersResp.Data.Members {
-			if m.UserID != nil {
-				roleMap[*m.UserID] = m.ChannelRole
-			}
+			roleMap[m.UserID] = m.ChannelRole
 		}
 		assert.Equal(t, "channel_moderator", roleMap[modUserID], "First user should be channel_moderator")
 		assert.Equal(t, "channel_member", roleMap[memberUserID2], "Second user should be channel_member")

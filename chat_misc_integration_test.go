@@ -267,9 +267,9 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 
 	t.Run("UpdateChannelType", func(t *testing.T) {
 		resp, err := client.Chat().UpdateChannelType(ctx, typeName, &UpdateChannelTypeRequest{
-			Automod:          "disabled",
-			AutomodBehavior:  "flag",
-			MaxMessageLength: 10000,
+			Automod:          PtrTo(AutomodModeDisabled),
+			AutomodBehavior:  PtrTo(ChannelModerationBehaviorFlag),
+			MaxMessageLength: PtrTo(10000),
 			TypingEvents:     PtrTo(false),
 		})
 		require.NoError(t, err)
@@ -282,9 +282,9 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 		var updateErr error
 		for i := 0; i < 5; i++ {
 			resp, updateErr = client.Chat().UpdateChannelType(ctx, typeName, &UpdateChannelTypeRequest{
-				Automod:             "disabled",
-				AutomodBehavior:     "flag",
-				MaxMessageLength:    10000,
+				Automod:             PtrTo(AutomodModeDisabled),
+				AutomodBehavior:     PtrTo(ChannelModerationBehaviorFlag),
+				MaxMessageLength:    PtrTo(10000),
 				MarkMessagesPending: PtrTo(true),
 			})
 			if updateErr == nil {
@@ -300,9 +300,9 @@ func TestChatChannelTypeIntegration(t *testing.T) {
 
 	t.Run("UpdateChannelTypePushNotifications", func(t *testing.T) {
 		resp, err := client.Chat().UpdateChannelType(ctx, typeName, &UpdateChannelTypeRequest{
-			Automod:           "disabled",
-			AutomodBehavior:   "flag",
-			MaxMessageLength:  10000,
+			Automod:           PtrTo(AutomodModeDisabled),
+			AutomodBehavior:   PtrTo(ChannelModerationBehaviorFlag),
+			MaxMessageLength:  PtrTo(10000),
 			PushNotifications: PtrTo(false),
 		})
 		require.NoError(t, err)
