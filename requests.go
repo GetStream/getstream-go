@@ -4,66 +4,68 @@ package getstream
 type GetAppRequest struct {
 }
 type UpdateAppRequest struct {
-	AsyncUrlEnrichEnabled                 *bool                           `json:"async_url_enrich_enabled,omitempty"`
-	AutoTranslationEnabled                *bool                           `json:"auto_translation_enabled,omitempty"`
-	BeforeMessageSendHookAttemptTimeoutMs *int                            `json:"before_message_send_hook_attempt_timeout_ms,omitempty"`
-	BeforeMessageSendHookUrl              *string                         `json:"before_message_send_hook_url,omitempty"`
-	CdnExpirationSeconds                  *int                            `json:"cdn_expiration_seconds,omitempty"`
-	ChannelHideMembersOnly                *bool                           `json:"channel_hide_members_only,omitempty"`
-	ChatPrimaryUseCase                    *string                         `json:"chat_primary_use_case,omitempty"`
-	CustomActionHandlerUrl                *string                         `json:"custom_action_handler_url,omitempty"`
-	DisableAuthChecks                     *bool                           `json:"disable_auth_checks,omitempty"`
-	DisablePermissionsChecks              *bool                           `json:"disable_permissions_checks,omitempty"`
-	EnableHookPayloadCompression          *bool                           `json:"enable_hook_payload_compression,omitempty"`
-	EnforceUniqueUsernames                *string                         `json:"enforce_unique_usernames,omitempty"`
-	FeedAuditLogsEnabled                  *bool                           `json:"feed_audit_logs_enabled,omitempty"`
-	FeedsModerationEnabled                *bool                           `json:"feeds_moderation_enabled,omitempty"`
-	FeedsV2Region                         *string                         `json:"feeds_v2_region,omitempty"`
-	GuestUserCreationDisabled             *bool                           `json:"guest_user_creation_disabled,omitempty"`
-	ImageModerationEnabled                *bool                           `json:"image_moderation_enabled,omitempty"`
-	MaxAggregatedActivitiesLength         *int                            `json:"max_aggregated_activities_length,omitempty"`
-	MemberCustomOnMentionedUsersEnabled   *bool                           `json:"member_custom_on_mentioned_users_enabled,omitempty"`
-	MemberCustomOnMessagesEnabled         *bool                           `json:"member_custom_on_messages_enabled,omitempty"`
-	MemberCustomOnTypingEventsEnabled     *bool                           `json:"member_custom_on_typing_events_enabled,omitempty"`
-	MigratePermissionsToV2                *bool                           `json:"migrate_permissions_to_v2,omitempty"`
-	ModerationAnalyticsEnabled            *bool                           `json:"moderation_analytics_enabled,omitempty"`
-	ModerationEnabled                     *bool                           `json:"moderation_enabled,omitempty"`
-	ModerationOnboardingComplete          *bool                           `json:"moderation_onboarding_complete,omitempty"`
-	ModerationS3ImageAccessRoleArn        *string                         `json:"moderation_s3_image_access_role_arn,omitempty"`
-	ModerationWebhookUrl                  *string                         `json:"moderation_webhook_url,omitempty"`
-	MultiTenantEnabled                    *bool                           `json:"multi_tenant_enabled,omitempty"`
-	PermissionVersion                     *string                         `json:"permission_version,omitempty"`
-	RemindersInterval                     *int                            `json:"reminders_interval,omitempty"`
-	RemindersMaxMembers                   *int                            `json:"reminders_max_members,omitempty"`
-	RemindersMaxPerUser                   *int                            `json:"reminders_max_per_user,omitempty"`
-	RevokeTokensIssuedBefore              *Timestamp                      `json:"revoke_tokens_issued_before,omitempty"`
-	SnsKey                                *string                         `json:"sns_key,omitempty"`
-	SnsSecret                             *string                         `json:"sns_secret,omitempty"`
-	SnsTopicArn                           *string                         `json:"sns_topic_arn,omitempty"`
-	SqsKey                                *string                         `json:"sqs_key,omitempty"`
-	SqsSecret                             *string                         `json:"sqs_secret,omitempty"`
-	SqsUrl                                *string                         `json:"sqs_url,omitempty"`
-	UserResponseTimeEnabled               *bool                           `json:"user_response_time_enabled,omitempty"`
-	VideoPrimaryUseCase                   *string                         `json:"video_primary_use_case,omitempty"`
-	WebhookUrl                            *string                         `json:"webhook_url,omitempty"`
-	AllowedFlagReasons                    *[]string                       `json:"allowed_flag_reasons,omitempty"`
-	EventHooks                            *[]EventHook                    `json:"event_hooks,omitempty"`
-	ImageModerationBlockLabels            *[]string                       `json:"image_moderation_block_labels,omitempty"`
-	ImageModerationLabels                 *[]string                       `json:"image_moderation_labels,omitempty"`
-	UserSearchDisallowedRoles             *[]string                       `json:"user_search_disallowed_roles,omitempty"`
-	WebhookEvents                         *[]string                       `json:"webhook_events,omitempty"`
-	ActivityMetricsConfig                 *map[string]int                 `json:"activity_metrics_config,omitempty"`
-	ApnConfig                             *APNConfig                      `json:"apn_config,omitempty"`
-	AsyncModerationConfig                 *AsyncModerationConfiguration   `json:"async_moderation_config,omitempty"`
-	DatadogInfo                           *DataDogInfo                    `json:"datadog_info,omitempty"`
-	FileUploadConfig                      *FileUploadConfig               `json:"file_upload_config,omitempty"`
-	FirebaseConfig                        *FirebaseConfig                 `json:"firebase_config,omitempty"`
-	Grants                                *map[string][]string            `json:"grants,omitempty"`
-	HuaweiConfig                          *HuaweiConfig                   `json:"huawei_config,omitempty"`
-	ImageUploadConfig                     *FileUploadConfig               `json:"image_upload_config,omitempty"`
-	ModerationDashboardPreferences        *ModerationDashboardPreferences `json:"moderation_dashboard_preferences,omitempty"`
-	PushConfig                            *PushConfig                     `json:"push_config,omitempty"`
-	XiaomiConfig                          *XiaomiConfig                   `json:"xiaomi_config,omitempty"`
+	AsyncUrlEnrichEnabled                 *bool   `json:"async_url_enrich_enabled,omitempty"`
+	AutoTranslationEnabled                *bool   `json:"auto_translation_enabled,omitempty"`
+	BeforeMessageSendHookAttemptTimeoutMs *int    `json:"before_message_send_hook_attempt_timeout_ms,omitempty"`
+	BeforeMessageSendHookUrl              *string `json:"before_message_send_hook_url,omitempty"`
+	CdnExpirationSeconds                  *int    `json:"cdn_expiration_seconds,omitempty"`
+	ChannelHideMembersOnly                *bool   `json:"channel_hide_members_only,omitempty"`
+	ChatPrimaryUseCase                    *string `json:"chat_primary_use_case,omitempty"`
+	CustomActionHandlerUrl                *string `json:"custom_action_handler_url,omitempty"`
+	DisableAuthChecks                     *bool   `json:"disable_auth_checks,omitempty"`
+	DisablePermissionsChecks              *bool   `json:"disable_permissions_checks,omitempty"`
+	EnableHookPayloadCompression          *bool   `json:"enable_hook_payload_compression,omitempty"`
+	EnforceUniqueUsernames                *string `json:"enforce_unique_usernames,omitempty"`
+	FeedAuditLogsEnabled                  *bool   `json:"feed_audit_logs_enabled,omitempty"`
+	FeedsModerationEnabled                *bool   `json:"feeds_moderation_enabled,omitempty"`
+	FeedsV2Region                         *string `json:"feeds_v2_region,omitempty"`
+	GuestUserCreationDisabled             *bool   `json:"guest_user_creation_disabled,omitempty"`
+	ImageModerationEnabled                *bool   `json:"image_moderation_enabled,omitempty"`
+	MaxAggregatedActivitiesLength         *int    `json:"max_aggregated_activities_length,omitempty"`
+	MemberCustomOnMentionedUsersEnabled   *bool   `json:"member_custom_on_mentioned_users_enabled,omitempty"`
+	MemberCustomOnMessagesEnabled         *bool   `json:"member_custom_on_messages_enabled,omitempty"`
+	MemberCustomOnTypingEventsEnabled     *bool   `json:"member_custom_on_typing_events_enabled,omitempty"`
+	MigratePermissionsToV2                *bool   `json:"migrate_permissions_to_v2,omitempty"`
+	ModerationAnalyticsEnabled            *bool   `json:"moderation_analytics_enabled,omitempty"`
+	ModerationEnabled                     *bool   `json:"moderation_enabled,omitempty"`
+	ModerationOnboardingComplete          *bool   `json:"moderation_onboarding_complete,omitempty"`
+	ModerationS3ImageAccessRoleArn        *string `json:"moderation_s3_image_access_role_arn,omitempty"`
+	ModerationWebhookUrl                  *string `json:"moderation_webhook_url,omitempty"`
+	MultiTenantEnabled                    *bool   `json:"multi_tenant_enabled,omitempty"`
+	PermissionVersion                     *string `json:"permission_version,omitempty"`
+	RemindersInterval                     *int    `json:"reminders_interval,omitempty"`
+	RemindersMaxMembers                   *int    `json:"reminders_max_members,omitempty"`
+	RemindersMaxPerUser                   *int    `json:"reminders_max_per_user,omitempty"`
+	// Revokes tokens issued before this date
+	RevokeTokensIssuedBefore       *Timestamp                      `json:"revoke_tokens_issued_before,omitempty"`
+	SnsKey                         *string                         `json:"sns_key,omitempty"`
+	SnsSecret                      *string                         `json:"sns_secret,omitempty"`
+	SnsTopicArn                    *string                         `json:"sns_topic_arn,omitempty"`
+	SqsKey                         *string                         `json:"sqs_key,omitempty"`
+	SqsSecret                      *string                         `json:"sqs_secret,omitempty"`
+	SqsUrl                         *string                         `json:"sqs_url,omitempty"`
+	TwoWayBlockEffectEnabled       *bool                           `json:"two_way_block_effect_enabled,omitempty"`
+	UserResponseTimeEnabled        *bool                           `json:"user_response_time_enabled,omitempty"`
+	VideoPrimaryUseCase            *string                         `json:"video_primary_use_case,omitempty"`
+	WebhookUrl                     *string                         `json:"webhook_url,omitempty"`
+	AllowedFlagReasons             *[]string                       `json:"allowed_flag_reasons,omitempty"`
+	EventHooks                     *[]EventHook                    `json:"event_hooks,omitempty"`
+	ImageModerationBlockLabels     *[]string                       `json:"image_moderation_block_labels,omitempty"`
+	ImageModerationLabels          *[]string                       `json:"image_moderation_labels,omitempty"`
+	UserSearchDisallowedRoles      *[]string                       `json:"user_search_disallowed_roles,omitempty"`
+	WebhookEvents                  *[]string                       `json:"webhook_events,omitempty"`
+	ActivityMetricsConfig          *map[string]int                 `json:"activity_metrics_config,omitempty"`
+	ApnConfig                      *APNConfig                      `json:"apn_config,omitempty"`
+	AsyncModerationConfig          *AsyncModerationConfiguration   `json:"async_moderation_config,omitempty"`
+	DatadogInfo                    *DataDogInfo                    `json:"datadog_info,omitempty"`
+	FileUploadConfig               *FileUploadConfig               `json:"file_upload_config,omitempty"`
+	FirebaseConfig                 *FirebaseConfig                 `json:"firebase_config,omitempty"`
+	Grants                         *map[string][]string            `json:"grants,omitempty"`
+	HuaweiConfig                   *HuaweiConfig                   `json:"huawei_config,omitempty"`
+	ImageUploadConfig              *FileUploadConfig               `json:"image_upload_config,omitempty"`
+	ModerationDashboardPreferences *ModerationDashboardPreferences `json:"moderation_dashboard_preferences,omitempty"`
+	PushConfig                     *PushConfig                     `json:"push_config,omitempty"`
+	XiaomiConfig                   *XiaomiConfig                   `json:"xiaomi_config,omitempty"`
 }
 type ListBlockListsRequest struct {
 	Team   *string `json:"-" query:"team"`
@@ -81,7 +83,7 @@ type CreateBlockListRequest struct {
 	IsSubstringMatchingEnabled *bool    `json:"is_substring_matching_enabled,omitempty"`
 	Team                       *string  `json:"team,omitempty"`
 	UserID                     *string  `json:"user_id,omitempty"`
-	// Block list type. One of: regex, domain, domain_allowlist, email, email_allowlist, word
+	// Block list type. One of: regex, domain, domain_allowlist, email, email_allowlist, word, word_allowlist
 	Type *string `json:"type,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
@@ -121,9 +123,9 @@ type CreateCampaignRequest struct {
 	// The name of the campaign
 	Name *string `json:"name,omitempty"`
 	// The sender mode of the campaign
-	SenderMode *string `json:"sender_mode,omitempty"`
+	SenderMode *CampaignSenderMode `json:"sender_mode,omitempty"`
 	// The visibility of the created channels for the sender
-	SenderVisibility *string `json:"sender_visibility,omitempty"`
+	SenderVisibility *CampaignSenderVisibility `json:"sender_visibility,omitempty"`
 	// Whether the campaign should show channels, if they are hidden
 	ShowChannels *bool `json:"show_channels,omitempty"`
 	// Whether to skip push notifications
@@ -153,20 +155,22 @@ type GetCampaignRequest struct {
 	Limit *int    `json:"-" query:"limit"`
 }
 type UpdateCampaignRequest struct {
-	SenderID         string                   `json:"sender_id"`
-	MessageTemplate  CampaignMessageTemplate  `json:"message_template"`
-	CreateChannels   *bool                    `json:"create_channels,omitempty"`
-	Description      *string                  `json:"description,omitempty"`
-	ID               *string                  `json:"id,omitempty"`
-	Name             *string                  `json:"name,omitempty"`
-	SenderMode       *string                  `json:"sender_mode,omitempty"`
-	SenderVisibility *string                  `json:"sender_visibility,omitempty"`
-	ShowChannels     *bool                    `json:"show_channels,omitempty"`
-	SkipPush         *bool                    `json:"skip_push,omitempty"`
-	SkipWebhook      *bool                    `json:"skip_webhook,omitempty"`
-	SegmentIds       *[]string                `json:"segment_ids,omitempty"`
-	UserIds          *[]string                `json:"user_ids,omitempty"`
-	ChannelTemplate  *CampaignChannelTemplate `json:"channel_template,omitempty"`
+	SenderID        string                  `json:"sender_id"`
+	MessageTemplate CampaignMessageTemplate `json:"message_template"`
+	CreateChannels  *bool                   `json:"create_channels,omitempty"`
+	Description     *string                 `json:"description,omitempty"`
+	ID              *string                 `json:"id,omitempty"`
+	Name            *string                 `json:"name,omitempty"`
+	// Whether a campaign includes or excludes its sender.
+	SenderMode *CampaignSenderMode `json:"sender_mode,omitempty"`
+	// How a campaign appears to its sender.
+	SenderVisibility *CampaignSenderVisibility `json:"sender_visibility,omitempty"`
+	ShowChannels     *bool                     `json:"show_channels,omitempty"`
+	SkipPush         *bool                     `json:"skip_push,omitempty"`
+	SkipWebhook      *bool                     `json:"skip_webhook,omitempty"`
+	SegmentIds       *[]string                 `json:"segment_ids,omitempty"`
+	UserIds          *[]string                 `json:"user_ids,omitempty"`
+	ChannelTemplate  *CampaignChannelTemplate  `json:"channel_template,omitempty"`
 }
 type StartCampaignRequest struct {
 	ScheduledFor *Timestamp `json:"scheduled_for,omitempty"`
@@ -175,6 +179,8 @@ type StartCampaignRequest struct {
 type StopCampaignRequest struct {
 }
 type QueryChannelsRequest struct {
+	// Whether to include active_member_count for each channel
+	IncludeActiveMemberCount *bool `json:"include_active_member_count,omitempty"`
 	// Number of channels to limit
 	Limit *int `json:"limit,omitempty"`
 	// Number of members to limit
@@ -206,6 +212,8 @@ type ChannelBatchUpdateRequest struct {
 	Filter map[string]any `json:"filter"`
 	// Required with the `addMembersHideHistory` operation, and rejected with every other operation including `addMembers`. Hides each matched channel's history before this time from the members the operation adds. Members that already belong to a matched channel are never affected. Must be in RFC3339 format (e.g., "2024-01-01T10:00:00Z") and in the past.
 	HideHistoryBefore *Timestamp `json:"hide_history_before,omitempty"`
+	// For updateData and hide only. Requires a root cids $eq or $in filter with at most 100 CIDs and no root $or/$and. A synchronous hide also requires 1 to 10 distinct member user IDs. Split larger selections into requests of at most 100 CIDs. A success_channels_count response means the database update completed; a task_id response means it was queued and must be polled, including on older API nodes.
+	Synchronous *bool `json:"synchronous,omitempty"`
 	// `updateData` only. Deletes these keys from each channel's existing custom object, leaving every other custom key untouched. Keys are dot-paths; deleting a key that does not exist is a no-op. Cannot be combined with `data.custom`
 	CustomUnset *[]string                    `json:"custom_unset,omitempty"`
 	Members     *[]ChannelBatchMemberRequest `json:"members,omitempty"`
@@ -229,7 +237,9 @@ type GroupedQueryChannelsRequest struct {
 	// Default max channels per group (default 10)
 	Limit  *int    `json:"limit,omitempty"`
 	UserID *string `json:"user_id,omitempty"`
-	// Groups to return, keyed by group name. Each group can define limit, next, or prev. 'next' and 'prev' cursors are only allowed when the request contains exactly one group; multi-group pagination is rejected.
+	// Optional query_timestamp descending with NULLS LAST when enabled. Omitted sort preserves existing last_updated ordering and cursor formats
+	Sort *[]SortParamRequest `json:"sort,omitempty"`
+	// Groups to return, keyed by stored group name. Each entry can define limit, next, prev, and optional filter_conditions: date bounds for stored groups; all supports combined group/date branches or one group $ne exclusion. Cursors are only allowed when requesting exactly one group. Omitted or null filters preserve legacy grouping, including all.
 	Groups *map[string]GroupedChannelsGroupRequest `json:"groups,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
@@ -244,6 +254,8 @@ type MarkChannelsReadRequest struct {
 type GetOrCreateDistinctChannelRequest struct {
 	// Whether this channel will be hidden for the user who created the channel or not
 	HideForCreator *bool `json:"hide_for_creator,omitempty"`
+	// Adds scheduled_messages to the response: the acting user's own scheduled, sending and failed messages in this channel (server-side requests name the user with data.created_by_id or data.created_by; without one the field is omitted). Absent from the response when there are more than 100 or they could not be loaded; use the scheduled messages query then
+	IncludeScheduledMessages *bool `json:"include_scheduled_messages,omitempty"`
 	// Refresh channel state
 	State              *bool `json:"state,omitempty"`
 	ThreadUnreadCounts *bool `json:"thread_unread_counts,omitempty"`
@@ -313,6 +325,20 @@ type UpdateChannelRequest struct {
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }
+type QueryChannelBansRequest struct {
+	// Whether to exclude expired bans or not
+	ExcludeExpiredBans *bool `json:"exclude_expired_bans,omitempty"`
+	// When true, the response includes total and total_by_scope: the number of banned users overall and per scope, independent of paging
+	IncludeTotal *bool   `json:"include_total,omitempty"`
+	Limit        *int    `json:"limit,omitempty"`
+	Next         *string `json:"next,omitempty"`
+	Prev         *string `json:"prev,omitempty"`
+	UserID       *string `json:"user_id,omitempty"`
+	// Filter conditions to apply to the query
+	FilterConditions *map[string]any `json:"filter_conditions,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
+}
 type DeleteDraftRequest struct {
 	ParentID *string `json:"-" query:"parent_id"`
 	UserID   *string `json:"-" query:"user_id"`
@@ -332,6 +358,27 @@ type UploadChannelFileRequest struct {
 	File *string     `json:"file,omitempty"`
 	User *OnlyUserID `json:"user,omitempty"`
 }
+
+func (*UploadChannelFileRequest) isMultipart() {}
+
+type ForkChannelRequest struct {
+	// ID of the top-level message to fork at. The fork copies the visible messages created up to it, itself included, and their replies up to it. Fork only at a message the agent has finished writing: a message still being streamed is copied as it is at the time of the fork
+	MessageID string `json:"message_id"`
+	// The channel a fork creates
+	Channel ForkChannelTarget `json:"channel"`
+	// When true, the copied messages carry no attachments. By default attachments are copied
+	ExcludeAttachments *bool   `json:"exclude_attachments,omitempty"`
+	UserID             *string `json:"user_id,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
+}
+type ForkMessageIDsRequest struct {
+	// IDs of messages of the source channel, up to 1000
+	SourceMessageIds []string `json:"source_message_ids"`
+	UserID           *string  `json:"user_id,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
+}
 type HideChannelRequest struct {
 	// Whether to clear message history of the channel or not
 	ClearHistory *bool   `json:"clear_history,omitempty"`
@@ -348,6 +395,9 @@ type UploadChannelImageRequest struct {
 	UploadSizes *[]ImageSize `json:"upload_sizes,omitempty"`
 	User        *OnlyUserID  `json:"user,omitempty"`
 }
+
+func (*UploadChannelImageRequest) isMultipart() {}
+
 type UpdateMemberPartialRequest struct {
 	UserID *string         `json:"-" query:"user_id"`
 	Unset  *[]string       `json:"unset,omitempty"`
@@ -360,12 +410,14 @@ type SendMessageRequest struct {
 	// When true, the response includes channel_context: a slim channel object with cid, type, id and created_by
 	IncludeChannelContext *bool `json:"include_channel_context,omitempty"`
 	// When true, the response includes mentioned_members: for each mentioned user, whether that user is currently a channel member. Requires the ReadChannelMembers permission
-	IncludeMentionedMembers *bool              `json:"include_mentioned_members,omitempty"`
-	KeepChannelHidden       *bool              `json:"keep_channel_hidden,omitempty"`
-	Pending                 *bool              `json:"pending,omitempty"`
-	SkipEnrichUrl           *bool              `json:"skip_enrich_url,omitempty"`
-	SkipPush                *bool              `json:"skip_push,omitempty"`
-	PendingMessageMetadata  *map[string]string `json:"pending_message_metadata,omitempty"`
+	IncludeMentionedMembers *bool `json:"include_mentioned_members,omitempty"`
+	KeepChannelHidden       *bool `json:"keep_channel_hidden,omitempty"`
+	Pending                 *bool `json:"pending,omitempty"`
+	// When set to a future time, the message is not sent now: it is stored and sent at that time (UTC), rounded up to the first whole minute that is at least 1 minute from now, never earlier than requested. The response then carries scheduled_message with the rounded time. Must be at most the app's maximum lead time (120 days by default) from now. A time that is now or in the past sends the message now as if scheduled_at was not set, unless the request's message ID belongs to a scheduled message that was canceled or already sent. Slash commands cannot be scheduled
+	ScheduledAt            *Timestamp         `json:"scheduled_at,omitempty"`
+	SkipEnrichUrl          *bool              `json:"skip_enrich_url,omitempty"`
+	SkipPush               *bool              `json:"skip_push,omitempty"`
+	PendingMessageMetadata *map[string]string `json:"pending_message_metadata,omitempty"`
 }
 type GetManyMessagesRequest struct {
 	Ids                 []string `json:"-" query:"ids"`
@@ -391,6 +443,8 @@ type GetPinnedMessagesRequest struct {
 type GetOrCreateChannelRequest struct {
 	// Whether this channel will be hidden for the user who created the channel or not
 	HideForCreator *bool `json:"hide_for_creator,omitempty"`
+	// Adds scheduled_messages to the response: the acting user's own scheduled, sending and failed messages in this channel (server-side requests name the user with data.created_by_id or data.created_by; without one the field is omitted). Absent from the response when there are more than 100 or they could not be loaded; use the scheduled messages query then
+	IncludeScheduledMessages *bool `json:"include_scheduled_messages,omitempty"`
 	// Refresh channel state
 	State              *bool `json:"state,omitempty"`
 	ThreadUnreadCounts *bool `json:"thread_unread_counts,omitempty"`
@@ -407,6 +461,17 @@ type MarkReadRequest struct {
 	// Optional Thread ID to specifically mark a given thread as read
 	ThreadID *string `json:"thread_id,omitempty"`
 	UserID   *string `json:"user_id,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
+}
+type RewindChannelRequest struct {
+	// ID of the newest visible message the caller saw. The rewind fails with a conflict when it is no longer the newest
+	ExpectedLastMessageID string `json:"expected_last_message_id"`
+	// ID of the top-level message to rewind the channel to. Every message created after it is hidden
+	MessageID string `json:"message_id"`
+	// When true, `message_id` is hidden too and the message before it becomes the newest visible message
+	Inclusive *bool   `json:"inclusive,omitempty"`
+	UserID    *string `json:"user_id,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }
@@ -445,9 +510,9 @@ type ListChannelTypesRequest struct {
 }
 type CreateChannelTypeRequest struct {
 	// Automod. One of: disabled, simple, AI
-	Automod string `json:"automod"`
+	Automod AutomodMode `json:"automod"`
 	// Automod behavior. One of: flag, block
-	AutomodBehavior string `json:"automod_behavior"`
+	AutomodBehavior BlocklistBehavior `json:"automod_behavior"`
 	// Max message length
 	MaxMessageLength int `json:"max_message_length"`
 	// Channel type name
@@ -455,7 +520,7 @@ type CreateChannelTypeRequest struct {
 	// Blocklist
 	Blocklist *string `json:"blocklist,omitempty"`
 	// Blocklist behavior. One of: flag, block, shadow_block
-	BlocklistBehavior *string `json:"blocklist_behavior,omitempty"`
+	BlocklistBehavior *ChannelModerationBehavior `json:"blocklist_behavior,omitempty"`
 	// Connect events
 	ConnectEvents *bool `json:"connect_events,omitempty"`
 	// Count messages in channel.
@@ -476,13 +541,17 @@ type CreateChannelTypeRequest struct {
 	// Polls
 	Polls *bool `json:"polls,omitempty"`
 	// Default push notification level for the channel type. One of: all, all_mentions, mentions, direct_mentions, none
-	PushLevel *string `json:"push_level,omitempty"`
+	PushLevel *PushLevel `json:"push_level,omitempty"`
 	// Push notifications
 	PushNotifications *bool `json:"push_notifications,omitempty"`
+	// Enables message quotes
+	Quotes *bool `json:"quotes,omitempty"`
 	// Reactions
 	Reactions *bool `json:"reactions,omitempty"`
 	// Read events
 	ReadEvents *bool `json:"read_events,omitempty"`
+	// Enables message reminders
+	Reminders *bool `json:"reminders,omitempty"`
 	// Replies
 	Replies *bool `json:"replies,omitempty"`
 	// Search
@@ -502,8 +571,10 @@ type CreateChannelTypeRequest struct {
 	// List of commands that channel supports
 	Commands *[]string `json:"commands,omitempty"`
 	// List of permissions for the channel type
-	Permissions     *[]PolicyRequest `json:"permissions,omitempty"`
-	ChatPreferences *ChatPreferences `json:"chat_preferences,omitempty"`
+	Permissions *[]PolicyRequest `json:"permissions,omitempty"`
+	// Sets thresholds for AI moderation
+	AutomodThresholds *Thresholds      `json:"automod_thresholds,omitempty"`
+	ChatPreferences   *ChatPreferences `json:"chat_preferences,omitempty"`
 	// List of grants for the channel type
 	Grants *map[string][]string `json:"grants,omitempty"`
 }
@@ -512,22 +583,26 @@ type DeleteChannelTypeRequest struct {
 type GetChannelTypeRequest struct {
 }
 type UpdateChannelTypeRequest struct {
-	Automod                        string              `json:"automod"`
-	AutomodBehavior                string              `json:"automod_behavior"`
-	MaxMessageLength               int                 `json:"max_message_length"`
-	Blocklist                      *string             `json:"blocklist,omitempty"`
-	BlocklistBehavior              *string             `json:"blocklist_behavior,omitempty"`
-	ConnectEvents                  *bool               `json:"connect_events,omitempty"`
-	CountMessages                  *bool               `json:"count_messages,omitempty"`
-	CustomEvents                   *bool               `json:"custom_events,omitempty"`
-	DeliveryEvents                 *bool               `json:"delivery_events,omitempty"`
-	MarkMessagesPending            *bool               `json:"mark_messages_pending,omitempty"`
-	MessageRetention               *string             `json:"message_retention,omitempty"`
-	Mutes                          *bool               `json:"mutes,omitempty"`
-	PartitionSize                  *int                `json:"partition_size,omitempty"`
-	PartitionTtl                   *string             `json:"partition_ttl,omitempty"`
-	Polls                          *bool               `json:"polls,omitempty"`
-	PushLevel                      *string             `json:"push_level,omitempty"`
+	// Automod level applied to a channel type.
+	Automod *AutomodMode `json:"automod,omitempty"`
+	// What automod or a blocklist does when it matches.
+	AutomodBehavior *ChannelModerationBehavior `json:"automod_behavior,omitempty"`
+	Blocklist       *string                    `json:"blocklist,omitempty"`
+	// What automod or a blocklist does when it matches.
+	BlocklistBehavior   *ChannelModerationBehavior `json:"blocklist_behavior,omitempty"`
+	ConnectEvents       *bool                      `json:"connect_events,omitempty"`
+	CountMessages       *bool                      `json:"count_messages,omitempty"`
+	CustomEvents        *bool                      `json:"custom_events,omitempty"`
+	DeliveryEvents      *bool                      `json:"delivery_events,omitempty"`
+	MarkMessagesPending *bool                      `json:"mark_messages_pending,omitempty"`
+	MaxMessageLength    *int                       `json:"max_message_length,omitempty"`
+	MessageRetention    *string                    `json:"message_retention,omitempty"`
+	Mutes               *bool                      `json:"mutes,omitempty"`
+	PartitionSize       *int                       `json:"partition_size,omitempty"`
+	PartitionTtl        *string                    `json:"partition_ttl,omitempty"`
+	Polls               *bool                      `json:"polls,omitempty"`
+	// Sets the push notification level for a channel type
+	PushLevel                      *PushLevel          `json:"push_level,omitempty"`
 	PushNotifications              *bool               `json:"push_notifications,omitempty"`
 	Quotes                         *bool               `json:"quotes,omitempty"`
 	Reactions                      *bool               `json:"reactions,omitempty"`
@@ -700,7 +775,11 @@ type UndeleteMessageRequest struct {
 	UndeletedBy string `json:"undeleted_by"`
 }
 type CastPollVoteRequest struct {
-	UserID *string `json:"user_id,omitempty"`
+	// Key of the moderation configuration to use. Server-side only.
+	ConfigKey *string `json:"config_key,omitempty"`
+	// Team associated with the configuration. Server-side only.
+	ConfigTeam *string `json:"config_team,omitempty"`
+	UserID     *string `json:"user_id,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 	Vote *VoteData    `json:"vote,omitempty"`
@@ -712,14 +791,16 @@ type DeleteReminderRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
 type UpdateReminderRequest struct {
-	RemindAt *Timestamp `json:"remind_at,omitempty"`
-	UserID   *string    `json:"user_id,omitempty"`
+	ExpiresAt *Timestamp `json:"expires_at,omitempty"`
+	RemindAt  *Timestamp `json:"remind_at,omitempty"`
+	UserID    *string    `json:"user_id,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }
 type CreateReminderRequest struct {
-	RemindAt *Timestamp `json:"remind_at,omitempty"`
-	UserID   *string    `json:"user_id,omitempty"`
+	ExpiresAt *Timestamp `json:"expires_at,omitempty"`
+	RemindAt  *Timestamp `json:"remind_at,omitempty"`
+	UserID    *string    `json:"user_id,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }
@@ -803,11 +884,13 @@ type QueryRemindersRequest struct {
 type GetRetentionPolicyRequest struct {
 }
 type SetRetentionPolicyRequest struct {
-	MaxAgeHours int    `json:"max_age_hours"`
-	Policy      string `json:"policy"`
+	MaxAgeHours int `json:"max_age_hours"`
+	// What a retention policy applies to.
+	Policy RetentionPolicyType `json:"policy"`
 }
 type DeleteRetentionPolicyRequest struct {
-	Policy string `json:"policy"`
+	// What a retention policy applies to.
+	Policy RetentionPolicyType `json:"policy"`
 }
 type GetRetentionPolicyRunsRequest struct {
 	Limit *int    `json:"limit,omitempty"`
@@ -817,6 +900,29 @@ type GetRetentionPolicyRunsRequest struct {
 	Sort *[]SortParamRequest `json:"sort,omitempty"`
 	// Filter conditions to apply to the query
 	FilterConditions *map[string]any `json:"filter_conditions,omitempty"`
+}
+type QueryScheduledMessagesRequest struct {
+	// Page size, 1 to 100. Defaults to 20
+	Limit *int `json:"limit,omitempty"`
+	// Cursor from the previous page
+	Next   *string `json:"next,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Only scheduled_at ascending is supported. Pending messages come before failed ones
+	Sort *[]SortParamRequest `json:"sort,omitempty"`
+	// Filter for querying scheduled messages
+	Filter *ScheduledMessagesFilter `json:"filter,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
+}
+type DeleteScheduledMessageRequest struct {
+}
+type UpdateScheduledMessageRequest struct {
+	// New send time (UTC). Must be in the future and at most the app's maximum lead time from now. Rounded up to the first whole minute that is at least 1 minute from now, never earlier than requested. Resending the stored time leaves it unchanged
+	ScheduledAt *Timestamp `json:"scheduled_at,omitempty"`
+	// Message data for creating or updating a message
+	Message *MessageRequest `json:"message,omitempty"`
+}
+type SendScheduledMessageNowRequest struct {
 }
 type SearchRequest struct {
 	Payload *SearchPayload `json:"-" query:"payload"`
@@ -924,7 +1030,8 @@ type UpdateThreadPartialRequest struct {
 	User *UserRequest `json:"user,omitempty"`
 }
 type UnreadCountsRequest struct {
-	UserID *string `json:"-" query:"user_id"`
+	UserID               *string `json:"-" query:"user_id"`
+	IncludeLargeChannels *bool   `json:"-" query:"include_large_channels"`
 }
 type UnreadCountsBatchRequest struct {
 	UserIds []string `json:"user_ids"`
@@ -932,10 +1039,18 @@ type UnreadCountsBatchRequest struct {
 type SendUserCustomEventRequest struct {
 	Event UserCustomEventRequest `json:"event"`
 }
+type CheckGCPPubSubRequest struct {
+	// Publish the test message with an ordering key through the regional endpoint, as a hook with ordering enabled would; requires gcp_pubsub_region
+	GcpPubsubEventBasedOrderingKeyEnabled *bool `json:"gcp_pubsub_event_based_ordering_key_enabled,omitempty"`
+	// GCP region used for the regional Pub/Sub endpoint when ordering is enabled
+	GcpPubsubRegion *string `json:"gcp_pubsub_region,omitempty"`
+	// Fully qualified GCP Pub/Sub topic name (projects/{project}/topics/{topic})
+	GcpPubsubTopic *string `json:"gcp_pubsub_topic,omitempty"`
+}
 type CheckPushRequest struct {
 	// Push message template for APN
 	ApnTemplate *string `json:"apn_template,omitempty"`
-	// Type of event for push templates (default: message.new). One of: message.new, message.updated, reaction.new, reaction.updated, notification.reminder_due
+	// Type of event for push templates (default: message.new). One of: message.new, message.updated, reaction.new, reaction.updated, notification.reminder_due, feeds.activity.added, feeds.comment.added, feeds.activity.reaction.added, feeds.comment.reaction.added, feeds.follow.created, feeds.notification_feed.updated
 	EventType *string `json:"event_type,omitempty"`
 	// Push message data template for Firebase
 	FirebaseDataTemplate *string `json:"firebase_data_template,omitempty"`
@@ -946,7 +1061,7 @@ type CheckPushRequest struct {
 	// Name of push provider
 	PushProviderName *string `json:"push_provider_name,omitempty"`
 	// Push provider type. One of: firebase, apn, huawei, xiaomi
-	PushProviderType *string `json:"push_provider_type,omitempty"`
+	PushProviderType *PushProviderName `json:"push_provider_type,omitempty"`
 	// Don't require existing devices to render templates
 	SkipDevices *bool   `json:"skip_devices,omitempty"`
 	UserID      *string `json:"user_id,omitempty"`
@@ -980,7 +1095,7 @@ type CreateDeviceRequest struct {
 	// Device ID
 	ID string `json:"id"`
 	// Push provider
-	PushProvider string `json:"push_provider"`
+	PushProvider PushProviderName `json:"push_provider"`
 	// Stable physical device identifier used to deduplicate pushes across push providers (e.g. APNs VoIP and Firebase on the same iOS device). Distinct from 'id', which is the push token.
 	HardwareID *string `json:"hardware_id,omitempty"`
 	// Push provider name
@@ -1051,9 +1166,10 @@ type AddActivityRequest struct {
 	// ID of a poll to attach to activity
 	PollID *string `json:"poll_id,omitempty"`
 	// Controls who can add comments/replies to this activity. One of: everyone, people_i_follow, nobody
-	RestrictReplies *string `json:"restrict_replies,omitempty"`
+	RestrictReplies *RestrictReplies `json:"restrict_replies,omitempty"`
 	// Whether to skip URL enrichment for the activity
 	SkipEnrichUrl *bool `json:"skip_enrich_url,omitempty"`
+	SkipExisting  *bool `json:"skip_existing,omitempty"`
 	// Whether to skip push notifications
 	SkipPush *bool `json:"skip_push,omitempty"`
 	// Text content of the activity
@@ -1061,7 +1177,7 @@ type AddActivityRequest struct {
 	// ID of the user creating the activity
 	UserID *string `json:"user_id,omitempty"`
 	// Visibility setting for the activity. One of: public, private, tag
-	Visibility *string `json:"visibility,omitempty"`
+	Visibility *ActivityVisibility `json:"visibility,omitempty"`
 	// If visibility is 'tag', this is the tag name and is required
 	VisibilityTag *string `json:"visibility_tag,omitempty"`
 	// List of attachments for the activity
@@ -1091,6 +1207,8 @@ type UpsertActivitiesRequest struct {
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 	// If true, forces moderation to run for server-side requests. By default, server-side requests skip moderation. Client-side requests always run moderation regardless of this field.
 	ForceModeration *bool `json:"force_moderation,omitempty"`
+	// Server-side only. If true, activities whose id already exists are left unchanged instead of updated: no write, events or notifications. They are listed in skipped_existing and returned as stored. Soft-deleted activities count as existing and are returned with deleted_at set. Default: false.
+	SkipExisting *bool `json:"skip_existing,omitempty"`
 }
 type UpdateActivitiesPartialBatchRequest struct {
 	// List of activity changes to apply. Each change specifies an activity ID and the fields to set/unset
@@ -1122,8 +1240,10 @@ type QueryActivitiesRequest struct {
 	EnrichOwnFields *bool   `json:"enrich_own_fields,omitempty"`
 	// When true, include both expired and non-expired activities in the result.
 	IncludeExpiredActivities *bool `json:"include_expired_activities,omitempty"`
-	IncludePrivateActivities *bool `json:"include_private_activities,omitempty"`
-	// When true, include soft-deleted activities in the result.
+	// When true, include activities hidden by moderation (shadowed or removed). Server-side only; not allowed when a user is set.
+	IncludeModeratedActivities *bool `json:"include_moderated_activities,omitempty"`
+	IncludePrivateActivities   *bool `json:"include_private_activities,omitempty"`
+	// When true, include soft-deleted activities in the result. Server-side only; not allowed when a user is set.
 	IncludeSoftDeletedActivities *bool   `json:"include_soft_deleted_activities,omitempty"`
 	Limit                        *int    `json:"limit,omitempty"`
 	Next                         *string `json:"next,omitempty"`
@@ -1230,11 +1350,15 @@ type DeleteActivityRequest struct {
 	DeleteNotificationActivity *bool `json:"-" query:"delete_notification_activity"`
 }
 type GetActivityRequest struct {
-	CommentSort   *string `json:"-" query:"comment_sort"`
-	CommentLimit  *int    `json:"-" query:"comment_limit"`
-	UserID        *string `json:"-" query:"user_id"`
-	Language      *string `json:"-" query:"language"`
-	TranslateText *bool   `json:"-" query:"translate_text"`
+	CommentSort                  *string `json:"-" query:"comment_sort"`
+	CommentLimit                 *int    `json:"-" query:"comment_limit"`
+	SkipOwnFollowings            *bool   `json:"-" query:"skip_own_followings"`
+	UserID                       *string `json:"-" query:"user_id"`
+	Language                     *string `json:"-" query:"language"`
+	TranslateText                *bool   `json:"-" query:"translate_text"`
+	IncludeTopLevelCommentCount  *bool   `json:"-" query:"include_top_level_comment_count"`
+	IncludeSoftDeletedActivities *bool   `json:"-" query:"include_soft_deleted_activities"`
+	IncludeModeratedActivities   *bool   `json:"-" query:"include_moderated_activities"`
 }
 type UpdateActivityPartialRequest struct {
 	// Whether to copy custom data to the notification activity (only applies when handle_mention_notifications creates notifications) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
@@ -1271,7 +1395,7 @@ type UpdateActivityRequest struct {
 	// Poll ID
 	PollID *string `json:"poll_id,omitempty"`
 	// Controls who can add comments/replies to this activity. One of: everyone, people_i_follow, nobody
-	RestrictReplies *string `json:"restrict_replies,omitempty"`
+	RestrictReplies *RestrictReplies `json:"restrict_replies,omitempty"`
 	// If true, runs activity processors on the updated activity. Processors will only run if the activity text and/or attachments are changed. Defaults to false.
 	RunActivityProcessors *bool `json:"run_activity_processors,omitempty"`
 	// Whether to skip URL enrichment for the activity
@@ -1280,7 +1404,7 @@ type UpdateActivityRequest struct {
 	Text   *string `json:"text,omitempty"`
 	UserID *string `json:"user_id,omitempty"`
 	// Visibility setting for the activity
-	Visibility *string `json:"visibility,omitempty"`
+	Visibility *ActivityVisibility `json:"visibility,omitempty"`
 	// If visibility is 'tag', this is the tag name and is required
 	VisibilityTag *string `json:"visibility_tag,omitempty"`
 	// List of attachments for the activity
@@ -1350,6 +1474,7 @@ type QueryBookmarksRequest struct {
 }
 type DeleteCollectionsRequest struct {
 	CollectionRefs []string `json:"-" query:"collection_refs"`
+	HardDelete     *bool    `json:"-" query:"hard_delete"`
 }
 type ReadCollectionsRequest struct {
 	UserID         *string  `json:"-" query:"user_id"`
@@ -1386,18 +1511,19 @@ type QueryCollectionsRequest struct {
 	User *UserRequest `json:"user,omitempty"`
 }
 type GetCommentsRequest struct {
-	ObjectID      string  `json:"-" query:"object_id"`
-	ObjectType    string  `json:"-" query:"object_type"`
-	Depth         *int    `json:"-" query:"depth"`
-	Sort          *string `json:"-" query:"sort"`
-	RepliesLimit  *int    `json:"-" query:"replies_limit"`
-	IDAround      *string `json:"-" query:"id_around"`
-	Language      *string `json:"-" query:"language"`
-	TranslateText *bool   `json:"-" query:"translate_text"`
-	UserID        *string `json:"-" query:"user_id"`
-	Limit         *int    `json:"-" query:"limit"`
-	Prev          *string `json:"-" query:"prev"`
-	Next          *string `json:"-" query:"next"`
+	ObjectID                    string  `json:"-" query:"object_id"`
+	ObjectType                  string  `json:"-" query:"object_type"`
+	Depth                       *int    `json:"-" query:"depth"`
+	Sort                        *string `json:"-" query:"sort"`
+	RepliesLimit                *int    `json:"-" query:"replies_limit"`
+	IDAround                    *string `json:"-" query:"id_around"`
+	Language                    *string `json:"-" query:"language"`
+	TranslateText               *bool   `json:"-" query:"translate_text"`
+	UserID                      *string `json:"-" query:"user_id"`
+	Limit                       *int    `json:"-" query:"limit"`
+	Prev                        *string `json:"-" query:"prev"`
+	Next                        *string `json:"-" query:"next"`
+	IncludeTopLevelCommentCount *bool   `json:"-" query:"include_top_level_comment_count"`
 }
 type AddCommentRequest struct {
 	// Text content of the comment
@@ -1441,6 +1567,8 @@ type QueryCommentsRequest struct {
 	Filter map[string]any `json:"filter"`
 	// Returns the comment with the specified ID along with surrounding comments for context
 	IDAround *string `json:"id_around,omitempty"`
+	// When true, include soft-deleted comments in the result. Server-side only, and requires an object_id filter. Covers comments removed via deleteComment and via soft user-data deletion. Moderation-actioned comments (removed, hidden, shadow_blocked) remain excluded, as are comments whose parent activity is itself deleted.
+	IncludeSoftDeletedComments *bool `json:"include_soft_deleted_comments,omitempty"`
 	// Maximum number of comments to return
 	Limit *int    `json:"limit,omitempty"`
 	Next  *string `json:"next,omitempty"`
@@ -1523,6 +1651,13 @@ type UpdateCommentRequest struct {
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }
+type CommentFeedbackRequest struct {
+	// Whether to hide this comment for the user
+	Hide   *bool   `json:"hide,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
+}
 type UpdateCommentPartialRequest struct {
 	// Whether to copy custom data to notification activities Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
 	// Deprecated: this field is deprecated.
@@ -1595,6 +1730,16 @@ type TranslateCommentRequest struct {
 	// ISO 639-1 language code to translate to
 	Language string `json:"language"`
 }
+type ExportFeedsAppRequest struct {
+}
+type ExportFeedsByTypeRequest struct {
+	// Only export rows created at or after this time. On reactions and follows it requires user_id; on comments soft-deleted rows are left out
+	CreatedAtFrom *Timestamp `json:"created_at_from,omitempty"`
+	// Only export rows created before this time. On reactions and follows it requires user_id; on comments soft-deleted rows are left out
+	CreatedAtTo *Timestamp `json:"created_at_to,omitempty"`
+	// Only export rows of this user: activities, comments and reactions by the user; follows where the user created the source or the target feed. With user_id, soft-deleted activities and comments are left out
+	UserID *string `json:"user_id,omitempty"`
+}
 type ListFeedGroupsRequest struct {
 	IncludeSoftDeleted *bool `json:"-" query:"include_soft_deleted"`
 }
@@ -1604,7 +1749,7 @@ type CreateFeedGroupRequest struct {
 	// Role new followers of feeds in this group are given. Either a built-in (feed_follower, feed_member_viewer) or any role your app has defined. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
 	DefaultFollowerRole *string `json:"default_follower_role,omitempty"`
 	// Default visibility for the feed group, can be 'public', 'visible', 'followers', 'members', or 'private'. Defaults to 'visible' if not provided.
-	DefaultVisibility *string `json:"default_visibility,omitempty"`
+	DefaultVisibility *FeedVisibility `json:"default_visibility,omitempty"`
 	// Configuration for activity processors
 	ActivityProcessors *[]ActivityProcessorConfig `json:"activity_processors,omitempty"`
 	// Configuration for activity selectors
@@ -1625,17 +1770,19 @@ type DeleteFeedRequest struct {
 	PurgeUserActivities *bool `json:"-" query:"purge_user_activities"`
 }
 type GetOrCreateFeedRequest struct {
-	Language                 *string    `json:"-" query:"language"`
-	TranslateText            *bool      `json:"-" query:"translate_text"`
-	IDAround                 *string    `json:"id_around,omitempty"`
-	Limit                    *int       `json:"limit,omitempty"`
-	Next                     *string    `json:"next,omitempty"`
-	OverwriteInterestWeights *bool      `json:"overwrite_interest_weights,omitempty"`
-	Prev                     *string    `json:"prev,omitempty"`
-	UserID                   *string    `json:"user_id,omitempty"`
-	View                     *string    `json:"view,omitempty"`
-	Watch                    *bool      `json:"watch,omitempty"`
-	Data                     *FeedInput `json:"data,omitempty"`
+	Language                 *string `json:"-" query:"language"`
+	TranslateText            *bool   `json:"-" query:"translate_text"`
+	IDAround                 *string `json:"id_around,omitempty"`
+	Limit                    *int    `json:"limit,omitempty"`
+	Next                     *string `json:"next,omitempty"`
+	OverwriteInterestWeights *bool   `json:"overwrite_interest_weights,omitempty"`
+	Prev                     *string `json:"prev,omitempty"`
+	UserID                   *string `json:"user_id,omitempty"`
+	View                     *string `json:"view,omitempty"`
+	Watch                    *bool   `json:"watch,omitempty"`
+	// Feature-gated; not available for all apps. Request-scoped list of actor/user IDs whose activities are filtered from this GetOrCreateFeed response only. Merged (union) into the viewing user's in-memory blocked authors for this request; never persisted to blocked_users. Max: 1000.
+	DiscardActors *[]string  `json:"discard_actors,omitempty"`
+	Data          *FeedInput `json:"data,omitempty"`
 	// Options to skip specific enrichments to improve performance. Default is false (enrichments are included). Setting a field to true skips that enrichment.
 	EnrichmentOptions   *EnrichmentOptions `json:"enrichment_options,omitempty"`
 	ExternalRanking     *map[string]any    `json:"external_ranking,omitempty"`
@@ -1647,7 +1794,8 @@ type GetOrCreateFeedRequest struct {
 	InterestWeights        *map[string]float64     `json:"interest_weights,omitempty"`
 	MemberPagination       *PagerRequest           `json:"member_pagination,omitempty"`
 	// User request object
-	User *UserRequest `json:"user,omitempty"`
+	User           *UserRequest `json:"user,omitempty"`
+	ViewerLocation *Location    `json:"viewer_location,omitempty"`
 }
 type UpdateFeedRequest struct {
 	// If true, removes the geographic location from the feed
@@ -1694,7 +1842,7 @@ type PinActivityRequest struct {
 }
 type ChangeFeedVisibilityRequest struct {
 	// Feed visibility level: public, visible, followers, members, or private
-	Visibility string `json:"visibility"`
+	Visibility FeedVisibility `json:"visibility"`
 	// What to do with existing pending follows when loosening visibility from 'followers': auto_approve (default) or reject
 	PendingFollowsAction *string `json:"pending_follows_action,omitempty"`
 }
@@ -1732,13 +1880,22 @@ type QueryPinnedActivitiesRequest struct {
 	Language        *string `json:"-" query:"language"`
 	TranslateText   *bool   `json:"-" query:"translate_text"`
 	EnrichOwnFields *bool   `json:"enrich_own_fields,omitempty"`
-	Limit           *int    `json:"limit,omitempty"`
-	Next            *string `json:"next,omitempty"`
-	Prev            *string `json:"prev,omitempty"`
+	// When true, return pinned activities even if they have expired. Server-side only; not allowed when a user is set.
+	IncludeExpiredActivities *bool `json:"include_expired_activities,omitempty"`
+	// When true, return pinned activities even if moderation hides them (shadowed or removed). Server-side only; not allowed when a user is set.
+	IncludeModeratedActivities *bool `json:"include_moderated_activities,omitempty"`
+	// When true, return pinned activities even if they are soft-deleted. Server-side only; not allowed when a user is set.
+	IncludeSoftDeletedActivities *bool   `json:"include_soft_deleted_activities,omitempty"`
+	Limit                        *int    `json:"limit,omitempty"`
+	Next                         *string `json:"next,omitempty"`
+	Prev                         *string `json:"prev,omitempty"`
+	UserID                       *string `json:"user_id,omitempty"`
 	// Sorting parameters for the query
 	Sort *[]SortParamRequest `json:"sort,omitempty"`
 	// Filters to apply to the query
 	Filter *map[string]any `json:"filter,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
 }
 type GetFollowSuggestionsRequest struct {
 	Limit  *int    `json:"-" query:"limit"`
@@ -1756,7 +1913,7 @@ type GetOrCreateFeedGroupRequest struct {
 	// Role new followers of feeds in this group are given. Either a built-in (feed_follower, feed_member_viewer) or any role your app has defined. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
 	DefaultFollowerRole *string `json:"default_follower_role,omitempty"`
 	// Default visibility for the feed group, can be 'public', 'visible', 'followers', 'members', or 'private'. Defaults to 'visible' if not provided.
-	DefaultVisibility *string `json:"default_visibility,omitempty"`
+	DefaultVisibility *FeedVisibility `json:"default_visibility,omitempty"`
 	// Configuration for activity processors
 	ActivityProcessors *[]ActivityProcessorConfig `json:"activity_processors,omitempty"`
 	// Configuration for activity selectors
@@ -1776,7 +1933,7 @@ type UpdateFeedGroupRequest struct {
 	// Role new followers of feeds in this group are given. Either a built-in (feed_follower, feed_member_viewer) or any role your app has defined. Empty means feed_follower. Applied when the follow is accepted, so a follow that starts pending picks it up on approval
 	DefaultFollowerRole *string `json:"default_follower_role,omitempty"`
 	// Default visibility for the feed group. One of: public, visible, followers, members, private
-	DefaultVisibility *string `json:"default_visibility,omitempty"`
+	DefaultVisibility *FeedVisibility `json:"default_visibility,omitempty"`
 	// Configuration for activity processors
 	ActivityProcessors *[]ActivityProcessorConfig `json:"activity_processors,omitempty"`
 	// Configuration for activity selectors
@@ -1892,11 +2049,11 @@ type UpdateFollowRequest struct {
 	// Optional role for the follower in the follow relationship. Server-side only. Either a built-in ('feed_follower' (the default) or 'feed_member_viewer') or any role your app has defined; grants are not inspected.
 	FollowerRole *string `json:"follower_role,omitempty"`
 	// Push preference for the follow relationship
-	PushPreference *string `json:"push_preference,omitempty"`
+	PushPreference *FollowPushPreference `json:"push_preference,omitempty"`
 	// Whether to skip push for this follow
 	SkipPush *bool `json:"skip_push,omitempty"`
 	// Status of the follow relationship. One of: accepted, pending, rejected
-	Status *string `json:"status,omitempty"`
+	Status *FollowStatus `json:"status,omitempty"`
 	// Custom data for the follow relationship
 	Custom *map[string]any `json:"custom,omitempty"`
 }
@@ -1917,11 +2074,11 @@ type FollowRequest struct {
 	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 	// Push preference for the follow relationship
-	PushPreference *string `json:"push_preference,omitempty"`
+	PushPreference *FollowPushPreference `json:"push_preference,omitempty"`
 	// Whether to skip push for this follow
 	SkipPush *bool `json:"skip_push,omitempty"`
 	// Status of the follow relationship. One of: accepted, pending, rejected
-	Status *string `json:"status,omitempty"`
+	Status *FollowStatus `json:"status,omitempty"`
 	// Custom data for the follow relationship
 	Custom *map[string]any `json:"custom,omitempty"`
 }
@@ -1936,6 +2093,8 @@ type AcceptFollowRequest struct {
 type FollowBatchRequest struct {
 	// List of follow relationships to create
 	Follows []FollowRequest `json:"follows"`
+	// If true, the batch is queued as a background task, paced per app, and the response has empty follows and a task_id. Server-side only. Supported by the get-or-create endpoint (GetOrCreateFollows); FollowBatch rejects it. Async batches can apply out of order with other follow writes. Defaults to false.
+	Async *bool `json:"async,omitempty"`
 	// If true, auto-creates users referenced by source/target FIDs in the batch when they don't already exist. Server-side only. Defaults to false. This top-level field is the only supported batch/upsert create_users control.
 	CreateUsers *bool `json:"create_users,omitempty"`
 	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
@@ -1944,15 +2103,19 @@ type FollowBatchRequest struct {
 type GetOrCreateFollowsRequest struct {
 	// List of follow relationships to create
 	Follows []FollowRequest `json:"follows"`
+	// If true, the batch is queued as a background task, paced per app, and the response has empty follows and a task_id. Server-side only. Supported by the get-or-create endpoint (GetOrCreateFollows); FollowBatch rejects it. Async batches can apply out of order with other follow writes. Defaults to false.
+	Async *bool `json:"async,omitempty"`
 	// If true, auto-creates users referenced by source/target FIDs in the batch when they don't already exist. Server-side only. Defaults to false. This top-level field is the only supported batch/upsert create_users control.
 	CreateUsers *bool `json:"create_users,omitempty"`
 	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 }
 type QueryFollowsRequest struct {
-	Limit *int    `json:"limit,omitempty"`
-	Next  *string `json:"next,omitempty"`
-	Prev  *string `json:"prev,omitempty"`
+	// When true (server-side only), the response includes group_counts: accepted following counts keyed by the followed feed's group. Requires exactly one source_feed / source_fid string equality. HTTP 400 if target_feed appears, if two source FIDs are given, or if $in / $or mentions those keys. Independent of paging and of other filters, including status.
+	IncludeGroupCounts *bool   `json:"include_group_counts,omitempty"`
+	Limit              *int    `json:"limit,omitempty"`
+	Next               *string `json:"next,omitempty"`
+	Prev               *string `json:"prev,omitempty"`
 	// Sorting parameters for the query
 	Sort *[]SortParamRequest `json:"sort,omitempty"`
 	// Filters to apply to the query
@@ -1981,11 +2144,11 @@ type GetOrCreateFollowRequest struct {
 	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
 	EnrichOwnFields *bool `json:"enrich_own_fields,omitempty"`
 	// Push preference for the follow relationship
-	PushPreference *string `json:"push_preference,omitempty"`
+	PushPreference *FollowPushPreference `json:"push_preference,omitempty"`
 	// Whether to skip push for this follow
 	SkipPush *bool `json:"skip_push,omitempty"`
 	// Status of the follow relationship. One of: accepted, pending, rejected
-	Status *string `json:"status,omitempty"`
+	Status *FollowStatus `json:"status,omitempty"`
 	// Custom data for the follow relationship
 	Custom *map[string]any `json:"custom,omitempty"`
 }
@@ -2031,6 +2194,26 @@ type UpdateMembershipLevelRequest struct {
 	// Custom data for the membership level
 	Custom *map[string]any `json:"custom,omitempty"`
 }
+type FeedsGetRetentionPolicyRequest struct {
+}
+type FeedsSetRetentionPolicyRequest struct {
+	MaxAgeHours int       `json:"max_age_hours"`
+	Policy      string    `json:"policy"`
+	Enabled     *bool     `json:"enabled,omitempty"`
+	FeedGroups  *[]string `json:"feed_groups,omitempty"`
+}
+type FeedsDeleteRetentionPolicyRequest struct {
+	Policy string `json:"policy"`
+}
+type FeedsGetRetentionPolicyRunsRequest struct {
+	Limit *int    `json:"limit,omitempty"`
+	Next  *string `json:"next,omitempty"`
+	Prev  *string `json:"prev,omitempty"`
+	// Array of sort parameters
+	Sort *[]SortParamRequest `json:"sort,omitempty"`
+	// Filter conditions to apply to the query
+	FilterConditions *map[string]any `json:"filter_conditions,omitempty"`
+}
 type QueryRevisionHistoryRequest struct {
 	// Filter to apply to the query
 	Filter map[string]any `json:"filter"`
@@ -2049,6 +2232,8 @@ type QueryFeedsUsageStatsRequest struct {
 type UnfollowBatchRequest struct {
 	// List of follow relationships to remove, each with optional keep_history
 	Follows []UnfollowPair `json:"follows"`
+	// If true, the batch is queued as a background task, paced per app, and the response has empty follows and a task_id. Server-side only. Supported by the get-or-create endpoint (GetOrCreateUnfollows); UnfollowBatch rejects it. Async batches can apply out of order with other follow writes. Defaults to false.
+	Async *bool `json:"async,omitempty"`
 	// Whether to delete the corresponding notification activity (default: false)
 	DeleteNotificationActivity *bool `json:"delete_notification_activity,omitempty"`
 	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
@@ -2057,6 +2242,8 @@ type UnfollowBatchRequest struct {
 type GetOrCreateUnfollowsRequest struct {
 	// List of follow relationships to remove, each with optional keep_history
 	Follows []UnfollowPair `json:"follows"`
+	// If true, the batch is queued as a background task, paced per app, and the response has empty follows and a task_id. Server-side only. Supported by the get-or-create endpoint (GetOrCreateUnfollows); UnfollowBatch rejects it. Async batches can apply out of order with other follow writes. Defaults to false.
+	Async *bool `json:"async,omitempty"`
 	// Whether to delete the corresponding notification activity (default: false)
 	DeleteNotificationActivity *bool `json:"delete_notification_activity,omitempty"`
 	// If true, enriches the follow's source_feed and target_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
@@ -2080,8 +2267,15 @@ type DeleteFeedUserDataRequest struct {
 }
 type ExportFeedUserDataRequest struct {
 }
+type DeleteUserInterestsRequest struct {
+	Tags []string `json:"-" query:"tags"`
+}
 type GetUserInterestsRequest struct {
 	Limit *int `json:"-" query:"limit"`
+}
+type UpsertUserInterestsRequest struct {
+	// Interest tags to add or update (1-50)
+	Interests []UserInterestRequest `json:"interests"`
 }
 type CreateGuestRequest struct {
 	// User request object
@@ -2197,6 +2391,8 @@ type AnalyzeRequest struct {
 	ConfigKey *string `json:"config_key,omitempty"`
 	// Original timestamp when the content was produced. Used as the `published_at` timestamp on per-content log entries that surface in `matched_contents` on aggregation-rule webhooks.
 	ContentPublishedAt *Timestamp `json:"content_published_at,omitempty"`
+	// ISO 3166-1 alpha-2 country the content is aimed at (e.g. US, DE). Forwarded to the AI text provider as country context so it can resolve words whose meaning changes between countries.
+	CountryCode *string `json:"country_code,omitempty"`
 	// ID of the user who created the content. Required with entity_type + entity_id; omit all three for stateless mode.
 	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
 	// Caller-supplied content identifier. Required with entity_type + entity_creator_id; omit all three for stateless mode.
@@ -2220,6 +2416,8 @@ type AppealRequest struct {
 	EntityID string `json:"entity_id"`
 	// Type of entity being appealed (e.g., message, user)
 	EntityType string `json:"entity_type"`
+	// CID of the channel ban being appealed. Only used when entity_type is stream:user; omit to appeal the global ban.
+	ChannelCid *string `json:"channel_cid,omitempty"`
 	// ID of the review queue item (flagged message) that triggered the ban. Applicable only for user ban appeals.
 	ReviewQueueItemID *string `json:"review_queue_item_id,omitempty"`
 	UserID            *string `json:"user_id,omitempty"`
@@ -2256,7 +2454,8 @@ type BulkActionAppealsRequest struct {
 	Restore *RestoreActionRequestPayload `json:"restore,omitempty"`
 	// Configuration for unban moderation action
 	Unban *UnbanActionRequestPayload `json:"unban,omitempty"`
-	// Deprecated: use restore instead — it now also reverses a block or shadow block. Configuration for unblock action.
+	// Deprecated: Use restore instead, which now also reverses a block or shadow block. Configuration for unblock action.
+	// Deprecated: this field is deprecated.
 	Unblock *UnblockActionRequestPayload `json:"unblock,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
@@ -2264,11 +2463,16 @@ type BulkActionAppealsRequest struct {
 type BanRequest struct {
 	// ID of the user to ban
 	TargetUserID string `json:"target_user_id"`
+	// Whether to also ban the user from future channels created by the banner
+	BanFromFutureChannels *bool `json:"ban_from_future_channels,omitempty"`
 	// ID of the user performing the ban
 	BannedByID *string `json:"banned_by_id,omitempty"`
 	// Channel where the ban applies
-	ChannelCid     *string `json:"channel_cid,omitempty"`
-	DeleteMessages *string `json:"delete_messages,omitempty"`
+	ChannelCid *string `json:"channel_cid,omitempty"`
+	// How a ban or user deletion treats the user's messages.
+	DeleteMessages *DeleteMessages `json:"delete_messages,omitempty"`
+	// Whether to delete reactions by the banned user on other users' messages
+	DeleteReactions *bool `json:"delete_reactions,omitempty"`
 	// Whether to ban the user's IP address
 	IpBan *bool `json:"ip_ban,omitempty"`
 	// Optional explanation for the ban
@@ -2303,6 +2507,8 @@ type CheckRequest struct {
 	ConfigTeam *string `json:"config_team,omitempty"`
 	// Original timestamp when the content was produced (for correlating flagged content with source video timeline)
 	ContentPublishedAt *Timestamp `json:"content_published_at,omitempty"`
+	// ISO 3166-1 alpha-2 country the content is aimed at (e.g. US, DE), used as country context by AI text providers
+	CountryCode *string `json:"country_code,omitempty"`
 	// Whether to run moderation in test mode
 	TestMode          *bool              `json:"test_mode,omitempty"`
 	UserID            *string            `json:"user_id,omitempty"`
@@ -2338,6 +2544,7 @@ type UpsertConfigRequest struct {
 	BodyguardConfig                    *AITextConfig                       `json:"bodyguard_config,omitempty"`
 	FloodConfig                        *FloodConfig                        `json:"flood_config,omitempty"`
 	GoogleVisionConfig                 *GoogleVisionConfig                 `json:"google_vision_config,omitempty"`
+	IntentConfig                       *IntentConfigRequest                `json:"intent_config,omitempty"`
 	LlmConfig                          *LLMConfig                          `json:"llm_config,omitempty"`
 	RuleBuilderConfig                  *RuleBuilderConfig                  `json:"rule_builder_config,omitempty"`
 	// User request object
@@ -2376,6 +2583,20 @@ type CustomCheckRequest struct {
 	UserID          *string `json:"user_id,omitempty"`
 	// Content payload for moderation
 	ModerationPayload *ModerationPayloadRequest `json:"moderation_payload,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
+}
+type QueryModerationFeedbackRequest struct {
+	// Maximum number of matching items returned per submission, 1 to 50; all by default
+	ItemLimit *int    `json:"item_limit,omitempty"`
+	Limit     *int    `json:"limit,omitempty"`
+	Next      *string `json:"next,omitempty"`
+	Prev      *string `json:"prev,omitempty"`
+	UserID    *string `json:"user_id,omitempty"`
+	// Sorting parameters: created_at only, newest first by default
+	Sort *[]SortParamRequest `json:"sort,omitempty"`
+	// Filter conditions
+	Filter *map[string]any `json:"filter,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }
@@ -2430,7 +2651,7 @@ type LabelsRequest struct {
 	ContentType *string `json:"content_type,omitempty"`
 	// When true, run moderation and return labels without persisting the result. Useful for one-off checks (e.g. UI testers) that should not be recorded in the stored history.
 	DryRun *bool `json:"dry_run,omitempty"`
-	// Optional moderation policy key (max 128 chars). For username moderation, set this to a policy whose key starts with 'username:' (e.g. 'username:default') to opt into the low-latency fast-path: blocklists (customer + Stream-managed defaults) short-circuit the LLM, and the LLM fallback uses gpt-4.1-nano with a 24h Valkey verdict cache. Without a 'username:' prefix the request falls through to the standard Bodyguard Analyze v1 username path.
+	// Optional moderation policy key (max 128 chars). For username moderation, set this to a policy whose key starts with 'username:' (e.g. 'username:default') to opt into the low-latency fast-path: blocklists (customer + Stream-managed defaults) short-circuit the LLM, and the LLM fallback uses gpt-4o-mini (overridable via moderation_settings.llm_username_model) with a 24h Valkey verdict cache. Without a 'username:' prefix the request falls through to the standard Bodyguard Analyze v1 username path.
 	Policy *string `json:"policy,omitempty"`
 	// Optional customer-supplied user identifier for the content author (max 256 chars). Enables filtering stored results by user_id.
 	UserID *string `json:"user_id,omitempty"`
@@ -2567,6 +2788,13 @@ type DeleteQueueRequest struct {
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }
+type RevealMediaRequest struct {
+	// ID of the review queue item whose media is revealed
+	ItemID string  `json:"item_id"`
+	UserID *string `json:"user_id,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
+}
 type QueryReviewQueueRequest struct {
 	ExcludeDefaultActionConfig *bool `json:"exclude_default_action_config,omitempty"`
 	Limit                      *int  `json:"limit,omitempty"`
@@ -2583,7 +2811,7 @@ type QueryReviewQueueRequest struct {
 	UserID    *string `json:"user_id,omitempty"`
 	// Sorting parameters for the results
 	Sort *[]SortParamRequest `json:"sort,omitempty"`
-	// Filter conditions for review queue items. Accepts built-in fields (e.g. status, channel_cid, severity, recommended_action) and customer-supplied moderation_payload.custom keys: any key that is not a built-in field is matched against the item's custom moderation data (e.g. {"location_id": "loc-42"}). Use filter_config.filterable_custom_keys to discover which custom keys the app exposes as chips.
+	// Filter conditions for review queue items. Accepts built-in fields (e.g. status, channel_cid, severity, recommended_action) and customer-supplied moderation_payload.custom keys: any key that is not a built-in field is matched against the item's custom moderation data (e.g. {"location_id": "loc-42"}). Use filter_config.filterable_custom_keys to discover which custom keys the app exposes as chips. content_text searches the moderated text: "$q" is a keyword search (terms ANDed, no adjacency) over the indexed tsvector, while "$eq" (or "$in" for several wordings) matches the text exactly. The exact form is unindexed, so scope it with date_range rather than running it across the whole queue.
 	Filter *map[string]any `json:"filter,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
@@ -2594,14 +2822,14 @@ type GetSetupSessionRequest struct {
 }
 type UpsertSetupSessionRequest struct {
 	// The current step of the setup wizard. One of: welcome, input, configure, live
-	CurrentStep string `json:"current_step"`
+	CurrentStep SetupStep `json:"current_step"`
 	// The status of the setup session. One of: in_progress, completed
-	Status string `json:"status"`
+	Status SetupStatus `json:"status"`
 	// Per-step data keyed by step name (welcome, input, configure, live)
 	SetupData *map[string]any `json:"setup_data,omitempty"`
 }
 type SubmitActionRequest struct {
-	// Type of moderation action to perform. One of: mark_reviewed, delete_message, delete_activity, delete_comment, delete_reaction, ban, custom, unban, restore, delete_user, delete_user_messages, unblock, block, shadow_block, unmask, kick_user, end_call, escalate, de_escalate
+	// Type of moderation action to perform. One of: mark_reviewed, delete_message, delete_activity, delete_comment, delete_reaction, delete_poll, delete_poll_option, delete_poll_answer, ban, custom, unban, restore, delete_user, delete_user_messages, unblock, block, shadow_block, unmask, kick_user, end_call, escalate, de_escalate
 	ActionType string `json:"action_type"`
 	// UUID of the appeal to act on (required for reject_appeal, optional for other actions)
 	AppealID *string `json:"appeal_id,omitempty"`
@@ -2621,6 +2849,12 @@ type SubmitActionRequest struct {
 	DeleteComment *DeleteCommentRequestPayload `json:"delete_comment,omitempty"`
 	// Configuration for message deletion action
 	DeleteMessage *DeleteMessageRequestPayload `json:"delete_message,omitempty"`
+	// Configuration for poll deletion action. Poll deletion is always permanent.
+	DeletePoll *DeletePollRequestPayload `json:"delete_poll,omitempty"`
+	// Configuration for deleting the free-text poll answer a review item was raised for. Chat polls only. Deletion is permanent; the poll and other votes are kept.
+	DeletePollAnswer *DeletePollAnswerRequestPayload `json:"delete_poll_answer,omitempty"`
+	// Configuration for deleting the single poll option a review item was raised for. Deletion is permanent; the rest of the poll is kept.
+	DeletePollOption *DeletePollOptionRequestPayload `json:"delete_poll_option,omitempty"`
 	// Configuration for reaction deletion action
 	DeleteReaction *DeleteReactionRequestPayload `json:"delete_reaction,omitempty"`
 	// Configuration for user deletion action
@@ -2640,30 +2874,50 @@ type SubmitActionRequest struct {
 	ShadowBlock *ShadowBlockActionRequestPayload `json:"shadow_block,omitempty"`
 	// Configuration for unban moderation action
 	Unban *UnbanActionRequestPayload `json:"unban,omitempty"`
-	// Deprecated: use restore instead — it now also reverses a block or shadow block. Configuration for unblock action.
+	// Deprecated: Use restore instead, which now also reverses a block or shadow block. Configuration for unblock action.
+	// Deprecated: this field is deprecated.
 	Unblock *UnblockActionRequestPayload `json:"unblock,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }
 type SubmitModerationFeedbackRequest struct {
-	// The moderated content the moderator is providing feedback on
-	Message string `json:"message"`
-	// Original publication time of the moderated content (RFC3339)
-	PublishedAt string `json:"published_at"`
-	// Provider-side reference identifying the moderated content
-	Reference string `json:"reference"`
 	// Optional moderation channel UUID for context
 	ChannelID *string `json:"channel_id,omitempty"`
+	// Moderator's confidence in this feedback (LOW, MEDIUM, HIGH, VERY_HIGH); forwarded to the moderation provider. Optional
+	Confidence *string `json:"confidence,omitempty"`
 	// Action originally produced by the moderation system
 	CurrentRecommendedAction *string `json:"current_recommended_action,omitempty"`
 	// Optional free-form note explaining why the classification was wrong
 	Description *string `json:"description,omitempty"`
+	// ID of the user who created the entity
+	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
+	// ID of the entity the items belong to
+	EntityID *string `json:"entity_id,omitempty"`
+	// Type of the entity the items belong to
+	EntityType *string `json:"entity_type,omitempty"`
 	// Optional moderator-supplied action
 	ExpectedRecommendedAction *string `json:"expected_recommended_action,omitempty"`
+	// Whether the referenced flags are marked (true, default) or unmarked (false) as false positives
+	FalsePositive *bool `json:"false_positive,omitempty"`
+	// false_positive (default) disputes existing detections; false_negative reports missed content: items carry the content, expected_labels is required and flag_id is not allowed
+	FeedbackType *string `json:"feedback_type,omitempty"`
+	// The moderated content the moderator is providing feedback on. Required unless items is provided
+	Message *string `json:"message,omitempty"`
+	// Original publication time of the moderated content (RFC3339). Required unless items is provided
+	PublishedAt *string `json:"published_at,omitempty"`
+	// Provider-side reference identifying the moderated content. Required unless items is provided
+	Reference *string `json:"reference,omitempty"`
+	// Review queue item the feedback targets, as an alternative to entity_type and entity_id
+	ReviewQueueItemID *string `json:"review_queue_item_id,omitempty"`
+	UserID            *string `json:"user_id,omitempty"`
 	// Classifications originally produced by the moderation system
 	CurrentLabels *[]string `json:"current_labels,omitempty"`
 	// Optional moderator-supplied classifications (up to 16 entries)
 	ExpectedLabels *[]string `json:"expected_labels,omitempty"`
+	// Pieces of content of one entity the feedback is about (1 to 50)
+	Items *[]SubmitModerationFeedbackItem `json:"items,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
 }
 type UnbanRequest struct {
 	TargetUserID string  `json:"-" query:"target_user_id"`
@@ -2673,6 +2927,7 @@ type UnbanRequest struct {
 	// Deprecated: this field is deprecated.
 	UnbannedByID *string `json:"unbanned_by_id,omitempty"`
 	// User request object
+	// Deprecated: this field is deprecated.
 	UnbannedBy *UserRequest `json:"unbanned_by,omitempty"`
 }
 type UnmuteRequest struct {
@@ -2727,6 +2982,10 @@ type CreatePollRequest struct {
 	// Indicates whether users can suggest user defined answers
 	AllowAnswers              *bool `json:"allow_answers,omitempty"`
 	AllowUserSuggestedOptions *bool `json:"allow_user_suggested_options,omitempty"`
+	// Key of the moderation configuration to use. Server-side only.
+	ConfigKey *string `json:"config_key,omitempty"`
+	// Team associated with the configuration. Server-side only.
+	ConfigTeam *string `json:"config_team,omitempty"`
 	// A description of the poll
 	Description *string `json:"description,omitempty"`
 	// Indicates whether users can cast multiple votes
@@ -2735,9 +2994,11 @@ type CreatePollRequest struct {
 	// Indicates whether the poll is open for voting
 	IsClosed *bool `json:"is_closed,omitempty"`
 	// Indicates the maximum amount of votes a user can cast
-	MaxVotesAllowed  *int               `json:"max_votes_allowed,omitempty"`
-	UserID           *string            `json:"user_id,omitempty"`
-	VotingVisibility *string            `json:"voting_visibility,omitempty"`
+	MaxVotesAllowed *int    `json:"max_votes_allowed,omitempty"`
+	Team            *string `json:"team,omitempty"`
+	UserID          *string `json:"user_id,omitempty"`
+	// Represents the visibility of votes in a poll.
+	VotingVisibility *VotingVisibility  `json:"voting_visibility,omitempty"`
 	Options          *[]PollOptionInput `json:"options,omitempty"`
 	// Custom data for this object
 	Custom *map[string]any `json:"custom,omitempty"`
@@ -2753,6 +3014,10 @@ type UpdatePollRequest struct {
 	AllowAnswers *bool `json:"allow_answers,omitempty"`
 	// Allow user suggested options
 	AllowUserSuggestedOptions *bool `json:"allow_user_suggested_options,omitempty"`
+	// Key of the moderation configuration to use. Server-side only.
+	ConfigKey *string `json:"config_key,omitempty"`
+	// Team associated with the configuration. Server-side only.
+	ConfigTeam *string `json:"config_team,omitempty"`
 	// Poll description
 	Description *string `json:"description,omitempty"`
 	// Enforce unique vote
@@ -2763,7 +3028,7 @@ type UpdatePollRequest struct {
 	MaxVotesAllowed *int    `json:"max_votes_allowed,omitempty"`
 	UserID          *string `json:"user_id,omitempty"`
 	// Voting visibility
-	VotingVisibility *string `json:"voting_visibility,omitempty"`
+	VotingVisibility *VotingVisibility `json:"voting_visibility,omitempty"`
 	// Poll options
 	Options *[]PollOptionRequest `json:"options,omitempty"`
 	// Custom data for this object
@@ -2788,7 +3053,11 @@ type GetPollRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
 type UpdatePollPartialRequest struct {
-	UserID *string `json:"user_id,omitempty"`
+	// Key of the moderation configuration to use. Server-side only.
+	ConfigKey *string `json:"config_key,omitempty"`
+	// Team associated with the configuration. Server-side only.
+	ConfigTeam *string `json:"config_team,omitempty"`
+	UserID     *string `json:"user_id,omitempty"`
 	// Array of field names to unset
 	Unset *[]string `json:"unset,omitempty"`
 	// Sets new field values
@@ -2798,8 +3067,12 @@ type UpdatePollPartialRequest struct {
 }
 type CreatePollOptionRequest struct {
 	// Option text
-	Text   string  `json:"text"`
-	UserID *string `json:"user_id,omitempty"`
+	Text string `json:"text"`
+	// Key of the moderation configuration to use. Server-side only.
+	ConfigKey *string `json:"config_key,omitempty"`
+	// Team associated with the configuration. Server-side only.
+	ConfigTeam *string `json:"config_team,omitempty"`
+	UserID     *string `json:"user_id,omitempty"`
 	// Custom data for this object
 	Custom *map[string]any `json:"custom,omitempty"`
 	// User request object
@@ -2809,8 +3082,12 @@ type UpdatePollOptionRequest struct {
 	// Option ID
 	ID string `json:"id"`
 	// Option text
-	Text   string  `json:"text"`
-	UserID *string `json:"user_id,omitempty"`
+	Text string `json:"text"`
+	// Key of the moderation configuration to use. Server-side only.
+	ConfigKey *string `json:"config_key,omitempty"`
+	// Team associated with the configuration. Server-side only.
+	ConfigTeam *string `json:"config_team,omitempty"`
+	UserID     *string `json:"user_id,omitempty"`
 	// Custom data for this object
 	Custom *map[string]any `json:"custom,omitempty"`
 	// User request object
@@ -2820,6 +3097,7 @@ type DeletePollOptionRequest struct {
 	UserID *string `json:"-" query:"user_id"`
 }
 type GetPollOptionRequest struct {
+	UserID *string `json:"-" query:"user_id"`
 }
 type QueryPollVotesRequest struct {
 	UserID *string `json:"-" query:"user_id"`
@@ -2843,14 +3121,14 @@ type UpsertPushProviderRequest struct {
 type DeletePushProviderRequest struct {
 }
 type GetPushTemplatesRequest struct {
-	PushProviderType string  `json:"-" query:"push_provider_type"`
-	PushProviderName *string `json:"-" query:"push_provider_name"`
+	PushProviderType PushProviderName `json:"-" query:"push_provider_type"`
+	PushProviderName *string          `json:"-" query:"push_provider_name"`
 }
 type UpsertPushTemplateRequest struct {
 	// Event type. One of: message.new, message.updated, reaction.new, notification.reminder_due, feeds.activity.added, feeds.comment.added, feeds.activity.reaction.added, feeds.comment.reaction.added, feeds.follow.created, feeds.notification_feed.updated
 	EventType string `json:"event_type"`
 	// Push provider type. One of: firebase, apn, huawei, xiaomi
-	PushProviderType string `json:"push_provider_type"`
+	PushProviderType PushProviderName `json:"push_provider_type"`
 	// Whether to send push notification for this event
 	EnablePush *bool `json:"enable_push,omitempty"`
 	// Push provider name
@@ -2893,6 +3171,9 @@ type UploadFileRequest struct {
 	File *string     `json:"file,omitempty"`
 	User *OnlyUserID `json:"user,omitempty"`
 }
+
+func (*UploadFileRequest) isMultipart() {}
+
 type DeleteImageRequest struct {
 	Url *string `json:"-" query:"url"`
 }
@@ -2902,6 +3183,9 @@ type UploadImageRequest struct {
 	UploadSizes *[]ImageSize `json:"upload_sizes,omitempty"`
 	User        *OnlyUserID  `json:"user,omitempty"`
 }
+
+func (*UploadImageRequest) isMultipart() {}
+
 type ListUserGroupsRequest struct {
 	Limit       *int    `json:"-" query:"limit"`
 	IDGt        *string `json:"-" query:"id_gt"`
@@ -2972,6 +3256,12 @@ type BlockUsersRequest struct {
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }
+type ClaimGuestUserRequest struct {
+	// ID of the guest user to claim
+	GuestUserID string `json:"guest_user_id"`
+	// ID of the regular user that claims the guest and receives its channels, messages and reactions
+	UserID string `json:"user_id"`
+}
 type DeactivateUsersRequest struct {
 	// User IDs to deactivate
 	UserIds []string `json:"user_ids"`
@@ -2992,9 +3282,10 @@ type DeleteUsersRequest struct {
 	Calls *string `json:"calls,omitempty"`
 	// Conversation channels delete mode.
 	// Conversation channel is any channel which only has two members one of which is the user being deleted.
-	// * null or empty string - doesn't delete any conversation channels
+	// * null or empty string - doesn't delete any conversation channels, unless user is 'hard', in which case it defaults to 'hard'
 	// * soft - marks all conversation channels as deleted (same effect as Delete Channels with 'hard' option disabled)
 	// * hard - deletes channel and all its data completely including messages (same effect as Delete Channels with 'hard' option enabled)
+	// * keep - doesn't delete any conversation channels. Use it with user 'hard', where null or empty string defaults to 'hard'
 	Conversations *string `json:"conversations,omitempty"`
 	// Delete user files.
 	// * false or empty string - doesn't delete any files
@@ -3011,7 +3302,7 @@ type DeleteUsersRequest struct {
 	// User delete mode.
 	// * soft - marks user as deleted and retains all user data
 	// * pruning - marks user as deleted and nullifies user information
-	// * hard - deletes user completely. Requires 'hard' option for messages and conversations as well
+	// * hard - deletes user completely. Requires 'hard' option for messages, and 'hard' or 'keep' option for conversations
 	User *string `json:"user,omitempty"`
 }
 type GetUserLiveLocationsRequest struct {
@@ -3084,6 +3375,14 @@ type QueryCallMembersRequest struct {
 	Sort *[]SortParamRequest `json:"sort,omitempty"`
 	// Filter conditions to apply to the query
 	FilterConditions *map[string]any `json:"filter_conditions,omitempty"`
+}
+type QueryCallRingAttemptsRequest struct {
+	// Call ID
+	ID string `json:"id"`
+	// The type of call
+	Type string `json:"type"`
+	// Limit the attempts to one call session; omit to read every session of the call
+	CallSessionID *string `json:"call_session_id,omitempty"`
 }
 type QueryCallStatsRequest struct {
 	Limit *int    `json:"limit,omitempty"`
@@ -3217,6 +3516,8 @@ type RingCallRequest struct {
 	Video *bool `json:"video,omitempty"`
 	// Members that should receive the ring. If no ids are provided, all call members who are not already in the call will receive ring notifications.
 	MembersIds *[]string `json:"members_ids,omitempty"`
+	// Opaque context stored on the ring attempt; refs and IDs only
+	Custom *map[string]any `json:"custom,omitempty"`
 }
 type StartRTMPBroadcastsRequest struct {
 	// List of broadcasts to start
@@ -3244,8 +3545,8 @@ type StartClosedCaptionsRequest struct {
 	// Which external storage to use for transcriptions (only applicable if enable_transcription is true)
 	ExternalStorage *string `json:"external_storage,omitempty"`
 	// The spoken language in the call, if not provided the language defined in the transcription settings will be used. One of: auto, ar, bg, ca, cs, da, de, el, en, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, ms, nl, no, pl, pt, ro, ru, sk, sl, sv, ta, th, tl, tr, uk, zh
-	Language            *string              `json:"language,omitempty"`
-	SpeechSegmentConfig *SpeechSegmentConfig `json:"speech_segment_config,omitempty"`
+	Language            *TranscriptionLanguage `json:"language,omitempty"`
+	SpeechSegmentConfig *SpeechSegmentConfig   `json:"speech_segment_config,omitempty"`
 }
 type StartFrameRecordingRequest struct {
 	RecordingExternalStorage *string `json:"recording_external_storage,omitempty"`
@@ -3254,7 +3555,7 @@ type StartTranscriptionRequest struct {
 	// Enable closed captions along with transcriptions
 	EnableClosedCaptions *bool `json:"enable_closed_captions,omitempty"`
 	// The spoken language in the call, if not provided the language defined in the transcription settings will be used. One of: auto, ar, bg, ca, cs, da, de, el, en, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, ms, nl, no, pl, pt, ro, ru, sk, sl, sv, ta, th, tl, tr, uk, zh
-	Language *string `json:"language,omitempty"`
+	Language *TranscriptionLanguage `json:"language,omitempty"`
 	// Store transcriptions in this external storage
 	TranscriptionExternalStorage *string `json:"transcription_external_storage,omitempty"`
 }

@@ -33,6 +33,10 @@ func (c *Channels) Update(ctx context.Context, request *UpdateChannelRequest) (*
 	return c.client.UpdateChannel(ctx, c.channelType, c.channelD, request)
 }
 
+func (c *Channels) QueryChannelBans(ctx context.Context, request *QueryChannelBansRequest) (*StreamResponse[QueryChannelBansResponse], error) {
+	return c.client.QueryChannelBans(ctx, c.channelType, c.channelD, request)
+}
+
 func (c *Channels) DeleteDraft(ctx context.Context, request *DeleteDraftRequest) (*StreamResponse[Response], error) {
 	return c.client.DeleteDraft(ctx, c.channelType, c.channelD, request)
 }
@@ -51,6 +55,14 @@ func (c *Channels) DeleteChannelFile(ctx context.Context, request *DeleteChannel
 
 func (c *Channels) UploadChannelFile(ctx context.Context, request *UploadChannelFileRequest) (*StreamResponse[UploadChannelFileResponse], error) {
 	return c.client.UploadChannelFile(ctx, c.channelType, c.channelD, request)
+}
+
+func (c *Channels) Fork(ctx context.Context, request *ForkChannelRequest) (*StreamResponse[ForkChannelResponse], error) {
+	return c.client.ForkChannel(ctx, c.channelType, c.channelD, request)
+}
+
+func (c *Channels) ForkMessageIDs(ctx context.Context, request *ForkMessageIDsRequest) (*StreamResponse[ForkMessageIDsResponse], error) {
+	return c.client.ForkMessageIDs(ctx, c.channelType, c.channelD, request)
 }
 
 func (c *Channels) Hide(ctx context.Context, request *HideChannelRequest) (*StreamResponse[HideChannelResponse], error) {
@@ -87,6 +99,10 @@ func (c *Channels) GetOrCreate(ctx context.Context, request *GetOrCreateChannelR
 
 func (c *Channels) MarkRead(ctx context.Context, request *MarkReadRequest) (*StreamResponse[MarkReadResponse], error) {
 	return c.client.MarkRead(ctx, c.channelType, c.channelD, request)
+}
+
+func (c *Channels) Rewind(ctx context.Context, request *RewindChannelRequest) (*StreamResponse[RewindChannelResponse], error) {
+	return c.client.RewindChannel(ctx, c.channelType, c.channelD, request)
 }
 
 func (c *Channels) Show(ctx context.Context, request *ShowChannelRequest) (*StreamResponse[ShowChannelResponse], error) {

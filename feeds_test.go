@@ -317,6 +317,13 @@ func TestFeedsUpdateComment(t *testing.T) {
 	_, err = client.Feeds().UpdateComment(context.Background(), "", &getstream.UpdateCommentRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsCommentFeedback(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().CommentFeedback(context.Background(), "", &getstream.CommentFeedbackRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsUpdateCommentPartial(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -364,6 +371,20 @@ func TestFeedsTranslateComment(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().TranslateComment(context.Background(), "", &getstream.TranslateCommentRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsExportFeedsApp(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().ExportFeedsApp(context.Background(), &getstream.ExportFeedsAppRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsExportFeedsByType(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().ExportFeedsByType(context.Background(), "", &getstream.ExportFeedsByTypeRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsListFeedGroups(t *testing.T) {
@@ -702,6 +723,34 @@ func TestFeedsUpdateMembershipLevel(t *testing.T) {
 	_, err = client.Feeds().UpdateMembershipLevel(context.Background(), "", &getstream.UpdateMembershipLevelRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsFeedsGetRetentionPolicy(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().FeedsGetRetentionPolicy(context.Background(), &getstream.FeedsGetRetentionPolicyRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsFeedsSetRetentionPolicy(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().FeedsSetRetentionPolicy(context.Background(), &getstream.FeedsSetRetentionPolicyRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsFeedsDeleteRetentionPolicy(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().FeedsDeleteRetentionPolicy(context.Background(), &getstream.FeedsDeleteRetentionPolicyRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsFeedsGetRetentionPolicyRuns(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().FeedsGetRetentionPolicyRuns(context.Background(), &getstream.FeedsGetRetentionPolicyRunsRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsQueryRevisionHistory(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -751,10 +800,24 @@ func TestFeedsExportFeedUserData(t *testing.T) {
 	_, err = client.Feeds().ExportFeedUserData(context.Background(), "", &getstream.ExportFeedUserDataRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsDeleteUserInterests(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().DeleteUserInterests(context.Background(), "", &getstream.DeleteUserInterestsRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsGetUserInterests(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
 
 	_, err = client.Feeds().GetUserInterests(context.Background(), "", &getstream.GetUserInterestsRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsUpsertUserInterests(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().UpsertUserInterests(context.Background(), "", &getstream.UpsertUserInterestsRequest{})
 	require.NoError(t, err)
 }

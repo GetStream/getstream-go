@@ -178,6 +178,13 @@ func (c *ModerationClient) CustomCheck(ctx context.Context, request *CustomCheck
 	return res, err
 }
 
+// List moderation feedback submissions that have an item matching the filter, with those items, sorting and pagination. Server-side only.
+func (c *ModerationClient) QueryModerationFeedback(ctx context.Context, request *QueryModerationFeedbackRequest) (*StreamResponse[QueryModerationFeedbackResponse], error) {
+	var result QueryModerationFeedbackResponse
+	res, err := MakeRequest[QueryModerationFeedbackRequest, QueryModerationFeedbackResponse](c.client, ctx, "POST", "/api/v2/moderation/feedback_items", nil, request, &result, nil)
+	return res, err
+}
+
 // Delete a specific moderation template by its name
 func (c *ModerationClient) V2DeleteTemplate(ctx context.Context, request *V2DeleteTemplateRequest) (*StreamResponse[DeleteModerationTemplateResponse], error) {
 	var result DeleteModerationTemplateResponse
@@ -374,6 +381,13 @@ func (c *ModerationClient) DeleteQueue(ctx context.Context, id string, request *
 	return res, err
 }
 
+// Authorize revealing a review queue item's blurred media. CSAM can only be revealed by users with the RevealProtectedMedia permission. Reveals of blurred CSAM or gore are recorded in the moderation action logs.
+func (c *ModerationClient) RevealMedia(ctx context.Context, request *RevealMediaRequest) (*StreamResponse[RevealMediaResponse], error) {
+	var result RevealMediaResponse
+	res, err := MakeRequest[RevealMediaRequest, RevealMediaResponse](c.client, ctx, "POST", "/api/v2/moderation/reveal_media", nil, request, &result, nil)
+	return res, err
+}
+
 // Query review queue items allows you to filter the review queue items. This is used for building a moderation dashboard.
 func (c *ModerationClient) QueryReviewQueue(ctx context.Context, request *QueryReviewQueueRequest) (*StreamResponse[QueryReviewQueueResponse], error) {
 	var result QueryReviewQueueResponse
@@ -412,7 +426,7 @@ func (c *ModerationClient) SubmitAction(ctx context.Context, request *SubmitActi
 	return res, err
 }
 
-// Forward a moderator-supplied correction to the moderation feedback pipeline. Server-side only.
+// Forward a moderator-supplied correction to the moderation feedback pipeline, optionally marking the referenced flags as false positives. Server-side only.
 func (c *ModerationClient) SubmitModerationFeedback(ctx context.Context, request *SubmitModerationFeedbackRequest) (*StreamResponse[SubmitModerationFeedbackResponse], error) {
 	var result SubmitModerationFeedbackResponse
 	res, err := MakeRequest[SubmitModerationFeedbackRequest, SubmitModerationFeedbackResponse](c.client, ctx, "POST", "/api/v2/moderation/submit_moderation_feedback", nil, request, &result, nil)
