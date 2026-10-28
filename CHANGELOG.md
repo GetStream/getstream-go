@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. Releases are automated by [release-please](https://github.com/googleapis/release-please); see [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## [8.0.0](https://github.com/GetStream/getstream-go/compare/v7.1.1...v8.0.0) (2026-10-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* [FLU-1105] regenerate the client from openapi-v239.93.2 ([#179](https://github.com/GetStream/getstream-go/issues/179))
+
+### Features
+
+* [FLU-1105] regenerate the client from openapi-v239.93.2 ([#179](https://github.com/GetStream/getstream-go/issues/179)) ([c9f8d3a](https://github.com/GetStream/getstream-go/commit/c9f8d3af0fcd18ac9c74a3de83cd5ea0231818b4))
+
 ## [7.1.1](https://github.com/GetStream/getstream-go/compare/v7.1.0...v7.1.1) (2026-10-01)
 
 
