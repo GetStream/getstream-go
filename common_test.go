@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/GetStream/getstream-go/v7"
+	"github.com/GetStream/getstream-go/v8"
 	"github.com/stretchr/testify/require"
 )
 
