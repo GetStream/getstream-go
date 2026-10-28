@@ -28,6 +28,7 @@ If you are currently using [`stream-chat-go`](https://github.com/GetStream/strea
 ## Upgrading from an older major?
 
 - [v6 → v7](MIGRATION_v6_to_v7.md): new import path; CreateReminder returns CreateReminderResponse.
+- [v7 → v8](MIGRATION_v7_to_v8.md): new import path; FLU-1105 named enum types in the generated client.
 
 - [v4 → v5](MIGRATION_v4_to_v5.md): new import path, four removed response fields, `CheckResponse` no longer comparable.
 - [v3 → v4](MIGRATION_v3_to_v4.md): OpenAPI-aligned type renaming.
