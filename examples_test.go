@@ -322,9 +322,9 @@ func TestCreateChatChannelBasics(t *testing.T) {
 	assert.Equal(t, "hello", msgResponse.Data.Message.Text)
 
 	_, err = initClient(t).Chat().UpdateChannelType(ctx, "messaging", &getstream.UpdateChannelTypeRequest{
-		Automod:          "disabled",
-		AutomodBehavior:  "block",
-		MaxMessageLength: 1000,
+		Automod:          getstream.PtrTo(getstream.AutomodModeDisabled),
+		AutomodBehavior:  getstream.PtrTo(getstream.ChannelModerationBehaviorBlock),
+		MaxMessageLength: getstream.PtrTo(1000),
 		CustomEvents:     getstream.PtrTo(true),
 	})
 	require.NoError(t, err)
