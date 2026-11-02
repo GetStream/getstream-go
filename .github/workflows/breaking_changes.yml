@@ -1,4 +1,4 @@
-name: Breaking changes
+name: OpenAPI
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ permissions:
 jobs:
   # A regen PR whose .spec-version moves to a protocol tag that carries approved breaking changes the base tag did not must be a major: the `!` in its title squash-merges into the commit release-please reads. The sdk-not-breaking label passes it once a human judges those tickets irrelevant to this SDK.
   breaking-changes:
-    name: Breaking changes
+    name: Breaking changes check
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
