@@ -1,0 +1,53 @@
+name: Breaking changes
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  # A regen PR whose .spec-version moves to a protocol tag that carries approved breaking changes the base tag did not must be a major: the `!` in its title squash-merges into the commit release-please reads. The sdk-not-breaking label passes it once a human judges those tickets irrelevant to this SDK.
+  breaking-changes:
+    name: Breaking changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          TITLE: ${{ github.event.pull_request.title }}
+          NOT_BREAKING: ${{ contains(github.event.pull_request.labels.*.name, 'sdk-not-breaking') }}
+          # wire applies to every SDK, go to getstream-go only.
+          LISTS: (.wire // []) + (.go // [])
+        run: |
+          set -euo pipefail
+          spec_tag() { gh api "repos/$1/contents/.spec-version?ref=$2" -H 'Accept: application/vnd.github.raw' 2>/dev/null | sed -n 's/^spec: //p' || true; }
+          old=$(spec_tag "$GITHUB_REPOSITORY" "$BASE_SHA")
+          new=$(spec_tag "$HEAD_REPO" "$HEAD_SHA")
+          if [ -z "$new" ] || [ "$old" = "$new" ]; then echo "spec unchanged: ${new:-none}"; exit 0; fi
+          tag_re='^openapi-v[0-9.]+$'
+          if ! [[ $new =~ $tag_re ]]; then echo "::warning::.spec-version names no protocol tag ($new), so it cannot be compared"; exit 0; fi
+          [[ $old =~ $tag_re ]] || old=
+
+          expr=".info.\"x-stream-breaking-changes\" | $LISTS | unique | .[]"
+          tickets() {
+            curl -fsSL "https://raw.githubusercontent.com/GetStream/protocol/$1/openapi/v2/serverside-api.yaml" -o "$RUNNER_TEMP/spec.yaml" || { echo "::error::could not download the $1 spec"; exit 1; }
+            [ "$(yq '.info."x-stream-breaking-changes" | tag' "$RUNNER_TEMP/spec.yaml")" = '!!map' ] || return 1
+            yq -r "$expr" "$RUNNER_TEMP/spec.yaml" | sort > "$RUNNER_TEMP/$2"
+          }
+          if [ -z "$old" ] || ! tickets "$old" old; then echo "::warning::${old:-the base} carries no breaking-change list, so $new cannot be compared"; exit 0; fi
+          if ! tickets "$new" new; then echo "::warning::$new carries no breaking-change list"; exit 0; fi
+
+          added=$(comm -13 "$RUNNER_TEMP/old" "$RUNNER_TEMP/new")
+          if [ -z "$added" ]; then echo "$old to $new brings no approved breaking change"; exit 0; fi
+          echo "$old to $new brings these approved breaking changes:"
+          echo "$added"
+          bang='^[a-z]+(\([^)]*\))?!:'
+          if [[ $TITLE =~ $bang ]]; then echo "the title marks a major"; exit 0; fi
+          if [ "$NOT_BREAKING" = true ]; then echo "labelled sdk-not-breaking"; exit 0; fi
+          echo "::error::$new brings approved breaking changes (${added//$'\n'/, }). Add '!' to the PR title to release a major, or label the PR sdk-not-breaking if none of them breaks this SDK."
+          exit 1
