@@ -380,6 +380,13 @@ func TestFeedsExportFeedsApp(t *testing.T) {
 	_, err = client.Feeds().ExportFeedsApp(context.Background(), &getstream.ExportFeedsAppRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsCancelExportFeeds(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().CancelExportFeeds(context.Background(), "", &getstream.CancelExportFeedsRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsExportFeedsByType(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

@@ -2,7 +2,7 @@
 package getstream
 
 type AIAudioConfigRequest struct {
-	// Bodyguard credentials profile to classify transcripts with. Applies to the NLP engine only; ignored when LLM configurability is enabled. Empty falls back to the app-pinned profile, then the organization's top-level credentials
+	// Bodyguard credentials profile to classify transcripts with. Applies to the NLP engine only; ignored when the policy's engine is LLM. Empty falls back to the app-pinned profile, then the organization's top-level credentials
 	Profile *string `json:"profile,omitempty"`
 	// Deprecated pre-split rule list. Still the live config while no engine config exists; once one does it is kept as a fallback for whichever engine has none of its own
 	Rules        []BodyguardRule `json:"rules,omitempty"`
@@ -11,7 +11,7 @@ type AIAudioConfigRequest struct {
 }
 
 type AIAudioConfigResponse struct {
-	// Whether the engine selected by the application's LLM configurability flag has a rule that does something. Derived, not stored
+	// Whether the policy's engine (engine.provider, else the application's LLM configurability flag) has a rule that does something. Derived, not stored
 	Enabled bool `json:"enabled"`
 	// Bodyguard credentials profile transcripts are classified with. Applies to the NLP engine only
 	Profile string `json:"profile"`
@@ -22,10 +22,11 @@ type AIAudioConfigResponse struct {
 }
 
 type AIImageConfig struct {
-	Async    *bool                `json:"async,omitempty"`
-	Enabled  *bool                `json:"enabled,omitempty"`
-	OcrRules []OCRRule            `json:"ocr_rules,omitempty"`
-	Rules    []AWSRekognitionRule `json:"rules,omitempty"`
+	Async            *bool                `json:"async,omitempty"`
+	Enabled          *bool                `json:"enabled,omitempty"`
+	OcrRules         []OCRRule            `json:"ocr_rules,omitempty"`
+	OcrSeverityRules []BodyguardRule      `json:"ocr_severity_rules,omitempty"`
+	Rules            []AWSRekognitionRule `json:"rules,omitempty"`
 }
 
 type AIImageLabelDefinition struct {
@@ -605,7 +606,9 @@ type ActivityResponse struct {
 	// Reactions from users the current user follows or has mutual follows with
 	FriendReactions []FeedsReactionResponse `json:"friend_reactions,omitempty"`
 	// Recent shares of the activity, one entry per share (org-gated)
-	LatestShares        []ShareResponse       `json:"latest_shares,omitempty"`
+	LatestShares []ShareResponse `json:"latest_shares,omitempty"`
+	// Codes explaining why this activity was shown (e.g. 'following', 'popular', 'interest:nba'). Only included when include_reasons is enabled in enrichment options.
+	Reasons             []string              `json:"reasons,omitempty"`
 	CurrentFeed         *FeedResponse         `json:"current_feed,omitempty"`
 	I18n                map[string]string     `json:"i18n,omitempty"`
 	Location            *Location             `json:"location,omitempty"`
@@ -650,6 +653,8 @@ type ActivitySelectorConfig struct {
 	RankingCandidateLimit *int `json:"ranking_candidate_limit,omitempty"`
 	// Maximum time in milliseconds this selector may take (25-5000). A selector that runs over its budget is dropped from that read instead of failing it, and stays out for the rest of that pagination session. The budget can only tighten the default, never extend it. Omit to use the default. Only supported on the popular, proximity, interest, query and follow_suggestion selectors
 	TimeBudgetMs *int `json:"time_budget_ms,omitempty"`
+	// Radius in kilometers the proximity selector searches around the viewer's location (the request's viewer_location, else the user's custom.location) when its filter has no near or within_bounds. Greater than 0 and at most 250. Omit to use the default (10). Only supported on the proximity selector
+	ViewerLocationRadiusKm *float64 `json:"viewer_location_radius_km,omitempty"`
 	// Sort parameters for activity selection
 	Sort       []SortParamRequest `json:"sort,omitempty"`
 	FeedGroups *FeedGroupScope    `json:"feed_groups,omitempty"`
@@ -671,6 +676,8 @@ type ActivitySelectorConfigResponse struct {
 	RankingCandidateLimit *int `json:"ranking_candidate_limit,omitempty"`
 	// Maximum time in milliseconds this selector may take before it is dropped from the read
 	TimeBudgetMs *int `json:"time_budget_ms,omitempty"`
+	// Radius in kilometers the proximity selector searches around the viewer's location
+	ViewerLocationRadiusKm *float64 `json:"viewer_location_radius_km,omitempty"`
 	// Sort parameters for activity selection
 	Sort       []SortParamRequest `json:"sort,omitempty"`
 	FeedGroups *FeedGroupScope    `json:"feed_groups,omitempty"`
@@ -1194,6 +1201,21 @@ func (e *AsyncExportErrorEvent) GetEventType() string {
 	return e.Type
 }
 
+type AsyncExportFeedsSuccessEvent struct {
+	CreatedAt    Timestamp      `json:"created_at"`
+	FinishedAt   Timestamp      `json:"finished_at"`
+	ManifestPath string         `json:"manifest_path"`
+	StartedAt    Timestamp      `json:"started_at"`
+	TaskID       string         `json:"task_id"`
+	Custom       map[string]any `json:"custom"`
+	Type         string         `json:"type"`
+	ReceivedAt   *Timestamp     `json:"received_at,omitempty"`
+}
+
+func (e *AsyncExportFeedsSuccessEvent) GetEventType() string {
+	return e.Type
+}
+
 type AsyncExportLabelResultsEvent struct {
 	CreatedAt  Timestamp      `json:"created_at"`
 	FinishedAt Timestamp      `json:"finished_at"`
@@ -1560,10 +1582,11 @@ type BlockActionRequestPayload struct {
 }
 
 type BlockListConfig struct {
-	Async          *bool           `json:"async,omitempty"`
-	Enabled        *bool           `json:"enabled,omitempty"`
-	MatchSubstring *bool           `json:"match_substring,omitempty"`
-	Rules          []BlockListRule `json:"rules,omitempty"`
+	Async            *bool           `json:"async,omitempty"`
+	Enabled          *bool           `json:"enabled,omitempty"`
+	ExplicitUrlsOnly *bool           `json:"explicit_urls_only,omitempty"`
+	MatchSubstring   *bool           `json:"match_substring,omitempty"`
+	Rules            []BlockListRule `json:"rules,omitempty"`
 }
 
 type BlockListOptions struct {
@@ -2971,11 +2994,13 @@ type CallStatsSessionResponse struct {
 
 // CallTranscription represents a transcription of a call.
 type CallTranscription struct {
-	EndTime   Timestamp `json:"end_time"`
-	Filename  string    `json:"filename"`
-	SessionID string    `json:"session_id"`
-	StartTime Timestamp `json:"start_time"`
-	Url       string    `json:"url"`
+	EndTime    Timestamp `json:"end_time"`
+	Filename   string    `json:"filename"`
+	SessionID  string    `json:"session_id"`
+	StartTime  Timestamp `json:"start_time"`
+	Url        string    `json:"url"`
+	Language   *string   `json:"language,omitempty"`
+	Translated *bool     `json:"translated,omitempty"`
 }
 
 // This event is sent when call transcription has failed
@@ -3250,6 +3275,11 @@ type CampaignStatsResponse struct {
 	StatsStartedAt       Timestamp `json:"stats_started_at"`
 	StatsUsersRead       int       `json:"stats_users_read"`
 	StatsUsersSent       int       `json:"stats_users_sent"`
+}
+
+// Response for cancelling a feeds export
+type CancelExportFeedsResponse struct {
+	Duration string `json:"duration"`
 }
 
 // Basic response information
@@ -3565,7 +3595,7 @@ type ChannelExport struct {
 type ChannelForkResponse struct {
 	// CID of the fork
 	ChannelCid string `json:"channel_cid"`
-	// Number of messages copied into the fork, once completed
+	// Number of messages copied into the fork, once completed. On a failed fork, the number of messages of its history, newest first, copied before the copy failed; the fork can hold a few more
 	CopiedMessageCount int `json:"copied_message_count"`
 	// Date/time of the fork
 	CreatedAt Timestamp `json:"created_at"`
@@ -3573,19 +3603,25 @@ type ChannelForkResponse struct {
 	SourceChannelCid string `json:"source_channel_cid"`
 	// ID of the message of the source channel the fork was made at
 	SourceMessageID string `json:"source_message_id"`
-	// `completed` once every message is copied. `backfilling` while a background task copies the history older than the newest page; the fork is usable meanwhile, and the newest messages, which an agent reads, are already there
+	// `completed` once every message is copied. `backfilling` while a background task copies the history older than the newest page; the fork is usable meanwhile, and the newest messages, which an agent reads, are normally already there. The request reads at most 1,000 source messages: when those are mostly deleted, shadowed or replies shown in the channel, it copies fewer, at least the message the fork is made at, and the task copies the rest. `failed` when the copy failed for good (see `failed_reason`): nothing more is copied, the fork keeps what it holds and is usable, and it no longer counts toward the source's fork limit
 	Status string `json:"status"`
-	// Maps the ID of each message the request copied, the newest page, to its ID in the fork. A fork message ID is a UUIDv5 of the fork CID and the source message ID; the fork message IDs endpoint maps any others
+	// Maps the ID of each message the request copied, the newest page, to its ID in the fork; short when the request copied less than a page (see `status`). A fork message ID is a UUIDv5 of the fork CID and the source message ID; the fork message IDs endpoint maps any others
 	MessageIDMap map[string]string `json:"message_id_map"`
+	// Why the copy of a failed fork failed: `fork_message_id_taken` (the ID a message is copied under is held by another message; fork into another channel ID) or `message_too_large` (a source message is over a size limit of agent channels: its text, custom data or attachments)
+	FailedReason *string `json:"failed_reason,omitempty"`
+	// ID, in the source channel, of the oldest message a truncated fork copied. The fork holds no older source message; replies of the oldest copied messages may also have been left out
+	OldestSourceMessageID *string `json:"oldest_source_message_id,omitempty"`
 	// ID of the task copying the older history of a backfilling fork
 	TaskID *string `json:"task_id,omitempty"`
+	// True, once completed, when the source held more than 10,000 messages up to the fork point: the fork holds the newest 10,000 of them
+	Truncated *bool `json:"truncated,omitempty"`
 }
 
 // A fork of an agent channel
 type ChannelForkSummary struct {
 	// CID of the fork
 	ChannelCid string `json:"channel_cid"`
-	// Number of messages copied into the fork, once completed
+	// Number of messages copied into the fork, once completed. On a failed fork, the number of messages of its history, newest first, copied before the copy failed; the fork can hold a few more
 	CopiedMessageCount int `json:"copied_message_count"`
 	// Date/time of the fork
 	CreatedAt Timestamp `json:"created_at"`
@@ -3593,13 +3629,19 @@ type ChannelForkSummary struct {
 	SourceChannelCid string `json:"source_channel_cid"`
 	// ID of the message of the source channel the fork was made at
 	SourceMessageID string `json:"source_message_id"`
-	// `completed` once every message is copied. `backfilling` while a background task copies the history older than the newest page; the fork is usable meanwhile, and the newest messages, which an agent reads, are already there
+	// `completed` once every message is copied. `backfilling` while a background task copies the history older than the newest page; the fork is usable meanwhile, and the newest messages, which an agent reads, are normally already there. The request reads at most 1,000 source messages: when those are mostly deleted, shadowed or replies shown in the channel, it copies fewer, at least the message the fork is made at, and the task copies the rest. `failed` when the copy failed for good (see `failed_reason`): nothing more is copied, the fork keeps what it holds and is usable, and it no longer counts toward the source's fork limit
 	Status string `json:"status"`
+	// Why the copy of a failed fork failed: `fork_message_id_taken` (the ID a message is copied under is held by another message; fork into another channel ID) or `message_too_large` (a source message is over a size limit of agent channels: its text, custom data or attachments)
+	FailedReason *string `json:"failed_reason,omitempty"`
+	// ID, in the source channel, of the oldest message a truncated fork copied. The fork holds no older source message; replies of the oldest copied messages may also have been left out
+	OldestSourceMessageID *string `json:"oldest_source_message_id,omitempty"`
 	// ID of the task copying the older history of a backfilling fork
 	TaskID *string `json:"task_id,omitempty"`
+	// True, once completed, when the source held more than 10,000 messages up to the fork point: the fork holds the newest 10,000 of them
+	Truncated *bool `json:"truncated,omitempty"`
 }
 
-// Emitted on an agent channel once a fork of it into a new agent channel is complete.
+// Emitted once a fork of an agent channel into a new agent channel is finished, complete or failed (`fork.status` is `completed` or `failed`): on the source channel, and on the fork, whose members are told over WebSocket so a client showing the fork while it was backfilling reads it again. `cid` is the channel the event was sent on; `fork` names both.
 type ChannelForkedEvent struct {
 	// Date/time of creation
 	CreatedAt Timestamp `json:"created_at"`
@@ -3610,14 +3652,14 @@ type ChannelForkedEvent struct {
 	Fork ChannelForkSummary `json:"fork"`
 	// The type of event: "channel.forked" in this case
 	Type string `json:"type"`
-	// The ID of the channel which was forked
+	// The ID of the channel the event is sent on
 	ChannelID *string `json:"channel_id,omitempty"`
 	// The number of members in the channel
 	ChannelMemberCount  *int `json:"channel_member_count,omitempty"`
 	ChannelMessageCount *int `json:"channel_message_count,omitempty"`
-	// The type of the channel which was forked
+	// The type of the channel the event is sent on
 	ChannelType *string `json:"channel_type,omitempty"`
-	// The CID of the channel which was forked
+	// The CID of the channel the event is sent on: the source, or the fork
 	Cid        *string    `json:"cid,omitempty"`
 	ReceivedAt *Timestamp `json:"received_at,omitempty"`
 	// The team ID
@@ -3975,6 +4017,8 @@ type ChannelResponse struct {
 	Config          *ChannelConfigWithInfo `json:"config,omitempty"`
 	// User response object
 	CreatedBy *UserResponse `json:"created_by,omitempty"`
+	// A fork of an agent channel
+	Fork *ChannelForkSummary `json:"fork,omitempty"`
 	// User response object
 	TruncatedBy *UserResponse `json:"truncated_by,omitempty"`
 }
@@ -5013,6 +5057,7 @@ type ConfigResponse struct {
 	AutomodSemanticFiltersConfig       *AutomodSemanticFiltersConfig       `json:"automod_semantic_filters_config,omitempty"`
 	AutomodToxicityConfig              *AutomodToxicityConfig              `json:"automod_toxicity_config,omitempty"`
 	BlockListConfig                    *BlockListConfig                    `json:"block_list_config,omitempty"`
+	Engine                             *ModerationEngineConfigResponse     `json:"engine,omitempty"`
 	FloodConfig                        *FloodConfig                        `json:"flood_config,omitempty"`
 	IntentConfig                       *IntentConfigResponse               `json:"intent_config,omitempty"`
 	LlmConfig                          *LLMConfig                          `json:"llm_config,omitempty"`
@@ -5578,6 +5623,13 @@ type DeleteFeedsRetentionPolicyResponse struct {
 	Duration string `json:"duration"`
 }
 
+type DeleteHistoryWindowTeamsResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+	// The teams of the request that had full history and are now back on the default window
+	Teams []string `json:"teams"`
+}
+
 // Basic response information
 type DeleteImportV2TaskResponse struct {
 	// Duration of the request in milliseconds
@@ -5998,6 +6050,8 @@ type EnrichmentOptions struct {
 	IncludeFlatActivities *bool `json:"include_flat_activities,omitempty"`
 	// Default: false. Server-side only. When true, the response includes ranking_config: the ranking configuration (from the feed view, or the feed group as fallback) used to rank this read.
 	IncludeRankingConfig *bool `json:"include_ranking_config,omitempty"`
+	// Default: false. When true, For You activities include reasons: codes for why each was shown. Ignored with skip_all.
+	IncludeReasons *bool `json:"include_reasons,omitempty"`
 	// Default: false. When true, includes score_vars in activity responses containing variable values used at ranking time.
 	IncludeScoreVars *bool `json:"include_score_vars,omitempty"`
 	// Default: false. When true, skips all activity enrichments.
@@ -7152,7 +7206,7 @@ type FollowBatchResponse struct {
 	Created []FollowResponse `json:"created"`
 	// List of current follow relationships
 	Follows []FollowResponse `json:"follows"`
-	// ID of the background task when the request was sent with async: true
+	// ID of the background task when the batch ran async
 	TaskID *string `json:"task_id,omitempty"`
 }
 
@@ -7780,6 +7834,15 @@ type GetFollowSuggestionsResponse struct {
 	AlgorithmUsed *string                  `json:"algorithm_used,omitempty"`
 }
 
+type GetHistoryWindowTeamsResponse struct {
+	// History window, in hours, of every team without full history; 0 is full history
+	DefaultWindowHours int `json:"default_window_hours"`
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+	// Teams with full history
+	Teams []HistoryWindowTeam `json:"teams"`
+}
+
 // Basic response information
 type GetImportResponse struct {
 	// Duration of the request in milliseconds
@@ -8014,13 +8077,13 @@ type GetSetupSessionResponse struct {
 type GetTaskResponse struct {
 	CreatedAt Timestamp `json:"created_at"`
 	Duration  string    `json:"duration"`
-	// Current status of task
+	// Current status of the whole operation. A task whose result reports an in-progress status of its own is returned as running until that status is terminal, so completed means the operation itself finished rather than that its first step was accepted. A result that never reaches a terminal status stops being reported as running after a fixed period and falls back to the task's own status.
 	Status string `json:"status"`
 	// ID of task
 	TaskID    string       `json:"task_id"`
 	UpdatedAt Timestamp    `json:"updated_at"`
 	Error     *ErrorResult `json:"error,omitempty"`
-	// Result produced by task after completion
+	// Result produced by task after completion. A task that does its work in stages may carry a status of its own here, describing that work rather than the task; the top-level status already accounts for it, so use that to tell whether the operation has finished.
 	Result map[string]any `json:"result,omitempty"`
 }
 
@@ -8066,7 +8129,7 @@ type GroupedChannelsBucket struct {
 }
 
 type GroupedChannelsGroupRequest struct {
-	// Max channels for this group; omitted or zero uses the request limit
+	// Max channels for this group; values above 15 are capped at 15. Omitted or zero uses the request limit
 	Limit *int `json:"limit,omitempty"`
 	// Cursor for the next page; only allowed when requesting one group
 	Next *string `json:"next,omitempty"`
@@ -8125,6 +8188,16 @@ type HarmConfig struct {
 type HideChannelResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
+}
+
+// A team with full history
+type HistoryWindowTeam struct {
+	// Date/time the team was first given full history
+	CreatedAt Timestamp `json:"created_at"`
+	// The team, as set on channels and users
+	Team string `json:"team"`
+	// Date/time the team was last marked
+	UpdatedAt Timestamp `json:"updated_at"`
 }
 
 type HuaweiConfig struct {
@@ -8923,6 +8996,8 @@ type MarkReviewedRequestPayload struct {
 	DecisionReason *string `json:"decision_reason,omitempty"`
 	// Skip marking content as reviewed
 	DisableMarkingContentAsReviewed *bool `json:"disable_marking_content_as_reviewed,omitempty"`
+	// Internal moderator note, stored on the action log and returned by QueryModerationLogs. Not shown to the appealing user; use decision_reason for that
+	Reason *string `json:"reason,omitempty"`
 }
 
 type MatchedContent struct {
@@ -9909,6 +9984,20 @@ type ModerationDashboardPreferences struct {
 	OverviewDashboard              *OverviewDashboardConfig   `json:"overview_dashboard,omitempty"`
 }
 
+type ModerationEngineConfigRequest struct {
+	// LLM model used when the provider resolves to llm. Not allowed with provider nlp. Empty uses the app's moderation settings
+	Model *string `json:"model,omitempty"`
+	// llm or nlp. Empty follows the app's LLM moderation setting
+	Provider *string `json:"provider,omitempty"`
+}
+
+type ModerationEngineConfigResponse struct {
+	// LLM model used when the provider resolves to llm. Not allowed with provider nlp. Empty uses the app's moderation settings
+	Model *string `json:"model,omitempty"`
+	// llm or nlp. Empty follows the app's LLM moderation setting
+	Provider *string `json:"provider,omitempty"`
+}
+
 type ModerationFeedbackItemResponse struct {
 	// When the item was submitted; all items of one submission share it
 	CreatedAt Timestamp `json:"created_at"`
@@ -10063,6 +10152,7 @@ func (e *ModerationMarkReviewedEvent) GetEventType() string {
 type ModerationPayload struct {
 	CountryCode      *string           `json:"country_code,omitempty"`
 	Audios           []string          `json:"audios,omitempty"`
+	CountryCodes     []string          `json:"country_codes,omitempty"`
 	ImageOrderedKeys []string          `json:"image_ordered_keys,omitempty"`
 	Images           []string          `json:"images,omitempty"`
 	OtherMedia       []string          `json:"other_media,omitempty"`
@@ -10179,10 +10269,14 @@ type ModerationRulesTriggeredEvent struct {
 	// Application ID the rule belongs to.
 	AppID *int `json:"app_id,omitempty"`
 	// The `category` sent on the labels request. Omitted when the event was not produced by the labels API.
-	Category   *string    `json:"category,omitempty"`
+	Category *string `json:"category,omitempty"`
+	// CID of the channel the moderated content belongs to. Omitted when the content has no channel.
+	ChannelCid *string    `json:"channel_cid,omitempty"`
 	ReceivedAt *Timestamp `json:"received_at,omitempty"`
 	// The review queue item ID if applicable
 	ReviewQueueItemID *string `json:"review_queue_item_id,omitempty"`
+	// Highest severity (`LOW` / `MEDIUM` / `HIGH` / `CRITICAL`) among the moderation results that carried a matched label. Omitted when no label matched or the provider reports no severity.
+	Severity *string `json:"severity,omitempty"`
 	// Configured count that fires the condition. This is the number stored on the rule, not the live counter.
 	Threshold *int `json:"threshold,omitempty"`
 	// Configured window of the condition that fired, for example 10m.
@@ -10191,6 +10285,8 @@ type ModerationRulesTriggeredEvent struct {
 	ViolationNumber *int `json:"violation_number,omitempty"`
 	// Ordered list of contents whose verdicts contributed to an aggregation rule's threshold. Populated only for aggregation rules when callers supplied `content_ids`.
 	MatchedContents []MatchedContent `json:"matched_contents,omitempty"`
+	// Harm labels on the moderated content that the rule's text label conditions (`text_content`, `text_rule`) matched. Omitted when the rule has no such condition.
+	MatchedLabels []string `json:"matched_labels,omitempty"`
 	// Cross-user webhook_only flood rules only: the distinct users who sent the content since the previous webhook for this rule. Omitted on other events.
 	MatchedUserIds []string `json:"matched_user_ids,omitempty"`
 	// The rule's config_keys. Omitted when the rule is application-wide.
@@ -11838,6 +11934,15 @@ type QueryCommentsResponse struct {
 	Prev *string `json:"prev,omitempty"`
 }
 
+type QueryDeletedChannelsResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+	// Soft-deleted channels matching the filter, each with deleted_at set
+	Channels []ChannelResponse `json:"channels"`
+	Next     *string           `json:"next,omitempty"`
+	Prev     *string           `json:"prev,omitempty"`
+}
+
 type QueryDraftsResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -12789,6 +12894,8 @@ type Response struct {
 type RestoreActionRequestPayload struct {
 	// Reason for the appeal decision
 	DecisionReason *string `json:"decision_reason,omitempty"`
+	// Internal moderator note, stored on the action log and returned by QueryModerationLogs. Not shown to the appealing user; use decision_reason for that
+	Reason *string `json:"reason,omitempty"`
 }
 
 type RestoreActivityResponse struct {
@@ -12913,7 +13020,8 @@ type ReviewQueueItemResponse struct {
 	// ID of the moderator who escalated the item
 	EscalatedBy *string `json:"escalated_by,omitempty"`
 	// When the item was reviewed
-	ReviewedAt *Timestamp `json:"reviewed_at,omitempty"`
+	ReviewedAt   *Timestamp `json:"reviewed_at,omitempty"`
+	CountryCodes []string   `json:"country_codes,omitempty"`
 	// IDs of the item's flags a moderator marked as false positives
 	FalsePositiveFlags []string `json:"false_positive_flags,omitempty"`
 	// Teams associated with this item
@@ -13857,6 +13965,13 @@ type SetFeedsRetentionPolicyResponse struct {
 	Policy   FeedsRetentionPolicy `json:"policy"`
 }
 
+type SetHistoryWindowTeamsResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+	// The teams of the request, each with full history
+	Teams []HistoryWindowTeam `json:"teams"`
+}
+
 // Basic response information
 type SetRetentionPolicyResponse struct {
 	// Duration of the request in milliseconds
@@ -14727,7 +14842,7 @@ type UnfollowBatchResponse struct {
 	Duration string `json:"duration"`
 	// List of follow relationships that were removed
 	Follows []FollowResponse `json:"follows"`
-	// ID of the background task when the request was sent with async: true
+	// ID of the background task when the batch ran async
 	TaskID *string `json:"task_id,omitempty"`
 }
 
@@ -15391,7 +15506,7 @@ type UserChannelCountRuleParameters struct {
 	TimeWindow *string `json:"time_window,omitempty"`
 }
 
-// This event is sent when a regular user claims a guest user. The guest's channels, messages and reactions are then moved to the claiming user.
+// This event is sent when a regular user claims a guest user. The guest's channels, messages and reactions are then moved to the claiming user. Webhooks receive it when the claim is made; the claiming user's websocket connections receive it when the move has completed, as the signal to reload channels and messages.
 type UserClaimedEvent struct {
 	// Date/time of creation
 	CreatedAt Timestamp                `json:"created_at"`

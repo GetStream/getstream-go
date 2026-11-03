@@ -136,6 +136,8 @@ const (
 	EventTypeFeedsCommentReactionUpdated        = "feeds.comment.reaction.updated"
 	EventTypeFeedsCommentRestored               = "feeds.comment.restored"
 	EventTypeFeedsCommentUpdated                = "feeds.comment.updated"
+	EventTypeFeedsExportError                   = "feeds.export.error"
+	EventTypeFeedsExportSuccess                 = "feeds.export.success"
 	EventTypeFeedsFeedCreated                   = "feeds.feed.created"
 	EventTypeFeedsFeedDeleted                   = "feeds.feed.deleted"
 	EventTypeFeedsFeedUpdated                   = "feeds.feed.updated"
@@ -534,6 +536,10 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(CommentRestoredEvent)
 	case "feeds.comment.updated":
 		event = new(CommentUpdatedEvent)
+	case "feeds.export.error":
+		event = new(AsyncExportErrorEvent)
+	case "feeds.export.success":
+		event = new(AsyncExportFeedsSuccessEvent)
 	case "feeds.feed.created":
 		event = new(FeedCreatedEvent)
 	case "feeds.feed.deleted":

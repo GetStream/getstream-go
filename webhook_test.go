@@ -191,6 +191,8 @@ func TestParseWebhookEvent(t *testing.T) {
 		{"parse feeds.comment.reaction.updated", []byte(`{"type":"feeds.comment.reaction.updated"}`), "feeds.comment.reaction.updated", false},
 		{"parse feeds.comment.restored", []byte(`{"type":"feeds.comment.restored"}`), "feeds.comment.restored", false},
 		{"parse feeds.comment.updated", []byte(`{"type":"feeds.comment.updated"}`), "feeds.comment.updated", false},
+		{"parse feeds.export.error", []byte(`{"type":"feeds.export.error"}`), "feeds.export.error", false},
+		{"parse feeds.export.success", []byte(`{"type":"feeds.export.success"}`), "feeds.export.success", false},
 		{"parse feeds.feed.created", []byte(`{"type":"feeds.feed.created"}`), "feeds.feed.created", false},
 		{"parse feeds.feed.deleted", []byte(`{"type":"feeds.feed.deleted"}`), "feeds.feed.deleted", false},
 		{"parse feeds.feed.updated", []byte(`{"type":"feeds.feed.updated"}`), "feeds.feed.updated", false},

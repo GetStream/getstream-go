@@ -229,12 +229,24 @@ type DeleteChannelsRequest struct {
 	// Server-side only. When true, the soft delete preserves message history instead of hiding it, so a later recreation of any of these channel IDs restores the full history. Only supported for distinct channels. Cannot be combined with hard_delete.
 	SkipTruncate *bool `json:"skip_truncate,omitempty"`
 }
+type QueryDeletedChannelsRequest struct {
+	// Number of channels per page, 1-100 (default 25)
+	Limit *int `json:"limit,omitempty"`
+	// Cursor for the next page, from the previous response
+	Next *string `json:"next,omitempty"`
+	// Cursor for the previous page, from the previous response
+	Prev *string `json:"prev,omitempty"`
+	// Sort order. Only created_at is supported; defaults to created_at ascending
+	Sort *[]SortParamRequest `json:"sort,omitempty"`
+	// Optional filter. Omit it, or pass {}, to list every soft-deleted channel of the app; for example {"team": "tenant-a"} narrows to one tenant
+	FilterConditions *map[string]any `json:"filter_conditions,omitempty"`
+}
 type MarkDeliveredRequest struct {
 	UserID                  *string                    `json:"-" query:"user_id"`
 	LatestDeliveredMessages *[]DeliveredMessagePayload `json:"latest_delivered_messages,omitempty"`
 }
 type GroupedQueryChannelsRequest struct {
-	// Default max channels per group (default 10)
+	// Default max channels per group (default 10); values above 15 are capped at 15
 	Limit  *int    `json:"limit,omitempty"`
 	UserID *string `json:"user_id,omitempty"`
 	// Optional query_timestamp descending with NULLS LAST when enabled. Omitted sort preserves existing last_updated ordering and cursor formats
@@ -678,6 +690,16 @@ type ExportChannelsRequest struct {
 	Version *string `json:"version,omitempty"`
 	// For csv format: subset of message columns to include (defaults to a standard set)
 	IncludeFields *[]string `json:"include_fields,omitempty"`
+}
+type GetHistoryWindowTeamsRequest struct {
+}
+type SetHistoryWindowTeamsRequest struct {
+	// Teams to give full history, 1 to 10, each listed once. Marking a team that already has full history keeps its created_at
+	Teams []string `json:"teams"`
+}
+type DeleteHistoryWindowTeamsRequest struct {
+	// Teams to put back on the app's default history window, 1 to 10, each listed once. A team without full history is ignored
+	Teams []string `json:"teams"`
 }
 type QueryMembersRequest struct {
 	Payload *QueryMembersPayload `json:"-" query:"payload"`
@@ -1731,14 +1753,24 @@ type TranslateCommentRequest struct {
 	Language string `json:"language"`
 }
 type ExportFeedsAppRequest struct {
+	// Whether soft-deleted activities and comments are exported. Defaults to true
+	IncludeDeleted *bool `json:"include_deleted,omitempty"`
+	// Only export these item types, e.g. activity or comment; each one of the export layout item types, without duplicates. poll and poll_vote require activity. Empty exports everything
+	Types *[]string `json:"types,omitempty"`
+}
+type CancelExportFeedsRequest struct {
 }
 type ExportFeedsByTypeRequest struct {
-	// Only export rows created at or after this time. On reactions and follows it requires user_id; on comments soft-deleted rows are left out
+	// Only export rows created at or after this time. On reactions it requires user_id or activity_ids, on follows user_id; on comments without activity_ids soft-deleted rows are left out
 	CreatedAtFrom *Timestamp `json:"created_at_from,omitempty"`
-	// Only export rows created before this time. On reactions and follows it requires user_id; on comments soft-deleted rows are left out
+	// Only export rows created before this time. On reactions it requires user_id or activity_ids, on follows user_id; on comments without activity_ids soft-deleted rows are left out
 	CreatedAtTo *Timestamp `json:"created_at_to,omitempty"`
+	// Whether soft-deleted activities and comments are exported. Defaults to false; true cannot be combined with user_id on activities or comments
+	IncludeDeleted *bool `json:"include_deleted,omitempty"`
 	// Only export rows of this user: activities, comments and reactions by the user; follows where the user created the source or the target feed. With user_id, soft-deleted activities and comments are left out
 	UserID *string `json:"user_id,omitempty"`
+	// Only export comments or reactions of these activities; not allowed on other types. At most 100 unique, non-empty IDs
+	ActivityIds *[]string `json:"activity_ids,omitempty"`
 }
 type ListFeedGroupsRequest struct {
 	IncludeSoftDeleted *bool `json:"-" query:"include_soft_deleted"`
@@ -2093,7 +2125,7 @@ type AcceptFollowRequest struct {
 type FollowBatchRequest struct {
 	// List of follow relationships to create
 	Follows []FollowRequest `json:"follows"`
-	// If true, the batch is queued as a background task, paced per app, and the response has empty follows and a task_id. Server-side only. Supported by the get-or-create endpoint (GetOrCreateFollows); FollowBatch rejects it. Async batches can apply out of order with other follow writes. Defaults to false.
+	// If true, the batch is queued as a background task, paced per app, and the response has empty follows and a task_id. Server-side only. Supported by the get-or-create endpoint (GetOrCreateFollows); FollowBatch rejects it. Async batches can apply out of order with other follow writes. When unset, server-side batches of at least 10 items run async for apps created on or after 2026-11-05; set false to opt out.
 	Async *bool `json:"async,omitempty"`
 	// If true, auto-creates users referenced by source/target FIDs in the batch when they don't already exist. Server-side only. Defaults to false. This top-level field is the only supported batch/upsert create_users control.
 	CreateUsers *bool `json:"create_users,omitempty"`
@@ -2103,7 +2135,7 @@ type FollowBatchRequest struct {
 type GetOrCreateFollowsRequest struct {
 	// List of follow relationships to create
 	Follows []FollowRequest `json:"follows"`
-	// If true, the batch is queued as a background task, paced per app, and the response has empty follows and a task_id. Server-side only. Supported by the get-or-create endpoint (GetOrCreateFollows); FollowBatch rejects it. Async batches can apply out of order with other follow writes. Defaults to false.
+	// If true, the batch is queued as a background task, paced per app, and the response has empty follows and a task_id. Server-side only. Supported by the get-or-create endpoint (GetOrCreateFollows); FollowBatch rejects it. Async batches can apply out of order with other follow writes. When unset, server-side batches of at least 10 items run async for apps created on or after 2026-11-05; set false to opt out.
 	Async *bool `json:"async,omitempty"`
 	// If true, auto-creates users referenced by source/target FIDs in the batch when they don't already exist. Server-side only. Defaults to false. This top-level field is the only supported batch/upsert create_users control.
 	CreateUsers *bool `json:"create_users,omitempty"`
@@ -2232,7 +2264,7 @@ type QueryFeedsUsageStatsRequest struct {
 type UnfollowBatchRequest struct {
 	// List of follow relationships to remove, each with optional keep_history
 	Follows []UnfollowPair `json:"follows"`
-	// If true, the batch is queued as a background task, paced per app, and the response has empty follows and a task_id. Server-side only. Supported by the get-or-create endpoint (GetOrCreateUnfollows); UnfollowBatch rejects it. Async batches can apply out of order with other follow writes. Defaults to false.
+	// If true, the batch is queued as a background task, paced per app, and the response has empty follows and a task_id. Server-side only. Supported by the get-or-create endpoint (GetOrCreateUnfollows); UnfollowBatch rejects it. Async batches can apply out of order with other follow writes. When unset, server-side batches of at least 10 items run async for apps created on or after 2026-11-05; set false to opt out.
 	Async *bool `json:"async,omitempty"`
 	// Whether to delete the corresponding notification activity (default: false)
 	DeleteNotificationActivity *bool `json:"delete_notification_activity,omitempty"`
@@ -2242,7 +2274,7 @@ type UnfollowBatchRequest struct {
 type GetOrCreateUnfollowsRequest struct {
 	// List of follow relationships to remove, each with optional keep_history
 	Follows []UnfollowPair `json:"follows"`
-	// If true, the batch is queued as a background task, paced per app, and the response has empty follows and a task_id. Server-side only. Supported by the get-or-create endpoint (GetOrCreateUnfollows); UnfollowBatch rejects it. Async batches can apply out of order with other follow writes. Defaults to false.
+	// If true, the batch is queued as a background task, paced per app, and the response has empty follows and a task_id. Server-side only. Supported by the get-or-create endpoint (GetOrCreateUnfollows); UnfollowBatch rejects it. Async batches can apply out of order with other follow writes. When unset, server-side batches of at least 10 items run async for apps created on or after 2026-11-05; set false to opt out.
 	Async *bool `json:"async,omitempty"`
 	// Whether to delete the corresponding notification activity (default: false)
 	DeleteNotificationActivity *bool `json:"delete_notification_activity,omitempty"`
@@ -2391,7 +2423,8 @@ type AnalyzeRequest struct {
 	ConfigKey *string `json:"config_key,omitempty"`
 	// Original timestamp when the content was produced. Used as the `published_at` timestamp on per-content log entries that surface in `matched_contents` on aggregation-rule webhooks.
 	ContentPublishedAt *Timestamp `json:"content_published_at,omitempty"`
-	// ISO 3166-1 alpha-2 country the content is aimed at (e.g. US, DE). Forwarded to the AI text provider as country context so it can resolve words whose meaning changes between countries.
+	// ISO 3166-1 alpha-2 country the content is aimed at (e.g. US, DE). Ignored when country_codes is set, but an invalid value is still rejected with 400.
+	// Deprecated: this field is deprecated.
 	CountryCode *string `json:"country_code,omitempty"`
 	// ID of the user who created the content. Required with entity_type + entity_id; omit all three for stateless mode.
 	EntityCreatorID *string `json:"entity_creator_id,omitempty"`
@@ -2400,6 +2433,8 @@ type AnalyzeRequest struct {
 	// Caller-defined entity type. Required with entity_id + entity_creator_id; omit all three for stateless mode.
 	EntityType *string `json:"entity_type,omitempty"`
 	UserID     *string `json:"user_id,omitempty"`
+	// ISO 3166-1 alpha-2 countries the content is aimed at (e.g. US, DE), up to 300. The first is the primary country. Every country is sent to the AI text and image harm detection engines as country context. Takes precedence over country_code.
+	CountryCodes *[]string `json:"country_codes,omitempty"`
 	// Optional map from a content label (either a `texts` key or an `image:<key>` multipart label) to a caller-supplied per-instance identifier. Echoed on per-field verdicts and surfaced in `matched_contents` when an aggregation rule fires.
 	ContentIds *map[string]string `json:"content_ids,omitempty"`
 	// Arbitrary metadata surfaced in the dashboard.
@@ -2507,11 +2542,14 @@ type CheckRequest struct {
 	ConfigTeam *string `json:"config_team,omitempty"`
 	// Original timestamp when the content was produced (for correlating flagged content with source video timeline)
 	ContentPublishedAt *Timestamp `json:"content_published_at,omitempty"`
-	// ISO 3166-1 alpha-2 country the content is aimed at (e.g. US, DE), used as country context by AI text providers
+	// ISO 3166-1 alpha-2 country the content is aimed at (e.g. US, DE). Ignored when country_codes is set, but an invalid value is still rejected with 400.
+	// Deprecated: this field is deprecated.
 	CountryCode *string `json:"country_code,omitempty"`
 	// Whether to run moderation in test mode
-	TestMode          *bool              `json:"test_mode,omitempty"`
-	UserID            *string            `json:"user_id,omitempty"`
+	TestMode *bool   `json:"test_mode,omitempty"`
+	UserID   *string `json:"user_id,omitempty"`
+	// ISO 3166-1 alpha-2 countries the content is aimed at (e.g. US, DE), up to 300. The first is the primary country. Every country is sent to the AI text and image harm detection engines as country context. Takes precedence over country_code.
+	CountryCodes      *[]string          `json:"country_codes,omitempty"`
 	Config            *ModerationConfig  `json:"config,omitempty"`
 	ModerationPayload *ModerationPayload `json:"moderation_payload,omitempty"`
 	// Additional moderation configuration options
@@ -2542,6 +2580,7 @@ type UpsertConfigRequest struct {
 	AutomodToxicityConfig              *AutomodToxicityConfig              `json:"automod_toxicity_config,omitempty"`
 	BlockListConfig                    *BlockListConfig                    `json:"block_list_config,omitempty"`
 	BodyguardConfig                    *AITextConfig                       `json:"bodyguard_config,omitempty"`
+	Engine                             *ModerationEngineConfigRequest      `json:"engine,omitempty"`
 	FloodConfig                        *FloodConfig                        `json:"flood_config,omitempty"`
 	GoogleVisionConfig                 *GoogleVisionConfig                 `json:"google_vision_config,omitempty"`
 	IntentConfig                       *IntentConfigRequest                `json:"intent_config,omitempty"`
