@@ -23,12 +23,13 @@ trap 'git -C "$SOURCE_PATH" worktree remove --force "$SPEC_DIR/chat" 2>/dev/null
 SPEC_FILE="$SPEC_DIR/serverside-api.yaml"
 curl -fsSL -o "$SPEC_FILE" "https://raw.githubusercontent.com/GetStream/protocol/${SPEC_TAG}/openapi/v2/serverside-api.yaml"
 
-# GENERATOR_BIN=<path> runs the openapi binary attached to the chat release of the spec's version, so no chat checkout is needed.
+# GENERATOR_BIN=<path> runs an openapi binary attached to a chat release, so no chat checkout is needed; .spec-version records the version it reports.
 # Otherwise the generator is built from chat at the spec's own tag, so the templates match the breaking-change list the regen PR check reads from that spec.
 # GENERATOR_REF=HEAD builds from the ../chat checkout as it is, for an unreleased generator fix; the regen PR then has to be a major.
 if [ -n "$GENERATOR_BIN" ]; then
   GENERATOR=$(cd "$(dirname "$GENERATOR_BIN")" && pwd)/$(basename "$GENERATOR_BIN")
-  GENERATOR_VERSION=${SPEC_TAG#openapi-}
+  GENERATOR_VERSION=$("$GENERATOR" --version)
+  GENERATOR_VERSION=${GENERATOR_VERSION##* }
 else
   [ -d $SOURCE_PATH ] || { echo "cannot find chat path on the parent folder (${SOURCE_PATH}), do you have a copy of the API source?"; exit 1; }
   GENERATOR_REF=${GENERATOR_REF:-${SPEC_TAG#openapi-}}
