@@ -114,6 +114,13 @@ func (c *ChatClient) DeleteChannels(ctx context.Context, request *DeleteChannels
 	return res, err
 }
 
+// Lists soft-deleted channels, ordered by created_at. Server-side only. Without a filter it lists every soft-deleted channel of the app; filter by team to scope it to one tenant. To permanently remove the returned channels, pass their cids to Delete channels (POST /channels/delete) with hard_delete set to true; the single-channel Delete channel endpoint does not accept soft-deleted channels.
+func (c *ChatClient) QueryDeletedChannels(ctx context.Context, request *QueryDeletedChannelsRequest) (*StreamResponse[QueryDeletedChannelsResponse], error) {
+	var result QueryDeletedChannelsResponse
+	res, err := MakeRequest[QueryDeletedChannelsRequest, QueryDeletedChannelsResponse](c.client, ctx, "POST", "/api/v2/chat/channels/deleted", nil, request, &result, nil)
+	return res, err
+}
+
 // Mark the status of a channel message delivered.
 func (c *ChatClient) MarkDelivered(ctx context.Context, request *MarkDeliveredRequest) (*StreamResponse[MarkDeliveredResponse], error) {
 	var result MarkDeliveredResponse
@@ -287,7 +294,7 @@ func (c *ChatClient) UploadChannelFile(ctx context.Context, _type string, id str
 	return res, err
 }
 
-// Forks an agent channel at one of its messages: creates a new agent channel holding a copy of the messages a client sees up to it, itself included, with their replies up to it. The source channel is not changed. Reactions, pins, polls, read state, mutes, reminders, moderation flags and edit history are not copied. Fork only at a message the agent has finished writing. The request copies the newest 100 messages and their replies, so the fork is usable when it returns; older history is copied by a background task (`fork.status` is `backfilling`, `fork.task_id` names the task) and `channel.forked` is sent once every message is copied. A retry with the same channel ID and message returns the fork. Only available for the `agent` channel type.
+// Forks an agent channel at one of its messages: creates a new agent channel holding a copy of the messages a client sees up to it, itself included, with their replies up to it. The source channel is not changed. Reactions, pins, polls, read state, mutes, reminders, moderation flags and edit history are not copied. Fork only at a message the agent has finished writing. The request copies the newest 100 messages and their replies, so the fork is usable when it returns (fewer when the newest 1,000 messages are mostly deleted or hidden); older history is copied by a background task (`fork.status` is `backfilling`, `fork.task_id` names the task) and `channel.forked` is sent once every message is copied. A retry with the same channel ID and message returns the fork. Only available for the `agent` channel type.
 //
 // Sends events:
 // - channel.created
@@ -586,6 +593,27 @@ func (c *ChatClient) QueryDrafts(ctx context.Context, request *QueryDraftsReques
 func (c *ChatClient) ExportChannels(ctx context.Context, request *ExportChannelsRequest) (*StreamResponse[ExportChannelsResponse], error) {
 	var result ExportChannelsResponse
 	res, err := MakeRequest[ExportChannelsRequest, ExportChannelsResponse](c.client, ctx, "POST", "/api/v2/chat/export_channels", nil, request, &result, nil)
+	return res, err
+}
+
+// Returns the app's default history window and the teams with full history. Only for apps with the history window enabled; other apps get 403. Server-side only.
+func (c *ChatClient) GetHistoryWindowTeams(ctx context.Context, request *GetHistoryWindowTeamsRequest) (*StreamResponse[GetHistoryWindowTeamsResponse], error) {
+	var result GetHistoryWindowTeamsResponse
+	res, err := MakeRequest[any, GetHistoryWindowTeamsResponse](c.client, ctx, "GET", "/api/v2/chat/history_window/teams", nil, nil, &result, nil)
+	return res, err
+}
+
+// Gives up to ten teams full history. Only for apps with the history window enabled; other apps get 403. Server-side only.
+func (c *ChatClient) SetHistoryWindowTeams(ctx context.Context, request *SetHistoryWindowTeamsRequest) (*StreamResponse[SetHistoryWindowTeamsResponse], error) {
+	var result SetHistoryWindowTeamsResponse
+	res, err := MakeRequest[SetHistoryWindowTeamsRequest, SetHistoryWindowTeamsResponse](c.client, ctx, "POST", "/api/v2/chat/history_window/teams", nil, request, &result, nil)
+	return res, err
+}
+
+// Puts up to ten teams back on the app's default history window. Only for apps with the history window enabled; other apps get 403. Server-side only.
+func (c *ChatClient) DeleteHistoryWindowTeams(ctx context.Context, request *DeleteHistoryWindowTeamsRequest) (*StreamResponse[DeleteHistoryWindowTeamsResponse], error) {
+	var result DeleteHistoryWindowTeamsResponse
+	res, err := MakeRequest[DeleteHistoryWindowTeamsRequest, DeleteHistoryWindowTeamsResponse](c.client, ctx, "POST", "/api/v2/chat/history_window/teams/delete", nil, request, &result, nil)
 	return res, err
 }
 

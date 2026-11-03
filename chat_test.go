@@ -79,6 +79,13 @@ func TestChatDeleteChannels(t *testing.T) {
 	_, err = client.Chat().DeleteChannels(context.Background(), &getstream.DeleteChannelsRequest{})
 	require.NoError(t, err)
 }
+func TestChatQueryDeletedChannels(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().QueryDeletedChannels(context.Background(), &getstream.QueryDeletedChannelsRequest{})
+	require.NoError(t, err)
+}
 func TestChatMarkDelivered(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -350,6 +357,27 @@ func TestChatExportChannels(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Chat().ExportChannels(context.Background(), &getstream.ExportChannelsRequest{})
+	require.NoError(t, err)
+}
+func TestChatGetHistoryWindowTeams(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().GetHistoryWindowTeams(context.Background(), &getstream.GetHistoryWindowTeamsRequest{})
+	require.NoError(t, err)
+}
+func TestChatSetHistoryWindowTeams(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().SetHistoryWindowTeams(context.Background(), &getstream.SetHistoryWindowTeamsRequest{})
+	require.NoError(t, err)
+}
+func TestChatDeleteHistoryWindowTeams(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().DeleteHistoryWindowTeams(context.Background(), &getstream.DeleteHistoryWindowTeamsRequest{})
 	require.NoError(t, err)
 }
 func TestChatQueryMembers(t *testing.T) {

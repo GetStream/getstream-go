@@ -532,7 +532,17 @@ func (c *FeedsClient) TranslateComment(ctx context.Context, id string, request *
 // Starts an async task that exports all feeds data of the app in export format v1. Poll the task for the result
 func (c *FeedsClient) ExportFeedsApp(ctx context.Context, request *ExportFeedsAppRequest) (*StreamResponse[ExportFeedsResponse], error) {
 	var result ExportFeedsResponse
-	res, err := MakeRequest[any, ExportFeedsResponse](c.client, ctx, "POST", "/api/v2/feeds/export/app", nil, nil, &result, nil)
+	res, err := MakeRequest[ExportFeedsAppRequest, ExportFeedsResponse](c.client, ctx, "POST", "/api/v2/feeds/export/app", nil, request, &result, nil)
+	return res, err
+}
+
+// Cancels a queued or processing feeds export. A queued export is cancelled immediately; a processing one is stopped by the worker, which removes the files it wrote
+func (c *FeedsClient) CancelExportFeeds(ctx context.Context, taskID string, request *CancelExportFeedsRequest) (*StreamResponse[CancelExportFeedsResponse], error) {
+	var result CancelExportFeedsResponse
+	pathParams := map[string]string{
+		"task_id": taskID,
+	}
+	res, err := MakeRequest[any, CancelExportFeedsResponse](c.client, ctx, "POST", "/api/v2/feeds/export/{task_id}/cancel", nil, nil, &result, pathParams)
 	return res, err
 }
 
