@@ -16,5 +16,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          subjectPattern: ^(?!.*\b(CHA|FEEDS|FLU|VID|MOD2?|PLA|AI|INF|PBE)-[0-9]+\b).+$
-          subjectPatternError: The title becomes the public changelog line, so keep ticket IDs out of it. Put the ticket in the branch name or the PR body.
+          subjectPattern: ^(?!.*\b[A-Z][A-Z0-9]+-[0-9]+\b).+$
+          subjectPatternError: The title becomes the public changelog line, so keep ticket IDs such as ABC-123 out of it and put the ticket in the branch name or the PR body. Write any other uppercase name and number without the dash, such as SHA256.

@@ -25,6 +25,12 @@ jobs:
     timeout-minutes: 60
     # The getstream-sdk-bot key lives only in this environment, which deploys from the default branch. The App pushes and merges, because GITHUB_TOKEN events start neither the PR checks nor the release run.
     environment: sdk-bot
+    # GITHUB_TOKEN reads the PR's checks, which the App has no permission for.
+    permissions:
+      checks: read
+      contents: read
+      pull-requests: read
+      statuses: read
     steps:
       - id: app
         uses: actions/create-github-app-token@v3
@@ -51,6 +57,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           READ_TOKEN: ${{ steps.read.outputs.token }}
+          CHECKS_TOKEN: ${{ github.token }}
           APP_SLUG: ${{ steps.app.outputs.app-slug }}
           TAG: ${{ github.event.client_payload.tag || inputs.tag }}
         run: |
@@ -155,7 +162,7 @@ jobs:
           head=$(git rev-parse HEAD)
           for _ in $(seq 45); do
             sleep 60
-            checks=$(gh pr checks "$num" --required --json bucket --jq '[.[].bucket] | unique | join(",")' 2>&1) || true
+            checks=$(GH_TOKEN=$CHECKS_TOKEN gh pr checks "$num" --required --json bucket --jq '[.[].bucket] | unique | join(",")' 2>&1) || true
             case $checks in
               *"checks reported"*|*pending*) ;;
               *fail*|*cancel*) echo "::notice::#$num has a failing required check, so a human takes it from here"; exit 0 ;;
