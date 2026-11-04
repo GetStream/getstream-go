@@ -982,28 +982,28 @@ func (c *ChatClient) QueryReminders(ctx context.Context, request *QueryReminders
 	return res, err
 }
 
-// Returns all retention policies configured for the app. Server-side only.
+// Returns all retention policies configured for the app. The per-channel-type rules of the 'inactive-channels-by-type' policy are returned in 'channel_type_rules' rather than in 'policies'. Server-side only.
 func (c *ChatClient) GetRetentionPolicy(ctx context.Context, request *GetRetentionPolicyRequest) (*StreamResponse[GetRetentionPolicyResponse], error) {
 	var result GetRetentionPolicyResponse
 	res, err := MakeRequest[any, GetRetentionPolicyResponse](c.client, ctx, "GET", "/api/v2/chat/retention_policy", nil, nil, &result, nil)
 	return res, err
 }
 
-// Creates or updates a retention policy for the app. Server-side only.
+// Creates or updates a retention policy for the app. The 'inactive-channels-by-type' policy sets the 'max_age_hours' rule of the channel type given by 'channel_type', which overrides 'inactive-channels' for that type; its response carries the saved rule in 'channel_type_rule'. Server-side only.
 func (c *ChatClient) SetRetentionPolicy(ctx context.Context, request *SetRetentionPolicyRequest) (*StreamResponse[SetRetentionPolicyResponse], error) {
 	var result SetRetentionPolicyResponse
 	res, err := MakeRequest[SetRetentionPolicyRequest, SetRetentionPolicyResponse](c.client, ctx, "POST", "/api/v2/chat/retention_policy", nil, request, &result, nil)
 	return res, err
 }
 
-// Removes a retention policy for the app. Server-side only.
+// Removes a retention policy for the app. For the 'inactive-channels-by-type' policy, 'channel_type' selects the rule to remove. Server-side only.
 func (c *ChatClient) DeleteRetentionPolicy(ctx context.Context, request *DeleteRetentionPolicyRequest) (*StreamResponse[DeleteRetentionPolicyResponse], error) {
 	var result DeleteRetentionPolicyResponse
 	res, err := MakeRequest[DeleteRetentionPolicyRequest, DeleteRetentionPolicyResponse](c.client, ctx, "POST", "/api/v2/chat/retention_policy/delete", nil, request, &result, nil)
 	return res, err
 }
 
-// Returns filtered and sorted retention cleanup run history for the app. Supports filter_conditions on 'policy' (possible values: 'old-messages', 'inactive-channels') and 'date' fields. Server-side only.
+// Returns filtered and sorted retention cleanup run history for the app. Supports filter_conditions on 'policy' (possible values: 'old-messages', 'inactive-channels', 'inactive-channels@type:<channel type>', 'inactive-channels@blanket:<channel type>') and 'date' fields. Once the app has a per-channel-type rule, inactive-channels runs are recorded per channel type, under 'inactive-channels@type:<channel type>' for a type with its own rule and 'inactive-channels@blanket:<channel type>' for a type covered by the app-wide rule, and 'policy': 'inactive-channels' no longer matches new runs; filter with '$in' over the pass names of your channel types. Server-side only.
 func (c *ChatClient) GetRetentionPolicyRuns(ctx context.Context, request *GetRetentionPolicyRunsRequest) (*StreamResponse[GetRetentionPolicyRunsResponse], error) {
 	var result GetRetentionPolicyRunsResponse
 	res, err := MakeRequest[GetRetentionPolicyRunsRequest, GetRetentionPolicyRunsResponse](c.client, ctx, "POST", "/api/v2/chat/retention_policy/runs", nil, request, &result, nil)

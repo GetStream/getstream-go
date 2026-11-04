@@ -188,7 +188,8 @@ func (c *ModerationClient) QueryModerationFeedback(ctx context.Context, request 
 // Delete a specific moderation template by its name
 func (c *ModerationClient) V2DeleteTemplate(ctx context.Context, request *V2DeleteTemplateRequest) (*StreamResponse[DeleteModerationTemplateResponse], error) {
 	var result DeleteModerationTemplateResponse
-	res, err := MakeRequest[any, DeleteModerationTemplateResponse](c.client, ctx, "DELETE", "/api/v2/moderation/feeds_moderation_template", nil, nil, &result, nil)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, DeleteModerationTemplateResponse](c.client, ctx, "DELETE", "/api/v2/moderation/feeds_moderation_template", params, nil, &result, nil)
 	return res, err
 }
 
@@ -301,7 +302,8 @@ func (c *ModerationClient) GetPolicyTestRun(ctx context.Context, id string, requ
 
 func (c *ModerationClient) ListPolicyTestSets(ctx context.Context, request *ListPolicyTestSetsRequest) (*StreamResponse[PolicyTestSetListResponse], error) {
 	var result PolicyTestSetListResponse
-	res, err := MakeRequest[any, PolicyTestSetListResponse](c.client, ctx, "GET", "/api/v2/moderation/policy_tests/sets", nil, nil, &result, nil)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, PolicyTestSetListResponse](c.client, ctx, "GET", "/api/v2/moderation/policy_tests/sets", params, nil, &result, nil)
 	return res, err
 }
 

@@ -908,11 +908,13 @@ type GetRetentionPolicyRequest struct {
 type SetRetentionPolicyRequest struct {
 	MaxAgeHours int `json:"max_age_hours"`
 	// What a retention policy applies to.
-	Policy RetentionPolicyType `json:"policy"`
+	Policy      RetentionPolicyType `json:"policy"`
+	ChannelType *string             `json:"channel_type,omitempty"`
 }
 type DeleteRetentionPolicyRequest struct {
 	// What a retention policy applies to.
-	Policy RetentionPolicyType `json:"policy"`
+	Policy      RetentionPolicyType `json:"policy"`
+	ChannelType *string             `json:"channel_type,omitempty"`
 }
 type GetRetentionPolicyRunsRequest struct {
 	Limit *int    `json:"limit,omitempty"`
@@ -1908,6 +1910,10 @@ type RejectFeedMemberInviteRequest struct {
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }
+type GetNotificationStatusRequest struct {
+	View   *string `json:"-" query:"view"`
+	UserID *string `json:"-" query:"user_id"`
+}
 type QueryPinnedActivitiesRequest struct {
 	Language        *string `json:"-" query:"language"`
 	TranslateText   *bool   `json:"-" query:"translate_text"`
@@ -2640,6 +2646,7 @@ type QueryModerationFeedbackRequest struct {
 	User *UserRequest `json:"user,omitempty"`
 }
 type V2DeleteTemplateRequest struct {
+	Name *string `json:"-" query:"name"`
 }
 type V2QueryTemplatesRequest struct {
 }
@@ -2777,6 +2784,8 @@ type MuteRequest struct {
 type GetPolicyTestRunRequest struct {
 }
 type ListPolicyTestSetsRequest struct {
+	Limit  *int `json:"-" query:"limit"`
+	Offset *int `json:"-" query:"offset"`
 }
 type CreatePolicyTestSetRequest struct {
 	// Display name; unique within an app
