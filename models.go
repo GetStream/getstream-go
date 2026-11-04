@@ -595,7 +595,9 @@ type ActivityResponse struct {
 	IsSeen           *bool   `json:"is_seen,omitempty"`
 	IsWatched        *bool   `json:"is_watched,omitempty"`
 	ModerationAction *string `json:"moderation_action,omitempty"`
-	// Which activity selector provided this activity (e.g., 'following', 'popular', 'interest'). Only set when using multiple activity selectors with ranking.
+	// 1-based position of this activity. On ranked feeds it is the activity's slot in the ranked feed, continuing across pages; activities filtered out for this user leave gaps. Otherwise it is relative to the returned page. Only set on feed reads for paid plans with an authenticated user, when the app uses feed impressions (For You exploration, or a For You ranking that uses impressions_bucket).
+	Position *int `json:"position,omitempty"`
+	// Which activity selector provided this activity (e.g., 'following', 'popular', 'interest'), or 'exploration' for the For You exploration slot. Only set when using multiple activity selectors with ranking.
 	SelectorSource *string `json:"selector_source,omitempty"`
 	// Text content of the activity
 	Text *string `json:"text,omitempty"`
@@ -4216,6 +4218,12 @@ type ChannelTypeConfig struct {
 	ChatPreferences   *ChatPreferences `json:"chat_preferences,omitempty"`
 }
 
+type ChannelTypeRuleResponse struct {
+	ChannelType string    `json:"channel_type"`
+	EnabledAt   Timestamp `json:"enabled_at"`
+	MaxAgeHours int       `json:"max_age_hours"`
+}
+
 // Emitted when a channel is successfully unfrozen.
 type ChannelUnFrozenEvent struct {
 	// Date/time of creation
@@ -7311,7 +7319,23 @@ type ForYouConfig struct {
 	// Turns For You ranking on. Groups: only the non-aggregated 'foryou' group. Views: applies only when read on that group
 	Enabled *bool `json:"enabled,omitempty"`
 	// Name of a registered ranking preset that stands in for 'score' when score is empty. One of: for_you_v2, hot
-	Preset *string `json:"preset,omitempty"`
+	Preset      *string                  `json:"preset,omitempty"`
+	Dwell       *ForYouDwellConfig       `json:"dwell,omitempty"`
+	Exploration *ForYouExplorationConfig `json:"exploration,omitempty"`
+}
+
+type ForYouDwellConfig struct {
+	// Keeps each user's long dwells. Requires for_you.enabled and a plan with activity metrics
+	Enabled *bool `json:"enabled,omitempty"`
+	// Minimum dwell_ms that counts as a long dwell. 1000 to 60000, defaults to 5000
+	ThresholdMs *int `json:"threshold_ms,omitempty"`
+}
+
+type ForYouExplorationConfig struct {
+	// Turns the exploration slot on. Requires for_you.enabled and a plan with activity metrics
+	Enabled *bool `json:"enabled,omitempty"`
+	// 1-based position in the ranked list that receives the exploration activity. 1 to 100, defaults to 15
+	Slot *int `json:"slot,omitempty"`
 }
 
 type ForkChannelResponse struct {
@@ -7886,6 +7910,18 @@ type GetModerationRuleResponse struct {
 	Rule     *ModerationRuleV2Response `json:"rule,omitempty"`
 }
 
+type GetNotificationStatusResponse struct {
+	Duration string `json:"duration"`
+	// Number of unread activities or groups
+	Unread int `json:"unread"`
+	// Number of unseen activities or groups
+	Unseen int `json:"unseen"`
+	// When the feed was last marked read
+	LastReadAt *Timestamp `json:"last_read_at,omitempty"`
+	// When the feed was last marked seen
+	LastSeenAt *Timestamp `json:"last_seen_at,omitempty"`
+}
+
 type GetOGResponse struct {
 	Duration string         `json:"duration"`
 	Custom   map[string]any `json:"custom"`
@@ -7959,6 +7995,8 @@ type GetOrCreateFeedResponse struct {
 	Feed                 FeedResponse                 `json:"feed"`
 	Next                 *string                      `json:"next,omitempty"`
 	Prev                 *string                      `json:"prev,omitempty"`
+	// Signed token identifying this read. Pass it with activity metrics events to attribute them to this read. Only set on feed reads for paid plans with an authenticated user, when the app uses feed impressions (For You exploration, or a For You ranking that uses impressions_bucket)
+	RequestID *string `json:"request_id,omitempty"`
 	// Activity selectors dropped from this read because they exceeded their time budget (see the time_budget_ms selector setting). Their activities are missing from this page, and they stay out for the rest of this pagination session. Omitted when every selector completed
 	DegradedSelectors   []string                    `json:"degraded_selectors,omitempty"`
 	FollowersPagination *PagerResponse              `json:"followers_pagination,omitempty"`
@@ -8045,8 +8083,9 @@ type GetRepliesResponse struct {
 // Basic response information
 type GetRetentionPolicyResponse struct {
 	// Duration of the request in milliseconds
-	Duration string            `json:"duration"`
-	Policies []RetentionPolicy `json:"policies"`
+	Duration         string                    `json:"duration"`
+	Policies         []RetentionPolicy         `json:"policies"`
+	ChannelTypeRules []ChannelTypeRuleResponse `json:"channel_type_rules,omitempty"`
 }
 
 // Basic response information
@@ -12934,8 +12973,9 @@ type RetentionPolicy struct {
 type RetentionPolicyType string
 
 const (
-	RetentionPolicyTypeInactiveChannels RetentionPolicyType = "inactive-channels"
-	RetentionPolicyTypeOldMessages      RetentionPolicyType = "old-messages"
+	RetentionPolicyTypeInactiveChannels       RetentionPolicyType = "inactive-channels"
+	RetentionPolicyTypeInactiveChannelsByType RetentionPolicyType = "inactive-channels-by-type"
+	RetentionPolicyTypeOldMessages            RetentionPolicyType = "old-messages"
 )
 
 func (c RetentionPolicyType) String() string {
@@ -12943,10 +12983,11 @@ func (c RetentionPolicyType) String() string {
 }
 
 type RetentionRunResponse struct {
-	AppPk  int      `json:"app_pk"`
-	Date   string   `json:"date"`
-	Policy string   `json:"policy"`
-	Stats  RunStats `json:"stats"`
+	AppPk       int      `json:"app_pk"`
+	Date        string   `json:"date"`
+	Policy      string   `json:"policy"`
+	Stats       RunStats `json:"stats"`
+	ChannelType *string  `json:"channel_type,omitempty"`
 }
 
 // Response after a reveal of a review queue item's media is allowed
@@ -13975,8 +14016,9 @@ type SetHistoryWindowTeamsResponse struct {
 // Basic response information
 type SetRetentionPolicyResponse struct {
 	// Duration of the request in milliseconds
-	Duration string          `json:"duration"`
-	Policy   RetentionPolicy `json:"policy"`
+	Duration        string                   `json:"duration"`
+	Policy          RetentionPolicy          `json:"policy"`
+	ChannelTypeRule *ChannelTypeRuleResponse `json:"channel_type_rule,omitempty"`
 }
 
 type SetupSession struct {
@@ -14619,10 +14661,16 @@ type TopBroadcast struct {
 type TrackActivityMetricsEvent struct {
 	// The ID of the activity to track the metric for
 	ActivityID string `json:"activity_id"`
-	// The metric name (e.g. views, clicks, impressions). Alphanumeric and underscores only.
+	// The metric name (e.g. views, clicks, impressions, dwell). Alphanumeric and underscores only. dwell requires dwell_ms.
 	Metric string `json:"metric"`
 	// The amount to increment (positive) or decrement (negative). Defaults to 1. The absolute value counts against rate limits.
 	Delta *int `json:"delta,omitempty"`
+	// Milliseconds the activity was in view. Required for the built-in dwell metric; apps with a custom dwell metric keep their own behavior.
+	DwellMs *int `json:"dwell_ms,omitempty"`
+	// 1-based position of the activity in that feed read. A value below 1 fails only this event. Accepted but not stored yet.
+	Position *int `json:"position,omitempty"`
+	// The request_id returned by the feed read that showed the activity. An invalid, expired (older than 48h) or future-dated (more than 5 minutes ahead) value fails only this event. Impressions sent with a valid request_id feed ranking, are not added to the activity's metrics.impressions, and must use a delta of 1.
+	RequestID *string `json:"request_id,omitempty"`
 }
 
 // Result of tracking a single metric event
@@ -14790,6 +14838,8 @@ type UnbanActionRequestPayload struct {
 	DecisionReason *string `json:"decision_reason,omitempty"`
 	// Also remove the future channels ban for this user
 	RemoveFutureChannelsBan *bool `json:"remove_future_channels_ban,omitempty"`
+	// When lifting a shadow ban, also restore the messages the user sent during it. Runs asynchronously; ignored for a regular ban
+	RestoreShadowedMessages *bool `json:"restore_shadowed_messages,omitempty"`
 	// Optional: unban user directly without review item
 	TargetUserID *string `json:"target_user_id,omitempty"`
 }

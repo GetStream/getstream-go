@@ -708,6 +708,18 @@ func (c *FeedsClient) RejectFeedMemberInvite(ctx context.Context, feedGroupID st
 	return res, err
 }
 
+// Returns the unread and unseen counts of a notification feed, along with the last seen and last read timestamps, without building a page.
+func (c *FeedsClient) GetNotificationStatus(ctx context.Context, feedGroupID string, feedID string, request *GetNotificationStatusRequest) (*StreamResponse[GetNotificationStatusResponse], error) {
+	var result GetNotificationStatusResponse
+	pathParams := map[string]string{
+		"feed_group_id": feedGroupID,
+		"feed_id":       feedID,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetNotificationStatusResponse](c.client, ctx, "GET", "/api/v2/feeds/feed_groups/{feed_group_id}/feeds/{feed_id}/notification_status", params, nil, &result, pathParams)
+	return res, err
+}
+
 // Query pinned activities for a feed with filter query
 func (c *FeedsClient) QueryPinnedActivities(ctx context.Context, feedGroupID string, feedID string, request *QueryPinnedActivitiesRequest) (*StreamResponse[QueryPinnedActivitiesResponse], error) {
 	var result QueryPinnedActivitiesResponse
