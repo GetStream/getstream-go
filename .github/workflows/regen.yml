@@ -22,7 +22,7 @@ jobs:
   regen:
     name: Regenerate
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 60
     # The getstream-sdk-bot key lives only in this environment, which deploys from the default branch. The App pushes and merges, because GITHUB_TOKEN events start neither the PR checks nor the release run.
     environment: sdk-bot
     steps:
@@ -148,7 +148,22 @@ jobs:
           fi
           # A removal makes the regen a major, which a human merges in a breaking-change window.
           if grep -q '^BREAKING CHANGE: ' "$RUNNER_TEMP/changelog"; then
-            gh pr merge "$num" --disable-auto 2>/dev/null || true
-          else
-            gh pr merge "$num" --auto --squash
+            echo "::notice::#$num removes API, so a human merges it"
+            exit 0
           fi
+          # Auto-merge waits for a code owner review even though the App may bypass it, so the App merges once the required checks pass. GitHub refuses the merge while a required check has not reported yet, so a refusal only means try again.
+          head=$(git rev-parse HEAD)
+          for _ in $(seq 45); do
+            sleep 60
+            checks=$(gh pr checks "$num" --required --json bucket --jq '[.[].bucket] | unique | join(",")' 2>&1) || true
+            case $checks in
+              *"checks reported"*|*pending*) ;;
+              *fail*|*cancel*) echo "::notice::#$num has a failing required check, so a human takes it from here"; exit 0 ;;
+              pass|pass,skipping|skipping,pass)
+                if [[ $(gh pr view "$num" --json title --jq .title) =~ $bang ]]; then echo "::notice::#$num is marked as a major, so a human merges it"; exit 0; fi
+                gh pr merge "$num" --squash --match-head-commit "$head" && exit 0 ;;
+              *) echo "::warning::could not read the required checks of #$num: $checks" ;;
+            esac
+          done
+          echo "::error::#$num did not merge within 45 minutes"
+          exit 1

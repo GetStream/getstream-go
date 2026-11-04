@@ -15,3 +15,6 @@ jobs:
       - uses: amannn/action-semantic-pull-request@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          subjectPattern: ^(?!.*\b(CHA|FEEDS|FLU|VID|MOD2?|PLA|AI|INF|PBE)-[0-9]+\b).+$
+          subjectPatternError: The title becomes the public changelog line, so keep ticket IDs out of it. Put the ticket in the branch name or the PR body.
