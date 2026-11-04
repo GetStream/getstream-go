@@ -1,0 +1,154 @@
+name: Regenerate
+
+# Regenerates the client from a protocol openapi release with the generator attached to the chat release of the same version, then opens one PR that merges itself once its required checks pass. protocol dispatches on each release; the daily run catches a missed one.
+on:
+  repository_dispatch:
+    types: [openapi-release]
+  schedule:
+    - cron: '23 6 * * *'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Protocol release, e.g. openapi-v240.4.0. Empty takes the latest.
+        required: false
+
+permissions: {}
+
+concurrency:
+  group: regen
+  cancel-in-progress: false
+
+jobs:
+  regen:
+    name: Regenerate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # The getstream-sdk-bot key lives only in this environment, which deploys from the default branch. The App pushes and merges, because GITHUB_TOKEN events start neither the PR checks nor the release run.
+    environment: sdk-bot
+    steps:
+      - id: app
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: Iv23lioh9qYGjBIp9nsK
+          private-key: ${{ secrets.SDK_BOT_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+      # Read-only, for the generator on the chat release and the protocol release list.
+      - id: read
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: Iv23lioh9qYGjBIp9nsK
+          private-key: ${{ secrets.SDK_BOT_PRIVATE_KEY }}
+          repositories: chat,protocol
+          permission-contents: read
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app.outputs.token }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Regenerate and open the PR
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          READ_TOKEN: ${{ steps.read.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          TAG: ${{ github.event.client_payload.tag || inputs.tag }}
+        run: |
+          set -euo pipefail
+          base=$GITHUB_REF_NAME
+          branch=regen/auto
+          bang='^[a-z]+(\([^)]*\))?!:'
+          newest() { printf '%s\n' "$@" | sort -V | tail -1; }
+
+          if [ -z "$TAG" ]; then
+            TAG=$(GH_TOKEN=$READ_TOKEN gh api 'repos/GetStream/protocol/releases?per_page=100' --jq '.[].tag_name' | grep -E '^openapi-v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          fi
+          [[ $TAG =~ ^openapi-v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::$TAG is not a protocol openapi release"; exit 1; }
+          current=$(sed -n 's/^spec: //p' .spec-version)
+          if [ "$(newest "$current" "$TAG")" = "$current" ]; then echo "$base is at $current, which is not older than $TAG"; exit 0; fi
+
+          # A human who marked the open PR breaking or not breaking owns it until it merges or closes.
+          num=
+          pr=$(gh pr list --head "$branch" --base "$base" --state open --json number,title,labels --jq '.[0] // empty')
+          if [ -n "$pr" ]; then
+            num=$(jq -r .number <<< "$pr")
+            title=$(jq -r .title <<< "$pr")
+            if [[ $title =~ $bang ]] || jq -e 'any(.labels[]; .name == "sdk-not-breaking")' <<< "$pr" > /dev/null; then
+              echo "::notice::#$num waits for a human, so it is left as it is"
+              exit 0
+            fi
+            open=$(grep -o 'openapi-v[0-9.]*[0-9]' <<< "$title" || true)
+            behind=$(gh api "repos/$GITHUB_REPOSITORY/compare/$base...$branch" --jq .behind_by)
+            if [ "$(newest "$open" "$TAG")" != "$TAG" ] || { [ "$open" = "$TAG" ] && [ "$behind" = 0 ]; }; then
+              echo "#$num already carries $open on top of $base"
+              exit 0
+            fi
+          fi
+
+          bin=$RUNNER_TEMP/generator
+          mkdir -p "$bin"
+          GH_TOKEN=$READ_TOKEN gh release download "${TAG#openapi-}" --repo GetStream/chat --pattern 'openapi-linux-amd64*' --dir "$bin"
+          (cd "$bin" && sha256sum -c openapi-linux-amd64.sha256)
+          chmod +x "$bin/openapi-linux-amd64"
+          SPEC_TAG=$TAG GENERATOR_BIN=$bin/openapi-linux-amd64 ./generate.sh
+          if [ -z "$(git status --porcelain)" ]; then echo "$TAG changes nothing"; exit 0; fi
+
+          # The changelog lists added and removed operations and their parameters, webhook events and schema properties. release-please reads each entry of a BEGIN_COMMIT_OVERRIDE block as one commit, and an entry starts at a blank line followed by a type.
+          inventory() {
+            spec=$RUNNER_TEMP/$1.yaml
+            curl -fsSL "https://raw.githubusercontent.com/GetStream/protocol/$1/openapi/v2/serverside-api.yaml" -o "$spec"
+            {
+              # Go names each method after its operationId in PascalCase.
+              {
+                yq -r '.paths | to_entries | .[] | .value | to_entries | .[] | select(.value.operationId) | "op " + .value.operationId' "$spec"
+                yq -r '.paths | to_entries | .[] | .value | to_entries | .[] | select(.value.operationId) | .value.operationId as $o | (.value.parameters // [])[] | "field " + $o + "." + .name' "$spec"
+              } | perl -pe 's/^(\w+ )(\w+)/$1 . join("", map { ucfirst } split(m{_}, $2))/e'
+              yq -r '.components.schemas | keys | .[] | "type " + .' "$spec"
+              yq -r '.components.schemas | to_entries | .[] | .key as $s | (.value.properties // {}) | keys | .[] | "field " + $s + "." + .' "$spec"
+            } | sort -u
+          }
+          inventory "$current" > "$RUNNER_TEMP/old"
+          inventory "$TAG" > "$RUNNER_TEMP/new"
+          added() { comm -13 "$RUNNER_TEMP/old" "$RUNNER_TEMP/new" | sed -n "s/^$1 //p"; }
+          removed() { comm -23 "$RUNNER_TEMP/old" "$RUNNER_TEMP/new" | sed -n "s/^$1 //p"; }
+          # Keeps the fields of schemas and operations present in both specs; a new or removed one stands for its own fields.
+          kept() { while read -r f; do if grep -Eqx "(type|op) ${f%%.*}" "$RUNNER_TEMP/old" && grep -Eqx "(type|op) ${f%%.*}" "$RUNNER_TEMP/new"; then echo "$f"; fi; done; }
+          group() { awk -F. -v word="$1" '{ f[$1] = (f[$1] ? f[$1] ", " : "") $2 } END { for (t in f) print f[t] " " word " " t }' | sort; }
+          {
+            added op | sed 's/^/feat: add /'
+            added type | { grep 'Event$' || true; } | sed 's/^/feat: add webhook event /'
+            added field | kept | group to | sed 's/^/feat: add /'
+            { removed op; removed type; removed field | kept | group from; } | while read -r r; do printf 'feat: remove %s\n\nBREAKING CHANGE: removes %s\n' "$r" "$r"; done
+          } | awk 'NR > 1 && /^feat: / { print "" } { print }' > "$RUNNER_TEMP/changelog"
+
+          type=chore
+          if [ -s "$RUNNER_TEMP/changelog" ]; then type=feat; fi
+          title="$type: regenerate client from $TAG"
+          {
+            echo "Regenerated from protocol [\`$TAG\`](https://github.com/GetStream/protocol/releases/tag/$TAG) with the generator from chat \`${TAG#openapi-}\`."
+            if [ -s "$RUNNER_TEMP/changelog" ]; then
+              echo
+              echo BEGIN_COMMIT_OVERRIDE
+              cat "$RUNNER_TEMP/changelog"
+              echo END_COMMIT_OVERRIDE
+            fi
+          } > "$RUNNER_TEMP/body"
+          cat "$RUNNER_TEMP/body"
+
+          id=$(gh api "users/${APP_SLUG}[bot]" --jq .id)
+          git switch -q -C "$branch"
+          git add -A
+          git -c user.name="${APP_SLUG}[bot]" -c user.email="$id+${APP_SLUG}[bot]@users.noreply.github.com" commit -q -m "$title"
+          git push -q -f origin "$branch"
+          if [ -n "$num" ]; then
+            gh pr edit "$num" --title "$title" --body-file "$RUNNER_TEMP/body"
+          else
+            url=$(gh pr create --base "$base" --head "$branch" --title "$title" --body-file "$RUNNER_TEMP/body")
+            num=${url##*/}
+          fi
+          # A removal makes the regen a major, which a human merges in a breaking-change window.
+          if grep -q '^BREAKING CHANGE: ' "$RUNNER_TEMP/changelog"; then
+            gh pr merge "$num" --disable-auto 2>/dev/null || true
+          else
+            gh pr merge "$num" --auto --squash
+          fi
