@@ -33,12 +33,13 @@ jobs:
           private-key: ${{ secrets.SDK_BOT_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
-      - id: chat
+      # Read-only, for the generator on the chat release and the protocol release list.
+      - id: read
         uses: actions/create-github-app-token@v3
         with:
           client-id: Iv23lioh9qYGjBIp9nsK
           private-key: ${{ secrets.SDK_BOT_PRIVATE_KEY }}
-          repositories: chat
+          repositories: chat,protocol
           permission-contents: read
       - uses: actions/checkout@v4
         with:
@@ -49,7 +50,7 @@ jobs:
       - name: Regenerate and open the PR
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
-          CHAT_TOKEN: ${{ steps.chat.outputs.token }}
+          READ_TOKEN: ${{ steps.read.outputs.token }}
           APP_SLUG: ${{ steps.app.outputs.app-slug }}
           TAG: ${{ github.event.client_payload.tag || inputs.tag }}
         run: |
@@ -60,7 +61,7 @@ jobs:
           newest() { printf '%s\n' "$@" | sort -V | tail -1; }
 
           if [ -z "$TAG" ]; then
-            TAG=$(gh api repos/GetStream/protocol/releases --jq 'map(select(.tag_name | startswith("openapi-v"))) | .[0].tag_name')
+            TAG=$(GH_TOKEN=$READ_TOKEN gh api 'repos/GetStream/protocol/releases?per_page=100' --jq '.[].tag_name' | grep -E '^openapi-v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
           fi
           [[ $TAG =~ ^openapi-v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::$TAG is not a protocol openapi release"; exit 1; }
           current=$(sed -n 's/^spec: //p' .spec-version)
@@ -86,7 +87,7 @@ jobs:
 
           bin=$RUNNER_TEMP/generator
           mkdir -p "$bin"
-          GH_TOKEN=$CHAT_TOKEN gh release download "${TAG#openapi-}" --repo GetStream/chat --pattern 'openapi-linux-amd64*' --dir "$bin"
+          GH_TOKEN=$READ_TOKEN gh release download "${TAG#openapi-}" --repo GetStream/chat --pattern 'openapi-linux-amd64*' --dir "$bin"
           (cd "$bin" && sha256sum -c openapi-linux-amd64.sha256)
           chmod +x "$bin/openapi-linux-amd64"
           SPEC_TAG=$TAG GENERATOR_BIN=$bin/openapi-linux-amd64 ./generate.sh
@@ -145,4 +146,9 @@ jobs:
             url=$(gh pr create --base "$base" --head "$branch" --title "$title" --body-file "$RUNNER_TEMP/body")
             num=${url##*/}
           fi
-          gh pr merge "$num" --auto --squash
+          # A removal makes the regen a major, which a human merges in a breaking-change window.
+          if grep -q '^BREAKING CHANGE: ' "$RUNNER_TEMP/changelog"; then
+            gh pr merge "$num" --disable-auto 2>/dev/null || true
+          else
+            gh pr merge "$num" --auto --squash
+          fi
