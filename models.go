@@ -2843,6 +2843,7 @@ type CallSettingsResponse struct {
 	Thumbnails    ThumbnailsSettingsResponse    `json:"thumbnails"`
 	Transcription TranscriptionSettingsResponse `json:"transcription"`
 	Video         VideoSettingsResponse         `json:"video"`
+	ExtraOpts     map[string]any                `json:"extra_opts,omitempty"`
 	Ingress       *IngressSettingsResponse      `json:"ingress,omitempty"`
 }
 
