@@ -203,4 +203,4 @@ jobs:
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then echo "SLACK_WEBHOOK_URL is not set, so nothing is posted"; exit 0; fi
-          jq -n --arg text ":warning: getstream-go regen ${NOTE:-failed}. <$RUN|Run>" '{text: $text}' | curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK_URL"
+          jq -n --arg text ":warning: getstream-go auto-regen ${NOTE:-failed}. <$RUN|Details>" '{text: $text}' | curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK_URL"
