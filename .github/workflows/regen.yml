@@ -106,12 +106,23 @@ jobs:
             num=$(jq -r .number <<< "$pr")
             title=$(jq -r .title <<< "$pr")
             if [[ $title =~ $bang ]]; then hold "is marked as a major"; fi
-            if jq -e 'any(.labels[]; .name == "sdk-not-breaking")' <<< "$pr" > /dev/null; then land "$(jq -r .headRefOid <<< "$pr")"; fi
-            open=$(grep -o 'openapi-v[0-9.]*[0-9]' <<< "$title" || true)
+            head=$(jq -r .headRefOid <<< "$pr")
             behind=$(gh api "repos/$GITHUB_REPOSITORY/compare/$base...$branch" --jq .behind_by)
-            if [ "$(newest "$open" "$TAG")" != "$TAG" ] || { [ "$open" = "$TAG" ] && [ "$behind" = 0 ]; }; then
-              echo "#$num already carries $open on top of $base"
-              land "$(jq -r .headRefOid <<< "$pr")"
+            # Regenerating would drop the tickets a human named in the body, so a labelled PR that fell behind takes in the base with a merge, as the up-to-date rule requires.
+            if jq -e 'any(.labels[]; .name == "sdk-not-breaking")' <<< "$pr" > /dev/null; then
+              if [ "$behind" != 0 ]; then
+                gh pr update-branch "$num" || { echo "::notice::#$num does not take in $base cleanly, so a human takes it from here"; exit 0; }
+                moved=$head
+                for _ in $(seq 30); do sleep 5; moved=$(gh pr view "$num" --json headRefOid --jq .headRefOid); [ "$moved" != "$head" ] && break; done
+                [ "$moved" != "$head" ] || { echo "::error::#$num did not move after taking in $base"; exit 1; }
+                head=$moved
+              fi
+              land "$head"
+            fi
+            open=$(grep -o 'openapi-v[0-9.]*[0-9]' <<< "$title" || true)
+            if [ "$(newest "$open" "$TAG")" != "$TAG" ] || [ "$open" = "$TAG" ]; then
+              if [ "$behind" = 0 ]; then echo "#$num already carries $open on top of $base"; land "$head"; fi
+              if [ "$open" != "$TAG" ]; then echo "#$num carries the newer $open, which a run for that tag brings up to date"; exit 0; fi
             fi
           fi
 
