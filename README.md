@@ -80,7 +80,7 @@ Head over to [CONTRIBUTING.md](./CONTRIBUTING.md) for some development tips.
 
 ### Generate Code from Spec
 
-To regenerate the Go source from OpenAPI, just run the `./generate.sh` script from this repo.
+The Go source regenerates itself from the OpenAPI spec on every chat release; see [Regeneration](./CONTRIBUTING.md#regeneration-for-stream-developers). To regenerate by hand, run `./generate.sh` from this repo.
 
 > **Note**
 > Code generation currently relies on tooling that is not publicly available. Only Stream developers can regenerate SDK source code from the OpenAPI spec.
