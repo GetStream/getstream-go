@@ -66,6 +66,31 @@ jobs:
           branch=regen/auto
           bang='^[a-z]+(\([^)]*\))?!:'
           newest() { printf '%s\n' "$@" | sort -V | tail -1; }
+          # Leaves a major to a human, who merges it in a breaking-change window, and disarms any auto-merge so an approval alone cannot merge it.
+          hold() {
+            gh pr merge "$num" --disable-auto 2>/dev/null || true
+            echo "::notice::#$num $1, so a human merges it"
+            exit 0
+          }
+          # Merges the open regen PR at commit $1 as the App once its required checks pass. Auto-merge waits for a code owner review although the App may bypass it, and gh refuses a blocked PR without --admin, which skips only what the App may bypass. GitHub refuses the merge while a required check has not reported yet, so a refusal only means try again.
+          land() {
+            body=$(gh pr view "$num" --json body --jq .body)
+            if grep -q '^BREAKING CHANGE: ' <<< "$body"; then hold "removes API"; fi
+            for _ in $(seq 45); do
+              sleep 60
+              checks=$(GH_TOKEN=$CHECKS_TOKEN gh pr checks "$num" --required --json bucket --jq '[.[].bucket] | unique | join(",")' 2>&1) || true
+              case $checks in
+                *"checks reported"*|*pending*) ;;
+                *fail*|*cancel*) echo "::notice::#$num has a failing required check, so a human takes it from here"; exit 0 ;;
+                pass|pass,skipping|skipping,pass)
+                  if [[ $(gh pr view "$num" --json title --jq .title) =~ $bang ]]; then hold "is marked as a major"; fi
+                  gh pr merge "$num" --squash --admin --match-head-commit "$1" && exit 0 ;;
+                *) echo "::warning::could not read the required checks of #$num: $checks" ;;
+              esac
+            done
+            echo "::error::#$num did not merge within 45 minutes"
+            exit 1
+          }
 
           if [ -z "$TAG" ]; then
             TAG=$(GH_TOKEN=$READ_TOKEN gh api 'repos/GetStream/protocol/releases?per_page=100' --jq '.[].tag_name' | grep -E '^openapi-v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
@@ -74,21 +99,19 @@ jobs:
           current=$(sed -n 's/^spec: //p' .spec-version)
           if [ "$(newest "$current" "$TAG")" = "$current" ]; then echo "$base is at $current, which is not older than $TAG"; exit 0; fi
 
-          # A human who marked the open PR breaking or not breaking owns it until it merges or closes.
+          # An open PR a human marked breaking or not breaking is not regenerated, so the judgement stays with the spec it was made on.
           num=
-          pr=$(gh pr list --head "$branch" --base "$base" --state open --json number,title,labels --jq '.[0] // empty')
+          pr=$(gh pr list --head "$branch" --base "$base" --state open --json number,title,labels,headRefOid --jq '.[0] // empty')
           if [ -n "$pr" ]; then
             num=$(jq -r .number <<< "$pr")
             title=$(jq -r .title <<< "$pr")
-            if [[ $title =~ $bang ]] || jq -e 'any(.labels[]; .name == "sdk-not-breaking")' <<< "$pr" > /dev/null; then
-              echo "::notice::#$num waits for a human, so it is left as it is"
-              exit 0
-            fi
+            if [[ $title =~ $bang ]]; then hold "is marked as a major"; fi
+            if jq -e 'any(.labels[]; .name == "sdk-not-breaking")' <<< "$pr" > /dev/null; then land "$(jq -r .headRefOid <<< "$pr")"; fi
             open=$(grep -o 'openapi-v[0-9.]*[0-9]' <<< "$title" || true)
             behind=$(gh api "repos/$GITHUB_REPOSITORY/compare/$base...$branch" --jq .behind_by)
             if [ "$(newest "$open" "$TAG")" != "$TAG" ] || { [ "$open" = "$TAG" ] && [ "$behind" = 0 ]; }; then
               echo "#$num already carries $open on top of $base"
-              exit 0
+              land "$(jq -r .headRefOid <<< "$pr")"
             fi
           fi
 
@@ -153,24 +176,4 @@ jobs:
             url=$(gh pr create --base "$base" --head "$branch" --title "$title" --body-file "$RUNNER_TEMP/body")
             num=${url##*/}
           fi
-          # A removal makes the regen a major, which a human merges in a breaking-change window.
-          if grep -q '^BREAKING CHANGE: ' "$RUNNER_TEMP/changelog"; then
-            echo "::notice::#$num removes API, so a human merges it"
-            exit 0
-          fi
-          # Auto-merge waits for a code owner review even though the App may bypass it, so the App merges once the required checks pass. GitHub refuses the merge while a required check has not reported yet, so a refusal only means try again.
-          head=$(git rev-parse HEAD)
-          for _ in $(seq 45); do
-            sleep 60
-            checks=$(GH_TOKEN=$CHECKS_TOKEN gh pr checks "$num" --required --json bucket --jq '[.[].bucket] | unique | join(",")' 2>&1) || true
-            case $checks in
-              *"checks reported"*|*pending*) ;;
-              *fail*|*cancel*) echo "::notice::#$num has a failing required check, so a human takes it from here"; exit 0 ;;
-              pass|pass,skipping|skipping,pass)
-                if [[ $(gh pr view "$num" --json title --jq .title) =~ $bang ]]; then echo "::notice::#$num is marked as a major, so a human merges it"; exit 0; fi
-                gh pr merge "$num" --squash --match-head-commit "$head" && exit 0 ;;
-              *) echo "::warning::could not read the required checks of #$num: $checks" ;;
-            esac
-          done
-          echo "::error::#$num did not merge within 45 minutes"
-          exit 1
+          land "$(git rev-parse HEAD)"
