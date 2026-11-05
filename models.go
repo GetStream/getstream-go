@@ -15517,6 +15517,8 @@ type UserBannedEvent struct {
 	User      UserResponseCommonFields `json:"user"`
 	// The type of event: "user.banned" in this case
 	Type string `json:"type"`
+	// Whether the ban also applies to channels created later by the same creator. Without a channel, check user.banned to tell a global ban from a future-channels-only ban
+	BanFromFutureChannels *bool `json:"ban_from_future_channels,omitempty"`
 	// The ID of the channel where the target user was banned
 	ChannelID           *string `json:"channel_id,omitempty"`
 	ChannelMemberCount  *int    `json:"channel_member_count,omitempty"`
