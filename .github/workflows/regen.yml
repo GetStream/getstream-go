@@ -72,10 +72,10 @@ jobs:
             echo "::notice::#$num $1"
             echo "note=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$num|#$num> $1" >> "$GITHUB_OUTPUT"
           }
-          # Leaves a major to a human, who merges it in a breaking-change window, and disarms any auto-merge so an approval alone cannot merge it.
+          # Leaves a major to a human, who merges it in a breaking-change window, and disarms any auto-merge so an approval alone cannot merge it. A `!` title means a human already took the PR, so that hold is not posted again on every run.
           hold() {
             gh pr merge "$num" --disable-auto 2>/dev/null || true
-            human "$1, so a human merges it"
+            if [ "${2:-}" = quiet ]; then echo "::notice::#$num $1, so a human merges it"; else human "$1, so a human merges it"; fi
             exit 0
           }
           # Merges the open regen PR at commit $1 as the App once its required checks pass. Auto-merge waits for a code owner review although the App may bypass it, and gh refuses a blocked PR without --admin, which skips only what the App may bypass. GitHub refuses the merge while a required check has not reported yet, so a refusal only means try again.
@@ -89,7 +89,7 @@ jobs:
                 *"checks reported"*|*pending*) ;;
                 *fail*|*cancel*) human "has a failing required check, so a human takes it from here"; exit 0 ;;
                 pass|pass,skipping|skipping,pass)
-                  if [[ $(gh pr view "$num" --json title --jq .title) =~ $bang ]]; then hold "is marked as a major"; fi
+                  if [[ $(gh pr view "$num" --json title --jq .title) =~ $bang ]]; then hold "is marked as a major" quiet; fi
                   gh pr merge "$num" --squash --admin --match-head-commit "$1" && exit 0 ;;
                 *) echo "::warning::could not read the required checks of #$num: $checks" ;;
               esac
@@ -111,7 +111,7 @@ jobs:
           if [ -n "$pr" ]; then
             num=$(jq -r .number <<< "$pr")
             title=$(jq -r .title <<< "$pr")
-            if [[ $title =~ $bang ]]; then hold "is marked as a major"; fi
+            if [[ $title =~ $bang ]]; then hold "is marked as a major" quiet; fi
             head=$(jq -r .headRefOid <<< "$pr")
             behind=$(gh api "repos/$GITHUB_REPOSITORY/compare/$base...$branch" --jq .behind_by)
             # Regenerating would drop the tickets a human named in the body, so a labelled PR that fell behind takes in the base with a merge, as the up-to-date rule requires.
