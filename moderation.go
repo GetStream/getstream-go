@@ -142,6 +142,13 @@ func (c *ModerationClient) UpsertConfig(ctx context.Context, request *UpsertConf
 	return res, err
 }
 
+// Save a moderation configuration as a new version without making it live. The version takes effect once it is published.
+func (c *ModerationClient) SaveConfigVersion(ctx context.Context, request *SaveConfigVersionRequest) (*StreamResponse[SaveConfigVersionResponse], error) {
+	var result SaveConfigVersionResponse
+	res, err := MakeRequest[SaveConfigVersionRequest, SaveConfigVersionResponse](c.client, ctx, "POST", "/api/v2/moderation/config/versions", nil, request, &result, nil)
+	return res, err
+}
+
 // Delete a specific moderation policy by its name
 func (c *ModerationClient) DeleteConfig(ctx context.Context, key string, request *DeleteConfigRequest) (*StreamResponse[DeleteModerationConfigResponse], error) {
 	var result DeleteModerationConfigResponse
@@ -161,6 +168,40 @@ func (c *ModerationClient) GetConfig(ctx context.Context, key string, request *G
 	}
 	params := extractQueryParams(request)
 	res, err := MakeRequest[any, GetConfigResponse](c.client, ctx, "GET", "/api/v2/moderation/config/{key}", params, nil, &result, pathParams)
+	return res, err
+}
+
+// List the retained versions of a moderation configuration, newest first, and which one is published.
+func (c *ModerationClient) ListConfigVersions(ctx context.Context, key string, request *ListConfigVersionsRequest) (*StreamResponse[ListConfigVersionsResponse], error) {
+	var result ListConfigVersionsResponse
+	pathParams := map[string]string{
+		"key": key,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, ListConfigVersionsResponse](c.client, ctx, "GET", "/api/v2/moderation/config/{key}/versions", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Retrieve the full moderation configuration stored in a specific version, whether or not it is published.
+func (c *ModerationClient) GetConfigVersion(ctx context.Context, key string, version string, request *GetConfigVersionRequest) (*StreamResponse[GetConfigVersionResponse], error) {
+	var result GetConfigVersionResponse
+	pathParams := map[string]string{
+		"key":     key,
+		"version": version,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetConfigVersionResponse](c.client, ctx, "GET", "/api/v2/moderation/config/{key}/versions/{version}", params, nil, &result, pathParams)
+	return res, err
+}
+
+// Make a stored version the moderation configuration in effect. Publishing an older version reverts to it without creating a new version.
+func (c *ModerationClient) PublishConfigVersion(ctx context.Context, key string, version string, request *PublishConfigVersionRequest) (*StreamResponse[PublishConfigVersionResponse], error) {
+	var result PublishConfigVersionResponse
+	pathParams := map[string]string{
+		"key":     key,
+		"version": version,
+	}
+	res, err := MakeRequest[PublishConfigVersionRequest, PublishConfigVersionResponse](c.client, ctx, "POST", "/api/v2/moderation/config/{key}/versions/{version}/publish", nil, request, &result, pathParams)
 	return res, err
 }
 

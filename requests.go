@@ -2597,12 +2597,58 @@ type UpsertConfigRequest struct {
 	VelocityFilterConfig *VelocityFilterConfig `json:"velocity_filter_config,omitempty"`
 	VideoCallRuleConfig  *VideoCallRuleConfig  `json:"video_call_rule_config,omitempty"`
 }
+type SaveConfigVersionRequest struct {
+	// Latest version the edit was based on, 0 for a policy without versions. The save is rejected when a newer version exists
+	BaseVersion int `json:"base_version"`
+	// Unique identifier for the moderation configuration
+	Key string `json:"key"`
+	// Whether moderation should be performed asynchronously
+	Async *bool `json:"async,omitempty"`
+	// Team associated with the configuration
+	Team *string `json:"team,omitempty"`
+	// Optional user ID to associate with the audit log entry
+	UserID                             *string                             `json:"user_id,omitempty"`
+	AWSRekognitionConfig               *AIImageConfig                      `json:"aws_rekognition_config,omitempty"`
+	AiAudioConfig                      *AIAudioConfigRequest               `json:"ai_audio_config,omitempty"`
+	AiImageConfig                      *AIImageConfig                      `json:"ai_image_config,omitempty"`
+	AiTextConfig                       *AITextConfig                       `json:"ai_text_config,omitempty"`
+	AiVideoConfig                      *AIVideoConfigRequest               `json:"ai_video_config,omitempty"`
+	AutomodPlatformCircumventionConfig *AutomodPlatformCircumventionConfig `json:"automod_platform_circumvention_config,omitempty"`
+	AutomodSemanticFiltersConfig       *AutomodSemanticFiltersConfig       `json:"automod_semantic_filters_config,omitempty"`
+	AutomodToxicityConfig              *AutomodToxicityConfig              `json:"automod_toxicity_config,omitempty"`
+	BlockListConfig                    *BlockListConfig                    `json:"block_list_config,omitempty"`
+	BodyguardConfig                    *AITextConfig                       `json:"bodyguard_config,omitempty"`
+	Engine                             *ModerationEngineConfigRequest      `json:"engine,omitempty"`
+	FloodConfig                        *FloodConfig                        `json:"flood_config,omitempty"`
+	GoogleVisionConfig                 *GoogleVisionConfig                 `json:"google_vision_config,omitempty"`
+	IntentConfig                       *IntentConfigRequest                `json:"intent_config,omitempty"`
+	LlmConfig                          *LLMConfig                          `json:"llm_config,omitempty"`
+	RuleBuilderConfig                  *RuleBuilderConfig                  `json:"rule_builder_config,omitempty"`
+	// User request object
+	User                 *UserRequest          `json:"user,omitempty"`
+	VelocityFilterConfig *VelocityFilterConfig `json:"velocity_filter_config,omitempty"`
+	VideoCallRuleConfig  *VideoCallRuleConfig  `json:"video_call_rule_config,omitempty"`
+}
 type DeleteConfigRequest struct {
 	Team   *string `json:"-" query:"team"`
 	UserID *string `json:"-" query:"user_id"`
 }
 type GetConfigRequest struct {
 	Team *string `json:"-" query:"team"`
+}
+type ListConfigVersionsRequest struct {
+	Team *string `json:"-" query:"team"`
+}
+type GetConfigVersionRequest struct {
+	Team *string `json:"-" query:"team"`
+}
+type PublishConfigVersionRequest struct {
+	// Team associated with the configuration
+	Team *string `json:"team,omitempty"`
+	// Optional user ID to associate with the audit log entry
+	UserID *string `json:"user_id,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
 }
 type QueryModerationConfigsRequest struct {
 	Limit  *int    `json:"limit,omitempty"`

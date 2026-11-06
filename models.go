@@ -643,12 +643,18 @@ func (e *ActivityRestoredEvent) GetEventType() string {
 }
 
 type ActivitySelectorConfig struct {
-	// Type of selector. One of: popular, proximity, following, current_feed, query, interest, follow_suggestion
+	// Type of selector. One of: popular, proximity, following, current_feed, query, interest, follow_suggestion, friends_engaged
 	Type ActivitySelectorType `json:"type"`
 	// Time threshold for activity selection (string). Expected RFC3339 format (e.g., 2006-01-02T15:04:05Z07:00). Cannot be used together with cutoff_window
 	CutoffTime *string `json:"cutoff_time,omitempty"`
 	// Flexible relative time window for activity selection (e.g., '1h', '3d', '1y'). Activities older than this duration will be filtered out. Cannot be used together with cutoff_time
 	CutoffWindow *string `json:"cutoff_window,omitempty"`
+	// Who counts as a friend for the friends_engaged selector: 'mutual' (default, users the viewer and they follow each other) or 'following' (users the viewer follows). Only supported on the friends_engaged selector
+	FriendType *string `json:"friend_type,omitempty"`
+	// Maximum number of close friends the friends_engaged selector reads reactions from (1-50, default 10). Only supported on the friends_engaged selector
+	MaxFriends *int `json:"max_friends,omitempty"`
+	// Minimum number of distinct close friends that must have reacted to an activity for friends_engaged to select it (1-10, default 1, not above max_friends). Only supported on the friends_engaged selector
+	MinFriends *int `json:"min_friends,omitempty"`
 	// Minimum popularity threshold. For the 'popular' selector, omit to use the default (5); values below 1 are rejected
 	MinPopularity *int `json:"min_popularity,omitempty"`
 	// Maximum number of candidate activities this selector contributes to a ranked feed (1-1000). Omit to use the default ranking buffer. Only supported on the popular, proximity, interest and query selectors, and ignored on feeds without ranking
@@ -657,6 +663,8 @@ type ActivitySelectorConfig struct {
 	TimeBudgetMs *int `json:"time_budget_ms,omitempty"`
 	// Radius in kilometers the proximity selector searches around the viewer's location (the request's viewer_location, else the user's custom.location) when its filter has no near or within_bounds. Greater than 0 and at most 250. Omit to use the default (10). Only supported on the proximity selector
 	ViewerLocationRadiusKm *float64 `json:"viewer_location_radius_km,omitempty"`
+	// Reaction types that count for the friends_engaged selector (at most 10, default all types). Only supported on the friends_engaged selector
+	ReactionTypes []string `json:"reaction_types,omitempty"`
 	// Sort parameters for activity selection
 	Sort       []SortParamRequest `json:"sort,omitempty"`
 	FeedGroups *FeedGroupScope    `json:"feed_groups,omitempty"`
@@ -672,6 +680,12 @@ type ActivitySelectorConfigResponse struct {
 	CutoffTime *Timestamp `json:"cutoff_time,omitempty"`
 	// Flexible relative time window for activity selection (e.g., '1h', '3d', '1y')
 	CutoffWindow *string `json:"cutoff_window,omitempty"`
+	// Who counts as a friend for the friends_engaged selector
+	FriendType *string `json:"friend_type,omitempty"`
+	// Maximum number of close friends the friends_engaged selector reads reactions from
+	MaxFriends *int `json:"max_friends,omitempty"`
+	// Minimum number of distinct close friends that must have reacted for friends_engaged to select an activity
+	MinFriends *int `json:"min_friends,omitempty"`
 	// Minimum popularity threshold. For the 'popular' selector, values below 1 are normalized to the default (5) at read time.
 	MinPopularity *int `json:"min_popularity,omitempty"`
 	// Maximum number of candidate activities this selector contributes to a ranked feed
@@ -680,6 +694,8 @@ type ActivitySelectorConfigResponse struct {
 	TimeBudgetMs *int `json:"time_budget_ms,omitempty"`
 	// Radius in kilometers the proximity selector searches around the viewer's location
 	ViewerLocationRadiusKm *float64 `json:"viewer_location_radius_km,omitempty"`
+	// Reaction types that count for the friends_engaged selector
+	ReactionTypes []string `json:"reaction_types,omitempty"`
 	// Sort parameters for activity selection
 	Sort       []SortParamRequest `json:"sort,omitempty"`
 	FeedGroups *FeedGroupScope    `json:"feed_groups,omitempty"`
@@ -694,6 +710,7 @@ const (
 	ActivitySelectorTypeCurrentFeed      ActivitySelectorType = "current_feed"
 	ActivitySelectorTypeFollowSuggestion ActivitySelectorType = "follow_suggestion"
 	ActivitySelectorTypeFollowing        ActivitySelectorType = "following"
+	ActivitySelectorTypeFriendsEngaged   ActivitySelectorType = "friends_engaged"
 	ActivitySelectorTypeInterest         ActivitySelectorType = "interest"
 	ActivitySelectorTypePopular          ActivitySelectorType = "popular"
 	ActivitySelectorTypeProximity        ActivitySelectorType = "proximity"
@@ -2509,7 +2526,7 @@ type CallRejectedEvent struct {
 	User UserResponse `json:"user"`
 	// The type of event: "call.rejected" in this case
 	Type string `json:"type"`
-	// Provides information about why the call was rejected. You can provide any value, but the Stream API and SDKs use these default values: rejected, cancel, timeout and busy
+	// Provides information about why the call was rejected. You can provide any value, but the Stream API and SDKs use these default values: decline, cancel, timeout and busy
 	Reason *string `json:"reason,omitempty"`
 }
 
@@ -5052,6 +5069,8 @@ type ConfigResponse struct {
 	// When the configuration was last updated
 	UpdatedAt                   Timestamp `json:"updated_at"`
 	SupportedVideoCallHarmTypes []string  `json:"supported_video_call_harm_types"`
+	// The version of this configuration moderation currently runs
+	PublishedVersion *int `json:"published_version,omitempty"`
 	// Configurable image moderation label definitions for dashboard rendering
 	AiImageLabelDefinitions []AIImageLabelDefinition `json:"ai_image_label_definitions,omitempty"`
 	// Names of Bodyguard credential profiles registered on this app. The dashboard uses this list to render the profile picker on the AI Text section.
@@ -5072,6 +5091,17 @@ type ConfigResponse struct {
 	LlmConfig                          *LLMConfig                          `json:"llm_config,omitempty"`
 	VelocityFilterConfig               *VelocityFilterConfig               `json:"velocity_filter_config,omitempty"`
 	VideoCallRuleConfig                *VideoCallRuleConfig                `json:"video_call_rule_config,omitempty"`
+}
+
+type ConfigVersionResponse struct {
+	// When this version was saved
+	CreatedAt Timestamp `json:"created_at"`
+	// ID of the user who saved this version, empty when saved without a user
+	CreatedBy string `json:"created_by"`
+	// Whether this is the version moderation currently runs
+	Published bool `json:"published"`
+	// Sequential version number, per key and team
+	Version int `json:"version"`
 }
 
 type ContentCountRuleParameters struct {
@@ -7715,6 +7745,12 @@ type GetConfigResponse struct {
 	Config   *ConfigResponse `json:"config,omitempty"`
 }
 
+type GetConfigVersionResponse struct {
+	Duration string                `json:"duration"`
+	Version  ConfigVersionResponse `json:"version"`
+	Config   *ConfigResponse       `json:"config,omitempty"`
+}
+
 // Basic response information
 type GetCustomPermissionResponse struct {
 	// Duration of the request in milliseconds
@@ -8808,13 +8844,13 @@ type LayoutSettingsResponse struct {
 }
 
 type LifecycleSettingsRequest struct {
-	// Call lifecycle mode. One of: reusable, single_use. A single_use call cannot be reused once it has ended; the server ends it when its ring settles without an answer (currently: when the caller cancels the ring). Fixed at call creation
+	// Call lifecycle mode. One of: reusable, single_use. A single_use call cannot be reused once it has ended; the server ends it when its ring settles without an answer: when the caller cancels the ring, or when the ring times out on the server (missed_call_timeout_ms) without anyone accepting or joining. Fixed at call creation
 	Mode *CallLifecycleMode `json:"mode,omitempty"`
 }
 
 // LifecycleSettings is the payload for call lifecycle settings
 type LifecycleSettingsResponse struct {
-	// Call lifecycle mode. One of: reusable, single_use. A single_use call cannot be reused once it has ended; the server ends it when its ring settles without an answer (currently: when the caller cancels the ring). Fixed at call creation
+	// Call lifecycle mode. One of: reusable, single_use. A single_use call cannot be reused once it has ended; the server ends it when its ring settles without an answer: when the caller cancels the ring, or when the ring times out on the server (missed_call_timeout_ms) without anyone accepting or joining. Fixed at call creation
 	Mode CallLifecycleMode `json:"mode"`
 }
 
@@ -8872,6 +8908,14 @@ type ListCommandsResponse struct {
 	Duration string `json:"duration"`
 	// List of commands
 	Commands []Command `json:"commands"`
+}
+
+type ListConfigVersionsResponse struct {
+	Duration string `json:"duration"`
+	// Retained versions of this configuration, newest first, including the published one
+	Versions []ConfigVersionResponse `json:"versions"`
+	// The version moderation currently runs
+	PublishedVersion *int `json:"published_version,omitempty"`
 }
 
 // List devices response
@@ -9966,6 +10010,7 @@ type ModerationConfig struct {
 	Async                              *bool                               `json:"async,omitempty"`
 	CreatedAt                          *Timestamp                          `json:"created_at,omitempty"`
 	Key                                *string                             `json:"key,omitempty"`
+	PublishedVersion                   *int                                `json:"published_version,omitempty"`
 	Team                               *string                             `json:"team,omitempty"`
 	UpdatedAt                          *Timestamp                          `json:"updated_at,omitempty"`
 	SupportedVideoCallHarmTypes        []string                            `json:"supported_video_call_harm_types,omitempty"`
@@ -11384,6 +11429,11 @@ type PrivacySettingsResponse struct {
 	ReadReceipts *ReadReceiptsResponse `json:"read_receipts,omitempty"`
 	// The settings for typing indicator events.
 	TypingIndicators *TypingIndicatorsResponse `json:"typing_indicators,omitempty"`
+}
+
+type PublishConfigVersionResponse struct {
+	Duration string          `json:"duration"`
+	Config   *ConfigResponse `json:"config,omitempty"`
 }
 
 type PublishedTrackFlags struct {
@@ -13551,6 +13601,13 @@ type SIPTrunkResponse struct {
 
 type SRTIngress struct {
 	Address string `json:"address"`
+}
+
+type SaveConfigVersionResponse struct {
+	Duration string                `json:"duration"`
+	Version  ConfigVersionResponse `json:"version"`
+	// The version moderation currently runs
+	PublishedVersion *int `json:"published_version,omitempty"`
 }
 
 // The channel of a scheduled message
