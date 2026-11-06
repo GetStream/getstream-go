@@ -2,6 +2,66 @@
 
 All notable changes to this project will be documented in this file. Releases are automated by [release-please](https://github.com/googleapis/release-please); see [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## [8.1.0](https://github.com/GetStream/getstream-go/compare/v8.0.0...v8.1.0) (2026-11-06)
+
+
+### Features
+
+* add activity_ids, include_deleted to ExportFeedsByTypeRequest ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add ban_from_future_channels to UserBannedEvent ([40b6eaa](https://github.com/GetStream/getstream-go/commit/40b6eaa9df4f10988c611df193d9b24531b79ffd))
+* add CancelExportFeeds ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add channel_cid, matched_labels, severity to ModerationRulesTriggeredEvent ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add channel_type to DeleteRetentionPolicyRequest ([12c041b](https://github.com/GetStream/getstream-go/commit/12c041b46dff1a1509367ec09f634342e37daa48))
+* add channel_type to RetentionRunResponse ([12c041b](https://github.com/GetStream/getstream-go/commit/12c041b46dff1a1509367ec09f634342e37daa48))
+* add channel_type to SetRetentionPolicyRequest ([12c041b](https://github.com/GetStream/getstream-go/commit/12c041b46dff1a1509367ec09f634342e37daa48))
+* add channel_type_rule to SetRetentionPolicyResponse ([12c041b](https://github.com/GetStream/getstream-go/commit/12c041b46dff1a1509367ec09f634342e37daa48))
+* add channel_type_rules to GetRetentionPolicyResponse ([12c041b](https://github.com/GetStream/getstream-go/commit/12c041b46dff1a1509367ec09f634342e37daa48))
+* add country_codes to AnalyzeRequest ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add country_codes to CheckRequest ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add country_codes to ModerationPayload ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add country_codes to ReviewQueueItemResponse ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add DeleteHistoryWindowTeams ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add dwell_ms, position, request_id to TrackActivityMetricsEvent ([12c041b](https://github.com/GetStream/getstream-go/commit/12c041b46dff1a1509367ec09f634342e37daa48))
+* add dwell, exploration to ForYouConfig ([12c041b](https://github.com/GetStream/getstream-go/commit/12c041b46dff1a1509367ec09f634342e37daa48))
+* add engine to ConfigResponse ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add engine to UpsertConfigRequest ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add explicit_urls_only to BlockListConfig ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add extra_opts to CallSettingsResponse ([479f6db](https://github.com/GetStream/getstream-go/commit/479f6dbd1fccdf3698d111af798ebbcbd2d4fb4f))
+* add failed_reason, oldest_source_message_id, truncated to ChannelForkResponse ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add failed_reason, oldest_source_message_id, truncated to ChannelForkSummary ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add fork to ChannelResponse ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add friend_type, max_friends, min_friends, reaction_types to ActivitySelectorConfig ([d0c9187](https://github.com/GetStream/getstream-go/commit/d0c9187a6933b7bd02d564cacc0a1ced796d662f))
+* add friend_type, max_friends, min_friends, reaction_types to ActivitySelectorConfigResponse ([d0c9187](https://github.com/GetStream/getstream-go/commit/d0c9187a6933b7bd02d564cacc0a1ced796d662f))
+* add GetConfigVersion ([d0c9187](https://github.com/GetStream/getstream-go/commit/d0c9187a6933b7bd02d564cacc0a1ced796d662f))
+* add GetHistoryWindowTeams ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add GetNotificationStatus ([12c041b](https://github.com/GetStream/getstream-go/commit/12c041b46dff1a1509367ec09f634342e37daa48))
+* add include_reasons to EnrichmentOptions ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add language, translated to CallTranscription ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add limit, offset to ListPolicyTestSets ([12c041b](https://github.com/GetStream/getstream-go/commit/12c041b46dff1a1509367ec09f634342e37daa48))
+* add ListConfigVersions ([d0c9187](https://github.com/GetStream/getstream-go/commit/d0c9187a6933b7bd02d564cacc0a1ced796d662f))
+* add name to V2DeleteTemplate ([12c041b](https://github.com/GetStream/getstream-go/commit/12c041b46dff1a1509367ec09f634342e37daa48))
+* add ocr_severity_rules to AIImageConfig ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add position to ActivityResponse ([12c041b](https://github.com/GetStream/getstream-go/commit/12c041b46dff1a1509367ec09f634342e37daa48))
+* add PublishConfigVersion ([d0c9187](https://github.com/GetStream/getstream-go/commit/d0c9187a6933b7bd02d564cacc0a1ced796d662f))
+* add published_version to ConfigResponse ([d0c9187](https://github.com/GetStream/getstream-go/commit/d0c9187a6933b7bd02d564cacc0a1ced796d662f))
+* add published_version to ModerationConfig ([d0c9187](https://github.com/GetStream/getstream-go/commit/d0c9187a6933b7bd02d564cacc0a1ced796d662f))
+* add QueryDeletedChannels ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add reason to MarkReviewedRequestPayload ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add reason to RestoreActionRequestPayload ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add reasons to ActivityResponse ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add request_id to GetOrCreateFeedResponse ([12c041b](https://github.com/GetStream/getstream-go/commit/12c041b46dff1a1509367ec09f634342e37daa48))
+* add restore_shadowed_messages to UnbanActionRequestPayload ([12c041b](https://github.com/GetStream/getstream-go/commit/12c041b46dff1a1509367ec09f634342e37daa48))
+* add SaveConfigVersion ([d0c9187](https://github.com/GetStream/getstream-go/commit/d0c9187a6933b7bd02d564cacc0a1ced796d662f))
+* add SetHistoryWindowTeams ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add viewer_location_radius_km to ActivitySelectorConfig ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add viewer_location_radius_km to ActivitySelectorConfigResponse ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+* add webhook event AsyncExportFeedsSuccessEvent ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+
+
+### Bug Fixes
+
+* ExportFeedsApp sends include_deleted and types in the request body ([ff9b869](https://github.com/GetStream/getstream-go/commit/ff9b86922e38c5e38aa83e41b12f0f02727a94f6))
+
 ## [8.0.0](https://github.com/GetStream/getstream-go/compare/v7.1.1...v8.0.0) (2026-10-28)
 
 
