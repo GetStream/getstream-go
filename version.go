@@ -1,7 +1,7 @@
 package getstream
 
 const (
-	versionName = "v8.0.0" // x-release-please-version
+	versionName = "v8.1.0" // x-release-please-version
 )
 
 // Version returns the version of the library. versionName is written by the release
