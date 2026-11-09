@@ -1393,6 +1393,7 @@ type GetActivityRequest struct {
 	IncludeTopLevelCommentCount  *bool   `json:"-" query:"include_top_level_comment_count"`
 	IncludeSoftDeletedActivities *bool   `json:"-" query:"include_soft_deleted_activities"`
 	IncludeModeratedActivities   *bool   `json:"-" query:"include_moderated_activities"`
+	SkipViewerVisibility         *bool   `json:"-" query:"skip_viewer_visibility"`
 }
 type UpdateActivityPartialRequest struct {
 	// Whether to copy custom data to the notification activity (only applies when handle_mention_notifications creates notifications) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
