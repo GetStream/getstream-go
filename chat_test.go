@@ -667,6 +667,13 @@ func TestChatSearch(t *testing.T) {
 	_, err = client.Chat().Search(context.Background(), &getstream.SearchRequest{})
 	require.NoError(t, err)
 }
+func TestChatSearchAll(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().SearchAll(context.Background(), &getstream.SearchAllRequest{})
+	require.NoError(t, err)
+}
 func TestChatCreateSegment(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

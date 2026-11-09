@@ -10000,6 +10000,8 @@ type ModerationCheckCompletedEvent struct {
 	Custom            map[string]any `json:"custom"`
 	Type              string         `json:"type"`
 	ReceivedAt        *Timestamp     `json:"received_at,omitempty"`
+	// Content payload for moderation
+	ModerationPayload *ModerationPayloadResponse `json:"moderation_payload,omitempty"`
 }
 
 func (e *ModerationCheckCompletedEvent) GetEventType() string {
@@ -13818,6 +13820,54 @@ type ScreensharingSettingsResponse struct {
 	AccessRequestEnabled bool              `json:"access_request_enabled"`
 	Enabled              bool              `json:"enabled"`
 	TargetResolution     *TargetResolution `json:"target_resolution,omitempty"`
+}
+
+type SearchAllChannelsSection struct {
+	// Opaque cursor for the next page of this section, present only when more results exist. Pass it back under next.channels with the same query
+	Next *string `json:"next,omitempty"`
+	// Channels the caller is a member of whose name starts with the query, in the same shape as the query channels endpoint's results but without messages or members
+	Channels []ChannelStateResponseFields `json:"channels,omitempty"`
+	Error    *SearchAllSectionError       `json:"error,omitempty"`
+	Warning  *SearchAllWarning            `json:"warning,omitempty"`
+}
+
+type SearchAllMessagesSection struct {
+	// Opaque cursor for the next page of this section, present only when more results exist. Pass it back under next.messages with the same query
+	Next *string `json:"next,omitempty"`
+	// Matching messages, newest first, in the same shape as the search endpoint's results
+	Results        []SearchResult         `json:"results,omitempty"`
+	Error          *SearchAllSectionError `json:"error,omitempty"`
+	ResultsWarning *SearchWarning         `json:"results_warning,omitempty"`
+	Warning        *SearchAllWarning      `json:"warning,omitempty"`
+}
+
+type SearchAllResponse struct {
+	// Duration of the request in milliseconds
+	Duration string                    `json:"duration"`
+	Channels *SearchAllChannelsSection `json:"channels,omitempty"`
+	Messages *SearchAllMessagesSection `json:"messages,omitempty"`
+	Users    *SearchAllUsersSection    `json:"users,omitempty"`
+}
+
+type SearchAllSectionError struct {
+	// Error code. backend_timeout and backend_unavailable are retryable; unsupported (the app's configuration cannot serve this section) and internal_error are not
+	Code string `json:"code"`
+	// Human-readable description of the failure
+	Message string `json:"message"`
+}
+
+type SearchAllUsersSection struct {
+	// Opaque cursor for the next page of this section, present only when more results exist. Pass it back under next.users with the same query
+	Next *string `json:"next,omitempty"`
+	// Users whose name or username starts with the query, in the same shape as the query users endpoint's results
+	Users   []FullUserResponse     `json:"users,omitempty"`
+	Error   *SearchAllSectionError `json:"error,omitempty"`
+	Warning *SearchAllWarning      `json:"warning,omitempty"`
+}
+
+type SearchAllWarning struct {
+	// Warning code. cursor_rejected: the cursor supplied for this section failed to decode, so the section restarted from page 1
+	Code string `json:"code"`
 }
 
 type SearchPayload struct {

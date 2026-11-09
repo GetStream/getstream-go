@@ -1064,6 +1064,13 @@ func (c *ChatClient) Search(ctx context.Context, request *SearchRequest) (*Strea
 	return res, err
 }
 
+// Runs one free-text query across messages, users and channels and returns one envelope with a section per requested entity. The server picks the match operator, sort and scope for every section: messages are matched as full text in the channels the caller can read, users by name or username prefix, and channels by name prefix among the channels the caller is a member of. Each section carries its own opaque `next` cursor when more results exist; a section that fails is reported in its `error` field while the other sections return normally.
+func (c *ChatClient) SearchAll(ctx context.Context, request *SearchAllRequest) (*StreamResponse[SearchAllResponse], error) {
+	var result SearchAllResponse
+	res, err := MakeRequest[SearchAllRequest, SearchAllResponse](c.client, ctx, "POST", "/api/v2/chat/search/all", nil, request, &result, nil)
+	return res, err
+}
+
 // Create a segment
 func (c *ChatClient) CreateSegment(ctx context.Context, request *CreateSegmentRequest) (*StreamResponse[CreateSegmentResponse], error) {
 	var result CreateSegmentResponse
