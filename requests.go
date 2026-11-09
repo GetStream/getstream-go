@@ -3025,9 +3025,10 @@ type SubmitModerationFeedbackRequest struct {
 	User *UserRequest `json:"user,omitempty"`
 }
 type UnbanRequest struct {
-	TargetUserID string  `json:"-" query:"target_user_id"`
-	ChannelCid   *string `json:"-" query:"channel_cid"`
-	CreatedBy    *string `json:"-" query:"created_by"`
+	TargetUserID            string  `json:"-" query:"target_user_id"`
+	ChannelCid              *string `json:"-" query:"channel_cid"`
+	CreatedBy               *string `json:"-" query:"created_by"`
+	RemoveFutureChannelsBan *bool   `json:"-" query:"remove_future_channels_ban"`
 	// ID of the user performing the unban Deprecated: not used by the unban flow
 	// Deprecated: this field is deprecated.
 	UnbannedByID *string `json:"unbanned_by_id,omitempty"`
