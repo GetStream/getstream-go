@@ -951,6 +951,16 @@ type SendScheduledMessageNowRequest struct {
 type SearchRequest struct {
 	Payload *SearchPayload `json:"-" query:"payload"`
 }
+type SearchAllRequest struct {
+	// Number of results per section, 1-30. Defaults to 10. Applies to every requested section; there is no per-section limit
+	Limit *int `json:"limit,omitempty"`
+	// Free-text search phrase, 1-80 characters after trimming whitespace. Required. Matched as a prefix of a user's name or username and of a channel's name, and as full-text against message text
+	Query *string `json:"query,omitempty"`
+	// Which sections to search: any subset of messages, users and channels. Defaults to all three when omitted; must not be empty when provided. Response sections always appear in the order messages, users, channels
+	Entities *[]string `json:"entities,omitempty"`
+	// Opaque pagination cursors from a previous response, keyed by entity. A cursor that fails to decode restarts that section from page 1 with a cursor_rejected warning; the request fails with 400 only when every cursor supplied for a requested entity is invalid. Cursors for entities not in entities are ignored
+	Next *map[string]string `json:"next,omitempty"`
+}
 type CreateSegmentRequest struct {
 	// The type of the segment
 	Type string `json:"type"`
