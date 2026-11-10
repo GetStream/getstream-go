@@ -386,7 +386,7 @@ func TestCall_AutoFrameRecording(t *testing.T) {
 		},
 	})
 	require.NoError(t, err)
-	assert.Equal(t, "auto-on", resp.Data.Settings.FrameRecording.Mode)
+	assert.Equal(t, getstream.FeatureActivationModeAutoOn, resp.Data.Settings.FrameRecording.Mode)
 }
 
 func ExampleNewClient_withConnectionPoolTuning() {

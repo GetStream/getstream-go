@@ -45,7 +45,7 @@ func TestChatDeviceIntegration(t *testing.T) {
 		for _, d := range listResp.Data.Devices {
 			if d.ID == deviceID {
 				found = true
-				assert.Equal(t, "firebase", d.PushProvider)
+				assert.Equal(t, PushProviderNameFirebase, d.PushProvider)
 				assert.Equal(t, userID, d.UserID)
 			}
 		}
