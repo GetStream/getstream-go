@@ -4703,6 +4703,7 @@ type ClosedCaptionRuleParameters struct {
 	Threshold     *int              `json:"threshold,omitempty"`
 	TimeWindow    *string           `json:"time_window,omitempty"`
 	HarmLabels    []string          `json:"harm_labels,omitempty"`
+	Severities    []string          `json:"severities,omitempty"`
 	LlmHarmLabels map[string]string `json:"llm_harm_labels,omitempty"`
 }
 
