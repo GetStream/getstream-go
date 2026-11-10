@@ -144,13 +144,13 @@ func setup(t *testing.T, rm *ResourceManager, createCallType bool) (*Stream, *Ca
 		require.NoError(t, err, "Failed to create call type")
 		assert.Equal(t, callTypeName, response.Data.Name)
 		assert.True(t, response.Data.Settings.Audio.MicDefaultOn)
-		assert.Equal(t, "speaker", response.Data.Settings.Audio.DefaultDevice)
+		assert.Equal(t, AudioDefaultDeviceSpeaker, response.Data.Settings.Audio.DefaultDevice)
 		assert.False(t, response.Data.Settings.Screensharing.AccessRequestEnabled)
 		assert.True(t, response.Data.Settings.Screensharing.Enabled)
 		assert.True(t, response.Data.NotificationSettings.Enabled)
 		assert.False(t, response.Data.NotificationSettings.SessionStarted.Enabled)
 		assert.True(t, response.Data.NotificationSettings.CallNotification.Enabled)
-		assert.Equal(t, "{{ user.display_name }} invites you to a call", response.Data.NotificationSettings.CallNotification.APNS.Title)
+		assert.Equal(t, PtrTo("{{ user.display_name }} invites you to a call"), response.Data.NotificationSettings.CallNotification.APNS.Title)
 
 		// Register cleanup for the created call type
 		rm.RegisterCleanup(func() {
@@ -352,8 +352,8 @@ func TestCRUDCallTypeOperations(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.False(t, response.Data.Settings.Audio.MicDefaultOn)
-		assert.Equal(t, "earpiece", response.Data.Settings.Audio.DefaultDevice)
-		assert.Equal(t, "disabled", response.Data.Settings.Recording.Mode)
+		assert.Equal(t, AudioDefaultDeviceEarpiece, response.Data.Settings.Audio.DefaultDevice)
+		assert.Equal(t, FeatureActivationModeDisabled, response.Data.Settings.Recording.Mode)
 		assert.True(t, response.Data.Settings.Backstage.Enabled)
 		assert.Equal(t, []string{OwnCapabilityJoinBackstage.String()}, response.Data.Grants["host"])
 	})
@@ -1005,7 +1005,7 @@ func TestEnableCallRecordingAndBackstageMode(t *testing.T) {
 			},
 		})
 		require.NoError(t, err)
-		assert.Equal(t, "available", response.Data.Call.Settings.Recording.Mode)
+		assert.Equal(t, FeatureActivationModeAvailable, response.Data.Call.Settings.Recording.Mode)
 	})
 
 	t.Run("EnableBackstageMode", func(t *testing.T) {
