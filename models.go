@@ -9084,6 +9084,13 @@ type MarkReviewedRequestPayload struct {
 	Reason *string `json:"reason,omitempty"`
 }
 
+type MatchedBlocklist struct {
+	// Blocklist name, as set on the rule condition.
+	Name string `json:"name"`
+	// Distinct text the blocklist matched in the content, at most 10 values of up to 256 bytes each. Word, email and domain blocklists report a single match, in the normalized form they compare, even when several words hit; regex lists and domain/email allowlists report every match, except that an allowlist with LLM domain validation enabled reports the one URL the check kept. Regex lists match on the text with invisible characters removed, except the built-in URL list, which reports the URL as it appears in the content. Can be empty when the blocklist hit but no value was recorded (for example a flag stored before this field existed).
+	Matches []string `json:"matches"`
+}
+
 type MatchedContent struct {
 	// The `content_ids[label]` value supplied on the `/analyze` request that contributed this entry.
 	ID string `json:"id"`
@@ -10374,6 +10381,8 @@ type ModerationRulesTriggeredEvent struct {
 	TimeWindow *string `json:"time_window,omitempty"`
 	// The violation number for call rules (optional)
 	ViolationNumber *int `json:"violation_number,omitempty"`
+	// Blocklists that the rule's blocklist conditions (`text_content`, `text_rule`) matched, each with the text it matched in the content. Omitted when the rule has no such condition or none matched.
+	MatchedBlocklists []MatchedBlocklist `json:"matched_blocklists,omitempty"`
 	// Ordered list of contents whose verdicts contributed to an aggregation rule's threshold. Populated only for aggregation rules when callers supplied `content_ids`.
 	MatchedContents []MatchedContent `json:"matched_contents,omitempty"`
 	// Harm labels on the moderated content that the rule's text label conditions (`text_content`, `text_rule`) matched. Omitted when the rule has no such condition.
