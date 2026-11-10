@@ -10076,6 +10076,8 @@ type ModerationEngineConfigRequest struct {
 	Model *string `json:"model,omitempty"`
 	// llm or nlp. Empty follows the app's LLM moderation setting
 	Provider *string `json:"provider,omitempty"`
+	// OpenAI reasoning effort for model. Requires model, and must be one the model accepts. Empty uses the model's default
+	ReasoningEffort *string `json:"reasoning_effort,omitempty"`
 }
 
 type ModerationEngineConfigResponse struct {
@@ -10083,6 +10085,8 @@ type ModerationEngineConfigResponse struct {
 	Model *string `json:"model,omitempty"`
 	// llm or nlp. Empty follows the app's LLM moderation setting
 	Provider *string `json:"provider,omitempty"`
+	// OpenAI reasoning effort for model. Requires model, and must be one the model accepts. Empty uses the model's default
+	ReasoningEffort *string `json:"reasoning_effort,omitempty"`
 }
 
 type ModerationFeedbackItemResponse struct {
