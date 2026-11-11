@@ -438,6 +438,13 @@ func (c *ModerationClient) QueryReviewQueue(ctx context.Context, request *QueryR
 	return res, err
 }
 
+// Count the review queue items matching a filter, so a moderation dashboard can show a total for a queue or view. Counts are kept up to date in the background while they are being requested.
+func (c *ModerationClient) CountReviewQueue(ctx context.Context, request *CountReviewQueueRequest) (*StreamResponse[CountReviewQueueResponse], error) {
+	var result CountReviewQueueResponse
+	res, err := MakeRequest[CountReviewQueueRequest, CountReviewQueueResponse](c.client, ctx, "POST", "/api/v2/moderation/review_queue/count", nil, request, &result, nil)
+	return res, err
+}
+
 // Retrieve a specific review queue item by its ID
 func (c *ModerationClient) GetReviewQueueItem(ctx context.Context, id string, request *GetReviewQueueItemRequest) (*StreamResponse[GetReviewQueueItemResponse], error) {
 	var result GetReviewQueueItemResponse
