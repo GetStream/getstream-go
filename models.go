@@ -10096,21 +10096,25 @@ type ModerationDashboardPreferences struct {
 }
 
 type ModerationEngineConfigRequest struct {
-	// LLM model used when the provider resolves to llm. Not allowed with provider nlp. Empty uses the app's moderation settings
+	// LLM model used when the provider resolves to llm, or a Stream model with provider stream (an alias, or a pinned version the server accepts). Not allowed with provider nlp. Empty uses the app's moderation settings, or the latest Stream model
 	Model *string `json:"model,omitempty"`
-	// llm or nlp. Empty follows the app's LLM moderation setting
+	// llm, nlp or stream. Empty follows the app's LLM moderation setting
 	Provider *string `json:"provider,omitempty"`
 	// OpenAI reasoning effort for model. Requires model, and must be one the model accepts. Empty uses the model's default
 	ReasoningEffort *string `json:"reasoning_effort,omitempty"`
+	// How sure a Stream model must be before it flags: relaxed, balanced or strict. Only with provider stream. Empty is balanced
+	Strictness *string `json:"strictness,omitempty"`
 }
 
 type ModerationEngineConfigResponse struct {
-	// LLM model used when the provider resolves to llm. Not allowed with provider nlp. Empty uses the app's moderation settings
+	// LLM model used when the provider resolves to llm, or a Stream model with provider stream (an alias, or a pinned version the server accepts). Not allowed with provider nlp. Empty uses the app's moderation settings, or the latest Stream model
 	Model *string `json:"model,omitempty"`
-	// llm or nlp. Empty follows the app's LLM moderation setting
+	// llm, nlp or stream. Empty follows the app's LLM moderation setting
 	Provider *string `json:"provider,omitempty"`
 	// OpenAI reasoning effort for model. Requires model, and must be one the model accepts. Empty uses the model's default
 	ReasoningEffort *string `json:"reasoning_effort,omitempty"`
+	// How sure a Stream model must be before it flags: relaxed, balanced or strict. Only with provider stream. Empty is balanced
+	Strictness *string `json:"strictness,omitempty"`
 }
 
 type ModerationFeedbackItemResponse struct {
