@@ -2923,6 +2923,13 @@ type QueryReviewQueueRequest struct {
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }
+type CountReviewQueueRequest struct {
+	UserID *string `json:"user_id,omitempty"`
+	// Filter conditions for review queue items, the same filter Query Review Queue takes. The count covers exactly the items that query lists for this filter, ignoring sort, paging and item locks.
+	Filter *map[string]any `json:"filter,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
+}
 type GetReviewQueueItemRequest struct {
 }
 type GetSetupSessionRequest struct {

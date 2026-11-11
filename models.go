@@ -5140,6 +5140,18 @@ type CountByMinuteResponse struct {
 	StartTs Timestamp `json:"start_ts"`
 }
 
+type CountReviewQueueResponse struct {
+	// Whether more items match than are counted exactly (50,000), so total is a lower bound
+	Capped   bool   `json:"capped"`
+	Duration string `json:"duration"`
+	// Whether the count is missing or out of date because the queue changed since it was computed. A later request may return a fresher count.
+	Pending bool `json:"pending"`
+	// Number of review queue items matching the filter. When capped is true, at least this many items match.
+	Total int `json:"total"`
+	// When the count was computed. Counts are refreshed in the background as the review queue changes.
+	ComputedAt *Timestamp `json:"computed_at,omitempty"`
+}
+
 type Coverage struct {
 	PublisherEncodingProfiles int            `json:"publisher_encoding_profiles"`
 	Absent                    []AbsentMetric `json:"absent"`
@@ -10322,16 +10334,18 @@ type ModerationPayloadResponse struct {
 }
 
 type ModerationQueueResponse struct {
-	CreatedAt   Timestamp        `json:"created_at"`
-	CreatedBy   string           `json:"created_by"`
-	Description string           `json:"description"`
-	ID          string           `json:"id"`
-	ItemCount   int              `json:"item_count"`
-	Name        string           `json:"name"`
-	UpdatedAt   Timestamp        `json:"updated_at"`
-	Type        string           `json:"type"`
-	Sort        []map[string]any `json:"sort"`
-	Filters     map[string]any   `json:"filters"`
+	CreatedAt        Timestamp        `json:"created_at"`
+	CreatedBy        string           `json:"created_by"`
+	Description      string           `json:"description"`
+	ID               string           `json:"id"`
+	ItemCount        int              `json:"item_count"`
+	ItemCountCapped  bool             `json:"item_count_capped"`
+	ItemCountPending bool             `json:"item_count_pending"`
+	Name             string           `json:"name"`
+	UpdatedAt        Timestamp        `json:"updated_at"`
+	Type             string           `json:"type"`
+	Sort             []map[string]any `json:"sort"`
+	Filters          map[string]any   `json:"filters"`
 }
 
 // Response from AI moderation
