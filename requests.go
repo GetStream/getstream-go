@@ -2334,6 +2334,8 @@ type CreateImportURLRequest struct {
 	Filename *string `json:"filename,omitempty"`
 }
 type ListImportsRequest struct {
+	Limit  *int `json:"-" query:"limit"`
+	Offset *int `json:"-" query:"offset"`
 }
 type CreateImportRequest struct {
 	Mode        string `json:"mode"`

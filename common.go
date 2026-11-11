@@ -196,7 +196,8 @@ func (c *Client) CreateImportURL(ctx context.Context, request *CreateImportURLRe
 // Gets an import
 func (c *Client) ListImports(ctx context.Context, request *ListImportsRequest) (*StreamResponse[ListImportsResponse], error) {
 	var result ListImportsResponse
-	res, err := MakeRequest[any, ListImportsResponse](c, ctx, "GET", "/api/v2/imports", nil, nil, &result, nil)
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, ListImportsResponse](c, ctx, "GET", "/api/v2/imports", params, nil, &result, nil)
 	return res, err
 }
 
