@@ -6189,36 +6189,40 @@ type EscalationMetadata struct {
 }
 
 type EventHook struct {
-	CreatedAt                             *Timestamp                     `json:"created_at,omitempty"`
-	Enabled                               *bool                          `json:"enabled,omitempty"`
-	GcpPubsubAuthType                     *string                        `json:"gcp_pubsub_auth_type,omitempty"`
-	GcpPubsubEventBasedOrderingKeyEnabled *bool                          `json:"gcp_pubsub_event_based_ordering_key_enabled,omitempty"`
-	GcpPubsubRegion                       *string                        `json:"gcp_pubsub_region,omitempty"`
-	GcpPubsubTopic                        *string                        `json:"gcp_pubsub_topic,omitempty"`
-	HookType                              *string                        `json:"hook_type,omitempty"`
-	ID                                    *string                        `json:"id,omitempty"`
-	Product                               *string                        `json:"product,omitempty"`
-	ShouldSendCustomEvents                *bool                          `json:"should_send_custom_events,omitempty"`
-	SnsAuthType                           *string                        `json:"sns_auth_type,omitempty"`
-	SnsEventBasedMessageGroupIDEnabled    *bool                          `json:"sns_event_based_message_group_id_enabled,omitempty"`
-	SnsKey                                *string                        `json:"sns_key,omitempty"`
-	SnsRegion                             *string                        `json:"sns_region,omitempty"`
-	SnsRoleArn                            *string                        `json:"sns_role_arn,omitempty"`
-	SnsSecret                             *string                        `json:"sns_secret,omitempty"`
-	SnsTopicArn                           *string                        `json:"sns_topic_arn,omitempty"`
-	SqsAuthType                           *string                        `json:"sqs_auth_type,omitempty"`
-	SqsEventBasedMessageGroupIDEnabled    *bool                          `json:"sqs_event_based_message_group_id_enabled,omitempty"`
-	SqsKey                                *string                        `json:"sqs_key,omitempty"`
-	SqsQueueUrl                           *string                        `json:"sqs_queue_url,omitempty"`
-	SqsRegion                             *string                        `json:"sqs_region,omitempty"`
-	SqsRoleArn                            *string                        `json:"sqs_role_arn,omitempty"`
-	SqsSecret                             *string                        `json:"sqs_secret,omitempty"`
-	TimeoutMs                             *int                           `json:"timeout_ms,omitempty"`
-	UpdatedAt                             *Timestamp                     `json:"updated_at,omitempty"`
-	WebhookUrl                            *string                        `json:"webhook_url,omitempty"`
-	EventTypes                            []string                       `json:"event_types,omitempty"`
-	Callback                              *AsyncModerationCallbackConfig `json:"callback,omitempty"`
-	FailoverConfig                        *WebhookFailoverConfig         `json:"failover_config,omitempty"`
+	CreatedAt                             *Timestamp `json:"created_at,omitempty"`
+	Enabled                               *bool      `json:"enabled,omitempty"`
+	GcpPubsubAuthType                     *string    `json:"gcp_pubsub_auth_type,omitempty"`
+	GcpPubsubEventBasedOrderingKeyEnabled *bool      `json:"gcp_pubsub_event_based_ordering_key_enabled,omitempty"`
+	GcpPubsubRegion                       *string    `json:"gcp_pubsub_region,omitempty"`
+	GcpPubsubTopic                        *string    `json:"gcp_pubsub_topic,omitempty"`
+	HookType                              *string    `json:"hook_type,omitempty"`
+	ID                                    *string    `json:"id,omitempty"`
+	Product                               *string    `json:"product,omitempty"`
+	ShouldSendCustomEvents                *bool      `json:"should_send_custom_events,omitempty"`
+	SnsAuthType                           *string    `json:"sns_auth_type,omitempty"`
+	SnsEventBasedMessageGroupIDEnabled    *bool      `json:"sns_event_based_message_group_id_enabled,omitempty"`
+	SnsKey                                *string    `json:"sns_key,omitempty"`
+	SnsRegion                             *string    `json:"sns_region,omitempty"`
+	// Deprecated: Role auth was never supported; use resource auth.
+	// Deprecated: this field is deprecated.
+	SnsRoleArn                         *string `json:"sns_role_arn,omitempty"`
+	SnsSecret                          *string `json:"sns_secret,omitempty"`
+	SnsTopicArn                        *string `json:"sns_topic_arn,omitempty"`
+	SqsAuthType                        *string `json:"sqs_auth_type,omitempty"`
+	SqsEventBasedMessageGroupIDEnabled *bool   `json:"sqs_event_based_message_group_id_enabled,omitempty"`
+	SqsKey                             *string `json:"sqs_key,omitempty"`
+	SqsQueueUrl                        *string `json:"sqs_queue_url,omitempty"`
+	SqsRegion                          *string `json:"sqs_region,omitempty"`
+	// Deprecated: Role auth was never supported; use resource auth.
+	// Deprecated: this field is deprecated.
+	SqsRoleArn     *string                        `json:"sqs_role_arn,omitempty"`
+	SqsSecret      *string                        `json:"sqs_secret,omitempty"`
+	TimeoutMs      *int                           `json:"timeout_ms,omitempty"`
+	UpdatedAt      *Timestamp                     `json:"updated_at,omitempty"`
+	WebhookUrl     *string                        `json:"webhook_url,omitempty"`
+	EventTypes     []string                       `json:"event_types,omitempty"`
+	Callback       *AsyncModerationCallbackConfig `json:"callback,omitempty"`
+	FailoverConfig *WebhookFailoverConfig         `json:"failover_config,omitempty"`
 }
 
 type EventNotificationSettings struct {
@@ -8365,6 +8369,16 @@ type ImportBlockListResponse struct {
 	Duration string `json:"duration"`
 	TaskID   string `json:"task_id"`
 }
+type ImportCustomFormat string
+
+const (
+	ImportCustomFormatNested ImportCustomFormat = "nested"
+	ImportCustomFormatRoot   ImportCustomFormat = "root"
+)
+
+func (c ImportCustomFormat) String() string {
+	return string(c)
+}
 
 type ImportTask struct {
 	CreatedAt Timestamp           `json:"created_at"`
@@ -8395,6 +8409,8 @@ type ImportV2TaskItem struct {
 }
 
 type ImportV2TaskSettings struct {
+	// How custom fields are read from imported items: root (default) takes unknown root keys as custom data, nested reads them from a custom object and is only supported for feeds imports.
+	CustomFormat          *ImportCustomFormat     `json:"custom_format,omitempty"`
 	MergeCustom           *bool                   `json:"merge_custom,omitempty"`
 	Mode                  *string                 `json:"mode,omitempty"`
 	Path                  *string                 `json:"path,omitempty"`
