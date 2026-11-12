@@ -37,24 +37,26 @@ type UpdateAppRequest struct {
 	RemindersMaxMembers                   *int    `json:"reminders_max_members,omitempty"`
 	RemindersMaxPerUser                   *int    `json:"reminders_max_per_user,omitempty"`
 	// Revokes tokens issued before this date
-	RevokeTokensIssuedBefore       *Timestamp                      `json:"revoke_tokens_issued_before,omitempty"`
-	SnsKey                         *string                         `json:"sns_key,omitempty"`
-	SnsSecret                      *string                         `json:"sns_secret,omitempty"`
-	SnsTopicArn                    *string                         `json:"sns_topic_arn,omitempty"`
-	SqsKey                         *string                         `json:"sqs_key,omitempty"`
-	SqsSecret                      *string                         `json:"sqs_secret,omitempty"`
-	SqsUrl                         *string                         `json:"sqs_url,omitempty"`
-	TwoWayBlockEffectEnabled       *bool                           `json:"two_way_block_effect_enabled,omitempty"`
-	UserResponseTimeEnabled        *bool                           `json:"user_response_time_enabled,omitempty"`
-	VideoPrimaryUseCase            *string                         `json:"video_primary_use_case,omitempty"`
-	WebhookUrl                     *string                         `json:"webhook_url,omitempty"`
-	AllowedFlagReasons             *[]string                       `json:"allowed_flag_reasons,omitempty"`
-	EventHooks                     *[]EventHook                    `json:"event_hooks,omitempty"`
-	ImageModerationBlockLabels     *[]string                       `json:"image_moderation_block_labels,omitempty"`
-	ImageModerationLabels          *[]string                       `json:"image_moderation_labels,omitempty"`
-	UserSearchDisallowedRoles      *[]string                       `json:"user_search_disallowed_roles,omitempty"`
-	WebhookEvents                  *[]string                       `json:"webhook_events,omitempty"`
-	ActivityMetricsConfig          *map[string]int                 `json:"activity_metrics_config,omitempty"`
+	RevokeTokensIssuedBefore   *Timestamp      `json:"revoke_tokens_issued_before,omitempty"`
+	SnsKey                     *string         `json:"sns_key,omitempty"`
+	SnsSecret                  *string         `json:"sns_secret,omitempty"`
+	SnsTopicArn                *string         `json:"sns_topic_arn,omitempty"`
+	SqsKey                     *string         `json:"sqs_key,omitempty"`
+	SqsSecret                  *string         `json:"sqs_secret,omitempty"`
+	SqsUrl                     *string         `json:"sqs_url,omitempty"`
+	TwoWayBlockEffectEnabled   *bool           `json:"two_way_block_effect_enabled,omitempty"`
+	UserResponseTimeEnabled    *bool           `json:"user_response_time_enabled,omitempty"`
+	VideoPrimaryUseCase        *string         `json:"video_primary_use_case,omitempty"`
+	WebhookUrl                 *string         `json:"webhook_url,omitempty"`
+	AllowedFlagReasons         *[]string       `json:"allowed_flag_reasons,omitempty"`
+	EventHooks                 *[]EventHook    `json:"event_hooks,omitempty"`
+	ImageModerationBlockLabels *[]string       `json:"image_moderation_block_labels,omitempty"`
+	ImageModerationLabels      *[]string       `json:"image_moderation_labels,omitempty"`
+	UserSearchDisallowedRoles  *[]string       `json:"user_search_disallowed_roles,omitempty"`
+	WebhookEvents              *[]string       `json:"webhook_events,omitempty"`
+	ActivityMetricsConfig      *map[string]int `json:"activity_metrics_config,omitempty"`
+	// Settings for the moderation agent reviewer, which reviews moderation outcomes and proposes or applies an action.
+	AgentReview                    *AgentReviewSettingsPayload     `json:"agent_review,omitempty"`
 	ApnConfig                      *APNConfig                      `json:"apn_config,omitempty"`
 	AsyncModerationConfig          *AsyncModerationConfiguration   `json:"async_moderation_config,omitempty"`
 	DatadogInfo                    *DataDogInfo                    `json:"datadog_info,omitempty"`
@@ -2435,6 +2437,25 @@ type InsertActionLogRequest struct {
 	// Custom metadata for the action log
 	Custom *map[string]any `json:"custom,omitempty"`
 }
+type ListAgentFeedbackRequest struct {
+	Limit *int    `json:"-" query:"limit"`
+	Next  *string `json:"-" query:"next"`
+}
+type SubmitAgentFeedbackRequest struct {
+	// Review queue item Nora reviewed
+	ItemID string `json:"item_id"`
+	// Action the moderator took
+	ModeratorAction string `json:"moderator_action"`
+	// How similar cases should be judged, up to 2000 characters
+	Improvement *string `json:"improvement,omitempty"`
+	// Why the moderator disagreed, up to 2000 characters
+	Reason *string `json:"reason,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
+}
+type GetAgentReviewStatusRequest struct {
+}
 type AnalyzeRequest struct {
 	// When true, the response carries no verdicts (status `pending`) and per-modality results arrive via `moderation.text_analysis.complete` and `moderation.image_analysis.complete` webhooks. Image moderation runs on a background worker; text moderation runs synchronously and is then delivered via webhook.
 	AsyncResponse *bool `json:"async_response,omitempty"`
@@ -2943,13 +2964,14 @@ type UpsertSetupSessionRequest struct {
 	SetupData *map[string]any `json:"setup_data,omitempty"`
 }
 type SubmitActionRequest struct {
-	// Type of moderation action to perform. One of: mark_reviewed, delete_message, delete_activity, delete_comment, delete_reaction, delete_poll, delete_poll_option, delete_poll_answer, ban, custom, unban, restore, delete_user, delete_user_messages, unblock, block, shadow_block, unmask, kick_user, end_call, escalate, de_escalate
+	// Type of moderation action to perform. One of: mark_reviewed, delete_message, delete_activity, delete_comment, delete_reaction, delete_poll, delete_poll_option, delete_poll_answer, ban, custom, unban, restore, delete_user, delete_user_messages, unblock, block, shadow_block, unmask, kick_user, end_call, escalate, de_escalate, agent_recommendation
 	ActionType string `json:"action_type"`
 	// UUID of the appeal to act on (required for reject_appeal, optional for other actions)
 	AppealID *string `json:"appeal_id,omitempty"`
 	// UUID of the review queue item to act on
-	ItemID *string `json:"item_id,omitempty"`
-	UserID *string `json:"user_id,omitempty"`
+	ItemID              *string                     `json:"item_id,omitempty"`
+	UserID              *string                     `json:"user_id,omitempty"`
+	AgentRecommendation *AgentRecommendationPayload `json:"agent_recommendation,omitempty"`
 	// Configuration for ban moderation action
 	Ban *BanActionRequestPayload `json:"ban,omitempty"`
 	// Configuration for block action
