@@ -538,6 +538,11 @@ func TestWebhookConformance_Negative(t *testing.T) {
 		sig := readStr(t, filepath.Join(invalidRoot, "bad_compression", "signature.txt"))
 		return VerifyAndParseWebhookBytes(body, sig, canonicalTestSecret)
 	})
+	expectInvalid("oversized_compression", "payload exceeds", func() (WebhookEvent, error) {
+		body := readFile(t, filepath.Join(invalidRoot, "oversized_compression", "body.gz"))
+		sig := readStr(t, filepath.Join(invalidRoot, "oversized_compression", "signature.txt"))
+		return VerifyAndParseWebhookBytes(body, sig, canonicalTestSecret)
+	})
 	// Per CHA-3071 wire format: DecodeSqsPayload falls back to raw bytes when
 	// base64 decoding fails (uncompressed wire format). For input that is
 	// neither valid base64 nor valid JSON nor gzip-prefixed, ParseSqs still
