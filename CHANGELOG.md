@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file. Releases are automated by [release-please](https://github.com/googleapis/release-please); see [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## [8.2.0](https://github.com/GetStream/getstream-go/compare/v8.1.0...v8.2.0) (2026-11-13)
+
+
+### Features
+
+* add agent_recommendation to ActionLogResponse ([4c351db](https://github.com/GetStream/getstream-go/commit/4c351db73e55a9e8456b0aba7f7c1dbbe352ed6d))
+* add agent_recommendation to SubmitActionRequest ([4c351db](https://github.com/GetStream/getstream-go/commit/4c351db73e55a9e8456b0aba7f7c1dbbe352ed6d))
+* add agent_review to GetReviewQueueItemResponse ([4c351db](https://github.com/GetStream/getstream-go/commit/4c351db73e55a9e8456b0aba7f7c1dbbe352ed6d))
+* add agent_review to ReviewQueueItemResponse ([4c351db](https://github.com/GetStream/getstream-go/commit/4c351db73e55a9e8456b0aba7f7c1dbbe352ed6d))
+* add agent_review to UpdateAppRequest ([4c351db](https://github.com/GetStream/getstream-go/commit/4c351db73e55a9e8456b0aba7f7c1dbbe352ed6d))
+* add agent_review, effective_agent_review to AppResponseFields ([4c351db](https://github.com/GetStream/getstream-go/commit/4c351db73e55a9e8456b0aba7f7c1dbbe352ed6d))
+* add CountReviewQueue ([2af9128](https://github.com/GetStream/getstream-go/commit/2af91285c02a45e7038b15b0fc729b191740d715))
+* add custom_format to ImportV2TaskSettings ([792c198](https://github.com/GetStream/getstream-go/commit/792c19888c14f98361ca9f8094f39bc9988c1137))
+* add diversify to ArrangeConfig ([96284f8](https://github.com/GetStream/getstream-go/commit/96284f86e926294eba923086872acedbbe02b29f))
+* add expected_value to CallCustomPropertyParameters ([96284f8](https://github.com/GetStream/getstream-go/commit/96284f86e926294eba923086872acedbbe02b29f))
+* add expected_value to ContentCustomPropertyCountParameters ([96284f8](https://github.com/GetStream/getstream-go/commit/96284f86e926294eba923086872acedbbe02b29f))
+* add expected_value to ContentCustomPropertyParameters ([96284f8](https://github.com/GetStream/getstream-go/commit/96284f86e926294eba923086872acedbbe02b29f))
+* add expected_value to UserCustomPropertyParameters ([96284f8](https://github.com/GetStream/getstream-go/commit/96284f86e926294eba923086872acedbbe02b29f))
+* add GetAgentReviewStatus ([4c351db](https://github.com/GetStream/getstream-go/commit/4c351db73e55a9e8456b0aba7f7c1dbbe352ed6d))
+* add include_soft_deleted_channel to GetChannel ([96284f8](https://github.com/GetStream/getstream-go/commit/96284f86e926294eba923086872acedbbe02b29f))
+* add item_count_capped, item_count_pending to ModerationQueueResponse ([2af9128](https://github.com/GetStream/getstream-go/commit/2af91285c02a45e7038b15b0fc729b191740d715))
+* add limit, offset to ListImports ([792c198](https://github.com/GetStream/getstream-go/commit/792c19888c14f98361ca9f8094f39bc9988c1137))
+* add ListAgentFeedback ([4c351db](https://github.com/GetStream/getstream-go/commit/4c351db73e55a9e8456b0aba7f7c1dbbe352ed6d))
+* add matched_blocklists to ModerationRulesTriggeredEvent ([5b94ba3](https://github.com/GetStream/getstream-go/commit/5b94ba36bb7ea8376179ee3e18e3488fd3985009))
+* add moderation_payload to ModerationCheckCompletedEvent ([98942f1](https://github.com/GetStream/getstream-go/commit/98942f11bd211bcc60f813dbfc65a2e59171b9f4))
+* add reasoning_effort to ModerationEngineConfigRequest ([ecd158f](https://github.com/GetStream/getstream-go/commit/ecd158f0711c6a75fa456efa5517ea8d2a3523f7))
+* add reasoning_effort to ModerationEngineConfigResponse ([ecd158f](https://github.com/GetStream/getstream-go/commit/ecd158f0711c6a75fa456efa5517ea8d2a3523f7))
+* add remove_future_channels_ban to Unban ([aab8357](https://github.com/GetStream/getstream-go/commit/aab8357eb7d309555590e10e69f868e70f5c409e))
+* add SearchAll ([98942f1](https://github.com/GetStream/getstream-go/commit/98942f11bd211bcc60f813dbfc65a2e59171b9f4))
+* add severities to ClosedCaptionRuleParameters ([2723e90](https://github.com/GetStream/getstream-go/commit/2723e90b45dfa329fb1c904fc34d9b88b9746a5f))
+* add severities to IPFlagCountRuleParameters ([96284f8](https://github.com/GetStream/getstream-go/commit/96284f86e926294eba923086872acedbbe02b29f))
+* add severities to OCRContentParameters ([96284f8](https://github.com/GetStream/getstream-go/commit/96284f86e926294eba923086872acedbbe02b29f))
+* add severities to TextContentParameters ([96284f8](https://github.com/GetStream/getstream-go/commit/96284f86e926294eba923086872acedbbe02b29f))
+* add severities to TextRuleParameters ([96284f8](https://github.com/GetStream/getstream-go/commit/96284f86e926294eba923086872acedbbe02b29f))
+* add skip_viewer_visibility to GetActivity ([11b8924](https://github.com/GetStream/getstream-go/commit/11b8924586965f8ce2f04d18035403431bd6f998))
+* add strictness to ModerationEngineConfigRequest ([99edac4](https://github.com/GetStream/getstream-go/commit/99edac4d3d6576c24faf787dc0a1c688142badeb))
+* add strictness to ModerationEngineConfigResponse ([99edac4](https://github.com/GetStream/getstream-go/commit/99edac4d3d6576c24faf787dc0a1c688142badeb))
+* add SubmitAgentFeedback ([4c351db](https://github.com/GetStream/getstream-go/commit/4c351db73e55a9e8456b0aba7f7c1dbbe352ed6d))
+
+
+### Bug Fixes
+
+* limit decompressed webhook payloads to 10 MiB, configurable with MaxWebhookPayloadBytes ([96284f8](https://github.com/GetStream/getstream-go/commit/96284f86e926294eba923086872acedbbe02b29f))
+
 ## [8.1.0](https://github.com/GetStream/getstream-go/compare/v8.0.0...v8.1.0) (2026-11-06)
 
 
