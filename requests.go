@@ -581,6 +581,8 @@ type CreateChannelTypeRequest struct {
 	// URL enrichment
 	UrlEnrichment        *bool `json:"url_enrichment,omitempty"`
 	UserMessageReminders *bool `json:"user_message_reminders,omitempty"`
+	// Transcribe voice recording attachments.
+	VoiceTranscription *bool `json:"voice_transcription,omitempty"`
 	// Blocklists
 	Blocklists *[]BlockListOptions `json:"blocklists,omitempty"`
 	// List of commands that channel supports
@@ -631,6 +633,7 @@ type UpdateChannelTypeRequest struct {
 	Uploads                        *bool               `json:"uploads,omitempty"`
 	UrlEnrichment                  *bool               `json:"url_enrichment,omitempty"`
 	UserMessageReminders           *bool               `json:"user_message_reminders,omitempty"`
+	VoiceTranscription             *bool               `json:"voice_transcription,omitempty"`
 	AllowedFlagReasons             *[]string           `json:"allowed_flag_reasons,omitempty"`
 	Blocklists                     *[]BlockListOptions `json:"blocklists,omitempty"`
 	// List of commands that channel supports
