@@ -1294,11 +1294,12 @@ type AppealResponse struct {
 type ArrangeConfig struct {
 	// Activity field that defines a source. One of: type, user_id
 	Key *string `json:"key,omitempty"`
-	// Arrangement mode. Currently only 'blend' is supported; 'diversify' and 'slot' are reserved
+	// Arrangement mode. 'blend' and 'diversify' are supported; 'slot' is reserved
 	Mode *string `json:"mode,omitempty"`
 	// Activities scoring strictly below this value are moved to the end of the feed, in score order, before the mode runs. 0 is a valid value. Must be greater than exclude_below when both are set
-	TailBelow *float64            `json:"tail_below,omitempty"`
-	Blend     *BlendArrangeConfig `json:"blend,omitempty"`
+	TailBelow *float64                `json:"tail_below,omitempty"`
+	Blend     *BlendArrangeConfig     `json:"blend,omitempty"`
+	Diversify *DiversifyArrangeConfig `json:"diversify,omitempty"`
 }
 
 type AsyncBulkImageModerationEvent struct {
@@ -2178,8 +2179,9 @@ func (e *CallCreatedEvent) GetEventType() string {
 }
 
 type CallCustomPropertyParameters struct {
-	Operator    *string `json:"operator,omitempty"`
-	PropertyKey *string `json:"property_key,omitempty"`
+	ExpectedValue any     `json:"expected_value,omitempty"`
+	Operator      *string `json:"operator,omitempty"`
+	PropertyKey   *string `json:"property_key,omitempty"`
 }
 
 // This event is sent asynchronously when a single DTMF digit is received from a SIP participant. The event is broadcast after the digit press ends. Use seq_number for ordering within a session and timestamp for the actual detection time.
@@ -5242,15 +5244,17 @@ type ContentCountryCodeParameters struct {
 }
 
 type ContentCustomPropertyCountParameters struct {
-	Operator    *string `json:"operator,omitempty"`
-	PropertyKey *string `json:"property_key,omitempty"`
-	Threshold   *int    `json:"threshold,omitempty"`
-	TimeWindow  *string `json:"time_window,omitempty"`
+	ExpectedValue any     `json:"expected_value,omitempty"`
+	Operator      *string `json:"operator,omitempty"`
+	PropertyKey   *string `json:"property_key,omitempty"`
+	Threshold     *int    `json:"threshold,omitempty"`
+	TimeWindow    *string `json:"time_window,omitempty"`
 }
 
 type ContentCustomPropertyParameters struct {
-	Operator    *string `json:"operator,omitempty"`
-	PropertyKey *string `json:"property_key,omitempty"`
+	ExpectedValue any     `json:"expected_value,omitempty"`
+	Operator      *string `json:"operator,omitempty"`
+	PropertyKey   *string `json:"property_key,omitempty"`
 }
 
 // Geographic coordinates
@@ -6048,6 +6052,19 @@ type DeviceResponse struct {
 	PushProviderName *string `json:"push_provider_name,omitempty"`
 	// When true the token is for Apple VoIP push notifications
 	Voip *bool `json:"voip,omitempty"`
+}
+
+type DiversifyArrangeConfig struct {
+	// Decay strategy: per-repeat score multiplier, greater than 0 and less than 1. Defaults to 0.5
+	Decay *float64 `json:"decay,omitempty"`
+	// Decay strategy: the lowest multiplier a repeated key can reach, at least 0 and less than 1. Defaults to 0.25
+	Floor *float64 `json:"floor,omitempty"`
+	// Cap strategy: the most items of one key value allowed in any window of consecutive slots. At least 1
+	Max *int `json:"max,omitempty"`
+	// Diversify strategy: 'cap' (default) or 'decay'
+	Strategy *string `json:"strategy,omitempty"`
+	// Cap strategy: window size in slots, greater than max and at most 100. Defaults to max + 1
+	Window *int `json:"window,omitempty"`
 }
 
 // Contains the draft message content
@@ -8454,6 +8471,7 @@ type IPFlagCountRuleParameters struct {
 	Threshold  *int     `json:"threshold,omitempty"`
 	TimeWindow *string  `json:"time_window,omitempty"`
 	HarmLabels []string `json:"harm_labels,omitempty"`
+	Severities []string `json:"severities,omitempty"`
 }
 
 type ImageContentParameters struct {
@@ -10874,6 +10892,7 @@ type OCRContentParameters struct {
 	LabelOperator *string  `json:"label_operator,omitempty"`
 	Severity      *string  `json:"severity,omitempty"`
 	HarmLabels    []string `json:"harm_labels,omitempty"`
+	Severities    []string `json:"severities,omitempty"`
 }
 
 type OCRRule struct {
@@ -14799,6 +14818,7 @@ type TextContentParameters struct {
 	TextLengthOperator *string           `json:"text_length_operator,omitempty"`
 	BlocklistMatch     []string          `json:"blocklist_match,omitempty"`
 	HarmLabels         []string          `json:"harm_labels,omitempty"`
+	Severities         []string          `json:"severities,omitempty"`
 	LlmHarmLabels      map[string]string `json:"llm_harm_labels,omitempty"`
 }
 
@@ -14811,6 +14831,7 @@ type TextRuleParameters struct {
 	BlocklistMatch             []string          `json:"blocklist_match,omitempty"`
 	HarmLabels                 []string          `json:"harm_labels,omitempty"`
 	SemanticFilterNames        []string          `json:"semantic_filter_names,omitempty"`
+	Severities                 []string          `json:"severities,omitempty"`
 	LlmHarmLabels              map[string]string `json:"llm_harm_labels,omitempty"`
 }
 
@@ -15920,8 +15941,9 @@ type UserCustomEventRequest struct {
 }
 
 type UserCustomPropertyParameters struct {
-	Operator    *string `json:"operator,omitempty"`
-	PropertyKey *string `json:"property_key,omitempty"`
+	ExpectedValue any     `json:"expected_value,omitempty"`
+	Operator      *string `json:"operator,omitempty"`
+	PropertyKey   *string `json:"property_key,omitempty"`
 }
 
 // This event is sent when a user gets deactivated. The event contains information about the user that was deactivated.

@@ -285,16 +285,17 @@ type DeleteChannelRequest struct {
 	SkipTruncate *bool `json:"-" query:"skip_truncate"`
 }
 type GetChannelRequest struct {
-	State            *bool   `json:"-" query:"state"`
-	MessagesLimit    *int    `json:"-" query:"messages_limit"`
-	MembersLimit     *int    `json:"-" query:"members_limit"`
-	WatchersLimit    *int    `json:"-" query:"watchers_limit"`
-	MessagesIDLt     *string `json:"-" query:"messages_id_lt"`
-	MessagesIDLte    *string `json:"-" query:"messages_id_lte"`
-	MessagesIDGt     *string `json:"-" query:"messages_id_gt"`
-	MessagesIDGte    *string `json:"-" query:"messages_id_gte"`
-	MessagesIDAround *string `json:"-" query:"messages_id_around"`
-	UserID           *string `json:"-" query:"user_id"`
+	State                     *bool   `json:"-" query:"state"`
+	MessagesLimit             *int    `json:"-" query:"messages_limit"`
+	MembersLimit              *int    `json:"-" query:"members_limit"`
+	WatchersLimit             *int    `json:"-" query:"watchers_limit"`
+	MessagesIDLt              *string `json:"-" query:"messages_id_lt"`
+	MessagesIDLte             *string `json:"-" query:"messages_id_lte"`
+	MessagesIDGt              *string `json:"-" query:"messages_id_gt"`
+	MessagesIDGte             *string `json:"-" query:"messages_id_gte"`
+	MessagesIDAround          *string `json:"-" query:"messages_id_around"`
+	IncludeSoftDeletedChannel *bool   `json:"-" query:"include_soft_deleted_channel"`
+	UserID                    *string `json:"-" query:"user_id"`
 }
 type UpdateChannelPartialRequest struct {
 	UserID *string         `json:"user_id,omitempty"`

@@ -246,6 +246,11 @@ var ErrUnknownEventType = errors.New("stream: unknown webhook event type")
 // for Stream's always-JSON payloads.
 var gzipMagic = []byte{0x1F, 0x8B}
 
+// MaxWebhookPayloadBytes caps the decompressed size of a gzip webhook body.
+// GunzipPayload runs before the signature check, so without a cap an
+// unsigned gzip bomb could exhaust memory. Raise it if your events are larger.
+var MaxWebhookPayloadBytes int64 = 10 << 20
+
 // GetEventType extracts the event type from a raw webhook payload.
 // This is useful for routing webhooks before full deserialization.
 //
@@ -746,7 +751,8 @@ func VerifySignature(body []byte, signature, secret string) bool {
 // '{', '[', '"', a digit, '-', or one of t/f/n/whitespace; never 0x1F.
 //
 // Returns ErrInvalidWebhook (wrapped) if body has the gzip magic prefix
-// but isn't a valid gzip stream.
+// but isn't a valid gzip stream, or decompresses to more than
+// MaxWebhookPayloadBytes.
 func GunzipPayload(body []byte) ([]byte, error) {
 	if len(body) < 2 || !bytes.Equal(body[:2], gzipMagic) {
 		return body, nil
@@ -756,9 +762,13 @@ func GunzipPayload(body []byte) ([]byte, error) {
 		return nil, fmt.Errorf("%w: gzip decompression failed: %v", ErrInvalidWebhook, err)
 	}
 	defer r.Close()
-	out, err := io.ReadAll(r)
+	limit := MaxWebhookPayloadBytes
+	out, err := io.ReadAll(io.LimitReader(r, limit+1))
 	if err != nil {
 		return nil, fmt.Errorf("%w: gzip decompression failed: %v", ErrInvalidWebhook, err)
+	}
+	if int64(len(out)) > limit {
+		return nil, fmt.Errorf("%w: gzip decompression failed: payload exceeds %d bytes", ErrInvalidWebhook, limit)
 	}
 	return out, nil
 }
