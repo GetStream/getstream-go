@@ -1487,10 +1487,20 @@ type Attachment struct {
 	Title          *string        `json:"title,omitempty"`
 	TitleLink      *string        `json:"title_link,omitempty"`
 	// Attachment type (e.g. image, video, url)
-	Type    *string  `json:"type,omitempty"`
-	Actions []Action `json:"actions,omitempty"`
-	Fields  []Field  `json:"fields,omitempty"`
-	Giphy   *Images  `json:"giphy,omitempty"`
+	Type            *string                       `json:"type,omitempty"`
+	Actions         []Action                      `json:"actions,omitempty"`
+	Fields          []Field                       `json:"fields,omitempty"`
+	Giphy           *Images                       `json:"giphy,omitempty"`
+	VoiceTranscript *AttachmentTranscriptResponse `json:"voice_transcript,omitempty"`
+}
+
+type AttachmentTranscriptResponse struct {
+	// Why the recording could not be transcribed: unsupported_format, too_large, blocked_url, fetch_failed or invalid_response
+	Error *string `json:"error,omitempty"`
+	// Transcribed text of the recording
+	Text *string `json:"text,omitempty"`
+	// Languages detected in the recording
+	Languages []TranscriptLanguageResponse `json:"languages,omitempty"`
 }
 
 type Audience struct {
@@ -3543,6 +3553,7 @@ type ChannelConfig struct {
 	Uploads                        bool                      `json:"uploads"`
 	UrlEnrichment                  bool                      `json:"url_enrichment"`
 	UserMessageReminders           bool                      `json:"user_message_reminders"`
+	VoiceTranscription             bool                      `json:"voice_transcription"`
 	// List of commands that channel supports
 	Commands  []string `json:"commands"`
 	Blocklist *string  `json:"blocklist,omitempty"`
@@ -3586,6 +3597,8 @@ type ChannelConfigOverrides struct {
 	UrlEnrichment *bool `json:"url_enrichment,omitempty"`
 	// Enable/disable user message reminders
 	UserMessageReminders *bool `json:"user_message_reminders,omitempty"`
+	// Enables or disables transcription of voice recordings
+	VoiceTranscription *bool `json:"voice_transcription,omitempty"`
 	// List of commands that channel supports
 	Commands        []string            `json:"commands,omitempty"`
 	ChatPreferences *ChatPreferences    `json:"chat_preferences,omitempty"`
@@ -3622,6 +3635,7 @@ type ChannelConfigWithInfo struct {
 	Uploads                        bool                      `json:"uploads"`
 	UrlEnrichment                  bool                      `json:"url_enrichment"`
 	UserMessageReminders           bool                      `json:"user_message_reminders"`
+	VoiceTranscription             bool                      `json:"voice_transcription"`
 	Commands                       []Command                 `json:"commands"`
 	Blocklist                      *string                   `json:"blocklist,omitempty"`
 	// What automod or a blocklist does when it matches.
@@ -4347,6 +4361,7 @@ type ChannelTypeConfig struct {
 	Uploads                        bool                      `json:"uploads"`
 	UrlEnrichment                  bool                      `json:"url_enrichment"`
 	UserMessageReminders           bool                      `json:"user_message_reminders"`
+	VoiceTranscription             bool                      `json:"voice_transcription"`
 	Commands                       []Command                 `json:"commands"`
 	Permissions                    []PolicyRequest           `json:"permissions"`
 	Grants                         map[string][]string       `json:"grants"`
@@ -5179,6 +5194,8 @@ type ConfigOverridesRequest struct {
 	UrlEnrichment *bool `json:"url_enrichment,omitempty"`
 	// Enable/disable user message reminders
 	UserMessageReminders *bool `json:"user_message_reminders,omitempty"`
+	// Enable/disable transcription of voice recordings in this channel
+	VoiceTranscription *bool `json:"voice_transcription,omitempty"`
 	// List of available commands
 	Commands        []string         `json:"commands,omitempty"`
 	ChatPreferences *ChatPreferences `json:"chat_preferences,omitempty"`
@@ -5354,6 +5371,7 @@ type CreateChannelTypeResponse struct {
 	Uploads                        bool                `json:"uploads"`
 	UrlEnrichment                  bool                `json:"url_enrichment"`
 	UserMessageReminders           bool                `json:"user_message_reminders"`
+	VoiceTranscription             bool                `json:"voice_transcription"`
 	Commands                       []string            `json:"commands"`
 	Permissions                    []PolicyRequest     `json:"permissions"`
 	Grants                         map[string][]string `json:"grants"`
@@ -7856,6 +7874,7 @@ type GetChannelTypeResponse struct {
 	Uploads                        bool                `json:"uploads"`
 	UrlEnrichment                  bool                `json:"url_enrichment"`
 	UserMessageReminders           bool                `json:"user_message_reminders"`
+	VoiceTranscription             bool                `json:"voice_transcription"`
 	Commands                       []Command           `json:"commands"`
 	Permissions                    []PolicyRequest     `json:"permissions"`
 	Grants                         map[string][]string `json:"grants"`
@@ -8161,10 +8180,11 @@ type GetOGResponse struct {
 	// og:url
 	TitleLink *string `json:"title_link,omitempty"`
 	// Attachment type, could be empty, image, audio or video
-	Type    *string  `json:"type,omitempty"`
-	Actions []Action `json:"actions,omitempty"`
-	Fields  []Field  `json:"fields,omitempty"`
-	Giphy   *Images  `json:"giphy,omitempty"`
+	Type            *string                       `json:"type,omitempty"`
+	Actions         []Action                      `json:"actions,omitempty"`
+	Fields          []Field                       `json:"fields,omitempty"`
+	Giphy           *Images                       `json:"giphy,omitempty"`
+	VoiceTranscript *AttachmentTranscriptResponse `json:"voice_transcript,omitempty"`
 }
 
 type GetOrCreateCallResponse struct {
@@ -15053,6 +15073,11 @@ type TrackStatsResponse struct {
 	DurationSeconds int    `json:"duration_seconds"`
 	TrackType       string `json:"track_type"`
 }
+
+type TranscriptLanguageResponse struct {
+	// Language code, e.g. en
+	Code string `json:"code"`
+}
 type TranscriptionLanguage string
 
 const (
@@ -15488,6 +15513,7 @@ type UpdateChannelTypeResponse struct {
 	Uploads                        bool                `json:"uploads"`
 	UrlEnrichment                  bool                `json:"url_enrichment"`
 	UserMessageReminders           bool                `json:"user_message_reminders"`
+	VoiceTranscription             bool                `json:"voice_transcription"`
 	Commands                       []string            `json:"commands"`
 	Permissions                    []PolicyRequest     `json:"permissions"`
 	Grants                         map[string][]string `json:"grants"`
