@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. Releases are automated by [release-please](https://github.com/googleapis/release-please); see [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## [8.3.0](https://github.com/GetStream/getstream-go/compare/v8.2.0...v8.3.0) (2026-11-13)
+
+
+### Features
+
+* add voice_transcript to Attachment ([bc95105](https://github.com/GetStream/getstream-go/commit/bc95105c894f5d1ee7b89fb6419efa6634786069))
+* add voice_transcript to GetOGResponse ([bc95105](https://github.com/GetStream/getstream-go/commit/bc95105c894f5d1ee7b89fb6419efa6634786069))
+* add voice_transcription to ChannelConfig ([bc95105](https://github.com/GetStream/getstream-go/commit/bc95105c894f5d1ee7b89fb6419efa6634786069))
+* add voice_transcription to ChannelConfigOverrides ([bc95105](https://github.com/GetStream/getstream-go/commit/bc95105c894f5d1ee7b89fb6419efa6634786069))
+* add voice_transcription to ChannelConfigWithInfo ([bc95105](https://github.com/GetStream/getstream-go/commit/bc95105c894f5d1ee7b89fb6419efa6634786069))
+* add voice_transcription to ChannelTypeConfig ([bc95105](https://github.com/GetStream/getstream-go/commit/bc95105c894f5d1ee7b89fb6419efa6634786069))
+* add voice_transcription to ConfigOverridesRequest ([bc95105](https://github.com/GetStream/getstream-go/commit/bc95105c894f5d1ee7b89fb6419efa6634786069))
+* add voice_transcription to CreateChannelTypeRequest ([bc95105](https://github.com/GetStream/getstream-go/commit/bc95105c894f5d1ee7b89fb6419efa6634786069))
+* add voice_transcription to CreateChannelTypeResponse ([bc95105](https://github.com/GetStream/getstream-go/commit/bc95105c894f5d1ee7b89fb6419efa6634786069))
+* add voice_transcription to GetChannelTypeResponse ([bc95105](https://github.com/GetStream/getstream-go/commit/bc95105c894f5d1ee7b89fb6419efa6634786069))
+* add voice_transcription to UpdateChannelTypeRequest ([bc95105](https://github.com/GetStream/getstream-go/commit/bc95105c894f5d1ee7b89fb6419efa6634786069))
+* add voice_transcription to UpdateChannelTypeResponse ([bc95105](https://github.com/GetStream/getstream-go/commit/bc95105c894f5d1ee7b89fb6419efa6634786069))
+
 ## [8.2.0](https://github.com/GetStream/getstream-go/compare/v8.1.0...v8.2.0) (2026-11-13)
 
 
