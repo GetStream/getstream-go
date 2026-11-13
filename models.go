@@ -165,7 +165,7 @@ type ActionLogResponse struct {
 	ID string `json:"id"`
 	// Reason for the moderation action
 	Reason string `json:"reason"`
-	// Classification of who triggered the action (e.g. user, moderator, automod, api_integration)
+	// Classification of who triggered the action (e.g. user, moderator, automod, agent_reviewer, api_integration)
 	ReporterType string `json:"reporter_type"`
 	// ID of the user who was the target of the action
 	TargetUserID string `json:"target_user_id"`
@@ -174,9 +174,10 @@ type ActionLogResponse struct {
 	// Type of moderation action
 	Type        string   `json:"type"`
 	AiProviders []string `json:"ai_providers"`
-	// Additional metadata about the action
-	Custom          map[string]any           `json:"custom"`
-	ReviewQueueItem *ReviewQueueItemResponse `json:"review_queue_item,omitempty"`
+	// Additional metadata about the action. An agent_recommendation log keeps the suggested action under recommended_action
+	Custom              map[string]any               `json:"custom"`
+	AgentRecommendation *AgentRecommendationResponse `json:"agent_recommendation,omitempty"`
+	ReviewQueueItem     *ReviewQueueItemResponse     `json:"review_queue_item,omitempty"`
 	// User response object
 	TargetUser *UserResponse `json:"target_user,omitempty"`
 	// User response object
@@ -882,6 +883,127 @@ type AddUserGroupMembersResponse struct {
 	UserGroup *UserGroupResponse `json:"user_group,omitempty"`
 }
 
+// One moderator correction of a Nora review
+type AgentFeedbackResponse struct {
+	// Nora review this correction is about
+	AgentReviewID string `json:"agent_review_id"`
+	// Text of the item when the correction was saved
+	ContentExcerpt string `json:"content_excerpt"`
+	// When the correction was first saved
+	CreatedAt Timestamp `json:"created_at"`
+	// Moderator who submitted the correction
+	CreatedBy string `json:"created_by"`
+	// Entity type of the queue item
+	EntityType string `json:"entity_type"`
+	// Feedback row id
+	ID string `json:"id"`
+	// How similar cases should be judged
+	Improvement string `json:"improvement"`
+	// Review queue item the correction is about
+	ItemID string `json:"item_id"`
+	// Action the moderator took
+	ModeratorAction string `json:"moderator_action"`
+	// Policy action Nora recommended
+	NoraAction string `json:"nora_action"`
+	// Why the moderator disagreed
+	Reason string `json:"reason"`
+	// When the correction was last saved
+	UpdatedAt Timestamp `json:"updated_at"`
+	// Labels Nora matched on this review
+	Labels []string `json:"labels"`
+}
+
+type AgentRecommendationPayload struct {
+	// Why Nora suggests this action. Stored on the action log, cut to 500 bytes
+	Reason string `json:"reason"`
+	// Action Nora suggests for the item
+	RecommendedAction string `json:"recommended_action"`
+}
+
+type AgentRecommendationResponse struct {
+	// Why Nora suggested this action
+	Reason string `json:"reason"`
+	// Action Nora suggested for the item
+	RecommendedAction string `json:"recommended_action"`
+}
+
+type AgentReviewJudgmentResponse struct {
+	// Why the agent matched this label
+	Explanation *string `json:"explanation,omitempty"`
+	// Moderation label this judgment is about
+	Label *string `json:"label,omitempty"`
+	// The agent's verdict for this label
+	Verdict *string `json:"verdict,omitempty"`
+	// Quotes from the content that support the verdict
+	Evidence []string `json:"evidence,omitempty"`
+}
+
+type AgentReviewResponse struct {
+	// True when the agent did not have the full context it needed
+	ContextIncomplete bool `json:"context_incomplete"`
+	// When this review was recorded
+	CreatedAt Timestamp `json:"created_at"`
+	// Lifecycle status of the review
+	Status string `json:"status"`
+	// Session id of the agent run that produced this review
+	AgentSessionID *string `json:"agent_session_id,omitempty"`
+	// The agent's confidence in its recommended action, from 0 to 1
+	Confidence *float64 `json:"confidence,omitempty"`
+	// Whether the flag is supported, a likely false positive, or uncertain
+	FlagAssessment *string `json:"flag_assessment,omitempty"`
+	// Model route that produced this review
+	ModelRoute *string `json:"model_route,omitempty"`
+	// Why Nora chose the recommended action
+	Reason *string `json:"reason,omitempty"`
+	// Action the agent recommends for the item
+	RecommendedAction *string `json:"recommended_action,omitempty"`
+	// Why the review was skipped or failed. Set when status is skipped or failed
+	SkipReason *string `json:"skip_reason,omitempty"`
+	// Short summary of the review
+	Summary *string `json:"summary,omitempty"`
+	// Per-label judgments, with the evidence the agent quoted
+	Judgments []AgentReviewJudgmentResponse `json:"judgments,omitempty"`
+	// Token usage reported for this review
+	Usage map[string]any `json:"usage,omitempty"`
+}
+
+// Settings for the moderation agent reviewer, which reviews moderation outcomes and proposes or applies an action.
+type AgentReviewSettingsPayload struct {
+	// The app's Accelerate agent config with role agent_moderator.
+	AgentConfigID *string `json:"agent_config_id,omitempty"`
+	// Minimum verdict confidence (0-1) for auto_act to apply an action. Defaults to 0.9.
+	AutoActMinConfidence *float64 `json:"auto_act_min_confidence,omitempty"`
+	// Days of the user's moderation history given to the agent. Defaults to 7, at most 30.
+	ContextDays *int `json:"context_days,omitempty"`
+	// Surrounding items given to the agent on each side of the reviewed one: chat messages, Feeds comments, or the author's other Feeds activities. Defaults to 20, at most 100.
+	ContextMessages *int `json:"context_messages,omitempty"`
+	// Turns the agent reviewer on. It only runs when agent_config_id is set too.
+	Enabled *bool `json:"enabled,omitempty"`
+	// Maximum reviews in flight for the app. Defaults to 10, at most 100.
+	MaxConcurrency *int `json:"max_concurrency,omitempty"`
+	// approve_first records the verdict for a moderator to approve; auto_act applies it when its confidence reaches auto_act_min_confidence; export_only changes nothing on the review queue and only exports each verdict for evaluation. Defaults to approve_first.
+	Mode *string `json:"mode,omitempty"`
+	// Sends the images of the content under review to the agent, so it can judge them alongside the text. The agent config must run on a model that sees images. Defaults to false.
+	ReviewImages *bool `json:"review_images,omitempty"`
+	// Fraction (0-1) of checks reviewed with scope all_checks. Defaults to 1.
+	SampleRate *float64 `json:"sample_rate,omitempty"`
+	// Which checks are reviewed: flagged ones only, or all_checks sampled by sample_rate. Defaults to flagged.
+	Scope *string `json:"scope,omitempty"`
+	// Moderation rule IDs: only items flagged by one of these rules are reviewed, and items flagged only by other sources are left to moderators. Empty reviews every flagged item. Only used with scope flagged; at most 100.
+	RuleIds []string `json:"rule_ids,omitempty"`
+}
+
+type AgentReviewSummaryResponse struct {
+	// Verdict confidence from 0 to 1
+	Confidence float64 `json:"confidence"`
+	// pending, processing, done, failed, or skipped
+	Status string `json:"status"`
+	// Whether the flag matches the content. Set once the review is done
+	FlagAssessment *string `json:"flag_assessment,omitempty"`
+	// The action Nora recommends. Set once the review is done
+	RecommendedAction *string `json:"recommended_action,omitempty"`
+}
+
 type AggregatedActivityResponse struct {
 	// Number of activities in this aggregation
 	ActivityCount int `json:"activity_count"`
@@ -1050,25 +1172,29 @@ type AppResponseFields struct {
 	CallTypes                 map[string]*CallType      `json:"call_types"`
 	ChannelConfigs            map[string]*ChannelConfig `json:"channel_configs"`
 	// Request limit defaults applied by the server when the corresponding field is omitted.
-	Defaults                              AppDefaults                     `json:"defaults"`
-	FileUploadConfig                      FileUploadConfig                `json:"file_upload_config"`
-	Grants                                map[string][]string             `json:"grants"`
-	ImageUploadConfig                     FileUploadConfig                `json:"image_upload_config"`
-	Policies                              map[string][]Policy             `json:"policies"`
-	PushNotifications                     PushNotificationFields          `json:"push_notifications"`
-	BeforeMessageSendHookAttemptTimeoutMs *int                            `json:"before_message_send_hook_attempt_timeout_ms,omitempty"`
-	BeforeMessageSendHookUrl              *string                         `json:"before_message_send_hook_url,omitempty"`
-	ChatPrimaryUseCase                    *string                         `json:"chat_primary_use_case,omitempty"`
-	ModerationOnboardingComplete          *bool                           `json:"moderation_onboarding_complete,omitempty"`
-	ModerationS3ImageAccessRoleArn        *string                         `json:"moderation_s3_image_access_role_arn,omitempty"`
-	RevokeTokensIssuedBefore              *Timestamp                      `json:"revoke_tokens_issued_before,omitempty"`
-	VideoPrimaryUseCase                   *string                         `json:"video_primary_use_case,omitempty"`
-	AllowedFlagReasons                    []string                        `json:"allowed_flag_reasons,omitempty"`
-	Geofences                             []GeofenceResponse              `json:"geofences,omitempty"`
-	ImageModerationLabels                 []string                        `json:"image_moderation_labels,omitempty"`
-	ActivityMetricsConfig                 map[string]int                  `json:"activity_metrics_config,omitempty"`
-	DatadogInfo                           *DataDogInfo                    `json:"datadog_info,omitempty"`
-	ModerationDashboardPreferences        *ModerationDashboardPreferences `json:"moderation_dashboard_preferences,omitempty"`
+	Defaults                              AppDefaults            `json:"defaults"`
+	FileUploadConfig                      FileUploadConfig       `json:"file_upload_config"`
+	Grants                                map[string][]string    `json:"grants"`
+	ImageUploadConfig                     FileUploadConfig       `json:"image_upload_config"`
+	Policies                              map[string][]Policy    `json:"policies"`
+	PushNotifications                     PushNotificationFields `json:"push_notifications"`
+	BeforeMessageSendHookAttemptTimeoutMs *int                   `json:"before_message_send_hook_attempt_timeout_ms,omitempty"`
+	BeforeMessageSendHookUrl              *string                `json:"before_message_send_hook_url,omitempty"`
+	ChatPrimaryUseCase                    *string                `json:"chat_primary_use_case,omitempty"`
+	ModerationOnboardingComplete          *bool                  `json:"moderation_onboarding_complete,omitempty"`
+	ModerationS3ImageAccessRoleArn        *string                `json:"moderation_s3_image_access_role_arn,omitempty"`
+	RevokeTokensIssuedBefore              *Timestamp             `json:"revoke_tokens_issued_before,omitempty"`
+	VideoPrimaryUseCase                   *string                `json:"video_primary_use_case,omitempty"`
+	AllowedFlagReasons                    []string               `json:"allowed_flag_reasons,omitempty"`
+	Geofences                             []GeofenceResponse     `json:"geofences,omitempty"`
+	ImageModerationLabels                 []string               `json:"image_moderation_labels,omitempty"`
+	ActivityMetricsConfig                 map[string]int         `json:"activity_metrics_config,omitempty"`
+	// Settings for the moderation agent reviewer, which reviews moderation outcomes and proposes or applies an action.
+	AgentReview *AgentReviewSettingsPayload `json:"agent_review,omitempty"`
+	DatadogInfo *DataDogInfo                `json:"datadog_info,omitempty"`
+	// Settings for the moderation agent reviewer, which reviews moderation outcomes and proposes or applies an action.
+	EffectiveAgentReview           *AgentReviewSettingsPayload     `json:"effective_agent_review,omitempty"`
+	ModerationDashboardPreferences *ModerationDashboardPreferences `json:"moderation_dashboard_preferences,omitempty"`
 }
 
 // This event is sent when an appeal is accepted
@@ -7573,6 +7699,18 @@ type GetActivityResponse struct {
 	Activity ActivityResponse `json:"activity"`
 }
 
+type GetAgentReviewStatusResponse struct {
+	// Actions Nora took in the last 7 days
+	Applied  int    `json:"applied"`
+	Duration string `json:"duration"`
+	// Items Nora escalated in the last 7 days
+	Escalated int `json:"escalated"`
+	// Reviews that finished in the last 7 days
+	Reviewed int `json:"reviewed"`
+	// Why the latest review failed. Absent unless that review failed
+	LastError *string `json:"last_error,omitempty"`
+}
+
 type GetAppealResponse struct {
 	Duration string              `json:"duration"`
 	Item     *AppealItemResponse `json:"item,omitempty"`
@@ -8152,8 +8290,9 @@ type GetRetentionPolicyRunsResponse struct {
 }
 
 type GetReviewQueueItemResponse struct {
-	Duration string                   `json:"duration"`
-	Item     *ReviewQueueItemResponse `json:"item,omitempty"`
+	Duration    string                   `json:"duration"`
+	AgentReview *AgentReviewResponse     `json:"agent_review,omitempty"`
+	Item        *ReviewQueueItemResponse `json:"item,omitempty"`
 }
 
 type GetSegmentResponse struct {
@@ -8911,6 +9050,15 @@ type LimitsSettingsResponse struct {
 	MaxDurationSeconds          *int     `json:"max_duration_seconds,omitempty"`
 	MaxParticipants             *int     `json:"max_participants,omitempty"`
 	MaxParticipantsExcludeOwner *bool    `json:"max_participants_exclude_owner,omitempty"`
+}
+
+// Moderator corrections, newest first
+type ListAgentFeedbackResponse struct {
+	Duration string `json:"duration"`
+	// Corrections, newest first
+	Feedback []AgentFeedbackResponse `json:"feedback"`
+	// Cursor for the next page. Absent when this is the last page
+	Next *string `json:"next,omitempty"`
 }
 
 // Basic response information
@@ -13167,9 +13315,10 @@ type ReviewQueueItemResponse struct {
 	// IDs of the item's flags a moderator marked as false positives
 	FalsePositiveFlags []string `json:"false_positive_flags,omitempty"`
 	// Teams associated with this item
-	Teams    []string            `json:"teams,omitempty"`
-	Activity *EnrichedActivity   `json:"activity,omitempty"`
-	Appeal   *AppealItemResponse `json:"appeal,omitempty"`
+	Teams       []string                    `json:"teams,omitempty"`
+	Activity    *EnrichedActivity           `json:"activity,omitempty"`
+	AgentReview *AgentReviewSummaryResponse `json:"agent_review,omitempty"`
+	Appeal      *AppealItemResponse         `json:"appeal,omitempty"`
 	// User response object
 	AssignedTo         *UserResponse            `json:"assigned_to,omitempty"`
 	Call               *ModerationCallResponse  `json:"call,omitempty"`
@@ -14502,6 +14651,37 @@ type SubmitActionResponse struct {
 	AutoRestoreWarning *string                  `json:"auto_restore_warning,omitempty"`
 	AppealItem         *AppealItemResponse      `json:"appeal_item,omitempty"`
 	Item               *ReviewQueueItemResponse `json:"item,omitempty"`
+}
+
+// The stored moderator correction
+type SubmitAgentFeedbackResponse struct {
+	// Nora review this correction is about
+	AgentReviewID string `json:"agent_review_id"`
+	// Text of the item when the correction was saved
+	ContentExcerpt string `json:"content_excerpt"`
+	// When the correction was first saved
+	CreatedAt Timestamp `json:"created_at"`
+	// Moderator who submitted the correction
+	CreatedBy string `json:"created_by"`
+	Duration  string `json:"duration"`
+	// Entity type of the queue item
+	EntityType string `json:"entity_type"`
+	// Feedback row id
+	ID string `json:"id"`
+	// How similar cases should be judged
+	Improvement string `json:"improvement"`
+	// Review queue item the correction is about
+	ItemID string `json:"item_id"`
+	// Action the moderator took
+	ModeratorAction string `json:"moderator_action"`
+	// Policy action Nora recommended
+	NoraAction string `json:"nora_action"`
+	// Why the moderator disagreed
+	Reason string `json:"reason"`
+	// When the correction was last saved
+	UpdatedAt Timestamp `json:"updated_at"`
+	// Labels Nora matched on this review
+	Labels []string `json:"labels"`
 }
 
 type SubmitModerationFeedbackItem struct {

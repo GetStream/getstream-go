@@ -62,6 +62,28 @@ func (c *ModerationClient) InsertActionLog(ctx context.Context, request *InsertA
 	return res, err
 }
 
+// List moderator corrections of Nora's reviews for this app, newest first
+func (c *ModerationClient) ListAgentFeedback(ctx context.Context, request *ListAgentFeedbackRequest) (*StreamResponse[ListAgentFeedbackResponse], error) {
+	var result ListAgentFeedbackResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, ListAgentFeedbackResponse](c.client, ctx, "GET", "/api/v2/moderation/agent_feedback", params, nil, &result, nil)
+	return res, err
+}
+
+// Record a moderator correction when their action overturns Nora's review of a queue item
+func (c *ModerationClient) SubmitAgentFeedback(ctx context.Context, request *SubmitAgentFeedbackRequest) (*StreamResponse[SubmitAgentFeedbackResponse], error) {
+	var result SubmitAgentFeedbackResponse
+	res, err := MakeRequest[SubmitAgentFeedbackRequest, SubmitAgentFeedbackResponse](c.client, ctx, "POST", "/api/v2/moderation/agent_feedback", nil, request, &result, nil)
+	return res, err
+}
+
+// Last error and 7-day counts for the app's agent moderator
+func (c *ModerationClient) GetAgentReviewStatus(ctx context.Context, request *GetAgentReviewStatusRequest) (*StreamResponse[GetAgentReviewStatusResponse], error) {
+	var result GetAgentReviewStatusResponse
+	res, err := MakeRequest[any, GetAgentReviewStatusResponse](c.client, ctx, "GET", "/api/v2/moderation/agent_review_status", nil, nil, &result, nil)
+	return res, err
+}
+
 // Moderate named text fields and raw image bytes via multipart/form-data. Returns a per-field lightweight verdict.
 func (c *ModerationClient) Analyze(ctx context.Context, request *AnalyzeRequest) (*StreamResponse[AnalyzeResponse], error) {
 	var result AnalyzeResponse
