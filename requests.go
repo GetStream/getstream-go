@@ -2249,6 +2249,18 @@ type UpdateMembershipLevelRequest struct {
 	// Custom data for the membership level
 	Custom *map[string]any `json:"custom,omitempty"`
 }
+type ListPromotedTopicsRequest struct {
+}
+type PromoteTopicsRequest struct {
+	// How long the promotion lasts, in seconds (60-86400)
+	Ttl int `json:"ttl"`
+	// The tags to promote (1-10, each at most 255 characters)
+	Tags []string `json:"tags"`
+	// The trend weight of the tags, above 0 and at most 1. Defaults to 1
+	Weight *float64 `json:"weight,omitempty"`
+}
+type UnpromoteTopicsRequest struct {
+}
 type FeedsGetRetentionPolicyRequest struct {
 }
 type FeedsSetRetentionPolicyRequest struct {
@@ -2331,6 +2343,9 @@ type GetUserInterestsRequest struct {
 type UpsertUserInterestsRequest struct {
 	// Interest tags to add or update (1-50)
 	Interests []UserInterestRequest `json:"interests"`
+}
+type GetTrendingTopicsRequest struct {
+	Limit *int `json:"-" query:"limit"`
 }
 type CreateGuestRequest struct {
 	// User request object
@@ -2613,23 +2628,26 @@ type UpsertConfigRequest struct {
 	// Team associated with the configuration
 	Team *string `json:"team,omitempty"`
 	// Optional user ID to associate with the audit log entry
-	UserID                             *string                             `json:"user_id,omitempty"`
-	AWSRekognitionConfig               *AIImageConfig                      `json:"aws_rekognition_config,omitempty"`
-	AiAudioConfig                      *AIAudioConfigRequest               `json:"ai_audio_config,omitempty"`
-	AiImageConfig                      *AIImageConfig                      `json:"ai_image_config,omitempty"`
-	AiTextConfig                       *AITextConfig                       `json:"ai_text_config,omitempty"`
-	AiVideoConfig                      *AIVideoConfigRequest               `json:"ai_video_config,omitempty"`
+	UserID               *string               `json:"user_id,omitempty"`
+	AWSRekognitionConfig *AIImageConfig        `json:"aws_rekognition_config,omitempty"`
+	AiAudioConfig        *AIAudioConfigRequest `json:"ai_audio_config,omitempty"`
+	AiImageConfig        *AIImageConfig        `json:"ai_image_config,omitempty"`
+	AiTextConfig         *AITextConfig         `json:"ai_text_config,omitempty"`
+	AiVideoConfig        *AIVideoConfigRequest `json:"ai_video_config,omitempty"`
+	// Deprecated: this field is deprecated.
 	AutomodPlatformCircumventionConfig *AutomodPlatformCircumventionConfig `json:"automod_platform_circumvention_config,omitempty"`
-	AutomodSemanticFiltersConfig       *AutomodSemanticFiltersConfig       `json:"automod_semantic_filters_config,omitempty"`
-	AutomodToxicityConfig              *AutomodToxicityConfig              `json:"automod_toxicity_config,omitempty"`
-	BlockListConfig                    *BlockListConfig                    `json:"block_list_config,omitempty"`
-	BodyguardConfig                    *AITextConfig                       `json:"bodyguard_config,omitempty"`
-	Engine                             *ModerationEngineConfigRequest      `json:"engine,omitempty"`
-	FloodConfig                        *FloodConfig                        `json:"flood_config,omitempty"`
-	GoogleVisionConfig                 *GoogleVisionConfig                 `json:"google_vision_config,omitempty"`
-	IntentConfig                       *IntentConfigRequest                `json:"intent_config,omitempty"`
-	LlmConfig                          *LLMConfig                          `json:"llm_config,omitempty"`
-	RuleBuilderConfig                  *RuleBuilderConfig                  `json:"rule_builder_config,omitempty"`
+	// Deprecated: this field is deprecated.
+	AutomodSemanticFiltersConfig *AutomodSemanticFiltersConfig `json:"automod_semantic_filters_config,omitempty"`
+	// Deprecated: this field is deprecated.
+	AutomodToxicityConfig *AutomodToxicityConfig         `json:"automod_toxicity_config,omitempty"`
+	BlockListConfig       *BlockListConfig               `json:"block_list_config,omitempty"`
+	BodyguardConfig       *AITextConfig                  `json:"bodyguard_config,omitempty"`
+	Engine                *ModerationEngineConfigRequest `json:"engine,omitempty"`
+	FloodConfig           *FloodConfig                   `json:"flood_config,omitempty"`
+	GoogleVisionConfig    *GoogleVisionConfig            `json:"google_vision_config,omitempty"`
+	IntentConfig          *IntentConfigRequest           `json:"intent_config,omitempty"`
+	LlmConfig             *LLMConfig                     `json:"llm_config,omitempty"`
+	RuleBuilderConfig     *RuleBuilderConfig             `json:"rule_builder_config,omitempty"`
 	// User request object
 	User                 *UserRequest          `json:"user,omitempty"`
 	VelocityFilterConfig *VelocityFilterConfig `json:"velocity_filter_config,omitempty"`
@@ -2645,23 +2663,26 @@ type SaveConfigVersionRequest struct {
 	// Team associated with the configuration
 	Team *string `json:"team,omitempty"`
 	// Optional user ID to associate with the audit log entry
-	UserID                             *string                             `json:"user_id,omitempty"`
-	AWSRekognitionConfig               *AIImageConfig                      `json:"aws_rekognition_config,omitempty"`
-	AiAudioConfig                      *AIAudioConfigRequest               `json:"ai_audio_config,omitempty"`
-	AiImageConfig                      *AIImageConfig                      `json:"ai_image_config,omitempty"`
-	AiTextConfig                       *AITextConfig                       `json:"ai_text_config,omitempty"`
-	AiVideoConfig                      *AIVideoConfigRequest               `json:"ai_video_config,omitempty"`
+	UserID               *string               `json:"user_id,omitempty"`
+	AWSRekognitionConfig *AIImageConfig        `json:"aws_rekognition_config,omitempty"`
+	AiAudioConfig        *AIAudioConfigRequest `json:"ai_audio_config,omitempty"`
+	AiImageConfig        *AIImageConfig        `json:"ai_image_config,omitempty"`
+	AiTextConfig         *AITextConfig         `json:"ai_text_config,omitempty"`
+	AiVideoConfig        *AIVideoConfigRequest `json:"ai_video_config,omitempty"`
+	// Deprecated: this field is deprecated.
 	AutomodPlatformCircumventionConfig *AutomodPlatformCircumventionConfig `json:"automod_platform_circumvention_config,omitempty"`
-	AutomodSemanticFiltersConfig       *AutomodSemanticFiltersConfig       `json:"automod_semantic_filters_config,omitempty"`
-	AutomodToxicityConfig              *AutomodToxicityConfig              `json:"automod_toxicity_config,omitempty"`
-	BlockListConfig                    *BlockListConfig                    `json:"block_list_config,omitempty"`
-	BodyguardConfig                    *AITextConfig                       `json:"bodyguard_config,omitempty"`
-	Engine                             *ModerationEngineConfigRequest      `json:"engine,omitempty"`
-	FloodConfig                        *FloodConfig                        `json:"flood_config,omitempty"`
-	GoogleVisionConfig                 *GoogleVisionConfig                 `json:"google_vision_config,omitempty"`
-	IntentConfig                       *IntentConfigRequest                `json:"intent_config,omitempty"`
-	LlmConfig                          *LLMConfig                          `json:"llm_config,omitempty"`
-	RuleBuilderConfig                  *RuleBuilderConfig                  `json:"rule_builder_config,omitempty"`
+	// Deprecated: this field is deprecated.
+	AutomodSemanticFiltersConfig *AutomodSemanticFiltersConfig `json:"automod_semantic_filters_config,omitempty"`
+	// Deprecated: this field is deprecated.
+	AutomodToxicityConfig *AutomodToxicityConfig         `json:"automod_toxicity_config,omitempty"`
+	BlockListConfig       *BlockListConfig               `json:"block_list_config,omitempty"`
+	BodyguardConfig       *AITextConfig                  `json:"bodyguard_config,omitempty"`
+	Engine                *ModerationEngineConfigRequest `json:"engine,omitempty"`
+	FloodConfig           *FloodConfig                   `json:"flood_config,omitempty"`
+	GoogleVisionConfig    *GoogleVisionConfig            `json:"google_vision_config,omitempty"`
+	IntentConfig          *IntentConfigRequest           `json:"intent_config,omitempty"`
+	LlmConfig             *LLMConfig                     `json:"llm_config,omitempty"`
+	RuleBuilderConfig     *RuleBuilderConfig             `json:"rule_builder_config,omitempty"`
 	// User request object
 	User                 *UserRequest          `json:"user,omitempty"`
 	VelocityFilterConfig *VelocityFilterConfig `json:"velocity_filter_config,omitempty"`

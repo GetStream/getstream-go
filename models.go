@@ -5224,19 +5224,22 @@ type ConfigResponse struct {
 	AiAudioConfig              *AIAudioConfigResponse    `json:"ai_audio_config,omitempty"`
 	AiImageConfig              *AIImageConfig            `json:"ai_image_config,omitempty"`
 	// Available L2 subclassifications per L1 image moderation label, based on the active provider
-	AiImageSubclassifications          map[string][]string                 `json:"ai_image_subclassifications,omitempty"`
-	AiTextConfig                       *AITextConfig                       `json:"ai_text_config,omitempty"`
-	AiVideoConfig                      *AIVideoConfigResponse              `json:"ai_video_config,omitempty"`
+	AiImageSubclassifications map[string][]string    `json:"ai_image_subclassifications,omitempty"`
+	AiTextConfig              *AITextConfig          `json:"ai_text_config,omitempty"`
+	AiVideoConfig             *AIVideoConfigResponse `json:"ai_video_config,omitempty"`
+	// Deprecated: this field is deprecated.
 	AutomodPlatformCircumventionConfig *AutomodPlatformCircumventionConfig `json:"automod_platform_circumvention_config,omitempty"`
-	AutomodSemanticFiltersConfig       *AutomodSemanticFiltersConfig       `json:"automod_semantic_filters_config,omitempty"`
-	AutomodToxicityConfig              *AutomodToxicityConfig              `json:"automod_toxicity_config,omitempty"`
-	BlockListConfig                    *BlockListConfig                    `json:"block_list_config,omitempty"`
-	Engine                             *ModerationEngineConfigResponse     `json:"engine,omitempty"`
-	FloodConfig                        *FloodConfig                        `json:"flood_config,omitempty"`
-	IntentConfig                       *IntentConfigResponse               `json:"intent_config,omitempty"`
-	LlmConfig                          *LLMConfig                          `json:"llm_config,omitempty"`
-	VelocityFilterConfig               *VelocityFilterConfig               `json:"velocity_filter_config,omitempty"`
-	VideoCallRuleConfig                *VideoCallRuleConfig                `json:"video_call_rule_config,omitempty"`
+	// Deprecated: this field is deprecated.
+	AutomodSemanticFiltersConfig *AutomodSemanticFiltersConfig `json:"automod_semantic_filters_config,omitempty"`
+	// Deprecated: this field is deprecated.
+	AutomodToxicityConfig *AutomodToxicityConfig          `json:"automod_toxicity_config,omitempty"`
+	BlockListConfig       *BlockListConfig                `json:"block_list_config,omitempty"`
+	Engine                *ModerationEngineConfigResponse `json:"engine,omitempty"`
+	FloodConfig           *FloodConfig                    `json:"flood_config,omitempty"`
+	IntentConfig          *IntentConfigResponse           `json:"intent_config,omitempty"`
+	LlmConfig             *LLMConfig                      `json:"llm_config,omitempty"`
+	VelocityFilterConfig  *VelocityFilterConfig           `json:"velocity_filter_config,omitempty"`
+	VideoCallRuleConfig   *VideoCallRuleConfig            `json:"video_call_rule_config,omitempty"`
 }
 
 type ConfigVersionResponse struct {
@@ -7528,7 +7531,9 @@ type ForYouConfig struct {
 	// Turns For You ranking on. Groups: only the non-aggregated 'foryou' group. Views: applies only when read on that group
 	Enabled *bool `json:"enabled,omitempty"`
 	// Name of a registered ranking preset that stands in for 'score' when score is empty. One of: for_you_v2, hot
-	Preset      *string                  `json:"preset,omitempty"`
+	Preset *string `json:"preset,omitempty"`
+	// Tracks trending tags and turns on the topic_trend ranking variable (0-1, the highest trend over a post's interest tags). Requires enabled
+	Trending    *bool                    `json:"trending,omitempty"`
 	Dwell       *ForYouDwellConfig       `json:"dwell,omitempty"`
 	Exploration *ForYouExplorationConfig `json:"exploration,omitempty"`
 }
@@ -8361,6 +8366,13 @@ type GetThreadResponse struct {
 	Thread   ThreadStateResponse `json:"thread"`
 }
 
+// Trending topics ranked for the user
+type GetTrendingTopicsResponse struct {
+	Duration string `json:"duration"`
+	// Topics by descending score, then ascending tag
+	Topics []TrendingTopicResponse `json:"topics"`
+}
+
 // Response for getting a user group
 type GetUserGroupResponse struct {
 	Duration  string             `json:"duration"`
@@ -9187,6 +9199,13 @@ type ListPermissionsResponse struct {
 	// Duration of the request in milliseconds
 	Duration    string       `json:"duration"`
 	Permissions []Permission `json:"permissions"`
+}
+
+// The app's active promotions
+type ListPromotedTopicsResponse struct {
+	Duration string `json:"duration"`
+	// The active promotions, oldest first
+	PromotedTopics []PromotedTopicResponse `json:"promoted_topics"`
 }
 
 // Basic response information
@@ -11666,6 +11685,27 @@ type PrivacySettingsResponse struct {
 	ReadReceipts *ReadReceiptsResponse `json:"read_receipts,omitempty"`
 	// The settings for typing indicator events.
 	TypingIndicators *TypingIndicatorsResponse `json:"typing_indicators,omitempty"`
+}
+
+// The created promotion
+type PromoteTopicsResponse struct {
+	Duration string `json:"duration"`
+	// A set of topics promoted for the For You trend signal until it expires
+	PromotedTopic PromotedTopicResponse `json:"promoted_topic"`
+}
+
+// A set of topics promoted for the For You trend signal until it expires
+type PromotedTopicResponse struct {
+	// When the promotion expires
+	ExpiresAt Timestamp `json:"expires_at"`
+	// The ID of the promotion
+	ID string `json:"id"`
+	// When the promotion started
+	StartsAt Timestamp `json:"starts_at"`
+	// The trend weight the tags get, between 0 and 1
+	Weight float64 `json:"weight"`
+	// The promoted topic tags
+	Tags []string `json:"tags"`
 }
 
 type PublishConfigVersionResponse struct {
@@ -15184,6 +15224,16 @@ type TranslationSettings struct {
 	Languages []string `json:"languages,omitempty"`
 }
 
+// A trending topic with its score for the user
+type TrendingTopicResponse struct {
+	// Whether an active promotion contains the tag
+	Promoted bool `json:"promoted"`
+	// The trend of the tag scaled by the user's interest in it
+	Score float64 `json:"score"`
+	// The topic tag
+	Tag string `json:"tag"`
+}
+
 type TriggeredRuleResponse struct {
 	// ID of the moderation rule that triggered
 	RuleID string `json:"rule_id"`
@@ -15318,6 +15368,11 @@ type UnpinRequest struct {
 // UnpinResponse is the payload for unpinning a message.
 type UnpinResponse struct {
 	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+}
+
+// Response after ending a promotion
+type UnpromoteTopicsResponse struct {
 	Duration string `json:"duration"`
 }
 

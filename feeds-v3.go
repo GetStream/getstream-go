@@ -1017,6 +1017,30 @@ func (c *FeedsClient) UpdateMembershipLevel(ctx context.Context, id string, requ
 	return res, err
 }
 
+// Lists the app's active promotions, also while for_you.trending is off. Not paginated: an app holds at most 20. Server-side only.
+func (c *FeedsClient) ListPromotedTopics(ctx context.Context, request *ListPromotedTopicsRequest) (*StreamResponse[ListPromotedTopicsResponse], error) {
+	var result ListPromotedTopicsResponse
+	res, err := MakeRequest[any, ListPromotedTopicsResponse](c.client, ctx, "GET", "/api/v2/feeds/promoted_topics", nil, nil, &result, nil)
+	return res, err
+}
+
+// Promotes topic tags for the trend signal of feed groups with for_you.trending until the TTL passes. Clients watching a For You feed receive a feeds.promoted_topics.updated event. An app holds at most 20 active promotions. Server-side only.
+func (c *FeedsClient) PromoteTopics(ctx context.Context, request *PromoteTopicsRequest) (*StreamResponse[PromoteTopicsResponse], error) {
+	var result PromoteTopicsResponse
+	res, err := MakeRequest[PromoteTopicsRequest, PromoteTopicsResponse](c.client, ctx, "POST", "/api/v2/feeds/promoted_topics", nil, request, &result, nil)
+	return res, err
+}
+
+// Ends a promotion before it expires, also while for_you.trending is off. Clients watching a For You feed receive a feeds.promoted_topics.updated event. Returns 404 when the promotion is not active. Server-side only.
+func (c *FeedsClient) UnpromoteTopics(ctx context.Context, id string, request *UnpromoteTopicsRequest) (*StreamResponse[UnpromoteTopicsResponse], error) {
+	var result UnpromoteTopicsResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, UnpromoteTopicsResponse](c.client, ctx, "DELETE", "/api/v2/feeds/promoted_topics/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
 // Returns the feeds retention policies configured for the app. Server-side only.
 func (c *FeedsClient) FeedsGetRetentionPolicy(ctx context.Context, request *FeedsGetRetentionPolicyRequest) (*StreamResponse[GetFeedsRetentionPolicyResponse], error) {
 	var result GetFeedsRetentionPolicyResponse
@@ -1133,5 +1157,16 @@ func (c *FeedsClient) UpsertUserInterests(ctx context.Context, userID string, re
 		"user_id": userID,
 	}
 	res, err := MakeRequest[UpsertUserInterestsRequest, UpsertUserInterestsResponse](c.client, ctx, "PUT", "/api/v2/feeds/users/{user_id}/interests", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Returns the topics trending in the app, ranked for the user: the trend of a tag scaled by the user's interest weight in it. Tags the user has a negative weight for are left out. Empty for apps without for_you.trending. Client-side callers may only read their own.
+func (c *FeedsClient) GetTrendingTopics(ctx context.Context, userID string, request *GetTrendingTopicsRequest) (*StreamResponse[GetTrendingTopicsResponse], error) {
+	var result GetTrendingTopicsResponse
+	pathParams := map[string]string{
+		"user_id": userID,
+	}
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetTrendingTopicsResponse](c.client, ctx, "GET", "/api/v2/feeds/users/{user_id}/trending_topics", params, nil, &result, pathParams)
 	return res, err
 }
