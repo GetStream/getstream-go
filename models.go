@@ -45,21 +45,27 @@ type AITextConfig struct {
 }
 
 type AIVideoConfig struct {
-	Async   *bool                `json:"async,omitempty"`
-	Enabled *bool                `json:"enabled,omitempty"`
-	Rules   []AWSRekognitionRule `json:"rules,omitempty"`
+	Async            *bool                `json:"async,omitempty"`
+	Enabled          *bool                `json:"enabled,omitempty"`
+	OcrRules         []OCRRule            `json:"ocr_rules,omitempty"`
+	OcrSeverityRules []BodyguardRule      `json:"ocr_severity_rules,omitempty"`
+	Rules            []AWSRekognitionRule `json:"rules,omitempty"`
 }
 
 type AIVideoConfigRequest struct {
-	Async   *bool                `json:"async,omitempty"`
-	Enabled *bool                `json:"enabled,omitempty"`
-	Rules   []AWSRekognitionRule `json:"rules,omitempty"`
+	Async            *bool                `json:"async,omitempty"`
+	Enabled          *bool                `json:"enabled,omitempty"`
+	OcrRules         []OCRRule            `json:"ocr_rules,omitempty"`
+	OcrSeverityRules []BodyguardRule      `json:"ocr_severity_rules,omitempty"`
+	Rules            []AWSRekognitionRule `json:"rules,omitempty"`
 }
 
 type AIVideoConfigResponse struct {
-	Enabled bool                 `json:"enabled"`
-	Rules   []AWSRekognitionRule `json:"rules"`
-	Async   *bool                `json:"async,omitempty"`
+	Enabled          bool                 `json:"enabled"`
+	Rules            []AWSRekognitionRule `json:"rules"`
+	Async            *bool                `json:"async,omitempty"`
+	OcrRules         []OCRRule            `json:"ocr_rules,omitempty"`
+	OcrSeverityRules []BodyguardRule      `json:"ocr_severity_rules,omitempty"`
 }
 
 type APIError struct {
