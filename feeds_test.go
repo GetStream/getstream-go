@@ -737,6 +737,27 @@ func TestFeedsUpdateMembershipLevel(t *testing.T) {
 	_, err = client.Feeds().UpdateMembershipLevel(context.Background(), "", &getstream.UpdateMembershipLevelRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsListPromotedTopics(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().ListPromotedTopics(context.Background(), &getstream.ListPromotedTopicsRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsPromoteTopics(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().PromoteTopics(context.Background(), &getstream.PromoteTopicsRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsUnpromoteTopics(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().UnpromoteTopics(context.Background(), "", &getstream.UnpromoteTopicsRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsFeedsGetRetentionPolicy(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -833,5 +854,12 @@ func TestFeedsUpsertUserInterests(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().UpsertUserInterests(context.Background(), "", &getstream.UpsertUserInterestsRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsGetTrendingTopics(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().GetTrendingTopics(context.Background(), "", &getstream.GetTrendingTopicsRequest{})
 	require.NoError(t, err)
 }
