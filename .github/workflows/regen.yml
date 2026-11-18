@@ -1,6 +1,6 @@
 name: Regenerate
 
-# Regenerates the client from a protocol openapi release with the generator attached to the chat release of the same version, then opens one PR that merges itself once its required checks pass. protocol dispatches on each release; the daily run catches a missed one.
+# Regenerates the client from a protocol openapi release with the generator attached to the chat release of the same version, then opens one PR that merges itself once its required checks and the integration tests pass. protocol dispatches on each release; the daily run catches a missed one.
 on:
   repository_dispatch:
     types: [openapi-release]
@@ -11,6 +11,11 @@ on:
       tag:
         description: Protocol release, e.g. openapi-v240.4.0. Empty takes the latest.
         required: false
+  # Each finished integration attempt is handled right away: a pass merges the PR, a first red one is rerun even after the run that pushed has given up waiting, and a red rerun reaches a human.
+  workflow_run:
+    workflows: [Regen integration]
+    types: [completed]
+    branches: [regen/auto]
 
 permissions: {}
 
@@ -21,12 +26,14 @@ concurrency:
 jobs:
   regen:
     name: Regenerate
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion != 'skipped'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     # The getstream-sdk-bot key lives only in this environment, which deploys from the default branch. The App pushes and merges, because GITHUB_TOKEN events start neither the PR checks nor the release run.
     environment: sdk-bot
-    # GITHUB_TOKEN reads the PR's checks, which the App has no permission for.
+    # GITHUB_TOKEN reads the PR's checks and the integration run, which the App has no permission for, and reruns a red run once.
     permissions:
+      actions: write
       checks: read
       contents: read
       pull-requests: read
@@ -49,6 +56,8 @@ jobs:
           permission-contents: read
       - uses: actions/checkout@v4
         with:
+          # The branch tip, not the commit of the event: a run queued behind another one must see the regen that one merged.
+          ref: ${{ github.ref }}
           token: ${{ steps.app.outputs.token }}
       - uses: actions/setup-go@v5
         with:
@@ -61,8 +70,15 @@ jobs:
           CHECKS_TOKEN: ${{ github.token }}
           APP_SLUG: ${{ steps.app.outputs.app-slug }}
           TAG: ${{ github.event.client_payload.tag || inputs.tag }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
         run: |
           set -euo pipefail
+          # An attempt that was already rerun leaves the PR to the newer attempt, whose own completion starts a run.
+          if [ -n "$RUN_ID" ]; then
+            latest=$(GH_TOKEN=$CHECKS_TOKEN gh run view "$RUN_ID" --json attempt --jq .attempt)
+            if [ "$latest" -gt "$RUN_ATTEMPT" ]; then echo "Regen integration run $RUN_ID has attempt $latest, newer than $RUN_ATTEMPT"; exit 0; fi
+          fi
           base=$GITHUB_REF_NAME
           branch=regen/auto
           bang='^[a-z]+(\([^)]*\))?!:'
@@ -78,7 +94,7 @@ jobs:
             if [ "${2:-}" = quiet ]; then echo "::notice::#$num $1, so a human merges it"; else human "$1, so a human merges it"; fi
             exit 0
           }
-          # Merges the open regen PR at commit $1 as the App once its required checks pass. Auto-merge waits for a code owner review although the App may bypass it, and gh refuses a blocked PR without --admin, which skips only what the App may bypass. GitHub refuses the merge while a required check has not reported yet, so a refusal only means try again.
+          # Merges the open regen PR at commit $1 as the App once its required checks and the Regen integration run on that commit pass. Auto-merge waits for a code owner review although the App may bypass it, and gh refuses a blocked PR without --admin, which skips only what the App may bypass. GitHub refuses the merge while a required check has not reported yet, so a refusal only means try again.
           land() {
             body=$(gh pr view "$num" --json body --jq .body)
             if grep -q '^BREAKING CHANGE: ' <<< "$body"; then hold "removes API"; fi
@@ -90,6 +106,20 @@ jobs:
                 *fail*|*cancel*) human "has a failing required check, so a human takes it from here"; exit 0 ;;
                 pass|pass,skipping|skipping,pass)
                   if [[ $(gh pr view "$num" --json title --jq .title) =~ $bang ]]; then hold "is marked as a major" quiet; fi
+                  run=$(GH_TOKEN=$CHECKS_TOKEN gh run list --workflow regen_integration.yml --commit "$1" --limit 1 --json databaseId,status,conclusion,attempt --jq '.[] | "\(.databaseId) \(.attempt) \(.status)/\(.conclusion // "")"' 2>&1) || true
+                  read -r id attempt state _ <<< "$run"
+                  conclusion=${state#completed/}
+                  case $state in
+                    completed/success) ;;
+                    # The shared app and the repo-wide run-integration concurrency group, which drops a queued run, make a first red or cancelled run often not the regen's fault. The workflow_run trigger merges once the rerun passes.
+                    completed/*)
+                      if [ "$attempt" = 1 ] && GH_TOKEN=$CHECKS_TOKEN gh run rerun "$id"; then echo "::notice::#$num reran its integration tests after a $conclusion, and a pass merges it"; exit 0; fi
+                      human "has integration tests that ended in $conclusion on attempt $attempt, so a human takes it from here"
+                      if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then echo "ping=true" >> "$GITHUB_OUTPUT"; fi
+                      exit 0 ;;
+                    ''|queued/|in_progress/|waiting/|pending/|requested/) continue ;;
+                    *) echo "::warning::could not read the Regen integration run of #$num at $1: $run"; continue ;;
+                  esac
                   gh pr merge "$num" --squash --admin --match-head-commit "$1" && exit 0 ;;
                 *) echo "::warning::could not read the required checks of #$num: $checks" ;;
               esac
@@ -122,6 +152,7 @@ jobs:
                 for _ in $(seq 30); do sleep 5; moved=$(gh pr view "$num" --json headRefOid --jq .headRefOid); [ "$moved" != "$head" ] && break; done
                 [ "$moved" != "$head" ] || { echo "::error::#$num did not move after taking in $base"; exit 1; }
                 head=$moved
+                echo "ping=true" >> "$GITHUB_OUTPUT"
               fi
               land "$head"
             fi
@@ -187,6 +218,7 @@ jobs:
           git add -A
           git -c user.name="${APP_SLUG}[bot]" -c user.email="$id+${APP_SLUG}[bot]@users.noreply.github.com" commit -q -m "$title"
           git push -q -f origin "$branch"
+          echo "ping=true" >> "$GITHUB_OUTPUT"
           if [ -n "$num" ]; then
             gh pr edit "$num" --title "$title" --body-file "$RUNNER_TEMP/body"
           else
@@ -194,13 +226,16 @@ jobs:
             num=${url##*/}
           fi
           land "$(git rev-parse HEAD)"
-      # A regen that merges itself stays quiet; one that needs a human, or a failed run, posts one line.
+      # A regen that merges itself stays quiet; one that needs a human, or a failed run, posts one line. The group is mentioned once per head commit, by the run that pushed it or the run a red integration rerun started, so a red PR left open is not pinged again on every dispatch.
       - name: Heads-up
         if: failure() || steps.regen.outputs.note != ''
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           NOTE: ${{ steps.regen.outputs.note }}
+          PING: ${{ steps.regen.outputs.ping }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then echo "SLACK_WEBHOOK_URL is not set, so nothing is posted"; exit 0; fi
-          jq -n --arg text ":warning: getstream-go auto-regen ${NOTE:-failed}. <$RUN|Details>" '{text: $text}' | curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK_URL"
+          mention=
+          if [ "$PING" = true ] || [ -z "$NOTE" ]; then mention='<!subteam^S0CE4DYJ9SA> '; fi
+          jq -n --arg text "${mention}:warning: getstream-go auto-regen ${NOTE:-failed}. <$RUN|Details>" '{text: $text}' | curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK_URL"

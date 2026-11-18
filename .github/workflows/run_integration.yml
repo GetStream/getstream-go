@@ -2,6 +2,11 @@ name: _run-integration
 
 on:
   workflow_call:
+    inputs:
+      freeze-app-config:
+        description: Skip the tests that write app-wide settings.
+        type: boolean
+        default: false
     secrets:
       STREAM_API_SECRET:
         # Lives in the feeds-enabled-shard environment, not at repo level, so it is not
@@ -36,4 +41,5 @@ jobs:
           STREAM_BASE_URL: ${{ vars.STREAM_BASE_URL }}
           STREAM_API_KEY: ${{ vars.STREAM_API_KEY }}
           STREAM_API_SECRET: ${{ secrets.STREAM_API_SECRET }}
+          STREAM_FREEZE_APP_CONFIG: ${{ inputs.freeze-app-config && 'true' || '' }}
         run: go test -v -race -parallel 16 -timeout 20m ./...

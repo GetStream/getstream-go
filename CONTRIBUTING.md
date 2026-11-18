@@ -61,7 +61,7 @@ The client regenerates itself on every chat production release:
 
 1. chat attaches its `openapi` generator to the release and publishes the matching `openapi-vX` spec release in [protocol](https://github.com/GetStream/protocol).
 2. protocol notifies this repo, and the **Regenerate** workflow opens one PR from `regen/auto`, titled `feat: regenerate client from openapi-vX`. Its `BEGIN_COMMIT_OVERRIDE` block lists the changelog lines.
-3. Once the required checks pass, the PR merges itself, and release-please adds those lines to the Release PR. Merging the Release PR ships, as described under Release.
+3. Once the required checks pass and the **Regen integration** run passes on the PR's head commit, the PR merges itself, and release-please adds those lines to the Release PR. Merging the Release PR ships, as described under Release.
 
 A regen PR waits for a human when it removes API (its changelog carries a `BREAKING CHANGE:` footer), when the `Breaking changes check` finds an approved breaking change in the new spec, or when a required check fails. Only `getstream-sdk-bot` can push to `regen/**`.
 
@@ -70,6 +70,7 @@ A regen PR waits for a human when it removes API (its changelog carries a `BREAK
 - **Regenerate now:** run **Regenerate** from the Actions tab with an `openapi-vX` tag, or leave it empty for the latest. Locally, `SPEC_TAG=openapi-vX ./generate.sh` does the same with the generator built from a `../chat` checkout at that tag.
 - **A breaking change that breaks this SDK:** add `!` to the PR title, and before `END_COMMIT_OVERRIDE` add a blank line and `BREAKING CHANGE: <what breaks for customers>`. Then merge it yourself in a breaking-change window, with the migration described under Major versions.
 - **An approved breaking change that does not break this SDK:** label the PR `sdk-not-breaking` and name each ticket the check lists in the PR body. The next Regenerate run merges it, daily at 06:23 UTC or when you start one.
+- **Failed integration tests:** the tests share their Stream app with other SDKs' CI, so the Regenerate run reruns a red or cancelled **Regen integration** run once by itself, and merges the PR when the rerun passes. If the rerun is red too, fix the cause or rerun it again; a pass merges the PR. If no run started for the PR's head commit, start **Regen integration** on `regen/auto` from the Actions tab. The regen run skips the tests that write app-wide settings; the daily **Scheduled tests** run keeps them.
 - **Rewrite a changelog line:** edit the `BEGIN_COMMIT_OVERRIDE` block in the merged PR's body, then run the **Release** workflow to rebuild the Release PR. Keep ticket IDs out of PR titles; the title check rejects them, because a title becomes a changelog line.
 
 ## Release (for Stream developers)

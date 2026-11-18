@@ -6,6 +6,7 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -131,6 +132,14 @@ func skipIfShort(t *testing.T) {
 	t.Helper()
 	if testing.Short() {
 		t.Skip("Skipping integration test in short mode")
+	}
+}
+
+// skipIfAppConfigFrozen skips a test that writes app-wide settings when STREAM_FREEZE_APP_CONFIG is set, because the app is shared with other SDKs' CI.
+func skipIfAppConfigFrozen(t *testing.T) {
+	t.Helper()
+	if os.Getenv("STREAM_FREEZE_APP_CONFIG") != "" {
+		t.Skip("Skipping a test that writes app-wide settings: STREAM_FREEZE_APP_CONFIG is set")
 	}
 }
 
