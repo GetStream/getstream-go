@@ -88,7 +88,7 @@ jobs:
             echo "::notice::#$num $1"
             echo "note=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$num|#$num> $1" >> "$GITHUB_OUTPUT"
           }
-          # Leaves a major to a human, who merges it in a breaking-change window, and disarms any auto-merge so an approval alone cannot merge it. A `!` title means a human already took the PR, so that hold is not posted again on every run.
+          # Leaves a major to a human, who merges it in a breaking-change window, and disarms any auto-merge so an approval alone cannot merge it. The run that writes a `!` title posts the hold from land(); a `!` title already on the open PR means a human took it or an earlier run posted, so that hold stays quiet.
           hold() {
             gh pr merge "$num" --disable-auto 2>/dev/null || true
             if [ "${2:-}" = quiet ]; then echo "::notice::#$num $1, so a human merges it"; else human "$1, so a human merges it"; fi
@@ -97,7 +97,7 @@ jobs:
           # Merges the open regen PR at commit $1 as the App once its required checks and the Regen integration run on that commit pass. Auto-merge waits for a code owner review although the App may bypass it, and gh refuses a blocked PR without --admin, which skips only what the App may bypass. GitHub refuses the merge while a required check has not reported yet, so a refusal only means try again.
           land() {
             body=$(gh pr view "$num" --json body --jq .body)
-            if grep -q '^BREAKING CHANGE: ' <<< "$body"; then hold "removes API"; fi
+            if grep -q '^BREAKING CHANGE: ' <<< "$body"; then hold "carries breaking changes"; fi
             for _ in $(seq 45); do
               sleep 60
               checks=$(GH_TOKEN=$CHECKS_TOKEN gh pr checks "$num" --required --json bucket --jq '[.[].bucket] | unique | join(",")' 2>&1) || true
@@ -135,7 +135,7 @@ jobs:
           current=$(sed -n 's/^spec: //p' .spec-version)
           if [ "$(newest "$current" "$TAG")" = "$current" ]; then echo "$base is at $current, which is not older than $TAG"; exit 0; fi
 
-          # An open PR a human marked breaking or not breaking is not regenerated, so the judgement stays with the spec it was made on.
+          # An open PR marked breaking, or labelled not breaking by a human, is not regenerated, so the judgement stays with the spec it was made on.
           num=
           pr=$(gh pr list --head "$branch" --base "$base" --state open --json number,title,labels,headRefOid --jq '.[0] // empty')
           if [ -n "$pr" ]; then
@@ -192,15 +192,28 @@ jobs:
           # Keeps the fields of schemas and operations present in both specs; a new or removed one stands for its own fields.
           kept() { while read -r f; do if grep -Eqx "(type|op) ${f%%.*}" "$RUNNER_TEMP/old" && grep -Eqx "(type|op) ${f%%.*}" "$RUNNER_TEMP/new"; then echo "$f"; fi; done; }
           group() { awk -F. -v word="$1" '{ f[$1] = (f[$1] ? f[$1] ", " : "") $2 } END { for (t in f) print f[t] " " word " " t }' | sort; }
+          # The approved breaking changes the new spec brings, as chat allowlisted them: the lines of each ticket the current spec does not list. A spec from before chat published the lines yields none, and the Breaking changes check leaves the PR to a human.
+          : > "$RUNNER_TEMP/breaking"
+          if yq -e '.info."x-stream-breaking-changes"' "$RUNNER_TEMP/$current.yaml" > /dev/null; then
+            tickets() { yq -r '.info."x-stream-breaking-changes" | (.wire // []) + (.go // []) | .[]' "$RUNNER_TEMP/$1.yaml" | sort -u > "$RUNNER_TEMP/$1.tickets"; }
+            tickets "$current"
+            tickets "$TAG"
+            comm -13 "$RUNNER_TEMP/$current.tickets" "$RUNNER_TEMP/$TAG.tickets" | while read -r t; do
+              t=$t yq -r '.info."x-stream-breaking-change-lines"[strenv(t)] | (.wire // []) + (.go // []) | .[]' "$RUNNER_TEMP/$TAG.yaml"
+            done | awk 'NF && !seen[$0]++' > "$RUNNER_TEMP/breaking"
+          fi
           {
             added op | sed 's/^/feat: add /'
             added type | { grep 'Event$' || true; } | sed 's/^/feat: add webhook event /'
             added field | kept | group to | sed 's/^/feat: add /'
             { removed op; removed type; removed field | kept | group from; } | while read -r r; do printf 'feat: remove %s\n\nBREAKING CHANGE: removes %s\n' "$r" "$r"; done
+            # release-please keeps one BREAKING CHANGE footer per entry, so each line gets its own.
+            while read -r line; do printf 'feat: %s\n\nBREAKING CHANGE: %s\n' "$line" "$line"; done < "$RUNNER_TEMP/breaking"
           } | awk 'NR > 1 && /^feat: / { print "" } { print }' > "$RUNNER_TEMP/changelog"
 
           type=chore
           if [ -s "$RUNNER_TEMP/changelog" ]; then type=feat; fi
+          if [ -s "$RUNNER_TEMP/breaking" ]; then type='feat!'; fi
           title="$type: regenerate client from $TAG"
           {
             echo "Regenerated from protocol [\`$TAG\`](https://github.com/GetStream/protocol/releases/tag/$TAG) with the generator from chat \`${TAG#openapi-}\`."
