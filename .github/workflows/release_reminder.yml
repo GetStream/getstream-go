@@ -2,7 +2,7 @@ name: Release PR reminder
 
 on:
   schedule:
-    - cron: '37 8 * * *'
+    - cron: '37 8 * * 1-5'
   workflow_dispatch:
 
 permissions: {}
@@ -23,8 +23,8 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then echo "SLACK_WEBHOOK_URL is not set, so nothing is posted"; exit 0; fi
-          waiting="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --label 'autorelease: pending' --json url,title,createdAt --jq '
-            map(select((.title | startswith("chore(main): release ")) and (.createdAt | fromdateiso8601) < now - 2 * 86400))
+          waiting="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --label 'autorelease: pending' --json url,title,createdAt,labels --jq '
+            map(select((.title | startswith("chore(main): release ")) and (.createdAt | fromdateiso8601) < now - 2 * 86400 and all(.labels[]; .name != "release: hold")))
             | .[0] // empty | "<\(.url)|\(.title)> has waited \((now - (.createdAt | fromdateiso8601)) / 86400 | floor) days for a review."')"
           if [ -z "$waiting" ]; then echo "No Release PR has waited more than 2 days"; exit 0; fi
           jq -n --arg text ":hourglass: <!subteam^S0CE4DYJ9SA> getstream-go $waiting" '{text: $text}' | curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK_URL"
