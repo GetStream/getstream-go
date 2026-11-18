@@ -94,6 +94,13 @@ jobs:
             if [ "${2:-}" = quiet ]; then echo "::notice::#$num $1, so a human merges it"; else human "$1, so a human merges it"; fi
             exit 0
           }
+          # Whether a human took the open `!` PR: a `!` the regen wrote moves on with each newer tag, and a human takes the PR by renaming it or editing its body. A read error stops the run rather than overwrite their edit.
+          took() {
+            [[ $(gh pr view "$num" --json title --jq .title) =~ $bang ]] || return 1
+            t=$(gh api graphql -F owner="${GITHUB_REPOSITORY%/*}" -F name="${GITHUB_REPOSITORY#*/}" -F n="$num" -f query='query($owner: String!, $name: String!, $n: Int!) { repository(owner: $owner, name: $name) { pullRequest(number: $n) { editor { __typename } timelineItems(itemTypes: [RENAMED_TITLE_EVENT], last: 100) { nodes { ... on RenamedTitleEvent { actor { __typename } } } } } } }' \
+              --jq '.data.repository.pullRequest | [(.editor.__typename // "Bot"), (.timelineItems.nodes[].actor.__typename)] | any(. != "Bot")') || { echo "::error::could not read who edited #$num"; exit 1; }
+            [ "$t" = true ]
+          }
           # Merges the open regen PR at commit $1 as the App once its required checks and the Regen integration run on that commit pass. Auto-merge waits for a code owner review although the App may bypass it, and gh refuses a blocked PR without --admin, which skips only what the App may bypass. GitHub refuses the merge while a required check has not reported yet, so a refusal only means try again.
           land() {
             body=$(gh pr view "$num" --json body --jq .body)
@@ -139,17 +146,13 @@ jobs:
           current=$(sed -n 's/^spec: //p' .spec-version)
           if [ "$(newest "$current" "$TAG")" = "$current" ]; then echo "$base is at $current, which is not older than $TAG"; exit 0; fi
 
-          # An open PR a human marked breaking or not breaking is not regenerated, so the judgement stays with the spec it was made on. A `!` the regen wrote moves on with each newer tag; a human took the PR once they renamed it or edited its body.
+          # An open PR a human marked breaking or not breaking is not regenerated, so the judgement stays with the spec it was made on.
           num=
           pr=$(gh pr list --head "$branch" --base "$base" --state open --json number,title,labels,headRefOid --jq '.[0] // empty')
           if [ -n "$pr" ]; then
             num=$(jq -r .number <<< "$pr")
             title=$(jq -r .title <<< "$pr")
-            if [[ $title =~ $bang ]]; then
-              taken=$(gh api graphql -F owner="${GITHUB_REPOSITORY%/*}" -F name="${GITHUB_REPOSITORY#*/}" -F n="$num" -f query='query($owner: String!, $name: String!, $n: Int!) { repository(owner: $owner, name: $name) { pullRequest(number: $n) { editor { __typename } timelineItems(itemTypes: [RENAMED_TITLE_EVENT], last: 100) { nodes { ... on RenamedTitleEvent { actor { __typename } } } } } } }' \
-                --jq '.data.repository.pullRequest | [(.editor.__typename // "Bot"), (.timelineItems.nodes[].actor.__typename)] | any(. != "Bot")')
-              if [ "$taken" = true ]; then hold "is marked as a major" quiet; fi
-            fi
+            if took; then hold "is marked as a major" quiet; fi
             head=$(jq -r .headRefOid <<< "$pr")
             behind=$(gh api "repos/$GITHUB_REPOSITORY/compare/$base...$branch" --jq .behind_by)
             # Regenerating would drop the tickets a human named in the body, so a labelled PR that fell behind takes in the base with a merge, as the up-to-date rule requires.
@@ -245,6 +248,8 @@ jobs:
           } > "$RUNNER_TEMP/body"
           cat "$RUNNER_TEMP/body"
 
+          # Generating takes minutes, so a human may have taken the PR since the check above.
+          if [ -n "$num" ] && took; then hold "is marked as a major" quiet; fi
           id=$(gh api "users/${APP_SLUG}[bot]" --jq .id)
           git switch -q -C "$branch"
           git add -A
