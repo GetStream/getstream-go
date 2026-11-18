@@ -13946,6 +13946,8 @@ type ScheduledMessageContentResponse struct {
 	MentionedUsers []string `json:"mentioned_users,omitempty"`
 	// IDs of the users the message will be visible to
 	RestrictedVisibility []string `json:"restricted_visibility,omitempty"`
+	// Represents any chat message
+	QuotedMessage *MessageResponse `json:"quoted_message,omitempty"`
 	// The location a scheduled message will share
 	SharedLocation *ScheduledMessageLocation `json:"shared_location,omitempty"`
 }
