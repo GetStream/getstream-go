@@ -88,7 +88,7 @@ jobs:
             echo "::notice::#$num $1"
             echo "note=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$num|#$num> $1" >> "$GITHUB_OUTPUT"
           }
-          # Leaves a major to a human, who merges it in a breaking-change window, and disarms any auto-merge so an approval alone cannot merge it. The run that writes a `!` title posts the hold from land(); a `!` title already on the open PR means a human took it or an earlier run posted, so that hold stays quiet.
+          # Leaves a major to a human, who merges it in a breaking-change window, and disarms any auto-merge so an approval alone cannot merge it.
           hold() {
             gh pr merge "$num" --disable-auto 2>/dev/null || true
             if [ "${2:-}" = quiet ]; then echo "::notice::#$num $1, so a human merges it"; else human "$1, so a human merges it"; fi
@@ -97,7 +97,11 @@ jobs:
           # Merges the open regen PR at commit $1 as the App once its required checks and the Regen integration run on that commit pass. Auto-merge waits for a code owner review although the App may bypass it, and gh refuses a blocked PR without --admin, which skips only what the App may bypass. GitHub refuses the merge while a required check has not reported yet, so a refusal only means try again.
           land() {
             body=$(gh pr view "$num" --json body --jq .body)
-            if grep -q '^BREAKING CHANGE: ' <<< "$body"; then hold "carries breaking changes"; fi
+            # Posted when this run changed the PR's breaking changes ($prev is the body it replaced), not on every run that finds them unchanged.
+            if grep -q '^BREAKING CHANGE: ' <<< "$body"; then
+              if [ "$(grep '^BREAKING CHANGE: ' <<< "$body")" = "$(grep '^BREAKING CHANGE: ' <<< "${prev-$body}" || true)" ]; then hold "carries breaking changes" quiet; fi
+              hold "carries breaking changes"
+            fi
             for _ in $(seq 45); do
               sleep 60
               checks=$(GH_TOKEN=$CHECKS_TOKEN gh pr checks "$num" --required --json bucket --jq '[.[].bucket] | unique | join(",")' 2>&1) || true
@@ -135,13 +139,17 @@ jobs:
           current=$(sed -n 's/^spec: //p' .spec-version)
           if [ "$(newest "$current" "$TAG")" = "$current" ]; then echo "$base is at $current, which is not older than $TAG"; exit 0; fi
 
-          # An open PR marked breaking, or labelled not breaking by a human, is not regenerated, so the judgement stays with the spec it was made on.
+          # An open PR a human marked breaking or not breaking is not regenerated, so the judgement stays with the spec it was made on. A `!` the regen wrote moves on with each newer tag; a human took the PR once they renamed it or edited its body.
           num=
           pr=$(gh pr list --head "$branch" --base "$base" --state open --json number,title,labels,headRefOid --jq '.[0] // empty')
           if [ -n "$pr" ]; then
             num=$(jq -r .number <<< "$pr")
             title=$(jq -r .title <<< "$pr")
-            if [[ $title =~ $bang ]]; then hold "is marked as a major" quiet; fi
+            if [[ $title =~ $bang ]]; then
+              taken=$(gh api graphql -F owner="${GITHUB_REPOSITORY%/*}" -F name="${GITHUB_REPOSITORY#*/}" -F n="$num" -f query='query($owner: String!, $name: String!, $n: Int!) { repository(owner: $owner, name: $name) { pullRequest(number: $n) { editor { __typename } timelineItems(itemTypes: [RENAMED_TITLE_EVENT], last: 100) { nodes { ... on RenamedTitleEvent { actor { __typename } } } } } } }' \
+                --jq '.data.repository.pullRequest | [(.editor.__typename // "Bot"), (.timelineItems.nodes[].actor.__typename)] | any(. != "Bot")')
+              if [ "$taken" = true ]; then hold "is marked as a major" quiet; fi
+            fi
             head=$(jq -r .headRefOid <<< "$pr")
             behind=$(gh api "repos/$GITHUB_REPOSITORY/compare/$base...$branch" --jq .behind_by)
             # Regenerating would drop the tickets a human named in the body, so a labelled PR that fell behind takes in the base with a merge, as the up-to-date rule requires.
@@ -192,28 +200,39 @@ jobs:
           # Keeps the fields of schemas and operations present in both specs; a new or removed one stands for its own fields.
           kept() { while read -r f; do if grep -Eqx "(type|op) ${f%%.*}" "$RUNNER_TEMP/old" && grep -Eqx "(type|op) ${f%%.*}" "$RUNNER_TEMP/new"; then echo "$f"; fi; done; }
           group() { awk -F. -v word="$1" '{ f[$1] = (f[$1] ? f[$1] ", " : "") $2 } END { for (t in f) print f[t] " " word " " t }' | sort; }
-          # The approved breaking changes the new spec brings, as chat allowlisted them: the lines of each ticket the current spec does not list. A spec from before chat published the lines yields none, and the Breaking changes check leaves the PR to a human.
+          # The approved breaking changes the new spec brings, as chat allowlisted them, one "ticket TAB kind TAB line" each. With lines on both sides it diffs the lines, since chat may append one under a header an earlier tag published; against a current spec from before the lines, it takes the lines of each new ticket. A new spec without lines yields none, and the Breaking changes check leaves the PR to a human.
+          triples() { yq -r '.info."x-stream-breaking-change-lines" // {} | to_entries | .[] | .key as $t | ((.value.go // []) | map([$t, "go", .] | join("\t"))) + ((.value.wire // []) | map([$t, "wire", .] | join("\t"))) | .[]' "$RUNNER_TEMP/$1.yaml"; }
+          tickets() { yq -r '.info."x-stream-breaking-changes" | (.wire // []) + (.go // []) | .[]' "$RUNNER_TEMP/$1.yaml"; }
           : > "$RUNNER_TEMP/breaking"
-          if yq -e '.info."x-stream-breaking-changes"' "$RUNNER_TEMP/$current.yaml" > /dev/null; then
-            tickets() { yq -r '.info."x-stream-breaking-changes" | (.wire // []) + (.go // []) | .[]' "$RUNNER_TEMP/$1.yaml" | sort -u > "$RUNNER_TEMP/$1.tickets"; }
-            tickets "$current"
-            tickets "$TAG"
-            comm -13 "$RUNNER_TEMP/$current.tickets" "$RUNNER_TEMP/$TAG.tickets" | while read -r t; do
-              t=$t yq -r '.info."x-stream-breaking-change-lines"[strenv(t)] | (.wire // []) + (.go // []) | .[]' "$RUNNER_TEMP/$TAG.yaml"
-            done | awk 'NF && !seen[$0]++' > "$RUNNER_TEMP/breaking"
+          if yq -e '.info."x-stream-breaking-change-lines"' "$RUNNER_TEMP/$current.yaml" > /dev/null 2>&1; then
+            triples "$TAG" | awk -F'\t' 'FILENAME != "-" { old[$2 FS $3]; next } !(($2 FS $3) in old)' <(triples "$current") - > "$RUNNER_TEMP/breaking"
+          elif yq -e '.info."x-stream-breaking-changes"' "$RUNNER_TEMP/$current.yaml" > /dev/null 2>&1; then
+            triples "$TAG" | awk -F'\t' 'FILENAME != "-" { old[$0]; next } !($1 in old)' <(tickets "$current") - > "$RUNNER_TEMP/breaking"
           fi
+          # One entry per Go type, from a ticket's Go lines, or from its wire lines when it has none: "Type: Field change; Field change". Top-level names with the same change share one entry, wire lines group by their schema or endpoint. The list stops well below GitHub's 65,536-character PR body. release-please keeps one BREAKING CHANGE footer per entry, and only its last line.
+          breaking() {
+            awk -F'\t' '{ t[NR] = $1; k[NR] = $2; l[NR] = $3; if ($2 == "go") go[$1] } END { for (i = 1; i <= NR; i++) if ((k[i] == "go") == (t[i] in go) && !seen[k[i] FS l[i]]++) print k[i] FS l[i] }' "$RUNNER_TEMP/breaking" \
+              | awk -F'\t' '
+                  $1 == "go" && match($2, /^(\(\*?)?[A-Za-z0-9_]+\)?\.[A-Za-z0-9_]+: /) { h = substr($2, 1, RLENGTH - 2); gsub(/[(*)]/, "", h); t = h; sub(/\..*/, "", t); sub(/^[^.]*\./, "", h); g[t] = ((t in g) ? g[t] "; " : t ": ") h " " substr($2, RLENGTH + 1); next }
+                  $1 == "go" && match($2, /^[A-Za-z0-9_]+: /) { r = substr($2, RLENGTH + 1); n[r] = ((r in n) ? n[r] ", " : "") substr($2, 1, RLENGTH - 2); next }
+                  $1 == "wire" && match($2, /^(GET|POST|PUT|PATCH|DELETE) [^ ]+ /) { t = substr($2, 1, RLENGTH - 1); g[t] = ((t in g) ? g[t] "; " : t ": ") substr($2, RLENGTH + 1); next }
+                  $1 == "wire" && match($2, /'\''[A-Z][A-Za-z0-9_]*\//) { t = substr($2, RSTART + 1, RLENGTH - 2); g[t] = ((t in g) ? g[t] "; " : "") $2; next }
+                  { g[$2] = $2 }
+                  END { for (t in g) print t "\t" g[t]; for (r in n) print n[r] "\t" n[r] ": " r }' \
+              | sort | awk -F'\t' '{ e = sprintf("feat: change %s\n\nBREAKING CHANGE: %s\n", $1, $2); if (size + length(e) > 40000) { more++; next } size += length(e); printf "%s", e }
+                  END { if (more) printf "feat: change %d more APIs\n\nBREAKING CHANGE: %d more API changes are left out to fit the PR body\n", more, more }'
+          }
           {
             added op | sed 's/^/feat: add /'
             added type | { grep 'Event$' || true; } | sed 's/^/feat: add webhook event /'
             added field | kept | group to | sed 's/^/feat: add /'
             { removed op; removed type; removed field | kept | group from; } | while read -r r; do printf 'feat: remove %s\n\nBREAKING CHANGE: removes %s\n' "$r" "$r"; done
-            # release-please keeps one BREAKING CHANGE footer per entry, so each line gets its own.
-            while read -r line; do printf 'feat: %s\n\nBREAKING CHANGE: %s\n' "$line" "$line"; done < "$RUNNER_TEMP/breaking"
+            breaking
           } | awk 'NR > 1 && /^feat: / { print "" } { print }' > "$RUNNER_TEMP/changelog"
 
           type=chore
           if [ -s "$RUNNER_TEMP/changelog" ]; then type=feat; fi
-          if [ -s "$RUNNER_TEMP/breaking" ]; then type='feat!'; fi
+          if grep -q '^BREAKING CHANGE: ' "$RUNNER_TEMP/changelog"; then type='feat!'; fi
           title="$type: regenerate client from $TAG"
           {
             echo "Regenerated from protocol [\`$TAG\`](https://github.com/GetStream/protocol/releases/tag/$TAG) with the generator from chat \`${TAG#openapi-}\`."
@@ -233,8 +252,10 @@ jobs:
           git push -q -f origin "$branch"
           echo "ping=true" >> "$GITHUB_OUTPUT"
           if [ -n "$num" ]; then
+            prev=$(gh pr view "$num" --json body --jq .body)
             gh pr edit "$num" --title "$title" --body-file "$RUNNER_TEMP/body"
           else
+            prev=
             url=$(gh pr create --base "$base" --head "$branch" --title "$title" --body-file "$RUNNER_TEMP/body")
             num=${url##*/}
           fi
