@@ -1,6 +1,6 @@
 name: Regenerate
 
-# Regenerates the client from a protocol openapi release with the generator attached to the chat release of the same version, then opens one PR that merges itself once its required checks pass. protocol dispatches on each release; the daily run catches a missed one.
+# Regenerates the client from a protocol openapi release with the generator attached to the chat release of the same version, then opens one PR that merges itself once its required checks and the integration tests pass. protocol dispatches on each release; the daily run catches a missed one.
 on:
   repository_dispatch:
     types: [openapi-release]
@@ -78,7 +78,7 @@ jobs:
             if [ "${2:-}" = quiet ]; then echo "::notice::#$num $1, so a human merges it"; else human "$1, so a human merges it"; fi
             exit 0
           }
-          # Merges the open regen PR at commit $1 as the App once its required checks pass. Auto-merge waits for a code owner review although the App may bypass it, and gh refuses a blocked PR without --admin, which skips only what the App may bypass. GitHub refuses the merge while a required check has not reported yet, so a refusal only means try again.
+          # Merges the open regen PR at commit $1 as the App once its required checks and the Regen integration run on that commit pass. Auto-merge waits for a code owner review although the App may bypass it, and gh refuses a blocked PR without --admin, which skips only what the App may bypass. GitHub refuses the merge while a required check has not reported yet, so a refusal only means try again.
           land() {
             body=$(gh pr view "$num" --json body --jq .body)
             if grep -q '^BREAKING CHANGE: ' <<< "$body"; then hold "removes API"; fi
@@ -90,6 +90,12 @@ jobs:
                 *fail*|*cancel*) human "has a failing required check, so a human takes it from here"; exit 0 ;;
                 pass|pass,skipping|skipping,pass)
                   if [[ $(gh pr view "$num" --json title --jq .title) =~ $bang ]]; then hold "is marked as a major" quiet; fi
+                  integration=$(GH_TOKEN=$CHECKS_TOKEN gh pr checks "$num" --json workflow,bucket --jq '[.[] | select(.workflow == "Regen integration") | .bucket] | unique | join(",")' 2>/dev/null) || true
+                  case $integration in
+                    pass) ;;
+                    *fail*|*cancel*) human "failed the integration tests, so a human takes it from here"; exit 0 ;;
+                    *) continue ;;
+                  esac
                   gh pr merge "$num" --squash --admin --match-head-commit "$1" && exit 0 ;;
                 *) echo "::warning::could not read the required checks of #$num: $checks" ;;
               esac
@@ -203,4 +209,4 @@ jobs:
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then echo "SLACK_WEBHOOK_URL is not set, so nothing is posted"; exit 0; fi
-          jq -n --arg text ":warning: getstream-go auto-regen ${NOTE:-failed}. <$RUN|Details>" '{text: $text}' | curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK_URL"
+          jq -n --arg text "<!subteam^S0CE4DYJ9SA> :warning: getstream-go auto-regen ${NOTE:-failed}. <$RUN|Details>" '{text: $text}' | curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK_URL"
