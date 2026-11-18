@@ -1471,6 +1471,7 @@ func TestChatAppFileUploadConfigIntegration(t *testing.T) {
 func TestChatEventHooksIntegration(t *testing.T) {
 	t.Parallel()
 	skipIfShort(t)
+	skipIfAppConfigFrozen(t)
 	client := initClient(t)
 	ctx := context.Background()
 
