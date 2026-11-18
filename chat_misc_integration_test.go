@@ -489,6 +489,7 @@ func TestChatAppSettingsIntegration(t *testing.T) {
 	})
 
 	t.Run("UpdateAndVerifyApp", func(t *testing.T) {
+		skipIfAppConfigFrozen(t)
 		// Get current settings to restore later
 		getResp, err := client.GetApp(ctx, &GetAppRequest{})
 		require.NoError(t, err)
@@ -1410,6 +1411,7 @@ func TestChatCheckSQSSNSPushIntegration(t *testing.T) {
 func TestChatAppFileUploadConfigIntegration(t *testing.T) {
 	t.Parallel()
 	skipIfShort(t)
+	skipIfAppConfigFrozen(t)
 	client := initClient(t)
 	ctx := context.Background()
 

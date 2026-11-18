@@ -1942,6 +1942,7 @@ func test36BatchFeedOperations(t *testing.T, ctx context.Context, feedsClient *g
 }
 
 func testFileUploadIntegration(t *testing.T, ctx context.Context, client *getstream.Stream, testUserID string) {
+	skipIfAppConfigFrozen(t)
 	// Serialize app-config mutation (see appConfigMu): this UpdateApp sends
 	// size_limit=0 and would clobber a concurrent config test's read-back.
 	// defer-unlock runs after the restore defer below (defers are LIFO).
@@ -2000,6 +2001,7 @@ func testFileUploadIntegration(t *testing.T, ctx context.Context, client *getstr
 }
 
 func testImageUploadIntegration(t *testing.T, ctx context.Context, client *getstream.Stream, testUserID string) {
+	skipIfAppConfigFrozen(t)
 	// Clear any image upload restrictions so we can upload .png files
 	appResp, err := client.GetApp(ctx, &getstream.GetAppRequest{})
 	require.NoError(t, err, "Failed to get app config")

@@ -835,6 +835,7 @@ func TestChatChannelIntegration(t *testing.T) {
 	})
 
 	t.Run("UploadAndDeleteFile", func(t *testing.T) {
+		skipIfAppConfigFrozen(t)
 		// Serialize app-config mutation (see appConfigMu): this UpdateApp sends
 		// size_limit=0 and would clobber a concurrent config test's read-back.
 		// defer-unlock runs after the restore defer below (defers are LIFO).
