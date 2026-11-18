@@ -1,0 +1,27 @@
+name: Release PR body
+
+# release-please publishes the Release PR body as the release notes, and the release notification goes out before any later edit, so whatever a bot appends below release-please's footer (Cursor Bugbot's summary) is cut from the body as soon as it lands.
+on:
+  pull_request:
+    types: [edited]
+
+permissions: {}
+
+jobs:
+  trim:
+    name: Trim the Release PR body
+    if: startsWith(github.head_ref, 'release-please--branches--')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Cut everything below the release-please footer
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json body --jq .body > "${RUNNER_TEMP}/body.md"
+          awk '{ print } /^This PR was generated with \[Release Please\]/ { exit }' "${RUNNER_TEMP}/body.md" > "${RUNNER_TEMP}/trimmed.md"
+          if cmp -s "${RUNNER_TEMP}/body.md" "${RUNNER_TEMP}/trimmed.md"; then echo "Nothing below the footer"; exit 0; fi
+          gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --body-file "${RUNNER_TEMP}/trimmed.md"

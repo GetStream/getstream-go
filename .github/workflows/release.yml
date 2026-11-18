@@ -205,3 +205,22 @@ jobs:
           manifest-file: .release-please-manifest.json
           target-branch: ${{ github.ref_name }}
           skip-github-pull-request: true
+      # release-please copies the notes from the Release PR body, which also carries its own footer and whatever a bot appends below it. release_pr_body.yml keeps the body clean; this is the backstop. A re-run skips this step once the release exists, so a failure names the manual fix.
+      - name: Publish the changelog section as the release notes
+        if: steps.release.outputs.release_created == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag_name }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          manual="Fix it by hand: gh release edit $TAG --repo $GITHUB_REPOSITORY --notes-file notes.md, with the $VERSION section of CHANGELOG.md at $TAG in notes.md."
+          retry() { for i in 1 2 3; do "$@" && return; [ "$i" = 3 ] || sleep 10; done; return 1; }
+          fetch() { gh api "repos/${GITHUB_REPOSITORY}/contents/CHANGELOG.md?ref=${TAG}" -H "Accept: application/vnd.github.raw" > "${RUNNER_TEMP}/changelog.md"; }
+          retry fetch || { echo "::error::Could not read CHANGELOG.md at ${TAG}. $manual"; exit 1; }
+          awk -v v="$VERSION" '/^##+ \[/ { if (p) exit; p = index($0, "[" v "]") > 0 } p' "${RUNNER_TEMP}/changelog.md" > "${RUNNER_TEMP}/notes.md"
+          if [ ! -s "${RUNNER_TEMP}/notes.md" ]; then
+            echo "::error::CHANGELOG.md at ${TAG} has no section for ${VERSION}, so the release keeps the notes from the Release PR body. $manual"
+            exit 1
+          fi
+          retry gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file "${RUNNER_TEMP}/notes.md" || { echo "::error::Could not update the ${TAG} notes. $manual"; exit 1; }
