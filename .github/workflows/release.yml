@@ -205,3 +205,18 @@ jobs:
           manifest-file: .release-please-manifest.json
           target-branch: ${{ github.ref_name }}
           skip-github-pull-request: true
+      # release-please copies the notes from the Release PR body, which also carries its own footer and whatever a bot appends below it.
+      - name: Publish the changelog section as the release notes
+        if: steps.release.outputs.release_created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag_name }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/contents/CHANGELOG.md?ref=${TAG}" -H "Accept: application/vnd.github.raw" \
+            | awk -v v="$VERSION" '/^##+ \[/ { if (p) exit; p = index($0, "[" v "]") > 0 } p' > "${RUNNER_TEMP}/notes.md"
+          if [ ! -s "${RUNNER_TEMP}/notes.md" ]; then
+            echo "::error::CHANGELOG.md at ${TAG} has no section for ${VERSION}, so the release keeps the notes from the Release PR body."
+            exit 1
+          fi
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file "${RUNNER_TEMP}/notes.md"
