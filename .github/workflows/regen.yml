@@ -11,7 +11,7 @@ on:
       tag:
         description: Protocol release, e.g. openapi-v240.4.0. Empty takes the latest.
         required: false
-  # A passing rerun of the integration tests merges the PR without waiting for the next dispatch, and a red rerun reaches a human right away.
+  # Each finished integration attempt is handled right away: a pass merges the PR, a first red one is rerun even after the run that pushed has given up waiting, and a red rerun reaches a human.
   workflow_run:
     workflows: [Regen integration]
     types: [completed]
@@ -26,7 +26,7 @@ concurrency:
 jobs:
   regen:
     name: Regenerate
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.run_attempt > 1
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion != 'skipped'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     # The getstream-sdk-bot key lives only in this environment, which deploys from the default branch. The App pushes and merges, because GITHUB_TOKEN events start neither the PR checks nor the release run.
@@ -70,8 +70,12 @@ jobs:
           CHECKS_TOKEN: ${{ github.token }}
           APP_SLUG: ${{ steps.app.outputs.app-slug }}
           TAG: ${{ github.event.client_payload.tag || inputs.tag }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
         run: |
           set -euo pipefail
+          # An attempt that was already rerun leaves the PR to the newer attempt, whose own completion starts a run.
+          if [ -n "$RUN_ID" ] && [ "$(GH_TOKEN=$CHECKS_TOKEN gh run view "$RUN_ID" --json attempt --jq .attempt)" != "$RUN_ATTEMPT" ]; then echo "Regen integration run $RUN_ID has an attempt newer than $RUN_ATTEMPT"; exit 0; fi
           base=$GITHUB_REF_NAME
           branch=regen/auto
           bang='^[a-z]+(\([^)]*\))?!:'
