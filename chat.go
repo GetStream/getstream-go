@@ -1017,7 +1017,7 @@ func (c *ChatClient) QueryScheduledMessages(ctx context.Context, request *QueryS
 	return res, err
 }
 
-// Cancels a scheduled message so it is never sent, or removes a failed one. Returns 409 while the message is being sent
+// Cancels a scheduled message so it is never sent, or removes a failed one. Returns 409 while the message is being sent. Returns 400 scheduled_message_already_sent (code 123) when the message was already sent and 400 scheduled_message_canceled (code 124) when it was deleted
 //
 // Sends events:
 // - scheduled_message.deleted
@@ -1030,7 +1030,7 @@ func (c *ChatClient) DeleteScheduledMessage(ctx context.Context, id string, requ
 	return res, err
 }
 
-// Replaces the message and/or the send time of a scheduled message. The scheduling checks run again, and the message is then sent, under the caller's auth mode. A request that changes only scheduled_at keeps the auth mode the message was scheduled with. Returns 409 while the message is being sent
+// Replaces the message and/or the send time of a scheduled message. The scheduling checks run again, and the message is then sent, under the caller's auth mode. A request that changes only scheduled_at keeps the auth mode the message was scheduled with. Returns 409 while the message is being sent. Returns 400 scheduled_message_already_sent (code 123) when the message was already sent and 400 scheduled_message_canceled (code 124) when it was deleted
 //
 // Sends events:
 // - scheduled_message.updated
@@ -1043,7 +1043,7 @@ func (c *ChatClient) UpdateScheduledMessage(ctx context.Context, id string, requ
 	return res, err
 }
 
-// Moves the send time of a scheduled message to now and queues the send. Every send check runs when it is sent. Returns 409 while the message is being sent
+// Moves the send time of a scheduled message to now and queues the send. Every send check runs when it is sent. Returns 409 while the message is being sent. Returns 400 scheduled_message_already_sent (code 123) when the message was already sent and 400 scheduled_message_canceled (code 124) when it was deleted
 //
 // Sends events:
 // - scheduled_message.updated
