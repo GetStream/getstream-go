@@ -75,7 +75,10 @@ jobs:
         run: |
           set -euo pipefail
           # An attempt that was already rerun leaves the PR to the newer attempt, whose own completion starts a run.
-          if [ -n "$RUN_ID" ] && [ "$(GH_TOKEN=$CHECKS_TOKEN gh run view "$RUN_ID" --json attempt --jq .attempt)" != "$RUN_ATTEMPT" ]; then echo "Regen integration run $RUN_ID has an attempt newer than $RUN_ATTEMPT"; exit 0; fi
+          if [ -n "$RUN_ID" ]; then
+            latest=$(GH_TOKEN=$CHECKS_TOKEN gh run view "$RUN_ID" --json attempt --jq .attempt)
+            if [ "$latest" -gt "$RUN_ATTEMPT" ]; then echo "Regen integration run $RUN_ID has attempt $latest, newer than $RUN_ATTEMPT"; exit 0; fi
+          fi
           base=$GITHUB_REF_NAME
           branch=regen/auto
           bang='^[a-z]+(\([^)]*\))?!:'
