@@ -10990,6 +10990,7 @@ const (
 	OwnCapabilityScreenshare               OwnCapability = "screenshare"
 	OwnCapabilitySendAudio                 OwnCapability = "send-audio"
 	OwnCapabilitySendClosedCaptionsCall    OwnCapability = "send-closed-captions-call"
+	OwnCapabilitySendData                  OwnCapability = "send-data"
 	OwnCapabilitySendVideo                 OwnCapability = "send-video"
 	OwnCapabilityStartBroadcastCall        OwnCapability = "start-broadcast-call"
 	OwnCapabilityStartClosedCaptionsCall   OwnCapability = "start-closed-captions-call"
