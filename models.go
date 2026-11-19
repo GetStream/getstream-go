@@ -5959,6 +5959,10 @@ type DeleteSIPTrunkResponse struct {
 	Duration string `json:"duration"`
 }
 
+type DeleteScheduledActivityResponse struct {
+	Duration string `json:"duration"`
+}
+
 type DeleteScheduledMessageResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -7932,7 +7936,7 @@ type GetCommentsResponse struct {
 	// Total number of comments on the object, including replies at every depth
 	CommentCount int    `json:"comment_count"`
 	Duration     string `json:"duration"`
-	// Sort order used for the comments (first, last, top, best, controversial)
+	// Sort order used for the comments (first, last, top, best, controversial, popular, mutuals)
 	Sort string `json:"sort"`
 	// Threaded listing for the activity
 	Comments []ThreadedCommentResponse `json:"comments"`
@@ -8341,6 +8345,12 @@ type GetReviewQueueItemResponse struct {
 	Duration    string                   `json:"duration"`
 	AgentReview *AgentReviewResponse     `json:"agent_review,omitempty"`
 	Item        *ReviewQueueItemResponse `json:"item,omitempty"`
+}
+
+type GetScheduledActivityResponse struct {
+	Duration string `json:"duration"`
+	// An activity scheduled to be published at a future time
+	ScheduledActivity ScheduledActivityResponse `json:"scheduled_activity"`
 }
 
 type GetSegmentResponse struct {
@@ -11719,6 +11729,12 @@ type PublishConfigVersionResponse struct {
 	Config   *ConfigResponse `json:"config,omitempty"`
 }
 
+type PublishScheduledActivityNowResponse struct {
+	Duration string `json:"duration"`
+	// An activity scheduled to be published at a future time
+	ScheduledActivity ScheduledActivityResponse `json:"scheduled_activity"`
+}
+
 type PublishedTrackFlags struct {
 	Audio            bool `json:"audio"`
 	Screenshare      bool `json:"screenshare"`
@@ -12352,6 +12368,15 @@ type QueryFeedModerationTemplatesResponse struct {
 	Templates []QueryFeedModerationTemplate `json:"templates"`
 }
 
+// Basic response information
+type QueryFeedsReactionsResponse struct {
+	// Duration of the request in milliseconds
+	Duration  string                  `json:"duration"`
+	Reactions []FeedsReactionResponse `json:"reactions"`
+	Next      *string                 `json:"next,omitempty"`
+	Prev      *string                 `json:"prev,omitempty"`
+}
+
 type QueryFeedsResponse struct {
 	Duration string `json:"duration"`
 	// List of feeds matching the query
@@ -12611,6 +12636,23 @@ type QueryRevisionHistoryResponse struct {
 	Revisions []RevisionHistoryResponse `json:"revisions"`
 	Next      *string                   `json:"next,omitempty"`
 	Prev      *string                   `json:"prev,omitempty"`
+}
+
+type QueryScheduledActivitiesFilter struct {
+	// Only activities scheduled for this feed
+	Fid *string `json:"fid,omitempty"`
+	// Only activities of this user. Server-side only; client-side requests always see their own.
+	UserID *string `json:"user_id,omitempty"`
+	// Only activities with one of these statuses: scheduled, publishing, failed
+	Status []ScheduledActivityQueryStatus `json:"status,omitempty"`
+}
+
+type QueryScheduledActivitiesResponse struct {
+	Duration string `json:"duration"`
+	// The scheduled activities, ordered by scheduled_at
+	ScheduledActivities []ScheduledActivityResponse `json:"scheduled_activities"`
+	// Cursor for the next page, absent on the last page
+	Next *string `json:"next,omitempty"`
 }
 
 type QueryScheduledMessagesResponse struct {
@@ -13892,6 +13934,151 @@ type SaveConfigVersionResponse struct {
 	Version  ConfigVersionResponse `json:"version"`
 	// The version moderation currently runs
 	PublishedVersion *int `json:"published_version,omitempty"`
+}
+
+type ScheduleActivityResponse struct {
+	Duration string `json:"duration"`
+	// An activity scheduled to be published at a future time
+	ScheduledActivity ScheduledActivityResponse `json:"scheduled_activity"`
+}
+
+// Emitted when a scheduled activity fails to publish.
+type ScheduledActivityFailedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp `json:"created_at"`
+	// Why the activity failed to publish
+	FailureReason ScheduledActivityFailureReason `json:"failure_reason"`
+	Custom        map[string]any                 `json:"custom"`
+	// An activity scheduled to be published at a future time
+	ScheduledActivity ScheduledActivityResponse `json:"scheduled_activity"`
+	// The type of event: "feeds.scheduled_activity.failed" in this case
+	Type       string                    `json:"type"`
+	ReceivedAt *Timestamp                `json:"received_at,omitempty"`
+	User       *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (e *ScheduledActivityFailedEvent) GetEventType() string {
+	return e.Type
+}
+
+type ScheduledActivityFailureReason string
+
+const (
+	ScheduledActivityFailureReasonBanned            ScheduledActivityFailureReason = "banned"
+	ScheduledActivityFailureReasonExpired           ScheduledActivityFailureReason = "expired"
+	ScheduledActivityFailureReasonFeedDeleted       ScheduledActivityFailureReason = "feed_deleted"
+	ScheduledActivityFailureReasonIDConflict        ScheduledActivityFailureReason = "id_conflict"
+	ScheduledActivityFailureReasonInternalError     ScheduledActivityFailureReason = "internal_error"
+	ScheduledActivityFailureReasonInvalidActivity   ScheduledActivityFailureReason = "invalid_activity"
+	ScheduledActivityFailureReasonModerationBlocked ScheduledActivityFailureReason = "moderation_blocked"
+	ScheduledActivityFailureReasonNoPermission      ScheduledActivityFailureReason = "no_permission"
+	ScheduledActivityFailureReasonUserDeleted       ScheduledActivityFailureReason = "user_deleted"
+)
+
+func (c ScheduledActivityFailureReason) String() string {
+	return string(c)
+}
+
+// The activity a scheduled activity will publish
+type ScheduledActivityPreview struct {
+	// Type of activity
+	Type string `json:"type"`
+	// Feeds the activity will be added to
+	Feeds []string `json:"feeds"`
+	// When the published activity expires
+	ExpiresAt *Timestamp `json:"expires_at,omitempty"`
+	// ID the activity gets when published
+	ID *string `json:"id,omitempty"`
+	// ID of the parent activity
+	ParentID *string `json:"parent_id,omitempty"`
+	// ID of the poll attached to the activity
+	PollID *string `json:"poll_id,omitempty"`
+	// Who may reply to the activity
+	RestrictReplies *RestrictReplies `json:"restrict_replies,omitempty"`
+	// Text content of the activity
+	Text *string `json:"text,omitempty"`
+	// Visibility of the activity
+	Visibility *ActivityVisibility `json:"visibility,omitempty"`
+	// Visibility tag of the activity
+	VisibilityTag *string `json:"visibility_tag,omitempty"`
+	// Attachments of the activity
+	Attachments []Attachment `json:"attachments,omitempty"`
+	// Collections referenced by the activity
+	CollectionRefs []string `json:"collection_refs,omitempty"`
+	// Filter tags of the activity
+	FilterTags []string `json:"filter_tags,omitempty"`
+	// Interest tags of the activity
+	InterestTags []string `json:"interest_tags,omitempty"`
+	// Users mentioned in the activity
+	MentionedUserIds []string `json:"mentioned_user_ids,omitempty"`
+	// Custom data of the activity
+	Custom   map[string]any `json:"custom,omitempty"`
+	Location *Location      `json:"location,omitempty"`
+	// Search data of the activity
+	SearchData map[string]any `json:"search_data,omitempty"`
+}
+
+// Emitted when a scheduled activity was published.
+type ScheduledActivityPublishedEvent struct {
+	// Date/time of creation
+	CreatedAt Timestamp      `json:"created_at"`
+	Custom    map[string]any `json:"custom"`
+	// An activity scheduled to be published at a future time
+	ScheduledActivity ScheduledActivityResponse `json:"scheduled_activity"`
+	// The type of event: "feeds.scheduled_activity.published" in this case
+	Type       string                    `json:"type"`
+	ReceivedAt *Timestamp                `json:"received_at,omitempty"`
+	User       *UserResponseCommonFields `json:"user,omitempty"`
+}
+
+func (e *ScheduledActivityPublishedEvent) GetEventType() string {
+	return e.Type
+}
+
+type ScheduledActivityQueryStatus string
+
+const (
+	ScheduledActivityQueryStatusFailed     ScheduledActivityQueryStatus = "failed"
+	ScheduledActivityQueryStatusPublishing ScheduledActivityQueryStatus = "publishing"
+	ScheduledActivityQueryStatusScheduled  ScheduledActivityQueryStatus = "scheduled"
+)
+
+func (c ScheduledActivityQueryStatus) String() string {
+	return string(c)
+}
+
+// An activity scheduled to be published at a future time
+type ScheduledActivityResponse struct {
+	// When the activity was scheduled
+	CreatedAt Timestamp `json:"created_at"`
+	// ID of the scheduled activity, also the ID the activity gets when published
+	ID string `json:"id"`
+	// When the activity will be published
+	ScheduledAt Timestamp `json:"scheduled_at"`
+	// One of: scheduled, publishing, failed, canceled
+	Status ScheduledActivityStatus `json:"status"`
+	// When the scheduled activity was last changed
+	UpdatedAt Timestamp `json:"updated_at"`
+	// ID of the user the activity is published as
+	UserID string `json:"user_id"`
+	// Feeds the activity will be added to
+	Feeds []string `json:"feeds"`
+	// The activity a scheduled activity will publish
+	Activity ScheduledActivityPreview `json:"activity"`
+	// Why the publish failed; set only when status is failed
+	FailureReason *ScheduledActivityFailureReason `json:"failure_reason,omitempty"`
+}
+type ScheduledActivityStatus string
+
+const (
+	ScheduledActivityStatusCanceled   ScheduledActivityStatus = "canceled"
+	ScheduledActivityStatusFailed     ScheduledActivityStatus = "failed"
+	ScheduledActivityStatusPublishing ScheduledActivityStatus = "publishing"
+	ScheduledActivityStatusScheduled  ScheduledActivityStatus = "scheduled"
+)
+
+func (c ScheduledActivityStatus) String() string {
+	return string(c)
 }
 
 // The channel of a scheduled message
@@ -15728,6 +15915,12 @@ type UpdateSIPTrunkResponse struct {
 	Duration string `json:"duration"`
 	// SIP trunk information
 	SipTrunk *SIPTrunkResponse `json:"sip_trunk,omitempty"`
+}
+
+type UpdateScheduledActivityResponse struct {
+	Duration string `json:"duration"`
+	// An activity scheduled to be published at a future time
+	ScheduledActivity ScheduledActivityResponse `json:"scheduled_activity"`
 }
 
 type UpdateScheduledMessageResponse struct {

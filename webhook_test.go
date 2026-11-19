@@ -206,6 +206,8 @@ func TestParseWebhookEvent(t *testing.T) {
 		{"parse feeds.follow.deleted", []byte(`{"type":"feeds.follow.deleted"}`), "feeds.follow.deleted", false},
 		{"parse feeds.follow.updated", []byte(`{"type":"feeds.follow.updated"}`), "feeds.follow.updated", false},
 		{"parse feeds.notification_feed.updated", []byte(`{"type":"feeds.notification_feed.updated"}`), "feeds.notification_feed.updated", false},
+		{"parse feeds.scheduled_activity.failed", []byte(`{"type":"feeds.scheduled_activity.failed"}`), "feeds.scheduled_activity.failed", false},
+		{"parse feeds.scheduled_activity.published", []byte(`{"type":"feeds.scheduled_activity.published"}`), "feeds.scheduled_activity.published", false},
 		{"parse feeds.stories_feed.updated", []byte(`{"type":"feeds.stories_feed.updated"}`), "feeds.stories_feed.updated", false},
 		{"parse flag.updated", []byte(`{"type":"flag.updated"}`), "flag.updated", false},
 		{"parse import.error", []byte(`{"type":"import.error"}`), "import.error", false},

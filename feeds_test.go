@@ -758,6 +758,13 @@ func TestFeedsUnpromoteTopics(t *testing.T) {
 	_, err = client.Feeds().UnpromoteTopics(context.Background(), "", &getstream.UnpromoteTopicsRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsQueryFeedsReactions(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().QueryFeedsReactions(context.Background(), &getstream.QueryFeedsReactionsRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsFeedsGetRetentionPolicy(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
@@ -791,6 +798,48 @@ func TestFeedsQueryRevisionHistory(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = client.Feeds().QueryRevisionHistory(context.Background(), &getstream.QueryRevisionHistoryRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsScheduleActivity(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().ScheduleActivity(context.Background(), &getstream.ScheduleActivityRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsQueryScheduledActivities(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().QueryScheduledActivities(context.Background(), &getstream.QueryScheduledActivitiesRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsDeleteScheduledActivity(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().DeleteScheduledActivity(context.Background(), "", &getstream.DeleteScheduledActivityRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsGetScheduledActivity(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().GetScheduledActivity(context.Background(), "", &getstream.GetScheduledActivityRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsUpdateScheduledActivity(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().UpdateScheduledActivity(context.Background(), "", &getstream.UpdateScheduledActivityRequest{})
+	require.NoError(t, err)
+}
+func TestFeedsPublishScheduledActivityNow(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().PublishScheduledActivityNow(context.Background(), "", &getstream.PublishScheduledActivityNowRequest{})
 	require.NoError(t, err)
 }
 func TestFeedsQueryFeedsUsageStats(t *testing.T) {

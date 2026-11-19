@@ -151,6 +151,8 @@ const (
 	EventTypeFeedsFollowDeleted                 = "feeds.follow.deleted"
 	EventTypeFeedsFollowUpdated                 = "feeds.follow.updated"
 	EventTypeFeedsNotificationFeedUpdated       = "feeds.notification_feed.updated"
+	EventTypeFeedsScheduledActivityFailed       = "feeds.scheduled_activity.failed"
+	EventTypeFeedsScheduledActivityPublished    = "feeds.scheduled_activity.published"
 	EventTypeFeedsStoriesFeedUpdated            = "feeds.stories_feed.updated"
 	EventTypeFlagUpdated                        = "flag.updated"
 	EventTypeImportError                        = "import.error"
@@ -571,6 +573,10 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 		event = new(FollowUpdatedEvent)
 	case "feeds.notification_feed.updated":
 		event = new(NotificationFeedUpdatedEvent)
+	case "feeds.scheduled_activity.failed":
+		event = new(ScheduledActivityFailedEvent)
+	case "feeds.scheduled_activity.published":
+		event = new(ScheduledActivityPublishedEvent)
 	case "feeds.stories_feed.updated":
 		event = new(StoriesFeedUpdatedEvent)
 	case "flag.updated":

@@ -1828,9 +1828,11 @@ type GetOrCreateFeedRequest struct {
 	Next                     *string `json:"next,omitempty"`
 	OverwriteInterestWeights *bool   `json:"overwrite_interest_weights,omitempty"`
 	Prev                     *string `json:"prev,omitempty"`
-	UserID                   *string `json:"user_id,omitempty"`
-	View                     *string `json:"view,omitempty"`
-	Watch                    *bool   `json:"watch,omitempty"`
+	// Default: false. When true, a missing feed returns 404 instead of being created. Cannot be combined with data.
+	SkipFeedCreation *bool   `json:"skip_feed_creation,omitempty"`
+	UserID           *string `json:"user_id,omitempty"`
+	View             *string `json:"view,omitempty"`
+	Watch            *bool   `json:"watch,omitempty"`
 	// Feature-gated; not available for all apps. Request-scoped list of actor/user IDs whose activities are filtered from this GetOrCreateFeed response only. Merged (union) into the viewing user's in-memory blocked authors for this request; never persisted to blocked_users. Max: 1000.
 	DiscardActors *[]string  `json:"discard_actors,omitempty"`
 	Data          *FeedInput `json:"data,omitempty"`
@@ -2261,6 +2263,19 @@ type PromoteTopicsRequest struct {
 }
 type UnpromoteTopicsRequest struct {
 }
+type QueryFeedsReactionsRequest struct {
+	// Which reactions to list: activity reactions or comment reactions
+	ObjectType string `json:"object_type"`
+	// The user whose reactions to list
+	UserID string  `json:"user_id"`
+	Limit  *int    `json:"limit,omitempty"`
+	Next   *string `json:"next,omitempty"`
+	Prev   *string `json:"prev,omitempty"`
+	// Sort by created_at only (a single field); defaults to created_at descending
+	Sort *[]SortParamRequest `json:"sort,omitempty"`
+	// Optional filter; only reaction_type and created_at are accepted
+	Filter *map[string]any `json:"filter,omitempty"`
+}
 type FeedsGetRetentionPolicyRequest struct {
 }
 type FeedsSetRetentionPolicyRequest struct {
@@ -2289,6 +2304,80 @@ type QueryRevisionHistoryRequest struct {
 	Prev   *string        `json:"prev,omitempty"`
 	// Array of sort parameters
 	Sort *[]SortParamRequest `json:"sort,omitempty"`
+}
+type ScheduleActivityRequest struct {
+	// Type of activity
+	Type string `json:"type"`
+	// List of feeds to add the activity to with a default max limit of 25 feeds
+	Feeds []string `json:"feeds"`
+	// Whether to copy custom data to the notification activity (only applies when create_notification_activity is true) Deprecated: use notification_context.trigger.custom and notification_context.target.custom instead
+	// Deprecated: this field is deprecated.
+	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
+	// Whether to create notification activities for mentioned users
+	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+	// If true, creates the user referenced by user_id when it does not exist. Server-side only.
+	CreateUsers *bool `json:"create_users,omitempty"`
+	// Expiration time for the activity
+	ExpiresAt *string `json:"expires_at,omitempty"`
+	// If true, forces moderation to run at publish for server-side requests. By default, server-side requests skip moderation. Client-side requests always run moderation regardless of this field.
+	ForceModeration *bool `json:"force_moderation,omitempty"`
+	// Optional ID for the activity
+	ID *string `json:"id,omitempty"`
+	// ID of parent activity for replies/comments
+	ParentID *string `json:"parent_id,omitempty"`
+	// ID of a poll to attach to activity
+	PollID *string `json:"poll_id,omitempty"`
+	// Controls who can add comments/replies to this activity. One of: everyone, people_i_follow, nobody
+	RestrictReplies *RestrictReplies `json:"restrict_replies,omitempty"`
+	// When to publish the activity, an RFC 3339 time. A time less than a minute ahead or in the past is moved to one minute from now, and the time is rounded up to a whole minute.
+	ScheduledAt *Timestamp `json:"scheduled_at,omitempty"`
+	// Whether to skip URL enrichment for the activity
+	SkipEnrichUrl *bool `json:"skip_enrich_url,omitempty"`
+	// Whether to skip push notifications
+	SkipPush *bool `json:"skip_push,omitempty"`
+	// Text content of the activity
+	Text *string `json:"text,omitempty"`
+	// ID of the user creating the activity
+	UserID *string `json:"user_id,omitempty"`
+	// Visibility setting for the activity. One of: public, private, tag
+	Visibility *ActivityVisibility `json:"visibility,omitempty"`
+	// If visibility is 'tag', this is the tag name and is required
+	VisibilityTag *string `json:"visibility_tag,omitempty"`
+	// List of attachments for the activity
+	Attachments *[]Attachment `json:"attachments,omitempty"`
+	// Collections that this activity references
+	CollectionRefs *[]string `json:"collection_refs,omitempty"`
+	// Collections to create or update as part of this request, so an activity and the collections it references can be written in one call. Their refs (name:id) are added to collection_refs automatically; you do not need to restate them, and they count toward the same per-activity collection-reference limit, which is the effective cap here. A collection that already exists has its custom data updated. Use collection_refs instead when the collection already exists and you are only referencing it, which requires no collection permissions.
+	Collections *[]CollectionRequest `json:"collections,omitempty"`
+	// Tags for filtering activities
+	FilterTags *[]string `json:"filter_tags,omitempty"`
+	// Tags for indicating user interests
+	InterestTags *[]string `json:"interest_tags,omitempty"`
+	// List of users mentioned in the activity
+	MentionedUserIds *[]string `json:"mentioned_user_ids,omitempty"`
+	// Custom data for the activity
+	Custom   *map[string]any `json:"custom,omitempty"`
+	Location *Location       `json:"location,omitempty"`
+	// Additional data for search indexing
+	SearchData *map[string]any `json:"search_data,omitempty"`
+}
+type QueryScheduledActivitiesRequest struct {
+	// Maximum number of scheduled activities to return. Default 25, maximum 100.
+	Limit *int `json:"limit,omitempty"`
+	// Cursor from a previous response to fetch the next page
+	Next   *string                         `json:"next,omitempty"`
+	Filter *QueryScheduledActivitiesFilter `json:"filter,omitempty"`
+}
+type DeleteScheduledActivityRequest struct {
+}
+type GetScheduledActivityRequest struct {
+}
+type UpdateScheduledActivityRequest struct {
+	// When to publish the activity, an RFC 3339 time. A time less than a minute ahead or in the past is moved to one minute from now, and the time is rounded up to a whole minute.
+	ScheduledAt *Timestamp       `json:"scheduled_at,omitempty"`
+	Activity    *ActivityRequest `json:"activity,omitempty"`
+}
+type PublishScheduledActivityNowRequest struct {
 }
 type QueryFeedsUsageStatsRequest struct {
 	// Start date in YYYY-MM-DD format (optional, defaults to 30 days ago)
