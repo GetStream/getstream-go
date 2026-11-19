@@ -1041,6 +1041,13 @@ func (c *FeedsClient) UnpromoteTopics(ctx context.Context, id string, request *U
 	return res, err
 }
 
+// Lists a single user's activity or comment reactions, newest first by default, without activity or comment payloads
+func (c *FeedsClient) QueryFeedsReactions(ctx context.Context, request *QueryFeedsReactionsRequest) (*StreamResponse[QueryFeedsReactionsResponse], error) {
+	var result QueryFeedsReactionsResponse
+	res, err := MakeRequest[QueryFeedsReactionsRequest, QueryFeedsReactionsResponse](c.client, ctx, "POST", "/api/v2/feeds/reactions/query", nil, request, &result, nil)
+	return res, err
+}
+
 // Returns the feeds retention policies configured for the app. Server-side only.
 func (c *FeedsClient) FeedsGetRetentionPolicy(ctx context.Context, request *FeedsGetRetentionPolicyRequest) (*StreamResponse[GetFeedsRetentionPolicyResponse], error) {
 	var result GetFeedsRetentionPolicyResponse
@@ -1073,6 +1080,60 @@ func (c *FeedsClient) FeedsGetRetentionPolicyRuns(ctx context.Context, request *
 func (c *FeedsClient) QueryRevisionHistory(ctx context.Context, request *QueryRevisionHistoryRequest) (*StreamResponse[QueryRevisionHistoryResponse], error) {
 	var result QueryRevisionHistoryResponse
 	res, err := MakeRequest[QueryRevisionHistoryRequest, QueryRevisionHistoryResponse](c.client, ctx, "POST", "/api/v2/feeds/revisions/query", nil, request, &result, nil)
+	return res, err
+}
+
+// Schedule an activity to be published at a future time
+func (c *FeedsClient) ScheduleActivity(ctx context.Context, request *ScheduleActivityRequest) (*StreamResponse[ScheduleActivityResponse], error) {
+	var result ScheduleActivityResponse
+	res, err := MakeRequest[ScheduleActivityRequest, ScheduleActivityResponse](c.client, ctx, "POST", "/api/v2/feeds/scheduled_activities", nil, request, &result, nil)
+	return res, err
+}
+
+// Query scheduled activities ordered by scheduled time
+func (c *FeedsClient) QueryScheduledActivities(ctx context.Context, request *QueryScheduledActivitiesRequest) (*StreamResponse[QueryScheduledActivitiesResponse], error) {
+	var result QueryScheduledActivitiesResponse
+	res, err := MakeRequest[QueryScheduledActivitiesRequest, QueryScheduledActivitiesResponse](c.client, ctx, "POST", "/api/v2/feeds/scheduled_activities/query", nil, request, &result, nil)
+	return res, err
+}
+
+// Cancel a scheduled activity so it is never published
+func (c *FeedsClient) DeleteScheduledActivity(ctx context.Context, id string, request *DeleteScheduledActivityRequest) (*StreamResponse[DeleteScheduledActivityResponse], error) {
+	var result DeleteScheduledActivityResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, DeleteScheduledActivityResponse](c.client, ctx, "DELETE", "/api/v2/feeds/scheduled_activities/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Get a scheduled activity by its ID
+func (c *FeedsClient) GetScheduledActivity(ctx context.Context, id string, request *GetScheduledActivityRequest) (*StreamResponse[GetScheduledActivityResponse], error) {
+	var result GetScheduledActivityResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, GetScheduledActivityResponse](c.client, ctx, "GET", "/api/v2/feeds/scheduled_activities/{id}", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Change the activity or the publish time of a scheduled activity
+func (c *FeedsClient) UpdateScheduledActivity(ctx context.Context, id string, request *UpdateScheduledActivityRequest) (*StreamResponse[UpdateScheduledActivityResponse], error) {
+	var result UpdateScheduledActivityResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[UpdateScheduledActivityRequest, UpdateScheduledActivityResponse](c.client, ctx, "PATCH", "/api/v2/feeds/scheduled_activities/{id}", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Move the publish time of a scheduled activity to now
+func (c *FeedsClient) PublishScheduledActivityNow(ctx context.Context, id string, request *PublishScheduledActivityNowRequest) (*StreamResponse[PublishScheduledActivityNowResponse], error) {
+	var result PublishScheduledActivityNowResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, PublishScheduledActivityNowResponse](c.client, ctx, "POST", "/api/v2/feeds/scheduled_activities/{id}/publish_now", nil, nil, &result, pathParams)
 	return res, err
 }
 
