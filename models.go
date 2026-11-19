@@ -1199,7 +1199,9 @@ type AppResponseFields struct {
 	AgentReview *AgentReviewSettingsPayload `json:"agent_review,omitempty"`
 	DatadogInfo *DataDogInfo                `json:"datadog_info,omitempty"`
 	// Settings for the moderation agent reviewer, which reviews moderation outcomes and proposes or applies an action.
-	EffectiveAgentReview           *AgentReviewSettingsPayload     `json:"effective_agent_review,omitempty"`
+	EffectiveAgentReview *AgentReviewSettingsPayload `json:"effective_agent_review,omitempty"`
+	// The app's message marks policy: the mark types it defines or overrides, and the privacy switch. The channel type's mark_types says which of them are on in its channels.
+	MessageMarks                   *MessageMarksConfig             `json:"message_marks,omitempty"`
 	ModerationDashboardPreferences *ModerationDashboardPreferences `json:"moderation_dashboard_preferences,omitempty"`
 }
 
@@ -3571,6 +3573,7 @@ type ChannelConfig struct {
 	PushLevel          *PushLevel         `json:"push_level,omitempty"`
 	AllowedFlagReasons []string           `json:"allowed_flag_reasons,omitempty"`
 	Blocklists         []BlockListOptions `json:"blocklists,omitempty"`
+	MarkTypes          []string           `json:"mark_types,omitempty"`
 	// Sets thresholds for AI moderation
 	AutomodThresholds *Thresholds      `json:"automod_thresholds,omitempty"`
 	ChatPreferences   *ChatPreferences `json:"chat_preferences,omitempty"`
@@ -3660,6 +3663,7 @@ type ChannelConfigWithInfo struct {
 	ScheduledMessagesMinLeadTimeSeconds *int               `json:"scheduled_messages_min_lead_time_seconds,omitempty"`
 	AllowedFlagReasons                  []string           `json:"allowed_flag_reasons,omitempty"`
 	Blocklists                          []BlockListOptions `json:"blocklists,omitempty"`
+	MarkTypes                           []string           `json:"mark_types,omitempty"`
 	// Sets thresholds for AI moderation
 	AutomodThresholds *Thresholds         `json:"automod_thresholds,omitempty"`
 	ChatPreferences   *ChatPreferences    `json:"chat_preferences,omitempty"`
@@ -4098,6 +4102,7 @@ const (
 	ChannelOwnCapabilitySendCustomEvents                ChannelOwnCapability = "send-custom-events"
 	ChannelOwnCapabilitySendLinks                       ChannelOwnCapability = "send-links"
 	ChannelOwnCapabilitySendMessage                     ChannelOwnCapability = "send-message"
+	ChannelOwnCapabilitySendMessageMark                 ChannelOwnCapability = "send-message-mark"
 	ChannelOwnCapabilitySendPoll                        ChannelOwnCapability = "send-poll"
 	ChannelOwnCapabilitySendReaction                    ChannelOwnCapability = "send-reaction"
 	ChannelOwnCapabilitySendReply                       ChannelOwnCapability = "send-reply"
@@ -4380,6 +4385,7 @@ type ChannelTypeConfig struct {
 	PushLevel          *PushLevel         `json:"push_level,omitempty"`
 	AllowedFlagReasons []string           `json:"allowed_flag_reasons,omitempty"`
 	Blocklists         []BlockListOptions `json:"blocklists,omitempty"`
+	MarkTypes          []string           `json:"mark_types,omitempty"`
 	// Sets thresholds for AI moderation
 	AutomodThresholds *Thresholds      `json:"automod_thresholds,omitempty"`
 	ChatPreferences   *ChatPreferences `json:"chat_preferences,omitempty"`
@@ -4519,6 +4525,16 @@ type ChatDraftResponse struct {
 	QuotedMessage *ChatMessageResponse     `json:"quoted_message,omitempty"`
 }
 
+type ChatMarkGroupResponse struct {
+	Count    int                         `json:"count"`
+	LatestBy []ChatMessageMarkerResponse `json:"latest_by"`
+}
+
+type ChatMessageMarkerResponse struct {
+	CreatedAt Timestamp `json:"created_at"`
+	UserID    string    `json:"user_id"`
+}
+
 type ChatMessageResponse struct {
 	Cid                  string                 `json:"cid"`
 	CreatedAt            Timestamp              `json:"created_at"`
@@ -4543,27 +4559,29 @@ type ChatMessageResponse struct {
 	ReactionCounts       map[string]int         `json:"reaction_counts"`
 	ReactionScores       map[string]int         `json:"reaction_scores"`
 	// User response object
-	User                 UserResponse                  `json:"user"`
-	Command              *string                       `json:"command,omitempty"`
-	DeletedAt            *Timestamp                    `json:"deleted_at,omitempty"`
-	DeletedForMe         *bool                         `json:"deleted_for_me,omitempty"`
-	MessageTextUpdatedAt *Timestamp                    `json:"message_text_updated_at,omitempty"`
-	Mml                  *string                       `json:"mml,omitempty"`
-	ParentID             *string                       `json:"parent_id,omitempty"`
-	PinExpires           *Timestamp                    `json:"pin_expires,omitempty"`
-	PinnedAt             *Timestamp                    `json:"pinned_at,omitempty"`
-	PollID               *string                       `json:"poll_id,omitempty"`
-	QuotedMessageID      *string                       `json:"quoted_message_id,omitempty"`
-	ShowInChannel        *bool                         `json:"show_in_channel,omitempty"`
-	MentionedGroupIds    []string                      `json:"mentioned_group_ids,omitempty"`
-	MentionedGroups      []UserGroupResponse           `json:"mentioned_groups,omitempty"`
-	MentionedRoles       []string                      `json:"mentioned_roles,omitempty"`
-	ThreadParticipants   []UserResponse                `json:"thread_participants,omitempty"`
-	Draft                *ChatDraftResponse            `json:"draft,omitempty"`
-	I18n                 map[string]string             `json:"i18n,omitempty"`
-	ImageLabels          map[string][]string           `json:"image_labels,omitempty"`
-	Member               *ChannelMemberPartialResponse `json:"member,omitempty"`
-	Moderation           *ChatModerationV2Response     `json:"moderation,omitempty"`
+	User                 UserResponse                      `json:"user"`
+	Command              *string                           `json:"command,omitempty"`
+	DeletedAt            *Timestamp                        `json:"deleted_at,omitempty"`
+	DeletedForMe         *bool                             `json:"deleted_for_me,omitempty"`
+	MessageTextUpdatedAt *Timestamp                        `json:"message_text_updated_at,omitempty"`
+	Mml                  *string                           `json:"mml,omitempty"`
+	ParentID             *string                           `json:"parent_id,omitempty"`
+	PinExpires           *Timestamp                        `json:"pin_expires,omitempty"`
+	PinnedAt             *Timestamp                        `json:"pinned_at,omitempty"`
+	PollID               *string                           `json:"poll_id,omitempty"`
+	QuotedMessageID      *string                           `json:"quoted_message_id,omitempty"`
+	ShowInChannel        *bool                             `json:"show_in_channel,omitempty"`
+	MentionedGroupIds    []string                          `json:"mentioned_group_ids,omitempty"`
+	MentionedGroups      []UserGroupResponse               `json:"mentioned_groups,omitempty"`
+	MentionedRoles       []string                          `json:"mentioned_roles,omitempty"`
+	OwnMarks             []ChatOwnMarkResponse             `json:"own_marks,omitempty"`
+	ThreadParticipants   []UserResponse                    `json:"thread_participants,omitempty"`
+	Draft                *ChatDraftResponse                `json:"draft,omitempty"`
+	I18n                 map[string]string                 `json:"i18n,omitempty"`
+	ImageLabels          map[string][]string               `json:"image_labels,omitempty"`
+	MarkGroups           map[string]*ChatMarkGroupResponse `json:"mark_groups,omitempty"`
+	Member               *ChannelMemberPartialResponse     `json:"member,omitempty"`
+	Moderation           *ChatModerationV2Response         `json:"moderation,omitempty"`
 	// User response object
 	PinnedBy       *UserResponse                         `json:"pinned_by,omitempty"`
 	Poll           *PollResponseData                     `json:"poll,omitempty"`
@@ -4582,6 +4600,11 @@ type ChatModerationV2Response struct {
 	BlocklistsMatched     []string `json:"blocklists_matched,omitempty"`
 	ImageHarms            []string `json:"image_harms,omitempty"`
 	TextHarms             []string `json:"text_harms,omitempty"`
+}
+
+type ChatOwnMarkResponse struct {
+	CreatedAt Timestamp `json:"created_at"`
+	Type      string    `json:"type"`
 }
 
 type ChatPreferences struct {
@@ -5393,6 +5416,7 @@ type CreateChannelTypeResponse struct {
 	PushLevel          *PushLevel         `json:"push_level,omitempty"`
 	AllowedFlagReasons []string           `json:"allowed_flag_reasons,omitempty"`
 	Blocklists         []BlockListOptions `json:"blocklists,omitempty"`
+	MarkTypes          []string           `json:"mark_types,omitempty"`
 	// Sets thresholds for AI moderation
 	AutomodThresholds *Thresholds      `json:"automod_thresholds,omitempty"`
 	ChatPreferences   *ChatPreferences `json:"chat_preferences,omitempty"`
@@ -5472,6 +5496,15 @@ type CreateImportV2TaskResponse struct {
 type CreateMembershipLevelResponse struct {
 	Duration        string                  `json:"duration"`
 	MembershipLevel MembershipLevelResponse `json:"membership_level"`
+}
+
+// The mark and whether this request wrote it
+type CreateMessageMarkResponse struct {
+	// Whether this request wrote the mark. False on a repeat and on the author's own mark
+	Created  bool   `json:"created"`
+	Duration string `json:"duration"`
+	// A mark one user put on one message, for example played on a voice note. A mark is written once and never removed by users.
+	Mark MessageMarkResponse `json:"mark"`
 }
 
 type CreatePredefinedFilterResponse struct {
@@ -7902,6 +7935,7 @@ type GetChannelTypeResponse struct {
 	PushLevel          *PushLevel         `json:"push_level,omitempty"`
 	AllowedFlagReasons []string           `json:"allowed_flag_reasons,omitempty"`
 	Blocklists         []BlockListOptions `json:"blocklists,omitempty"`
+	MarkTypes          []string           `json:"mark_types,omitempty"`
 	// Sets thresholds for AI moderation
 	AutomodThresholds *Thresholds      `json:"automod_thresholds,omitempty"`
 	ChatPreferences   *ChatPreferences `json:"chat_preferences,omitempty"`
@@ -9301,6 +9335,20 @@ type MarkDeliveredResponse struct {
 	Duration string `json:"duration"`
 }
 
+// The marks of one type on a message the viewer authored: the count of every user who marked it and the newest 100 of them.
+type MarkGroupResponse struct {
+	// Number of users who marked the message with this type
+	Count int `json:"count"`
+	// The users who marked the message with this type, newest first, at most 100
+	LatestBy []MessageMarkerResponse `json:"latest_by"`
+}
+
+// How marks follow the marker's privacy settings.
+type MarkPrivacyConfig struct {
+	// When true, a mark by a user whose read receipts are off is kept for that user only: the author gets no event and does not see it in mark_groups or in the marks listing. Decided when the mark is written; changing the switch does not rewrite earlier marks. Defaults to false
+	RespectReadReceipts *bool `json:"respect_read_receipts,omitempty"`
+}
+
 type MarkReadResponse struct {
 	// Duration of the request in milliseconds
 	Duration string                 `json:"duration"`
@@ -9332,6 +9380,14 @@ type MarkReviewedRequestPayload struct {
 	DisableMarkingContentAsReviewed *bool `json:"disable_marking_content_as_reviewed,omitempty"`
 	// Internal moderator note, stored on the action log and returned by QueryModerationLogs. Not shown to the appealing user; use decision_reason for that
 	Reason *string `json:"reason,omitempty"`
+}
+
+// One mark type's policy.
+type MarkTypeConfig struct {
+	// Channel size above which the type is off, 1 to 100. Defaults to 100
+	MaxMembers *int `json:"max_members,omitempty"`
+	// Attachment types that qualify a message for the mark, any one of them; 1 to 10 entries, required for a custom type. For a built-in type the list replaces the default, and leaving it out keeps the default
+	Requires []string `json:"requires,omitempty"`
 }
 
 type MatchedBlocklist struct {
@@ -9670,6 +9726,48 @@ type MessageHistoryEntryResponse struct {
 	Custom             map[string]any `json:"custom"`
 }
 
+// A mark one user put on one message, for example played on a voice note. A mark is written once and never removed by users.
+type MessageMarkResponse struct {
+	// When the mark was written
+	CreatedAt Timestamp `json:"created_at"`
+	// The marked message
+	MessageID string `json:"message_id"`
+	// The user who marked the message
+	UserID string `json:"user_id"`
+	// The mark type, for example played
+	Type string `json:"type"`
+}
+
+// A mark one user put on one message, with that user.
+type MessageMarkWithUserResponse struct {
+	// When the mark was written
+	CreatedAt Timestamp `json:"created_at"`
+	// The marked message
+	MessageID string `json:"message_id"`
+	// The user who marked the message
+	UserID string `json:"user_id"`
+	// The mark type, for example played
+	Type string `json:"type"`
+	// User response object
+	User UserResponse `json:"user"`
+}
+
+// One user who marked the message, and when.
+type MessageMarkerResponse struct {
+	// When the mark was written
+	CreatedAt Timestamp `json:"created_at"`
+	// The user who marked the message
+	UserID string `json:"user_id"`
+}
+
+// The app's message marks policy: the mark types it defines or overrides, and the privacy switch. The channel type's mark_types says which of them are on in its channels.
+type MessageMarksConfig struct {
+	// How marks follow the marker's privacy settings.
+	Privacy *MarkPrivacyConfig `json:"privacy,omitempty"`
+	// Mark type definitions by name. A built-in name such as played overrides its defaults; a custom name must be namespaced, for example acme.viewed. At most 20 types
+	Types map[string]MarkTypeConfig `json:"types,omitempty"`
+}
+
 // Result of the message moderation
 type MessageModerationResult struct {
 	// Action taken by automod
@@ -9919,14 +10017,18 @@ type MessageResponse struct {
 	MentionedGroups []UserGroupResponse `json:"mentioned_groups,omitempty"`
 	// List of roles mentioned in the message (e.g. admin, channel_moderator, custom roles). Members with matching roles will receive push notifications based on their push preferences. Max 10 roles
 	MentionedRoles []string `json:"mentioned_roles,omitempty"`
+	// The viewer's own marks on this message, for example played. Omitted when marks are off for the channel type
+	OwnMarks []OwnMarkResponse `json:"own_marks,omitempty"`
 	// List of users who participate in thread
 	ThreadParticipants []UserResponse `json:"thread_participants,omitempty"`
 	Draft              *DraftResponse `json:"draft,omitempty"`
 	// Object with translations. Key `language` contains the original language key. Other keys contain translations
 	I18n map[string]string `json:"i18n,omitempty"`
 	// Contains image moderation information
-	ImageLabels map[string][]string           `json:"image_labels,omitempty"`
-	Member      *ChannelMemberPartialResponse `json:"member,omitempty"`
+	ImageLabels map[string][]string `json:"image_labels,omitempty"`
+	// On the viewer's own messages: who marked them, per mark type (for example played). Omitted when marks are off for the channel type
+	MarkGroups map[string]*MarkGroupResponse `json:"mark_groups,omitempty"`
+	Member     *ChannelMemberPartialResponse `json:"member,omitempty"`
 	// Channel member data for the users mentioned in the message, keyed by user id. Only present when the app has member custom on mentioned users enabled, and only for the first two mentioned users of each message
 	MentionedChannelMembers map[string]ChannelMemberPartialResponse `json:"mentioned_channel_members,omitempty"`
 	Moderation              *ModerationV2Response                   `json:"moderation,omitempty"`
@@ -10104,14 +10206,18 @@ type MessageWithChannelResponse struct {
 	MentionedGroups []UserGroupResponse `json:"mentioned_groups,omitempty"`
 	// List of roles mentioned in the message (e.g. admin, channel_moderator, custom roles). Members with matching roles will receive push notifications based on their push preferences. Max 10 roles
 	MentionedRoles []string `json:"mentioned_roles,omitempty"`
+	// The viewer's own marks on this message, for example played. Omitted when marks are off for the channel type
+	OwnMarks []OwnMarkResponse `json:"own_marks,omitempty"`
 	// List of users who participate in thread
 	ThreadParticipants []UserResponse `json:"thread_participants,omitempty"`
 	Draft              *DraftResponse `json:"draft,omitempty"`
 	// Object with translations. Key `language` contains the original language key. Other keys contain translations
 	I18n map[string]string `json:"i18n,omitempty"`
 	// Contains image moderation information
-	ImageLabels map[string][]string           `json:"image_labels,omitempty"`
-	Member      *ChannelMemberPartialResponse `json:"member,omitempty"`
+	ImageLabels map[string][]string `json:"image_labels,omitempty"`
+	// On the viewer's own messages: who marked them, per mark type (for example played). Omitted when marks are off for the channel type
+	MarkGroups map[string]*MarkGroupResponse `json:"mark_groups,omitempty"`
+	Member     *ChannelMemberPartialResponse `json:"member,omitempty"`
 	// Channel member data for the users mentioned in the message, keyed by user id. Only present when the app has member custom on mentioned users enabled, and only for the first two mentioned users of each message
 	MentionedChannelMembers map[string]ChannelMemberPartialResponse `json:"mentioned_channel_members,omitempty"`
 	Moderation              *ModerationV2Response                   `json:"moderation,omitempty"`
@@ -11014,6 +11120,14 @@ const (
 
 func (c OwnCapability) String() string {
 	return string(c)
+}
+
+// A mark the viewer put on this message.
+type OwnMarkResponse struct {
+	// When the mark was written
+	CreatedAt Timestamp `json:"created_at"`
+	// The mark type, for example played
+	Type string `json:"type"`
 }
 
 type OwnUserResponse struct {
@@ -12510,6 +12624,21 @@ type QueryMessageHistoryResponse struct {
 	MessageHistory []MessageHistoryEntryResponse `json:"message_history"`
 	Next           *string                       `json:"next,omitempty"`
 	Prev           *string                       `json:"prev,omitempty"`
+}
+
+// Filter for listing the marks on a message
+type QueryMessageMarksFilter struct {
+	// Only marks of this type, for example played
+	Type *string `json:"type,omitempty"`
+}
+
+type QueryMessageMarksResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
+	// The marks of this page, newest first
+	Marks []MessageMarkWithUserResponse `json:"marks"`
+	// Cursor for the next page; absent on the last page
+	Next *string `json:"next,omitempty"`
 }
 
 type QueryModerationConfigsResponse struct {
@@ -14088,8 +14217,12 @@ type ScheduledMessageChannelResponse struct {
 	Cid string `json:"cid"`
 	// Channel ID
 	ID string `json:"id"`
+	// Number of members of the channel. 0 when the channel is deleted
+	MemberCount int `json:"member_count"`
 	// Channel type
 	Type string `json:"type"`
+	// Up to 4 members of the channel, oldest first. Empty when the channel is deleted
+	Members []ChannelMemberResponse `json:"members"`
 	// Channel image, from its custom data
 	Image *string `json:"image,omitempty"`
 	// Channel name, from its custom data
@@ -14417,12 +14550,14 @@ type SearchResultMessage struct {
 	MentionedGroupIds    []string            `json:"mentioned_group_ids,omitempty"`
 	MentionedGroups      []UserGroupResponse `json:"mentioned_groups,omitempty"`
 	MentionedRoles       []string            `json:"mentioned_roles,omitempty"`
+	OwnMarks             []OwnMarkResponse   `json:"own_marks,omitempty"`
 	ThreadParticipants   []UserResponse      `json:"thread_participants,omitempty"`
 	// Represents channel in chat
 	Channel                 *ChannelResponse                        `json:"channel,omitempty"`
 	Draft                   *DraftResponse                          `json:"draft,omitempty"`
 	I18n                    map[string]string                       `json:"i18n,omitempty"`
 	ImageLabels             map[string][]string                     `json:"image_labels,omitempty"`
+	MarkGroups              map[string]*MarkGroupResponse           `json:"mark_groups,omitempty"`
 	Member                  *ChannelMemberPartialResponse           `json:"member,omitempty"`
 	MentionedChannelMembers map[string]ChannelMemberPartialResponse `json:"mentioned_channel_members,omitempty"`
 	Moderation              *ModerationV2Response                   `json:"moderation,omitempty"`
@@ -15777,6 +15912,7 @@ type UpdateChannelTypeResponse struct {
 	PushLevel          *PushLevel         `json:"push_level,omitempty"`
 	AllowedFlagReasons []string           `json:"allowed_flag_reasons,omitempty"`
 	Blocklists         []BlockListOptions `json:"blocklists,omitempty"`
+	MarkTypes          []string           `json:"mark_types,omitempty"`
 	// Sets thresholds for AI moderation
 	AutomodThresholds *Thresholds      `json:"automod_thresholds,omitempty"`
 	ChatPreferences   *ChatPreferences `json:"chat_preferences,omitempty"`

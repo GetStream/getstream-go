@@ -56,15 +56,17 @@ type UpdateAppRequest struct {
 	WebhookEvents              *[]string       `json:"webhook_events,omitempty"`
 	ActivityMetricsConfig      *map[string]int `json:"activity_metrics_config,omitempty"`
 	// Settings for the moderation agent reviewer, which reviews moderation outcomes and proposes or applies an action.
-	AgentReview                    *AgentReviewSettingsPayload     `json:"agent_review,omitempty"`
-	ApnConfig                      *APNConfig                      `json:"apn_config,omitempty"`
-	AsyncModerationConfig          *AsyncModerationConfiguration   `json:"async_moderation_config,omitempty"`
-	DatadogInfo                    *DataDogInfo                    `json:"datadog_info,omitempty"`
-	FileUploadConfig               *FileUploadConfig               `json:"file_upload_config,omitempty"`
-	FirebaseConfig                 *FirebaseConfig                 `json:"firebase_config,omitempty"`
-	Grants                         *map[string][]string            `json:"grants,omitempty"`
-	HuaweiConfig                   *HuaweiConfig                   `json:"huawei_config,omitempty"`
-	ImageUploadConfig              *FileUploadConfig               `json:"image_upload_config,omitempty"`
+	AgentReview           *AgentReviewSettingsPayload   `json:"agent_review,omitempty"`
+	ApnConfig             *APNConfig                    `json:"apn_config,omitempty"`
+	AsyncModerationConfig *AsyncModerationConfiguration `json:"async_moderation_config,omitempty"`
+	DatadogInfo           *DataDogInfo                  `json:"datadog_info,omitempty"`
+	FileUploadConfig      *FileUploadConfig             `json:"file_upload_config,omitempty"`
+	FirebaseConfig        *FirebaseConfig               `json:"firebase_config,omitempty"`
+	Grants                *map[string][]string          `json:"grants,omitempty"`
+	HuaweiConfig          *HuaweiConfig                 `json:"huawei_config,omitempty"`
+	ImageUploadConfig     *FileUploadConfig             `json:"image_upload_config,omitempty"`
+	// The app's message marks policy: the mark types it defines or overrides, and the privacy switch. The channel type's mark_types says which of them are on in its channels.
+	MessageMarks                   *MessageMarksConfig             `json:"message_marks,omitempty"`
 	ModerationDashboardPreferences *ModerationDashboardPreferences `json:"moderation_dashboard_preferences,omitempty"`
 	PushConfig                     *PushConfig                     `json:"push_config,omitempty"`
 	XiaomiConfig                   *XiaomiConfig                   `json:"xiaomi_config,omitempty"`
@@ -587,6 +589,8 @@ type CreateChannelTypeRequest struct {
 	Blocklists *[]BlockListOptions `json:"blocklists,omitempty"`
 	// List of commands that channel supports
 	Commands *[]string `json:"commands,omitempty"`
+	// Message mark types members can send in channels of this type, for example played
+	MarkTypes *[]string `json:"mark_types,omitempty"`
 	// List of permissions for the channel type
 	Permissions *[]PolicyRequest `json:"permissions,omitempty"`
 	// Sets thresholds for AI moderation
@@ -638,6 +642,7 @@ type UpdateChannelTypeRequest struct {
 	Blocklists                     *[]BlockListOptions `json:"blocklists,omitempty"`
 	// List of commands that channel supports
 	Commands    *[]string        `json:"commands,omitempty"`
+	MarkTypes   *[]string        `json:"mark_types,omitempty"`
 	Permissions *[]PolicyRequest `json:"permissions,omitempty"`
 	// Sets thresholds for AI moderation
 	AutomodThresholds *Thresholds          `json:"automod_thresholds,omitempty"`
@@ -764,6 +769,24 @@ type EphemeralMessageUpdateRequest struct {
 	Unset *[]string `json:"unset,omitempty"`
 	// Sets new field values
 	Set *map[string]any `json:"set,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
+}
+type CreateMessageMarkRequest struct {
+	// The mark type: a built-in type such as played (the acting user played the message's audio, voiceRecording or video attachment) or a type the app defines in its message_marks settings
+	Type   string  `json:"type"`
+	UserID *string `json:"user_id,omitempty"`
+	// User request object
+	User *UserRequest `json:"user,omitempty"`
+}
+type QueryMessageMarksRequest struct {
+	// Page size, 1 to 100. Defaults to 25
+	Limit *int `json:"limit,omitempty"`
+	// Cursor from the previous page's next field. The order is fixed: newest first
+	Next   *string `json:"next,omitempty"`
+	UserID *string `json:"user_id,omitempty"`
+	// Filter for listing the marks on a message
+	Filter *QueryMessageMarksFilter `json:"filter,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }

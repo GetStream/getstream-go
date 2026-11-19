@@ -723,6 +723,29 @@ func (c *ChatClient) EphemeralMessageUpdate(ctx context.Context, id string, requ
 	return res, err
 }
 
+// Marks a message for the acting user, for example played when the user played a voice note. A mark is written once: a repeat returns created false and the stored mark, and nothing else happens. The message author's own mark is a no-op. A message the user deleted for themselves answers as a first write does, created true, without storing anything. A mark on a message whose author is shadow-banned is stored hidden: the marker keeps it, the author never sees it. Only members of channels whose type lists the mark type can mark, and only messages with a matching attachment; a thread reply is marked like any other message
+//
+// Sends events:
+// - message.mark_added
+func (c *ChatClient) CreateMessageMark(ctx context.Context, id string, request *CreateMessageMarkRequest) (*StreamResponse[CreateMessageMarkResponse], error) {
+	var result CreateMessageMarkResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[CreateMessageMarkRequest, CreateMessageMarkResponse](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/marks", nil, request, &result, pathParams)
+	return res, err
+}
+
+// Lists the marks on a message one page at a time, newest first; the order cannot be changed. The message's mark_groups carry the count and the newest 100 markers per type, this endpoint lists every marker. Only the message author may list client-side; server-side, pass the author's user_id or no user_id. filter.type narrows the list to one mark type; without it every type the channel type lists is returned
+func (c *ChatClient) QueryMessageMarks(ctx context.Context, id string, request *QueryMessageMarksRequest) (*StreamResponse[QueryMessageMarksResponse], error) {
+	var result QueryMessageMarksResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[QueryMessageMarksRequest, QueryMessageMarksResponse](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/marks/query", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Sends reaction to specified message
 //
 // Sends events:

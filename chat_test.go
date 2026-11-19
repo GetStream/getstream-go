@@ -443,6 +443,20 @@ func TestChatEphemeralMessageUpdate(t *testing.T) {
 	_, err = client.Chat().EphemeralMessageUpdate(context.Background(), "", &getstream.EphemeralMessageUpdateRequest{})
 	require.NoError(t, err)
 }
+func TestChatCreateMessageMark(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().CreateMessageMark(context.Background(), "", &getstream.CreateMessageMarkRequest{})
+	require.NoError(t, err)
+}
+func TestChatQueryMessageMarks(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().QueryMessageMarks(context.Background(), "", &getstream.QueryMessageMarksRequest{})
+	require.NoError(t, err)
+}
 func TestChatSendReaction(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
