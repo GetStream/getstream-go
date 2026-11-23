@@ -3589,6 +3589,17 @@ type DeleteUsersRequest struct {
 	// * pruning - marks user as deleted and nullifies user information
 	// * hard - deletes user completely. Requires 'hard' option for messages, and 'hard' or 'keep' option for conversations
 	User *string `json:"user,omitempty"`
+	// Channel CIDs (type:id) to keep intact. Applies to every user in user_ids.
+	// Channels listed here keep their rows, messages, memberships, thread participation and reactions, and are not deleted as conversations,
+	// whatever the messages and conversations modes say. Everything else is deleted as usual.
+	// * Maximum 1000 entries, duplicates included. Duplicates are then ignored.
+	// * Cannot be combined with user 'hard' (400).
+	// * Cannot be combined with files true (400).
+	// * A malformed CID is rejected with 400.
+	// * A well-formed CID that does not exist is accepted and excludes nothing.
+	// * Scheduled messages are not channel-scoped: with user 'pruning' the user's scheduled messages are still removed in every channel, excluded ones included.
+	// * The user.deleted event does not list the kept channels. A consumer that mirrors deletions must skip them itself.
+	ExcludeChannelCids *[]string `json:"exclude_channel_cids,omitempty"`
 }
 type GetUserLiveLocationsRequest struct {
 	UserID *string `json:"-" query:"user_id"`
