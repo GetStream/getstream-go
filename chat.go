@@ -260,6 +260,20 @@ func (c *ChatClient) GetDraft(ctx context.Context, _type string, id string, requ
 	return res, err
 }
 
+// Creates a draft
+//
+// Sends events:
+// - draft.updated
+func (c *ChatClient) CreateDraft(ctx context.Context, _type string, id string, request *CreateDraftRequest) (*StreamResponse[CreateDraftResponse], error) {
+	var result CreateDraftResponse
+	pathParams := map[string]string{
+		"type": _type,
+		"id":   id,
+	}
+	res, err := MakeRequest[CreateDraftRequest, CreateDraftResponse](c.client, ctx, "POST", "/api/v2/chat/channels/{type}/{id}/draft", nil, request, &result, pathParams)
+	return res, err
+}
+
 // Sends event to the channel
 func (c *ChatClient) SendEvent(ctx context.Context, _type string, id string, request *SendEventRequest) (*StreamResponse[EventResponse], error) {
 	var result EventResponse
@@ -483,7 +497,7 @@ func (c *ChatClient) TruncateChannel(ctx context.Context, _type string, id strin
 	return res, err
 }
 
-// Marks channel as unread from a specific message
+// Marks channel as unread from a specific message, or as soft unread (a dot without a counter) when no message_id, message_timestamp or thread_id is given
 func (c *ChatClient) MarkUnread(ctx context.Context, _type string, id string, request *MarkUnreadRequest) (*StreamResponse[Response], error) {
 	var result Response
 	pathParams := map[string]string{

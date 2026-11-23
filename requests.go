@@ -87,6 +87,8 @@ type CreateBlockListRequest struct {
 	IsSubstringMatchingEnabled *bool    `json:"is_substring_matching_enabled,omitempty"`
 	Team                       *string  `json:"team,omitempty"`
 	UserID                     *string  `json:"user_id,omitempty"`
+	// For regex block lists, reject any rule that matches 50% or more of a built-in sample dataset as too broad
+	Validate *bool `json:"validate,omitempty"`
 	// Block list type. One of: regex, domain, domain_allowlist, email, email_allowlist, word, word_allowlist
 	Type *string `json:"type,omitempty"`
 	// User request object
@@ -110,6 +112,8 @@ type UpdateBlockListRequest struct {
 	IsSubstringMatchingEnabled *bool   `json:"is_substring_matching_enabled,omitempty"`
 	Team                       *string `json:"team,omitempty"`
 	UserID                     *string `json:"user_id,omitempty"`
+	// For regex block lists, reject any rule that matches 50% or more of a built-in sample dataset as too broad
+	Validate *bool `json:"validate,omitempty"`
 	// List of words to block
 	Words *[]string `json:"words,omitempty"`
 	// User request object
@@ -364,6 +368,10 @@ type GetDraftRequest struct {
 	ParentID *string `json:"-" query:"parent_id"`
 	UserID   *string `json:"-" query:"user_id"`
 }
+type CreateDraftRequest struct {
+	// Message data for creating or updating a message
+	Message MessageRequest `json:"message"`
+}
 type SendEventRequest struct {
 	Event EventRequest `json:"event"`
 }
@@ -513,11 +521,11 @@ type TruncateChannelRequest struct {
 	User *UserRequest `json:"user,omitempty"`
 }
 type MarkUnreadRequest struct {
-	// ID of the message from where the channel is marked unread
+	// ID of the message from where the channel is marked unread. Omit message_id, message_timestamp and thread_id to mark the whole channel soft unread: a dot without a counter
 	MessageID *string `json:"message_id,omitempty"`
-	// Timestamp of the message from where the channel is marked unread
+	// Timestamp of the message from where the channel is marked unread. Omit message_id, message_timestamp and thread_id to mark the whole channel soft unread
 	MessageTimestamp *Timestamp `json:"message_timestamp,omitempty"`
-	// Mark a thread unread, specify one of the thread, message timestamp, or message id
+	// Mark a thread unread. Specify at most one of thread_id, message_timestamp, or message_id; omit all three to mark the channel soft unread
 	ThreadID *string `json:"thread_id,omitempty"`
 	UserID   *string `json:"user_id,omitempty"`
 	// User request object
@@ -2462,6 +2470,9 @@ type GetTrendingTopicsRequest struct {
 type CreateGuestRequest struct {
 	// User request object
 	User UserRequest `json:"user"`
+}
+type GetHookEventsRequest struct {
+	Product []string `json:"-" query:"product"`
 }
 type CreateImportURLRequest struct {
 	Filename *string `json:"filename,omitempty"`

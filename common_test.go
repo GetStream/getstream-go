@@ -163,6 +163,13 @@ func TestCommonCreateGuest(t *testing.T) {
 	_, err = client.CreateGuest(context.Background(), &getstream.CreateGuestRequest{})
 	require.NoError(t, err)
 }
+func TestCommonGetHookEvents(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.GetHookEvents(context.Background(), &getstream.GetHookEventsRequest{})
+	require.NoError(t, err)
+}
 func TestCommonCreateImportURL(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

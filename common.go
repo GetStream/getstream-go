@@ -186,6 +186,13 @@ func (c *Client) CreateGuest(ctx context.Context, request *CreateGuestRequest) (
 	return res, err
 }
 
+func (c *Client) GetHookEvents(ctx context.Context, request *GetHookEventsRequest) (*StreamResponse[GetHookEventsResponse], error) {
+	var result GetHookEventsResponse
+	params := extractQueryParams(request)
+	res, err := MakeRequest[any, GetHookEventsResponse](c, ctx, "GET", "/api/v2/hook/events", params, nil, &result, nil)
+	return res, err
+}
+
 // Creates a new import URL
 func (c *Client) CreateImportURL(ctx context.Context, request *CreateImportURLRequest) (*StreamResponse[CreateImportURLResponse], error) {
 	var result CreateImportURLResponse
