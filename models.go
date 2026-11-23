@@ -5435,6 +5435,13 @@ type CreateCommandResponse struct {
 }
 
 // Basic response information
+type CreateDraftResponse struct {
+	// Duration of the request in milliseconds
+	Duration string        `json:"duration"`
+	Draft    DraftResponse `json:"draft"`
+}
+
+// Basic response information
 type CreateExternalStorageResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
@@ -8145,6 +8152,13 @@ type GetHistoryWindowTeamsResponse struct {
 }
 
 // Basic response information
+type GetHookEventsResponse struct {
+	// Duration of the request in milliseconds
+	Duration string       `json:"duration"`
+	Events   []HookEvents `json:"events"`
+}
+
+// Basic response information
 type GetImportResponse struct {
 	// Duration of the request in milliseconds
 	Duration   string      `json:"duration"`
@@ -8529,6 +8543,12 @@ type HistoryWindowTeam struct {
 	Team string `json:"team"`
 	// Date/time the team was last marked
 	UpdatedAt Timestamp `json:"updated_at"`
+}
+
+type HookEvents struct {
+	Description string   `json:"description"`
+	Name        string   `json:"name"`
+	Products    []string `json:"products"`
 }
 
 type HuaweiConfig struct {
@@ -10904,6 +10924,8 @@ type NotificationMarkUnreadEvent struct {
 	// The ID of the last read message
 	LastReadMessageID *string    `json:"last_read_message_id,omitempty"`
 	ReceivedAt        *Timestamp `json:"received_at,omitempty"`
+	// True when the channel was marked unread without a message: an unread dot with no counter
+	SoftUnread *bool `json:"soft_unread,omitempty"`
 	// The team ID
 	Team *string `json:"team,omitempty"`
 	// The ID of the thread which was marked as unread
@@ -13194,6 +13216,7 @@ type ReadStateResponse struct {
 	LastDeliveredAt        *Timestamp   `json:"last_delivered_at,omitempty"`
 	LastDeliveredMessageID *string      `json:"last_delivered_message_id,omitempty"`
 	LastReadMessageID      *string      `json:"last_read_message_id,omitempty"`
+	SoftUnread             *bool        `json:"soft_unread,omitempty"`
 }
 
 type RecordSettings struct {
@@ -15718,12 +15741,14 @@ type UnreadCountsBatchResponse struct {
 type UnreadCountsChannel struct {
 	// The channel CID (type:id).
 	ChannelID string `json:"channel_id"`
-	// Whether the channel has messages newer than the user's last read. Large channels have no unread_count and only report this.
+	// Whether the channel counts as unread for the user: it has messages newer than the user's last read, or the user marked it unread without a message (soft_unread). It is true for soft-unread channels even though unread_count is 0. Large channels have no unread_count and only report this.
 	HasUnread bool `json:"has_unread"`
 	// The date which the current user last read the channel.
 	LastRead Timestamp `json:"last_read"`
 	// The number of unread messages inside the channel.
 	UnreadCount int `json:"unread_count"`
+	// True when the user marked the channel unread without a message. unread_count stays 0, and the channel adds 1 to total_unread_count; clients should key off has_unread and this field rather than unread_count > 0.
+	SoftUnread *bool `json:"soft_unread,omitempty"`
 }
 
 // The unread information from channels with a specific type.
