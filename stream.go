@@ -103,13 +103,23 @@ func (s *Stream) VerifyAndParseWebhookBytes(body []byte, signature string) (Webh
 }
 
 // ParseSqs is a convenience wrapper that calls the package-level ParseSqs.
-// No signature is required; SQS deliveries are authenticated via AWS IAM.
+// It verifies no signature: only principals the queue's IAM policy allows can
+// send to it.
 func (s *Stream) ParseSqs(messageBody string) (WebhookEvent, error) {
 	return ParseSqs(messageBody)
 }
 
 // ParseSns is a convenience wrapper that calls the package-level ParseSns.
-// No signature is required; SNS deliveries are authenticated via AWS IAM.
+// It verifies no signature, so use it only for a body read from an
+// IAM-protected SQS queue. For an SNS HTTP(S) subscription, use
+// VerifyAndParseSns.
 func (s *Stream) ParseSns(notificationBody string) (WebhookEvent, error) {
 	return ParseSns(notificationBody)
+}
+
+// VerifyAndParseSns verifies and parses an SNS HTTP(S) notification envelope
+// using this client's API secret. Convenience wrapper around the package-level
+// VerifyAndParseSns — drops the secret parameter.
+func (s *Stream) VerifyAndParseSns(notificationBody string) (WebhookEvent, error) {
+	return VerifyAndParseSns(notificationBody, string(s.apiSecret))
 }

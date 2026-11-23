@@ -720,7 +720,8 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 //   - signature: The signature from the X-Signature header
 //   - secret: Your webhook secret (found in the Stream Dashboard)
 //
-// Returns true if the signature is valid, false otherwise.
+// Returns true if the signature is valid, false otherwise. An empty secret or
+// signature is always invalid, so an unset secret variable rejects every request.
 //
 // Example usage:
 //
@@ -736,6 +737,9 @@ func ParseWebhookEvent(rawEvent []byte) (WebhookEvent, error) {
 //	    // Process webhook...
 //	}
 func VerifyWebhookSignature(body []byte, signature string, secret string) bool {
+	if secret == "" || signature == "" {
+		return false
+	}
 	h := hmac.New(sha256.New, []byte(secret))
 	h.Write(body)
 	expected := hex.EncodeToString(h.Sum(nil))
@@ -822,7 +826,7 @@ func unwrapSNSNotificationBody(body string) string {
 // DecodeSnsPayload accepts either a full SNS HTTP notification envelope JSON
 // ({"Type":"Notification","Message":"<base64>",...}) or a pre-extracted Message
 // string (forwarded-through-SQS path). It then base64-decodes and gunzips the
-// inner payload.
+// inner payload. It does not verify the signature.
 func DecodeSnsPayload(notificationBody string) ([]byte, error) {
 	return DecodeSqsPayload(unwrapSNSNotificationBody(notificationBody))
 }
@@ -943,9 +947,10 @@ func WebhookMiddleware(secret string) func(http.Handler) http.Handler {
 
 // ParseSqs decodes (base64 + gzip pass-through) and parses an SQS Message Body.
 //
-// Backend emits no signature attribute on SQS messages today, so this helper
-// performs no signature verification. If a signed variant is added later,
-// it'll be a separate function rather than retrofitting this signature.
+// It performs no signature verification: only principals the queue's IAM
+// policy allows can send to it. Each message also carries a "signature"
+// attribute, the same HMAC as the X-Signature header, which VerifySignature
+// checks against the decoded payload.
 func ParseSqs(messageBody string) (WebhookEvent, error) {
 	payload, err := DecodeSqsPayload(messageBody)
 	if err != nil {
@@ -955,11 +960,39 @@ func ParseSqs(messageBody string) (WebhookEvent, error) {
 }
 
 // ParseSns unwraps the standard AWS SNS notification envelope and parses
-// the inner payload. Same no-signature posture as ParseSqs.
+// the inner payload. It performs no signature verification, so use it only
+// for a body read from an IAM-protected SQS queue. For an SNS HTTP(S)
+// subscription, which anyone can POST to, use VerifyAndParseSns.
 func ParseSns(notificationBody string) (WebhookEvent, error) {
 	payload, err := DecodeSnsPayload(notificationBody)
 	if err != nil {
 		return nil, err
+	}
+	return ParseEvent(payload)
+}
+
+// VerifyAndParseSns verifies and parses a Stream event delivered to an SNS
+// HTTP(S) subscription. notificationBody is the SNS notification envelope
+// JSON, with raw message delivery off. The signature is read from its
+// "signature" message attribute: HMAC-SHA256 of the uncompressed JSON, keyed
+// by your API secret, the same value HTTP webhooks send as X-Signature.
+//
+// Returns an error wrapping ErrInvalidWebhook for every failure mode,
+// including a missing envelope or signature attribute ("signature mismatch").
+func VerifyAndParseSns(notificationBody, secret string) (WebhookEvent, error) {
+	var env struct {
+		Message           *string
+		MessageAttributes map[string]struct{ Value string }
+	}
+	if err := json.Unmarshal([]byte(notificationBody), &env); err != nil || env.Message == nil {
+		return nil, fmt.Errorf("%w: invalid JSON payload: invalid SNS envelope", ErrInvalidWebhook)
+	}
+	payload, err := DecodeSqsPayload(*env.Message)
+	if err != nil {
+		return nil, err
+	}
+	if !VerifySignature(payload, env.MessageAttributes["signature"].Value, secret) {
+		return nil, fmt.Errorf("%w: signature mismatch", ErrInvalidWebhook)
 	}
 	return ParseEvent(payload)
 }
