@@ -14453,7 +14453,7 @@ type ScreensharingSettingsResponse struct {
 type SearchAllChannelsSection struct {
 	// Opaque cursor for the next page of this section, present only when more results exist. Pass it back under next.channels with the same query
 	Next *string `json:"next,omitempty"`
-	// Channels the caller is a member of whose name starts with the query, in the same shape as the query channels endpoint's results but without messages or members
+	// Channels the caller is a member of whose name starts with the query, in the same shape as the query channels endpoint's results, without messages and with up to 4 members, oldest first. channel.member_count is the channel's total member count
 	Channels []ChannelStateResponseFields `json:"channels,omitempty"`
 	Error    *SearchAllSectionError       `json:"error,omitempty"`
 	Warning  *SearchAllWarning            `json:"warning,omitempty"`
