@@ -11,7 +11,7 @@ jobs:
   trim:
     name: Trim the Release PR body
     if: startsWith(github.head_ref, 'release-please--branches--')
-    runs-on: ubuntu-latest
+    runs-on: { group: github-public-ubuntu-static }
     timeout-minutes: 5
     permissions:
       pull-requests: write
