@@ -12214,8 +12214,12 @@ type QueryAppealsResponse struct {
 	Duration string `json:"duration"`
 	// List of Appeal Items
 	Items []AppealItemResponse `json:"items"`
-	Next  *string              `json:"next,omitempty"`
-	Prev  *string              `json:"prev,omitempty"`
+	// Whether more appeals match than are counted exactly (1,000), so total is a lower bound. Returned when include_count is set.
+	Capped *bool   `json:"capped,omitempty"`
+	Next   *string `json:"next,omitempty"`
+	Prev   *string `json:"prev,omitempty"`
+	// Number of appeals matching the filter, returned when include_count is set. When capped is true, at least this many appeals match.
+	Total *int `json:"total,omitempty"`
 }
 
 type QueryBannedUsersPayload struct {
