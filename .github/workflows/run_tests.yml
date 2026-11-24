@@ -19,7 +19,7 @@ permissions:
 jobs:
   test-build:
     name: 🧪 Test & Build ${{ matrix.goVer }}
-    runs-on: ubuntu-latest
+    runs-on: { group: github-public-ubuntu-static }
     timeout-minutes: 15
     strategy:
       fail-fast: false
