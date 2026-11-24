@@ -915,9 +915,15 @@ func VerifyAndParseWebhook(r *http.Request, secret string) (WebhookEvent, error)
 	if r == nil {
 		return nil, fmt.Errorf("%w: nil request", ErrInvalidWebhook)
 	}
-	body, err := io.ReadAll(r.Body)
+	if r.Body == nil {
+		return nil, fmt.Errorf("%w: nil request body", ErrInvalidWebhook)
+	}
+	body, err := io.ReadAll(io.LimitReader(r.Body, MaxWebhookPayloadBytes+1))
 	if err != nil {
 		return nil, fmt.Errorf("%w: read body: %v", ErrInvalidWebhook, err)
+	}
+	if int64(len(body)) > MaxWebhookPayloadBytes {
+		return nil, fmt.Errorf("%w: payload exceeds maximum size of %d bytes", ErrInvalidWebhook, MaxWebhookPayloadBytes)
 	}
 	r.Body = io.NopCloser(bytes.NewReader(body))
 	return VerifyAndParseWebhookBytes(body, r.Header.Get("X-Signature"), secret)

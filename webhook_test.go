@@ -335,6 +335,17 @@ func TestVerifyAndParseWebhookFromRequest_NilRequest(t *testing.T) {
 	}
 }
 
+func TestVerifyAndParseWebhookFromRequest_OversizedBodyRejected(t *testing.T) {
+	oversized := bytes.Repeat([]byte("a"), int(MaxWebhookPayloadBytes)+1)
+	req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(oversized))
+	req.Header.Set("X-Signature", "00")
+
+	_, err := VerifyAndParseWebhook(req, "test-webhook-secret")
+	if !errors.Is(err, ErrInvalidWebhook) {
+		t.Fatalf("expected ErrInvalidWebhook for oversized body, got %v", err)
+	}
+}
+
 func TestWebhookMiddleware_HappyPath(t *testing.T) {
 	secret := "test-webhook-secret"
 	body := []byte(`{"type":"message.new"}`)
