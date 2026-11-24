@@ -165,9 +165,12 @@ func buildAPIError(resp *http.Response, body []byte) *StreamError {
 
 // requestURL constructs the full request URL
 func (c *Client) requestURL(path string, values url.Values, pathParams map[string]string) (string, error) {
-	path = buildPath(path, pathParams)
+	escapedPath, err := buildPath(path, pathParams)
+	if err != nil {
+		return "", err
+	}
 
-	u, err := url.Parse(c.baseUrl + path)
+	u, err := url.Parse(c.baseUrl + escapedPath)
 	if err != nil {
 		return "", stackWrap(err, "url.Parse")
 	}
@@ -181,15 +184,20 @@ func (c *Client) requestURL(path string, values url.Values, pathParams map[strin
 	return u.String(), nil
 }
 
-// buildPath constructs a URL path with parameters, escaping them appropriately.
-func buildPath(path string, pathParams map[string]string) string {
+// buildPath constructs a URL path with parameters, escaping them appropriately
+// without mutating pathParams (which may be reused across retries).
+func buildPath(path string, pathParams map[string]string) (string, error) {
 	if pathParams == nil {
-		return path
+		return path, nil
 	}
+	escaped := make(map[string]string, len(pathParams))
 	for k, v := range pathParams {
-		pathParams[k] = url.QueryEscape(v)
+		if v == "." || v == ".." {
+			return "", fmt.Errorf("invalid path parameter %q: must not be a dot-segment", k)
+		}
+		escaped[k] = url.PathEscape(v)
 	}
-	return replaceParams(path, pathParams)
+	return replaceParams(path, escaped), nil
 }
 
 // replaceParams replaces placeholders in the path with the corresponding values from pathParams.
