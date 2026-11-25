@@ -53,19 +53,21 @@ type AIVideoConfig struct {
 }
 
 type AIVideoConfigRequest struct {
-	Async            *bool                `json:"async,omitempty"`
-	Enabled          *bool                `json:"enabled,omitempty"`
-	OcrRules         []OCRRule            `json:"ocr_rules,omitempty"`
-	OcrSeverityRules []BodyguardRule      `json:"ocr_severity_rules,omitempty"`
-	Rules            []AWSRekognitionRule `json:"rules,omitempty"`
+	Async            *bool                 `json:"async,omitempty"`
+	Enabled          *bool                 `json:"enabled,omitempty"`
+	OcrRules         []OCRRule             `json:"ocr_rules,omitempty"`
+	OcrSeverityRules []BodyguardRule       `json:"ocr_severity_rules,omitempty"`
+	Rules            []AWSRekognitionRule  `json:"rules,omitempty"`
+	AudioConfig      *AIAudioConfigRequest `json:"audio_config,omitempty"`
 }
 
 type AIVideoConfigResponse struct {
-	Enabled          bool                 `json:"enabled"`
-	Rules            []AWSRekognitionRule `json:"rules"`
-	Async            *bool                `json:"async,omitempty"`
-	OcrRules         []OCRRule            `json:"ocr_rules,omitempty"`
-	OcrSeverityRules []BodyguardRule      `json:"ocr_severity_rules,omitempty"`
+	Enabled          bool                   `json:"enabled"`
+	Rules            []AWSRekognitionRule   `json:"rules"`
+	Async            *bool                  `json:"async,omitempty"`
+	OcrRules         []OCRRule              `json:"ocr_rules,omitempty"`
+	OcrSeverityRules []BodyguardRule        `json:"ocr_severity_rules,omitempty"`
+	AudioConfig      *AIAudioConfigResponse `json:"audio_config,omitempty"`
 }
 
 type APIError struct {
@@ -7824,8 +7826,10 @@ type GetBlockListResponse struct {
 type GetBlockedUsersResponse struct {
 	// Duration of the request in milliseconds
 	Duration string `json:"duration"`
-	// Array of blocked user object
+	// Blocked users on this page, oldest block first
 	Blocks []BlockedUserResponse `json:"blocks"`
+	// Cursor for the next page. Absent on the last page
+	Next *string `json:"next,omitempty"`
 }
 
 // Basic response information
@@ -16608,7 +16612,7 @@ type UserIdenticalImageCountParameters struct {
 
 // An interest tag to set on a user with its ranking weight
 type UserInterestRequest struct {
-	// The interest tag; trimmed and lower-cased like activity interest_tags
+	// The interest tag; trimmed and lower-cased like activity interest_tags. Avoid commas: removing interests takes a comma-separated list, so a tag that contains a comma cannot be removed
 	Tag string `json:"tag"`
 	// Ranking weight between -1.0 (dislike) and 1.0 (like). Defaults to 1.0
 	Weight *float64 `json:"weight,omitempty"`
