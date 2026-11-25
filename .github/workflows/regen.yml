@@ -148,7 +148,7 @@ jobs:
 
           # An open PR a human marked breaking or not breaking is not regenerated, so the judgement stays with the spec it was made on.
           num=
-          pr=$(gh pr list --head "$branch" --base "$base" --state open --json number,title,labels,headRefOid --jq '.[0] // empty')
+          pr=$(gh pr list --head "$branch" --base "$base" --state open --json number,title,labels,headRefOid,isCrossRepository --jq 'map(select(.isCrossRepository | not)) | .[0] // empty')
           if [ -n "$pr" ]; then
             num=$(jq -r .number <<< "$pr")
             title=$(jq -r .title <<< "$pr")
