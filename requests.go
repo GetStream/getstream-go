@@ -827,6 +827,8 @@ type QueryReactionsRequest struct {
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
 }
+type TranscribeMessageRequest struct {
+}
 type TranslateMessageRequest struct {
 	// Language to translate message to
 	Language string `json:"language"`
