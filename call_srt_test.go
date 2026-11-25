@@ -80,24 +80,4 @@ func TestCreateSRTCredentials(t *testing.T) {
 			require.ErrorContains(t, err, "at least one second", d)
 		}
 	})
-
-	t.Run("rejects a stream id over the SRT limit", func(t *testing.T) {
-		_, err := newSRTTestCall(t, "livestream", strings.Repeat("c", 200)).
-			CreateSRTCredentials(strings.Repeat("u", 100))
-		require.ErrorContains(t, err, "512-byte SRT limit")
-	})
-
-	t.Run("fmt does not print the address", func(t *testing.T) {
-		creds, err := newSRTTestCall(t, "livestream", "my-call").CreateSRTCredentials("john")
-		require.NoError(t, err)
-		token, _ := parseSRTToken(t, creds.Address)
-
-		for _, verb := range []string{"%v", "%+v", "%#v", "%s"} {
-			for _, v := range []interface{}{creds, *creds} {
-				printed := fmt.Sprintf(verb, v)
-				require.NotContains(t, printed, token, verb)
-				require.Contains(t, printed, "[redacted]", verb)
-			}
-		}
-	})
 }

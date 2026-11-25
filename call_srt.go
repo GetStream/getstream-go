@@ -2,8 +2,6 @@ package getstream
 
 import (
 	"errors"
-	"fmt"
-	"regexp"
 	"strings"
 	"time"
 
@@ -14,29 +12,13 @@ import (
 // WithSRTTokenExpiration sets another duration.
 const DefaultSRTTokenExpiration = 24 * time.Hour
 
-// maxSRTStreamIDBytes is the SRT limit on the stream id; encoders refuse a longer one.
-const maxSRTStreamIDBytes = 512
-
-var srtStreamIDPattern = regexp.MustCompile(`[?&]streamid=([^&]*)`)
-
 // SRTCredentials holds the SRT address an encoder (OBS, ffmpeg, ...) publishes to.
 //
-// Address contains a user token, so String and GoString leave it out: printing the
-// credentials with fmt does not leak it. Read the field directly when you need it.
+// Address contains a user token, so keep it secret.
 type SRTCredentials struct {
 	Address string
 	// ExpiresAt is when the token in Address expires.
 	ExpiresAt time.Time
-}
-
-// String returns the credentials with the address redacted.
-func (c SRTCredentials) String() string {
-	return fmt.Sprintf("SRTCredentials{Address: [redacted], ExpiresAt: %s}", c.ExpiresAt.Format(time.RFC3339))
-}
-
-// GoString returns the credentials with the address redacted, for the %#v verb.
-func (c SRTCredentials) GoString() string {
-	return c.String()
 }
 
 type srtCredentialsOptions struct {
@@ -97,9 +79,6 @@ func (c *Call) CreateSRTCredentials(userID string, opts ...SRTCredentialsOption)
 
 	address := strings.ReplaceAll(c.data.Ingress.Srt.Address, "{passphrase}", segments[2])
 	address = strings.ReplaceAll(address, "{token}", token)
-	if m := srtStreamIDPattern.FindStringSubmatch(address); m != nil && len(m[1]) > maxSRTStreamIDBytes {
-		return nil, fmt.Errorf("the SRT stream id is %d bytes, over the %d-byte SRT limit; use a shorter user ID or call ID", len(m[1]), maxSRTStreamIDBytes)
-	}
 
 	return &SRTCredentials{
 		Address:   address,
