@@ -810,6 +810,19 @@ func (c *ChatClient) QueryReactions(ctx context.Context, id string, request *Que
 	return res, err
 }
 
+// Transcribes the voice recordings of a message that have no transcript yet. Transcription runs in the background: the transcript arrives in the attachment's voice_transcript field with message.updated. A recording that already has a transcript, or is already being transcribed, is not transcribed again
+//
+// Sends events:
+// - message.updated
+func (c *ChatClient) TranscribeMessage(ctx context.Context, id string, request *TranscribeMessageRequest) (*StreamResponse[TranscribeMessageResponse], error) {
+	var result TranscribeMessageResponse
+	pathParams := map[string]string{
+		"id": id,
+	}
+	res, err := MakeRequest[any, TranscribeMessageResponse](c.client, ctx, "POST", "/api/v2/chat/messages/{id}/transcribe", nil, nil, &result, pathParams)
+	return res, err
+}
+
 // Translates message to a given language using automated translation software
 //
 // Sends events:

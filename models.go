@@ -4114,6 +4114,7 @@ const (
 	ChannelOwnCapabilityShareLocation                   ChannelOwnCapability = "share-location"
 	ChannelOwnCapabilitySkipSlowMode                    ChannelOwnCapability = "skip-slow-mode"
 	ChannelOwnCapabilitySlowMode                        ChannelOwnCapability = "slow-mode"
+	ChannelOwnCapabilityTranscribeVoiceMessage          ChannelOwnCapability = "transcribe-voice-message"
 	ChannelOwnCapabilityTypingEvents                    ChannelOwnCapability = "typing-events"
 	ChannelOwnCapabilityUpdateAnyMessage                ChannelOwnCapability = "update-any-message"
 	ChannelOwnCapabilityUpdateChannel                   ChannelOwnCapability = "update-channel"
@@ -10444,6 +10445,7 @@ type ModerationDashboardPreferences struct {
 	DisableActionLogs              *bool                      `json:"disable_action_logs,omitempty"`
 	DisableAuditLogs               *bool                      `json:"disable_audit_logs,omitempty"`
 	DisableFlaggingReviewedEntity  *bool                      `json:"disable_flagging_reviewed_entity,omitempty"`
+	DisableReviewQueue             *bool                      `json:"disable_review_queue,omitempty"`
 	EnforceShadowServerSide        *bool                      `json:"enforce_shadow_server_side,omitempty"`
 	EscalationQueueEnabled         *bool                      `json:"escalation_queue_enabled,omitempty"`
 	FlagUserOnFlaggedContent       *bool                      `json:"flag_user_on_flagged_content,omitempty"`
@@ -15474,6 +15476,12 @@ type TrackActivityMetricsResponse struct {
 type TrackStatsResponse struct {
 	DurationSeconds int    `json:"duration_seconds"`
 	TrackType       string `json:"track_type"`
+}
+
+// Basic response information
+type TranscribeMessageResponse struct {
+	// Duration of the request in milliseconds
+	Duration string `json:"duration"`
 }
 
 type TranscriptLanguageResponse struct {
