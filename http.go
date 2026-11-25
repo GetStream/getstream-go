@@ -568,15 +568,45 @@ func makeRequestOnce[GRequest any, GResponse any](c *Client, ctx context.Context
 	}
 	defer resp.Body.Close()
 
-	b, err := io.ReadAll(resp.Body)
+	b, err := readResponseBody(resp, c.MaxResponseBodyBytes())
 	if err != nil {
-		return nil, wrapTransportError(err)
+		return nil, err
 	}
 
 	duration := time.Since(start)
 	c.logResponseReceived(method, path, resp.StatusCode, len(b), duration, b)
 
 	return parseResponse(c, resp, b, response)
+}
+
+// readResponseBody reads resp.Body up to limit bytes. A body that fits is read
+// to EOF, so the connection goes back to the pool. A body over the limit
+// fails with ErrResponseTooLarge without being buffered: the caller's Close
+// on the unread remainder makes the transport drop that connection, which is
+// cheaper than draining an arbitrarily large (or endless) body.
+func readResponseBody(resp *http.Response, limit int64) ([]byte, error) {
+	if resp.ContentLength > limit {
+		return nil, responseTooLargeError(resp.StatusCode, limit)
+	}
+	b, err := io.ReadAll(io.LimitReader(resp.Body, limit+1))
+	if err != nil {
+		return nil, wrapTransportError(err)
+	}
+	if int64(len(b)) > limit {
+		return nil, responseTooLargeError(resp.StatusCode, limit)
+	}
+	return b, nil
+}
+
+func responseTooLargeError(statusCode int, limit int64) *StreamError {
+	return &StreamError{
+		sentinel:      ErrResponseTooLarge,
+		StatusCode:    statusCode,
+		Unrecoverable: true,
+		Message: fmt.Sprintf(
+			"stream: response body exceeds the %d-byte limit (raise it with WithMaxResponseBodyBytes)", limit,
+		),
+	}
 }
 
 // addRateLimitInfo adds rate limit information to the result

@@ -36,6 +36,11 @@ var (
 	// ErrTaskFailed fires when WaitForTask observes status=="failed".
 	// StreamError.Task carries the task's ErrorResult.
 	ErrTaskFailed = errors.New("stream: task failed")
+
+	// ErrResponseTooLarge fires when a response body exceeds the client's
+	// cap (see WithMaxResponseBodyBytes). StreamError.StatusCode carries the
+	// HTTP status of the oversized response. Never retried.
+	ErrResponseTooLarge = errors.New("stream: response too large")
 )
 
 // Transport-error subtype values populated on StreamError.ErrorType when the
