@@ -492,6 +492,13 @@ func TestChatQueryReactions(t *testing.T) {
 	_, err = client.Chat().QueryReactions(context.Background(), "", &getstream.QueryReactionsRequest{})
 	require.NoError(t, err)
 }
+func TestChatTranscribeMessage(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Chat().TranscribeMessage(context.Background(), "", &getstream.TranscribeMessageRequest{})
+	require.NoError(t, err)
+}
 func TestChatTranslateMessage(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)
