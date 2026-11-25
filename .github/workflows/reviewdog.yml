@@ -8,14 +8,19 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
   reviewdog:
     name: 🐶 Reviewdog
+    # The github-pr-review reporter posts review comments.
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: { group: github-public-amd64 }
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: reviewdog/action-setup@v1
         with:

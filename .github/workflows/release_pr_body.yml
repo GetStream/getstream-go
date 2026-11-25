@@ -10,7 +10,13 @@ permissions: {}
 jobs:
   trim:
     name: Trim the Release PR body
-    if: startsWith(github.head_ref, 'release-please--branches--')
+    # This job edits a PR body with a write token, so it acts only on a Release PR opened from this repository by release-please:
+    # getstream-sdk-bot on the default branch, or GITHUB_TOKEN (github-actions) on a hotfix branch. The branch name alone is not
+    # enough, since anyone can open a PR, a fork's included, from a branch called release-please--branches--x.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository
+      && contains(fromJSON('["getstream-sdk-bot[bot]", "github-actions[bot]"]'), github.event.pull_request.user.login)
+      && startsWith(github.head_ref, 'release-please--branches--')
     runs-on: { group: github-public-amd64 }
     timeout-minutes: 5
     permissions:
