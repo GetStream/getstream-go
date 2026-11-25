@@ -718,7 +718,7 @@ func (c *Client) UpdateUsers(ctx context.Context, request *UpdateUsersRequest) (
 	return res, err
 }
 
-// Get list of blocked Users
+// Returns users blocked by one user, oldest block first. Page with limit (default 500, max 500) and next.
 func (c *Client) GetBlockedUsers(ctx context.Context, request *GetBlockedUsersRequest) (*StreamResponse[GetBlockedUsersResponse], error) {
 	var result GetBlockedUsersResponse
 	params := extractQueryParams(request)

@@ -266,6 +266,8 @@ type GroupedQueryChannelsRequest struct {
 }
 type MarkChannelsReadRequest struct {
 	UserID *string `json:"user_id,omitempty"`
+	// Filter conditions to apply to the query
+	FilterConditions *map[string]any `json:"filter_conditions,omitempty"`
 	// Map of channel ID to last read message ID
 	ReadByChannel *map[string]string `json:"read_by_channel,omitempty"`
 	// User request object
@@ -2939,7 +2941,7 @@ type QueryLabelResultsRequest struct {
 	UserID *string `json:"user_id,omitempty"`
 	// Sorting parameters
 	Sort *[]SortParamRequest `json:"sort,omitempty"`
-	// Filter conditions
+	// Filter conditions. keyword searches the moderated content: "$q" matches whole words, while "$contains" is a case-insensitive substring match (text inside unspaced CJK sentences, word roots, emoji and symbols). "$contains" requires a date_range or created_at window within the last 7 days, at most 1 day long, or 7 days when the filter also narrows language to at most 3 non-empty values. The 7-day window is best effort: a language that covers most of an app's results can still time out.
 	Filter *map[string]any `json:"filter,omitempty"`
 	// User request object
 	User *UserRequest `json:"user,omitempty"`
@@ -3535,6 +3537,8 @@ type UpdateUsersRequest struct {
 }
 type GetBlockedUsersRequest struct {
 	UserID *string `json:"-" query:"user_id"`
+	Limit  *int    `json:"-" query:"limit"`
+	Next   *string `json:"-" query:"next"`
 }
 type BlockUsersRequest struct {
 	// User id to block
