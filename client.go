@@ -294,11 +294,19 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 
 // Claims contains optional parameters for token creation.
 type Claims struct {
-	Role         string                 // Role assigned to the user
-	ChannelCIDs  []string               // Channel IDs the user has access to
-	CallCIDs     []string               // Call IDs the user has access to
-	CustomClaims map[string]interface{} // Additional custom claims
+	Role        string   // Role assigned to the user
+	ChannelCIDs []string // Channel IDs the user has access to
+	CallCIDs    []string // Call IDs the user has access to
+	// CustomClaims are additional claims added to the token. They cannot set
+	// "user_id" or "server" (CreateToken returns an error). A custom "exp" is
+	// ignored when WithExpiration is used, and Role, ChannelCIDs and CallCIDs
+	// take precedence over custom claims of the same name.
+	CustomClaims map[string]interface{}
 }
+
+// reservedCustomClaims are claims a user token's custom claims may not set:
+// the token's identity comes only from the userID argument.
+var reservedCustomClaims = []string{"user_id", "server"}
 
 func (c *Client) createToken(userID string, claims *Claims, expiration *time.Duration) (string, error) {
 	if userID == "" {
@@ -306,20 +314,25 @@ func (c *Client) createToken(userID string, claims *Claims, expiration *time.Dur
 	}
 
 	now := time.Now().Unix()
-	jwtClaims := jwt.MapClaims{
-		"user_id": userID,
-		"iat":     now,
+	jwtClaims := jwt.MapClaims{"iat": now}
+
+	if claims != nil {
+		for _, key := range reservedCustomClaims {
+			if _, ok := claims.CustomClaims[key]; ok {
+				return "", fmt.Errorf("custom claim %q is reserved and cannot be set on a user token", key)
+			}
+		}
+		for key, value := range claims.CustomClaims {
+			jwtClaims[key] = value
+		}
 	}
 
+	jwtClaims["user_id"] = userID
 	if expiration != nil && *expiration > 0 {
 		jwtClaims["exp"] = now + int64(expiration.Seconds())
 	}
 
 	if claims != nil {
-		for key, value := range claims.CustomClaims {
-			jwtClaims[key] = value
-		}
-
 		if claims.Role != "" {
 			jwtClaims["role"] = claims.Role
 		}
