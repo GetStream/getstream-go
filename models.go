@@ -4562,29 +4562,31 @@ type ChatMessageResponse struct {
 	ReactionCounts       map[string]int         `json:"reaction_counts"`
 	ReactionScores       map[string]int         `json:"reaction_scores"`
 	// User response object
-	User                 UserResponse                      `json:"user"`
-	Command              *string                           `json:"command,omitempty"`
-	DeletedAt            *Timestamp                        `json:"deleted_at,omitempty"`
-	DeletedForMe         *bool                             `json:"deleted_for_me,omitempty"`
-	MessageTextUpdatedAt *Timestamp                        `json:"message_text_updated_at,omitempty"`
-	Mml                  *string                           `json:"mml,omitempty"`
-	ParentID             *string                           `json:"parent_id,omitempty"`
-	PinExpires           *Timestamp                        `json:"pin_expires,omitempty"`
-	PinnedAt             *Timestamp                        `json:"pinned_at,omitempty"`
-	PollID               *string                           `json:"poll_id,omitempty"`
-	QuotedMessageID      *string                           `json:"quoted_message_id,omitempty"`
-	ShowInChannel        *bool                             `json:"show_in_channel,omitempty"`
-	MentionedGroupIds    []string                          `json:"mentioned_group_ids,omitempty"`
-	MentionedGroups      []UserGroupResponse               `json:"mentioned_groups,omitempty"`
-	MentionedRoles       []string                          `json:"mentioned_roles,omitempty"`
-	OwnMarks             []ChatOwnMarkResponse             `json:"own_marks,omitempty"`
-	ThreadParticipants   []UserResponse                    `json:"thread_participants,omitempty"`
-	Draft                *ChatDraftResponse                `json:"draft,omitempty"`
-	I18n                 map[string]string                 `json:"i18n,omitempty"`
-	ImageLabels          map[string][]string               `json:"image_labels,omitempty"`
-	MarkGroups           map[string]*ChatMarkGroupResponse `json:"mark_groups,omitempty"`
-	Member               *ChannelMemberPartialResponse     `json:"member,omitempty"`
-	Moderation           *ChatModerationV2Response         `json:"moderation,omitempty"`
+	User                 UserResponse          `json:"user"`
+	Command              *string               `json:"command,omitempty"`
+	DeletedAt            *Timestamp            `json:"deleted_at,omitempty"`
+	DeletedForMe         *bool                 `json:"deleted_for_me,omitempty"`
+	MessageTextUpdatedAt *Timestamp            `json:"message_text_updated_at,omitempty"`
+	Mml                  *string               `json:"mml,omitempty"`
+	ParentID             *string               `json:"parent_id,omitempty"`
+	PinExpires           *Timestamp            `json:"pin_expires,omitempty"`
+	PinnedAt             *Timestamp            `json:"pinned_at,omitempty"`
+	PollID               *string               `json:"poll_id,omitempty"`
+	QuotedMessageID      *string               `json:"quoted_message_id,omitempty"`
+	ShowInChannel        *bool                 `json:"show_in_channel,omitempty"`
+	MentionedGroupIds    []string              `json:"mentioned_group_ids,omitempty"`
+	MentionedGroups      []UserGroupResponse   `json:"mentioned_groups,omitempty"`
+	MentionedRoles       []string              `json:"mentioned_roles,omitempty"`
+	OwnMarks             []ChatOwnMarkResponse `json:"own_marks,omitempty"`
+	ThreadParticipants   []UserResponse        `json:"thread_participants,omitempty"`
+	// User response object
+	DeletedBy   *UserResponse                     `json:"deleted_by,omitempty"`
+	Draft       *ChatDraftResponse                `json:"draft,omitempty"`
+	I18n        map[string]string                 `json:"i18n,omitempty"`
+	ImageLabels map[string][]string               `json:"image_labels,omitempty"`
+	MarkGroups  map[string]*ChatMarkGroupResponse `json:"mark_groups,omitempty"`
+	Member      *ChannelMemberPartialResponse     `json:"member,omitempty"`
+	Moderation  *ChatModerationV2Response         `json:"moderation,omitempty"`
 	// User response object
 	PinnedBy       *UserResponse                         `json:"pinned_by,omitempty"`
 	Poll           *PollResponseData                     `json:"poll,omitempty"`
@@ -10046,7 +10048,9 @@ type MessageResponse struct {
 	OwnMarks []OwnMarkResponse `json:"own_marks,omitempty"`
 	// List of users who participate in thread
 	ThreadParticipants []UserResponse `json:"thread_participants,omitempty"`
-	Draft              *DraftResponse `json:"draft,omitempty"`
+	// User response object
+	DeletedBy *UserResponse  `json:"deleted_by,omitempty"`
+	Draft     *DraftResponse `json:"draft,omitempty"`
 	// Object with translations. Key `language` contains the original language key. Other keys contain translations
 	I18n map[string]string `json:"i18n,omitempty"`
 	// Contains image moderation information
@@ -10235,7 +10239,9 @@ type MessageWithChannelResponse struct {
 	OwnMarks []OwnMarkResponse `json:"own_marks,omitempty"`
 	// List of users who participate in thread
 	ThreadParticipants []UserResponse `json:"thread_participants,omitempty"`
-	Draft              *DraftResponse `json:"draft,omitempty"`
+	// User response object
+	DeletedBy *UserResponse  `json:"deleted_by,omitempty"`
+	Draft     *DraftResponse `json:"draft,omitempty"`
 	// Object with translations. Key `language` contains the original language key. Other keys contain translations
 	I18n map[string]string `json:"i18n,omitempty"`
 	// Contains image moderation information
@@ -14586,7 +14592,9 @@ type SearchResultMessage struct {
 	OwnMarks             []OwnMarkResponse   `json:"own_marks,omitempty"`
 	ThreadParticipants   []UserResponse      `json:"thread_participants,omitempty"`
 	// Represents channel in chat
-	Channel                 *ChannelResponse                        `json:"channel,omitempty"`
+	Channel *ChannelResponse `json:"channel,omitempty"`
+	// User response object
+	DeletedBy               *UserResponse                           `json:"deleted_by,omitempty"`
 	Draft                   *DraftResponse                          `json:"draft,omitempty"`
 	I18n                    map[string]string                       `json:"i18n,omitempty"`
 	ImageLabels             map[string][]string                     `json:"image_labels,omitempty"`
