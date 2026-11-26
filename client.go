@@ -1,10 +1,6 @@
 package getstream
 
 import (
-	"bytes"
-	"crypto"
-	"crypto/hmac"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"net"
@@ -367,9 +363,5 @@ func (c *Client) createTokenWithClaims(claims jwt.MapClaims) (string, error) {
 
 // VerifyWebhook validates if hmac signature is correct for message body.
 func (c *Client) VerifyWebhook(body, signature []byte) (valid bool) {
-	mac := hmac.New(crypto.SHA256.New, c.apiSecret)
-	_, _ = mac.Write(body)
-
-	expectedMAC := hex.EncodeToString(mac.Sum(nil))
-	return bytes.Equal(signature, []byte(expectedMAC))
+	return VerifyWebhookSignature(body, string(signature), string(c.apiSecret))
 }
