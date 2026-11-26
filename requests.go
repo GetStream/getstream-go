@@ -2646,10 +2646,12 @@ type AppealRequest struct {
 type GetAppealRequest struct {
 }
 type QueryAppealsRequest struct {
-	Limit  *int    `json:"limit,omitempty"`
-	Next   *string `json:"next,omitempty"`
-	Prev   *string `json:"prev,omitempty"`
-	UserID *string `json:"user_id,omitempty"`
+	// Whether to also return the number of appeals matching the filter (total and capped). Set limit to 0 to get only the count. Not returned for team-scoped moderators, or when the count fails.
+	IncludeCount *bool   `json:"include_count,omitempty"`
+	Limit        *int    `json:"limit,omitempty"`
+	Next         *string `json:"next,omitempty"`
+	Prev         *string `json:"prev,omitempty"`
+	UserID       *string `json:"user_id,omitempty"`
 	// Sorting parameters for appeals
 	Sort *[]SortParamRequest `json:"sort,omitempty"`
 	// Filter conditions for appeals
