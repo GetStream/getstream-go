@@ -2061,6 +2061,40 @@ type BrowserDataResponse struct {
 	Version *string `json:"version,omitempty"`
 }
 
+type BudgetStatusResponse struct {
+	// Whether exhausting the budget rejects requests with HTTP 429. False when the budget is only measured, or while enforcement is temporarily suspended
+	Enforced bool `json:"enforced"`
+	// Database time in milliseconds the endpoint may use per sliding window
+	LimitMs int `json:"limit_ms"`
+	// Database time in milliseconds left in the current sliding window, never negative
+	RemainingMs int `json:"remaining_ms"`
+	// The Unix timestamp at which all usage currently in the window will have expired, if no new usage is added. The current time when no usage is recorded in the window. Can be in the future while used_ms is 0, when earlier usage was refunded
+	Reset int `json:"reset"`
+	// Database time in milliseconds used in the current sliding window, including requests still in flight
+	UsedMs int `json:"used_ms"`
+	// Length of the sliding window in seconds
+	WindowSeconds int `json:"window_seconds"`
+}
+
+type BudgetsResponse struct {
+	// Map of endpoint budgets shared by all platforms. Set when budgets are not tracked per platform
+	All map[string]BudgetStatusResponse `json:"all,omitempty"`
+	// Map of endpoint budgets for the Android platform
+	Android map[string]BudgetStatusResponse `json:"android,omitempty"`
+	// Map of endpoint budgets for the iOS platform
+	Ios map[string]BudgetStatusResponse `json:"ios,omitempty"`
+	// Map of endpoint budgets for the server-side platform
+	ServerSide map[string]BudgetStatusResponse `json:"server_side,omitempty"`
+	// Map of endpoint budgets for the Unity platform
+	Unity map[string]BudgetStatusResponse `json:"unity,omitempty"`
+	// Map of endpoint budgets for the Unity console platform
+	UnityConsole map[string]BudgetStatusResponse `json:"unity_console,omitempty"`
+	// Map of endpoint budgets for the Unity desktop platform
+	UnityDesktop map[string]BudgetStatusResponse `json:"unity_desktop,omitempty"`
+	// Map of endpoint budgets for the web platform
+	Web map[string]BudgetStatusResponse `json:"web,omitempty"`
+}
+
 type BulkActionAppealsResponse struct {
 	Duration string `json:"duration"`
 	// Appeals that could not be processed, with per-item error messages
@@ -8352,6 +8386,7 @@ type GetRateLimitsResponse struct {
 	Duration string `json:"duration"`
 	// Map of endpoint rate limits for the Android platform
 	Android map[string]LimitInfoResponse `json:"android,omitempty"`
+	Budgets *BudgetsResponse             `json:"budgets,omitempty"`
 	// Map of endpoint rate limits for the iOS platform
 	Ios map[string]LimitInfoResponse `json:"ios,omitempty"`
 	// Map of endpoint rate limits for the server-side platform
