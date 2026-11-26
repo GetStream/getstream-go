@@ -1229,6 +1229,7 @@ type AddActivityRequest struct {
 	CopyCustomToNotification *bool `json:"copy_custom_to_notification,omitempty"`
 	// Whether to create notification activities for mentioned users
 	CreateNotificationActivity *bool `json:"create_notification_activity,omitempty"`
+	CreateSystemFeeds          *bool `json:"create_system_feeds,omitempty"`
 	CreateUsers                *bool `json:"create_users,omitempty"`
 	EnrichOwnFields            *bool `json:"enrich_own_fields,omitempty"`
 	// Expiration time for the activity
@@ -1276,6 +1277,8 @@ type AddActivityRequest struct {
 type UpsertActivitiesRequest struct {
 	// List of activities to create or update
 	Activities []ActivityRequest `json:"activities"`
+	// Server-side only. If true, a missing feed whose id is not a user id (e.g. game:123) is created as a system feed with no user owner. Missing feeds named after an existing user are created either way. Built-in groups (such as user, timeline and notification) and notification groups still require a user. Default: false.
+	CreateSystemFeeds *bool `json:"create_system_feeds,omitempty"`
 	// Server-side only. If true, auto-creates users referenced by activity user_id values that don't already exist. Default: false.
 	CreateUsers *bool `json:"create_users,omitempty"`
 	// If true, enriches the activities' current_feed with own_* fields (own_follows, own_followings, own_capabilities, own_membership). Defaults to false for performance.
