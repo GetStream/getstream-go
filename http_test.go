@@ -18,6 +18,7 @@ func TestBuildPath(t *testing.T) {
 		path       string
 		pathParams map[string]string
 		want       string
+		wantErr    bool
 	}{
 		{
 			name:       "No parameters",
@@ -35,22 +36,55 @@ func TestBuildPath(t *testing.T) {
 			want: "/api/user/123",
 		},
 		{
-			name: "Escaped characters",
+			name: "Escaped characters use RFC 3986 path percent-encoding",
 			path: "/api/{query}",
 			pathParams: map[string]string{
 				"query": "special char/=&%",
 			},
-			want: "/api/special+char%2F%3D%26%25",
+			want: "/api/special%20char%2F=&%25",
+		},
+		{
+			name:       "Rejects single-dot segment",
+			path:       "/api/{id}",
+			pathParams: map[string]string{"id": "."},
+			wantErr:    true,
+		},
+		{
+			name:       "Rejects double-dot segment",
+			path:       "/api/{id}",
+			pathParams: map[string]string{"id": ".."},
+			wantErr:    true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := buildPath(tt.path, tt.pathParams); got != tt.want {
+			got, err := buildPath(tt.path, tt.pathParams)
+			if tt.wantErr {
+				if err == nil {
+					t.Fatalf("buildPath(%q, %v) expected error, got %q", tt.path, tt.pathParams, got)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("buildPath(%q, %v) unexpected error: %v", tt.path, tt.pathParams, err)
+			}
+			if got != tt.want {
 				t.Errorf("buildPath(%q, %v) = %q, want %q", tt.path, tt.pathParams, got, tt.want)
 			}
 		})
 	}
+
+	t.Run("Does not mutate caller pathParams across retries", func(t *testing.T) {
+		params := map[string]string{"id": "a/b c"}
+		first, err := buildPath("/api/{id}", params)
+		assert.NoError(t, err)
+		second, err := buildPath("/api/{id}", params)
+		assert.NoError(t, err)
+		assert.Equal(t, "/api/a%2Fb%20c", first)
+		assert.Equal(t, first, second)
+		assert.Equal(t, "a/b c", params["id"])
+	})
 }
 
 func TestExtractQueryParams(t *testing.T) {
