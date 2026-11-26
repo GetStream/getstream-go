@@ -2692,6 +2692,8 @@ type BanRequest struct {
 	BannedByID *string `json:"banned_by_id,omitempty"`
 	// Channel where the ban applies
 	ChannelCid *string `json:"channel_cid,omitempty"`
+	// Ban the user from every channel of this type, including channels they join later. Cannot be combined with channel_cid, ip_ban, ban_from_future_channels, delete_messages or delete_reactions
+	ChannelType *string `json:"channel_type,omitempty"`
 	// How a ban or user deletion treats the user's messages.
 	DeleteMessages *DeleteMessages `json:"delete_messages,omitempty"`
 	// Whether to delete reactions by the banned user on other users' messages
@@ -3214,6 +3216,7 @@ type UnbanRequest struct {
 	ChannelCid              *string `json:"-" query:"channel_cid"`
 	CreatedBy               *string `json:"-" query:"created_by"`
 	RemoveFutureChannelsBan *bool   `json:"-" query:"remove_future_channels_ban"`
+	ChannelType             *string `json:"-" query:"channel_type"`
 	// ID of the user performing the unban Deprecated: not used by the unban flow
 	// Deprecated: this field is deprecated.
 	UnbannedByID *string `json:"unbanned_by_id,omitempty"`
