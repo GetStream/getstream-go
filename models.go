@@ -15134,9 +15134,11 @@ func (e *StoriesFeedUpdatedEvent) GetEventType() string {
 type SubmitActionResponse struct {
 	Duration string `json:"duration"`
 	// Present when the appeal was accepted but the entity could not be restored automatically. The moderator should restore it manually.
-	AutoRestoreWarning *string                  `json:"auto_restore_warning,omitempty"`
-	AppealItem         *AppealItemResponse      `json:"appeal_item,omitempty"`
-	Item               *ReviewQueueItemResponse `json:"item,omitempty"`
+	AutoRestoreWarning *string `json:"auto_restore_warning,omitempty"`
+	// ID of the review queue item the action was performed on
+	ItemID     *string                  `json:"item_id,omitempty"`
+	AppealItem *AppealItemResponse      `json:"appeal_item,omitempty"`
+	Item       *ReviewQueueItemResponse `json:"item,omitempty"`
 }
 
 // The stored moderator correction
