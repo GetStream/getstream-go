@@ -842,6 +842,13 @@ func TestFeedsPublishScheduledActivityNow(t *testing.T) {
 	_, err = client.Feeds().PublishScheduledActivityNow(context.Background(), "", &getstream.PublishScheduledActivityNowRequest{})
 	require.NoError(t, err)
 }
+func TestFeedsQueryFeedsEngagementStats(t *testing.T) {
+	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
+	require.NoError(t, err)
+
+	_, err = client.Feeds().QueryFeedsEngagementStats(context.Background(), &getstream.QueryFeedsEngagementStatsRequest{})
+	require.NoError(t, err)
+}
 func TestFeedsQueryFeedsUsageStats(t *testing.T) {
 	client, err := getstream.NewClient("key", "secret", getstream.WithHTTPClient(&StubHTTPClient{}))
 	require.NoError(t, err)

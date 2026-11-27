@@ -203,6 +203,8 @@ jobs:
       && (needs.tests.result == 'success' || needs.tests.result == 'skipped') }}
     runs-on: { group: github-public-amd64 }
     timeout-minutes: 5
+    # A person approves every release before it is tagged, since the Go module proxy fetches a tag as soon as it exists and caches it for good.
+    environment: release
     permissions:
       contents: write
       issues: write
