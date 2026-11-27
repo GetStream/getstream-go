@@ -1186,6 +1186,12 @@ type CreateDeviceRequest struct {
 }
 type ExportUsersRequest struct {
 	UserIds []string `json:"user_ids"`
+	// Start of the message window, inclusive: messages with created_at >= messages_from are exported. Unlike export_channels' messages_since, which is exclusive. Reactions are selected by the time they were added, in the same window.
+	MessagesFrom *Timestamp `json:"messages_from,omitempty"`
+	// End of the message window, exclusive: messages with created_at < messages_to are exported. Unlike export_channels' messages_until, which is inclusive. Must be after messages_from. When any of channel_cids, messages_from or messages_to is set, calls are omitted from the export.
+	MessagesTo *Timestamp `json:"messages_to,omitempty"`
+	// Limit the export to these channels, in type:id form (at most 100, not empty). Without it every channel of the users is exported.
+	ChannelCids *[]string `json:"channel_cids,omitempty"`
 }
 type ListExternalStorageRequest struct {
 }
