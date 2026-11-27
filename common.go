@@ -534,7 +534,7 @@ func (c *Client) UpsertPushTemplate(ctx context.Context, request *UpsertPushTemp
 	return res, err
 }
 
-// Get rate limits usage and quotas
+// Get rate limits usage and quotas, and the query budget status of budgeted endpoints
 func (c *Client) GetRateLimits(ctx context.Context, request *GetRateLimitsRequest) (*StreamResponse[GetRateLimitsResponse], error) {
 	var result GetRateLimitsResponse
 	params := extractQueryParams(request)

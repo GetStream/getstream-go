@@ -1203,7 +1203,9 @@ type AppResponseFields struct {
 	// Settings for the moderation agent reviewer, which reviews moderation outcomes and proposes or applies an action.
 	EffectiveAgentReview *AgentReviewSettingsPayload `json:"effective_agent_review,omitempty"`
 	// The app's message marks policy: the mark types it defines or overrides, and the privacy switch. The channel type's mark_types says which of them are on in its channels.
-	MessageMarks                   *MessageMarksConfig             `json:"message_marks,omitempty"`
+	MessageMarks *MessageMarksConfig `json:"message_marks,omitempty"`
+	// The app's message schema settings: how strictly messages and reactions are checked, and the JSON Schemas they are checked against.
+	MessageSchema                  *MessageSchemaSettings          `json:"message_schema,omitempty"`
 	ModerationDashboardPreferences *ModerationDashboardPreferences `json:"moderation_dashboard_preferences,omitempty"`
 }
 
@@ -2059,6 +2061,40 @@ type BroadcastSettingsResponse struct {
 type BrowserDataResponse struct {
 	Name    *string `json:"name,omitempty"`
 	Version *string `json:"version,omitempty"`
+}
+
+type BudgetStatusResponse struct {
+	// Whether exhausting the budget rejects requests with HTTP 429. False when the budget is only measured, or while enforcement is temporarily suspended
+	Enforced bool `json:"enforced"`
+	// Database time in milliseconds the endpoint may use per sliding window
+	LimitMs int `json:"limit_ms"`
+	// Database time in milliseconds left in the current sliding window, never negative
+	RemainingMs int `json:"remaining_ms"`
+	// The Unix timestamp at which all usage currently in the window will have expired, if no new usage is added. The current time when no usage is recorded in the window. Can be in the future while used_ms is 0, when earlier usage was refunded
+	Reset int `json:"reset"`
+	// Database time in milliseconds used in the current sliding window, including requests still in flight
+	UsedMs int `json:"used_ms"`
+	// Length of the sliding window in seconds
+	WindowSeconds int `json:"window_seconds"`
+}
+
+type BudgetsResponse struct {
+	// Map of endpoint budgets shared by all platforms. Set when budgets are not tracked per platform
+	All map[string]BudgetStatusResponse `json:"all,omitempty"`
+	// Map of endpoint budgets for the Android platform
+	Android map[string]BudgetStatusResponse `json:"android,omitempty"`
+	// Map of endpoint budgets for the iOS platform
+	Ios map[string]BudgetStatusResponse `json:"ios,omitempty"`
+	// Map of endpoint budgets for the server-side platform
+	ServerSide map[string]BudgetStatusResponse `json:"server_side,omitempty"`
+	// Map of endpoint budgets for the Unity platform
+	Unity map[string]BudgetStatusResponse `json:"unity,omitempty"`
+	// Map of endpoint budgets for the Unity console platform
+	UnityConsole map[string]BudgetStatusResponse `json:"unity_console,omitempty"`
+	// Map of endpoint budgets for the Unity desktop platform
+	UnityDesktop map[string]BudgetStatusResponse `json:"unity_desktop,omitempty"`
+	// Map of endpoint budgets for the web platform
+	Web map[string]BudgetStatusResponse `json:"web,omitempty"`
 }
 
 type BulkActionAppealsResponse struct {
@@ -4562,29 +4598,31 @@ type ChatMessageResponse struct {
 	ReactionCounts       map[string]int         `json:"reaction_counts"`
 	ReactionScores       map[string]int         `json:"reaction_scores"`
 	// User response object
-	User                 UserResponse                      `json:"user"`
-	Command              *string                           `json:"command,omitempty"`
-	DeletedAt            *Timestamp                        `json:"deleted_at,omitempty"`
-	DeletedForMe         *bool                             `json:"deleted_for_me,omitempty"`
-	MessageTextUpdatedAt *Timestamp                        `json:"message_text_updated_at,omitempty"`
-	Mml                  *string                           `json:"mml,omitempty"`
-	ParentID             *string                           `json:"parent_id,omitempty"`
-	PinExpires           *Timestamp                        `json:"pin_expires,omitempty"`
-	PinnedAt             *Timestamp                        `json:"pinned_at,omitempty"`
-	PollID               *string                           `json:"poll_id,omitempty"`
-	QuotedMessageID      *string                           `json:"quoted_message_id,omitempty"`
-	ShowInChannel        *bool                             `json:"show_in_channel,omitempty"`
-	MentionedGroupIds    []string                          `json:"mentioned_group_ids,omitempty"`
-	MentionedGroups      []UserGroupResponse               `json:"mentioned_groups,omitempty"`
-	MentionedRoles       []string                          `json:"mentioned_roles,omitempty"`
-	OwnMarks             []ChatOwnMarkResponse             `json:"own_marks,omitempty"`
-	ThreadParticipants   []UserResponse                    `json:"thread_participants,omitempty"`
-	Draft                *ChatDraftResponse                `json:"draft,omitempty"`
-	I18n                 map[string]string                 `json:"i18n,omitempty"`
-	ImageLabels          map[string][]string               `json:"image_labels,omitempty"`
-	MarkGroups           map[string]*ChatMarkGroupResponse `json:"mark_groups,omitempty"`
-	Member               *ChannelMemberPartialResponse     `json:"member,omitempty"`
-	Moderation           *ChatModerationV2Response         `json:"moderation,omitempty"`
+	User                 UserResponse          `json:"user"`
+	Command              *string               `json:"command,omitempty"`
+	DeletedAt            *Timestamp            `json:"deleted_at,omitempty"`
+	DeletedForMe         *bool                 `json:"deleted_for_me,omitempty"`
+	MessageTextUpdatedAt *Timestamp            `json:"message_text_updated_at,omitempty"`
+	Mml                  *string               `json:"mml,omitempty"`
+	ParentID             *string               `json:"parent_id,omitempty"`
+	PinExpires           *Timestamp            `json:"pin_expires,omitempty"`
+	PinnedAt             *Timestamp            `json:"pinned_at,omitempty"`
+	PollID               *string               `json:"poll_id,omitempty"`
+	QuotedMessageID      *string               `json:"quoted_message_id,omitempty"`
+	ShowInChannel        *bool                 `json:"show_in_channel,omitempty"`
+	MentionedGroupIds    []string              `json:"mentioned_group_ids,omitempty"`
+	MentionedGroups      []UserGroupResponse   `json:"mentioned_groups,omitempty"`
+	MentionedRoles       []string              `json:"mentioned_roles,omitempty"`
+	OwnMarks             []ChatOwnMarkResponse `json:"own_marks,omitempty"`
+	ThreadParticipants   []UserResponse        `json:"thread_participants,omitempty"`
+	// User response object
+	DeletedBy   *UserResponse                     `json:"deleted_by,omitempty"`
+	Draft       *ChatDraftResponse                `json:"draft,omitempty"`
+	I18n        map[string]string                 `json:"i18n,omitempty"`
+	ImageLabels map[string][]string               `json:"image_labels,omitempty"`
+	MarkGroups  map[string]*ChatMarkGroupResponse `json:"mark_groups,omitempty"`
+	Member      *ChannelMemberPartialResponse     `json:"member,omitempty"`
+	Moderation  *ChatModerationV2Response         `json:"moderation,omitempty"`
 	// User response object
 	PinnedBy       *UserResponse                         `json:"pinned_by,omitempty"`
 	Poll           *PollResponseData                     `json:"poll,omitempty"`
@@ -6262,6 +6300,29 @@ type EndCallResponse struct {
 	Duration string `json:"duration"`
 }
 
+type EngagementRates struct {
+	// dwell_ms / dwell_count, in milliseconds
+	AvgDwellMs *float64 `json:"avg_dwell_ms,omitempty"`
+	// clicks / users (user-days)
+	ClicksPerUser *float64 `json:"clicks_per_user,omitempty"`
+	// clicks / impressions
+	Ctr *float64 `json:"ctr,omitempty"`
+	// hides / impressions
+	HideRate *float64 `json:"hide_rate,omitempty"`
+	// impressions / users (user-days)
+	ImpressionsPerUser *float64 `json:"impressions_per_user,omitempty"`
+}
+
+type EngagementStatsResult struct {
+	// Empty outside an experiment
+	ExperimentID string `json:"experiment_id"`
+	GroupID      string `json:"group_id"`
+	ViewID       string `json:"view_id"`
+	// Daily values and total per metric: reads, users, impressions, clicks, dwell_ms, dwell_count, hides. users.total counts user-days
+	Metrics map[string]DailyMetricStatsResponse `json:"metrics"`
+	Rates   EngagementRates                     `json:"rates"`
+}
+
 type EnrichedActivity struct {
 	ForeignID       *string                       `json:"foreign_id,omitempty"`
 	ID              *string                       `json:"id,omitempty"`
@@ -7136,6 +7197,8 @@ type FeedsNotificationTrigger struct {
 type FeedsPolicyConfig struct {
 	MaxAgeHours int      `json:"max_age_hours"`
 	FeedGroups  []string `json:"feed_groups,omitempty"`
+	// Activities must match every condition to be deleted.
+	FilterConditions map[string]any `json:"filter_conditions,omitempty"`
 }
 
 type FeedsPreferences struct {
@@ -7581,6 +7644,8 @@ func (e *FollowUpdatedEvent) GetEventType() string {
 }
 
 type ForYouConfig struct {
+	// Counts engagement per feed view and experiment. Requires enabled and a plan with activity metrics
+	Analytics *bool `json:"analytics,omitempty"`
 	// Turns For You ranking on. Groups: only the non-aggregated 'foryou' group. Views: applies only when read on that group
 	Enabled *bool `json:"enabled,omitempty"`
 	// Name of a registered ranking preset that stands in for 'score' when score is empty. One of: for_you_v2, hot
@@ -7588,6 +7653,7 @@ type ForYouConfig struct {
 	// Tracks trending tags and turns on the topic_trend ranking variable (0-1, the highest trend over a post's interest tags). Requires enabled
 	Trending    *bool                    `json:"trending,omitempty"`
 	Dwell       *ForYouDwellConfig       `json:"dwell,omitempty"`
+	Experiment  *ForYouExperimentConfig  `json:"experiment,omitempty"`
 	Exploration *ForYouExplorationConfig `json:"exploration,omitempty"`
 }
 
@@ -7596,6 +7662,20 @@ type ForYouDwellConfig struct {
 	Enabled *bool `json:"enabled,omitempty"`
 	// Minimum dwell_ms that counts as a long dwell. 1000 to 60000, defaults to 5000
 	ThresholdMs *int `json:"threshold_ms,omitempty"`
+}
+
+type ForYouExperimentConfig struct {
+	// Experiment identifier, 1 to 64 letters, digits, dashes or underscores
+	ID *string `json:"id,omitempty"`
+	// 2 to 4 feed views with distinct ids; weights are percents summing to 100
+	Variants []ForYouExperimentVariant `json:"variants,omitempty"`
+}
+
+type ForYouExperimentVariant struct {
+	// ID of an existing feed view
+	View *string `json:"view,omitempty"`
+	// Share of users in percent, 1 to 100
+	Weight *int `json:"weight,omitempty"`
 }
 
 type ForYouExplorationConfig struct {
@@ -8292,7 +8372,7 @@ type GetOrCreateFeedResponse struct {
 	Feed                 FeedResponse                 `json:"feed"`
 	Next                 *string                      `json:"next,omitempty"`
 	Prev                 *string                      `json:"prev,omitempty"`
-	// Signed token identifying this read. Pass it with activity metrics events to attribute them to this read. Only set on feed reads for paid plans with an authenticated user, when the app uses feed impressions (For You exploration, or a For You ranking that uses impressions_bucket)
+	// Signed token identifying this read. Pass it with activity metrics events to attribute them to this read. Only set on feed reads for paid plans with an authenticated user, when the app uses feed impressions (For You exploration, or a For You ranking that uses impressions_bucket) or For You engagement analytics
 	RequestID *string `json:"request_id,omitempty"`
 	// Activity selectors dropped from this read because they exceeded their time budget (see the time_budget_ms selector setting). Their activities are missing from this page, and they stay out for the rest of this pagination session. Omitted when every selector completed
 	DegradedSelectors   []string                    `json:"degraded_selectors,omitempty"`
@@ -8350,6 +8430,7 @@ type GetRateLimitsResponse struct {
 	Duration string `json:"duration"`
 	// Map of endpoint rate limits for the Android platform
 	Android map[string]LimitInfoResponse `json:"android,omitempty"`
+	Budgets *BudgetsResponse             `json:"budgets,omitempty"`
 	// Map of endpoint rate limits for the iOS platform
 	Ios map[string]LimitInfoResponse `json:"ios,omitempty"`
 	// Map of endpoint rate limits for the server-side platform
@@ -10046,7 +10127,9 @@ type MessageResponse struct {
 	OwnMarks []OwnMarkResponse `json:"own_marks,omitempty"`
 	// List of users who participate in thread
 	ThreadParticipants []UserResponse `json:"thread_participants,omitempty"`
-	Draft              *DraftResponse `json:"draft,omitempty"`
+	// User response object
+	DeletedBy *UserResponse  `json:"deleted_by,omitempty"`
+	Draft     *DraftResponse `json:"draft,omitempty"`
 	// Object with translations. Key `language` contains the original language key. Other keys contain translations
 	I18n map[string]string `json:"i18n,omitempty"`
 	// Contains image moderation information
@@ -10065,6 +10148,18 @@ type MessageResponse struct {
 	ReactionGroups map[string]*ReactionGroupResponse `json:"reaction_groups,omitempty"`
 	Reminder       *ReminderResponseData             `json:"reminder,omitempty"`
 	SharedLocation *SharedLocationResponseData       `json:"shared_location,omitempty"`
+}
+
+// The app's message schema settings: how strictly messages and reactions are checked, and the JSON Schemas they are checked against.
+type MessageSchemaSettings struct {
+	// The settings document version to use. When omitted, the latest version is used; an unknown version is rejected
+	DocumentVersion *int `json:"document_version,omitempty"`
+	// How violations are handled: off does not check, report checks and records violations without rejecting the write, enforce rejects writes that violate the schema. Defaults to off
+	Mode *string `json:"mode,omitempty"`
+	// The rules a message is checked against.
+	Message *MessageValidation `json:"message,omitempty"`
+	// The rules a reaction is checked against.
+	Reaction *ReactionValidation `json:"reaction,omitempty"`
 }
 
 type MessageStatsResponse struct {
@@ -10158,6 +10253,14 @@ func (e *MessageUpdatedEvent) GetEventType() string {
 	return e.Type
 }
 
+// The rules a message is checked against.
+type MessageValidation struct {
+	// Message document paths that cannot change after the message is created
+	FrozenFields []string `json:"frozen_fields,omitempty"`
+	// A JSON Schema 2020-12 object validating {message, user}
+	Schema map[string]any `json:"schema,omitempty"`
+}
+
 // Represents any chat message
 type MessageWithChannelResponse struct {
 	// Channel unique identifier in <type>:<id> format
@@ -10235,7 +10338,9 @@ type MessageWithChannelResponse struct {
 	OwnMarks []OwnMarkResponse `json:"own_marks,omitempty"`
 	// List of users who participate in thread
 	ThreadParticipants []UserResponse `json:"thread_participants,omitempty"`
-	Draft              *DraftResponse `json:"draft,omitempty"`
+	// User response object
+	DeletedBy *UserResponse  `json:"deleted_by,omitempty"`
+	Draft     *DraftResponse `json:"draft,omitempty"`
 	// Object with translations. Key `language` contains the original language key. Other keys contain translations
 	I18n map[string]string `json:"i18n,omitempty"`
 	// Contains image moderation information
@@ -12515,6 +12620,12 @@ type QueryFeedModerationTemplatesResponse struct {
 	Templates []QueryFeedModerationTemplate `json:"templates"`
 }
 
+type QueryFeedsEngagementStatsResponse struct {
+	Duration string `json:"duration"`
+	// One series per (group, view, experiment), in byte order of experiment, view, then group
+	Results []EngagementStatsResult `json:"results"`
+}
+
 // Basic response information
 type QueryFeedsReactionsResponse struct {
 	// Duration of the request in milliseconds
@@ -13191,6 +13302,12 @@ type ReactionUpdatedEvent struct {
 
 func (e *ReactionUpdatedEvent) GetEventType() string {
 	return e.Type
+}
+
+// The rules a reaction is checked against.
+type ReactionValidation struct {
+	// A JSON Schema 2020-12 object validating {reaction, user}
+	Schema map[string]any `json:"schema,omitempty"`
 }
 
 type ReactivateUserResponse struct {
@@ -14586,7 +14703,9 @@ type SearchResultMessage struct {
 	OwnMarks             []OwnMarkResponse   `json:"own_marks,omitempty"`
 	ThreadParticipants   []UserResponse      `json:"thread_participants,omitempty"`
 	// Represents channel in chat
-	Channel                 *ChannelResponse                        `json:"channel,omitempty"`
+	Channel *ChannelResponse `json:"channel,omitempty"`
+	// User response object
+	DeletedBy               *UserResponse                           `json:"deleted_by,omitempty"`
 	Draft                   *DraftResponse                          `json:"draft,omitempty"`
 	I18n                    map[string]string                       `json:"i18n,omitempty"`
 	ImageLabels             map[string][]string                     `json:"image_labels,omitempty"`
@@ -14744,6 +14863,8 @@ type SetFeedsRetentionPolicyRequest struct {
 	Policy      string   `json:"policy"`
 	Enabled     *bool    `json:"enabled,omitempty"`
 	FeedGroups  []string `json:"feed_groups,omitempty"`
+	// Limits deletion to activities matching every condition; expires_at supports only $exists: true. Not allowed on old-activities. Omitted or null keeps the stored filter; {} removes it.
+	FilterConditions *map[string]any `json:"filter_conditions,omitempty"`
 }
 
 // Basic response information
@@ -15091,9 +15212,11 @@ func (e *StoriesFeedUpdatedEvent) GetEventType() string {
 type SubmitActionResponse struct {
 	Duration string `json:"duration"`
 	// Present when the appeal was accepted but the entity could not be restored automatically. The moderator should restore it manually.
-	AutoRestoreWarning *string                  `json:"auto_restore_warning,omitempty"`
-	AppealItem         *AppealItemResponse      `json:"appeal_item,omitempty"`
-	Item               *ReviewQueueItemResponse `json:"item,omitempty"`
+	AutoRestoreWarning *string `json:"auto_restore_warning,omitempty"`
+	// ID of the review queue item the action was performed on
+	ItemID     *string                  `json:"item_id,omitempty"`
+	AppealItem *AppealItemResponse      `json:"appeal_item,omitempty"`
+	Item       *ReviewQueueItemResponse `json:"item,omitempty"`
 }
 
 // The stored moderator correction
@@ -15450,7 +15573,7 @@ type TrackActivityMetricsEvent struct {
 	DwellMs *int `json:"dwell_ms,omitempty"`
 	// 1-based position of the activity in that feed read. A value below 1 fails only this event. Accepted but not stored yet.
 	Position *int `json:"position,omitempty"`
-	// The request_id returned by the feed read that showed the activity. An invalid, expired (older than 48h) or future-dated (more than 5 minutes ahead) value fails only this event. Impressions sent with a valid request_id feed ranking, are not added to the activity's metrics.impressions, and must use a delta of 1.
+	// The request_id returned by the feed read that showed the activity. An invalid, expired (older than 48h) or future-dated (more than 5 minutes ahead) value fails only this event. Impressions sent with a valid request_id must use a delta of 1 and feed For You engagement analytics. In apps that use feed impressions (exploration or impressions_bucket) they feed ranking and are not added to the activity's metrics.impressions; with For You analytics on and no feed impressions they are added as without a request_id.
 	RequestID *string `json:"request_id,omitempty"`
 }
 
