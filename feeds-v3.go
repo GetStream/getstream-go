@@ -1055,7 +1055,7 @@ func (c *FeedsClient) FeedsGetRetentionPolicy(ctx context.Context, request *Feed
 	return res, err
 }
 
-// Creates or updates a feeds retention policy for the app (an app may have multiple, each scoped to feed groups). Server-side only.
+// Creates or updates a feeds retention policy for the app (an app may have multiple, each scoped to feed groups and, except old-activities, optionally narrowed by filter_conditions). Server-side only.
 func (c *FeedsClient) FeedsSetRetentionPolicy(ctx context.Context, request *FeedsSetRetentionPolicyRequest) (*StreamResponse[SetFeedsRetentionPolicyResponse], error) {
 	var result SetFeedsRetentionPolicyResponse
 	res, err := MakeRequest[FeedsSetRetentionPolicyRequest, SetFeedsRetentionPolicyResponse](c.client, ctx, "POST", "/api/v2/feeds/retention_policy", nil, request, &result, nil)
@@ -1134,6 +1134,18 @@ func (c *FeedsClient) PublishScheduledActivityNow(ctx context.Context, id string
 		"id": id,
 	}
 	res, err := MakeRequest[any, PublishScheduledActivityNowResponse](c.client, ctx, "POST", "/api/v2/feeds/scheduled_activities/{id}/publish_now", nil, nil, &result, pathParams)
+	return res, err
+}
+
+// Retrieve For You engagement statistics (reads, users, impressions, clicks, dwell, hides) per view and experiment, aggregated by day.
+// users.total counts user-days.
+// Requires a paid Feeds plan (403 otherwise).
+// limit is the maximum number of series (one per group, view and experiment), not rows; it never cuts a series. A metric's days with no events are omitted from its daily values.
+// This endpoint is not paginated: it is a bounded report over one group's views and experiments for at most 396 days, and limit x days must not exceed 10,000 (the default limit always fits).
+// This endpoint is server-side only.
+func (c *FeedsClient) QueryFeedsEngagementStats(ctx context.Context, request *QueryFeedsEngagementStatsRequest) (*StreamResponse[QueryFeedsEngagementStatsResponse], error) {
+	var result QueryFeedsEngagementStatsResponse
+	res, err := MakeRequest[QueryFeedsEngagementStatsRequest, QueryFeedsEngagementStatsResponse](c.client, ctx, "POST", "/api/v2/feeds/stats/engagement", nil, request, &result, nil)
 	return res, err
 }
 
