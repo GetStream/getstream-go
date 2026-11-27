@@ -66,7 +66,9 @@ type UpdateAppRequest struct {
 	HuaweiConfig          *HuaweiConfig                 `json:"huawei_config,omitempty"`
 	ImageUploadConfig     *FileUploadConfig             `json:"image_upload_config,omitempty"`
 	// The app's message marks policy: the mark types it defines or overrides, and the privacy switch. The channel type's mark_types says which of them are on in its channels.
-	MessageMarks                   *MessageMarksConfig             `json:"message_marks,omitempty"`
+	MessageMarks *MessageMarksConfig `json:"message_marks,omitempty"`
+	// The app's message schema settings: how strictly messages and reactions are checked, and the JSON Schemas they are checked against.
+	MessageSchema                  *MessageSchemaSettings          `json:"message_schema,omitempty"`
 	ModerationDashboardPreferences *ModerationDashboardPreferences `json:"moderation_dashboard_preferences,omitempty"`
 	PushConfig                     *PushConfig                     `json:"push_config,omitempty"`
 	XiaomiConfig                   *XiaomiConfig                   `json:"xiaomi_config,omitempty"`
@@ -1377,6 +1379,8 @@ type AddBookmarkRequest struct {
 type ActivityFeedbackRequest struct {
 	// Whether to hide this activity
 	Hide *bool `json:"hide,omitempty"`
+	// From the feed response; attributes the hide to the feed's view
+	RequestID *string `json:"request_id,omitempty"`
 	// Whether to show less content like this
 	ShowLess *bool `json:"show_less,omitempty"`
 	// Whether to show more content like this
@@ -2321,6 +2325,8 @@ type FeedsSetRetentionPolicyRequest struct {
 	Policy      string    `json:"policy"`
 	Enabled     *bool     `json:"enabled,omitempty"`
 	FeedGroups  *[]string `json:"feed_groups,omitempty"`
+	// Limits deletion to activities matching every condition; expires_at supports only $exists: true. Not allowed on old-activities. Omitted or null keeps the stored filter; {} removes it.
+	FilterConditions *map[string]any `json:"filter_conditions,omitempty"`
 }
 type FeedsDeleteRetentionPolicyRequest struct {
 	Policy string `json:"policy"`
@@ -2416,6 +2422,20 @@ type UpdateScheduledActivityRequest struct {
 	Activity    *ActivityRequest `json:"activity,omitempty"`
 }
 type PublishScheduledActivityNowRequest struct {
+}
+type QueryFeedsEngagementStatsRequest struct {
+	// Feed group to report on
+	GroupID string `json:"group_id"`
+	// Only this experiment (optional)
+	ExperimentID *string `json:"experiment_id,omitempty"`
+	// Start date in YYYY-MM-DD format (optional, defaults to 29 days before to, so a 30-day range)
+	From *string `json:"from,omitempty"`
+	// Maximum number of series (one per group, view and experiment), not rows, 1 to 100 (optional, defaults to 100, or 10,000 / days for ranges over 100 days). The limit never cuts a series; a metric's days with no events are omitted from its daily values. limit x days must not exceed 10,000
+	Limit *int `json:"limit,omitempty"`
+	// End date in YYYY-MM-DD format (optional, defaults to today UTC). The range is at most 396 days
+	To *string `json:"to,omitempty"`
+	// Only this view (optional)
+	ViewID *string `json:"view_id,omitempty"`
 }
 type QueryFeedsUsageStatsRequest struct {
 	// Start date in YYYY-MM-DD format (optional, defaults to 30 days ago)
