@@ -172,10 +172,37 @@ type tokenOptions struct {
 
 type TokenOption func(*tokenOptions)
 
+// WithExpiration sets the token lifetime: the token gets an "exp" claim of
+// "iat" plus d, in whole seconds. Without WithExpiration the token has no
+// "exp" claim and does not expire.
+//
+// d must be positive. CreateToken returns an error for zero or a negative
+// duration (for example time.Until of a deadline that has passed) instead of
+// minting a token that never expires. A lifetime under one second rounds up
+// to one second, the smallest lifetime "exp" can express; longer lifetimes
+// are truncated to whole seconds.
 func WithExpiration(d time.Duration) TokenOption {
 	return func(t *tokenOptions) {
 		t.expiration = &d
 	}
+}
+
+// normalizeExpiration validates an explicitly requested token lifetime so it
+// always yields an "exp" claim: it rejects zero and negative durations and
+// rounds a sub-second lifetime up to one second. A nil expiration stays nil
+// (no "exp" claim).
+func normalizeExpiration(expiration *time.Duration) (*time.Duration, error) {
+	if expiration == nil {
+		return nil, nil
+	}
+	if *expiration <= 0 {
+		return nil, fmt.Errorf("token expiration must be positive, got %s; omit WithExpiration for a token without exp", *expiration)
+	}
+	if *expiration < time.Second {
+		oneSecond := time.Second
+		return &oneSecond, nil
+	}
+	return expiration, nil
 }
 
 func WithClaims(claims Claims) TokenOption {
@@ -303,6 +330,10 @@ type Claims struct {
 func (c *Client) createToken(userID string, claims *Claims, expiration *time.Duration) (string, error) {
 	if userID == "" {
 		return "", errors.New("user ID is required")
+	}
+	expiration, err := normalizeExpiration(expiration)
+	if err != nil {
+		return "", err
 	}
 
 	now := time.Now().Unix()
