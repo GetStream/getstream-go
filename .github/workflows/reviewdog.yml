@@ -8,14 +8,21 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
   reviewdog:
     name: 🐶 Reviewdog
+    # Read-only token: this job runs PR code, so findings are reported as
+    # workflow annotations (github-pr-annotations) instead of review comments.
+    # reviewdog only uses the token to read the PR diff.
+    permissions:
+      contents: read
+      pull-requests: read # reviewdog reads the PR diff
     runs-on: { group: github-public-amd64 }
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: reviewdog/action-setup@v1
         with:
@@ -32,4 +39,6 @@ jobs:
       - name: Reviewdog
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: $(go env GOPATH)/bin/golangci-lint run --out-format line-number | reviewdog -f=golangci-lint -name=golangci-lint -reporter=github-pr-review
+        run: |
+          "$(go env GOPATH)/bin/golangci-lint" run --out-format line-number \
+            | reviewdog -f=golangci-lint -name=golangci-lint -reporter=github-pr-annotations
