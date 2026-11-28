@@ -31,6 +31,13 @@ const (
 	defaultIdleTimeout = 55 * time.Second
 	// defaultConnectTimeout caps TCP + TLS handshake duration.
 	defaultConnectTimeout = 10 * time.Second
+
+	// DefaultMaxResponseBodyBytes is the default cap on an API response body
+	// (64 MiB, after transparent gzip decompression). It is far above any
+	// legitimate API response and only exists so a misbehaving or malicious
+	// endpoint can't make the client buffer an unbounded body in memory.
+	// Override with WithMaxResponseBodyBytes.
+	DefaultMaxResponseBodyBytes int64 = 64 << 20
 )
 
 func PtrTo[T any](v T) *T {
@@ -55,6 +62,9 @@ type Client struct {
 	logger             Logger
 	logBodies          bool // true iff WithLogBodies(true) was used; gates body fields on DEBUG events
 	retry              RetryConfig
+	// maxResponseBodyBytes caps how much of a response body is read; <= 0
+	// means DefaultMaxResponseBodyBytes.
+	maxResponseBodyBytes int64
 }
 
 func (c *Client) HttpClient() HttpClient {
@@ -87,6 +97,15 @@ func (c *Client) IdleTimeout() time.Duration {
 
 func (c *Client) ConnectTimeout() time.Duration {
 	return c.connectTimeout
+}
+
+// MaxResponseBodyBytes returns the cap on an API response body, see
+// WithMaxResponseBodyBytes.
+func (c *Client) MaxResponseBodyBytes() int64 {
+	if c.maxResponseBodyBytes <= 0 {
+		return DefaultMaxResponseBodyBytes
+	}
+	return c.maxResponseBodyBytes
 }
 
 type ClientOption func(c *Client)
@@ -147,6 +166,16 @@ func WithBaseUrl(baseURL string) ClientOption {
 func WithLogger(logger Logger) ClientOption {
 	return func(c *Client) {
 		c.logger = logger
+	}
+}
+
+// WithMaxResponseBodyBytes caps how many bytes of an API response body the
+// client reads (DefaultMaxResponseBodyBytes, 64 MiB, by default). A response
+// over the cap fails with an error matching ErrResponseTooLarge instead of
+// being buffered or silently truncated. n <= 0 keeps the default.
+func WithMaxResponseBodyBytes(n int64) ClientOption {
+	return func(c *Client) {
+		c.maxResponseBodyBytes = n
 	}
 }
 
