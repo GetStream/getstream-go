@@ -5,6 +5,7 @@ import (
 	"crypto"
 	"crypto/hmac"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -294,10 +295,78 @@ func newClient(apiKey, apiSecret string, options ...ClientOption) (*Client, erro
 
 // Claims contains optional parameters for token creation.
 type Claims struct {
-	Role         string                 // Role assigned to the user
-	ChannelCIDs  []string               // Channel IDs the user has access to
-	CallCIDs     []string               // Call IDs the user has access to
-	CustomClaims map[string]interface{} // Additional custom claims
+	Role        string   // Role assigned to the user
+	ChannelCIDs []string // Channel IDs the user has access to
+	CallCIDs    []string // Call IDs the user has access to
+	// CustomClaims are additional claims added to the token. CreateToken
+	// returns an error if they set "user_id", "server" or "egress", if a key is
+	// another spelling of a claim the backend reads (such as "User_ID"), or if
+	// "iat" is not a positive whole Unix timestamp that is not in the future.
+	// A custom "exp" is ignored when WithExpiration is used, and Role,
+	// ChannelCIDs and CallCIDs take precedence over custom claims of the same name.
+	CustomClaims map[string]interface{}
+}
+
+// reservedCustomClaims are claims a user token's custom claims may not set.
+// The token's identity comes only from the userID argument (the backend treats
+// a token without a user_id as a server token), and "egress" lets a token join
+// calls without the app's role grants.
+var reservedCustomClaims = []string{"user_id", "server", "egress"}
+
+// backendClaims are the claim names the backend reads from a token. It decodes
+// them with encoding/json, which matches names case-insensitively with Unicode
+// simple folding (so "uſer_id" and "USER_ID" both set user_id) and lets the last
+// matching key win, so a custom claim may use only the exact spelling.
+var backendClaims = []string{
+	"user_id", "call_cids", "channel_cids", "role", "egress", "stream_check_writes",
+	"scoped_call_cid", "iss", "sub", "aud", "exp", "nbf", "iat", "jti", "server",
+}
+
+// checkCustomClaims returns an error if a custom claim may not be set on a user token.
+func checkCustomClaims(customClaims map[string]interface{}, now int64) error {
+	for key, value := range customClaims {
+		for _, name := range backendClaims {
+			// strings.EqualFold uses the same simple folding as encoding/json,
+			// including the Kelvin sign (k) and the long s (s).
+			if key != name && strings.EqualFold(key, name) {
+				return fmt.Errorf("custom claim %q is read by the backend as %q; use %q", key, name, name)
+			}
+		}
+		for _, reserved := range reservedCustomClaims {
+			if key == reserved {
+				return fmt.Errorf("custom claim %q is reserved and cannot be set on a user token", key)
+			}
+		}
+		if key == "iat" {
+			// The backend skips per-user token revocation for a token without
+			// an iat, and a later iat outlives revocations made before it.
+			if iat, ok := wholeNumber(value); !ok || iat <= 0 || iat > now {
+				return errors.New(`custom claim "iat" must be a positive whole Unix timestamp that is not in the future`)
+			}
+		}
+	}
+	return nil
+}
+
+// wholeNumber returns v as an int64 if it is a whole number.
+func wholeNumber(v interface{}) (int64, bool) {
+	switch n := v.(type) {
+	case int:
+		return int64(n), true
+	case int32:
+		return int64(n), true
+	case int64:
+		return n, true
+	case float64:
+		if n != float64(int64(n)) {
+			return 0, false
+		}
+		return int64(n), true
+	case json.Number:
+		i, err := n.Int64()
+		return i, err == nil
+	}
+	return 0, false
 }
 
 func (c *Client) createToken(userID string, claims *Claims, expiration *time.Duration) (string, error) {
@@ -306,20 +375,23 @@ func (c *Client) createToken(userID string, claims *Claims, expiration *time.Dur
 	}
 
 	now := time.Now().Unix()
-	jwtClaims := jwt.MapClaims{
-		"user_id": userID,
-		"iat":     now,
+	jwtClaims := jwt.MapClaims{"iat": now}
+
+	if claims != nil {
+		if err := checkCustomClaims(claims.CustomClaims, now); err != nil {
+			return "", err
+		}
+		for key, value := range claims.CustomClaims {
+			jwtClaims[key] = value
+		}
 	}
 
+	jwtClaims["user_id"] = userID
 	if expiration != nil && *expiration > 0 {
 		jwtClaims["exp"] = now + int64(expiration.Seconds())
 	}
 
 	if claims != nil {
-		for key, value := range claims.CustomClaims {
-			jwtClaims[key] = value
-		}
-
 		if claims.Role != "" {
 			jwtClaims["role"] = claims.Role
 		}
