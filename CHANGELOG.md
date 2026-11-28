@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. Releases are automated by [release-please](https://github.com/googleapis/release-please); see [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## [8.5.0](https://github.com/GetStream/getstream-go/compare/v8.4.0...v8.5.0) (2026-11-28)
+
+
+### Features
+
+* add analytics, experiment to ForYouConfig ([4358c8c](https://github.com/GetStream/getstream-go/commit/4358c8cadfe0bb8d382dde5e55974d220dc5cce9))
+* add audio_config to AIVideoConfigRequest ([6fd94e7](https://github.com/GetStream/getstream-go/commit/6fd94e7646d8a0a76dd1ab381ba8de21fcbf1482))
+* add audio_config to AIVideoConfigResponse ([6fd94e7](https://github.com/GetStream/getstream-go/commit/6fd94e7646d8a0a76dd1ab381ba8de21fcbf1482))
+* add budgets to GetRateLimitsResponse ([b765cc5](https://github.com/GetStream/getstream-go/commit/b765cc548b26c03ac7753ceed7df26ca95b9042d))
+* add capped, total to QueryAppealsResponse ([cea590b](https://github.com/GetStream/getstream-go/commit/cea590b77842b1fd2513bc9b4c8345d8edefe0ed))
+* add channel_cids, messages_from, messages_to to ExportUsersRequest ([0e174cf](https://github.com/GetStream/getstream-go/commit/0e174cf65f98064df80fa1d5e5accd282247edac))
+* add channel_type to BanRequest ([b1f908c](https://github.com/GetStream/getstream-go/commit/b1f908c790f13d7f208c054e022965c64bfe1e14))
+* add channel_type to Unban ([b1f908c](https://github.com/GetStream/getstream-go/commit/b1f908c790f13d7f208c054e022965c64bfe1e14))
+* add create_system_feeds to AddActivityRequest ([e3b7d23](https://github.com/GetStream/getstream-go/commit/e3b7d230cf7a1496c594f3ad2af1bc0a0f244b51))
+* add create_system_feeds to UpsertActivitiesRequest ([e3b7d23](https://github.com/GetStream/getstream-go/commit/e3b7d230cf7a1496c594f3ad2af1bc0a0f244b51))
+* add deleted_by to ChatMessageResponse ([e3b7d23](https://github.com/GetStream/getstream-go/commit/e3b7d230cf7a1496c594f3ad2af1bc0a0f244b51))
+* add deleted_by to MessageResponse ([e3b7d23](https://github.com/GetStream/getstream-go/commit/e3b7d230cf7a1496c594f3ad2af1bc0a0f244b51))
+* add deleted_by to MessageWithChannelResponse ([e3b7d23](https://github.com/GetStream/getstream-go/commit/e3b7d230cf7a1496c594f3ad2af1bc0a0f244b51))
+* add deleted_by to SearchResultMessage ([e3b7d23](https://github.com/GetStream/getstream-go/commit/e3b7d230cf7a1496c594f3ad2af1bc0a0f244b51))
+* add disable_review_queue to ModerationDashboardPreferences ([6ba46f1](https://github.com/GetStream/getstream-go/commit/6ba46f191595d49604836252e42cf182f66015d0))
+* add filter_conditions to FeedsPolicyConfig ([4358c8c](https://github.com/GetStream/getstream-go/commit/4358c8cadfe0bb8d382dde5e55974d220dc5cce9))
+* add filter_conditions to MarkChannelsReadRequest ([6fd94e7](https://github.com/GetStream/getstream-go/commit/6fd94e7646d8a0a76dd1ab381ba8de21fcbf1482))
+* add filter_conditions to SetFeedsRetentionPolicyRequest ([4358c8c](https://github.com/GetStream/getstream-go/commit/4358c8cadfe0bb8d382dde5e55974d220dc5cce9))
+* add include_count to QueryAppealsRequest ([cea590b](https://github.com/GetStream/getstream-go/commit/cea590b77842b1fd2513bc9b4c8345d8edefe0ed))
+* add item_id to SubmitActionResponse ([2ce23db](https://github.com/GetStream/getstream-go/commit/2ce23dbad4bcdd6d695b4d4e5af41b2cf0668dac))
+* add limit, next to GetBlockedUsers ([6fd94e7](https://github.com/GetStream/getstream-go/commit/6fd94e7646d8a0a76dd1ab381ba8de21fcbf1482))
+* add message_schema to AppResponseFields ([4358c8c](https://github.com/GetStream/getstream-go/commit/4358c8cadfe0bb8d382dde5e55974d220dc5cce9))
+* add message_schema to UpdateAppRequest ([4358c8c](https://github.com/GetStream/getstream-go/commit/4358c8cadfe0bb8d382dde5e55974d220dc5cce9))
+* add next to GetBlockedUsersResponse ([6fd94e7](https://github.com/GetStream/getstream-go/commit/6fd94e7646d8a0a76dd1ab381ba8de21fcbf1482))
+* add QueryFeedsEngagementStats ([4358c8c](https://github.com/GetStream/getstream-go/commit/4358c8cadfe0bb8d382dde5e55974d220dc5cce9))
+* add request_id to ActivityFeedbackRequest ([4358c8c](https://github.com/GetStream/getstream-go/commit/4358c8cadfe0bb8d382dde5e55974d220dc5cce9))
+* add TranscribeMessage ([6ba46f1](https://github.com/GetStream/getstream-go/commit/6ba46f191595d49604836252e42cf182f66015d0))
+
 ## [8.4.0](https://github.com/GetStream/getstream-go/compare/v8.3.0...v8.4.0) (2026-11-23)
 
 
