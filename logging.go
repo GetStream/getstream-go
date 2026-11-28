@@ -10,7 +10,58 @@ import (
 
 var redactedQueryParams = map[string]struct{}{"api_key": {}, "api_secret": {}, "token": {}}
 
-var redactedBodyKeys = []string{"api_secret", "token", "password"}
+var redactedBodyKeySubstrings = []string{
+	"secret",
+	"token",
+	"password",
+	"credential",
+	"private_key",
+	"auth_key",
+	"p12_cert",
+	"stream_key",
+}
+
+func isSensitiveBodyKey(k string) bool {
+	lower := strings.ToLower(k)
+	for _, sub := range redactedBodyKeySubstrings {
+		if strings.Contains(lower, sub) {
+			return true
+		}
+	}
+	return false
+}
+
+func redactJSONValue(v any) (any, bool) {
+	switch val := v.(type) {
+	case map[string]any:
+		changed := false
+		for k, child := range val {
+			if isSensitiveBodyKey(k) {
+				val[k] = "<redacted>"
+				changed = true
+				continue
+			}
+			redactedChild, childChanged := redactJSONValue(child)
+			if childChanged {
+				val[k] = redactedChild
+				changed = true
+			}
+		}
+		return val, changed
+	case []any:
+		changed := false
+		for i, item := range val {
+			redactedItem, itemChanged := redactJSONValue(item)
+			if itemChanged {
+				val[i] = redactedItem
+				changed = true
+			}
+		}
+		return val, changed
+	default:
+		return v, false
+	}
+}
 
 // redactQuery returns the encoded query string with known-secret param values
 // replaced by <redacted>. The original values are never mutated.
@@ -26,24 +77,18 @@ func redactQuery(q url.Values) string {
 	return clone.Encode()
 }
 
-// redactJSONBody shallow-redacts known-secret top-level keys of a JSON object
-// body. Non-JSON-object bodies pass through unchanged.
+// redactJSONBody recursively redacts sensitive keys inside a JSON object or
+// array body. Non-JSON bodies pass through unchanged.
 func redactJSONBody(b []byte) string {
-	var m map[string]json.RawMessage
-	if err := json.Unmarshal(b, &m); err != nil {
+	var parsed any
+	if err := json.Unmarshal(b, &parsed); err != nil {
 		return string(b)
 	}
-	changed := false
-	for _, k := range redactedBodyKeys {
-		if _, ok := m[k]; ok {
-			m[k] = json.RawMessage(`"<redacted>"`)
-			changed = true
-		}
-	}
+	redacted, changed := redactJSONValue(parsed)
 	if !changed {
 		return string(b)
 	}
-	out, err := json.Marshal(m)
+	out, err := json.Marshal(redacted)
 	if err != nil {
 		return string(b)
 	}
